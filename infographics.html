@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAID Infographics — The Math in Pictures</title>
+  <meta name="description" content="Visual proof: Canada's MAID program in charts. All data from Health Canada annual reports.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Infographic-specific styles ── */
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2rem 1.5rem;
+      margin: 2rem 0;
+    }
+    .chart-container h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+    }
+    .chart-container .chart-subtitle {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .chart-source {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      text-align: right;
+    }
+    svg text { font-family: 'Courier New', monospace; }
+
+    /* ── Bar chart ── */
+    .bar-chart { width: 100%; max-width: 760px; }
+    .bar-chart .bar { transition: opacity 0.2s; }
+    .bar-chart .bar:hover { opacity: 0.85; }
+
+    /* ── Donut chart ── */
+    .donut-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: center;
+      justify-content: center;
+    }
+    .donut-legend {
+      list-style: none;
+      padding: 0;
+      font-size: 0.9rem;
+    }
+    .donut-legend li {
+      padding: 0.3rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .donut-legend .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── Icon grid (daily deaths) ── */
+    .icon-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      max-width: 500px;
+      margin: 1rem auto;
+    }
+    .icon-grid .person {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+    .icon-grid .person.dead { background: var(--accent); }
+    .icon-grid .person.alive { background: #1a3a1a; }
+
+    /* ── Timeline ── */
+    .projection-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+    .projection-bar .year-label {
+      width: 50px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .projection-bar .bar-track {
+      flex: 1;
+      height: 28px;
+      background: #111;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .projection-bar .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .projection-bar .bar-fill.actual { background: var(--accent); }
+    .projection-bar .bar-fill.projected { background: #6a2030; border: 1px dashed var(--accent); }
+
+    /* ── Share-of-deaths pie ── */
+    .share-visual {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      max-width: 400px;
+      margin: 1rem auto;
+    }
+    .share-visual .cell {
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+    }
+    .share-visual .cell.maid { background: var(--accent); }
+    .share-visual .cell.other { background: #1a1a1a; border: 1px solid #222; }
+
+    /* ── Nav ── */
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="flag">&#127464;&#127462;</div>
+    <h1>The Math in Pictures</h1>
+    <p class="subtitle">Every chart on this page is generated from Health Canada's published data. No AI-generated images. No stock photos. Just numbers visualized.</p>
+  </header>
+
+  <div class="content">
+
+    <p class="back-link"><a href="index.html">&larr; Back to full report</a></p>
+
+    <!-- ══════ CHART 1: Annual MAID Deaths Bar Chart ══════ -->
+    <div class="chart-container">
+      <h3>Annual MAID Deaths in Canada (2016&ndash;2024)</h3>
+      <p class="chart-subtitle">Compound Annual Growth Rate: 41.6% &mdash; Doubling every 2 years</p>
+
+      <svg class="bar-chart" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
+        <!-- Y-axis -->
+        <line x1="60" y1="20" x2="60" y2="280" stroke="#333" stroke-width="1"/>
+        <!-- X-axis -->
+        <line x1="60" y1="280" x2="740" y2="280" stroke="#333" stroke-width="1"/>
+
+        <!-- Y-axis labels (max ~18000) -->
+        <text x="55" y="280" fill="#666" font-size="11" text-anchor="end">0</text>
+        <text x="55" y="215" fill="#666" font-size="11" text-anchor="end">5K</text>
+        <line x1="60" y1="215" x2="740" y2="215" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4"/>
+        <text x="55" y="150" fill="#666" font-size="11" text-anchor="end">10K</text>
+        <line x1="60" y1="150" x2="740" y2="150" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4"/>
+        <text x="55" y="85" fill="#666" font-size="11" text-anchor="end">15K</text>
+        <line x1="60" y1="85" x2="740" y2="85" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4"/>
+        <text x="55" y="25" fill="#666" font-size="11" text-anchor="end">18K</text>
+
+        <!-- Bars: height = deaths/18000 * 260, y = 280 - height -->
+        <!-- 2016: 1018 → h=14.7 -->
+        <rect class="bar" x="80" y="265" width="60" height="15" rx="2" fill="#8b1a2b"/>
+        <text x="110" y="260" fill="#ccc" font-size="10" text-anchor="middle">1,018</text>
+        <text x="110" y="298" fill="#888" font-size="11" text-anchor="middle">2016</text>
+
+        <!-- 2017: 2838 → h=41 -->
+        <rect class="bar" x="152" y="239" width="60" height="41" rx="2" fill="#9b1e30"/>
+        <text x="182" y="234" fill="#ccc" font-size="10" text-anchor="middle">2,838</text>
+        <text x="182" y="298" fill="#888" font-size="11" text-anchor="middle">2017</text>
+
+        <!-- 2018: 4480 → h=65 -->
+        <rect class="bar" x="224" y="215" width="60" height="65" rx="2" fill="#ab2236"/>
+        <text x="254" y="210" fill="#ccc" font-size="10" text-anchor="middle">4,480</text>
+        <text x="254" y="298" fill="#888" font-size="11" text-anchor="middle">2018</text>
+
+        <!-- 2019: 5631 → h=81 -->
+        <rect class="bar" x="296" y="199" width="60" height="81" rx="2" fill="#b5263a"/>
+        <text x="326" y="194" fill="#ccc" font-size="10" text-anchor="middle">5,631</text>
+        <text x="326" y="298" fill="#888" font-size="11" text-anchor="middle">2019</text>
+
+        <!-- 2020: 7595 → h=110 -->
+        <rect class="bar" x="368" y="170" width="60" height="110" rx="2" fill="#bf2a3e"/>
+        <text x="398" y="165" fill="#ccc" font-size="10" text-anchor="middle">7,595</text>
+        <text x="398" y="298" fill="#888" font-size="11" text-anchor="middle">2020</text>
+
+        <!-- 2021: 10064 → h=145 -->
+        <rect class="bar" x="440" y="135" width="60" height="145" rx="2" fill="#c92e42"/>
+        <text x="470" y="130" fill="#ccc" font-size="10" text-anchor="middle">10,064</text>
+        <text x="470" y="298" fill="#888" font-size="11" text-anchor="middle">2021</text>
+
+        <!-- 2022: 13241 → h=191 -->
+        <rect class="bar" x="512" y="89" width="60" height="191" rx="2" fill="#d43248"/>
+        <text x="542" y="84" fill="#ccc" font-size="10" text-anchor="middle">13,241</text>
+        <text x="542" y="298" fill="#888" font-size="11" text-anchor="middle">2022</text>
+
+        <!-- 2023: 15343 → h=222 -->
+        <rect class="bar" x="584" y="58" width="60" height="222" rx="2" fill="#de364c"/>
+        <text x="614" y="53" fill="#ccc" font-size="10" text-anchor="middle">15,343</text>
+        <text x="614" y="298" fill="#888" font-size="11" text-anchor="middle">2023</text>
+
+        <!-- 2024: 16499 → h=238 -->
+        <rect class="bar" x="656" y="42" width="60" height="238" rx="2" fill="#e63950"/>
+        <text x="686" y="37" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">16,499</text>
+        <text x="686" y="298" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">2024</text>
+
+        <!-- Trend arrow -->
+        <text x="700" y="320" fill="#e63950" font-size="10" text-anchor="end">CAGR: 41.6%</text>
+      </svg>
+      <p class="chart-source">Source: Health Canada Annual Reports 1st&ndash;6th [1]&ndash;[6]</p>
+    </div>
+
+    <!-- ══════ CHART 2: Share of All Deaths (waffle chart) ══════ -->
+    <div class="chart-container">
+      <h3>1 in 20 Deaths in Canada Is Now MAID</h3>
+      <p class="chart-subtitle">Each square represents 1 out of 20 Canadian deaths in 2024. The red square is MAID.</p>
+
+      <div class="share-visual" id="waffle-20">
+        <!-- 1 red, 19 dark = 5% -->
+      </div>
+      <script>
+        (function() {
+          var w = document.getElementById('waffle-20');
+          for (var i = 0; i < 400; i++) {
+            var d = document.createElement('div');
+            d.className = 'cell ' + (i % 20 === 0 ? 'maid' : 'other');
+            w.appendChild(d);
+          }
+        })();
+      </script>
+
+      <div style="display:flex;gap:1.5rem;margin-top:1rem;font-size:0.85rem;">
+        <span><span style="display:inline-block;width:12px;height:12px;background:#c41e3a;border-radius:2px;vertical-align:middle;margin-right:4px;"></span> MAID death (5.05%)</span>
+        <span><span style="display:inline-block;width:12px;height:12px;background:#1a1a1a;border:1px solid #333;border-radius:2px;vertical-align:middle;margin-right:4px;"></span> Other cause of death</span>
+      </div>
+      <p class="chart-source">Source: Health Canada [6], Statistics Canada [13]</p>
+    </div>
+
+    <!-- ══════ CHART 3: Marginalisation Donut ══════ -->
+    <div class="chart-container">
+      <h3>Who Is Being Killed? Track 2 MAID by Housing Vulnerability</h3>
+      <p class="chart-subtitle">If MAID were random, 20% would come from each income quintile. It's not random.</p>
+
+      <div class="donut-row">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+          <!-- Background ring -->
+          <circle cx="110" cy="110" r="85" fill="none" stroke="#1a1a1a" stroke-width="30"/>
+          <!-- 48.3% = poorest quintile (red) -->
+          <!-- circumference = 2π×85 = 534.07, 48.3% = 258.0 -->
+          <circle cx="110" cy="110" r="85" fill="none" stroke="#c41e3a" stroke-width="30"
+            stroke-dasharray="258 276" stroke-dashoffset="133.5" transform="rotate(-90 110 110)"/>
+          <!-- Center text -->
+          <text x="110" y="100" fill="#fff" font-size="28" font-weight="bold" text-anchor="middle">48.3%</text>
+          <text x="110" y="122" fill="#888" font-size="12" text-anchor="middle">poorest quintile</text>
+          <text x="110" y="140" fill="#666" font-size="10" text-anchor="middle">(expected: 20%)</text>
+        </svg>
+
+        <ul class="donut-legend">
+          <li><span class="swatch" style="background:#c41e3a"></span> <strong>48.3%</strong> from poorest housing quintile</li>
+          <li><span class="swatch" style="background:#1a1a1a;border:1px solid #333"></span> 51.7% from all other quintiles combined</li>
+          <li style="margin-top:0.8rem;color:#888;font-size:0.8rem;">2.42&times; overrepresentation vs expected 20%</li>
+          <li style="color:#888;font-size:0.8rem;">Source: Ontario Coroner data [7]</li>
+        </ul>
+      </div>
+      <p class="chart-source">Source: The Conversation / Ontario Coroner [7], Cardus [14]</p>
+    </div>
+
+    <!-- ══════ CHART 4: Daily Deaths Visualization ══════ -->
+    <div class="chart-container">
+      <h3>45 Canadians Killed Per Day by MAID in 2024</h3>
+      <p class="chart-subtitle">Each red dot represents one person killed by their government in a single day.</p>
+
+      <div class="icon-grid" id="daily-grid"></div>
+      <script>
+        (function() {
+          var g = document.getElementById('daily-grid');
+          for (var i = 0; i < 45; i++) {
+            var d = document.createElement('div');
+            d.className = 'person dead';
+            d.title = 'MAID death #' + (i + 1);
+            d.style.width = '20px';
+            d.style.height = '20px';
+            d.style.borderRadius = '50%';
+            g.appendChild(d);
+          }
+        })();
+      </script>
+      <p style="text-align:center;margin-top:1rem;color:var(--text-muted);font-size:0.9rem;">
+        45 circles = 45 people. <strong>Every single day.</strong> 16,499 / 366 days = 45.1 per day.
+      </p>
+      <p class="chart-source">Source: Health Canada [6]</p>
+    </div>
+
+    <!-- ══════ CHART 5: 2030 Projection ══════ -->
+    <div class="chart-container">
+      <h3>Conservative Projection: 200,000+ Dead by 2030</h3>
+      <p class="chart-subtitle">Using the government's own lowest growth rate (7.5% from 2023&rarr;2024)</p>
+
+      <div style="max-width:600px;">
+        <!-- 2024 actual -->
+        <div class="projection-bar">
+          <span class="year-label">2024</span>
+          <div class="bar-track">
+            <div class="bar-fill actual" style="width:37.3%">76,475 (actual)</div>
+          </div>
+        </div>
+        <!-- 2025 -->
+        <div class="projection-bar">
+          <span class="year-label">2025</span>
+          <div class="bar-track">
+            <div class="bar-fill projected" style="width:46%">94,211</div>
+          </div>
+        </div>
+        <!-- 2026 -->
+        <div class="projection-bar">
+          <span class="year-label">2026</span>
+          <div class="bar-track">
+            <div class="bar-fill projected" style="width:55.3%">113,277</div>
+          </div>
+        </div>
+        <!-- 2027 -->
+        <div class="projection-bar">
+          <span class="year-label">2027</span>
+          <div class="bar-track">
+            <div class="bar-fill projected" style="width:65.3%">133,773</div>
+          </div>
+        </div>
+        <!-- 2028 -->
+        <div class="projection-bar">
+          <span class="year-label">2028</span>
+          <div class="bar-track">
+            <div class="bar-fill projected" style="width:76%">155,806</div>
+          </div>
+        </div>
+        <!-- 2029 -->
+        <div class="projection-bar">
+          <span class="year-label">2029</span>
+          <div class="bar-track">
+            <div class="bar-fill projected" style="width:87.6%">179,492</div>
+          </div>
+        </div>
+        <!-- 2030 -->
+        <div class="projection-bar">
+          <span class="year-label" style="color:#fff;font-weight:bold;">2030</span>
+          <div class="bar-track">
+            <div class="bar-fill actual" style="width:100%"><strong>204,954</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:1rem;">Formula: N(t) = 16,499 &times; (1.075)<sup>t</sup>, cumulative sum from 2016 base of 76,475.</p>
+      <p class="chart-source">Source: Health Canada [6], author calculation using government's own 7.5% growth rate</p>
+    </div>
+
+    <!-- ══════ CHART 6: Loneliness & Burden (Track 2) ══════ -->
+    <div class="chart-container">
+      <h3>Track 2: Why They Chose Death</h3>
+      <p class="chart-subtitle">Self-reported reasons among people whose death was NOT reasonably foreseeable (2024)</p>
+
+      <svg viewBox="0 0 600 180" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
+        <!-- Feeling like a burden: 49% -->
+        <text x="210" y="35" fill="#ccc" font-size="13" text-anchor="end">Feeling like a burden</text>
+        <rect x="220" y="20" width="294" height="24" rx="3" fill="#c41e3a" opacity="0.9"/>
+        <text x="520" y="37" fill="#fff" font-size="12" font-weight="bold">49%</text>
+
+        <!-- Loneliness: 47% -->
+        <text x="210" y="75" fill="#ccc" font-size="13" text-anchor="end">Loneliness &amp; isolation</text>
+        <rect x="220" y="60" width="282" height="24" rx="3" fill="#c41e3a" opacity="0.75"/>
+        <text x="508" y="77" fill="#fff" font-size="12" font-weight="bold">47%</text>
+
+        <!-- Loss of meaningful activities -->
+        <text x="210" y="115" fill="#ccc" font-size="13" text-anchor="end">Loss of meaningful activities</text>
+        <rect x="220" y="100" width="330" height="24" rx="3" fill="#8b1a2b"/>
+        <text x="556" y="117" fill="#ccc" font-size="12" font-weight="bold">~55%</text>
+
+        <!-- Context line -->
+        <text x="220" y="155" fill="#666" font-size="10">These are people who were not dying. They were lonely, poor, and felt like a burden.</text>
+        <text x="220" y="170" fill="#666" font-size="10">Canada's answer: kill them.</text>
+      </svg>
+      <p class="chart-source">Source: Health Canada Sixth Annual Report [6]</p>
+    </div>
+
+    <!-- ══════ DOWNLOAD / SHARE ══════ -->
+    <section id="share">
+      <h2><span class="section-num">SHARE</span>Spread the Math</h2>
+      <p>Every chart on this page is built from pure HTML and SVG. Right-click any chart and select "Save as image" or screenshot it. Share it everywhere.</p>
+      <p><a href="index.html">&larr; Back to the full report with all 7 mathematical proofs and 15 citations</a></p>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Daniel Perry. All rights reserved.</p>
+    <p>All data from official Government of Canada publications. <a href="index.html#references">View all sources</a>.</p>
+  </footer>
+
+</body>
+</html>
