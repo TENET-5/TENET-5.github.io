@@ -13,7 +13,7 @@
     'spotify:album:6VnEKzr2E68eJC8e0n6MHq'  // Bedtime for Democracy (1986)
   ];
 
-  var idx = Math.floor(Math.random() * tracks.length);
+  var idx = 0; // Always start with Give Me Convenience or Give Me Death
   var ctrl = null;
   var playing = false;
 
