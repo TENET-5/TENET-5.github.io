@@ -1,19 +1,15 @@
 /**
- * Spotify iFrame API player — official API reference implementation.
- * Dead Kennedys + Propagandhi anti-government tracks.
+ * Spotify iFrame API player — Dead Kennedys albums.
+ * Plays full albums through. Press play, read the evidence.
  * https://developer.spotify.com/documentation/embeds/references/iframe-api
  */
 (function() {
+  // Full DK albums — plays through track by track
   var tracks = [
-    'spotify:track:5wga4LOSV23mMOHnRsPK4X', // California Uber Alles — DK
-    'spotify:track:1FKrVbPYHJcBMBEON2f48B', // Holiday in Cambodia — DK
-    'spotify:track:5MbHKXeFnYaKwMG8JIKPbj', // Kill the Poor — DK
-    'spotify:track:4kqBOgIiCAMWd3ZjTGBbYn', // Government Flu — DK
-    'spotify:track:3PjTwHBwjxKiPu5nkEjBI5', // Police Truck — DK
-    'spotify:track:4qrT9xCo6CIqdvRfD8SJEA', // Stars and Stripes of Corruption — DK
-    'spotify:track:3VjpSK56VYgDYzJlm7HMqH', // Dear Coach's Corner — Propagandhi
-    'spotify:track:0DjRBPkkuxLv7ZHXL9XFHH', // And We Thought Nation States Were a Bad Idea — Propagandhi
-    'spotify:track:6fKQBf4Fh5ITFInVBfV1GE'  // Back to the Motor League — Propagandhi
+    'spotify:album:39RCMjmOBYGJOdCWe1GSEN', // Fresh Fruit for Rotting Vegetables (1980)
+    'spotify:album:6gQKAYf1VhWRCV8gMBBXHq', // Plastic Surgery Disasters (1982)
+    'spotify:album:2m7CEzEMpkbCxiJwFBadAn', // Frankenchrist (1985)
+    'spotify:album:6VnEKzr2E68eJC8e0n6MHq'  // Bedtime for Democracy (1986)
   ];
 
   var idx = Math.floor(Math.random() * tracks.length);
