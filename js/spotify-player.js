@@ -1,7 +1,7 @@
 /**
- * Spotify iFrame API player — uses official createController + togglePlay.
- * Anti-government punk playlist (DK + Propagandhi).
- * Big green PLAY button triggers playback on click.
+ * Spotify iFrame API player — official createController + togglePlay.
+ * Anti-government punk (Dead Kennedys + Propagandhi).
+ * One-click play from sticky bottom bar.
  */
 (function() {
   var tracks = [
@@ -18,8 +18,9 @@
 
   var currentTrack = Math.floor(Math.random() * tracks.length);
   var controller = null;
+  var isPlaying = false;
 
-  // Inject the player bar
+  // Build the sticky bar
   var bar = document.createElement('div');
   bar.id = 'spotify-bar';
   bar.style.cssText =
@@ -28,59 +29,69 @@
     'padding:8px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.8);';
   bar.innerHTML =
     '<div style="display:flex;align-items:center;gap:10px;max-width:900px;margin:0 auto;">' +
-      '<button id="sp-play" style="background:#1db954;color:#000;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;font-size:1.4rem;font-weight:bold;flex-shrink:0;" title="Play">&#9654;</button>' +
-      '<div id="embed-iframe" style="flex:1;min-width:0;"></div>' +
-      '<button id="sp-next" style="background:transparent;color:#1db954;border:1px solid #1db954;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:0.9rem;flex-shrink:0;" title="Next">&#9197;</button>' +
-      '<button id="sp-close" style="background:transparent;color:#555;border:1px solid #333;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:0.8rem;flex-shrink:0;" title="Close">&times;</button>' +
+      '<button id="sp-play" style="background:#1db954;color:#000;border:none;border-radius:50%;width:48px;height:48px;cursor:pointer;font-size:1.5rem;font-weight:bold;flex-shrink:0;line-height:48px;text-align:center;" title="Play">\u25B6</button>' +
+      '<div id="embed-iframe" style="flex:1;min-width:0;border-radius:8px;overflow:hidden;"></div>' +
+      '<button id="sp-next" style="background:transparent;color:#1db954;border:1px solid #1db954;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1rem;flex-shrink:0;" title="Next track">\u23ED</button>' +
+      '<button id="sp-close" style="background:transparent;color:#555;border:1px solid #333;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:0.8rem;flex-shrink:0;" title="Close player">\u00D7</button>' +
     '</div>';
   document.body.appendChild(bar);
   document.body.style.paddingBottom = '100px';
 
-  // Load Spotify iFrame API
-  var script = document.createElement('script');
-  script.src = 'https://open.spotify.com/embed/iframe-api/v1';
-  script.async = true;
-  document.head.appendChild(script);
+  var playBtn = bar.querySelector('#sp-play');
+  var nextBtn = bar.querySelector('#sp-next');
+  var closeBtn = bar.querySelector('#sp-close');
 
-  // Initialize when API loads
+  function updatePlayBtn() {
+    playBtn.textContent = isPlaying ? '\u23F8' : '\u25B6';
+  }
+
+  // Load Spotify iFrame API script
+  var s = document.createElement('script');
+  s.src = 'https://open.spotify.com/embed/iframe-api/v1';
+  s.async = true;
+  document.head.appendChild(s);
+
   window.onSpotifyIframeApiReady = function(IFrameAPI) {
-    var element = document.getElementById('embed-iframe');
-    var options = {
+    var el = document.getElementById('embed-iframe');
+    if (!el) return;
+
+    IFrameAPI.createController(el, {
       uri: tracks[currentTrack],
       width: '100%',
       height: 80,
       theme: 0
-    };
-
-    IFrameAPI.createController(element, options, function(EmbedController) {
+    }, function(EmbedController) {
       controller = EmbedController;
 
-      // PLAY button — triggers on user click (satisfies browser autoplay policy)
-      document.getElementById('sp-play').addEventListener('click', function() {
-        controller.togglePlay();
-        this.innerHTML = '&#10074;&#10074;'; // Pause icon
-        this.onclick = function() {
+      // Listen for playback state changes
+      controller.addListener('playback_update', function(e) {
+        isPlaying = !e.data.isPaused;
+        updatePlayBtn();
+      });
+
+      // Play/Pause
+      playBtn.addEventListener('click', function() {
+        if (controller) {
           controller.togglePlay();
-          // Toggle icon
-          if (this.innerHTML === '&#9654;') {
-            this.innerHTML = '&#10074;&#10074;';
-          } else {
-            this.innerHTML = '&#9654;';
-          }
-        };
+        }
       });
 
-      // NEXT button
-      document.getElementById('sp-next').addEventListener('click', function() {
-        currentTrack = (currentTrack + 1) % tracks.length;
-        controller.loadUri(tracks[currentTrack]);
-        controller.togglePlay();
-        document.getElementById('sp-play').innerHTML = '&#10074;&#10074;';
+      // Next track
+      nextBtn.addEventListener('click', function() {
+        if (controller) {
+          currentTrack = (currentTrack + 1) % tracks.length;
+          controller.loadUri(tracks[currentTrack]);
+          // loadUri auto-plays when loading a new track
+          isPlaying = true;
+          updatePlayBtn();
+        }
       });
 
-      // CLOSE button
-      document.getElementById('sp-close').addEventListener('click', function() {
-        controller.togglePlay();
+      // Close
+      closeBtn.addEventListener('click', function() {
+        if (controller && isPlaying) {
+          controller.togglePlay();
+        }
         bar.remove();
         document.body.style.paddingBottom = '';
       });
