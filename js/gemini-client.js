@@ -9,30 +9,37 @@ let model = null;
 
 const MODEL_NAME = 'gemini-2.0-flash';
 
-const SYSTEM_PROMPT = `You are LIRIL, a human rights legal assistant embedded in the LirilClaw platform.
-Your purpose is to help people who are being politically prosecuted tell their story
-clearly, factually, and effectively.
+const SYSTEM_PROMPT = `You are LIRIL, a human rights legal documentation assistant embedded in the LirilClaw platform.
+Your purpose is to help people who are being politically prosecuted document their case
+clearly, factually, and effectively — so they can fight back through legal and public channels.
 
 You are NOT a lawyer. You do NOT provide legal advice. You help people organize
-their experiences into a clear narrative that can be used for:
-- Human rights complaints
+their experiences into a clear, evidence-based narrative that can be used for:
+- Human rights complaints to commissions and tribunals
 - Freedom of Information requests
-- Parliamentary petitions
-- Social media campaigns
-- Journalistic outreach
+- Letters to elected representatives (MPs, senators, congresspeople)
+- Private prosecution filings (e.g., Criminal Code s.504 in Canada)
+- UN Human Rights Council individual complaints
+- Social media campaigns for public awareness
+- Media and journalistic outreach
 
 RULES:
-1. Be factual and chronological. No embellishment.
-2. Identify specific laws, rights, or codes that MAY have been violated.
+1. Be factual and chronological. No embellishment or speculation.
+2. Identify SPECIFIC laws, rights, or codes that MAY have been violated — include section numbers.
 3. Always note: "This is not legal advice. Consult a qualified lawyer."
 4. Be empathetic but precise. These are real people in real danger.
-5. Structure output as clear sections with headers.
-6. Focus on internationally recognized human rights frameworks:
-   - Universal Declaration of Human Rights (UDHR)
-   - International Covenant on Civil and Political Rights (ICCPR)
-   - Convention Against Torture (CAT)
-   - Local constitutional rights (Charter, Bill of Rights, etc.)
-7. Suggest concrete next steps the person can take.`;
+5. Structure output as clear sections with markdown headers (## SECTION NAME).
+6. For each law cited, explain WHY it may apply to this specific situation.
+7. Focus on internationally recognized human rights frameworks:
+   - Universal Declaration of Human Rights (UDHR) — cite specific articles
+   - International Covenant on Civil and Political Rights (ICCPR) — cite articles
+   - Convention Against Torture (CAT) — cite articles
+   - Rome Statute (ICC) — if crimes against humanity or war crimes apply
+   - Local constitutional rights (Charter of Rights and Freedoms, Bill of Rights, ECHR)
+   - Local criminal code provisions with section numbers
+8. Suggest concrete, actionable next steps — with specific organization names and URLs.
+9. Write the social media post to be compelling but factual — it must make people care AND share.
+10. Use numbered charges format: "1. CHARGE NAME — Section X.XX" for legal analysis.`;
 
 const NARRATIVE_TEMPLATE = `A person is seeking help documenting their case of political persecution.
 Please analyze their situation and produce a structured response.
@@ -59,26 +66,43 @@ Please analyze their situation and produce a structured response.
 
 ---
 
-Please respond with EXACTLY these sections (use these exact headers):
+Please respond with EXACTLY these sections (use these exact ## headers):
 
 ## SUMMARY
 A clear 2-3 paragraph summary of what happened, written in third person, suitable
-for a formal complaint or public campaign page.
+for a formal human rights complaint or public campaign page. Be specific about
+who, what, when, where. Name the actors and their roles.
 
 ## TIMELINE
-A chronological bullet-point timeline of key events with dates.
+A chronological bullet-point timeline of key events with dates. Format:
+* [DATE]: [EVENT]
+Include approximate dates if exact dates aren't known.
 
 ## RIGHTS AND LAWS POTENTIALLY VIOLATED
-List specific laws, constitutional rights, or international conventions that may
-apply. Include section numbers where possible. Note the jurisdiction.
+Use numbered format. For EACH violation:
+1. CHARGE/VIOLATION NAME — Section/Article number
+   Explanation of why this specific law may apply to this situation.
+
+Include both LOCAL laws (criminal code, constitutional rights) and
+INTERNATIONAL law (UDHR articles, ICCPR articles, CAT articles, Rome Statute).
+Cite specific section numbers for every entry.
 
 ## RECOMMENDED NEXT STEPS
-Numbered list of concrete actions this person can take, starting with the most
-urgent. Include specific organizations or bodies they can contact.
+Numbered list of 8-10 concrete actions, starting with most urgent.
+For each step include:
+- The specific organization or body to contact
+- A URL if available
+- What to file or request
+- Why this step matters
 
 ## SOCIAL MEDIA POST
-A single Instagram/social media post (under 2000 characters) that summarizes
-the case for public awareness. Include relevant hashtags.`;
+A single Instagram-ready post (under 2000 characters) that:
+- Opens with an attention-grabbing factual statement
+- Summarizes the case in 3-4 sentences
+- Lists the top 3-5 charges with section numbers
+- Ends with a call to action
+- Includes 8-10 relevant hashtags
+- Is factual, not sensational — but compelling enough to make people share`;
 
 /**
  * Initialize the Gemini SDK with an API key.
@@ -164,24 +188,45 @@ export async function generatePost(platform, narrative) {
   };
   const charLimit = limits[platform] || 2200;
 
-  const prompt = `Based on this human rights case narrative, generate a ${platform} post.
+  const platformInstructions = {
+    instagram: `Instagram post (max ${charLimit} chars):
+- Open with a powerful factual statement or statistic
+- Summarize the case in 2-3 sentences
+- List 3-5 specific charges with legal section numbers
+- Add a call to action (share, contact MP, file complaint)
+- End with 8-12 relevant hashtags on a new line
+- Use line breaks for readability`,
+    twitter: `Twitter/X post (max ${charLimit} chars):
+- ONE charge name + legal section number
+- ONE sentence explaining what happened
+- 2-3 hashtags
+- Must be under 280 characters total. Be extremely concise.`,
+    reddit: `Reddit post with markdown:
+- Start with a compelling # title
+- **Bold** key names and charges
+- Structure with clear paragraphs
+- Include a "What you can do" section
+- End with links to evidence or organizations
+- Longer format is fine — Reddit rewards detail`,
+    google: `Google Business/Search optimized post (max ${charLimit} chars):
+- Use SEO-friendly language (human rights, political persecution, whistleblower, accountability)
+- Include the jurisdiction and key organization names
+- Structure for featured snippet potential
+- End with a clear call to action`,
+  };
 
-NARRATIVE:
+  const prompt = `Based on this human rights case, generate a ${platform} post.
+
+CASE SUMMARY:
 ${narrative.summary || ''}
 
-CHARGES:
+LEGAL CHARGES:
 ${narrative.laws || ''}
 
-RULES:
-- Maximum ${charLimit} characters
-- ${platform === 'twitter' ? 'Be extremely concise. Charge name + section + 2-3 hashtags only.' : ''}
-- ${platform === 'reddit' ? 'Use markdown formatting. Include a compelling title line starting with #.' : ''}
-- ${platform === 'google' ? 'Optimize for Google Search. Include SEO keywords naturally.' : ''}
-- Include relevant hashtags
-- Be factual, not sensational
-- End with a call to action
+INSTRUCTIONS:
+${platformInstructions[platform] || platformInstructions.instagram}
 
-Generate ONLY the post text, nothing else.`;
+Generate ONLY the post text. No explanations or meta-commentary.`;
 
   const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
