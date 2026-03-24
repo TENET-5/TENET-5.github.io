@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LirilClaw AI Tool — Human Rights Campaign Builder</title>
+  <meta name="description" content="Build a human rights campaign with AI. Tell your story, get legal analysis, generate social media posts. Powered by Google Gemini. Free, runs in your browser.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── AI Tool Specific Styles ── */
+    .tool-container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+    /* Tabs */
+    .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
+    .tab-btn { padding: 0.7rem 1.2rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; font-family: inherit; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent-light); border-bottom-color: var(--accent); font-weight: 600; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Forms */
+    .form-group { margin-bottom: 1.2rem; }
+    .form-label { display: block; color: #ccc; font-size: 0.9rem; margin-bottom: 0.4rem; font-weight: 600; }
+    .form-input, .form-textarea, .form-select { width: 100%; padding: 0.7rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 0.95rem; border-radius: 4px; }
+    .form-textarea { min-height: 100px; resize: vertical; }
+    .form-select { appearance: auto; }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent); outline: none; }
+    .form-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+    /* Buttons */
+    .btn { padding: 0.6rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem; font-family: inherit; font-weight: 600; transition: background 0.2s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-light); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent-light); }
+    .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+    .btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+
+    /* Results */
+    .result-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; margin-bottom: 1rem; }
+    .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .result-header h3 { color: var(--accent-light); font-size: 1rem; margin: 0; }
+    .result-body { color: var(--text); font-size: 0.9rem; line-height: 1.7; white-space: pre-wrap; }
+
+    /* Templates */
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.8rem; margin: 1rem 0; }
+    .template-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+    .template-card:hover { border-color: var(--accent); }
+    .template-card.selected { border-color: var(--accent-light); background: rgba(196, 30, 58, 0.1); }
+    .template-card .icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+    .template-card h4 { font-size: 0.85rem; color: #fff; margin: 0.3rem 0; }
+    .template-card p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+    /* API Key Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; max-width: 500px; width: 90%; }
+    .modal h2 { color: var(--accent-light); margin-bottom: 1rem; font-size: 1.2rem; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 2rem; color: var(--text-muted); }
+    .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Status bar */
+    .status-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-dot.connected { background: #22c55e; }
+    .status-dot.disconnected { background: #888; }
+
+    /* Post cards */
+    .post-card { background: #1a1a1a; border: 1px solid #333; padding: 1rem; border-radius: 4px; margin-bottom: 0.8rem; }
+    .post-card .platform { font-size: 0.75rem; color: var(--accent-light); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .post-card pre { white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; color: var(--text); font-family: inherit; }
+
+    @media (max-width: 600px) {
+      .template-grid { grid-template-columns: 1fr 1fr; }
+      .tab-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="brand">TENET-5</a>
+    <a href="index.html">Data</a>
+    <a href="infographics.html">Infographics</a>
+    <a href="my-story.html">My Story</a>
+    <a href="legal.html">Legal</a>
+    <a href="history.html">History</a>
+    <a href="veterans.html">Veterans</a>
+    <a href="faq.html">FAQ</a>
+    <a href="resources.html">Resources</a>
+    <a href="open-letter.html">Open Letter</a>
+    <a href="lirilclaw.html">&#128295; LirilClaw</a>
+    <a href="ai-tool.html" class="active" style="color:#1a73e8;font-weight:bold;">&#129504; AI Tool</a>
+  </nav>
+
+  <header class="hero" style="padding: 2rem 1.5rem 1.5rem;">
+    <h1 style="font-size:1.8rem;">&#129504; LirilClaw AI Tool</h1>
+    <p class="subtitle">Tell your story. AI builds your campaign. Post everywhere. Runs in your browser.</p>
+  </header>
+
+  <div class="tool-container">
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Not connected</span>
+      <span style="margin-left:auto;">
+        <button class="btn btn-sm btn-outline" onclick="showApiKeyModal()">API Key</button>
+        <button class="btn btn-sm btn-outline" onclick="exportData()">Export</button>
+      </span>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showTab('story')">Tell Your Story</button>
+      <button class="tab-btn" onclick="showTab('analysis')">AI Analysis</button>
+      <button class="tab-btn" onclick="showTab('campaign')">Campaign Posts</button>
+      <button class="tab-btn" onclick="showTab('legal')">Legal Resources</button>
+      <button class="tab-btn" onclick="showTab('osint')">OSINT</button>
+    </div>
+
+    <!-- ═══ TAB 1: Tell Your Story ═══ -->
+    <div id="tab-story" class="tab-content active">
+      <h2 style="color:#fff;margin-bottom:0.5rem;">Choose Your Situation</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">Select a template that matches your case, or start from scratch.</p>
+
+      <div class="template-grid" id="template-grid"></div>
+
+      <h2 style="color:#fff;margin-top:2rem;margin-bottom:1rem;">Tell LIRIL What Happened</h2>
+
+      <div class="form-group">
+        <label class="form-label">What happened to you?</label>
+        <textarea class="form-textarea" id="f-what" rows="5" placeholder="Describe what happened..."></textarea>
+        <div class="form-hint" id="hint-what"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Who did this? (names, organizations, positions)</label>
+        <textarea class="form-textarea" id="f-who" rows="3" placeholder="Name the individuals and organizations responsible..."></textarea>
+        <div class="form-hint" id="hint-who"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">When did this happen? (dates, timeline)</label>
+        <input class="form-input" id="f-when" placeholder="e.g., Starting in 2020, ongoing...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Where? (location, jurisdiction)</label>
+        <input class="form-input" id="f-where" placeholder="e.g., Ontario, Canada">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Evidence you have</label>
+        <textarea class="form-textarea" id="f-evidence" rows="3" placeholder="Documents, recordings, witnesses, emails..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Jurisdiction</label>
+        <select class="form-select" id="f-jurisdiction">
+          <option value="canada">Canada</option>
+          <option value="usa">United States</option>
+          <option value="uk">United Kingdom</option>
+          <option value="international" selected>International</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-analyze" onclick="analyzeStory()">Analyze with AI</button>
+      </div>
+
+      <div id="loading-story" class="loading" style="display:none;">
+        <span class="spinner"></span> LIRIL is analyzing your story...
+      </div>
+    </div>
+
+    <!-- ═══ TAB 2: AI Analysis ═══ -->
+    <div id="tab-analysis" class="tab-content">
+      <div id="no-analysis" style="color:var(--text-muted);text-align:center;padding:3rem;">
+        Tell your story first, then AI will analyze it here.
+      </div>
+      <div id="analysis-results" style="display:none;"></div>
+    </div>
+
+    <!-- ═══ TAB 3: Campaign Posts ═══ -->
+    <div id="tab-campaign" class="tab-content">
+      <h2 style="color:#fff;margin-bottom:1rem;">Generate Campaign Posts</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">
+        Generate posts for different platforms from your narrative. AI adapts the content to each platform's format and character limit.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="genPost('instagram')">Instagram (2200)</button>
+        <button class="btn btn-outline" onclick="genPost('twitter')">Twitter/X (280)</button>
+        <button class="btn btn-outline" onclick="genPost('reddit')">Reddit</button>
+        <button class="btn btn-outline" onclick="genPost('google')">Google</button>
+      </div>
+      <div id="loading-posts" class="loading" style="display:none;">
+        <span class="spinner"></span> Generating post...
+      </div>
+      <div id="posts-container"></div>
+    </div>
+
+    <!-- ═══ TAB 4: Legal Resources ═══ -->
+    <div id="tab-legal" class="tab-content">
+      <h2 style="color:#fff;margin-bottom:1rem;">Legal Resources</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem;">
+        These organizations can help. For full legal document generation, <a href="lirilclaw.html">download LirilClaw</a> (generates s.504 Informations, FOI requests, UN complaints, and more).
+      </p>
+
+      <div class="result-section">
+        <div class="result-header"><h3>International Organizations</h3></div>
+        <div class="result-body">
+          <p><a href="https://www.ohchr.org/en/hr-bodies/hrc/complaint-procedure" target="_blank">UN Human Rights Council</a> — Individual complaint procedure</p>
+          <p><a href="https://www.icc-cpi.int/" target="_blank">International Criminal Court</a> — For crimes against humanity</p>
+          <p><a href="https://www.amnesty.org/en/" target="_blank">Amnesty International</a> — Human rights advocacy</p>
+          <p><a href="https://www.hrw.org/" target="_blank">Human Rights Watch</a> — Documentation and reporting</p>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-header"><h3>Canada</h3></div>
+        <div class="result-body">
+          <p><a href="https://www.chrc-ccdp.gc.ca/en/complaints" target="_blank">Canadian Human Rights Commission</a></p>
+          <p><a href="https://www.mpcc-cppm.gc.ca/" target="_blank">Military Police Complaints Commission</a></p>
+          <p><a href="https://www.crcc-ccetp.gc.ca/" target="_blank">CRCC — Civilian Review & Complaints</a></p>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-header"><h3>United States</h3></div>
+        <div class="result-body">
+          <p><a href="https://www.aclu.org/contact-us" target="_blank">ACLU</a></p>
+          <p><a href="https://civilrights.justice.gov/" target="_blank">DOJ Civil Rights Division</a></p>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-header"><h3>United Kingdom</h3></div>
+        <div class="result-body">
+          <p><a href="https://www.equalityhumanrights.com/" target="_blank">Equality and Human Rights Commission</a></p>
+        </div>
+      </div>
+
+      <div style="background:rgba(196,30,58,0.1);border:1px solid rgba(196,30,58,0.3);border-radius:4px;padding:1rem;margin-top:1.5rem;font-size:0.85rem;color:var(--accent-light);">
+        This is not legal advice. Always consult a qualified lawyer before taking legal action.
+      </div>
+    </div>
+
+    <!-- ═══ TAB 5: OSINT ═══ -->
+    <div id="tab-osint" class="tab-content">
+      <h2 style="color:#fff;margin-bottom:1rem;">Evidence Search (OSINT)</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">
+        AI suggests search queries to find evidence supporting your case. Build your narrative first.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="runOsint()">Suggest Searches</button>
+      </div>
+      <div id="loading-osint" class="loading" style="display:none;">
+        <span class="spinner"></span> Generating search suggestions...
+      </div>
+      <div id="osint-results"></div>
+    </div>
+
+  </div>
+
+  <!-- API Key Modal -->
+  <div class="modal-overlay" id="api-modal" style="display:none;">
+    <div class="modal">
+      <h2>Gemini API Key</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">
+        This tool uses Google Gemini AI to analyze your story. You need a free API key from
+        <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>.
+        Your key stays in your browser — it's never sent to our server.
+      </p>
+      <div class="form-group">
+        <input class="form-input" id="api-key-input" type="password" placeholder="Paste your Gemini API key...">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveApiKey()">Connect</button>
+        <button class="btn btn-outline" onclick="testApiKey()">Test</button>
+        <button class="btn btn-outline" onclick="clearKey()">Clear Key</button>
+        <button class="btn btn-outline" onclick="hideApiKeyModal()">Cancel</button>
+      </div>
+      <div id="api-test-result" style="margin-top:0.8rem;font-size:0.85rem;"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.8rem;border-top:1px solid var(--border);margin-top:2rem;">
+    Powered by LirilClaw + Google Gemini AI | <a href="lirilclaw.html">Download Desktop App</a> | SEED=118400<br>
+    Everyone deserves to be heard.
+  </footer>
+
+<script type="module">
+import { initGemini, testConnection, buildNarrative, refineNarrative, generatePost, suggestSearches, isReady, parseSections } from './js/gemini-client.js';
+import { getApiKey, setApiKey, clearApiKey, getNarrative, setNarrative, getPosts, addPost, getFormData, setFormData, exportAll } from './js/storage.js';
+
+// Campaign templates (ported from campaign_templates.py)
+const TEMPLATES = [
+  { id: 'whistleblower', icon: '\uD83D\uDD14', name: 'Whistleblower Retaliation', desc: 'Punished for reporting wrongdoing', hint_what: 'Describe what you reported and how they retaliated.', hint_who: 'Name the individuals and organizations who retaliated.' },
+  { id: 'police', icon: '\uD83D\uDEA8', name: 'Police Misconduct', desc: 'Excessive force, false arrest, cover-up', hint_what: 'Describe what the police did.', hint_who: 'Name the officers, badge numbers, department.' },
+  { id: 'prosecution', icon: '\u2696\uFE0F', name: 'Wrongful Prosecution', desc: 'Fabricated or political charges', hint_what: 'Describe the charges and why they are fabricated.', hint_who: 'Name the prosecutors and investigators.' },
+  { id: 'indigenous', icon: '\uD83E\uDEB6', name: 'Indigenous Rights', desc: 'Systemic racism, land theft, discrimination', hint_what: 'Describe the violation of your rights.', hint_who: 'Name the government agencies responsible.' },
+  { id: 'veterans', icon: '\uD83C\uDF96\uFE0F', name: 'Veterans Rights', desc: 'Denied care, mistreated by system', hint_what: 'Describe how you were mistreated.', hint_who: 'Name the VA officials or military officers.' },
+  { id: 'political', icon: '\uD83D\uDD12', name: 'Political Prisoner', desc: 'Detained for beliefs or speech', hint_what: 'Describe the detention and what led to it.', hint_who: 'Name the agency and officers.' },
+  { id: 'immigration', icon: '\uD83C\uDF0D', name: 'Immigration Abuse', desc: 'Detention abuse, deportation', hint_what: 'Describe the abuse in detention or proceedings.', hint_who: 'Name the facility and officers.' },
+  { id: 'workplace', icon: '\uD83D\uDCBC', name: 'Workplace Retaliation', desc: 'Fired for reporting wrongdoing', hint_what: 'Describe what you reported and how your employer retaliated.', hint_who: 'Name the managers and company.' },
+];
+
+let currentNarrative = null;
+
+// ── Init ──
+window.showTab = function(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+};
+
+window.showApiKeyModal = function() { document.getElementById('api-modal').style.display = 'flex'; };
+window.hideApiKeyModal = function() { document.getElementById('api-modal').style.display = 'none'; };
+window.exportData = exportAll;
+
+window.saveApiKey = async function() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) return;
+  try {
+    await initGemini(key);
+    setApiKey(key);
+    updateStatus(true);
+    hideApiKeyModal();
+  } catch (e) {
+    document.getElementById('api-test-result').innerHTML = '<span style="color:#ef4444;">' + e.message + '</span>';
+  }
+};
+
+window.testApiKey = async function() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) return;
+  const el = document.getElementById('api-test-result');
+  el.innerHTML = '<span class="spinner"></span> Testing...';
+  try {
+    await initGemini(key);
+    const response = await testConnection();
+    el.innerHTML = '<span style="color:#22c55e;">' + response + '</span>';
+  } catch (e) {
+    el.innerHTML = '<span style="color:#ef4444;">Failed: ' + e.message + '</span>';
+  }
+};
+
+window.clearKey = function() {
+  clearApiKey();
+  updateStatus(false);
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-test-result').innerHTML = 'Key cleared.';
+};
+
+window.analyzeStory = async function() {
+  if (!isReady()) { showApiKeyModal(); return; }
+  const formData = {
+    what_happened: document.getElementById('f-what').value,
+    who_did_it: document.getElementById('f-who').value,
+    when_happened: document.getElementById('f-when').value,
+    where_happened: document.getElementById('f-where').value,
+    evidence: document.getElementById('f-evidence').value,
+    jurisdiction: document.getElementById('f-jurisdiction').value,
+  };
+  setFormData(formData);
+
+  document.getElementById('loading-story').style.display = 'block';
+  document.getElementById('btn-analyze').disabled = true;
+
+  try {
+    const result = await buildNarrative(formData);
+    currentNarrative = result;
+    setNarrative(result);
+    displayAnalysis(result);
+    showTab('analysis');
+    // Auto-click the analysis tab
+    document.querySelectorAll('.tab-btn')[1].click();
+  } catch (e) {
+    alert('AI Error: ' + e.message);
+  } finally {
+    document.getElementById('loading-story').style.display = 'none';
+    document.getElementById('btn-analyze').disabled = false;
+  }
+};
+
+window.genPost = async function(platform) {
+  if (!isReady()) { showApiKeyModal(); return; }
+  if (!currentNarrative) { alert('Analyze your story first.'); return; }
+
+  document.getElementById('loading-posts').style.display = 'block';
+  try {
+    const result = await generatePost(platform, currentNarrative);
+    addPost(result);
+    displayPost(result);
+  } catch (e) {
+    alert('Post generation error: ' + e.message);
+  } finally {
+    document.getElementById('loading-posts').style.display = 'none';
+  }
+};
+
+window.runOsint = async function() {
+  if (!isReady()) { showApiKeyModal(); return; }
+  if (!currentNarrative) { alert('Analyze your story first.'); return; }
+
+  document.getElementById('loading-osint').style.display = 'block';
+  try {
+    const result = await suggestSearches(currentNarrative);
+    document.getElementById('osint-results').innerHTML =
+      '<div class="result-section"><div class="result-header"><h3>Suggested Searches</h3><button class="btn btn-sm btn-outline" onclick="copyText(this.closest(\'.result-section\').querySelector(\'.result-body\').textContent)">Copy</button></div><div class="result-body">' + result.replace(/\n/g, '<br>') + '</div></div>';
+  } catch (e) {
+    alert('OSINT error: ' + e.message);
+  } finally {
+    document.getElementById('loading-osint').style.display = 'none';
+  }
+};
+
+window.copyText = function(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    // Brief flash
+  });
+};
+
+// ── Display Functions ──
+function updateStatus(connected) {
+  const dot = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  dot.className = 'status-dot ' + (connected ? 'connected' : 'disconnected');
+  text.textContent = connected ? 'Gemini connected (gemini-2.0-flash)' : 'Not connected';
+}
+
+function displayAnalysis(data) {
+  document.getElementById('no-analysis').style.display = 'none';
+  const container = document.getElementById('analysis-results');
+  container.style.display = 'block';
+  container.innerHTML = '';
+
+  const sections = [
+    { key: 'summary', title: 'Summary' },
+    { key: 'timeline', title: 'Timeline' },
+    { key: 'laws', title: 'Rights and Laws Violated' },
+    { key: 'next_steps', title: 'Recommended Next Steps' },
+    { key: 'social_post', title: 'Social Media Post' },
+  ];
+
+  for (const s of sections) {
+    if (!data[s.key]) continue;
+    const div = document.createElement('div');
+    div.className = 'result-section';
+    div.innerHTML = `
+      <div class="result-header">
+        <h3>${s.title}</h3>
+        <button class="btn btn-sm btn-outline" onclick="copyText(this.closest('.result-section').querySelector('.result-body').textContent)">Copy</button>
+      </div>
+      <div class="result-body">${data[s.key].replace(/\n/g, '<br>')}</div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+function displayPost(data) {
+  const container = document.getElementById('posts-container');
+  const div = document.createElement('div');
+  div.className = 'post-card';
+  div.innerHTML = `
+    <div class="platform">${data.platform} (${data.charCount} chars) <button class="btn btn-sm btn-outline" style="float:right;" onclick="copyText(this.closest('.post-card').querySelector('pre').textContent)">Copy</button></div>
+    <pre>${data.post}</pre>
+  `;
+  container.prepend(div);
+}
+
+// ── Template Selection ──
+function renderTemplates() {
+  const grid = document.getElementById('template-grid');
+  for (const t of TEMPLATES) {
+    const card = document.createElement('div');
+    card.className = 'template-card';
+    card.innerHTML = `<div class="icon">${t.icon}</div><h4>${t.name}</h4><p>${t.desc}</p>`;
+    card.onclick = () => selectTemplate(t, card);
+    grid.appendChild(card);
+  }
+}
+
+function selectTemplate(t, card) {
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  document.getElementById('hint-what').textContent = t.hint_what;
+  document.getElementById('hint-who').textContent = t.hint_who;
+}
+
+// ── Init on load ──
+renderTemplates();
+
+// Restore API key if saved
+const savedKey = getApiKey();
+if (savedKey) {
+  try {
+    await initGemini(savedKey);
+    updateStatus(true);
+  } catch (e) {
+    updateStatus(false);
+  }
+} else {
+  updateStatus(false);
+}
+
+// Restore narrative if in session
+const savedNarrative = getNarrative();
+if (savedNarrative) {
+  currentNarrative = savedNarrative;
+  displayAnalysis(savedNarrative);
+}
+
+// Restore form data
+const savedForm = getFormData();
+if (savedForm.what_happened) document.getElementById('f-what').value = savedForm.what_happened;
+if (savedForm.who_did_it) document.getElementById('f-who').value = savedForm.who_did_it;
+if (savedForm.when_happened) document.getElementById('f-when').value = savedForm.when_happened;
+if (savedForm.where_happened) document.getElementById('f-where').value = savedForm.where_happened;
+if (savedForm.evidence) document.getElementById('f-evidence').value = savedForm.evidence;
+if (savedForm.jurisdiction) document.getElementById('f-jurisdiction').value = savedForm.jurisdiction;
+
+// Restore posts
+for (const p of getPosts()) displayPost(p);
+</script>
+
+</body>
+</html>
