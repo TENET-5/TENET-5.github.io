@@ -110,6 +110,7 @@
       <span style="margin-left:auto;">
         <button class="btn btn-sm btn-outline" onclick="showApiKeyModal()">API Key</button>
         <button class="btn btn-sm btn-outline" onclick="exportData()">Export</button>
+        <button class="btn btn-sm btn-outline" onclick="shareViaUrl()">Share</button>
       </span>
     </div>
 
@@ -323,6 +324,20 @@ window.showApiKeyModal = function() { document.getElementById('api-modal').style
 window.hideApiKeyModal = function() { document.getElementById('api-modal').style.display = 'none'; };
 window.exportData = exportAll;
 
+window.shareViaUrl = function() {
+  const narrative = getNarrative();
+  if (!narrative || !narrative.summary) { alert('Analyze your story first.'); return; }
+  // Compress: encode summary + laws as URL-safe base64
+  const shareData = JSON.stringify({ s: narrative.summary.slice(0, 500), l: narrative.laws.slice(0, 500) });
+  const encoded = btoa(unescape(encodeURIComponent(shareData)));
+  const url = window.location.origin + window.location.pathname + '?d=' + encoded;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Share URL copied to clipboard!\n\nAnyone with this link can see your campaign summary.\n\nNote: The link contains your narrative summary — no API key or personal data.');
+  }).catch(() => {
+    prompt('Copy this URL to share your campaign:', url);
+  });
+};
+
 window.saveApiKey = async function() {
   const key = document.getElementById('api-key-input').value.trim();
   if (!key) return;
@@ -527,6 +542,22 @@ if (savedForm.jurisdiction) document.getElementById('f-jurisdiction').value = sa
 
 // Restore posts
 for (const p of getPosts()) displayPost(p);
+
+// Load shared campaign from URL params
+const urlParams = new URLSearchParams(window.location.search);
+const sharedData = urlParams.get('d');
+if (sharedData && !currentNarrative) {
+  try {
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(sharedData))));
+    if (decoded.s) {
+      currentNarrative = { summary: decoded.s, laws: decoded.l || '', timeline: '', next_steps: '', social_post: '', raw: '' };
+      setNarrative(currentNarrative);
+      displayAnalysis(currentNarrative);
+      // Switch to analysis tab
+      document.querySelectorAll('.tab-btn')[1].click();
+    }
+  } catch(e) { console.log('Failed to load shared data:', e); }
+}
 </script>
 
 </body>
