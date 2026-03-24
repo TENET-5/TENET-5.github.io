@@ -6,6 +6,7 @@
 (function() {
   // Full DK albums — plays through track by track
   var tracks = [
+    'spotify:album:2x5IF6C5TgCyp3zasMUYgG', // User's requested album (plays first)
     'spotify:album:39RCMjmOBYGJOdCWe1GSEN', // Fresh Fruit for Rotting Vegetables (1980)
     'spotify:album:6gQKAYf1VhWRCV8gMBBXHq', // Plastic Surgery Disasters (1982)
     'spotify:album:2m7CEzEMpkbCxiJwFBadAn', // Frankenchrist (1985)
