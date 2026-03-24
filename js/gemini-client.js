@@ -1,7 +1,7 @@
 /**
  * LirilClaw Gemini Client — Google Gemini AI SDK wrapper
  * Runs client-side in the browser via ESM import.
- * SEED=118400 | Created by Daniel Perry — PPCLI, TF 3-09
+ * SEED=118400 | Created by Daniel Perry
  */
 
 let genAI = null;
