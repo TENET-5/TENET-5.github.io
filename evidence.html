@@ -98,6 +98,48 @@
   <div class="content" id="main">
 
     <!-- ══════════════════════════════════════════════ -->
+    <!-- INTERACTIVE HANSARD SEARCH -->
+    <!-- ══════════════════════════════════════════════ -->
+    <section id="hansard-search" style="margin-bottom:3rem;padding:2rem;background:var(--bg-card);border:2px solid var(--accent);border-radius:12px;">
+      <h2 style="color:var(--accent-light);margin-bottom:0.5rem;">&#128270; Search Parliamentary Record</h2>
+      <p style="color:var(--text-muted);margin-bottom:1.5rem;font-size:0.9rem;">
+        Search Hansard quotes, committee testimony, and public inquiry transcripts. All sourced from official Canadian government records.
+      </p>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <input type="text" id="search-input" placeholder="Search quotes, speakers, topics..."
+          style="flex:1;min-width:200px;padding:0.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1rem;"
+          oninput="filterEvidence()">
+        <select id="speaker-filter" onchange="filterEvidence()"
+          style="padding:0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+          <option value="">All Speakers</option>
+          <option value="mendicino">Marco Mendicino</option>
+          <option value="lametti">David Lametti</option>
+          <option value="poilievre">Pierre Poilievre</option>
+          <option value="vance">Jonathan Vance</option>
+          <option value="brennan">Kellie Brennan</option>
+          <option value="walbourne">Gary Walbourne</option>
+          <option value="byrne">Jenni Byrne</option>
+          <option value="chong">Michael Chong</option>
+          <option value="lucki">Brenda Lucki</option>
+        </select>
+        <select id="topic-filter" onchange="filterEvidence()"
+          style="padding:0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+          <option value="">All Topics</option>
+          <option value="emergencies">Emergencies Act</option>
+          <option value="maid">MAID / Euthanasia</option>
+          <option value="interference">Foreign Interference</option>
+          <option value="military">Military Justice</option>
+          <option value="whistleblower">Whistleblower</option>
+          <option value="firearms">Firearms</option>
+          <option value="clearance">Security Clearance</option>
+        </select>
+      </div>
+      <div id="search-stats" style="color:var(--text-muted);font-size:0.85rem;">
+        Showing all evidence cards. Type to search.
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════ -->
     <!-- MARCO MENDICINO -->
     <!-- ══════════════════════════════════════════════ -->
 
@@ -490,5 +532,105 @@
   </footer>
 
   <script src="js/spotify-player.js" defer></script>
+  <script>
+  // Interactive Hansard Search — filters evidence cards by text, speaker, topic
+  function filterEvidence() {
+    const query = document.getElementById('search-input').value.toLowerCase().trim();
+    const speaker = document.getElementById('speaker-filter').value.toLowerCase();
+    const topic = document.getElementById('topic-filter').value.toLowerCase();
+    const cards = document.querySelectorAll('.evidence-card');
+    const headings = document.querySelectorAll('#main > h2, #main > p');
+    let visible = 0;
+    let total = cards.length;
+
+    // Speaker keyword mapping
+    const speakerMap = {
+      mendicino: ['mendicino','public safety','emergencies act minister'],
+      lametti: ['lametti','justice minister','maid minister','bill c-7','bill c-14'],
+      poilievre: ['poilievre','opposition leader','clearance'],
+      vance: ['vance','cds','chief of defence'],
+      brennan: ['brennan','major kellie'],
+      walbourne: ['walbourne','ombudsman'],
+      byrne: ['byrne','harper','pmo'],
+      chong: ['chong','michael chong','wei zhao'],
+      lucki: ['lucki','rcmp commissioner'],
+    };
+
+    // Topic keyword mapping
+    const topicMap = {
+      emergencies: ['emergencies act','emergency','convoy','order in council','rouleau'],
+      maid: ['maid','euthanasia','assisted death','medical assistance','track 2','bill c-7','bill c-14','76,475','death'],
+      interference: ['interference','csis','chinese','espionage','foreign','hogue','nsicop','beijing','spy'],
+      military: ['military','cfnis','somalia','vance','airborne','mefloquine','court martial','nda'],
+      whistleblower: ['whistleblower','psdpa','reprisal','retaliation','disclosure','ombudsman'],
+      firearms: ['firearm','gun','oic','ban','c-21','c-71','prohibited'],
+      clearance: ['clearance','classified','secret','nsicop','briefing'],
+    };
+
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      let show = true;
+
+      // Text search
+      if (query && !text.includes(query)) show = false;
+
+      // Speaker filter
+      if (speaker && speakerMap[speaker]) {
+        const terms = speakerMap[speaker];
+        if (!terms.some(t => text.includes(t))) show = false;
+      }
+
+      // Topic filter
+      if (topic && topicMap[topic]) {
+        const terms = topicMap[topic];
+        if (!terms.some(t => text.includes(t))) show = false;
+      }
+
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    // Hide/show section headings based on whether their cards are visible
+    const sections = document.querySelectorAll('#main > h2:not([style*="color:var(--accent-light)"])');
+    sections.forEach(h2 => {
+      let next = h2.nextElementSibling;
+      let anyVisible = false;
+      while (next && next.tagName !== 'H2' && !next.id) {
+        if (next.classList && next.classList.contains('evidence-card') && next.style.display !== 'none') {
+          anyVisible = true;
+        }
+        next = next.nextElementSibling;
+      }
+      // Also hide the description paragraph after h2
+      const desc = h2.nextElementSibling;
+      if (query || speaker || topic) {
+        h2.style.display = anyVisible ? '' : 'none';
+        if (desc && desc.tagName === 'P') desc.style.display = anyVisible ? '' : 'none';
+      } else {
+        h2.style.display = '';
+        if (desc && desc.tagName === 'P') desc.style.display = '';
+      }
+    });
+
+    // Update stats
+    const stats = document.getElementById('search-stats');
+    if (!query && !speaker && !topic) {
+      stats.textContent = `Showing all ${total} evidence cards. Type to search.`;
+    } else {
+      stats.textContent = `Showing ${visible} of ${total} evidence cards.`;
+      if (visible === 0) {
+        stats.textContent += ' No matches found — try different terms.';
+      }
+    }
+  }
+
+  // Keyboard shortcut: / focuses search
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+      e.preventDefault();
+      document.getElementById('search-input').focus();
+    }
+  });
+  </script>
 </body>
 </html>
