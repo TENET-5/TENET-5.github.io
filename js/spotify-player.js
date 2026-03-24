@@ -52,11 +52,32 @@
     }, function(EmbedController) {
       ctrl = EmbedController;
 
+      // Autoplay — try immediately, then on first user interaction as fallback
+      var started = false;
+      function tryAutoplay() {
+        if (started || !ctrl) return;
+        ctrl.play();
+        started = true;
+      }
+      // Attempt immediate autoplay
+      tryAutoplay();
+      // Fallback: start on first click/scroll/keypress anywhere on page
+      var fallback = function() {
+        tryAutoplay();
+        document.removeEventListener('click', fallback);
+        document.removeEventListener('scroll', fallback);
+        document.removeEventListener('keydown', fallback);
+      };
+      document.addEventListener('click', fallback, {once: false});
+      document.addEventListener('scroll', fallback, {once: false});
+      document.addEventListener('keydown', fallback, {once: false});
+
       // Track playback state
       ctrl.addListener('playback_update', function(e) {
         if (e && e.data) {
           playing = !e.data.isPaused;
           document.getElementById('sp-play').innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+          if (!e.data.isPaused) started = true;
         }
       });
 
