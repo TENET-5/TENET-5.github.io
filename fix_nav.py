@@ -26,7 +26,6 @@ CANONICAL_NAV = """  <nav class="site-nav">
     <a href="lirilclaw.html" style="color:#e63950;font-weight:bold;">&#128295; LirilClaw</a>
     <a href="ai-tool.html" style="color:#1a73e8;font-weight:bold;">&#129504; AI Tool</a>
     <a href="mooserack.html" style="color:#4ade80;font-weight:bold;">&#128190; MooseRack</a>
-    <a href="music.html" style="color:#1DB954;font-weight:bold;">&#127925; Music</a>
   </nav>"""
 
 # Pages to skip (not real content pages)
