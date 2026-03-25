@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canadian Government Corruption Map — Structural Failures, Evidence &amp; Timeline</title>
+  <meta name="description" content="A complete structural map of documented Canadian government corruption: who did it, how it was done, and where the evidence lives. Public record only.">
+  <meta property="og:title" content="Canadian Government Corruption Map">
+  <meta property="og:description" content="Structural failures, documented scandals, and institutional capture — mapped by actor, mechanism, and evidence source.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_CA">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+    }
+    .filter-btn {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      color: #ccc;
+      padding: 0.35rem 0.9rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #c41e3a;
+      border-color: #c41e3a;
+      color: #fff;
+    }
+    .corruption-entry {
+      background: #111;
+      border-left: 4px solid #c41e3a;
+      border-radius: 4px;
+      margin: 1.5rem 0;
+      padding: 1.2rem 1.5rem;
+    }
+    .corruption-entry[data-severity="critical"] { border-left-color: #ff2244; }
+    .corruption-entry[data-severity="high"]     { border-left-color: #e63950; }
+    .corruption-entry[data-severity="systemic"] { border-left-color: #f59e0b; }
+    .entry-header {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+    .entry-year {
+      font-size: 0.8rem;
+      color: #888;
+      font-family: monospace;
+    }
+    .entry-actor {
+      font-size: 0.85rem;
+      background: #1e1e3a;
+      color: #93c5fd;
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+    }
+    .entry-tag {
+      font-size: 0.75rem;
+      background: #2a1a1a;
+      color: #fca5a5;
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+    }
+    .entry-title {
+      font-size: 1.1rem;
+      color: #fff;
+      font-weight: 600;
+      margin: 0.3rem 0;
+    }
+    .entry-mechanism {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin: 0.4rem 0;
+    }
+    .evidence-links {
+      margin-top: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .evidence-link {
+      font-size: 0.8rem;
+      color: #60a5fa;
+      text-decoration: none;
+      background: #0f1a2e;
+      padding: 0.2rem 0.7rem;
+      border-radius: 4px;
+      border: 1px solid #1e3a5f;
+    }
+    .evidence-link:hover { background: #1e3a5f; }
+    .aitip {
+      margin-top: 0.8rem;
+      background: #0a1a12;
+      border: 1px solid #166534;
+      border-radius: 4px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.85rem;
+      color: #86efac;
+    }
+    .aitip::before {
+      content: "⚡ LIRIL Pattern — ";
+      font-weight: bold;
+      color: #4ade80;
+    }
+    .system-map {
+      background: #0d0d1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 1.5rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #ccc;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.6;
+      margin: 1.5rem 0;
+    }
+    .system-map .broken { color: #ff6b6b; }
+    .system-map .ok    { color: #4ade80; }
+    .system-map .warn  { color: #fbbf24; }
+    .verdict-box {
+      background: #1a0a0a;
+      border: 2px solid #c41e3a;
+      border-radius: 6px;
+      padding: 1.2rem 1.5rem;
+      margin: 2rem 0;
+    }
+    .verdict-box h3 { color: #ff6b6b; margin-top: 0; }
+    .verdict-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #2a1a1a;
+      font-size: 0.9rem;
+    }
+    .verdict-row:last-child { border-bottom: none; }
+    .verdict-score {
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .score-malice   { color: #ff4444; }
+    .score-systemic { color: #fbbf24; }
+    .score-mixed    { color: #f97316; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <nav class="site-nav">
+    <a href="index.html" class="brand">TENET-5</a>
+    <a href="index.html">Data</a>
+    <a href="infographics.html">Infographics</a>
+    <a href="my-story.html">My Story</a>
+    <a href="legal.html">Legal</a>
+    <a href="history.html">History</a>
+    <a href="veterans.html">Veterans</a>
+    <a href="faq.html">FAQ</a>
+    <a href="resources.html">Resources</a>
+    <a href="open-letter.html">Open Letter</a>
+    <a href="evidence.html" style="color:#ff6b6b;font-weight:bold;">Evidence</a>
+    <a href="lirilclaw.html" style="color:#e63950;font-weight:bold;">&#128295; LirilClaw</a>
+    <a href="ai-tool.html" style="color:#1a73e8;font-weight:bold;">&#129504; AI Tool</a>
+    <a href="hansard-evidence.html" style="color:#e63950;font-weight:bold;">&#127963; Hansard Proof</a>
+    <a href="corruption-map.html" class="active" style="color:#fbbf24;font-weight:bold;">&#128269; Corruption Map</a>
+  </nav>
+
+  <header class="hero">
+    <div class="flag">&#127464;&#127462;</div>
+    <h1>Canadian Government<br>Corruption Map</h1>
+    <p class="subtitle">Every entry on this page is sourced from public record: Auditor General reports, parliamentary committee testimony, court decisions, and official government filings. These are not allegations — these are documented facts.</p>
+  </header>
+
+  <div class="content" id="main">
+
+    <!-- ══════ SYSTEM ARCHITECTURE MAP ══════ -->
+    <section id="system-map">
+      <h2><span class="section-num">01 &mdash; THE SYSTEM</span>How Canadian Government Is Structured — And Where It Breaks</h2>
+
+      <p>The Canadian system was designed for a high-trust era. It has never been updated for low-trust conditions. The bugs were always there — they're just being used now.</p>
+
+      <div class="system-map">CONSTITUTIONAL LAYER
+├── <span class="ok">Constitution Act 1867 + 1982</span>          ✓ Exists
+├── <span class="ok">Charter of Rights and Freedoms</span>         ✓ Exists
+└── <span class="warn">s.33 Notwithstanding Clause</span>           ⚠ Allows govts to suspend Charter rights for 5yr intervals
+
+LEGISLATIVE BRANCH
+├── <span class="broken">Senate (105 appointed seats)</span>          ✗ No election. No recall. PM appoints.
+└── House of Commons (338 elected MPs)
+    ├── <span class="broken">Party Whip system</span>                   ✗ MPs vote party line or lose committee seats/nomination
+    └── <span class="broken">PMO (unelected staff)</span>               ✗ Real executive power. Zero electoral accountability.
+
+EXECUTIVE BRANCH
+├── <span class="broken">Prime Minister + Cabinet</span>              ✗ Near-absolute power through party discipline
+├── <span class="warn">Privy Council Office (permanent)</span>     ⚠ Continuity across govts — no democratic mandate
+└── <span class="warn">Crown Corporations</span>                    ⚠ CBC, BDC, CMHC — appointed boards, limited oversight
+
+JUDICIAL BRANCH
+└── <span class="broken">Supreme Court (PM-appointed)</span>         ✗ No parliamentary confirmation. PM shapes court for decades.
+
+ACCOUNTABILITY LAYER
+├── <span class="broken">RCMP → Solicitor General → Cabinet</span>  ✗ Federal police report UP through executive, not independent
+├── <span class="broken">CSIS → Minister of Public Safety</span>    ✗ Intelligence reports to political masters
+├── <span class="warn">Office of the Commissioner of Lobbying</span> ⚠ Limited investigative powers, no criminal penalty authority
+└── <span class="warn">Ethics Commissioner</span>                    ⚠ Can find violations but penalty = public report only</div>
+    </section>
+
+    <!-- ══════ FILTERS ══════ -->
+    <section id="timeline">
+      <h2><span class="section-num">02 &mdash; THE RECORD</span>Documented Corruption by Actor, Mechanism &amp; Evidence</h2>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterEntries('all')">All</button>
+        <button class="filter-btn" onclick="filterEntries('pmo')">PMO Interference</button>
+        <button class="filter-btn" onclick="filterEntries('financial')">Financial Fraud</button>
+        <button class="filter-btn" onclick="filterEntries('judicial')">Judicial/Legal</button>
+        <button class="filter-btn" onclick="filterEntries('surveillance')">Surveillance</button>
+        <button class="filter-btn" onclick="filterEntries('systemic')">Systemic Design</button>
+      </div>
+
+      <!-- ─── SPONSORSHIP SCANDAL ─── -->
+      <div class="corruption-entry" data-severity="critical" data-tags="pmo financial">
+        <div class="entry-header">
+          <span class="entry-year">1996–2004</span>
+          <span class="entry-actor">Chrétien / Gagliano / Liberal Party</span>
+          <span class="entry-tag">PMO Interference</span>
+          <span class="entry-tag">Financial Fraud</span>
+        </div>
+        <div class="entry-title">Sponsorship Scandal — $100M in Public Funds to Liberal-Friendly Ad Firms</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> Public Works awarded sponsorship contracts to Quebec ad firms with Liberal ties — with minimal or no work delivered. Kickbacks flowed back to the Liberal Party of Canada. The PMO directed the program outside normal Treasury Board controls.
+          <br><br>
+          <strong>Who:</strong> PM Jean Chrétien, Public Works Minister Alfonso Gagliano, and a network of Quebec ad executives.
+          <br><br>
+          <strong>Finding:</strong> Auditor General Sheila Fraser (2004): <em>"I think this is such a serious matter that Canadians deserve to have it investigated by an independent commission."</em> The Gomery Commission confirmed systematic fraud.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://publications.gc.ca/collections/Collection/CP32-79-1-2006E.pdf" target="_blank" rel="noopener">Gomery Report Vol.1 (PDF)</a>
+          <a class="evidence-link" href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_200402_03_e_14883.html" target="_blank" rel="noopener">AG Report 2004 Ch.3</a>
+          <a class="evidence-link" href="https://www.parl.ca/LegisInfo/en/bill/38-1/c-277" target="_blank" rel="noopener">Hansard Record</a>
+        </div>
+        <div class="aitip">PMO bypassed Treasury Board controls — same mechanism used in WE Charity (2020) and ArriveCAN (2023). Pattern: emergency/crisis framing used to skip procurement rules.</div>
+      </div>
+
+      <!-- ─── SENATE EXPENSES ─── -->
+      <div class="corruption-entry" data-severity="critical" data-tags="pmo financial">
+        <div class="entry-header">
+          <span class="entry-year">2012–2016</span>
+          <span class="entry-actor">Harper PMO / Nigel Wright / Mike Duffy</span>
+          <span class="entry-tag">PMO Interference</span>
+          <span class="entry-tag">Financial Fraud</span>
+        </div>
+        <div class="entry-title">Senate Expenses Scandal — PMO Chief of Staff Paid Senator's Debt to Suppress RCMP Investigation</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> PMO Chief of Staff Nigel Wright wrote a personal cheque for $90,172 to Senator Mike Duffy to cover fraudulent expense claims — in exchange for Duffy publicly claiming he was repaying the money himself. Internal PMO emails showed coordination to manage the political fallout.
+          <br><br>
+          <strong>Who:</strong> PM Stephen Harper (claimed no knowledge), Nigel Wright (charged, stayed), Senator Mike Duffy (charged, acquitted — judge found PMO was the directing mind).
+          <br><br>
+          <strong>Finding:</strong> Trial judge found that Duffy was pressured by the PMO and acted under duress. Wright was never convicted. No one in the PMO was held accountable.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://www.canlii.org/en/on/onsc/doc/2016/2016onsc7340/2016onsc7340.html" target="_blank" rel="noopener">R v Duffy — ONSC 2016 (CanLII)</a>
+          <a class="evidence-link" href="https://www.rcmp-grc.gc.ca/en/news/2014/rcmp-statement-duffy-investigation" target="_blank" rel="noopener">RCMP Statement</a>
+        </div>
+        <div class="aitip">PMO directed cover-up of Senate fraud. Judge's findings confirm PMO as "directing mind" — yet no PMO actor faced criminal consequences. Accountability gap: PMO staff have no legal accountability mechanism.</div>
+      </div>
+
+      <!-- ─── SNC-LAVALIN ─── -->
+      <div class="corruption-entry" data-severity="critical" data-tags="pmo judicial">
+        <div class="entry-header">
+          <span class="entry-year">2018–2019</span>
+          <span class="entry-actor">Trudeau PMO / Gerald Butts / Michael Wernick</span>
+          <span class="entry-tag">PMO Interference</span>
+          <span class="entry-tag">Judicial/Legal</span>
+        </div>
+        <div class="entry-title">SNC-Lavalin Affair — PMO Pressured Attorney General to Drop Criminal Prosecution</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> PMO staff made at least 20 documented contacts with Attorney General Jody Wilson-Raybould pressuring her to issue a Deferred Prosecution Agreement to SNC-Lavalin — shielding the company from criminal bribery charges related to Libya. Wilson-Raybould refused. She was moved out of the AG role and later resigned from Cabinet.
+          <br><br>
+          <strong>Who:</strong> PM Justin Trudeau, PMO Chief of Staff Gerald Butts (resigned), Privy Council Clerk Michael Wernick (resigned), and multiple PMO staff.
+          <br><br>
+          <strong>Finding:</strong> Ethics Commissioner Mario Dion: PM Trudeau contravened s.9 of the Conflict of Interest Act. Wilson-Raybould's recorded phone call with Wernick entered the public record.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://ciec-ccie.parl.gc.ca/en/publications/Pages/snc-lavalin-report.aspx" target="_blank" rel="noopener">Ethics Commissioner Report 2019</a>
+          <a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/42-1/JUST/meeting-19/evidence" target="_blank" rel="noopener">Wilson-Raybould Testimony — JUST Committee</a>
+          <a class="evidence-link" href="https://www.cbc.ca/news/politics/wilson-raybould-wernick-audio-1.5047148" target="_blank" rel="noopener">Recorded Call Transcript</a>
+        </div>
+        <div class="aitip">Direct PMO interference in independent prosecution — textbook executive overreach. The mechanism: AG serves at PM's pleasure, making prosecutorial independence structurally impossible when PMO applies pressure.</div>
+      </div>
+
+      <!-- ─── WE CHARITY ─── -->
+      <div class="corruption-entry" data-severity="high" data-tags="pmo financial">
+        <div class="entry-header">
+          <span class="entry-year">2020</span>
+          <span class="entry-actor">Trudeau / Morneau / WE Charity</span>
+          <span class="entry-tag">PMO Interference</span>
+          <span class="entry-tag">Financial Fraud</span>
+        </div>
+        <div class="entry-title">WE Charity Scandal — $912M Student Grant Program Sole-Sourced to Organization with Financial Ties to PM's Family</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> The federal government sole-sourced a $912M Canada Student Service Grant to WE Charity — bypassing competitive procurement. WE Charity had paid PM Trudeau's mother and brother hundreds of thousands in speaking fees. Finance Minister Bill Morneau's family had received $41,000 in travel benefits from WE.
+          <br><br>
+          <strong>Who:</strong> PM Justin Trudeau (found to have violated Conflict of Interest Act twice), Finance Minister Bill Morneau (resigned, also found in violation).
+          <br><br>
+          <strong>Finding:</strong> Ethics Commissioner Dion — two separate Conflict of Interest Act violations. Both Trudeau and Morneau refused to testify fully; documents were provided only after committee subpoena.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://ciec-ccie.parl.gc.ca/en/publications/Pages/we-charity-report.aspx" target="_blank" rel="noopener">Ethics Commissioner Report — WE</a>
+          <a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/43-2/FINA/meeting-4/evidence" target="_blank" rel="noopener">FINA Committee Testimony</a>
+        </div>
+        <div class="aitip">Third documented Ethics Act violation for Trudeau PMO (Aga Khan vacation 2017, SNC 2019, WE 2020). Penalty each time: public report. Zero consequence. The Ethics Commissioner has no enforcement mechanism.</div>
+      </div>
+
+      <!-- ─── ARRIVECAN ─── -->
+      <div class="corruption-entry" data-severity="high" data-tags="financial">
+        <div class="entry-header">
+          <span class="entry-year">2020–2023</span>
+          <span class="entry-actor">CBSA / PSPC / GC Strategies</span>
+          <span class="entry-tag">Financial Fraud</span>
+        </div>
+        <div class="entry-title">ArriveCAN — $60M App Built by Two-Person Consulting Firm via 76 Untendered Contracts</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> ArriveCAN was contracted to GC Strategies — a two-person firm with no permanent employees and no app-building capacity — for $19.1M directly, part of a total $59.5M spend. The firm subcontracted the actual work. CBSA could not account for how $54M was spent. Contracts were awarded without competitive bidding using pandemic emergency provisions.
+          <br><br>
+          <strong>Who:</strong> CBSA leadership, Public Services and Procurement Canada officials. GC Strategies principals Kristian Firth and Darren Anthony (testified before committee, refused some answers, cited Charter).
+          <br><br>
+          <strong>Finding:</strong> Auditor General Karen Hogan (2024): "We found that the Canada Border Services Agency and Public Health Agency of Canada did not manage the ArriveCAN application with the due diligence expected of a government institution."
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202402_02_e_44265.html" target="_blank" rel="noopener">AG Report 2024 — ArriveCAN</a>
+          <a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/44-1/OGGO/meeting-95/evidence" target="_blank" rel="noopener">OGGO Committee — GC Strategies Testimony</a>
+        </div>
+        <div class="aitip">Pandemic emergency procurement bypassed all competitive rules — same mechanism as Sponsorship. Pattern: crisis conditions used to eliminate oversight. ArriveCAN is the most expensive app per-line-of-code in Canadian history by any reasonable estimate.</div>
+      </div>
+
+      <!-- ─── PROROGATION 2009 ─── -->
+      <div class="corruption-entry" data-severity="high" data-tags="pmo systemic">
+        <div class="entry-header">
+          <span class="entry-year">2008–2010</span>
+          <span class="entry-actor">Harper / Governor General Michaëlle Jean</span>
+          <span class="entry-tag">PMO Interference</span>
+          <span class="entry-tag">Systemic Design</span>
+        </div>
+        <div class="entry-title">Prorogation of Parliament — Used Twice to Avoid Confidence Votes and Afghan Detainee Documents</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> Harper prorogued Parliament in December 2008 to avoid a confidence vote his minority government would have lost. He prorogued again in December 2009 to halt parliamentary committee investigations into Afghan detainee torture allegations. The GG granted both requests with no public constitutional review.
+          <br><br>
+          <strong>Who:</strong> PM Stephen Harper. Governor General Michaëlle Jean granted both prorogations — the 2008 decision is the most contested exercise of vice-regal discretion in modern Canadian history.
+          <br><br>
+          <strong>Finding:</strong> No formal accountability mechanism existed. The Afghan detainee committee was reconstituted and ultimately received redacted documents. Academic consensus: both prorogations were constitutionally questionable exercises of power.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/40-2/SPEC/meeting-7/evidence" target="_blank" rel="noopener">Special Committee on Prorogation</a>
+          <a class="evidence-link" href="https://www.canlii.org/en/commentary/doc/2010CanLIIDocs2439" target="_blank" rel="noopener">CanLII Commentary — Prorogation Conventions</a>
+        </div>
+        <div class="aitip">Prorogation is a prerogative power with no statutory limit. It can be used indefinitely to avoid Parliament. The GG has no written obligation to refuse — and has never refused a PM request in modern history. Structural vulnerability: uncodified convention is not enforceable.</div>
+      </div>
+
+      <!-- ─── LOBBYING REVOLVING DOOR ─── -->
+      <div class="corruption-entry" data-severity="systemic" data-tags="systemic financial">
+        <div class="entry-header">
+          <span class="entry-year">Ongoing</span>
+          <span class="entry-actor">Multiple — All Parties</span>
+          <span class="entry-tag">Systemic Design</span>
+        </div>
+        <div class="entry-title">Lobbying Revolving Door — Ministers and Senior Officials Become Lobbyists for Industries They Regulated</div>
+        <div class="entry-mechanism">
+          <strong>How it works:</strong> The Lobbying Act imposes a 5-year cooling-off period on former ministers lobbying their former departments. However: (1) the rule only covers the former minister's own department, (2) "communication" must be oral or written — informal influence is not captured, (3) enforcement is by the Commissioner of Lobbying who cannot impose criminal penalties.
+          <br><br>
+          <strong>Documented examples:</strong> Former Health Minister Jane Philpott → public sector consulting. Former Finance officials → Bay Street. Former CRTC members → telecom industry. Pattern is consistent across all governing parties.
+          <br><br>
+          <strong>Finding:</strong> Commissioner of Lobbying annual reports document hundreds of registrations by former senior officials each year. The registry is public at lobbyists.gc.ca.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://lobbycanada.gc.ca/en/lobby-registry/" target="_blank" rel="noopener">Lobbyist Registry — Live</a>
+          <a class="evidence-link" href="https://lobbycanada.gc.ca/en/reports/" target="_blank" rel="noopener">Commissioner Annual Reports</a>
+        </div>
+        <div class="aitip">Revolving door is legal under current rules. The 5-year cooling period has never been extended despite multiple reform proposals. All parties benefit from the system when in power — no governing party has strengthened it.</div>
+      </div>
+
+      <!-- ─── MAID EXPANSION ─── -->
+      <div class="corruption-entry" data-severity="critical" data-tags="judicial systemic">
+        <div class="entry-header">
+          <span class="entry-year">2016–present</span>
+          <span class="entry-actor">Trudeau / Health Canada / Dept. of Justice</span>
+          <span class="entry-tag">Systemic Design</span>
+          <span class="entry-tag">Judicial/Legal</span>
+        </div>
+        <div class="entry-title">MAID Expansion — 76,475 Deaths Under a Program Repeatedly Expanded Without Parliamentary Debate</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> Bill C-14 (2016) legalized MAID under strict criteria. Bill C-7 (2021) removed the "reasonably foreseeable natural death" requirement and created Track 2 MAID — available for chronic conditions alone. The mental illness expansion (MAID MD-SUMC) was delayed three times by parliament but the infrastructure remains in place.
+          <br><br>
+          <strong>Who:</strong> PM Justin Trudeau, Minister of Justice David Lametti, Health Canada. Parliamentary committees repeatedly raised concerns that were not incorporated into legislation.
+          <br><br>
+          <strong>Finding:</strong> Health Canada's own 6th Annual Report (2024): 15,343 deaths in 2023 alone. Track 2 applications — for non-terminal conditions — grew 31% in 2022. Parliamentary Budget Officer confirmed no independent cost-benefit analysis was conducted before Track 2 expansion.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://www.canada.ca/en/health-canada/services/health-services-benefits/medical-assistance-dying/annual-reports.html" target="_blank" rel="noopener">Health Canada MAID Annual Reports</a>
+          <a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/44-1/JUST/meeting-41/evidence" target="_blank" rel="noopener">JUST Committee — MAID MD-SUMC</a>
+          <a class="evidence-link" href="index.html" style="">Full Data → Main Report</a>
+        </div>
+        <div class="aitip">MAID expansion followed the same legislative pattern as C-18 and C-11 — omnibus approach, closure motions to limit debate, Senate used as rubber stamp. Pattern: policy with irreversible consequences passed under time pressure with limited parliamentary scrutiny.</div>
+      </div>
+
+      <!-- ─── BILL C-18 MEDIA FUNDING ─── -->
+      <div class="corruption-entry" data-severity="systemic" data-tags="systemic">
+        <div class="entry-header">
+          <span class="entry-year">2023–present</span>
+          <span class="entry-actor">Trudeau / Rodriguez / Heritage Canada</span>
+          <span class="entry-tag">Systemic Design</span>
+        </div>
+        <div class="entry-title">Bill C-18 + Journalism Tax Credits — Government Created Financial Dependency Between Federal Funding and Major Newsrooms</div>
+        <div class="entry-mechanism">
+          <strong>How it was done:</strong> The Local Journalism Initiative ($595M over 5 years), the Canadian Journalism Labour Tax Credit (25% of eligible salaries), and C-18's Online News Act created a system where qualifying news organizations receive direct government subsidy. Qualification criteria are set by the government.
+          <br><br>
+          <strong>Who:</strong> PM Justin Trudeau, Heritage Minister Pablo Rodriguez. Bell, Postmedia, Torstar, and CBC are among the largest beneficiaries.
+          <br><br>
+          <strong>Finding:</strong> No independent finding of corruption — but structural capture risk is documented. Postmedia controls ~40% of Canadian daily newspapers and receives federal subsidy. CBC receives ~$1.4B in annual federal funding and is regulated by CRTC, whose chair is appointed by the PM.
+        </div>
+        <div class="evidence-links">
+          <a class="evidence-link" href="https://parl.ca/LegisInfo/en/bill/44-1/c-18" target="_blank" rel="noopener">Bill C-18 — Parliament</a>
+          <a class="evidence-link" href="https://www.canada.ca/en/canadian-heritage/services/journalism.html" target="_blank" rel="noopener">Local Journalism Initiative</a>
+          <a class="evidence-link" href="https://www.pbo-dpb.ca/en/publications/RP-2324-007-S--costing-local-journalism-initiative--estimation-couts-initiative-journalisme-local" target="_blank" rel="noopener">PBO Cost Analysis</a>
+        </div>
+        <div class="aitip">Media funding dependency doesn't require editorial orders — it creates structural incentives. Outlets dependent on government qualification criteria cannot be reliably adversarial to government. This is regulatory capture via subsidy, not overt censorship.</div>
+      </div>
+
+    </section>
+
+    <!-- ══════ VERDICT MATRIX ══════ -->
+    <section id="verdict">
+      <h2><span class="section-num">03 &mdash; ASSESSMENT</span>Malice vs. Systemic — Evidence-Based Verdicts</h2>
+
+      <p>Each failure is assessed on whether it was a deliberate act by identifiable individuals, or a structural/systemic failure that any actor would exploit. Sources: Ethics Commissioner findings, court decisions, AG reports, committee testimony.</p>
+
+      <div class="verdict-box">
+        <h3>Verdict Matrix — All Documented Cases</h3>
+        <div class="verdict-row">
+          <span>Sponsorship Scandal</span>
+          <span class="verdict-score score-malice">DELIBERATE — AG finding, criminal convictions</span>
+        </div>
+        <div class="verdict-row">
+          <span>Senate Expenses / Wright-Duffy</span>
+          <span class="verdict-score score-malice">DELIBERATE — court found PMO was directing mind</span>
+        </div>
+        <div class="verdict-row">
+          <span>SNC-Lavalin PMO Interference</span>
+          <span class="verdict-score score-malice">DELIBERATE — Ethics Commissioner found violation, recorded evidence</span>
+        </div>
+        <div class="verdict-row">
+          <span>WE Charity</span>
+          <span class="verdict-score score-malice">DELIBERATE — two Ethics Act violations confirmed</span>
+        </div>
+        <div class="verdict-row">
+          <span>ArriveCAN</span>
+          <span class="verdict-score score-mixed">MIXED — institutional failure + possible fraud (RCMP investigating)</span>
+        </div>
+        <div class="verdict-row">
+          <span>Prorogation 2008/2009</span>
+          <span class="verdict-score score-mixed">DELIBERATE use of SYSTEMIC gap — no law broken, convention violated</span>
+        </div>
+        <div class="verdict-row">
+          <span>Lobbying Revolving Door</span>
+          <span class="verdict-score score-systemic">SYSTEMIC — legal under current rules, all parties benefit</span>
+        </div>
+        <div class="verdict-row">
+          <span>MAID Expansion</span>
+          <span class="verdict-score score-mixed">MIXED — legislative design decisions with irreversible consequences</span>
+        </div>
+        <div class="verdict-row">
+          <span>Media Funding / C-18</span>
+          <span class="verdict-score score-systemic">SYSTEMIC — structural capture risk, not proven editorial interference</span>
+        </div>
+      </div>
+
+      <div class="stat-callout">
+        <p class="big-number">4 of 9</p>
+        <p>documented cases involve confirmed Ethics Act violations or criminal findings. In every case, the maximum penalty was a public report. No minister has served jail time for abuse of power in Canadian history.</p>
+      </div>
+    </section>
+
+    <!-- ══════ WHAT NEEDS TO CHANGE ══════ -->
+    <section id="fixes">
+      <h2><span class="section-num">04 &mdash; THE FIX</span>What Reform Would Actually Look Like</h2>
+
+      <table class="data-table" style="font-size:0.88rem;">
+        <thead>
+          <tr><th>Broken Node</th><th>Reform Required</th><th>Blocked By</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PMO unaccountable staff</td><td>PMO staff subject to Parliament Act — testify under oath, same rules as ministers</td><td>Every PM (benefits incumbents)</td></tr>
+          <tr><td>Senate unelected</td><td>Elected Senate with fixed terms and recall provisions</td><td>Constitutional amendment requires 7/10 provinces</td></tr>
+          <tr><td>RCMP reports to Cabinet</td><td>Independent federal police commissioner — reports to Parliament, not minister</td><td>Requires legislation — no governing party has tabled it</td></tr>
+          <tr><td>Ethics Commissioner toothless</td><td>Commissioner can impose fines, refer for prosecution, and disqualify from office</td><td>Parliament must pass enabling legislation</td></tr>
+          <tr><td>Supreme Court PM-appointed</td><td>Parliamentary confirmation hearings (non-binding minimum)</td><td>Requires convention change — PM unwilling</td></tr>
+          <tr><td>Prorogation unlimited</td><td>Statutory limit: prorogation cannot exceed 30 days without House vote</td><td>Requires legislation — any PM would lose a tool</td></tr>
+          <tr class="highlight"><td>Lobbying cooling-off</td><td>Extend to 7 years, cover all federal departments, criminal penalty for violation</td><td>Lobbying industry opposes; govts rely on talent pipeline</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ══════ SOURCES ══════ -->
+    <section id="sources">
+      <h2><span class="section-num">05 &mdash; SOURCES</span>All Public Record</h2>
+      <ol style="font-size:0.88rem;line-height:1.9;color:#aaa;">
+        <li>Auditor General of Canada — <a href="https://www.oag-bvg.gc.ca" target="_blank" rel="noopener">oag-bvg.gc.ca</a></li>
+        <li>Gomery Commission Final Report, 2006 — <a href="https://publications.gc.ca/collections/Collection/CP32-79-1-2006E.pdf" target="_blank" rel="noopener">publications.gc.ca</a></li>
+        <li>Office of the Conflict of Interest and Ethics Commissioner — <a href="https://ciec-ccie.parl.gc.ca" target="_blank" rel="noopener">ciec-ccie.parl.gc.ca</a></li>
+        <li>R v Duffy, 2016 ONSC 7340 — <a href="https://www.canlii.org/en/on/onsc/doc/2016/2016onsc7340/2016onsc7340.html" target="_blank" rel="noopener">CanLII</a></li>
+        <li>Wilson-Raybould testimony, JUST Committee, 2019-02-27 — <a href="https://www.ourcommons.ca/DocumentViewer/en/42-1/JUST/meeting-19/evidence" target="_blank" rel="noopener">ourcommons.ca</a></li>
+        <li>Health Canada MAID Annual Reports 1st–6th — <a href="https://www.canada.ca/en/health-canada/services/health-services-benefits/medical-assistance-dying/annual-reports.html" target="_blank" rel="noopener">canada.ca</a></li>
+        <li>Lobbyist Registry — <a href="https://lobbycanada.gc.ca/en/lobby-registry/" target="_blank" rel="noopener">lobbycanada.gc.ca</a></li>
+        <li>Parliamentary Budget Office — <a href="https://www.pbo-dpb.ca" target="_blank" rel="noopener">pbo-dpb.ca</a></li>
+        <li>Hansard — House of Commons Debates — <a href="https://www.ourcommons.ca/DocumentViewer/en/hansard" target="_blank" rel="noopener">ourcommons.ca</a></li>
+        <li>AG ArriveCAN Report, February 2024 — <a href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202402_02_e_44265.html" target="_blank" rel="noopener">oag-bvg.gc.ca</a></li>
+      </ol>
+    </section>
+
+    <p class="back-link" style="padding-bottom:2rem;"><a href="index.html">&larr; Back to main report</a></p>
+  </div>
+
+  <script>
+    function filterEntries(tag) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('.corruption-entry').forEach(el => {
+        if (tag === 'all') {
+          el.classList.remove('hidden');
+        } else {
+          const tags = el.dataset.tags || '';
+          el.classList.toggle('hidden', !tags.includes(tag));
+        }
+      });
+    }
+  </script>
+</body>
+</html>
