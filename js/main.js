@@ -150,3 +150,47 @@
   updateProgress();
   updateTopBtn();
 })();
+
+
+// ── Share Functions ───────────────────────────────────────────────────────
+function shareTwitter() {
+  var url = encodeURIComponent(window.location.href);
+  var text = encodeURIComponent('76,475 Canadians killed under MAID since 2016. Every number comes from Health Canada\'s own reports. Read it yourself.');
+  window.open('https://twitter.com/intent/tweet?text=' + text + '&url=' + url, '_blank');
+}
+function shareFacebook() {
+  var url = encodeURIComponent(window.location.href);
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
+}
+function shareReddit() {
+  var url = encodeURIComponent(window.location.href);
+  var title = encodeURIComponent('76,475 Canadians killed under MAID — government\'s own numbers');
+  window.open('https://www.reddit.com/submit?url=' + url + '&title=' + title, '_blank');
+}
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(function() {
+    var btn = document.getElementById('copy-btn');
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(function(){ btn.textContent = '📋 Copy Link'; }, 2000); }
+  });
+}
+
+// ── Live MAID Counter ─────────────────────────────────────────────────────
+(function() {
+  var el = document.getElementById('live-counter');
+  var elapsed = document.getElementById('elapsed-time');
+  if (!el) return;
+  // 16,499 deaths in 2024 (365 days) = 45.2/day = 0.0005231/second
+  var deathsPerSecond = 16499 / (365 * 24 * 3600);
+  var baseDate = new Date('2024-01-01T00:00:00Z');
+  function update() {
+    var now = new Date();
+    var seconds = (now - baseDate) / 1000;
+    var count = Math.floor(seconds * deathsPerSecond);
+    el.textContent = count.toLocaleString('en-CA');
+    // Elapsed time in 2024 context
+    var days = Math.floor((now - baseDate) / 86400000);
+    if (elapsed) elapsed.textContent = days.toLocaleString('en-CA') + ' days since Jan 1 2024';
+  }
+  update();
+  setInterval(update, 1000);
+})();
