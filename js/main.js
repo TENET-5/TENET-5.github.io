@@ -109,14 +109,13 @@
     hamburger.className = 'nav-hamburger';
     hamburger.setAttribute('aria-label', 'Toggle navigation');
     hamburger.innerHTML = '<span></span><span></span><span></span>';
-    nav.prepend(hamburger);
-
-    // Wrap all non-brand, non-hamburger links
-    var links = nav.querySelectorAll('a:not(.brand)');
-    var linkWrap = document.createElement('div');
-    linkWrap.className = 'nav-links';
-    links.forEach(function (a) { linkWrap.appendChild(a); });
-    nav.appendChild(linkWrap);
+    // Insert after brand link
+    var brand = nav.querySelector('.brand');
+    if (brand && brand.nextSibling) {
+      nav.insertBefore(hamburger, brand.nextSibling);
+    } else {
+      nav.prepend(hamburger);
+    }
 
     hamburger.addEventListener('click', function () {
       nav.classList.toggle('open');
@@ -124,8 +123,8 @@
     });
 
     // Close on link click (mobile)
-    linkWrap.addEventListener('click', function (e) {
-      if (e.target.tagName === 'A') {
+    nav.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A' && !e.target.classList.contains('brand')) {
         nav.classList.remove('open');
         hamburger.classList.remove('active');
       }
