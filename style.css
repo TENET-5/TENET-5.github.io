@@ -407,34 +407,99 @@ strong { color: var(--text-primary); font-weight: 600; }
   padding: var(--s-2xl) var(--s-md) var(--s-xl);
   position: relative;
   overflow: hidden;
+  min-height: 65vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-/* Layered gradient — subtle but present */
+/* Layered gradient — stronger, cinematic glow */
 .hero::before {
   content: '';
   position: absolute;
-  top: -30%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 80%;
+  inset: 0;
   background:
-    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(196,30,58,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 40% at 30% 20%, rgba(120,20,40,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 40% at 70% 20%, rgba(160,25,50,0.03) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(196,30,58,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 20% 30%, rgba(120,20,40,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 50% at 80% 30%, rgba(160,25,50,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 100% 40% at 50% 100%, rgba(5,5,6,0.7) 0%, transparent 60%);
   pointer-events: none;
+  z-index: 0;
 }
-/* Bottom accent line under hero */
+/* Animated crosshatch grid — cinematic depth */
 .hero::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(60%, 400px);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  inset: -60px;
+  background-image:
+    linear-gradient(rgba(196,30,58,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,30,58,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 65% 55% at 50% 40%, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 65% 55% at 50% 40%, black 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: gridDrift 25s linear infinite;
+}
+@keyframes gridDrift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(60px, 60px); }
 }
 .hero > * { position: relative; z-index: 1; }
+
+/* Hero CTA button row */
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-top: var(--s-md);
+}
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--dur) var(--ease);
+  border: 1px solid transparent;
+}
+.hero-cta-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.hero-cta-primary:hover {
+  background: var(--accent-bright);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+.hero-cta-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: rgba(255,255,255,0.12);
+}
+.hero-cta-secondary:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--accent-bright);
+  border-color: rgba(255,255,255,0.2);
+  transform: translateY(-2px);
+}
+.hero-cta-ghost {
+  background: transparent;
+  color: var(--accent-bright);
+  border-color: transparent;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.82rem;
+}
+.hero-cta-ghost:hover {
+  color: #fff;
+  background: var(--accent-soft);
+}
 
 .hero h1 {
   margin-bottom: var(--s-md);
@@ -993,7 +1058,9 @@ footer {
 }
 
 @media (max-width: 768px) {
-  .hero { padding: var(--s-xl) var(--s-sm) var(--s-lg); }
+  .hero { padding: var(--s-xl) var(--s-sm) var(--s-lg); min-height: 50vh; }
+  .hero-ctas { gap: 0.4rem; }
+  .hero-cta { font-size: 0.78rem; padding: 0.45rem 0.9rem; }
   .content { padding: 0 var(--s-sm); }
   section { padding: var(--s-lg) 0; }
   .feature-grid, .cta-grid { grid-template-columns: 1fr; }
