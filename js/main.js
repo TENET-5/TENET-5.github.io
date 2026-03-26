@@ -176,8 +176,10 @@ function shareReddit() {
 }
 function copyLink() {
   navigator.clipboard.writeText(window.location.href).then(function() {
-    var btn = document.getElementById('copy-btn');
-    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(function(){ btn.textContent = '📋 Copy Link'; }, 2000); }
+    ['copy-btn', 'copy-btn-bar'].forEach(function(id) {
+      var btn = document.getElementById(id);
+      if (btn) { btn.textContent = '✓ Copied!'; setTimeout(function(){ btn.textContent = '📋 Copy Link'; }, 2000); }
+    });
   });
 }
 
