@@ -46,23 +46,31 @@
 
   // ── Scroll Reveal ────────────────────────────────────────────────────────
   const revealEls = document.querySelectorAll(
-    'section, .stat-callout, .formula-box, .cta-card, .chart-container'
+    'section, .stat-callout, .formula-box, .cta-card, .chart-container, ' +
+    '.corruption-entry, .record, .verdict-box, .purchase-callout, ' +
+    '.meme-card, .hero-section, .section-title'
   );
-  revealEls.forEach(function (el) { el.classList.add('reveal'); });
+  revealEls.forEach(function (el) {
+    if (!el.classList.contains('reveal')) el.classList.add('reveal');
+  });
 
   if ('IntersectionObserver' in window) {
     const revealObs = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('revealed');
+          entry.target.classList.add('visible');
           revealObs.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
 
     revealEls.forEach(function (el) { revealObs.observe(el); });
   } else {
-    revealEls.forEach(function (el) { el.classList.add('revealed'); });
+    revealEls.forEach(function (el) {
+      el.classList.add('revealed');
+      el.classList.add('visible');
+    });
   }
 
   // ── Animated Counters ────────────────────────────────────────────────────
