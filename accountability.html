@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The 504 — Government Accountability Database | TENET-5</title>
+  <meta name="description" content="Every documented ethics violation, criminal charge, conviction, and scandal involving Canadian elected officials — federal and provincial. Public record only.">
+  <meta property="og:title" content="The 504 — Government Accountability Database">
+  <meta property="og:description" content="Searchable database of documented misconduct by Canadian elected officials at every level of government.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .db-controls {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin: 1.5rem 0; position: sticky; top: 44px;
+      background: rgba(10,10,14,0.95); backdrop-filter: blur(12px);
+      padding: 1rem 0; z-index: 100; border-bottom: 1px solid #222;
+    }
+    .db-search {
+      flex: 1; min-width: 200px; background: #111; border: 1px solid #333;
+      color: #eee; padding: 0.6rem 1rem; border-radius: 6px;
+      font-size: 0.9rem; font-family: inherit;
+    }
+    .db-search::placeholder { color: #666; }
+    .db-filter {
+      background: #1a1a2e; border: 1px solid #333; color: #ccc;
+      padding: 0.4rem 0.9rem; border-radius: 20px; cursor: pointer;
+      font-size: 0.78rem; font-weight: 500; transition: all 0.2s;
+    }
+    .db-filter:hover { background: #2a2a4e; color: #fff; }
+    .db-filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .db-stats {
+      font-size: 0.8rem; color: #888; padding: 0.5rem 0;
+      font-family: monospace; border-bottom: 1px solid #1a1a1a;
+      margin-bottom: 1rem;
+    }
+    .record {
+      border-left: 3px solid #333; padding: 1rem 1.2rem;
+      margin: 1rem 0; background: #0a0a12; border-radius: 0 6px 6px 0;
+      transition: border-color 0.2s;
+    }
+    .record:hover { border-left-color: var(--accent); }
+    .record[data-type="conviction"] { border-left-color: #ff2244; }
+    .record[data-type="ethics"] { border-left-color: #f59e0b; }
+    .record[data-type="charges"] { border-left-color: #f97316; }
+    .record[data-type="scandal"] { border-left-color: #a855f7; }
+    .record[data-type="expense"] { border-left-color: #3b82f6; }
+    .record[data-type="conflict"] { border-left-color: #ec4899; }
+    .rec-header {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      align-items: baseline; margin-bottom: 0.5rem;
+    }
+    .rec-name { font-weight: 700; color: #fff; font-size: 1rem; }
+    .rec-party {
+      font-size: 0.72rem; padding: 0.1rem 0.5rem;
+      border-radius: 10px; font-weight: 600;
+    }
+    .party-lib { background: #7f1d1d; color: #fca5a5; }
+    .party-con { background: #1e3a5f; color: #93c5fd; }
+    .party-ndp { background: #4a2c0d; color: #fdba74; }
+    .party-bq  { background: #1e1e5f; color: #a5b4fc; }
+    .party-grn { background: #14532d; color: #86efac; }
+    .party-ind { background: #333; color: #aaa; }
+    .party-pq  { background: #1e1e5f; color: #a5b4fc; }
+    .party-ucp { background: #1e3a5f; color: #93c5fd; }
+    .party-opc { background: #1e3a5f; color: #93c5fd; }
+    .rec-level {
+      font-size: 0.7rem; color: #888; padding: 0.1rem 0.5rem;
+      border: 1px solid #333; border-radius: 10px;
+    }
+    .rec-year { font-size: 0.78rem; color: #888; font-family: monospace; }
+    .rec-type {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .type-conviction { color: #ff4444; }
+    .type-ethics { color: #fbbf24; }
+    .type-charges { color: #f97316; }
+    .type-scandal { color: #a855f7; }
+    .type-expense { color: #3b82f6; }
+    .type-conflict { color: #ec4899; }
+    .rec-detail {
+      font-size: 0.88rem; color: #bbb; line-height: 1.6; margin-top: 0.4rem;
+    }
+    .rec-outcome {
+      font-size: 0.82rem; margin-top: 0.5rem; padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+    }
+    .outcome-convicted { background: #2a0a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+    .outcome-found { background: #2a1a0a; border: 1px solid #7f5d1d; color: #fde68a; }
+    .outcome-acquitted { background: #0a1a0a; border: 1px solid #166534; color: #86efac; }
+    .outcome-resigned { background: #1a0a2a; border: 1px solid #5b21b6; color: #c4b5fd; }
+    .outcome-ongoing { background: #0a0a1a; border: 1px solid #1e3a5f; color: #93c5fd; }
+    .outcome-nocharges { background: #111; border: 1px solid #333; color: #888; }
+    .section-divider {
+      font-size: 0.75rem; color: #555; letter-spacing: 0.15em;
+      text-transform: uppercase; padding: 1.5rem 0 0.5rem;
+      border-bottom: 1px solid #1a1a1a; margin-top: 2rem;
+      font-weight: 700;
+    }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0;
+      font-size: 0.75rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .purchase-callout {
+      background: #1a0a0a; border: 2px solid #c41e3a;
+      border-radius: 8px; padding: 1.5rem; margin: 2rem 0;
+    }
+    .purchase-callout h3 { color: #ff6b6b; margin-top: 0; }
+    .purchase-item {
+      display: flex; justify-content: space-between;
+      padding: 0.4rem 0; border-bottom: 1px solid #2a1a1a;
+      font-size: 0.88rem;
+    }
+    .purchase-item:last-child { border-bottom: none; }
+    .purchase-cost { font-family: monospace; color: #ff6b6b; font-weight: 700; }
+    .purchase-note { color: #888; font-size: 0.78rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav class="site-nav">
+    <a href="index.html" class="brand">TENET‑5</a>
+    <div class="nav-group nav-primary">
+      <a href="my-story.html">My Story</a>
+      <a href="evidence.html" class="nav-hot">Evidence</a>
+      <a href="5gw-subversion.html" class="nav-purple">⚔ The War On You</a>
+      <a href="hansard-evidence.html" class="nav-hot">🏛 Hansard</a>
+    </div>
+    <div class="nav-group nav-data">
+      <a href="harm-index.html" class="nav-danger">☠ Harm Index</a>
+      <a href="corruption-map.html" class="nav-warn">🔍 Corruption Map</a>
+      <a href="accountability.html" class="nav-danger active">📋 The 504</a>
+      <a href="infographics.html">Infographics</a>
+    </div>
+    <div class="nav-group nav-info">
+      <button class="nav-more-btn" aria-expanded="false" aria-haspopup="true">More <span class="chevron">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="legal.html">Legal</a>
+        <a href="history.html">History</a>
+        <a href="veterans.html">Veterans</a>
+        <a href="open-letter.html">Open Letter</a>
+        <a href="faq.html">FAQ</a>
+        <a href="resources.html">Resources</a>
+      </div>
+    </div>
+    <div class="nav-group nav-tools">
+      <a href="bloggins.html">Bloggins 🦝</a>
+      <a href="lirilclaw.html" class="nav-green">LirilClaw 🐾</a>
+      <a href="ai-tool.html" class="nav-blue">AI Tool 🧠</a>
+      <a href="mooserack.html" class="nav-purple">MooseRack 🫎</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Toggle nav" onclick="this.closest('.site-nav').classList.toggle('open')">☰</button>
+  </nav>
+
+  <div class="share-bar">
+    <span style="font-weight:700;font-size:0.85rem;color:#fff;">📋 THE 504 — GOVERNMENT ACCOUNTABILITY DATABASE</span>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <button onclick="shareTwitter()" style="background:#000;color:#fff;border:1px solid #fff;padding:0.3rem 0.8rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-weight:600;">𝕏 Share</button>
+      <button onclick="shareFacebook()" style="background:#1877f2;color:#fff;border:none;padding:0.3rem 0.8rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-weight:600;">Facebook</button>
+      <button onclick="copyLink()" id="copy-btn" style="background:#fff;color:#c41e3a;border:none;padding:0.3rem 0.8rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-weight:700;">📋 Copy</button>
+    </div>
+  </div>
+
+  <div class="content" id="main">
+    <div class="hero-section">
+      <span class="section-label">THE 504</span>
+      <h1>Government Accountability Database</h1>
+      <p class="hero-sub">Every documented ethics violation, criminal charge, conviction, and scandal involving Canadian elected officials — federal and provincial. Sources: Ethics Commissioner, Auditor General, court records, Hansard, Charbonneau Commission, provincial integrity commissioners. <strong>Public record only.</strong></p>
+    </div>
+
+    <!-- ══════ GOVERNMENT PURCHASING REALITY CHECK ══════ -->
+    <section>
+      <h2><span class="section-num">00 — REALITY CHECK</span>How Government Purchases Work (And Why They Shouldn't Cost This Much)</h2>
+
+      <p>Before we get to the individuals, let's talk about what your government actually pays for things — because the markup isn't a bug, it's the business model.</p>
+
+      <div class="purchase-callout">
+        <h3>What Your Government Pays vs. What Things Actually Cost</h3>
+        <div class="purchase-item">
+          <span>Pay system for 290,000 employees</span>
+          <span><span class="purchase-cost">$5,000,000,000+</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">What a pay system actually is: Employee × Rate × Hours = Deposit. Shopify processes billions. Tim Hortons pays 15 people on time for $30/month. A CS student could build one in a weekend.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>ArriveCAN — a COVID questionnaire app</span>
+          <span><span class="purchase-cost">$59,500,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">What it actually is: a web form with 10 fields and a QR code. A competent developer builds this in 3 days. 76% of subcontractors did zero work.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>Long Gun Registry — a database</span>
+          <span><span class="purchase-cost">$629,000,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">What it actually is: a table with columns (Name, Address, Serial Number, Type). Your local library catalogue is more complex. Original budget: $2 million.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>Hunting 84 deer on a BC island</span>
+          <span><span class="purchase-cost">$800,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">That's $9,524 per deer. With helicopters and semi-automatic weapons. Any hunter in Canada would have done it for a tag and a case of beer.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>Catching one (1) bullfrog</span>
+          <span><span class="purchase-cost">$10,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">Parks Canada. Four years. One bullfrog. A 12-year-old with a net would have done it for free.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>Flying a Canadian chef to India to cook Indian food</span>
+          <span><span class="purchase-cost">$17,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">India. Home of Indian food. They flew a Canadian there to make it. During a state visit. With your money.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>86 leather chair cushions (Mexico City embassy)</span>
+          <span><span class="purchase-cost">$24,638</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">$286 per cushion. You can get a whole leather chair at Costco for less.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>A fence at Signal Hill, Newfoundland</span>
+          <span><span class="purchase-cost">$65,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">Put up. Taken down one week later. $65,000 for a fence that existed for 7 days. That's $9,286 per day of fence.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>A barn at Rideau Hall</span>
+          <span><span class="purchase-cost">$8,000,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">Eight million dollars. For a barn. Your tax dollars built the most expensive barn in Canadian history. The cows must be thrilled.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>EV battery subsidies to foreign multinationals</span>
+          <span><span class="purchase-cost">$28,200,000,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">$28.2 billion to Stellantis, VW, and Northvolt (bankrupt). 20-year break-even "hope." Stellantis responded with layoffs. You paid for that.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item">
+          <span>Trans Mountain Pipeline (original est. $5.4B)</span>
+          <span><span class="purchase-cost">$34,200,000,000</span></span>
+        </div>
+        <div class="purchase-item">
+          <span class="purchase-note">6x over budget. Up to $18.8 billion in projected taxpayer losses. $1,255 per Canadian household. But there's no money for veterans.</span>
+          <span></span>
+        </div>
+        <div class="purchase-item" style="border-top: 2px solid #c41e3a; padding-top: 0.8rem; margin-top: 0.5rem;">
+          <span style="font-weight:700; color:#fff;">TOTAL DOCUMENTED WASTE (partial list)</span>
+          <span><span class="purchase-cost" style="font-size:1.1rem;">$100,000,000,000+</span></span>
+        </div>
+      </div>
+
+      <p style="color:#ff6b6b; font-weight:600; font-size:1.1rem;">Every dollar above came from you. None of it was optional. None of it was refunded. And nobody went to jail.</p>
+    </section>
+
+    <!-- ══════ LEGEND ══════ -->
+    <section>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#ff2244;"></div> Criminal Conviction</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f97316;"></div> Criminal Charges</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div> Ethics Violation</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> Conflict of Interest</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div> Scandal/Misconduct</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div> Expense Fraud</div>
+      </div>
+    </section>
+
+    <!-- ══════ SEARCH/FILTER ══════ -->
+    <div class="db-controls" id="controls">
+      <input type="text" class="db-search" id="search" placeholder="Search by name, party, province, crime..." oninput="filterDB()">
+      <button class="db-filter active" data-filter="all" onclick="setFilter(this)">All</button>
+      <button class="db-filter" data-filter="conviction" onclick="setFilter(this)">Convictions</button>
+      <button class="db-filter" data-filter="charges" onclick="setFilter(this)">Charges</button>
+      <button class="db-filter" data-filter="ethics" onclick="setFilter(this)">Ethics</button>
+      <button class="db-filter" data-filter="conflict" onclick="setFilter(this)">Conflict</button>
+      <button class="db-filter" data-filter="scandal" onclick="setFilter(this)">Scandal</button>
+      <button class="db-filter" data-filter="expense" onclick="setFilter(this)">Expenses</button>
+      <button class="db-filter" data-filter="federal" onclick="setFilter(this)">Federal</button>
+      <button class="db-filter" data-filter="provincial" onclick="setFilter(this)">Provincial</button>
+      <button class="db-filter" data-filter="municipal" onclick="setFilter(this)">Municipal</button>
+    </div>
+    <div class="db-stats" id="stats"></div>
+
+    <!-- ══════ RECORDS ══════ -->
+    <div id="records">
+
+    <!-- ═══ FEDERAL — PRIME MINISTERS & CABINET ═══ -->
+    <div class="section-divider">PRIME MINISTERS &amp; CABINET — FEDERAL</div>
+
+    <div class="record" data-type="ethics" data-level="federal" data-party="liberal" data-search="trudeau liberal prime minister aga khan vacation bahamas ethics conflict">
+      <div class="rec-header">
+        <span class="rec-name">Justin Trudeau</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Prime Minister</span>
+        <span class="rec-year">2017</span>
+        <span class="rec-type type-ethics">ETHICS VIOLATION</span>
+      </div>
+      <div class="rec-detail">Accepted a vacation on the Aga Khan's private island in the Bahamas (Christmas 2016). Ethics Commissioner found Trudeau violated four provisions of the Conflict of Interest Act — the first PM in Canadian history to be found in violation.</div>
+      <div class="rec-outcome outcome-found">FINDING: Guilty of 4 violations of Conflict of Interest Act. Penalty: a public report. No fine. No consequence.</div>
+    </div>
+
+    <div class="record" data-type="ethics" data-level="federal" data-party="liberal" data-search="trudeau liberal prime minister snc lavalin wilson-raybould attorney general ethics obstruction">
+      <div class="rec-header">
+        <span class="rec-name">Justin Trudeau</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Prime Minister</span>
+        <span class="rec-year">2019</span>
+        <span class="rec-type type-ethics">ETHICS VIOLATION</span>
+      </div>
+      <div class="rec-detail">Ethics Commissioner found Trudeau improperly pressured Attorney General Jody Wilson-Raybould to offer SNC-Lavalin a deferred prosecution agreement on fraud and corruption charges. Wilson-Raybould testified to 10 months of "veiled threats." Second ethics violation for a sitting PM.</div>
+      <div class="rec-outcome outcome-found">FINDING: Violated s.9 of the Conflict of Interest Act. Penalty: another public report. AG Wilson-Raybould was demoted, then expelled from caucus.</div>
+    </div>
+
+    <div class="record" data-type="conflict" data-level="federal" data-party="liberal" data-search="trudeau liberal we charity student grant sole source family paid speeches">
+      <div class="rec-header">
+        <span class="rec-name">Justin Trudeau</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Prime Minister</span>
+        <span class="rec-year">2020</span>
+        <span class="rec-type type-conflict">CONFLICT OF INTEREST</span>
+      </div>
+      <div class="rec-detail">WE Charity awarded $912M sole-source contract to administer student grants. PM's mother Margaret received $312,000 in speaking fees from WE. Brother Alexandre received $32,000. Trudeau did not recuse himself from Cabinet discussions. Ethics Commissioner found "apparent conflict" but no formal breach. Parliament prorogued to shut down committee investigations.</div>
+      <div class="rec-outcome outcome-found">FINDING: "Apparent conflict of interest" — technically cleared on narrow legal grounds. Parliament prorogued. Finance Minister Morneau resigned. WE Charity shut down Canadian operations.</div>
+    </div>
+
+    <div class="record" data-type="ethics" data-level="federal" data-party="liberal" data-search="morneau liberal finance minister we charity villa france conflict ethics">
+      <div class="rec-header">
+        <span class="rec-name">Bill Morneau</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Minister of Finance</span>
+        <span class="rec-year">2020</span>
+        <span class="rec-type type-ethics">ETHICS VIOLATION</span>
+      </div>
+      <div class="rec-detail">Broke three provisions of the Conflict of Interest Act over WE Charity. Failed to disclose that his corporation owned a villa in France. His family accepted $41,000 in WE-sponsored travel. Resigned as Finance Minister.</div>
+      <div class="rec-outcome outcome-found">FINDING: Three violations of the Conflict of Interest Act. Penalty: resignation (kept pension). No charges.</div>
+    </div>
+
+    <div class="record" data-type="conflict" data-level="federal" data-party="liberal" data-search="carney liberal prime minister blind trust investments conflict brookfield goldman sachs">
+      <div class="rec-header">
+        <span class="rec-name">Mark Carney</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Prime Minister</span>
+        <span class="rec-year">2025</span>
+        <span class="rec-type type-conflict">CONFLICT — UNDER INVESTIGATION</span>
+      </div>
+      <div class="rec-detail">Ethics Commissioner investigation into PM Carney's financial assets. Used 120-day loophole to delay divestment of extensive holdings (Brookfield Asset Management). Ethics Committee investigation ongoing as of Dec 2025. Opposition alleges "conflict of interest screen" is inadequate for a PM with deep ties to global finance.</div>
+      <div class="rec-outcome outcome-ongoing">ONGOING: Ethics Committee investigation active. Asset disclosure published but adequacy of blind trust disputed.</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="federal" data-party="conservative" data-search="harper conservative prime minister duffy wright pmo senate cover up">
+      <div class="rec-header">
+        <span class="rec-name">Stephen Harper (PMO)</span>
+        <span class="rec-party party-con">Conservative</span>
+        <span class="rec-level">Federal — Prime Minister's Office</span>
+        <span class="rec-year">2013</span>
+        <span class="rec-type type-scandal">SCANDAL / COVER-UP</span>
+      </div>
+      <div class="rec-detail">PMO Chief of Staff Nigel Wright wrote $90,172 personal cheque to Senator Mike Duffy to cover fraudulent expense claims. Internal PMO emails showed coordination to manage political fallout. Harper claimed no knowledge. Trial judge found the PMO was "the directing mind."</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: Duffy acquitted (judge blamed PMO). Wright charges stayed. Harper denied knowledge. No one in PMO held accountable.</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="federal" data-party="conservative" data-search="harper conservative prorogation parliament afghan detainees democracy">
+      <div class="rec-header">
+        <span class="rec-name">Stephen Harper</span>
+        <span class="rec-party party-con">Conservative</span>
+        <span class="rec-level">Federal — Prime Minister</span>
+        <span class="rec-year">2008–2009</span>
+        <span class="rec-type type-scandal">ABUSE OF PROCESS</span>
+      </div>
+      <div class="rec-detail">Prorogued Parliament twice — once in 2008 to avoid a confidence vote, once in 2009 to block release of Afghan detainee documents. Used constitutional mechanism to shut down democratic accountability.</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: Legal but unprecedented abuse of convention. Set the precedent Trudeau later used to shut down WE Charity investigations.</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="federal" data-party="liberal" data-search="chretien liberal prime minister sponsorship adscam quebec ad firms kickbacks">
+      <div class="rec-header">
+        <span class="rec-name">Jean Chrétien</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Prime Minister</span>
+        <span class="rec-year">1996–2004</span>
+        <span class="rec-type type-scandal">SCANDAL — CRIMINAL CONVICTIONS</span>
+      </div>
+      <div class="rec-detail">Sponsorship Scandal (AdScam): $332 million in public funds directed to Quebec ad firms with Liberal ties. $100 million redirected to the Liberal Party. PMO bypassed Treasury Board controls. Gomery Commission confirmed systematic fraud. Five people convicted.</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: Five individuals (ad executives). PM not charged. Penalty: public inquiry, loss of government in 2006 election.</div>
+    </div>
+
+    <!-- ═══ FEDERAL — MINISTERS & MPs ═══ -->
+    <div class="section-divider">FEDERAL MINISTERS &amp; MEMBERS OF PARLIAMENT</div>
+
+    <div class="record" data-type="ethics" data-level="federal" data-party="liberal" data-search="ng mary liberal international trade minister contract friend conflict ethics">
+      <div class="rec-header">
+        <span class="rec-name">Mary Ng</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Minister of International Trade</span>
+        <span class="rec-year">2022</span>
+        <span class="rec-type type-ethics">ETHICS VIOLATION</span>
+      </div>
+      <div class="rec-detail">Ethics Commissioner found Ng placed herself in conflict of interest by awarding communications contracts to a friend's company while serving as minister. Apologized publicly.</div>
+      <div class="rec-outcome outcome-found">FINDING: Conflict of Interest Act violation. Penalty: public apology. Kept portfolio.</div>
+    </div>
+
+    <div class="record" data-type="ethics" data-level="federal" data-party="liberal" data-search="fergus greg liberal speaker house commons ethics partisan video message">
+      <div class="rec-header">
+        <span class="rec-name">Greg Fergus</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Speaker of the House</span>
+        <span class="rec-year">2023</span>
+        <span class="rec-type type-ethics">ETHICS VIOLATION</span>
+      </div>
+      <div class="rec-detail">Ethics Commissioner found Fergus violated the Conflict of Interest Act by recording a partisan tribute video for a Liberal colleague using the Speaker's robes and office — resources meant to be non-partisan.</div>
+      <div class="rec-outcome outcome-found">FINDING: Ethics Act violation. Survived non-confidence vote as Speaker by narrow margin.</div>
+    </div>
+
+    <div class="record" data-type="ethics" data-level="federal" data-party="liberal" data-search="ratansi yasmin liberal mp sister constituency office employment nepotism">
+      <div class="rec-header">
+        <span class="rec-name">Yasmin Ratansi</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — MP (Don Valley East)</span>
+        <span class="rec-year">2021</span>
+        <span class="rec-type type-ethics">ETHICS VIOLATION</span>
+      </div>
+      <div class="rec-detail">Employed her foster sister in her constituency office for years in violation of nepotism rules. Ethics Commissioner confirmed violation. Sat as independent after being expelled from Liberal caucus.</div>
+      <div class="rec-outcome outcome-found">FINDING: Violation confirmed. Expelled from Liberal caucus. Did not re-run.</div>
+    </div>
+
+    <div class="record" data-type="conviction" data-level="federal" data-party="conservative" data-search="del mastro dean conservative mp peterborough elections act overspending fraud">
+      <div class="rec-header">
+        <span class="rec-name">Dean Del Mastro</span>
+        <span class="rec-party party-con">Conservative</span>
+        <span class="rec-level">Federal — MP (Peterborough)</span>
+        <span class="rec-year">2014</span>
+        <span class="rec-type type-conviction">CRIMINAL CONVICTION</span>
+      </div>
+      <div class="rec-detail">Found guilty of exceeding election spending limits, failing to report a personal contribution, and knowingly submitting a false or misleading document. Harper's former parliamentary secretary.</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: One month in jail, four months house arrest. Lost seat. First sitting MP convicted under Canada Elections Act.</div>
+    </div>
+
+    <div class="record" data-type="conviction" data-level="federal" data-party="conservative" data-search="carson bruce conservative advisor fraud influence peddling harper">
+      <div class="rec-header">
+        <span class="rec-name">Bruce Carson</span>
+        <span class="rec-party party-con">Conservative</span>
+        <span class="rec-level">Federal — Senior Advisor to PM Harper</span>
+        <span class="rec-year">2014</span>
+        <span class="rec-type type-conviction">CRIMINAL CONVICTION</span>
+      </div>
+      <div class="rec-detail">Convicted of influence peddling. Had two previous fraud convictions that were not disclosed when he was hired as senior advisor to PM Harper. Used position to lobby for water filtration company linked to his partner.</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: Influence peddling. Previously convicted of fraud (twice). Hired by PMO anyway.</div>
+    </div>
+
+    <div class="record" data-type="conviction" data-level="federal" data-party="ndp" data-search="robinson svend ndp mp burnaby theft ring auction jewelry shoplifting">
+      <div class="rec-header">
+        <span class="rec-name">Svend Robinson</span>
+        <span class="rec-party party-ndp">NDP</span>
+        <span class="rec-level">Federal — MP (Burnaby-Douglas)</span>
+        <span class="rec-year">2004</span>
+        <span class="rec-type type-conviction">CRIMINAL CONVICTION</span>
+      </div>
+      <div class="rec-detail">Longest-serving NDP MP. Charged with theft over $5,000 after stealing a diamond ring valued at $64,000 from an auction. Resigned seat. Received conditional discharge.</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: Theft over $5,000. Conditional discharge. Resigned. Later ran again in 2019 and 2021 (lost both).</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="federal" data-party="conservative" data-search="zajdel saulie conservative candidate corruption bribery fraud ministerial">
+      <div class="rec-header">
+        <span class="rec-name">Saulie Zajdel</span>
+        <span class="rec-party party-con">Conservative</span>
+        <span class="rec-level">Federal — Former Candidate / Ministerial Advisor</span>
+        <span class="rec-year">2013</span>
+        <span class="rec-type type-charges">CRIMINAL CHARGES</span>
+      </div>
+      <div class="rec-detail">Faced five criminal charges related to corruption, bribery, breach of trust, and fraud while serving as advisor to a federal minister.</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: Multiple charges. Served as ministerial advisor while under investigation.</div>
+    </div>
+
+    <!-- ═══ FEDERAL — SENATORS ═══ -->
+    <div class="section-divider">SENATE — APPOINTED, UNELECTED, UNACCOUNTABLE</div>
+
+    <div class="record" data-type="charges" data-level="federal" data-party="conservative" data-search="duffy mike senator conservative pei expense fraud breach trust wright cheque">
+      <div class="rec-header">
+        <span class="rec-name">Mike Duffy</span>
+        <span class="rec-party party-con">Conservative</span>
+        <span class="rec-level">Federal — Senator (PEI)</span>
+        <span class="rec-year">2014</span>
+        <span class="rec-type type-charges">31 CRIMINAL CHARGES</span>
+      </div>
+      <div class="rec-detail">RCMP laid 31 charges including fraud, breach of trust, and bribery. Claimed PEI residence for housing allowance while living in Ottawa. PMO Chief of Staff wrote $90K cheque to cover it up. Judge found Duffy was pressured by PMO and acted under duress.</div>
+      <div class="rec-outcome outcome-acquitted">ACQUITTED: All 31 charges. Judge blamed PMO, not Duffy. The system that created the fraud was not reformed.</div>
+    </div>
+
+    <div class="record" data-type="charges" data-level="federal" data-party="conservative" data-search="brazeau patrick senator conservative assault sexual cocaine threats expense fraud">
+      <div class="rec-header">
+        <span class="rec-name">Patrick Brazeau</span>
+        <span class="rec-party party-con">Conservative</span>
+        <span class="rec-level">Federal — Senator</span>
+        <span class="rec-year">2013–2015</span>
+        <span class="rec-type type-charges">MULTIPLE CRIMINAL CHARGES</span>
+      </div>
+      <div class="rec-detail">Charged with assault, sexual assault, cocaine possession, uttering threats, impaired driving, expense fraud, and breach of trust. Suspended from Senate. Charges eventually withdrawn or resulted in peace bonds.</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: Most charges withdrawn. Absolute discharge on some. Returned to Senate. Sat until 2025.</div>
+    </div>
+
+    <div class="record" data-type="charges" data-level="federal" data-party="liberal" data-search="harb mac senator liberal expense fraud breach trust ottawa residence">
+      <div class="rec-header">
+        <span class="rec-name">Mac Harb</span>
+        <span class="rec-party party-lib">Liberal</span>
+        <span class="rec-level">Federal — Senator</span>
+        <span class="rec-year">2013</span>
+        <span class="rec-type type-charges">CRIMINAL CHARGES</span>
+      </div>
+      <div class="rec-detail">RCMP charged with fraud and breach of trust for claiming a housing allowance for a property outside Ottawa while maintaining his primary residence in the city. Resigned from Senate.</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: Charges withdrawn — Crown cited "no reasonable prospect of conviction." Resigned. Kept pension.</div>
+    </div>
+
+    <div class="record" data-type="charges" data-level="federal" data-party="ind" data-search="porter arthur senator security intelligence review committee fraud conspiracy laundering">
+      <div class="rec-header">
+        <span class="rec-name">Arthur Porter</span>
+        <span class="rec-party party-ind">Appointed</span>
+        <span class="rec-level">Federal — Chair, Security Intelligence Review Committee</span>
+        <span class="rec-year">2013</span>
+        <span class="rec-type type-charges">CRIMINAL CHARGES — DIED BEFORE TRIAL</span>
+      </div>
+      <div class="rec-detail">Chair of the committee overseeing CSIS — Canada's intelligence watchdog. Charged with fraud, conspiracy, abuse of trust, and money laundering in connection with a $22.5M bribe scheme involving SNC-Lavalin and the McGill University Health Centre. Fled to Panama. Died in Panamanian custody in 2015.</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: Died in custody before trial. The man overseeing Canada's spy agency was an alleged international fraudster. Harper appointed him.</div>
+    </div>
+
+    <!-- ═══ PROVINCIAL — QUEBEC ═══ -->
+    <div class="section-divider">PROVINCIAL — QUEBEC (CHARBONNEAU COMMISSION + UPAC)</div>
+
+    <div class="record" data-type="conviction" data-level="provincial" data-party="ind" data-search="vaillancourt gilles mayor laval quebec corruption fraud kickbacks construction mafia charbonneau">
+      <div class="rec-header">
+        <span class="rec-name">Gilles Vaillancourt</span>
+        <span class="rec-party party-ind">Independent</span>
+        <span class="rec-level">Municipal — Mayor of Laval, QC</span>
+        <span class="rec-year">2016</span>
+        <span class="rec-type type-conviction">CRIMINAL CONVICTION</span>
+      </div>
+      <div class="rec-detail">Mayor of Laval for 23 years. Charbonneau Commission revealed systematic corruption: construction firms paid 2.5% kickbacks on every municipal contract. Organized crime involvement documented. $500 million in public money misappropriated in Montreal area alone (2004-2009).</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: Six years in prison. Ordered to repay $8.5 million. UPAC: 114 convictions, 331 people/companies charged province-wide.</div>
+    </div>
+
+    <div class="record" data-type="charges" data-level="provincial" data-party="ind" data-search="applebaum michael mayor montreal quebec fraud breach trust corruption">
+      <div class="rec-header">
+        <span class="rec-name">Michael Applebaum</span>
+        <span class="rec-party party-ind">Independent</span>
+        <span class="rec-level">Municipal — Mayor of Montreal, QC</span>
+        <span class="rec-year">2013</span>
+        <span class="rec-type type-charges">CRIMINAL CHARGES</span>
+      </div>
+      <div class="rec-detail">Arrested and charged with 14 counts including fraud, breach of trust, and conspiracy. Became interim mayor after Tremblay resigned over corruption allegations. Lasted 7 months before his own arrest. Montreal had three mayors in two years — all touched by corruption.</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: Found guilty of corruption charges. Montreal's third consecutive mayor involved in scandal.</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="provincial" data-party="lib" data-search="charest jean quebec liberal premier charbonneau construction corruption investigation">
+      <div class="rec-header">
+        <span class="rec-name">Jean Charest</span>
+        <span class="rec-party party-lib">Liberal (QC)</span>
+        <span class="rec-level">Provincial — Premier of Quebec</span>
+        <span class="rec-year">2011–2015</span>
+        <span class="rec-type type-scandal">SCANDAL / INVESTIGATION</span>
+      </div>
+      <div class="rec-detail">Resisted calls for a corruption inquiry for years before finally establishing the Charbonneau Commission in 2011. UPAC investigated connections between Liberal Party fundraising and construction industry contracts. Commission found corruption was "more deeply rooted than thought."</div>
+      <div class="rec-outcome outcome-ongoing">OUTCOME: Lost 2012 election. Later ran for CPC leadership (2022). Never charged despite UPAC investigations.</div>
+    </div>
+
+    <!-- ═══ PROVINCIAL — BRITISH COLUMBIA ═══ -->
+    <div class="section-divider">PROVINCIAL — BRITISH COLUMBIA</div>
+
+    <div class="record" data-type="conviction" data-level="provincial" data-party="lib" data-search="campbell gordon bc liberal premier dui impaired driving hawaii">
+      <div class="rec-header">
+        <span class="rec-name">Gordon Campbell</span>
+        <span class="rec-party party-lib">BC Liberal</span>
+        <span class="rec-level">Provincial — Premier of BC</span>
+        <span class="rec-year">2003</span>
+        <span class="rec-type type-conviction">CRIMINAL CONVICTION</span>
+      </div>
+      <div class="rec-detail">Arrested in Maui, Hawaii for impaired driving. BAC was 0.149 — nearly double the legal limit. Pleaded no contest. Remained as premier until 2011.</div>
+      <div class="rec-outcome outcome-convicted">CONVICTED: DUI in Hawaii. Kept job as Premier of BC for 8 more years. Later appointed Canadian High Commissioner to the UK by Harper.</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="provincial" data-party="lib" data-search="coleman rich bc liberal minister money laundering casino organized crime cullen commission">
+      <div class="rec-header">
+        <span class="rec-name">Rich Coleman / BC Liberal Cabinet</span>
+        <span class="rec-party party-lib">BC Liberal</span>
+        <span class="rec-level">Provincial — Multiple Ministers</span>
+        <span class="rec-year">2009–2018</span>
+        <span class="rec-type type-scandal">MONEY LAUNDERING — IGNORED</span>
+      </div>
+      <div class="rec-detail">Cullen Commission (2022) found BC Liberal ministers were briefed as early as 2009 on organized crime money laundering through BC casinos — estimated at $5.3 billion annually by 2018. Ministers Rich Coleman, Shirley Bond, and Mike de Jong criticized for ignoring RCMP and gaming intelligence warnings for nearly a decade.</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: No charges. $5.3 billion in annual money laundering documented. Ministers briefed and did nothing. Commission recommendations pending implementation.</div>
+    </div>
+
+    <!-- ═══ PROVINCIAL — ONTARIO ═══ -->
+    <div class="section-divider">PROVINCIAL — ONTARIO</div>
+
+    <div class="record" data-type="scandal" data-level="provincial" data-party="lib" data-search="mcguinty dalton ontario liberal premier ornge gas plants billion ehealth">
+      <div class="rec-header">
+        <span class="rec-name">Dalton McGuinty Government</span>
+        <span class="rec-party party-lib">Ontario Liberal</span>
+        <span class="rec-level">Provincial — Premier of Ontario</span>
+        <span class="rec-year">2009–2013</span>
+        <span class="rec-type type-scandal">MULTIPLE SCANDALS</span>
+      </div>
+      <div class="rec-detail">Gas plants cancellation: $1.1 billion wasted moving two gas plants to save Liberal seats. eHealth Ontario: $1 billion spent with no functioning system — consultants billed $3,000/day. ORNGE Air Ambulance: CEO paid $1.4M/year while off the Sunshine List. Prorogued legislature to avoid accountability. Emails deleted.</div>
+      <div class="rec-outcome outcome-resigned">OUTCOME: McGuinty resigned. Chief of Staff David Livingston convicted of deleting emails (breach of trust). $2B+ in documented waste.</div>
+    </div>
+
+    <!-- ═══ PROVINCIAL — ALBERTA ═══ -->
+    <div class="section-divider">PROVINCIAL — ALBERTA</div>
+
+    <div class="record" data-type="scandal" data-level="provincial" data-party="ucp" data-search="smith danielle alberta ucp premier ahs health services procurement mentzelopoulos fired auditor">
+      <div class="rec-header">
+        <span class="rec-name">Danielle Smith Government</span>
+        <span class="rec-party party-ucp">UCP</span>
+        <span class="rec-level">Provincial — Premier of Alberta</span>
+        <span class="rec-year">2025</span>
+        <span class="rec-type type-scandal">OBSTRUCTION ALLEGATION</span>
+      </div>
+      <div class="rec-detail">Former AHS head Athana Mentzelopoulos alleged she was fired two days before a scheduled meeting with the Auditor General to discuss inflated procurement contracts at Alberta Health Services. Whistleblower alleges the termination was to prevent disclosure of contracting irregularities.</div>
+      <div class="rec-outcome outcome-ongoing">ONGOING: Whistleblower allegations under review. AG investigation status unclear.</div>
+    </div>
+
+    <!-- ═══ FEDERAL — McKINSEY / CONSULTANT CLASS ═══ -->
+    <div class="section-divider">THE CONSULTANT CLASS — UNELECTED, UNACCOUNTABLE, PAID MORE THAN YOU</div>
+
+    <div class="record" data-type="scandal" data-level="federal" data-party="ind" data-search="mckinsey consultant contracts procurement 100 contracts 20 departments both parties">
+      <div class="rec-header">
+        <span class="rec-name">McKinsey &amp; Company</span>
+        <span class="rec-party party-ind">Non-Partisan Grift</span>
+        <span class="rec-level">Federal — Contractor (20+ Departments)</span>
+        <span class="rec-year">2011–2023</span>
+        <span class="rec-type type-scandal">PROCUREMENT ABUSE</span>
+      </div>
+      <div class="rec-detail">Nearly 100 contracts from 20 federal departments across both CPC and LPC governments. AG found procurement rules disregarded and value for money not demonstrated. This isn't one party's problem — it's a procurement system both parties feed from.</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: AG report. No charges. No refunds. McKinsey continues to receive government contracts globally.</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="federal" data-party="ind" data-search="gc strategies arrivecan contractor two person firm 19 million subcontractors zero work">
+      <div class="rec-header">
+        <span class="rec-name">GC Strategies (Kristian Firth / Darren Anthony)</span>
+        <span class="rec-party party-ind">Contractor</span>
+        <span class="rec-level">Federal — IT Contractor</span>
+        <span class="rec-year">2020–2024</span>
+        <span class="rec-type type-charges">RCMP INVESTIGATION</span>
+      </div>
+      <div class="rec-detail">Two-person firm received $19.1M for ArriveCAN. Set narrow terms for a $25M contract it then won. Three firms involved received $1 billion in federal contracts over 13 years. AG found 76% of subcontractors did zero work. Banned from government contracts for 7 years.</div>
+      <div class="rec-outcome outcome-ongoing">ONGOING: RCMP criminal investigation. Banned from federal contracts for 7 years. Faked Indigenous business certification.</div>
+    </div>
+
+    <div class="record" data-type="scandal" data-level="federal" data-party="ind" data-search="accenture ceba brazil outsourced 313 million pandemic emergency benefits">
+      <div class="rec-header">
+        <span class="rec-name">Accenture</span>
+        <span class="rec-party party-ind">Contractor</span>
+        <span class="rec-level">Federal — CEBA Program Contractor</span>
+        <span class="rec-year">2020–2023</span>
+        <span class="rec-type type-scandal">OUTSOURCING SCANDAL</span>
+      </div>
+      <div class="rec-detail">Received $313 million of $342 million in CEBA contracts. Outsourced work to Brazil during a Canadian pandemic. The emergency program paid $3.5 billion to 77,160 ineligible recipients. The contractor got rich. Canadians got the bill.</div>
+      <div class="rec-outcome outcome-nocharges">OUTCOME: AG report confirmed waste. No charges against Accenture. $3.5B in ineligible payments not recovered.</div>
+    </div>
+
+    </div><!-- /records -->
+
+    <!-- ══════ BOTTOM STATS ══════ -->
+    <section style="margin-top:3rem;">
+      <div class="stat-callout">
+        <p class="big-number" id="total-count">0</p>
+        <p>documented cases in this database. Every entry sourced from Ethics Commissioner findings, Auditor General reports, court records, Hansard testimony, the Charbonneau Commission, or provincial integrity commissioners. <strong>This is not opinion. This is the public record.</strong></p>
+      </div>
+
+      <div class="verdict-box" style="margin-top:2rem;">
+        <h3>The Pattern</h3>
+        <p style="color:#ccc; line-height:1.8;">
+          Every party. Every province. Every level of government. The pattern is always the same: someone gets caught, a report is written, nobody goes to jail, the system continues unchanged, and you pay for all of it.
+          <br><br>
+          The Charbonneau Commission documented <strong>$500 million in misappropriated funds</strong> in Montreal alone and resulted in <strong>114 convictions</strong> — proving that when you actually investigate, you find criminals. The federal system has never had a Charbonneau-style investigation. Ask yourself why.
+          <br><br>
+          <strong>Total documented waste on this site: over $100 billion.</strong> That's $2,500 for every man, woman, and child in Canada. Stolen, wasted, or given to corporations and consultants who delivered nothing. And not a single federal minister has ever served prison time for it.
+        </p>
+      </div>
+    </section>
+
+  </div><!-- /content -->
+
+  <script>
+  // ═══ SEARCH & FILTER ENGINE ═══
+  let currentFilter = 'all';
+
+  function filterDB() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const records = document.querySelectorAll('.record');
+    let shown = 0, total = records.length;
+
+    records.forEach(r => {
+      const search = (r.dataset.search || '') + ' ' + r.textContent.toLowerCase();
+      const type = r.dataset.type || '';
+      const level = r.dataset.level || '';
+      const party = r.dataset.party || '';
+
+      let matchFilter = currentFilter === 'all'
+        || type === currentFilter
+        || level === currentFilter
+        || party === currentFilter;
+      let matchSearch = !q || search.includes(q);
+
+      if (matchFilter && matchSearch) {
+        r.classList.remove('hidden');
+        shown++;
+      } else {
+        r.classList.add('hidden');
+      }
+    });
+
+    // Show/hide section dividers
+    document.querySelectorAll('.section-divider').forEach(d => {
+      let next = d.nextElementSibling;
+      let hasVisible = false;
+      while (next && !next.classList.contains('section-divider')) {
+        if (next.classList.contains('record') && !next.classList.contains('hidden')) {
+          hasVisible = true; break;
+        }
+        next = next.nextElementSibling;
+      }
+      d.style.display = hasVisible ? '' : 'none';
+    });
+
+    document.getElementById('stats').textContent = `Showing ${shown} of ${total} records`;
+    document.getElementById('total-count').textContent = total;
+  }
+
+  function setFilter(btn) {
+    document.querySelectorAll('.db-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    filterDB();
+  }
+
+  // Init
+  filterDB();
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>
