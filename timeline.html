@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline — 80 Years of Canadian Government Actions | TENET-5</title>
+  <meta name="description" content="Comprehensive searchable timeline of every major Canadian government action from 1945 to 2025. Filterable by decade, category, and impact.">
+  <meta property="og:title" content="Timeline — 80 Years of Canadian Government Actions">
+  <meta property="og:description" content="Every major federal action from 1945-2025: military, economic, constitutional, scandal, and more.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ─── Controls ─── */
+    .tl-controls {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin: 1.5rem 0; position: sticky; top: 44px;
+      background: rgba(10,10,14,0.95); backdrop-filter: blur(12px);
+      padding: 1rem 0; z-index: 100; border-bottom: 1px solid #222;
+    }
+    .tl-search {
+      flex: 1; min-width: 200px; background: #111; border: 1px solid #333;
+      color: #eee; padding: 0.6rem 1rem; border-radius: 6px;
+      font-size: 0.9rem; font-family: inherit;
+    }
+    .tl-search::placeholder { color: #666; }
+    .tl-filter {
+      background: #1a1a2e; border: 1px solid #333; color: #ccc;
+      padding: 0.4rem 0.9rem; border-radius: 20px; cursor: pointer;
+      font-size: 0.78rem; font-weight: 500; transition: all 0.2s;
+    }
+    .tl-filter:hover { background: #2a2a4e; color: #fff; }
+    .tl-filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tl-stats {
+      font-size: 0.8rem; color: #888; padding: 0.5rem 0;
+      font-family: monospace; border-bottom: 1px solid #1a1a1a;
+      margin-bottom: 1rem;
+    }
+
+    /* ─── Filter rows ─── */
+    .filter-row { display: flex; flex-wrap: wrap; gap: 0.4rem; width: 100%; }
+    .filter-row-label {
+      font-size: 0.68rem; color: #555; text-transform: uppercase;
+      letter-spacing: 0.1em; width: 100%; margin-top: 0.3rem; font-weight: 600;
+    }
+
+    /* ─── Legend ─── */
+    .tl-legend {
+      display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0;
+      font-size: 0.75rem; padding: 0.8rem; border: 1px solid #1a1a1a;
+      border-radius: 6px; background: #0a0a0e;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ─── Timeline spine ─── */
+    .timeline-container { position: relative; padding-left: 60px; margin-top: 2rem; }
+    .timeline-container::before {
+      content: ''; position: absolute; left: 28px; top: 0; bottom: 0;
+      width: 3px; background: linear-gradient(180deg, transparent, var(--accent) 2%, var(--accent) 98%, transparent);
+      border-radius: 2px;
+    }
+
+    /* ─── Decade header ─── */
+    .decade-header {
+      position: relative; margin: 3rem 0 1.5rem; padding: 0;
+    }
+    .decade-header h2 {
+      font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--text-primary); font-weight: 900; letter-spacing: -0.02em;
+      margin: 0; line-height: 1.2;
+    }
+    .decade-header .decade-dot {
+      position: absolute; left: -44px; top: 50%; transform: translateY(-50%);
+      width: 20px; height: 20px; background: var(--accent); border-radius: 50%;
+      border: 3px solid var(--bg); box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .decade-range { font-size: 0.8rem; color: var(--text-tertiary); font-family: 'JetBrains Mono', monospace; }
+
+    /* ─── Event card ─── */
+    .tl-event {
+      position: relative; margin: 1rem 0; padding: 1rem 1.2rem;
+      background: var(--bg-card); border-radius: 0 var(--r-md) var(--r-md) 0;
+      border-left: 3px solid #333; transition: border-color 0.2s, transform 0.2s;
+    }
+    .tl-event:hover { border-left-color: var(--accent); transform: translateX(4px); }
+    .tl-event::before {
+      content: ''; position: absolute; left: -21px; top: 1.2rem;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--bg-card); border: 2px solid #555;
+      transition: border-color 0.2s;
+    }
+    .tl-event:hover::before { border-color: var(--accent); }
+    .tl-event.hidden { display: none; }
+
+    /* category border colors */
+    .tl-event[data-cat="military"]       { border-left-color: #4a7c4a; }
+    .tl-event[data-cat="economic"]       { border-left-color: #c9a227; }
+    .tl-event[data-cat="constitutional"] { border-left-color: #3b82f6; }
+    .tl-event[data-cat="immigration"]    { border-left-color: #06b6d4; }
+    .tl-event[data-cat="indigenous"]     { border-left-color: #f97316; }
+    .tl-event[data-cat="social"]         { border-left-color: #a855f7; }
+    .tl-event[data-cat="scandal"]        { border-left-color: #ef4444; }
+    .tl-event[data-cat="foreign"]        { border-left-color: #6366f1; }
+    .tl-event[data-cat="veterans"]       { border-left-color: #059669; }
+
+    /* ─── Event header ─── */
+    .ev-header { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 0.4rem; }
+    .ev-year {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+      color: var(--accent-bright); font-weight: 600;
+    }
+    .ev-pm {
+      display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem;
+    }
+    .pm-circle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      font-size: 0.55rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .pm-name { color: var(--text-secondary); font-weight: 500; }
+    .ev-party {
+      font-size: 0.68rem; padding: 0.1rem 0.5rem;
+      border-radius: 10px; font-weight: 600;
+    }
+    .party-lib { background: #7f1d1d; color: #fca5a5; }
+    .party-con { background: #1e3a5f; color: #93c5fd; }
+    .party-ndp { background: #4a2c0d; color: #fdba74; }
+    .party-pq  { background: #1e1e5f; color: #a5b4fc; }
+
+    .ev-cat {
+      font-size: 0.65rem; padding: 0.1rem 0.5rem; border-radius: 10px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      border: 1px solid transparent;
+    }
+    .cat-military       { color: #86efac; border-color: #4a7c4a; }
+    .cat-economic       { color: #fde68a; border-color: #c9a227; }
+    .cat-constitutional { color: #93c5fd; border-color: #3b82f6; }
+    .cat-immigration    { color: #67e8f9; border-color: #06b6d4; }
+    .cat-indigenous     { color: #fdba74; border-color: #f97316; }
+    .cat-social         { color: #d8b4fe; border-color: #a855f7; }
+    .cat-scandal        { color: #fca5a5; border-color: #ef4444; }
+    .cat-foreign        { color: #a5b4fc; border-color: #6366f1; }
+    .cat-veterans       { color: #6ee7b7; border-color: #059669; }
+
+    /* ─── Title / desc ─── */
+    .ev-title { font-weight: 700; color: var(--text-primary); font-size: 0.95rem; margin: 0.3rem 0 0.2rem; }
+    .ev-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ─── Impact skulls ─── */
+    .ev-impact { margin-top: 0.4rem; font-size: 0.82rem; }
+    .skull-on { color: #ef4444; }
+    .skull-off { color: #333; }
+    .impact-label { font-size: 0.68rem; color: #666; margin-left: 0.3rem; }
+
+    /* ─── Data section ─── */
+    .data-section {
+      margin-top: 4rem; padding: 2rem; background: var(--bg-card);
+      border-radius: var(--r-lg); border: 1px solid var(--border);
+    }
+    .data-section h2 {
+      font-family: 'Playfair Display', serif; font-size: 1.5rem;
+      color: var(--text-primary); margin-bottom: 1.5rem;
+    }
+    .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .data-card {
+      padding: 1.2rem; background: var(--bg-elevated); border-radius: var(--r-md);
+      border: 1px solid var(--border);
+    }
+    .data-card h3 { font-size: 0.85rem; color: var(--accent-bright); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* bar chart */
+    .bar-chart { display: flex; flex-direction: column; gap: 0.5rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.5rem; }
+    .bar-label { font-size: 0.72rem; color: var(--text-tertiary); font-family: 'JetBrains Mono', monospace; width: 48px; text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 18px; background: #111; border-radius: 3px; overflow: hidden; position: relative; }
+    .bar-fill {
+      height: 100%; border-radius: 3px; transition: width 0.6s var(--ease);
+      display: flex; align-items: center; padding-left: 6px;
+      font-size: 0.62rem; font-weight: 700; color: #fff; white-space: nowrap;
+    }
+    .bar-fill.debt { background: linear-gradient(90deg, #c41e3a, #ef4444); }
+    .bar-fill.mil-spend { background: linear-gradient(90deg, #4a7c4a, #059669); }
+    .bar-fill.mil-pers { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+    .bar-fill.pub-serv { background: linear-gradient(90deg, #f97316, #f59e0b); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 640px) {
+      .timeline-container { padding-left: 30px; }
+      .timeline-container::before { left: 10px; }
+      .decade-header .decade-dot { left: -26px; width: 14px; height: 14px; }
+      .tl-event::before { left: -26px; }
+      .tl-event { padding: 0.8rem; }
+      .ev-header { gap: 0.3rem; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav class="site-nav">
+    <a href="index.html" class="brand">TENET&#x2011;5</a>
+    <div class="nav-group nav-primary">
+      <a href="my-story.html">My Story</a>
+      <a href="evidence.html" class="nav-hot">Evidence</a>
+      <a href="5gw-subversion.html" class="nav-purple">&#x2694; The War On You</a>
+      <a href="hansard-evidence.html" class="nav-hot">&#x1F3DB; Hansard</a>
+    </div>
+    <div class="nav-group nav-data">
+      <a href="harm-index.html" class="nav-danger">&#x2620; Harm Index</a>
+      <a href="corruption-map.html" class="nav-warn">&#x1F50D; Corruption Map</a>
+      <a href="accountability.html" class="nav-danger">&#x1F4CB; The 504</a>
+      <a href="timeline.html" class="nav-warn active">&#x1F4C5; Timeline</a>
+      <a href="infographics.html">Infographics</a>
+    </div>
+    <div class="nav-group nav-info">
+      <button class="nav-more-btn" aria-expanded="false" aria-haspopup="true">More <span class="chevron">&#x25BE;</span></button>
+      <div class="nav-dropdown">
+        <a href="legal.html">Legal</a>
+        <a href="history.html">History</a>
+        <a href="veterans.html">Veterans</a>
+        <a href="open-letter.html">Open Letter</a>
+        <a href="faq.html">FAQ</a>
+        <a href="resources.html">Resources</a>
+      </div>
+    </div>
+    <div class="nav-group nav-tools">
+      <a href="bloggins.html">Bloggins &#x1F99D;</a>
+      <a href="lirilclaw.html" class="nav-green">LirilClaw &#x1F43E;</a>
+      <a href="ai-tool.html" class="nav-blue">AI Tool &#x1F9E0;</a>
+      <a href="mooserack.html" class="nav-purple">MooseRack &#x1FAB4;</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Toggle nav" onclick="this.closest('.site-nav').classList.toggle('open')">&#x2630;</button>
+  </nav>
+
+  <main id="main" style="max-width: var(--max-data); margin: auto; padding: var(--s-lg) var(--s-sm);">
+
+    <!-- Hero -->
+    <header style="margin-bottom: var(--s-md);">
+      <h1 style="font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.5rem);color:var(--text-primary);font-weight:900;letter-spacing:-0.03em;line-height:1.1;margin-bottom:0.5rem;">
+        80 Years of Government Actions
+      </h1>
+      <p style="font-size:1rem;color:var(--text-tertiary);max-width:600px;">
+        Every major Canadian federal action from 1945 to 2025 &mdash; the good, the bad, and the devastating. Searchable, filterable, scored for impact.
+      </p>
+    </header>
+
+    <!-- Controls -->
+    <div class="tl-controls" id="controls">
+      <input type="text" class="tl-search" id="searchBox" placeholder="Search events, PMs, years, topics...">
+      <div class="filter-row">
+        <span class="filter-row-label">Decade</span>
+        <button class="tl-filter" data-decade="all">All</button>
+        <button class="tl-filter" data-decade="1940">1940s</button>
+        <button class="tl-filter" data-decade="1950">1950s</button>
+        <button class="tl-filter" data-decade="1960">1960s</button>
+        <button class="tl-filter" data-decade="1970">1970s</button>
+        <button class="tl-filter" data-decade="1980">1980s</button>
+        <button class="tl-filter" data-decade="1990">1990s</button>
+        <button class="tl-filter" data-decade="2000">2000s</button>
+        <button class="tl-filter" data-decade="2010">2010s</button>
+        <button class="tl-filter" data-decade="2020">2020s</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-row-label">Category</span>
+        <button class="tl-filter" data-cat="all">All</button>
+        <button class="tl-filter" data-cat="military">Military</button>
+        <button class="tl-filter" data-cat="economic">Economic</button>
+        <button class="tl-filter" data-cat="constitutional">Constitutional</button>
+        <button class="tl-filter" data-cat="immigration">Immigration</button>
+        <button class="tl-filter" data-cat="indigenous">Indigenous</button>
+        <button class="tl-filter" data-cat="social">Social</button>
+        <button class="tl-filter" data-cat="scandal">Scandal</button>
+        <button class="tl-filter" data-cat="foreign">Foreign Policy</button>
+        <button class="tl-filter" data-cat="veterans">Veterans</button>
+      </div>
+    </div>
+
+    <div class="tl-stats" id="stats">Showing all events</div>
+
+    <!-- Legend -->
+    <div class="tl-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#4a7c4a;"></div> Military</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c9a227;"></div> Economic</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div> Constitutional</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#06b6d4;"></div> Immigration</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316;"></div> Indigenous</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div> Social</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> Scandal</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6366f1;"></div> Foreign Policy</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#059669;"></div> Veterans</div>
+      <div class="legend-item" style="margin-left:auto;color:#888;">&#x1F480; = Impact (1&ndash;5)</div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-container" id="timeline">
+
+      <!-- ═══════ 1940s ═══════ -->
+      <div class="decade-header" data-decade="1940"><div class="decade-dot"></div><h2>1940s</h2><div class="decade-range">Post-War Reconstruction</div></div>
+
+      <div class="tl-event" data-year="1945" data-cat="veterans" data-decade="1940" data-pm="King" data-party="lib" data-search="veterans charter housing education soldiers">
+        <div class="ev-header">
+          <span class="ev-year">1945</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">MK</span><span class="pm-name">Mackenzie King</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-veterans">Veterans</span>
+        </div>
+        <div class="ev-title">Veterans Charter</div>
+        <div class="ev-desc">Comprehensive benefits package for returning WWII soldiers: housing assistance, education funding, land grants, and rehabilitation programs. One of Canada's most successful social programs ever enacted.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; positive action</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1947" data-cat="immigration" data-decade="1940" data-pm="King" data-party="lib" data-search="citizenship act canadian citizens">
+        <div class="ev-header">
+          <span class="ev-year">1947</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">MK</span><span class="pm-name">Mackenzie King</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-immigration">Immigration</span>
+        </div>
+        <div class="ev-title">Canadian Citizenship Act</div>
+        <div class="ev-desc">Canada creates its own citizenship for the first time. Previously, Canadians were British subjects. The Act established the legal concept of Canadian citizenship independent of Britain.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; foundational legislation</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1949" data-cat="foreign" data-decade="1940" data-pm="St. Laurent" data-party="lib" data-search="NATO founding member north atlantic treaty alliance cold war">
+        <div class="ev-header">
+          <span class="ev-year">1949</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">LS</span><span class="pm-name">Louis St. Laurent</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-foreign">Foreign Policy</span>
+        </div>
+        <div class="ev-title">NATO Founding Member</div>
+        <div class="ev-desc">Canada becomes one of 12 founding members of the North Atlantic Treaty Organization. Commits to collective defence in the Cold War era. Newfoundland also joins Confederation this year.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; alliance formation</span></div>
+      </div>
+
+      <!-- ═══════ 1950s ═══════ -->
+      <div class="decade-header" data-decade="1950"><div class="decade-dot"></div><h2>1950s</h2><div class="decade-range">Cold War &amp; Broken Promises</div></div>
+
+      <div class="tl-event" data-year="1950" data-cat="military" data-decade="1950" data-pm="St. Laurent" data-party="lib" data-search="korean war 516 killed 26000 served combat">
+        <div class="ev-header">
+          <span class="ev-year">1950&ndash;53</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">LS</span><span class="pm-name">Louis St. Laurent</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-military">Military</span>
+        </div>
+        <div class="ev-title">Korean War</div>
+        <div class="ev-desc">Canada commits over 26,000 troops to the UN force in Korea. 516 Canadians killed in action, thousands more wounded. Veterans later described feeling forgotten by their own government upon return.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; 516 killed, minimal post-war support</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1957" data-cat="military" data-decade="1950" data-pm="Diefenbaker" data-party="con" data-search="NORAD north american aerospace defence avro arrow program begins">
+        <div class="ev-header">
+          <span class="ev-year">1957</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">JD</span><span class="pm-name">John Diefenbaker</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-military">Military</span>
+        </div>
+        <div class="ev-title">NORAD Established, Avro Arrow Program Active</div>
+        <div class="ev-desc">NORAD (North American Aerospace Defense Command) created as a joint Canada-US defence agreement. The CF-105 Avro Arrow interceptor program is advancing &mdash; the most advanced fighter jet of its era.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; defence modernization</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1958" data-cat="economic" data-decade="1950" data-pm="Diefenbaker" data-party="con" data-search="avro arrow cancelled 14000 jobs destroyed aerospace industry">
+        <div class="ev-header">
+          <span class="ev-year">1959</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">JD</span><span class="pm-name">John Diefenbaker</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">Avro Arrow Cancelled &mdash; 14,000 Jobs Destroyed</div>
+        <div class="ev-desc">Diefenbaker cancels the CF-105 Arrow program and orders all prototypes, tooling, and blueprints destroyed. 14,000 Avro Canada employees laid off. Top engineers flee to NASA and US defence firms. Canada's indigenous aerospace industry never recovers.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; permanently destroyed Canadian aerospace</span></div>
+      </div>
+
+      <!-- ═══════ 1960s ═══════ -->
+      <div class="decade-header" data-decade="1960"><div class="decade-dot"></div><h2>1960s</h2><div class="decade-range">Rights &amp; Revolution</div></div>
+
+      <div class="tl-event" data-year="1960" data-cat="indigenous" data-decade="1960" data-pm="Diefenbaker" data-party="con" data-search="indigenous vote right federal franchise first nations status indian">
+        <div class="ev-header">
+          <span class="ev-year">1960</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">JD</span><span class="pm-name">John Diefenbaker</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-indigenous">Indigenous</span>
+        </div>
+        <div class="ev-title">Indigenous People Granted Federal Voting Rights</div>
+        <div class="ev-desc">Status Indians given the right to vote in federal elections without losing their treaty rights. Previously, Indigenous people had to renounce their status to vote &mdash; a deliberate exclusion since Confederation.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; overdue correction</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1967" data-cat="immigration" data-decade="1960" data-pm="Pearson" data-party="lib" data-search="points based immigration system merit skills">
+        <div class="ev-header">
+          <span class="ev-year">1967</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">LP</span><span class="pm-name">Lester Pearson</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-immigration">Immigration</span>
+        </div>
+        <div class="ev-title">Points-Based Immigration System Introduced</div>
+        <div class="ev-desc">Canada replaces race-based immigration preferences with a points system evaluating skills, education, and language ability. First of its kind globally. Eliminates formal racial discrimination in immigration policy.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; progressive reform</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1968" data-cat="constitutional" data-decade="1960" data-pm="P. Trudeau" data-party="lib" data-search="pierre trudeau elected official languages act bilingualism french english">
+        <div class="ev-header">
+          <span class="ev-year">1968&ndash;69</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Pierre Trudeau Elected; Official Languages Act</div>
+        <div class="ev-desc">Pierre Trudeau wins election on Trudeaumania wave. Passes the Official Languages Act (1969), making English and French co-equal official languages of the federal government. Transforms federal public service requirements.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; divisive but constitutional</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1969" data-cat="indigenous" data-decade="1960" data-pm="P. Trudeau" data-party="lib" data-search="white paper indian policy assimilation first nations rejected chretien">
+        <div class="ev-header">
+          <span class="ev-year">1969</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-indigenous">Indigenous</span>
+        </div>
+        <div class="ev-title">White Paper on Indian Policy</div>
+        <div class="ev-desc">Jean Chr&eacute;tien (then Indian Affairs Minister) proposes abolishing the Indian Act and all treaty rights, framing assimilation as &ldquo;equality.&rdquo; Rejected forcefully by First Nations leaders. Galvanizes the modern Indigenous rights movement.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; attempted forced assimilation</span></div>
+      </div>
+
+      <!-- ═══════ 1970s ═══════ -->
+      <div class="decade-header" data-decade="1970"><div class="decade-dot"></div><h2>1970s</h2><div class="decade-range">Crisis &amp; Multiculturalism</div></div>
+
+      <div class="tl-event" data-year="1970" data-cat="constitutional" data-decade="1970" data-pm="P. Trudeau" data-party="lib" data-search="october crisis war measures act FLQ martial law civil liberties quebec">
+        <div class="ev-header">
+          <span class="ev-year">1970</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">October Crisis &mdash; War Measures Act Invoked</div>
+        <div class="ev-desc">After FLQ kidnappings of James Cross and Pierre Laporte (murdered), Trudeau invokes the War Measures Act &mdash; the only peacetime use in Canadian history. Nearly 500 people arrested without charge in Quebec. Civil liberties suspended.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; mass arrests, civil liberties suspended</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1971" data-cat="social" data-decade="1970" data-pm="P. Trudeau" data-party="lib" data-search="multiculturalism policy cultural diversity official">
+        <div class="ev-header">
+          <span class="ev-year">1971</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Official Multiculturalism Policy</div>
+        <div class="ev-desc">Canada becomes the first country to adopt multiculturalism as official government policy, affirming cultural diversity within a bilingual framework. Later enshrined in the 1988 Multiculturalism Act.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; policy framework</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1974" data-cat="economic" data-decade="1970" data-pm="P. Trudeau" data-party="lib" data-search="FIRA foreign investment review agency protectionism">
+        <div class="ev-header">
+          <span class="ev-year">1974</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">Foreign Investment Review Agency (FIRA)</div>
+        <div class="ev-desc">FIRA established to screen foreign takeovers of Canadian businesses. Aimed at preserving Canadian economic sovereignty. Later dismantled by Mulroney and replaced with Investment Canada (pro-foreign-investment).</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; economic intervention</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1976" data-cat="constitutional" data-decade="1970" data-pm="P. Trudeau" data-party="pq" data-search="parti quebecois elected sovereignty movement rene levesque quebec">
+        <div class="ev-header">
+          <span class="ev-year">1976</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e1e8f;">RL</span><span class="pm-name">Ren&eacute; L&eacute;vesque (QC)</span></span>
+          <span class="ev-party party-pq">PQ</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Parti Qu&eacute;b&eacute;cois Elected in Quebec</div>
+        <div class="ev-desc">Ren&eacute; L&eacute;vesque's PQ wins a majority in Quebec on a platform of sovereignty-association. Begins the modern separatist era. Passes Bill 101 (Charter of the French Language) in 1977, reshaping Quebec's linguistic landscape.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; national unity crisis begins</span></div>
+      </div>
+
+      <!-- ═══════ 1980s ═══════ -->
+      <div class="decade-header" data-decade="1980"><div class="decade-dot"></div><h2>1980s</h2><div class="decade-range">Constitution &amp; Free Trade</div></div>
+
+      <div class="tl-event" data-year="1980" data-cat="economic" data-decade="1980" data-pm="P. Trudeau" data-party="lib" data-search="national energy program NEP alberta oil devastates western alienation">
+        <div class="ev-header">
+          <span class="ev-year">1980</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">National Energy Program (NEP)</div>
+        <div class="ev-desc">Federal government seizes control of oil pricing and revenues from Alberta. Devastates the Alberta economy, triggers capital flight, and creates lasting Western alienation against Ottawa. Estimated cost to Alberta: $50&ndash;100 billion.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; devastated Alberta, permanent political damage</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1980" data-cat="constitutional" data-decade="1980" data-pm="P. Trudeau" data-party="lib" data-search="quebec referendum 60 percent no sovereignty association levesque">
+        <div class="ev-header">
+          <span class="ev-year">1980</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Quebec Referendum &mdash; 60% No</div>
+        <div class="ev-desc">First Quebec sovereignty referendum. 59.56% vote No. Trudeau promises constitutional renewal in exchange for the No vote &mdash; a promise many Quebecers later feel was betrayed by the 1982 patriation without Quebec's consent.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; national unity preserved but promises broken</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1982" data-cat="constitutional" data-decade="1980" data-pm="P. Trudeau" data-party="lib" data-search="constitution patriated charter rights freedoms quebec excluded kitchen accord">
+        <div class="ev-header">
+          <span class="ev-year">1982</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PT</span><span class="pm-name">Pierre Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Constitution Patriated with Charter of Rights &mdash; Quebec Excluded</div>
+        <div class="ev-desc">Constitution repatriated from Britain with the new Charter of Rights and Freedoms. Negotiated via the &ldquo;Kitchen Accord&rdquo; &mdash; Quebec was excluded from the final deal. Quebec has never formally signed the Constitution. A wound that persists to this day.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; Quebec excluded, national unity fractured</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1984" data-cat="constitutional" data-decade="1980" data-pm="Mulroney" data-party="con" data-search="mulroney elected largest majority 211 seats progressive conservative">
+        <div class="ev-header">
+          <span class="ev-year">1984</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">BM</span><span class="pm-name">Brian Mulroney</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Mulroney Elected &mdash; Largest Majority in History</div>
+        <div class="ev-desc">Brian Mulroney wins 211 of 282 seats, the largest majority government in Canadian history. Promises to bring Quebec into the constitutional family and reduce the deficit. Sets stage for Meech Lake and free trade.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; democratic mandate</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1987" data-cat="constitutional" data-decade="1980" data-pm="Mulroney" data-party="con" data-search="meech lake accord fails 1990 distinct society quebec elijah harper">
+        <div class="ev-header">
+          <span class="ev-year">1987&ndash;90</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">BM</span><span class="pm-name">Brian Mulroney</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Meech Lake Accord &mdash; Fails</div>
+        <div class="ev-desc">Attempt to bring Quebec into the Constitution with &ldquo;distinct society&rdquo; clause. Fails in 1990 when Manitoba (Elijah Harper) and Newfoundland do not ratify before the deadline. Deepens Quebec alienation and fuels separatism.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; constitutional failure, separatism surges</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1988" data-cat="economic" data-decade="1980" data-pm="Mulroney" data-party="con" data-search="canada us free trade agreement FTA manufacturing jobs">
+        <div class="ev-header">
+          <span class="ev-year">1988</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">BM</span><span class="pm-name">Brian Mulroney</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">Canada-US Free Trade Agreement</div>
+        <div class="ev-desc">Landmark trade agreement eliminates most tariffs between Canada and the US. Wins the &ldquo;free trade election&rdquo; of 1988. Critics warn of manufacturing job losses and economic dependence. Precursor to NAFTA.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; trade boom but manufacturing erosion</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1989" data-cat="economic" data-decade="1980" data-pm="Mulroney" data-party="con" data-search="GST goods services tax replaced manufacturers sales tax">
+        <div class="ev-header">
+          <span class="ev-year">1989&ndash;91</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">BM</span><span class="pm-name">Brian Mulroney</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">GST Introduced</div>
+        <div class="ev-desc">Goods and Services Tax (7%, later 5%) replaces the hidden 13.5% Manufacturers' Sales Tax. Massively unpopular but more transparent and economically efficient. Chr&eacute;tien promises to scrap it &mdash; never does.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; regressive tax, but replaced worse system</span></div>
+      </div>
+
+      <!-- ═══════ 1990s ═══════ -->
+      <div class="decade-header" data-decade="1990"><div class="decade-dot"></div><h2>1990s</h2><div class="decade-range">Scandals &amp; Near-Secession</div></div>
+
+      <div class="tl-event" data-year="1992" data-cat="constitutional" data-decade="1990" data-pm="Mulroney" data-party="con" data-search="charlottetown accord rejected referendum 54 percent no">
+        <div class="ev-header">
+          <span class="ev-year">1992</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">BM</span><span class="pm-name">Brian Mulroney</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Charlottetown Accord Rejected by Referendum</div>
+        <div class="ev-desc">Second attempt at constitutional reform. Put to national referendum and rejected by 54% of voters. Both Quebec nationalists and Western populists vote No (for opposite reasons). Constitutional reform declared dead.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; constitutional reform dies</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1993" data-cat="scandal" data-decade="1990" data-pm="Mulroney" data-party="con" data-search="somalia affair airborne regiment disbanded cover-up torture shidane arone">
+        <div class="ev-header">
+          <span class="ev-year">1993</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">BM</span><span class="pm-name">Mulroney / Campbell</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Somalia Affair &mdash; Airborne Regiment Disbanded</div>
+        <div class="ev-desc">Canadian Airborne Regiment members torture and kill Shidane Arone, a Somali teenager. Military leadership covers up evidence, destroys documents. Regiment disbanded in 1995. Commission of inquiry shut down by government before completion.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; murder, cover-up, institutional betrayal</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1993" data-cat="economic" data-decade="1990" data-pm="Chretien" data-party="lib" data-search="chretien elected NAFTA implemented gun registry 2 million 629 million">
+        <div class="ev-header">
+          <span class="ev-year">1993&ndash;95</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Jean Chr&eacute;tien</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">Chr&eacute;tien Elected; NAFTA Implemented; Gun Registry Begins</div>
+        <div class="ev-desc">Chr&eacute;tien wins massive majority. NAFTA takes effect Jan 1, 1994. Long-gun registry launched with $2M budget &mdash; eventual cost exceeds $629M+ before being scrapped by Harper in 2012. Becomes a symbol of government waste and incompetence.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; $629M+ wasted on ineffective registry</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1995" data-cat="constitutional" data-decade="1990" data-pm="Chretien" data-party="lib" data-search="quebec referendum 50.58 percent no closest call sovereignty bouchard parizeau">
+        <div class="ev-header">
+          <span class="ev-year">1995</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Jean Chr&eacute;tien</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Quebec Referendum &mdash; 50.58% No (Closest Call)</div>
+        <div class="ev-desc">Canada nearly breaks apart. 50.58% No, 49.42% Yes on Quebec sovereignty. Margin of ~54,000 votes. Chr&eacute;tien government accused of complacency until the final weeks. Parizeau blames &ldquo;money and the ethnic vote&rdquo; in concession speech.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; country nearly dissolved</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1996" data-cat="scandal" data-decade="1990" data-pm="Chretien" data-party="lib" data-search="sponsorship program adscam begins liberal quebec unity">
+        <div class="ev-header">
+          <span class="ev-year">1996</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Jean Chr&eacute;tien</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Sponsorship Program Begins (Later: AdScam)</div>
+        <div class="ev-desc">Federal government launches a $332M sponsorship program to promote national unity in Quebec. Millions funnelled to Liberal-connected advertising firms for little or no work. Full scandal exposed by Auditor General in 2004.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; massive public corruption</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1997" data-cat="indigenous" data-decade="1990" data-pm="Chretien" data-party="lib" data-search="last residential school closes gordon 1996 1997">
+        <div class="ev-header">
+          <span class="ev-year">1997</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Jean Chr&eacute;tien</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-indigenous">Indigenous</span>
+        </div>
+        <div class="ev-title">Last Residential School Closes</div>
+        <div class="ev-desc">The last federally-run residential school (Gordon Residential School, Saskatchewan) closes its doors. The system operated for over 130 years, forcibly removing ~150,000 Indigenous children. Thousands died. Cultural genocide officially ends &mdash; but the damage is generational.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; 130+ years of cultural genocide ends</span></div>
+      </div>
+
+      <div class="tl-event" data-year="1998" data-cat="constitutional" data-decade="1990" data-pm="Chretien" data-party="lib" data-search="clarity act reference supreme court secession unilateral">
+        <div class="ev-header">
+          <span class="ev-year">1998&ndash;2000</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Jean Chr&eacute;tien</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Clarity Act Process</div>
+        <div class="ev-desc">Following the 1998 Supreme Court Reference on Secession, Chr&eacute;tien passes the Clarity Act (2000), requiring a &ldquo;clear majority&rdquo; on a &ldquo;clear question&rdquo; for any future secession vote. Quebec responds with its own Bill 99 asserting self-determination.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; legal framework, politically divisive</span></div>
+      </div>
+
+      <!-- ═══════ 2000s ═══════ -->
+      <div class="decade-header" data-decade="2000"><div class="decade-dot"></div><h2>2000s</h2><div class="decade-range">War, Scandal &amp; Reckoning</div></div>
+
+      <div class="tl-event" data-year="2001" data-cat="military" data-decade="2000" data-pm="Chretien" data-party="lib" data-search="afghanistan mission 158 killed 2000 wounded combat kandahar">
+        <div class="ev-header">
+          <span class="ev-year">2001&ndash;14</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Chr&eacute;tien / Martin / Harper</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-military">Military</span>
+        </div>
+        <div class="ev-title">Afghanistan Mission &mdash; 158 Killed, 2,000+ Wounded</div>
+        <div class="ev-desc">Canada deploys to Afghanistan after 9/11. Over 40,000 CAF members serve across 13 years. 158 killed, over 2,000 physically wounded, thousands more with PTSD. Veterans return to inadequate support, closed VAC offices, and a system that fights their claims.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; 158 dead, thousands with PTSD, poor veteran care</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2002" data-cat="social" data-decade="2000" data-pm="Chretien" data-party="lib" data-search="romanow report healthcare commission medicare funding">
+        <div class="ev-header">
+          <span class="ev-year">2002</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Jean Chr&eacute;tien</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Romanow Report on Healthcare</div>
+        <div class="ev-desc">Roy Romanow's Commission on the Future of Health Care recommends major federal reinvestment in public healthcare. Many recommendations ignored. Two decades later, the healthcare system is in crisis with record wait times and staff shortages.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; warnings ignored, crisis decades later</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2003" data-cat="foreign" data-decade="2000" data-pm="Chretien" data-party="lib" data-search="iraq war canada declines participate bush">
+        <div class="ev-header">
+          <span class="ev-year">2003</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JC</span><span class="pm-name">Jean Chr&eacute;tien</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-foreign">Foreign Policy</span>
+        </div>
+        <div class="ev-title">Canada Declines Iraq War Participation</div>
+        <div class="ev-desc">Chr&eacute;tien refuses to join the US-led invasion of Iraq without UN authorization. One of the most consequential foreign policy decisions in modern Canadian history. Widely praised in hindsight given the absence of WMDs.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; sound judgment</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2004" data-cat="scandal" data-decade="2000" data-pm="Martin" data-party="lib" data-search="sponsorship scandal exposed auditor general adscam gomery">
+        <div class="ev-header">
+          <span class="ev-year">2004</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PM</span><span class="pm-name">Paul Martin</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Sponsorship Scandal Exposed by Auditor General</div>
+        <div class="ev-desc">AG Sheila Fraser reveals $100M+ in sponsorship funds went to Liberal-connected firms for little or no work. Gomery Commission follows. Several officials convicted. Destroys Liberal credibility in Quebec for a generation.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; massive corruption, public trust shattered</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2005" data-cat="indigenous" data-decade="2000" data-pm="Martin" data-party="lib" data-search="kelowna accord 5 billion indigenous never implemented">
+        <div class="ev-header">
+          <span class="ev-year">2005</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PM</span><span class="pm-name">Paul Martin</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-indigenous">Indigenous</span>
+        </div>
+        <div class="ev-title">Kelowna Accord ($5B for Indigenous) &mdash; Never Implemented</div>
+        <div class="ev-desc">Historic $5-billion agreement between federal, provincial, territorial, and Indigenous leaders to close gaps in education, health, housing, and economic opportunity. Harper government cancels it after winning 2006 election. A generation of progress lost.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; best chance at reconciliation, cancelled</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2005" data-cat="social" data-decade="2000" data-pm="Martin" data-party="lib" data-search="same sex marriage legalized civil marriage act">
+        <div class="ev-header">
+          <span class="ev-year">2005</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">PM</span><span class="pm-name">Paul Martin</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Same-Sex Marriage Legalized (Civil Marriage Act)</div>
+        <div class="ev-desc">Canada becomes the fourth country globally and first in the Americas to legalize same-sex marriage nationwide through the Civil Marriage Act (Bill C-38). Upheld by courts as consistent with the Charter.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; rights expansion</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2006" data-cat="constitutional" data-decade="2000" data-pm="Harper" data-party="con" data-search="harper elected federal accountability act transparency">
+        <div class="ev-header">
+          <span class="ev-year">2006</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">SH</span><span class="pm-name">Stephen Harper</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Harper Elected; Federal Accountability Act</div>
+        <div class="ev-desc">Harper wins minority on anti-corruption platform. Passes the Federal Accountability Act &mdash; tightening lobbying rules, banning corporate/union donations, strengthening the Auditor General and Ethics Commissioner. Also apologizes for the Chinese head tax.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; accountability reform</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2007" data-cat="indigenous" data-decade="2000" data-pm="Harper" data-party="con" data-search="indian residential schools settlement agreement IRSSA largest class action">
+        <div class="ev-header">
+          <span class="ev-year">2007&ndash;08</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">SH</span><span class="pm-name">Stephen Harper</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-indigenous">Indigenous</span>
+        </div>
+        <div class="ev-title">Residential Schools Settlement &amp; Formal Apology</div>
+        <div class="ev-desc">Indian Residential Schools Settlement Agreement (2007) &mdash; largest class-action settlement in Canadian history. Harper delivers formal apology in Parliament (June 11, 2008). Establishes Truth and Reconciliation Commission. A significant but late first step.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; apology given, but action slow</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2008" data-cat="scandal" data-decade="2000" data-pm="Harper" data-party="con" data-search="prorogues parliament avoid confidence vote coalition crisis 2009 afghan detainee">
+        <div class="ev-header">
+          <span class="ev-year">2008&ndash;09</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">SH</span><span class="pm-name">Stephen Harper</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Harper Prorogues Parliament Twice</div>
+        <div class="ev-desc">Dec 2008: Prorogues to avoid a confidence vote from the Liberal-NDP coalition. Dec 2009: Prorogues again to avoid releasing Afghan detainee transfer documents. Sets precedent for using prorogation as a political escape hatch.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; abuse of parliamentary procedure</span></div>
+      </div>
+
+      <!-- ═══════ 2010s ═══════ -->
+      <div class="decade-header" data-decade="2010"><div class="decade-dot"></div><h2>2010s</h2><div class="decade-range">Pipeline Politics &amp; MAID</div></div>
+
+      <div class="tl-event" data-year="2011" data-cat="military" data-decade="2010" data-pm="Harper" data-party="con" data-search="afghanistan combat withdrawal 2011 training mission">
+        <div class="ev-header">
+          <span class="ev-year">2011</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">SH</span><span class="pm-name">Stephen Harper</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-military">Military</span>
+        </div>
+        <div class="ev-title">Canada Withdraws from Afghanistan Combat</div>
+        <div class="ev-desc">Combat mission ends in Kandahar. Transitions to training role in Kabul until 2014. Canada's longest war concludes with 158 dead, 2,000+ wounded, and a veteran community that will fight for recognition and support for years to come.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; war ends, veterans abandoned</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2012" data-cat="scandal" data-decade="2010" data-pm="Harper" data-party="con" data-search="senate expense scandal duffy wallin brazeau">
+        <div class="ev-header">
+          <span class="ev-year">2012&ndash;15</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">SH</span><span class="pm-name">Stephen Harper</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Senate Expense Scandal</div>
+        <div class="ev-desc">Senators Mike Duffy, Pamela Wallin, and Patrick Brazeau exposed for improper expense claims. Harper's chief of staff Nigel Wright secretly pays Duffy's $90,000 tab. Duffy charged but acquitted; judge blames the system. Reinforces public contempt for the Senate.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; institutional corruption</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2014" data-cat="social" data-decade="2010" data-pm="Harper" data-party="con" data-search="bill c-36 prostitution parliament hill shooting zehaf-bibeau">
+        <div class="ev-header">
+          <span class="ev-year">2014</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">SH</span><span class="pm-name">Stephen Harper</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Bill C-36 (Prostitution) &amp; Parliament Hill Shootings</div>
+        <div class="ev-desc">Bill C-36 criminalizes purchasing sex (Nordic model). In October, Michael Zehaf-Bibeau shoots Cpl. Nathan Cirillo at the National War Memorial and storms Parliament before being killed. Leads to expanded security and anti-terror legislation.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; terror attack, legislative response</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2015" data-cat="indigenous" data-decade="2010" data-pm="Harper" data-party="con" data-search="truth reconciliation commission TRC final report 94 calls to action">
+        <div class="ev-header">
+          <span class="ev-year">2015</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#1e3a8f;">SH</span><span class="pm-name">Stephen Harper</span></span>
+          <span class="ev-party party-con">Conservative</span>
+          <span class="ev-cat cat-indigenous">Indigenous</span>
+        </div>
+        <div class="ev-title">Truth and Reconciliation Commission Final Report</div>
+        <div class="ev-desc">TRC releases final report with 94 Calls to Action addressing the legacy of residential schools. Calls the system &ldquo;cultural genocide.&rdquo; As of 2024, fewer than 15 of the 94 Calls have been fully implemented by any level of government.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; cultural genocide documented, action stalled</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2015" data-cat="constitutional" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="trudeau elected majority 2015 sunny ways liberal">
+        <div class="ev-header">
+          <span class="ev-year">2015</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Justin Trudeau Elected (Majority)</div>
+        <div class="ev-desc">Trudeau wins majority on promises of electoral reform, Indigenous reconciliation, transparency, and balanced budgets by 2019. Electoral reform abandoned within 18 months. Balanced budgets never achieved. Begins decade of record spending and debt.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; broken promises set tone for decade</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2015" data-cat="social" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="MAID medical assistance dying legalized bill c-14">
+        <div class="ev-header">
+          <span class="ev-year">2016</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">MAID Legalized (Bill C-14)</div>
+        <div class="ev-desc">Medical Assistance in Dying legalized following the Carter v. Canada Supreme Court ruling. Initially limited to those whose death is &ldquo;reasonably foreseeable.&rdquo; Later expanded dramatically, raising concerns about vulnerable populations choosing death over inadequate social support.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; rights vs. safeguard concerns</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2016" data-cat="scandal" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="phoenix pay system 5 billion disaster public servants unpaid overpaid IBM">
+        <div class="ev-header">
+          <span class="ev-year">2016</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Phoenix Pay System Launched &mdash; $5B+ Disaster</div>
+        <div class="ev-desc">IBM-built Phoenix pay system launched to pay 300,000+ federal employees. Immediately fails catastrophically &mdash; workers go months without pay, receive incorrect amounts, or are overpaid and told to return money. Cost exceeds $5 billion with no end in sight.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; $5B+ wasted, 300,000 workers affected</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2016" data-cat="economic" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="carbon tax announced pricing pollution climate">
+        <div class="ev-header">
+          <span class="ev-year">2016</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">Carbon Tax Announced</div>
+        <div class="ev-desc">Federal carbon pricing announced at $10/tonne, rising annually. Provinces that don't implement their own system get the federal backstop. Becomes one of the most divisive economic policies of the era, challenged by multiple provinces in court.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; economic impact, political division</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2017" data-cat="social" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="bill c-16 gender identity expression feminist international assistance policy">
+        <div class="ev-header">
+          <span class="ev-year">2017</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Bill C-16 (Gender Identity) &amp; Feminist Foreign Policy</div>
+        <div class="ev-desc">Bill C-16 adds gender identity and expression to the Canadian Human Rights Act and Criminal Code as protected grounds. Also announces the Feminist International Assistance Policy, redirecting foreign aid through a gender lens.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; divisive social policy</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2018" data-cat="economic" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="trans mountain pipeline purchased 4.5 billion 34 billion kinder morgan">
+        <div class="ev-header">
+          <span class="ev-year">2018</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">Trans Mountain Pipeline Purchased &mdash; $4.5B &rarr; $34.2B</div>
+        <div class="ev-desc">Government buys Trans Mountain pipeline from Kinder Morgan for $4.5B after regulatory delays threaten the project. Expansion costs balloon to $34.2B total. A self-proclaimed climate government nationalizing a pipeline &mdash; satisfying no one.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; $34.2B, ideological contradiction</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2018" data-cat="social" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="cannabis legalized bill c-45 marijuana recreational">
+        <div class="ev-header">
+          <span class="ev-year">2018</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Cannabis Legalized (Bill C-45)</div>
+        <div class="ev-desc">Canada becomes the second country globally to legalize recreational cannabis. Bill C-45 (Cannabis Act) creates a regulated market. Pardons for prior possession convictions follow slowly. Black market persists due to high taxation and regulation.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Low harm &mdash; legalization reform</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2019" data-cat="scandal" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="SNC-Lavalin affair ethics commissioner jody wilson-raybould">
+        <div class="ev-header">
+          <span class="ev-year">2019</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">SNC-Lavalin Affair &mdash; Ethics Commissioner Finding</div>
+        <div class="ev-desc">PM's office pressures AG Jody Wilson-Raybould to offer SNC-Lavalin a deferred prosecution agreement. She refuses and is removed from cabinet. Ethics Commissioner finds Trudeau violated the Conflict of Interest Act. Two cabinet ministers resign in protest.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; obstruction of justice, ethical violation</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2019" data-cat="foreign" data-decade="2010" data-pm="J. Trudeau" data-party="lib" data-search="NSICOP report foreign interference classified intelligence">
+        <div class="ev-header">
+          <span class="ev-year">2019</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-foreign">Foreign Policy</span>
+        </div>
+        <div class="ev-title">NSICOP Report on Foreign Interference (Classified)</div>
+        <div class="ev-desc">National Security and Intelligence Committee of Parliamentarians issues classified report warning of foreign interference in Canadian democratic institutions. Government sits on it. Full public reckoning doesn't come until 2023 media leaks.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; foreign interference suppressed</span></div>
+      </div>
+
+      <!-- ═══════ 2020s ═══════ -->
+      <div class="decade-header" data-decade="2020"><div class="decade-dot"></div><h2>2020s</h2><div class="decade-range">Emergencies, Debt &amp; Collapse</div></div>
+
+      <div class="tl-event" data-year="2020" data-cat="economic" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="COVID lockdowns CERB CEWS 89.9 billion wasted fraser institute pandemic">
+        <div class="ev-header">
+          <span class="ev-year">2020</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-economic">Economic</span>
+        </div>
+        <div class="ev-title">COVID Lockdowns &mdash; CERB/CEWS ($89.9B per Fraser Institute)</div>
+        <div class="ev-desc">Pandemic spending totals hundreds of billions. CERB ($2,000/month), CEWS wage subsidies, and other programs. Fraser Institute estimates $89.9B went to recipients who didn't need it or didn't qualify. National debt explodes. Inflation follows.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; $89.9B wasted, debt explosion, inflation</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2020" data-cat="scandal" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="WE charity scandal prorogued parliament kielburger margaret trudeau">
+        <div class="ev-header">
+          <span class="ev-year">2020</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">WE Charity Scandal &mdash; Parliament Prorogued</div>
+        <div class="ev-desc">Government awards $912M student volunteer program to WE Charity, which paid Trudeau family members ~$500K in speaking fees. Ethics Commissioner investigates. Trudeau prorogues Parliament to shut down committee investigations. Third ethics violation.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; conflict of interest, prorogation abuse</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2020" data-cat="scandal" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="nova scotia mass shooting 22 dead RCMP lucki interference commissioner">
+        <div class="ev-header">
+          <span class="ev-year">2020</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Nova Scotia Mass Shooting (22 Dead) &mdash; RCMP Lucki Interference</div>
+        <div class="ev-desc">Canada's deadliest mass shooting: 22 killed in Nova Scotia. Mass Casualty Commission later reveals RCMP Commissioner Lucki pressured Nova Scotia RCMP to release firearm details to support the government's pending gun ban. Political interference in a massacre investigation.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; 22 dead, political exploitation</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2020" data-cat="social" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="order in council gun ban OIC no parliamentary debate firearms">
+        <div class="ev-header">
+          <span class="ev-year">2020</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Order in Council Gun Ban (No Parliamentary Debate)</div>
+        <div class="ev-desc">Government bans ~1,500 firearm models by Order in Council &mdash; bypassing Parliament entirely. Announced days after the Nova Scotia shooting. Targets legal gun owners, not the illegal firearms used in the shooting. Buyback program still not implemented years later.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; bypassed Parliament, targets legal owners</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2021" data-cat="indigenous" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="residential school GPR ground penetrating radar unmarked graves kamloops">
+        <div class="ev-header">
+          <span class="ev-year">2021</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-indigenous">Indigenous</span>
+        </div>
+        <div class="ev-title">Residential School GPR Announcements</div>
+        <div class="ev-desc">Ground-penetrating radar surveys at former residential school sites reveal potential unmarked burials, beginning with Kamloops (215 anomalies). National reckoning follows. SNC-Lavalin connected to some site surveys. Excavation and identification remain incomplete years later.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; scale of historical atrocity revealed</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2022" data-cat="constitutional" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="emergencies act freedom convoy federal court unconstitutional truckers ottawa">
+        <div class="ev-header">
+          <span class="ev-year">2022</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Emergencies Act Invoked (Freedom Convoy) &mdash; Ruled Unconstitutional</div>
+        <div class="ev-desc">First-ever invocation of the Emergencies Act to clear Freedom Convoy protests in Ottawa. Bank accounts frozen without court orders. Federal Court later rules the invocation was unreasonable and unconstitutional. Government appeals.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; ruled unconstitutional, bank accounts frozen</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2022" data-cat="scandal" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="arrivecan 59.5 million scandal app GC strategies dalian">
+        <div class="ev-header">
+          <span class="ev-year">2022</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">ArriveCAN Scandal &mdash; $59.5M</div>
+        <div class="ev-desc">Border travel app ArriveCAN costs $59.5M &mdash; for an app estimated to be worth $80K&ndash;$250K. Auditor General finds rampant mismanagement, fake subcontractors, and potential fraud. RCMP investigation follows. GC Strategies principals charged.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; $59.5M for an app, fraud charges</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2022" data-cat="social" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="MAID expanded mental illness track 2 vulnerable">
+        <div class="ev-header">
+          <span class="ev-year">2022</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">MAID Expanded &mdash; Mental Illness Inclusion Planned</div>
+        <div class="ev-desc">Bill C-7 expands MAID to those whose death is not reasonably foreseeable (Track 2). Mental illness as sole condition planned for 2024, then delayed to 2027. International concern that Canada is offering death to those denied adequate social support, housing, and healthcare.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; vulnerable populations at risk</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2023" data-cat="foreign" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="foreign interference inquiry hogue commission china india">
+        <div class="ev-header">
+          <span class="ev-year">2023</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-foreign">Foreign Policy</span>
+        </div>
+        <div class="ev-title">Foreign Interference Inquiry (Hogue Commission)</div>
+        <div class="ev-desc">After media leaks of CSIS intelligence, public inquiry into foreign interference led by Justice Marie-Jos&eacute;e Hogue begins. Examines interference by China, India, and others in Canadian elections and institutions. NSICOP later names sitting MPs connected to foreign states.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; democratic sovereignty compromised</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2023" data-cat="scandal" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="green slush fund SDTC sustainable development technology canada suspended">
+        <div class="ev-header">
+          <span class="ev-year">2023</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Green Slush Fund (SDTC) Suspended</div>
+        <div class="ev-desc">Sustainable Development Technology Canada (SDTC) suspended after whistleblowers reveal board members directing $390M+ to companies they had financial stakes in. AG confirms massive conflict of interest. Ethics and accountability structures failed completely.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; $390M+ in conflicts of interest</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2024" data-cat="social" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="jasper wildfire destroys 358 structures alberta national park">
+        <div class="ev-header">
+          <span class="ev-year">2024</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-social">Social</span>
+        </div>
+        <div class="ev-title">Jasper Wildfire Destroys 358 Structures</div>
+        <div class="ev-desc">Wildfire devastates the town of Jasper inside Jasper National Park, destroying 358 structures including homes and businesses. Federal land, federal responsibility. Questions raised about decades of inadequate forest management and fire mitigation on Parks Canada lands.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; 358 structures, federal negligence</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2024" data-cat="foreign" data-decade="2020" data-pm="J. Trudeau" data-party="lib" data-search="NSICOP names MPs connected foreign states intelligence report">
+        <div class="ev-header">
+          <span class="ev-year">2024</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">JT</span><span class="pm-name">Justin Trudeau</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-foreign">Foreign Policy</span>
+        </div>
+        <div class="ev-title">NSICOP Names MPs Connected to Foreign States</div>
+        <div class="ev-desc">National Security and Intelligence Committee of Parliamentarians releases report identifying sitting Members of Parliament who have been witting or semi-witting participants in foreign interference. Names remain classified, sparking public outrage and demands for transparency.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="impact-label">Catastrophic &mdash; elected officials serving foreign states</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2025" data-cat="constitutional" data-decade="2020" data-pm="Carney" data-party="lib" data-search="trudeau resigns carney PM never elected carbon tax 0 trump tariffs">
+        <div class="ev-header">
+          <span class="ev-year">2025</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">MC</span><span class="pm-name">Mark Carney</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Trudeau Resigns; Carney Becomes PM (Never Elected)</div>
+        <div class="ev-desc">Justin Trudeau resigns as Liberal leader. Mark Carney &mdash; former Bank of Canada and Bank of England governor &mdash; becomes Prime Minister without ever having held elected office. Sets carbon tax to 0% amid cost-of-living crisis. Faces Trump tariffs and economic turmoil.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">High harm &mdash; unelected PM, economic crisis</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2025" data-cat="constitutional" data-decade="2020" data-pm="Carney" data-party="lib" data-search="carney wins election 169 seats ethics investigation liberal majority">
+        <div class="ev-header">
+          <span class="ev-year">2025</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">MC</span><span class="pm-name">Mark Carney</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-constitutional">Constitutional</span>
+        </div>
+        <div class="ev-title">Carney Wins Election (169 Seats); Ethics Investigation Begins</div>
+        <div class="ev-desc">Carney calls snap election and wins 169 seats on anti-Trump nationalism. Ethics Commissioner launches investigation almost immediately. Governs with a mandate built on crisis rather than policy. Inherits record debt, housing crisis, and crumbling institutions.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; democratic mandate, ethics cloud</span></div>
+      </div>
+
+      <div class="tl-event" data-year="2025" data-cat="scandal" data-decade="2020" data-pm="Carney" data-party="lib" data-search="toronto police project south corruption 7 officers probe">
+        <div class="ev-header">
+          <span class="ev-year">2025</span>
+          <span class="ev-pm"><span class="pm-circle" style="background:#a22;">MC</span><span class="pm-name">Mark Carney</span></span>
+          <span class="ev-party party-lib">Liberal</span>
+          <span class="ev-cat cat-scandal">Scandal</span>
+        </div>
+        <div class="ev-title">Toronto Police Project South Corruption Probe</div>
+        <div class="ev-desc">Project South investigation exposes corruption involving 7 Toronto police officers. Part of a broader pattern of institutional accountability failures across Canadian law enforcement. Follows years of RCMP scandals and eroding public trust in policing.</div>
+        <div class="ev-impact"><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-on">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="skull-off">&#x1F480;</span><span class="impact-label">Moderate &mdash; institutional corruption</span></div>
+      </div>
+
+    </div><!-- /timeline-container -->
+
+    <!-- ═══════ DATA SECTION ═══════ -->
+    <div class="data-section">
+      <h2>The Numbers They Don't Want You to See</h2>
+      <div class="data-grid">
+
+        <div class="data-card">
+          <h3>Federal Debt-to-GDP Ratio</h3>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">1953</span><div class="bar-track"><div class="bar-fill debt" style="width:100%;">150% (post-WW2)</div></div></div>
+            <div class="bar-row"><span class="bar-label">1977</span><div class="bar-track"><div class="bar-fill debt" style="width:22%;">33%</div></div></div>
+            <div class="bar-row"><span class="bar-label">1996</span><div class="bar-track"><div class="bar-fill debt" style="width:56%;">83.6%</div></div></div>
+            <div class="bar-row"><span class="bar-label">2015</span><div class="bar-track"><div class="bar-fill debt" style="width:21%;">31%</div></div></div>
+            <div class="bar-row"><span class="bar-label">2024</span><div class="bar-track"><div class="bar-fill debt" style="width:74%;">110.8%</div></div></div>
+          </div>
+        </div>
+
+        <div class="data-card">
+          <h3>Military Spending (% of GDP)</h3>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">1953</span><div class="bar-track"><div class="bar-fill mil-spend" style="width:100%;">7.4%</div></div></div>
+            <div class="bar-row"><span class="bar-label">1970</span><div class="bar-track"><div class="bar-fill mil-spend" style="width:35%;">2.6%</div></div></div>
+            <div class="bar-row"><span class="bar-label">1990</span><div class="bar-track"><div class="bar-fill mil-spend" style="width:27%;">2.0%</div></div></div>
+            <div class="bar-row"><span class="bar-label">2010</span><div class="bar-track"><div class="bar-fill mil-spend" style="width:19%;">1.4%</div></div></div>
+            <div class="bar-row"><span class="bar-label">2023</span><div class="bar-track"><div class="bar-fill mil-spend" style="width:18%;">1.3%</div></div></div>
+          </div>
+        </div>
+
+        <div class="data-card">
+          <h3>Military Personnel (Regular Force)</h3>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">~1960</span><div class="bar-track"><div class="bar-fill mil-pers" style="width:100%;">~120,000 (Cold War)</div></div></div>
+            <div class="bar-row"><span class="bar-label">1990</span><div class="bar-track"><div class="bar-fill mil-pers" style="width:71%;">~85,000</div></div></div>
+            <div class="bar-row"><span class="bar-label">2010</span><div class="bar-track"><div class="bar-fill mil-pers" style="width:56%;">~68,000</div></div></div>
+            <div class="bar-row"><span class="bar-label">2024</span><div class="bar-track"><div class="bar-fill mil-pers" style="width:56%;">68,000 (16,500 short)</div></div></div>
+          </div>
+        </div>
+
+        <div class="data-card">
+          <h3>Federal Public Service Growth</h3>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">2015</span><div class="bar-track"><div class="bar-fill pub-serv" style="width:60%;">~259,000</div></div></div>
+            <div class="bar-row"><span class="bar-label">2019</span><div class="bar-track"><div class="bar-fill pub-serv" style="width:72%;">~287,000</div></div></div>
+            <div class="bar-row"><span class="bar-label">2023</span><div class="bar-track"><div class="bar-fill pub-serv" style="width:100%;">~367,000 (+108K in 8yr)</div></div></div>
+          </div>
+          <p style="font-size:0.75rem;color:#888;margin-top:0.8rem;">Public service grew 42% in 8 years &mdash; 3x the rate of population growth. Military shrank simultaneously.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <footer style="margin-top:4rem;padding:2rem 0;border-top:1px solid var(--border);text-align:center;">
+      <p style="font-size:0.8rem;color:var(--text-quaternary);">
+        All entries sourced from public record: Hansard, Auditor General reports, judicial rulings, and official government publications.<br>
+        This is not opinion. This is the record.
+      </p>
+      <p style="font-size:0.75rem;color:var(--text-quaternary);margin-top:0.5rem;">
+        &copy; 2025 TENET-5 &mdash; <a href="index.html" style="color:var(--accent);">Home</a>
+      </p>
+    </footer>
+
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+  (function() {
+    const searchBox = document.getElementById('searchBox');
+    const stats = document.getElementById('stats');
+    const events = document.querySelectorAll('.tl-event');
+    const decadeHeaders = document.querySelectorAll('.decade-header');
+    const decadeFilters = document.querySelectorAll('.tl-filter[data-decade]');
+    const catFilters = document.querySelectorAll('.tl-filter[data-cat]');
+
+    let activeDecade = 'all';
+    let activeCat = 'all';
+
+    function applyFilters() {
+      const q = searchBox.value.toLowerCase().trim();
+      let shown = 0;
+      const visibleDecades = new Set();
+
+      events.forEach(ev => {
+        const year = ev.dataset.year || '';
+        const cat = ev.dataset.cat || '';
+        const decade = ev.dataset.decade || '';
+        const pm = ev.dataset.pm || '';
+        const party = ev.dataset.party || '';
+        const search = ev.dataset.search || '';
+        const text = (ev.textContent || '').toLowerCase();
+        const haystack = [year, cat, decade, pm, party, search, text].join(' ');
+
+        let show = true;
+        if (activeDecade !== 'all' && decade !== activeDecade) show = false;
+        if (activeCat !== 'all' && cat !== activeCat) show = false;
+        if (q && !haystack.includes(q)) show = false;
+
+        ev.classList.toggle('hidden', !show);
+        if (show) { shown++; visibleDecades.add(decade); }
+      });
+
+      decadeHeaders.forEach(dh => {
+        const d = dh.dataset.decade;
+        dh.style.display = (activeDecade === 'all' || activeDecade === d) && (visibleDecades.has(d) || !activeCat && !q) ? '' : 'none';
+      });
+
+      stats.textContent = q || activeDecade !== 'all' || activeCat !== 'all'
+        ? `Showing ${shown} of ${events.length} events`
+        : `Showing all ${events.length} events`;
+    }
+
+    decadeFilters.forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeDecade = btn.dataset.decade;
+        decadeFilters.forEach(b => b.classList.toggle('active', b.dataset.decade === activeDecade));
+        applyFilters();
+      });
+    });
+
+    catFilters.forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCat = btn.dataset.cat;
+        catFilters.forEach(b => b.classList.toggle('active', b.dataset.cat === activeCat));
+        applyFilters();
+      });
+    });
+
+    searchBox.addEventListener('input', applyFilters);
+
+    // Set "All" active by default
+    decadeFilters.forEach(b => { if (b.dataset.decade === 'all') b.classList.add('active'); });
+    catFilters.forEach(b => { if (b.dataset.cat === 'all') b.classList.add('active'); });
+    applyFilters();
+  })();
+  </script>
+</body>
+</html>
