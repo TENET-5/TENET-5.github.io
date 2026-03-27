@@ -153,15 +153,24 @@
     });
   });
 
-  // ── s.504 Action Banner ─────────────────────────────────────────────────
-  var s504Banner = document.createElement('div');
-  s504Banner.id = 's504-action-banner';
-  s504Banner.style.cssText = 'position:fixed;bottom:70px;right:20px;z-index:99998;background:rgba(196,30,58,0.95);backdrop-filter:blur(12px);border:1px solid #ff4444;border-radius:10px;padding:14px 18px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.5);font-family:Inter,sans-serif;';
-  s504Banner.innerHTML = '<div style="color:#fff;font-size:0.82rem;font-weight:700;margin-bottom:8px;">⚖️ s.504 FILING — 29 COUNTS</div>' +
-    '<div style="color:#ffccd5;font-size:0.72rem;line-height:1.5;margin-bottom:10px;">Send this formal criminal filing to the Canadian Forces chain of command and print a copy for your records.</div>' +
-    '<button onclick="s504Action()" style="background:#fff;color:#c41e3a;border:none;padding:8px 16px;border-radius:6px;font-weight:700;font-size:0.8rem;cursor:pointer;width:100%;margin-bottom:6px;">📧 Send to chain of command & print</button>' +
-    '<button onclick="document.getElementById(\'s504-action-banner\').style.display=\'none\'" style="background:transparent;color:#ffccd5;border:1px solid rgba(255,255,255,0.2);padding:5px 12px;border-radius:6px;font-size:0.7rem;cursor:pointer;width:100%;">Dismiss</button>';
-  document.body.appendChild(s504Banner);
+  // ── s.504 Modal Popup ───────────────────────────────────────────────────
+  if (!sessionStorage.getItem('s504_dismissed')) {
+    var overlay = document.createElement('div');
+    overlay.id = 's504-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;';
+
+    var modal = document.createElement('div');
+    modal.style.cssText = 'background:#0c0c0e;border:2px solid #c41e3a;border-radius:16px;padding:2rem;max-width:480px;width:90%;box-shadow:0 16px 64px rgba(196,30,58,0.3),0 4px 20px rgba(0,0,0,0.6);text-align:center;animation:fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1) both;';
+    modal.innerHTML =
+      '<div style="font-size:2.5rem;margin-bottom:0.8rem;">⚖️</div>' +
+      '<h2 style="color:#fff;font-size:1.4rem;font-weight:800;margin-bottom:0.6rem;font-family:Playfair Display,serif;">SECTION 504 FILING</h2>' +
+      '<div style="color:#ff6b6b;font-size:0.9rem;font-weight:700;margin-bottom:1rem;">29 Criminal Counts — Captain Rebecca Covey (CFNIS)</div>' +
+      '<p style="color:#a0a0a6;font-size:0.82rem;line-height:1.7;margin-bottom:1.5rem;">This website documents the political prosecution of a Canadian Forces combat veteran. You can send this formal criminal filing to the Canadian Forces chain of command and print a copy.</p>' +
+      '<button onclick="s504Action();document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:#c41e3a;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;margin-bottom:10px;transition:all 0.2s;">📧 Send to chain of command & print</button>' +
+      '<button onclick="document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:transparent;color:#6e6e76;border:1px solid rgba(255,255,255,0.08);padding:8px 16px;border-radius:8px;font-size:0.8rem;cursor:pointer;width:100%;">Not now</button>';
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  }
 
   // ── Init ─────────────────────────────────────────────────────────────────
   updateProgress();
