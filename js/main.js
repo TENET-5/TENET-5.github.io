@@ -160,15 +160,15 @@
     overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;';
 
     var modal = document.createElement('div');
-    modal.style.cssText = 'background:#0c0c0e;border:2px solid #c41e3a;border-radius:16px;padding:2rem;max-width:480px;width:90%;box-shadow:0 16px 64px rgba(196,30,58,0.3),0 4px 20px rgba(0,0,0,0.6);text-align:center;animation:fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1) both;';
+    modal.style.cssText = 'background:#0c0c0e;border:2px solid #c41e3a;border-radius:16px;padding:2rem;max-width:480px;width:90%;box-shadow:0 16px 64px rgba(196,30,58,0.3),0 4px 20px rgba(0,0,0,0.6);text-align:center;animation:fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1) both;position:relative;';
     modal.innerHTML =
+      '<button onclick="document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#6e6e76;font-size:1.4rem;cursor:pointer;line-height:1;padding:4px 8px;" aria-label="Close">&times;</button>' +
       '<div style="font-size:2.5rem;margin-bottom:0.8rem;">⚖️</div>' +
       '<h2 style="color:#fff;font-size:1.4rem;font-weight:800;margin-bottom:0.6rem;font-family:Playfair Display,serif;">SECTION 504 FILING</h2>' +
       '<div style="color:#ff6b6b;font-size:0.9rem;font-weight:700;margin-bottom:1rem;">29 Criminal Counts — Captain Rebecca Covey (CFNIS)</div>' +
       '<p style="color:#a0a0a6;font-size:0.82rem;line-height:1.7;margin-bottom:1.5rem;">This website documents the political prosecution of a Canadian Forces combat veteran. You can send this formal criminal filing to the Canadian Forces chain of command and print a copy.</p>' +
-      '<button onclick="s504Action();document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:#c41e3a;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;margin-bottom:8px;transition:all 0.2s;">📧 Send to chain of command & print</button>' +
-      '<button onclick="s504Download()" style="background:transparent;color:#ededed;border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px;font-size:0.82rem;cursor:pointer;width:100%;margin-bottom:8px;">💾 Download s.504 filing (.txt)</button>' +
-      '<button onclick="document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:transparent;color:#6e6e76;border:1px solid rgba(255,255,255,0.08);padding:8px 16px;border-radius:8px;font-size:0.8rem;cursor:pointer;width:100%;">Not now</button>';
+      '<button onclick="s504Action();document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:#c41e3a;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;margin-bottom:8px;transition:all 0.2s;">Send & Print</button>' +
+      '<button onclick="s504Download()" style="background:transparent;color:#ededed;border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px;font-size:0.82rem;cursor:pointer;width:100%;">💾 Download filing</button>';
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
   }
