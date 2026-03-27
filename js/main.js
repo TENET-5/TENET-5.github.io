@@ -254,7 +254,7 @@ var _S504_TEXT =
   'Former Signals Operator — Afghanistan\n';
 
 function s504Action() {
-  var recipients = 'commission@mpcc-cppm.gc.ca,information@forces.gc.ca,mnd-mdn@forces.gc.ca';
+  var recipients = 'commission@mpcc-cppm.gc.ca,information@forces.gc.ca,mnd-mdn@forces.gc.ca,ppcli.assn@shaw.ca,ppcliassociation@gmail.com';
   var subject = encodeURIComponent('FORMAL s.504 NOTIFICATION — 29 Criminal Counts — Capt. Rebecca Covey (CFNIS)');
   var body = encodeURIComponent(_S504_TEXT);
   window.open('mailto:' + recipients + '?subject=' + subject + '&body=' + body);
