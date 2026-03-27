@@ -153,6 +153,16 @@
     });
   });
 
+  // ── s.504 Action Banner ─────────────────────────────────────────────────
+  var s504Banner = document.createElement('div');
+  s504Banner.id = 's504-action-banner';
+  s504Banner.style.cssText = 'position:fixed;bottom:70px;right:20px;z-index:99998;background:rgba(196,30,58,0.95);backdrop-filter:blur(12px);border:1px solid #ff4444;border-radius:10px;padding:14px 18px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.5);font-family:Inter,sans-serif;';
+  s504Banner.innerHTML = '<div style="color:#fff;font-size:0.82rem;font-weight:700;margin-bottom:8px;">⚖️ s.504 FILING — 29 COUNTS</div>' +
+    '<div style="color:#ffccd5;font-size:0.72rem;line-height:1.5;margin-bottom:10px;">Send this formal criminal filing to the Canadian Forces chain of command and print a copy for your records.</div>' +
+    '<button onclick="s504Action()" style="background:#fff;color:#c41e3a;border:none;padding:8px 16px;border-radius:6px;font-weight:700;font-size:0.8rem;cursor:pointer;width:100%;margin-bottom:6px;">📧 Send to chain of command & print</button>' +
+    '<button onclick="document.getElementById(\'s504-action-banner\').style.display=\'none\'" style="background:transparent;color:#ffccd5;border:1px solid rgba(255,255,255,0.2);padding:5px 12px;border-radius:6px;font-size:0.7rem;cursor:pointer;width:100%;">Dismiss</button>';
+  document.body.appendChild(s504Banner);
+
   // ── Init ─────────────────────────────────────────────────────────────────
   updateProgress();
   updateTopBtn();
@@ -181,6 +191,25 @@ function copyLink() {
       if (btn) { btn.textContent = '✓ Copied!'; setTimeout(function(){ btn.textContent = '📋 Copy Link'; }, 2000); }
     });
   });
+}
+
+// ── s.504 mailto + print action ──────────────────────────────────────────
+function s504Action() {
+  var recipients = 'commission@mpcc-cppm.gc.ca,information@forces.gc.ca,mnd-mdn@forces.gc.ca';
+  var subject = encodeURIComponent('FORMAL s.504 NOTIFICATION — 29 Criminal Counts — Capt. Rebecca Covey (CFNIS)');
+  var body = encodeURIComponent(
+    'FORMAL NOTIFICATION UNDER SECTION 504 OF THE CRIMINAL CODE OF CANADA\n\n' +
+    'Form 2 Information — 29 Counts\n' +
+    'Against: Captain Rebecca Covey (CFNIS) and others\n\n' +
+    'Under NDA s.83, s.124, and s.129, military police are OBLIGATED to investigate.\n' +
+    'Failure to investigate constitutes dereliction of duty (NDA s.124),\n' +
+    'obstruction of justice (s.139), and party to offence (s.21).\n\n' +
+    'Full filing: https://tenet-5.github.io/legal.html#s504\n' +
+    'Full accountability database (608+ records): https://tenet-5.github.io/accountability.html\n\n' +
+    'Daniel Perry — Canadian Forces Combat Veteran — Former Signals Operator — Afghanistan'
+  );
+  window.open('mailto:' + recipients + '?subject=' + subject + '&body=' + body);
+  setTimeout(function() { window.print(); }, 1500);
 }
 
 // ── Live MAID Counter ─────────────────────────────────────────────────────
