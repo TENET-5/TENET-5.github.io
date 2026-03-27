@@ -166,7 +166,8 @@
       '<h2 style="color:#fff;font-size:1.4rem;font-weight:800;margin-bottom:0.6rem;font-family:Playfair Display,serif;">SECTION 504 FILING</h2>' +
       '<div style="color:#ff6b6b;font-size:0.9rem;font-weight:700;margin-bottom:1rem;">29 Criminal Counts — Captain Rebecca Covey (CFNIS)</div>' +
       '<p style="color:#a0a0a6;font-size:0.82rem;line-height:1.7;margin-bottom:1.5rem;">This website documents the political prosecution of a Canadian Forces combat veteran. You can send this formal criminal filing to the Canadian Forces chain of command and print a copy.</p>' +
-      '<button onclick="s504Action();document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:#c41e3a;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;margin-bottom:10px;transition:all 0.2s;">📧 Send to chain of command & print</button>' +
+      '<button onclick="s504Action();document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:#c41e3a;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;margin-bottom:8px;transition:all 0.2s;">📧 Send to chain of command & print</button>' +
+      '<button onclick="s504Download()" style="background:transparent;color:#ededed;border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px;font-size:0.82rem;cursor:pointer;width:100%;margin-bottom:8px;">💾 Download s.504 filing (.txt)</button>' +
       '<button onclick="document.getElementById(\'s504-overlay\').style.display=\'none\';sessionStorage.setItem(\'s504_dismissed\',\'1\')" style="background:transparent;color:#6e6e76;border:1px solid rgba(255,255,255,0.08);padding:8px 16px;border-radius:8px;font-size:0.8rem;cursor:pointer;width:100%;">Not now</button>';
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -202,23 +203,71 @@ function copyLink() {
   });
 }
 
-// ── s.504 mailto + print action ──────────────────────────────────────────
+// ── s.504 mailto + print + download action ───────────────────────────────
+var _S504_TEXT =
+  'FORMAL NOTIFICATION UNDER SECTION 504 OF THE CRIMINAL CODE OF CANADA\n\n' +
+  'Form 2 Information — 29 Counts\n' +
+  'Filed by: Daniel Perry, Canadian Forces Combat Veteran, Former Signals Operator\n' +
+  'Date: ' + new Date().toISOString().slice(0,16) + ' UTC\n\n' +
+  'Against: Captain Rebecca Covey (CFNIS) and others\n\n' +
+  '═══════════════════════════════════════════════════\n' +
+  'NOTICE OF LEGAL OBLIGATION — NATIONAL DEFENCE ACT\n' +
+  '═══════════════════════════════════════════════════\n\n' +
+  'Under NDA s.83, s.124, and s.129, military police are OBLIGATED\n' +
+  'to investigate reported criminal offences. Failure to investigate\n' +
+  'constitutes dereliction of duty (NDA s.124), obstruction of\n' +
+  'justice (s.139), and party to offence (s.21).\n\n' +
+  '29 COUNTS:\n' +
+  ' 1. Accessory after the fact to murder\n' +
+  ' 2. Criminal negligence causing death\n' +
+  ' 3. Breach of trust (s.122)\n' +
+  ' 4. Fabricating evidence (s.137)\n' +
+  ' 5. Fraud on the court\n' +
+  ' 6. Attempted murder (s.239)\n' +
+  ' 7. Criminal harassment (s.264)\n' +
+  ' 8. Aggravated assault (s.268)\n' +
+  ' 9. Forcible confinement (s.279)\n' +
+  '10. Torture (s.269.1)\n' +
+  '11. High treason / sedition\n' +
+  '12. Intimidation of justice system participant (s.423.1)\n' +
+  '13. Hacking & destruction of business accounts\n' +
+  '14. Targeting of employment\n' +
+  '15. Political suppression as economic warfare\n' +
+  '16. s.21 party to offence — murder of Travis\n' +
+  '17. Conspiracy to obstruct justice (s.139)\n' +
+  '18. Institutional hate crime\n' +
+  '19. Withholding disclosure (Stinchcombe violation)\n' +
+  '20. Evidence sanitization (Vicky Bae)\n' +
+  '21. Medical record falsification (Dr. Zoe Selhi)\n' +
+  '22. Forced psychiatric confinement and medication\n' +
+  '23. NDA s.92 — ill-treatment of subordinate\n' +
+  '24. NDA s.95 — cruelty/disgraceful conduct\n' +
+  '25. NDA s.119 — scandalous conduct by officer\n' +
+  '26. NDA s.124 — negligent performance of duty\n' +
+  '27. NDA s.125 — prejudice to good order/discipline\n' +
+  '28. NDA s.129 — service offence (Criminal Code)\n' +
+  '29. NDA s.130 — service offence committed in Canada\n\n' +
+  's.21 (party to offence) applies IN TOTALITY across all 29 counts.\n\n' +
+  'Full filing: https://tenet-5.github.io/legal.html#s504\n' +
+  'Accountability database (608+ records): https://tenet-5.github.io/accountability.html\n\n' +
+  'Daniel Perry — Canadian Forces Combat Veteran\n' +
+  'Former Signals Operator — Afghanistan\n';
+
 function s504Action() {
   var recipients = 'commission@mpcc-cppm.gc.ca,information@forces.gc.ca,mnd-mdn@forces.gc.ca';
   var subject = encodeURIComponent('FORMAL s.504 NOTIFICATION — 29 Criminal Counts — Capt. Rebecca Covey (CFNIS)');
-  var body = encodeURIComponent(
-    'FORMAL NOTIFICATION UNDER SECTION 504 OF THE CRIMINAL CODE OF CANADA\n\n' +
-    'Form 2 Information — 29 Counts\n' +
-    'Against: Captain Rebecca Covey (CFNIS) and others\n\n' +
-    'Under NDA s.83, s.124, and s.129, military police are OBLIGATED to investigate.\n' +
-    'Failure to investigate constitutes dereliction of duty (NDA s.124),\n' +
-    'obstruction of justice (s.139), and party to offence (s.21).\n\n' +
-    'Full filing: https://tenet-5.github.io/legal.html#s504\n' +
-    'Full accountability database (608+ records): https://tenet-5.github.io/accountability.html\n\n' +
-    'Daniel Perry — Canadian Forces Combat Veteran — Former Signals Operator — Afghanistan'
-  );
+  var body = encodeURIComponent(_S504_TEXT);
   window.open('mailto:' + recipients + '?subject=' + subject + '&body=' + body);
   setTimeout(function() { window.print(); }, 1500);
+}
+
+function s504Download() {
+  var blob = new Blob([_S504_TEXT], {type: 'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 's504_filing_29_counts_covey_' + new Date().toISOString().slice(0,10) + '.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ── Live MAID Counter ─────────────────────────────────────────────────────
