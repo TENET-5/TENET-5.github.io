@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Board — Follow the Money, Follow the Connections</title>
+  <meta name="description" content="Interactive conspiracy board mapping documented connections between government contracts, lobbying, corporate directorships, campaign donations, and ethics violations. All public record.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .board-container { position: relative; width: 100%; min-height: 80vh; background: #0a0a0c; border: 1px solid #1a1a1e; border-radius: 12px; overflow: hidden; margin: 2rem auto; }
+    .board-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(196,30,58,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(196,30,58,0.03) 1px, transparent 1px); background-size: 40px 40px; }
+    .node { position: absolute; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem; font-size: 0.78rem; cursor: move; z-index: 10; max-width: 200px; transition: border-color 0.2s, box-shadow 0.2s; user-select: none; }
+    .node:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); z-index: 20; }
+    .node-title { font-weight: 700; color: var(--text-primary); font-size: 0.82rem; margin-bottom: 4px; }
+    .node-detail { color: var(--text-tertiary); font-size: 0.72rem; line-height: 1.5; }
+    .node-amount { color: #ff6b6b; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem; }
+    .node-type { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .type-contract { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .type-lobby { background: rgba(168,85,247,0.15); color: #a855f7; }
+    .type-donation { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .type-ethics { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .type-corporate { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .type-person { background: rgba(236,72,153,0.15); color: #ec4899; }
+    svg.threads { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+    svg.threads line { stroke: #c41e3a; stroke-width: 1.5; opacity: 0.4; }
+    svg.threads line.highlight { stroke: #ff4444; stroke-width: 2.5; opacity: 0.8; filter: drop-shadow(0 0 4px rgba(255,68,68,0.5)); }
+    .board-legend { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.5rem; background: var(--bg-elevated); border-bottom: 1px solid var(--border); font-size: 0.78rem; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .board-controls { padding: 1rem 1.5rem; background: var(--bg-elevated); border-top: 1px solid var(--border); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .board-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+    .board-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+    .board-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-bright); }
+    .stat-row { display: flex; gap: 2rem; justify-content: center; padding: 1.5rem; flex-wrap: wrap; }
+    .stat-box { text-align: center; }
+    .stat-box .num { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--accent-bright); }
+    .stat-box .label { font-size: 0.75rem; color: var(--text-tertiary); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="index.html" class="brand">TENET&#8209;5</a>
+    <div class="nav-group nav-primary">
+      <a href="my-story.html">My Story</a>
+      <a href="evidence.html" class="nav-hot">Evidence</a>
+      <a href="accountability.html" class="nav-danger">&#128203; The 504</a>
+      <a href="conspiracy-board.html" class="nav-warn active">&#128204; The Board</a>
+    </div>
+    <div class="nav-group nav-tools">
+      <a href="bloggins.html" class="nav-green">&#129437; Bloggins</a>
+      <a href="the-boot.html" class="nav-warn">&#129462; The Boot</a>
+      <a href="lirilclaw.html" class="nav-hot">&#128295; LirilClaw</a>
+    </div>
+  </nav>
+
+  <header class="hero" style="min-height:40vh;">
+    <h1>The Board</h1>
+    <p class="subtitle">Follow the money. Follow the connections. Every node is public record.</p>
+  </header>
+
+  <div class="content" style="max-width:1200px;margin:0 auto;padding:0 1rem;">
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="num" id="node-count">0</div><div class="label">Nodes</div></div>
+      <div class="stat-box"><div class="num" id="thread-count">0</div><div class="label">Connections</div></div>
+      <div class="stat-box"><div class="num" id="total-amount">$0</div><div class="label">Total $ Documented</div></div>
+    </div>
+
+    <div class="board-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> Contracts</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div> Lobbying</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div> Donations</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;"></div> Ethics Violations</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div> Corporate Links</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> Key Actors</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c41e3a;"></div> &#8212; Red Thread (connection)</div>
+    </div>
+
+    <div class="board-controls">
+      <button class="board-btn active" onclick="filterBoard('all')">All</button>
+      <button class="board-btn" onclick="filterBoard('contract')">Contracts</button>
+      <button class="board-btn" onclick="filterBoard('lobby')">Lobbying</button>
+      <button class="board-btn" onclick="filterBoard('donation')">Donations</button>
+      <button class="board-btn" onclick="filterBoard('ethics')">Ethics</button>
+      <button class="board-btn" onclick="filterBoard('corporate')">Corporate</button>
+    </div>
+
+    <div class="board-container" id="board">
+      <div class="board-bg"></div>
+      <svg class="threads" id="threads"></svg>
+    </div>
+
+    <div class="verdict-box" style="margin-top:2rem;">
+      <h3>How to Read The Board</h3>
+      <p style="color:#ccc; line-height:1.8; font-size:0.9rem;">
+        Every node on this board represents a documented public record: a government contract, a lobbying registration, a campaign donation, a corporate directorship, or an ethics violation. The red threads connect entities that share documented relationships &#8212; money flows, corporate links, lobbying relationships, or ethics findings.
+        <br><br>
+        <strong>Sources:</strong> BuyAndSell.gc.ca (federal procurement), Elections Canada (campaign finance), Office of the Commissioner of Lobbying (lobbyist registry), provincial corporate registries, Ethics Commissioner rulings, Auditor General reports, Charbonneau Commission evidence, and court records.
+        <br><br>
+        <strong>This is not speculation. Every connection is sourced from public record.</strong>
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Daniel Perry. All rights reserved.</p>
+  </footer>
+
+  <script>
+// ── Board Data ── All from public record
+var NODES = [
+  // SNC-Lavalin network
+  {id:'snc', x:150, y:80, type:'corporate', title:'SNC-Lavalin', detail:'Engineering firm. Convicted of fraud (Libyan bribes). Got DPA. $9.4B revenue.', amount:'$4.1B in subsidies'},
+  {id:'snc_gpr', x:350, y:60, type:'contract', title:'SNC GPR Contracts', detail:'Ground-penetrating radar at residential school sites. Same company convicted of fraud.', amount:''},
+  {id:'snc_dpa', x:150, y:200, type:'ethics', title:'SNC Deferred Prosecution', detail:'Bill C-74 created DPA regime. PMO pressured AG. Wilson-Raybould fired.', amount:''},
+  {id:'jwb', x:350, y:200, type:'person', title:'Jody Wilson-Raybould', detail:'AG fired after refusing to intervene in SNC prosecution. Testified to committee.', amount:''},
+  {id:'pmo_snc', x:250, y:140, type:'ethics', title:'PMO Pressure', detail:'11 contacts from PMO to AG office. Ethics Commissioner: PM violated s.9.', amount:''},
+
+  // McKinsey network
+  {id:'mckinsey', x:550, y:80, type:'contract', title:'McKinsey & Company', detail:'$209M in federal contracts. No-bid. DND, IRCC, PHAC.', amount:'$209M'},
+  {id:'mckinsey_dnd', x:700, y:60, type:'contract', title:'McKinsey &#8594; DND', detail:'Contracts with Department of National Defence. Consulting on procurement.', amount:'$100M+'},
+  {id:'mckinsey_ircc', x:700, y:140, type:'contract', title:'McKinsey &#8594; IRCC', detail:'Immigration consulting contracts.', amount:'$30M+'},
+  {id:'carney_mckinsey', x:550, y:200, type:'person', title:'Mark Carney', detail:'PM. Former McKinsey consultant. Now oversees departments that gave McKinsey $209M.', amount:''},
+
+  // ArriveCAN
+  {id:'arrivecan', x:150, y:350, type:'contract', title:'ArriveCAN App', detail:'$54M for a border app. AG: should have cost $4-5M.', amount:'$54M'},
+  {id:'gcstrat', x:350, y:350, type:'corporate', title:'GC Strategies', detail:'2-person firm. $20M+ in ArriveCAN subcontracts. Middlemen.', amount:'$20M+'},
+  {id:'arrivecan_ag', x:250, y:430, type:'ethics', title:'AG Audit Finding', detail:'Should have cost $4-5M. Paid $54M. Documentation "concerning."', amount:'$49M overpaid'},
+
+  // WE Charity
+  {id:'we', x:550, y:350, type:'ethics', title:'WE Charity &#8594; PM Family', detail:'$912M grant to WE. Trudeau family received $500K+ in fees from WE events.', amount:'$912M grant'},
+  {id:'we_family', x:700, y:350, type:'person', title:'Trudeau Family', detail:'Mother, brother received $500K+ from WE speaking engagements.', amount:'$500K+'},
+  {id:'we_morneau', x:700, y:430, type:'ethics', title:'Bill Morneau', detail:'Finance Minister. Family had financial ties to WE. Resigned.', amount:''},
+
+  // Aga Khan
+  {id:'agakhan', x:150, y:520, type:'ethics', title:'Aga Khan Foundation', detail:'Hundreds of millions in federal grants. PM vacationed on private island.', amount:'$300M+ grants'},
+  {id:'agakhan_ethics', x:350, y:520, type:'ethics', title:'4 Ethics Violations', detail:'PM violated ss. 5, 11, 12, 21 of Conflict of Interest Act. First sitting PM.', amount:''},
+
+  // Telecom oligopoly
+  {id:'rogers', x:550, y:520, type:'corporate', title:'Rogers', detail:'$15B revenue. Highest telecom prices in developed world. July 2022: nationwide outage.', amount:''},
+  {id:'bell', x:700, y:520, type:'corporate', title:'Bell', detail:'$23B revenue. Laid off 6,000 while profitable. Highest prices globally.', amount:''},
+  {id:'crtc_capture', x:625, y:600, type:'ethics', title:'CRTC Capture', detail:'Chair Ian Scott: came from Telus. Ruled for Big Three consistently.', amount:''},
+
+  // Loblaw
+  {id:'loblaw', x:150, y:650, type:'corporate', title:'Loblaw / Weston', detail:'$1.99B profit (2023). Bread price fixing 14 years. Shrinkflation.', amount:'$4.9B class action'},
+  {id:'loblaw_bread', x:350, y:650, type:'ethics', title:'Bread Price Fixing', detail:'14 years of price fixing. $25 gift cards as "compensation."', amount:'$4.9B'},
+  {id:'grocery_code', x:250, y:730, type:'ethics', title:'Voluntary Grocery Code', detail:'No enforcement. No penalties. Loblaw initially refused to sign.', amount:''},
+
+  // CIB
+  {id:'cib', x:550, y:650, type:'contract', title:'Canada Infrastructure Bank', detail:'$35B mandate. 11 projects completed. Parliament said abolish.', amount:'$35B'},
+  {id:'cib_pbo', x:700, y:650, type:'ethics', title:'PBO: Will Miss Target by $20B', detail:'Only $14.9B disbursed by 2028. Private investment: failed.', amount:'$20B shortfall'},
+
+  // Phoenix
+  {id:'phoenix', x:400, y:800, type:'contract', title:'Phoenix Pay System', detail:'$7.5B total. 10 years. Still broken. Workers lost homes.', amount:'$7.5B'},
+  {id:'ibm_phoenix', x:550, y:800, type:'corporate', title:'IBM Canada', detail:'Built Phoenix. $185M contract. System never worked properly.', amount:'$185M contract'},
+];
+
+var THREADS = [
+  // SNC network
+  ['snc', 'snc_gpr'], ['snc', 'snc_dpa'], ['snc_dpa', 'jwb'], ['snc_dpa', 'pmo_snc'], ['pmo_snc', 'jwb'],
+  // McKinsey
+  ['mckinsey', 'mckinsey_dnd'], ['mckinsey', 'mckinsey_ircc'], ['mckinsey', 'carney_mckinsey'],
+  // ArriveCAN
+  ['arrivecan', 'gcstrat'], ['arrivecan', 'arrivecan_ag'],
+  // WE
+  ['we', 'we_family'], ['we', 'we_morneau'],
+  // Aga Khan
+  ['agakhan', 'agakhan_ethics'],
+  // Telecom
+  ['rogers', 'crtc_capture'], ['bell', 'crtc_capture'],
+  // Loblaw
+  ['loblaw', 'loblaw_bread'], ['loblaw', 'grocery_code'], ['loblaw_bread', 'grocery_code'],
+  // CIB
+  ['cib', 'cib_pbo'],
+  // Phoenix
+  ['phoenix', 'ibm_phoenix'],
+  // Cross-network: consulting ↔ contracts
+  ['mckinsey', 'cib'], ['carney_mckinsey', 'cib'],
+  // Cross-network: ethics
+  ['pmo_snc', 'we'], ['agakhan_ethics', 'pmo_snc'],
+];
+
+// ── Render ──
+var board = document.getElementById('board');
+var svg = document.getElementById('threads');
+var nodeMap = {};
+
+NODES.forEach(function(n) {
+  var el = document.createElement('div');
+  el.className = 'node';
+  el.id = 'node-' + n.id;
+  el.dataset.type = n.type;
+  el.style.left = n.x + 'px';
+  el.style.top = n.y + 'px';
+  el.innerHTML =
+    '<div class="node-title">' + n.title + '</div>' +
+    (n.amount ? '<div class="node-amount">' + n.amount + '</div>' : '') +
+    '<div class="node-detail">' + n.detail + '</div>' +
+    '<span class="node-type type-' + n.type + '">' + n.type + '</span>';
+  board.appendChild(el);
+  nodeMap[n.id] = {el: el, x: n.x, y: n.y};
+});
+
+function drawThreads() {
+  svg.innerHTML = '';
+  svg.setAttribute('width', board.scrollWidth);
+  svg.setAttribute('height', board.scrollHeight);
+  THREADS.forEach(function(t) {
+    var a = nodeMap[t[0]], b = nodeMap[t[1]];
+    if (!a || !b) return;
+    var aEl = a.el, bEl = b.el;
+    if (aEl.style.display === 'none' || bEl.style.display === 'none') return;
+    var ax = aEl.offsetLeft + aEl.offsetWidth/2;
+    var ay = aEl.offsetTop + aEl.offsetHeight/2;
+    var bx = bEl.offsetLeft + bEl.offsetWidth/2;
+    var by = bEl.offsetTop + bEl.offsetHeight/2;
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', ax); line.setAttribute('y1', ay);
+    line.setAttribute('x2', bx); line.setAttribute('y2', by);
+    svg.appendChild(line);
+  });
+}
+
+function filterBoard(type) {
+  document.querySelectorAll('.board-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.querySelectorAll('.node').forEach(function(n) {
+    n.style.display = (type === 'all' || n.dataset.type === type) ? '' : 'none';
+  });
+  drawThreads();
+}
+
+// ── Drag nodes ──
+var dragging = null, dragOff = {x:0,y:0};
+board.addEventListener('mousedown', function(e) {
+  var n = e.target.closest('.node');
+  if (!n) return;
+  dragging = n;
+  dragOff.x = e.clientX - n.offsetLeft;
+  dragOff.y = e.clientY - n.offsetTop;
+  n.style.zIndex = 30;
+});
+document.addEventListener('mousemove', function(e) {
+  if (!dragging) return;
+  dragging.style.left = (e.clientX - dragOff.x) + 'px';
+  dragging.style.top = (e.clientY - dragOff.y) + 'px';
+  drawThreads();
+});
+document.addEventListener('mouseup', function() {
+  if (dragging) dragging.style.zIndex = 10;
+  dragging = null;
+});
+
+// ── Stats ──
+document.getElementById('node-count').textContent = NODES.length;
+document.getElementById('thread-count').textContent = THREADS.length;
+var totalAmt = 0;
+NODES.forEach(function(n) {
+  var m = (n.amount || '').match(/\$([\d.]+)([BMK]?)/);
+  if (m) {
+    var v = parseFloat(m[1]);
+    if (m[2] === 'B') v *= 1e9;
+    else if (m[2] === 'M') v *= 1e6;
+    else if (m[2] === 'K') v *= 1e3;
+    totalAmt += v;
+  }
+});
+document.getElementById('total-amount').textContent = '$' + (totalAmt/1e9).toFixed(1) + 'B';
+
+drawThreads();
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>
