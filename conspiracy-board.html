@@ -153,6 +153,39 @@ var NODES = [
   // Phoenix
   {id:'phoenix', x:400, y:800, type:'contract', title:'Phoenix Pay System', detail:'$7.5B total. 10 years. Still broken. Workers lost homes.', amount:'$7.5B'},
   {id:'ibm_phoenix', x:550, y:800, type:'corporate', title:'IBM Canada', detail:'Built Phoenix. $185M contract. System never worked properly.', amount:'$185M contract'},
+
+  // ── CFNIS / Covey Network ──
+  {id:'covey', x:900, y:80, type:'person', title:'Capt. Rebecca Covey', detail:'CFNIS. 29 criminal counts in s.504. Politically prosecuted a combat veteran.', amount:''},
+  {id:'cfnis', x:1050, y:80, type:'corporate', title:'CFNIS', detail:'Canadian Forces National Investigation Service. Investigated the whistleblower, not the threat.', amount:''},
+  {id:'perry', x:900, y:200, type:'person', title:'Daniel Perry', detail:'Combat veteran. Signals Operator. Afghanistan. Reported foreign interference. Prosecuted instead.', amount:''},
+  {id:'selhi', x:1050, y:200, type:'person', title:'Dr. Zoe Selhi', detail:'Providence Care. Labeled veteran "delusional" for stating Health Canada facts. Forced medication.', amount:''},
+  {id:'bae', x:1050, y:300, type:'person', title:'Vicky Bae', detail:'Withheld motions, sanitized evidence, suppressed disclosure. Stinchcombe violation.', amount:''},
+  {id:'hedge', x:900, y:300, type:'person', title:'Hedge', detail:'Federal apparatus. s.21 party to offence. Political prosecution chain.', amount:''},
+  {id:'dwan', x:975, y:380, type:'ethics', title:'DWAN Suppression', detail:'Phone confiscated. Communications monitored. Filing suppressed.', amount:''},
+
+  // ── Winnipeg Lab / Foreign Interference ──
+  {id:'qiu', x:900, y:480, type:'person', title:'Xiangguo Qiu', detail:'Winnipeg NML. Transferred Ebola sequence to China. Fled to China under new name.', amount:''},
+  {id:'cheng', x:1050, y:480, type:'person', title:'Keding Cheng', detail:'Qiu&#39;s husband. Co-conspirator. Also fled to China.', amount:''},
+  {id:'nml', x:975, y:560, type:'corporate', title:'National Microbiology Lab', detail:'Level 4. Canada&#39;s most secure lab. Espionage confirmed by CSIS.', amount:''},
+  {id:'csis_nml', x:900, y:640, type:'ethics', title:'CSIS Assessment', detail:'"Intentionally transferred scientific knowledge to China." "One of most serious breaches."', amount:''},
+  {id:'chinese_police', x:1050, y:640, type:'ethics', title:'Chinese Police Stations', detail:'Operating on Canadian soil. Toronto, Vancouver. Govt slow to act.', amount:''},
+  {id:'nsicop', x:975, y:720, type:'ethics', title:'NSICOP Report', detail:'MPs identified as assisting foreign states. Names classified. Canadians can&#39;t know who.', amount:''},
+  {id:'foreign_registry', x:1100, y:720, type:'ethics', title:'No Foreign Agent Registry', detail:'US: FARA since 1938. Australia: 2018. Canada: still debating.', amount:''},
+
+  // ── Charbonneau ──
+  {id:'charbonneau', x:150, y:900, type:'ethics', title:'Charbonneau Commission', detail:'$500M in misappropriated municipal funds. 114 convictions. Montreal construction cartel.', amount:'$500M'},
+  {id:'vaillancourt', x:350, y:900, type:'person', title:'Gilles Vaillancourt', detail:'Laval mayor. Convicted. Repaid $8.5M. Kickback scheme with construction firms.', amount:'$8.5M repaid'},
+  {id:'montreal_mafia', x:250, y:980, type:'corporate', title:'Construction Cartel', detail:'Firms colluded on $billions in contracts. 10-15% kickbacks. Decades.', amount:'$Billions'},
+
+  // ── MAID / Aktion T4 ──
+  {id:'maid', x:550, y:900, type:'ethics', title:'MAID Program', detail:'76,475 dead. 16,499 in 2024 alone. 45/day. PBO: saves $149.5M/year.', amount:'$149.5M "saved"'},
+  {id:'bill_c7', x:700, y:900, type:'ethics', title:'Bill C-7', detail:'Removed "reasonably foreseeable" death requirement. Track 2 opened.', amount:''},
+  {id:'maid_veterans', x:625, y:980, type:'ethics', title:'Veterans Offered MAID', detail:'VAC employees offered death instead of support. Multiple documented cases.', amount:''},
+
+  // ── Housing / Immigration ──
+  {id:'housing', x:900, y:900, type:'ethics', title:'Housing Crisis', detail:'$663K average. $1M Toronto. 1.2M new residents. 240K homes built.', amount:'$663K avg'},
+  {id:'tfw', x:1050, y:900, type:'ethics', title:'TFW Program', detail:'Amnesty: "exploitation is a feature." Tied permits. Wage suppression.', amount:''},
+  {id:'ircc', x:975, y:980, type:'ethics', title:'IRCC Backlog', detail:'958K applications. 56% within standard (target: 80%). Start-Up Visa: suspended for fraud.', amount:'958K backlog'},
 ];
 
 var THREADS = [
@@ -178,6 +211,27 @@ var THREADS = [
   ['mckinsey', 'cib'], ['carney_mckinsey', 'cib'],
   // Cross-network: ethics
   ['pmo_snc', 'we'], ['agakhan_ethics', 'pmo_snc'],
+  // CFNIS / Covey
+  ['covey', 'cfnis'], ['covey', 'perry'], ['cfnis', 'perry'], ['selhi', 'perry'],
+  ['bae', 'perry'], ['hedge', 'covey'], ['hedge', 'cfnis'], ['dwan', 'perry'],
+  ['bae', 'hedge'], ['selhi', 'dwan'],
+  // Winnipeg Lab / Foreign interference
+  ['qiu', 'cheng'], ['qiu', 'nml'], ['cheng', 'nml'], ['nml', 'csis_nml'],
+  ['chinese_police', 'nsicop'], ['nsicop', 'foreign_registry'],
+  ['csis_nml', 'nsicop'],
+  // Cross: foreign interference ↔ CFNIS (Perry reported this)
+  ['perry', 'nml'], ['cfnis', 'csis_nml'],
+  // Charbonneau
+  ['charbonneau', 'vaillancourt'], ['charbonneau', 'montreal_mafia'],
+  ['vaillancourt', 'montreal_mafia'],
+  // Cross: SNC was in the construction cartel world
+  ['snc', 'montreal_mafia'], ['snc', 'charbonneau'],
+  // MAID
+  ['maid', 'bill_c7'], ['maid', 'maid_veterans'], ['bill_c7', 'maid_veterans'],
+  // Housing / Immigration
+  ['housing', 'tfw'], ['housing', 'ircc'], ['tfw', 'ircc'],
+  // Cross: MAID ↔ housing (people choosing death over poverty)
+  ['maid', 'housing'],
 ];
 
 // ── Render ──
