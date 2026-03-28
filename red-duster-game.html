@@ -869,10 +869,104 @@ const dustMat = new THREE.PointsMaterial({ color: 0x998877, size: 0.03, transpar
 const dustParticles = new THREE.Points(dustGeo, dustMat);
 scene.add(dustParticles);
 
+// ── Procedural Weapon Textures ──
+function makeGripTexture() {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillStyle = '#252525';
+  for (let y = 0; y < 64; y += 4) {
+    for (let x = 0; x < 64; x += 4) {
+      if ((x + y) % 8 === 0) ctx.fillRect(x, y, 3, 3);
+    }
+  }
+  ctx.strokeStyle = '#0a0a0a';
+  ctx.lineWidth = 1;
+  for (let y = 8; y < 64; y += 8) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(64, y); ctx.stroke();
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+function makeRailTexture() {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 32;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(0, 0, 128, 32);
+  ctx.fillStyle = '#1a1a1e';
+  for (let x = 2; x < 128; x += 6) {
+    ctx.fillRect(x, 4, 4, 24);
+  }
+  ctx.fillStyle = '#3a3a40';
+  for (let x = 2; x < 128; x += 6) {
+    ctx.fillRect(x, 4, 4, 2);
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+function makeMetalTexture() {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1e1e22';
+  ctx.fillRect(0, 0, 64, 64);
+  for (let y = 0; y < 64; y++) {
+    const brightness = 28 + Math.random() * 8;
+    ctx.fillStyle = `rgb(${brightness},${brightness},${brightness+2})`;
+    ctx.fillRect(0, y, 64, 1);
+  }
+  ctx.strokeStyle = 'rgba(60,60,65,0.4)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 5; i++) {
+    ctx.beginPath();
+    ctx.moveTo(Math.random()*64, Math.random()*64);
+    ctx.lineTo(Math.random()*64, Math.random()*64);
+    ctx.stroke();
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+function makeWoodTexture() {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#5a3a1a';
+  ctx.fillRect(0, 0, 64, 64);
+  for (let y = 0; y < 64; y++) {
+    const wave = Math.sin(y * 0.3) * 3;
+    const brightness = 80 + Math.sin(y * 0.15 + wave) * 20;
+    ctx.fillStyle = `rgb(${brightness}, ${brightness*0.6|0}, ${brightness*0.3|0})`;
+    ctx.fillRect(0, y, 64, 1);
+  }
+  ctx.fillStyle = 'rgba(60,30,10,0.4)';
+  ctx.beginPath(); ctx.arc(20, 30, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(48, 50, 3, 0, Math.PI*2); ctx.fill();
+  return new THREE.CanvasTexture(c);
+}
+
+const gripTex = makeGripTexture();
+gripTex.wrapS = gripTex.wrapT = THREE.RepeatWrapping;
+gripTex.repeat.set(2, 3);
+
+const railTex = makeRailTexture();
+railTex.wrapS = railTex.wrapT = THREE.RepeatWrapping;
+railTex.repeat.set(4, 1);
+
+const metalTex = makeMetalTexture();
+metalTex.wrapS = metalTex.wrapT = THREE.RepeatWrapping;
+metalTex.repeat.set(2, 2);
+
+const woodGrainTex = makeWoodTexture();
+woodGrainTex.wrapS = woodGrainTex.wrapT = THREE.RepeatWrapping;
+woodGrainTex.repeat.set(1, 2);
+
 // ── Weapon Materials (shared, created once) ──
 const gunMetalMat = new THREE.MeshPhysicalMaterial({
   color: 0x1a1a1e, metalness: 0.95, roughness: 0.15,
-  clearcoat: 0.3, clearcoatRoughness: 0.4
+  clearcoat: 0.3, clearcoatRoughness: 0.4, map: metalTex
 });
 const gunMetalLightMat = new THREE.MeshPhysicalMaterial({
   color: 0x2a2a30, metalness: 0.9, roughness: 0.2,
@@ -880,10 +974,10 @@ const gunMetalLightMat = new THREE.MeshPhysicalMaterial({
 });
 const polymerMat = new THREE.MeshPhysicalMaterial({
   color: 0x1a1a1a, metalness: 0.0, roughness: 0.4,
-  clearcoat: 0.1
+  clearcoat: 0.1, map: gripTex
 });
 const woodMat = new THREE.MeshPhysicalMaterial({
-  color: 0x5a3a1a, metalness: 0.0, roughness: 0.65
+  color: 0x5a3a1a, metalness: 0.0, roughness: 0.65, map: woodGrainTex
 });
 const darkWoodMat = new THREE.MeshPhysicalMaterial({
   color: 0x3a2510, metalness: 0.0, roughness: 0.7
@@ -893,7 +987,7 @@ const rubberMat = new THREE.MeshStandardMaterial({
 });
 const railMat = new THREE.MeshPhysicalMaterial({
   color: 0x333338, metalness: 0.92, roughness: 0.18,
-  clearcoat: 0.15
+  clearcoat: 0.15, map: railTex
 });
 const redDotMat = new THREE.MeshBasicMaterial({
   color: 0xff0000, transparent: true, opacity: 0.8
@@ -1766,6 +1860,47 @@ const eEyeW = new THREE.MeshBasicMaterial({ color: 0xeeeeee });
 const eEyeB = new THREE.MeshBasicMaterial({ color: 0x111111 });
 const eEyeR = new THREE.MeshBasicMaterial({ color: 0xff2200, emissive: 0xff0000, emissiveIntensity: 0.6 });
 
+function makeEnemyFaceTexture(type) {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  // Skin base
+  ctx.fillStyle = type === 'heavy' ? '#8a6a4a' : '#c4956a';
+  ctx.fillRect(0, 0, 64, 64);
+  // Eyes
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(16, 20, 12, 8);
+  ctx.fillRect(36, 20, 12, 8);
+  // Pupils
+  ctx.fillStyle = type === 'heavy' ? '#cc0000' : '#222';
+  ctx.fillRect(20, 22, 6, 6);
+  ctx.fillRect(40, 22, 6, 6);
+  // Mouth
+  ctx.fillStyle = '#4a2a1a';
+  ctx.fillRect(22, 44, 20, 4);
+  // Nose shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(28, 30, 8, 10);
+  // Eyebrows (angry for heavy, neutral for others)
+  ctx.fillStyle = '#333';
+  ctx.lineWidth = 2;
+  if (type === 'heavy') {
+    ctx.beginPath(); ctx.moveTo(14, 18); ctx.lineTo(28, 15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(50, 18); ctx.lineTo(36, 15); ctx.stroke();
+  } else {
+    ctx.fillRect(16, 16, 12, 3);
+    ctx.fillRect(36, 16, 12, 3);
+  }
+  // Stubble for ranger
+  if (type === 'ranger') {
+    ctx.fillStyle = 'rgba(60,40,20,0.3)';
+    for (let i = 0; i < 30; i++) {
+      ctx.fillRect(18 + Math.random()*28, 38 + Math.random()*18, 1, 1);
+    }
+  }
+  return new THREE.CanvasTexture(c);
+}
+
 function buildSoldier(type) {
   const g = new THREE.Group();
   const s = type === 'heavy' ? 1.2 : type === 'ranger' ? 0.9 : 1.0;
@@ -1823,10 +1958,7 @@ function buildSoldier(type) {
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.07*s, 0.08*s, 0.1, 8), eSkinMat);
   neck.position.set(0, 1.33*s, 0); g.add(neck);
   // Head
-  const headTexLoader = new THREE.TextureLoader();
-  const commieFaceTex = headTexLoader.load('img/red-duster/rd_enemy_commie_2.png');
-  const cfnisFaceTex = headTexLoader.load('img/red-duster/rd_enemy_cfnis_2.png');
-  const faceMap = type === 'heavy' ? cfnisFaceTex : commieFaceTex;
+  const faceMap = makeEnemyFaceTexture(type);
   const faceMat = new THREE.MeshStandardMaterial({ map: faceMap, roughness: 0.6 });
   const headMats = [eSkinMat, eSkinMat, eSkinMat, eSkinMat, faceMat, eSkinMat];
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.22*s, 0.24*s, 0.22*s), headMats);
