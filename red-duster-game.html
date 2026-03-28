@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Red Duster: Frontline v3.1 — TENET5 Studios</title>
+<title>Red Duster: Frontline v3.2 — TENET5 Studios</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #fff; }
@@ -156,7 +156,7 @@ canvas#gameCanvas { display: block; }
   <div class="info">
     Defend the town of Maplewood against waves of hostile forces.<br>
     A fictional scenario in a hypothetical conflict zone.<br>
-    <span style="color:#ff6633">TENET5 Studios — Three.js WebGL Engine v3.1</span>
+    <span style="color:#ff6633">TENET5 Studios — Three.js WebGL Engine v3.2</span>
   </div>
   <button id="startBtn">DEPLOY</button>
   <div class="controls">
@@ -225,27 +225,43 @@ function playSound(type) {
   const now = audioCtx.currentTime;
   
   if (type === 'shoot') {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.frequency.value = 80;
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-    osc.start(now);
-    osc.stop(now + 0.08);
-    
+    // Punchy layered gunshot
     const noise = audioCtx.createBufferSource();
-    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.05, audioCtx.sampleRate);
+    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.15, audioCtx.sampleRate);
     const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < data.length; i++) {
+      const t = i / audioCtx.sampleRate;
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 30) * 0.6;
+    }
     noise.buffer = buffer;
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 3000;
+    lp.frequency.setValueAtTime(3000, now);
+    lp.frequency.exponentialRampToValueAtTime(300, now + 0.12);
     const noiseGain = audioCtx.createGain();
-    noise.connect(noiseGain);
-    noiseGain.connect(audioCtx.destination);
-    noiseGain.gain.setValueAtTime(0.08, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+    noise.connect(lp); lp.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+    noiseGain.gain.setValueAtTime(0.35, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
     noise.start(now);
+    // Low thump
+    const thump = audioCtx.createOscillator();
+    const thumpGain = audioCtx.createGain();
+    thump.connect(thumpGain); thumpGain.connect(audioCtx.destination);
+    thump.frequency.setValueAtTime(150, now);
+    thump.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+    thumpGain.gain.setValueAtTime(0.25, now);
+    thumpGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    thump.start(now); thump.stop(now + 0.08);
+    // Crack (high transient)
+    const crack = audioCtx.createOscillator();
+    const crackGain = audioCtx.createGain();
+    crack.connect(crackGain); crackGain.connect(audioCtx.destination);
+    crack.type = 'square';
+    crack.frequency.setValueAtTime(2000, now);
+    crack.frequency.exponentialRampToValueAtTime(200, now + 0.02);
+    crackGain.gain.setValueAtTime(0.15, now);
+    crackGain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
+    crack.start(now); crack.stop(now + 0.03);
   } else if (type === 'reload') {
     for (let i = 0; i < 3; i++) {
       const osc = audioCtx.createOscillator();
@@ -301,28 +317,41 @@ function playSound(type) {
     osc.start(now);
     osc.stop(now + 0.1);
   } else if (type === 'explosion') {
+    // Massive explosion with bass rumble
     const noise = audioCtx.createBufferSource();
-    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.6, audioCtx.sampleRate);
+    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 1.0, audioCtx.sampleRate);
     const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < data.length; i++) {
+      const t = i / audioCtx.sampleRate;
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 4) * 0.8;
+    }
     noise.buffer = buffer;
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 800;
     const noiseGain = audioCtx.createGain();
-    noise.connect(noiseGain);
-    noiseGain.connect(audioCtx.destination);
-    noiseGain.gain.setValueAtTime(0.3, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+    noise.connect(lp); lp.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+    noiseGain.gain.setValueAtTime(0.5, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
     noise.start(now);
-    
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.frequency.setValueAtTime(120, now);
-    osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
-    gain.gain.setValueAtTime(0.25, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-    osc.start(now);
-    osc.stop(now + 0.4);
+    // Sub bass rumble
+    const sub = audioCtx.createOscillator();
+    const subGain = audioCtx.createGain();
+    sub.connect(subGain); subGain.connect(audioCtx.destination);
+    sub.frequency.setValueAtTime(60, now);
+    sub.frequency.exponentialRampToValueAtTime(20, now + 0.6);
+    subGain.gain.setValueAtTime(0.4, now);
+    subGain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+    sub.start(now); sub.stop(now + 0.6);
+    // Impact crack
+    const crack = audioCtx.createOscillator();
+    const crackGain = audioCtx.createGain();
+    crack.connect(crackGain); crackGain.connect(audioCtx.destination);
+    crack.type = 'sawtooth';
+    crack.frequency.setValueAtTime(400, now);
+    crack.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+    crackGain.gain.setValueAtTime(0.3, now);
+    crackGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+    crack.start(now); crack.stop(now + 0.3);
   } else if (type === 'pickup') {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -403,7 +432,8 @@ const STATE = {
   footstepTimer: 0,
   sprint: 100, maxSprint: 100, sprinting: false,
   corpses: [], bloodDecals: [],
-  captureZones: [], damageIndicators: []
+  captureZones: [], damageIndicators: [],
+  screenShake: 0, shakeIntensity: 0
 };
 
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
@@ -462,13 +492,13 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.8;
+renderer.toneMappingExposure = 1.1;
 if (!document.getElementById('gameCanvas')) document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 const skyGradient = new THREE.Color(0x0a0a22);
 scene.background = skyGradient;
-scene.fog = new THREE.FogExp2(0x0a0a12, 0.035);
+scene.fog = new THREE.FogExp2(0x0a0a12, 0.025);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 const yawObj = new THREE.Object3D();
@@ -632,12 +662,13 @@ floor.position.set(MAP_W/2, 0, MAP_H/2);
 floor.receiveShadow = true;
 scene.add(floor);
 
-const ceilGeo = new THREE.PlaneGeometry(MAP_W, MAP_H);
-const ceilMat = new THREE.MeshStandardMaterial({ map: ceilTex, roughness: 0.9, metalness: 0.1, side: THREE.DoubleSide });
-const ceil = new THREE.Mesh(ceilGeo, ceilMat);
-ceil.rotation.x = Math.PI / 2;
-ceil.position.set(MAP_W/2, 3, MAP_H/2);
-scene.add(ceil);
+// Ceiling removed for open sky war zone feel
+// const ceilGeo = new THREE.PlaneGeometry(MAP_W, MAP_H);
+// const ceilMat = new THREE.MeshStandardMaterial({ map: ceilTex, roughness: 0.9, metalness: 0.1, side: THREE.DoubleSide });
+// const ceil = new THREE.Mesh(ceilGeo, ceilMat);
+// ceil.rotation.x = Math.PI / 2;
+// ceil.position.set(MAP_W/2, 3, MAP_H/2);
+// scene.add(ceil);
 
 const wallMat = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.8, metalness: 0.2 });
 const pillarMat = new THREE.MeshStandardMaterial({ map: pillarTex, roughness: 0.7, metalness: 0.3 });
@@ -688,10 +719,10 @@ for (let y = 0; y < MAP_H; y++) {
 }
 
 // ── Lighting ──
-const ambientLight = new THREE.AmbientLight(0x334466, 0.4);
+const ambientLight = new THREE.AmbientLight(0x334466, 0.6);
 scene.add(ambientLight);
 
-const moonLight = new THREE.DirectionalLight(0xaabbee, 0.6);
+const moonLight = new THREE.DirectionalLight(0xccddff, 0.9);
 moonLight.position.set(20, 30, 15);
 moonLight.castShadow = true;
 moonLight.shadow.camera.left = -20;
@@ -702,9 +733,12 @@ moonLight.shadow.mapSize.width = 2048;
 moonLight.shadow.mapSize.height = 2048;
 scene.add(moonLight);
 
-const fillLight = new THREE.DirectionalLight(0xff6633, 0.15);
+const fillLight = new THREE.DirectionalLight(0xff5522, 0.35);
 fillLight.position.set(-10, 10, -10);
 scene.add(fillLight);
+
+const hemiLight = new THREE.HemisphereLight(0x6688cc, 0x443322, 0.3);
+scene.add(hemiLight);
 
 // ── Barrel Point Lights (atmospheric glow) ──
 const barrelLights = [];
@@ -736,22 +770,114 @@ zoneConfigs.forEach(cfg => {
   });
 });
 
+// ── Ambient Dust Particles ──
+const dustCount = 300;
+const dustGeo = new THREE.BufferGeometry();
+const dustPositions = new Float32Array(dustCount * 3);
+const dustVelocities = [];
+for (let i = 0; i < dustCount; i++) {
+  dustPositions[i*3] = Math.random() * MAP_W;
+  dustPositions[i*3+1] = Math.random() * 2.5;
+  dustPositions[i*3+2] = Math.random() * MAP_H;
+  dustVelocities.push({ vx: (Math.random()-0.5)*0.3, vy: Math.random()*0.1, vz: (Math.random()-0.5)*0.3 });
+}
+dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPositions, 3));
+const dustMat = new THREE.PointsMaterial({ color: 0x998877, size: 0.03, transparent: true, opacity: 0.4, depthWrite: false });
+const dustParticles = new THREE.Points(dustGeo, dustMat);
+scene.add(dustParticles);
+
 // ── Weapon Viewmodel ──
-const weaponGeo = new THREE.BoxGeometry(0.08, 0.08, 0.4);
-const weaponMat = new THREE.MeshStandardMaterial({ color: WEAPONS[STATE.weapon].color, roughness: 0.4, metalness: 0.6 });
-const weapon = new THREE.Mesh(weaponGeo, weaponMat);
-weapon.position.set(0.15, -0.12, -0.3);
+function buildWeaponModel(type) {
+  const g = new THREE.Group();
+  if (type === 'rifle') {
+    // Receiver body
+    const recv = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.35), new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.3 }));
+    recv.position.z = -0.05; g.add(recv);
+    // Barrel
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.015, 0.35, 8), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9, roughness: 0.2 }));
+    barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.02, -0.38); g.add(barrel);
+    // Barrel shroud / handguard
+    const shroud = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.2), new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.6, roughness: 0.4 }));
+    shroud.position.set(0, 0.01, -0.25); g.add(shroud);
+    // Magazine
+    const mag = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.12, 0.06), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.7, roughness: 0.3 }));
+    mag.position.set(0, -0.09, -0.05); mag.rotation.x = 0.1; g.add(mag);
+    // Stock
+    const stock = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 0.18), new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7 }));
+    stock.position.set(0, -0.01, 0.18); g.add(stock);
+    // Stock butt
+    const butt = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.08, 0.03), new THREE.MeshStandardMaterial({ color: 0x2a1a0a, roughness: 0.8 }));
+    butt.position.set(0, -0.02, 0.27); g.add(butt);
+    // Grip
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.07, 0.03), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6 }));
+    grip.position.set(0, -0.07, 0.05); grip.rotation.x = 0.3; g.add(grip);
+    // Sight rail
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.015, 0.12), new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9 }));
+    rail.position.set(0, 0.05, -0.08); g.add(rail);
+    // Front sight post
+    const fsight = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.02, 0.008), new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.9 }));
+    fsight.position.set(0, 0.065, -0.3); g.add(fsight);
+    // Red dot on front sight
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.003, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+    dot.position.set(0, 0.075, -0.3); g.add(dot);
+  } else if (type === 'shotgun') {
+    // Long barrel
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.02, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.85, roughness: 0.2 }));
+    barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.02, -0.3); g.add(barrel);
+    // Second barrel (double barrel)
+    const barrel2 = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.02, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.85, roughness: 0.2 }));
+    barrel2.rotation.x = Math.PI/2; barrel2.position.set(0.03, 0.02, -0.3); g.add(barrel2);
+    // Receiver
+    const recv = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.06, 0.15), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7, roughness: 0.3 }));
+    recv.position.set(0.015, 0, -0.02); g.add(recv);
+    // Forend (wood)
+    const forend = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.05, 0.18), new THREE.MeshStandardMaterial({ color: 0x5a3a1a, roughness: 0.7 }));
+    forend.position.set(0.015, -0.01, -0.18); g.add(forend);
+    // Stock
+    const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.22), new THREE.MeshStandardMaterial({ color: 0x5a3a1a, roughness: 0.7 }));
+    stock.position.set(0.015, -0.02, 0.18); g.add(stock);
+    // Grip area
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.06, 0.04), new THREE.MeshStandardMaterial({ color: 0x4a2a0a, roughness: 0.6 }));
+    grip.position.set(0.015, -0.06, 0.04); grip.rotation.x = 0.25; g.add(grip);
+  } else { // pistol
+    // Slide
+    const slide = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.04, 0.18), new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.85, roughness: 0.2 }));
+    slide.position.set(0, 0.02, -0.03); g.add(slide);
+    // Barrel
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.01, 0.08, 8), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9 }));
+    barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.02, -0.15); g.add(barrel);
+    // Frame
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.035, 0.12), new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.7, roughness: 0.3 }));
+    frame.position.set(0, -0.005, -0.01); g.add(frame);
+    // Grip
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.08, 0.04), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 }));
+    grip.position.set(0, -0.05, 0.03); grip.rotation.x = 0.2; g.add(grip);
+    // Trigger guard
+    const tguard = new THREE.Mesh(new THREE.TorusGeometry(0.015, 0.003, 4, 8, Math.PI), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 }));
+    tguard.position.set(0, -0.025, -0.01); tguard.rotation.y = Math.PI/2; g.add(tguard);
+    // Front sight
+    const fsight = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.012, 0.006), new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9 }));
+    fsight.position.set(0, 0.045, -0.1); g.add(fsight);
+  }
+  return g;
+}
+
+let weapon = buildWeaponModel('rifle');
+weapon.position.set(0.18, -0.14, -0.3);
 camera.add(weapon);
 
 function updateWeaponVisuals() {
-  weapon.material.color.setHex(WEAPONS[STATE.weapon].color);
-  if (STATE.weapon === 'shotgun') {
-    weapon.scale.set(1.3, 1, 1.5);
-  } else if (STATE.weapon === 'pistol') {
-    weapon.scale.set(0.7, 0.8, 1);
-  } else {
-    weapon.scale.set(1, 1, 1);
-  }
+  camera.remove(weapon);
+  weapon = buildWeaponModel(STATE.weapon);
+  weapon.position.set(
+    STATE.weapon === 'pistol' ? 0.14 : 0.18,
+    STATE.weapon === 'pistol' ? -0.16 : -0.14,
+    -0.3
+  );
+  camera.add(weapon);
+  // Re-attach ammo sprite
+  ammoSprite.position.set(0, 0.06, -0.1);
+  weapon.add(ammoSprite);
 }
 
 // ── Weapon Ammo Counter Sprite ──
@@ -776,6 +902,23 @@ function updateAmmoSprite() {
   ammoCanvasCtx.shadowBlur = 0;
   ammoTex.needsUpdate = true;
 }
+
+// ── Muzzle Flash ──
+const flashGeo = new THREE.PlaneGeometry(0.15, 0.15);
+const flashMat = new THREE.MeshBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+const muzzleFlash = new THREE.Mesh(flashGeo, flashMat);
+muzzleFlash.position.set(0, 0.02, -0.55);
+muzzleFlash.rotation.z = Math.random() * Math.PI;
+camera.add(muzzleFlash);
+
+const flashGeo2 = new THREE.PlaneGeometry(0.1, 0.1);
+const flashMat2 = new THREE.MeshBasicMaterial({ color: 0xffffcc, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+const muzzleFlash2 = new THREE.Mesh(flashGeo2, flashMat2);
+muzzleFlash2.position.set(0, 0.02, -0.55);
+muzzleFlash2.rotation.y = Math.PI/2;
+camera.add(muzzleFlash2);
+
+let flashTimer = 0;
 
 // ── Enemy System — 3D CADPAT Soldiers ──
 const cadpatTex = makeTexture(64, 64, (ctx, w, h) => {
@@ -1327,6 +1470,8 @@ function updateGrenades(dt) {
 
 function explodeGrenade(x, y, z) {
   playSound('explosion');
+  STATE.screenShake = 0.3;
+  STATE.shakeIntensity = 0.08;
   
   for (let i = 0; i < 20; i++) {
     addParticle(x, y, z, 0xff6600);
@@ -1362,6 +1507,8 @@ function explodeBarrel(barrel) {
   const z = barrel.userData.z;
   
   playSound('explosion');
+  STATE.screenShake = 0.3;
+  STATE.shakeIntensity = 0.08;
   
   for (let i = 0; i < 15; i++) {
     addParticle(x, 0.5, z, 0xff3300);
@@ -1474,7 +1621,15 @@ function updatePlayer(dt) {
       STATE.footstepTimer = 0;
     }
     
-    weapon.position.y = -0.12 + Math.abs(Math.sin(performance.now() * 0.01)) * 0.02;
+    // Head bob
+    const bobFreq = STATE.sprinting ? 14 : 10;
+    const bobAmt = STATE.sprinting ? 0.04 : 0.025;
+    const bobTime = performance.now() * 0.001 * bobFreq;
+    yawObj.position.y = STATE.playerHeight + Math.sin(bobTime) * bobAmt;
+    // Weapon sway
+    weapon.position.y = -0.14 + Math.sin(bobTime) * 0.012;
+    weapon.position.x = (STATE.weapon === 'pistol' ? 0.14 : 0.18) + Math.cos(bobTime * 0.5) * 0.006;
+    weapon.rotation.z = Math.sin(bobTime * 0.5) * 0.015;
 
     const len = Math.sqrt(vx*vx + vz*vz);
     vx = (vx / len) * speed * dt;
@@ -1511,13 +1666,28 @@ function shoot() {
   STATE.shootCooldown = w.fireRate;
   playSound('shoot');
   
-  weapon.position.z = -0.20;
-  weapon.position.y = -0.10;
+  // Muzzle flash
+  flashTimer = 0.05;
+  muzzleFlash.material.opacity = 1;
+  muzzleFlash.rotation.z = Math.random() * Math.PI;
+  muzzleFlash.scale.setScalar(STATE.weapon === 'shotgun' ? 1.8 : STATE.weapon === 'pistol' ? 0.7 : 1.0);
+  muzzleFlash2.material.opacity = 0.8;
+  muzzleFlash2.rotation.z = Math.random() * Math.PI;
+  muzzleFlash2.scale.setScalar(STATE.weapon === 'shotgun' ? 1.8 : STATE.weapon === 'pistol' ? 0.7 : 1.0);
+  
+  const recoilZ = STATE.weapon === 'shotgun' ? -0.12 : STATE.weapon === 'pistol' ? -0.22 : -0.18;
+  const recoilY = STATE.weapon === 'shotgun' ? -0.08 : -0.10;
+  const recoilRot = STATE.weapon === 'shotgun' ? -0.15 : STATE.weapon === 'pistol' ? -0.08 : -0.1;
+  weapon.position.z = recoilZ;
+  weapon.position.y = recoilY;
+  weapon.rotation.x = recoilRot;
   document.getElementById('dmgFlash').style.background = 'radial-gradient(ellipse, transparent 40%, rgba(255,200,0,0.3))';
   document.getElementById('dmgFlash').style.opacity = '1';
   setTimeout(() => { 
       weapon.position.z = -0.3; 
-      weapon.position.y = -0.12; 
+      weapon.position.y = -0.14;
+      weapon.rotation.x = 0;
+      document.getElementById('dmgFlash').style.opacity = '0';
       document.getElementById('dmgFlash').style.opacity = '0';
       setTimeout(() => document.getElementById('dmgFlash').style.background = 'radial-gradient(ellipse, transparent 50%, rgba(255,0,0,0.4))', 100);
   }, 50);
@@ -1613,6 +1783,8 @@ function callAirstrike() {
   
   setTimeout(() => {
     playSound('explosion');
+    STATE.screenShake = 0.5;
+    STATE.shakeIntensity = 0.12;
     for (let i = STATE.enemies.length - 1; i >= 0; i--) {
       const e = STATE.enemies[i];
       const dist = distXZ(e.x, e.z, yawObj.position.x, yawObj.position.z);
@@ -1921,6 +2093,15 @@ function animate() {
     updateCorpses(dt);
     updateCaptureZones(dt);
     
+    // Muzzle flash fade
+    if (flashTimer > 0) {
+      flashTimer -= dt;
+      if (flashTimer <= 0) {
+        muzzleFlash.material.opacity = 0;
+        muzzleFlash2.material.opacity = 0;
+      }
+    }
+    
     // Sprint bar HUD
     const sprintPct = (STATE.sprint / STATE.maxSprint) * 100;
     document.getElementById('sprintFill').style.width = sprintPct + '%';
@@ -1990,6 +2171,30 @@ function animate() {
       drawMinimap();
     }
   }
+  
+  // Screen shake
+  if (STATE.screenShake > 0) {
+    STATE.screenShake -= dt;
+    const s = STATE.shakeIntensity * (STATE.screenShake / 0.3);
+    camera.position.x = (Math.random() - 0.5) * s;
+    camera.position.y = (Math.random() - 0.5) * s;
+  } else {
+    camera.position.x = 0;
+    camera.position.y = 0;
+  }
+  
+  // Ambient dust
+  const dpos = dustGeo.attributes.position.array;
+  for (let i = 0; i < dustCount; i++) {
+    const v = dustVelocities[i];
+    dpos[i*3] += v.vx * dt;
+    dpos[i*3+1] += v.vy * dt;
+    dpos[i*3+2] += v.vz * dt;
+    if (dpos[i*3+1] > 2.8) { dpos[i*3+1] = 0; v.vy = Math.random()*0.1; }
+    if (dpos[i*3] < 0 || dpos[i*3] > MAP_W) dpos[i*3] = Math.random() * MAP_W;
+    if (dpos[i*3+2] < 0 || dpos[i*3+2] > MAP_H) dpos[i*3+2] = Math.random() * MAP_H;
+  }
+  dustGeo.attributes.position.needsUpdate = true;
   
   // Barrel light flicker (always active for atmosphere)
   barrelLights.forEach(l => {
