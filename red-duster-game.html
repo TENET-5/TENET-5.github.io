@@ -703,34 +703,149 @@ function updateWeaponVisuals() {
   }
 }
 
-// ── Enemy System ──
+// ── Enemy System — 3D CADPAT Soldiers ──
+const cadpatTex = makeTexture(64, 64, (ctx, w, h) => {
+  ctx.fillStyle = '#4B5320';
+  ctx.fillRect(0, 0, w, h);
+  const cols = ['#2D3319','#3B4024','#5C6A2E','#6B7339','#3F4A1F','#222D13'];
+  for (let i = 0; i < 120; i++) {
+    ctx.fillStyle = cols[Math.floor(Math.random() * cols.length)];
+    ctx.fillRect(Math.random()*w, Math.random()*h, 3+Math.random()*8, 2+Math.random()*6);
+  }
+});
+const cadpatDarkTex = makeTexture(64, 64, (ctx, w, h) => {
+  ctx.fillStyle = '#3A2020';
+  ctx.fillRect(0, 0, w, h);
+  const cols = ['#2A1515','#4A2828','#5A3030','#301A1A','#200E0E'];
+  for (let i = 0; i < 120; i++) {
+    ctx.fillStyle = cols[Math.floor(Math.random() * cols.length)];
+    ctx.fillRect(Math.random()*w, Math.random()*h, 3+Math.random()*8, 2+Math.random()*6);
+  }
+});
+const rangerCamoTex = makeTexture(64, 64, (ctx, w, h) => {
+  ctx.fillStyle = '#5A5040';
+  ctx.fillRect(0, 0, w, h);
+  const cols = ['#4A4030','#6A5A48','#7A6A55','#3A3020','#5A4A38'];
+  for (let i = 0; i < 120; i++) {
+    ctx.fillStyle = cols[Math.floor(Math.random() * cols.length)];
+    ctx.fillRect(Math.random()*w, Math.random()*h, 3+Math.random()*8, 2+Math.random()*6);
+  }
+});
+const eSkinTex = makeTexture(32, 32, (ctx, w, h) => {
+  ctx.fillStyle = '#C4956A';
+  ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < 30; i++) {
+    const r = 140 + Math.random()*40 | 0, g = 120 + Math.random()*30 | 0, b = 80 + Math.random()*30 | 0;
+    ctx.fillStyle = 'rgba('+r+','+g+','+b+',0.3)';
+    ctx.fillRect(Math.random()*w, Math.random()*h, 3, 3);
+  }
+});
+const eSkinMat = new THREE.MeshStandardMaterial({ map: eSkinTex, roughness: 0.8 });
+const eBootMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+const eHelmetMat = new THREE.MeshStandardMaterial({ color: 0x3B4024, roughness: 0.6, metalness: 0.2 });
+const eVestMat = new THREE.MeshStandardMaterial({ color: 0x3a3a2a, roughness: 0.7, metalness: 0.1 });
+const eBeltMat = new THREE.MeshStandardMaterial({ color: 0x2a2a1a, roughness: 0.7 });
+const eEyeW = new THREE.MeshBasicMaterial({ color: 0xeeeeee });
+const eEyeB = new THREE.MeshBasicMaterial({ color: 0x111111 });
+const eEyeR = new THREE.MeshBasicMaterial({ color: 0xff2200, emissive: 0xff0000, emissiveIntensity: 0.6 });
+
+function buildSoldier(type) {
+  const g = new THREE.Group();
+  const s = type === 'heavy' ? 1.2 : type === 'ranger' ? 0.9 : 1.0;
+  const camoMat = new THREE.MeshStandardMaterial({
+    map: type === 'heavy' ? cadpatDarkTex : type === 'ranger' ? rangerCamoTex : cadpatTex,
+    roughness: 0.85
+  });
+  // Boots
+  [-0.12, 0.12].forEach(lx => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.16*s, 0.22, 0.22*s), eBootMat);
+    b.position.set(lx*s, 0.11, 0); b.castShadow = true; g.add(b);
+  });
+  // Legs (CADPAT pants)
+  [-0.12, 0.12].forEach(lx => {
+    const l = new THREE.Mesh(new THREE.BoxGeometry(0.16*s, 0.5*s, 0.18*s), camoMat);
+    l.position.set(lx*s, 0.47*s, 0); l.castShadow = true; g.add(l);
+  });
+  // Belt
+  const belt = new THREE.Mesh(new THREE.BoxGeometry(0.46*s, 0.06, 0.22*s), eBeltMat);
+  belt.position.set(0, 0.72*s, 0); g.add(belt);
+  // Torso (CADPAT jacket)
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.44*s, 0.55*s, 0.28*s), camoMat);
+  torso.position.set(0, 1.02*s, 0); torso.castShadow = true; g.add(torso);
+  // Tac vest (grunt + heavy)
+  if (type !== 'ranger') {
+    const vest = new THREE.Mesh(new THREE.BoxGeometry(0.48*s, 0.35*s, 0.32*s), eVestMat);
+    vest.position.set(0, 1.05*s, 0); g.add(vest);
+  }
+  // Epaulettes
+  [-0.28, 0.28].forEach(ex => {
+    const ep = new THREE.Mesh(new THREE.BoxGeometry(0.1*s, 0.05, 0.16*s), camoMat);
+    ep.position.set(ex*s, 1.28*s, 0); g.add(ep);
+  });
+  // Arms (CADPAT sleeves)
+  [-0.3, 0.3].forEach(ax => {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.13*s, 0.5*s, 0.13*s), camoMat);
+    arm.position.set(ax*s, 0.9*s, 0); arm.castShadow = true; g.add(arm);
+    const hand = new THREE.Mesh(new THREE.BoxGeometry(0.1*s, 0.12, 0.1*s), eSkinMat);
+    hand.position.set(ax*s, 0.6*s, 0); g.add(hand);
+  });
+  // Neck
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.07*s, 0.08*s, 0.1, 8), eSkinMat);
+  neck.position.set(0, 1.33*s, 0); g.add(neck);
+  // Head
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.22*s, 0.24*s, 0.22*s), eSkinMat);
+  head.position.set(0, 1.52*s, 0); head.castShadow = true; g.add(head);
+  // Eyes
+  [-0.055, 0.055].forEach(ex => {
+    const w = new THREE.Mesh(new THREE.SphereGeometry(0.025*s, 6, 4), eEyeW);
+    w.position.set(ex*s, 1.54*s, 0.11*s); g.add(w);
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.015*s, 4, 4), type === 'heavy' ? eEyeR : eEyeB);
+    p.position.set(ex*s, 1.54*s, 0.13*s); g.add(p);
+  });
+  // Helmet
+  const hel = new THREE.Mesh(new THREE.SphereGeometry(0.16*s, 10, 6, 0, Math.PI*2, 0, Math.PI*0.55), eHelmetMat);
+  hel.position.set(0, 1.62*s, 0); hel.castShadow = true; g.add(hel);
+  const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.17*s, 0.18*s, 0.03, 10), eHelmetMat);
+  brim.position.set(0, 1.55*s, 0); g.add(brim);
+  // Heavy: shoulder armor plates
+  if (type === 'heavy') {
+    [-0.32, 0.32].forEach(sx => {
+      const plate = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.18, 0.2), eVestMat);
+      plate.position.set(sx*s, 1.22*s, 0); g.add(plate);
+    });
+  }
+  // Ranger: carried rifle
+  if (type === 'ranger') {
+    const rifle = new THREE.Group();
+    const rb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.5),
+      new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8 }));
+    const rs = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.12),
+      new THREE.MeshStandardMaterial({ color: 0x553311 }));
+    rs.position.z = 0.3; rifle.add(rb, rs);
+    rifle.position.set(0.25*s, 0.85*s, 0.15); rifle.rotation.x = -0.2;
+    g.add(rifle);
+  }
+  return g;
+}
+
 function spawnEnemy(type = 'grunt') {
-  const enemyData = {
-    grunt:    { color: 0xffffff, tex: 'img/red-duster/enemy_commie.png', scale: 1, hp: 100, speed: 2.5, damage: 15, score: 10, ranged: false },
-    heavy:    { color: 0xffaaaa, tex: 'img/red-duster/enemy_cfnis.png',  scale: 1.2, hp: 300, speed: 1.5, damage: 25, score: 30, ranged: false },
-    ranger:   { color: 0xcccccc, tex: 'img/red-duster/enemy_commie.png', scale: 0.85, hp: 80, speed: 2.2, damage: 10, score: 20, ranged: true, shootCooldown: 0 }
+  const stats = {
+    grunt:  { hp: 100, speed: 2.5, damage: 15, score: 10, ranged: false, scale: 1.0 },
+    heavy:  { hp: 300, speed: 1.5, damage: 25, score: 30, ranged: false, scale: 1.2 },
+    ranger: { hp: 80,  speed: 2.2, damage: 10, score: 20, ranged: true,  scale: 0.9 }
   };
-  const data = enemyData[type];
-  
-  const mapUrl = data.tex;
-  const texLoader = new THREE.TextureLoader();
-  const tex = texLoader.load(mapUrl);
-  const mat = new THREE.SpriteMaterial({ map: tex, color: data.color });
-  const mesh = new THREE.Sprite(mat);
-  mesh.scale.set(1.4 * data.scale, 2.5 * data.scale, 1);
-  
-  let spawnX, spawnZ;
+  const data = stats[type];
+  const mesh = buildSoldier(type);
+  let sx, sz;
   do {
-    spawnX = Math.random() * (MAP_W - 4) + 2;
-    spawnZ = Math.random() * (MAP_H - 4) + 2;
-  } while (isColliding(spawnX, spawnZ, 0.5) || distXZ(spawnX, spawnZ, yawObj.position.x, yawObj.position.z) < 8);
-  
-  mesh.position.set(spawnX, 1.2 * data.scale, spawnZ);
+    sx = Math.random() * (MAP_W - 4) + 2;
+    sz = Math.random() * (MAP_H - 4) + 2;
+  } while (isColliding(sx, sz, 0.5) || distXZ(sx, sz, yawObj.position.x, yawObj.position.z) < 8);
+  mesh.position.set(sx, 0, sz);
   scene.add(mesh);
-  
   STATE.enemies.push({
     mesh, type, hp: data.hp, maxHp: data.hp, speed: data.speed, damage: data.damage, score: data.score,
-    x: spawnX, z: spawnZ, baseScale: data.scale, ranged: data.ranged, shootCooldown: 0, dead: false, deathTime: 0
+    x: sx, z: sz, baseScale: data.scale, ranged: data.ranged, shootCooldown: 0, dead: false, deathTime: 0
   });
 }
 
@@ -738,15 +853,15 @@ function updateEnemies(dt) {
   const playerX = yawObj.position.x;
   const playerZ = yawObj.position.z;
   const now = performance.now();
-  
+
   for (let i = STATE.enemies.length - 1; i >= 0; i--) {
     const e = STATE.enemies[i];
-    
+
     if (e.dead) {
       e.deathTime -= dt;
-      e.mesh.position.y -= dt * 2.5; 
-      e.mesh.material.opacity = Math.max(0, e.deathTime);
-      e.mesh.scale.y = Math.max(0.1, e.mesh.scale.y - dt * 5);
+      // Collapse sideways and sink
+      e.mesh.rotation.z = Math.min(Math.PI / 2, e.mesh.rotation.z + dt * 4);
+      e.mesh.position.y = Math.max(-0.5, e.mesh.position.y - dt * 0.8);
       if (e.deathTime <= 0) {
         scene.remove(e.mesh);
         STATE.enemies.splice(i, 1);
@@ -756,8 +871,11 @@ function updateEnemies(dt) {
 
     const dx = playerX - e.x;
     const dz = playerZ - e.z;
-    const dist = Math.sqrt(dx*dx + dz*dz);
-    
+    const dist = Math.sqrt(dx * dx + dz * dz);
+
+    // Face the player
+    e.mesh.rotation.y = Math.atan2(dx, dz);
+
     if (e.ranged && dist > 3 && dist < 15) {
       e.shootCooldown -= dt;
       if (e.shootCooldown <= 0) {
@@ -765,7 +883,7 @@ function updateEnemies(dt) {
         e.shootCooldown = 2 + Math.random();
       }
     }
-    
+
     const stopDist = e.ranged ? 6 : 1.2;
     let isMoving = false;
     if (dist > stopDist) {
@@ -783,10 +901,13 @@ function updateEnemies(dt) {
     } else if (!e.ranged && dist < 1.5) {
       damagePlayer(e.damage * dt);
     }
-    
-    // Locomotion bobbing
-    const baseY = 1.2 * e.baseScale;
-    e.mesh.position.y = isMoving ? baseY + Math.abs(Math.sin(now * 0.01 * e.speed)) * 0.15 : baseY;
+
+    // Walk bob
+    if (isMoving) {
+      e.mesh.position.y = Math.sin(now * 0.008 * e.speed) * 0.06;
+    } else {
+      e.mesh.position.y = 0;
+    }
   }
 }
 
@@ -846,7 +967,16 @@ function killEnemy(enemy, headshot = false) {
   
   enemy.dead = true;
   enemy.deathTime = 1.0;
-  enemy.mesh.material.color.setHex(0xff0000);
+  
+  enemy.mesh.traverse(c => {
+    if (c.isMesh && c.material) {
+      if (Array.isArray(c.material)) {
+        c.material.forEach(m => { if (m.color) m.color.setHex(0xff0000); });
+      } else if (c.material.color) {
+        c.material.color.setHex(0xff0000);
+      }
+    }
+  });
   
   playSound('death');
   if (headshot) {
