@@ -986,10 +986,15 @@ function buildSoldier(type) {
     const b = new THREE.Mesh(new THREE.BoxGeometry(0.16*s, 0.22, 0.22*s), eBootMat);
     b.position.set(lx*s, 0.11, 0); b.castShadow = true; g.add(b);
   });
-  // Legs (CADPAT pants)
+  // Legs (CADPAT pants) PIVOT AT HIP
+  g.userData.limbs = g.userData.limbs || {};
   [-0.12, 0.12].forEach(lx => {
-    const l = new THREE.Mesh(new THREE.BoxGeometry(0.16*s, 0.5*s, 0.18*s), camoMat);
-    l.position.set(lx*s, 0.47*s, 0); l.castShadow = true; g.add(l);
+    const legGeo = new THREE.BoxGeometry(0.16*s, 0.5*s, 0.18*s);
+    legGeo.translate(0, -0.25*s, 0); 
+    const l = new THREE.Mesh(legGeo, camoMat);
+    l.position.set(lx*s, 0.72*s, 0); l.castShadow = true; 
+    l.name = lx < 0 ? 'lLeg' : 'rLeg'; g.userData.limbs[l.name] = l;
+    g.add(l);
   });
   // Belt
   const belt = new THREE.Mesh(new THREE.BoxGeometry(0.46*s, 0.06, 0.22*s), eBeltMat);
@@ -1007,19 +1012,34 @@ function buildSoldier(type) {
     const ep = new THREE.Mesh(new THREE.BoxGeometry(0.1*s, 0.05, 0.16*s), camoMat);
     ep.position.set(ex*s, 1.28*s, 0); g.add(ep);
   });
-  // Arms (CADPAT sleeves)
+  // Arms (CADPAT sleeves) PIVOT AT SHOULDER
+  g.userData.limbs = g.userData.limbs || {};
   [-0.3, 0.3].forEach(ax => {
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.13*s, 0.5*s, 0.13*s), camoMat);
-    arm.position.set(ax*s, 0.9*s, 0); arm.castShadow = true; g.add(arm);
+    const armGeo = new THREE.BoxGeometry(0.13*s, 0.5*s, 0.13*s);
+    armGeo.translate(0, -0.25*s, 0);
+    const arm = new THREE.Mesh(armGeo, camoMat);
+    arm.position.set(ax*s, 1.15*s, 0); arm.castShadow = true; 
+    arm.name = ax < 0 ? 'lArm' : 'rArm'; g.userData.limbs[arm.name] = arm;
+    g.add(arm);
+    
     const hand = new THREE.Mesh(new THREE.BoxGeometry(0.1*s, 0.12, 0.1*s), eSkinMat);
-    hand.position.set(ax*s, 0.6*s, 0); g.add(hand);
+    hand.position.set(0, -0.55*s, 0); 
+    hand.name = ax < 0 ? 'lHand' : 'rHand'; g.userData.limbs[hand.name] = hand;
+    arm.add(hand);
   });
   // Neck
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.07*s, 0.08*s, 0.1, 8), eSkinMat);
   neck.position.set(0, 1.33*s, 0); g.add(neck);
   // Head
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.22*s, 0.24*s, 0.22*s), eSkinMat);
+  const headTexLoader = new THREE.TextureLoader();
+  const commieFaceTex = headTexLoader.load('img/red-duster/rd_enemy_commie_2.png');
+  const cfnisFaceTex = headTexLoader.load('img/red-duster/rd_enemy_cfnis_2.png');
+  const faceMap = type === 'heavy' ? cfnisFaceTex : commieFaceTex;
+  const faceMat = new THREE.MeshStandardMaterial({ map: faceMap, roughness: 0.6 });
+  const headMats = [eSkinMat, eSkinMat, eSkinMat, eSkinMat, faceMat, eSkinMat];
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.22*s, 0.24*s, 0.22*s), headMats);
   head.position.set(0, 1.52*s, 0); head.castShadow = true; g.add(head);
+  g.userData.limbs = g.userData.limbs || {}; g.userData.limbs['head'] = head;
   // Eyes
   [-0.055, 0.055].forEach(ex => {
     const w = new THREE.Mesh(new THREE.SphereGeometry(0.025*s, 6, 4), eEyeW);
@@ -1047,8 +1067,8 @@ function buildSoldier(type) {
     const rs = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.12),
       new THREE.MeshStandardMaterial({ color: 0x553311 }));
     rs.position.z = 0.3; rifle.add(rb, rs);
-    rifle.position.set(0.25*s, 0.85*s, 0.15); rifle.rotation.x = -0.2;
-    g.add(rifle);
+    rifle.position.set(0.15*s, -0.3*s, 0.2*s); rifle.rotation.x = -1.5;
+    g.userData.limbs['rArm'].add(rifle);
   }
   return g;
 }
@@ -1248,11 +1268,28 @@ function updateEnemies(dt) {
       damagePlayer(e.damage * dt, e.x, e.z);
     }
 
-    // Walk bob
+    // Walk bob & 3D Limb Kinematics
     if (isMoving) {
-      e.mesh.position.y = Math.sin(now * 0.008 * e.speed) * 0.06;
+      const swing = Math.sin(now * 0.012 * e.speed);
+      e.mesh.position.y = Math.abs(swing) * 0.08;
+      const limbs = e.mesh.userData.limbs;
+      const armLerp = e.ranged && dist > 3 && dist < 15 ? 0.05 : 0.3;
+      if (limbs) {
+        if(limbs.lArm) limbs.lArm.rotation.x += (swing * 0.8 - limbs.lArm.rotation.x) * armLerp;
+        if(limbs.rArm) limbs.rArm.rotation.x += (-swing * 0.8 - limbs.rArm.rotation.x) * armLerp;
+        if(limbs.lLeg) limbs.lLeg.rotation.x = -swing * 0.6;
+        if(limbs.rLeg) limbs.rLeg.rotation.x = swing * 0.6;
+        if(limbs.head) limbs.head.rotation.y = Math.sin(now * 0.005 * e.speed) * 0.2;
+      }
     } else {
       e.mesh.position.y = Math.sin(now * 0.003) * 0.02; // Idle sway
+      const limbs = e.mesh.userData.limbs;
+      if (limbs) {
+        if(limbs.lArm) limbs.lArm.rotation.x *= 0.8;
+        if(limbs.rArm) limbs.rArm.rotation.x *= 0.8;
+        if(limbs.lLeg) limbs.lLeg.rotation.x *= 0.8;
+        if(limbs.rLeg) limbs.rLeg.rotation.x *= 0.8;
+      }
     }
   }
 }
