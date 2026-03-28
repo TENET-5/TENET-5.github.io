@@ -283,6 +283,115 @@ python tools/lirilclaw/lirilclaw.py --headless</div>
       </div>
     </section>
 
+    <!-- ══════ THE TREASON LEDGER ══════ -->
+    <section id="treason-ledger">
+      <h2><span class="section-num">THE LEDGER</span>Phase 34: Accountability Matrix</h2>
+      <p>The LIRIL Intelligence Orchestrator has cross-referenced the active terms of <strong>4,668</strong> historical Canadian Members of Parliament against three of the most devastating subversion events in Canadian history.</p>
+      
+      <p>Below is the immutable public record of the <strong>877 politicians</strong> who held office while these operations were executed against the Canadian people.</p>
+
+      <div class="ledger-container" id="roster-container">
+        <!-- JS injects the data here -->
+        <p style="text-align:center; padding: 2rem;">[ INTEGRATING LIRIL DATASTREAM... ]</p>
+      </div>
+
+      <style>
+        .ledger-container {
+          background: #0a0a0a;
+          border: 1px solid var(--border);
+          border-left: 3px solid var(--accent);
+          margin-top: 2rem;
+          padding: 1.5rem;
+          border-radius: 4px;
+          max-height: 600px;
+          overflow-y: auto;
+        }
+        .event-block {
+          margin-bottom: 2rem;
+        }
+        .event-title {
+          color: var(--accent);
+          font-family: 'JetBrains Mono', monospace;
+          border-bottom: 1px dashed var(--border);
+          padding-bottom: 0.5rem;
+          margin-bottom: 1rem;
+          font-size: 1.2rem;
+        }
+        .mp-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 0.5rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.85rem;
+          color: #d1d5db;
+        }
+        .mp-name {
+          background: #111;
+          padding: 0.4rem 0.8rem;
+          border: 1px solid #222;
+          border-radius: 2px;
+        }
+        .mp-name:hover {
+          background: #222;
+          border-color: var(--accent-light);
+          color: #fff;
+        }
+      </style>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          // Adjust root path for GitHub Pages handling
+          const jsonPath = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'data/treason_roster_matrix.json' 
+            : '/data/treason_roster_matrix.json';
+
+          fetch(jsonPath)
+            .then(res => res.json())
+            .then(data => {
+              const container = document.getElementById('roster-container');
+              container.innerHTML = ''; // clear loading text
+
+              const events = [
+                { key: 'Gouzenko_Defection', title: 'I. The Gouzenko Defection & Soviet Ring (1945)' },
+                { key: 'Project_Sidewinder', title: 'II. Project Sidewinder Suppression (1997)' },
+                { key: 'Emergencies_Act', title: 'III. The Emergencies Act Disarmament (2022)' }
+              ];
+
+              events.forEach(evt => {
+                const roster = data[evt.key];
+                if (!roster) return;
+
+                const block = document.createElement('div');
+                block.className = 'event-block';
+
+                const header = document.createElement('h3');
+                header.className = 'event-title';
+                header.innerHTML = `${evt.title} <span style="float:right; color:#888; font-size:0.9rem;">[${roster.length} Identified]</span>`;
+                block.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'mp-grid';
+
+                roster.sort().forEach(name => {
+                  const div = document.createElement('div');
+                  div.className = 'mp-name';
+                  div.textContent = name;
+                  grid.appendChild(div);
+                });
+
+                block.appendChild(grid);
+                container.appendChild(block);
+              });
+            })
+            .catch(err => {
+              const container = document.getElementById('roster-container');
+              container.innerHTML = '<p style="color:red;font-family:monospace;">[!] CRITICAL ERROR: Failed to interface with the LIRIL datastream. The state network may be throttling this connection.</p>';
+              console.error(err);
+            });
+        });
+      </script>
+    </section>
+
     <!-- ══════ DANIEL PERRY ══════ -->
     <section>
       <h2><span class="section-num">WHO I AM</span>Daniel Perry</h2>
