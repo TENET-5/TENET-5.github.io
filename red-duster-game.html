@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Red Duster: Frontline v3.3 — TENET5 Studios</title>
+<title>Red Duster: Frontline v3.4 — TENET5 Studios</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #fff; }
@@ -194,7 +194,7 @@ canvas#gameCanvas { display: block; }
   </div>
   <div class="controls">
     WASD — Move &nbsp;|&nbsp; MOUSE — Aim &nbsp;|&nbsp; CLICK — Fire &nbsp;|&nbsp; R — Reload<br>
-    F — Airstrike &nbsp;|&nbsp; G — Grenade &nbsp;|&nbsp; 1/2/3 — Weapons<br>
+    F — Airstrike &nbsp;|&nbsp; G — Grenade &nbsp;|&nbsp; 1-5 — Weapons<br>
     SPACE — Jump &nbsp;|&nbsp; SHIFT — Sprint &nbsp;|&nbsp; TAB — Map &nbsp;|&nbsp; ESC — Pause
   </div>
 </div>
@@ -446,7 +446,9 @@ function updateHeartbeat() {
 const WEAPONS = {
   rifle: { name: 'ASSAULT RIFLE', mag: 30, damage: 25, fireRate: 100, reloadTime: 1500, spread: 0.01, pellets: 1, color: 0x333333 },
   shotgun: { name: 'SHOTGUN', mag: 8, damage: 15, fireRate: 600, reloadTime: 2000, spread: 0.08, pellets: 6, color: 0x664422 },
-  pistol: { name: 'PISTOL', mag: 12, damage: 18, fireRate: 200, reloadTime: 1000, spread: 0.015, pellets: 1, color: 0x223344 }
+  pistol: { name: 'PISTOL', mag: 12, damage: 18, fireRate: 200, reloadTime: 1000, spread: 0.015, pellets: 1, color: 0x223344 },
+  sniper: { name: 'SNIPER RIFLE', mag: 5, damage: 150, fireRate: 1200, reloadTime: 2500, spread: 0.002, pellets: 1, color: 0x2a2a2a },
+  lmg: { name: 'LIGHT MG', mag: 100, damage: 18, fireRate: 70, reloadTime: 3500, spread: 0.025, pellets: 1, color: 0x444433 }
 };
 
 // ── Game State ──
@@ -472,7 +474,7 @@ const STATE = {
 };
 
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
-const MAP_W = 32, MAP_H = 32;
+const MAP_W = 48, MAP_H = 48;
 const MAP = generateMap();
 
 function generateMap() {
@@ -484,39 +486,79 @@ function generateMap() {
       else { m[y][x] = 0; }
     }
   }
-  // Inner walls — buildings
-  const buildings = [
-    {x:3,y:3,w:5,h:4}, {x:12,y:2,w:4,h:3}, {x:20,y:3,w:6,h:5},
-    {x:2,y:12,w:4,h:6}, {x:8,y:10,w:3,h:3}, {x:14,y:11,w:5,h:4},
-    {x:22,y:12,w:5,h:3}, {x:4,y:22,w:6,h:4}, {x:13,y:20,w:4,h:5},
-    {x:22,y:20,w:5,h:6}, {x:9,y:26,w:3,h:3}, {x:17,y:26,w:4,h:3},
-    {x:27,y:8,w:3,h:4}, {x:15,y:6,w:3,h:2}
+  // District: Town Center (NW quadrant) — dense buildings
+  const townBuildings = [
+    {x:3,y:3,w:5,h:4}, {x:10,y:2,w:4,h:3}, {x:16,y:3,w:6,h:5},
+    {x:3,y:9,w:4,h:5}, {x:9,y:10,w:3,h:3}, {x:14,y:10,w:5,h:4},
+    {x:3,y:16,w:5,h:4}, {x:10,y:16,w:4,h:3}, {x:16,y:15,w:3,h:5}
   ];
-  buildings.forEach(b => {
+  // District: Industrial Zone (NE quadrant) — large warehouses
+  const industrialBuildings = [
+    {x:26,y:2,w:8,h:5}, {x:36,y:2,w:6,h:4}, {x:26,y:9,w:6,h:6},
+    {x:34,y:8,w:8,h:4}, {x:26,y:17,w:5,h:4}, {x:33,y:15,w:7,h:6},
+    {x:42,y:8,w:4,h:6}
+  ];
+  // District: Residential (SW quadrant) — rows of houses
+  const residentialBuildings = [
+    {x:3,y:26,w:4,h:3}, {x:9,y:26,w:4,h:3}, {x:15,y:26,w:4,h:3},
+    {x:3,y:31,w:4,h:3}, {x:9,y:31,w:4,h:3}, {x:15,y:31,w:4,h:3},
+    {x:3,y:36,w:4,h:3}, {x:9,y:36,w:4,h:3}, {x:15,y:36,w:4,h:3},
+    {x:3,y:41,w:5,h:4}, {x:10,y:41,w:6,h:4}
+  ];
+  // District: Outpost (SE quadrant) — military compound
+  const outpostBuildings = [
+    {x:28,y:28,w:10,h:3}, {x:28,y:33,w:5,h:5}, {x:35,y:33,w:5,h:5},
+    {x:28,y:40,w:12,h:4}, {x:42,y:28,w:4,h:6},
+    {x:42,y:36,w:4,h:8}
+  ];
+  
+  const allBuildings = [...townBuildings, ...industrialBuildings, ...residentialBuildings, ...outpostBuildings];
+  allBuildings.forEach(b => {
     for (let by = b.y; by < b.y+b.h && by < MAP_H-1; by++) {
       for (let bx = b.x; bx < b.x+b.w && bx < MAP_W-1; bx++) {
+        // Doorways — center of north and south walls
         if (by === b.y && bx === b.x + Math.floor(b.w/2)) continue;
         if (by === b.y+b.h-1 && bx === b.x + Math.floor(b.w/2)) continue;
+        // East doorway for large buildings
+        if (b.w >= 6 && bx === b.x+b.w-1 && by === b.y + Math.floor(b.h/2)) continue;
         m[by][bx] = 1;
       }
     }
   });
-  // Pillars
-  [[10,5],[25,15],[6,18],[20,10],[28,25]].forEach(([px,py]) => {
+  
+  // Pillars (structural, throughout map)
+  [[6,7],[12,7],[18,8],[30,6],[38,6],[44,12],
+   [6,20],[12,20],[24,24],[36,24],[44,24],
+   [6,30],[18,30],[24,30],[36,30],
+   [6,40],[18,40],[30,38],[42,44]].forEach(([px,py]) => {
     if (m[py] && m[py][px] === 0) m[py][px] = 2;
   });
-  // Crates
-  [[9,8],[18,9],[7,20],[24,18],[11,24],[26,5],[5,28],[19,28]].forEach(([px,py]) => {
+  
+  // Crates (cover objects)
+  [[8,5],[14,4],[22,6],[32,5],[40,4],[44,10],
+   [8,14],[20,13],[22,18],[32,20],[40,18],
+   [5,24],[14,24],[22,28],[34,26],[40,28],
+   [5,34],[14,34],[22,34],[34,38],[40,38],
+   [8,44],[20,44],[34,44]].forEach(([px,py]) => {
     if (m[py] && m[py][px] === 0) m[py][px] = 3;
   });
-  // Barrels
-  [[11,7],[23,9],[6,15],[17,19],[25,23],[14,28],[29,11],[8,25]].forEach(([px,py]) => {
+  
+  // Explosive barrels (hazards)
+  [[10,6],[23,5],[35,7],[43,15],
+   [7,18],[17,18],[25,22],[37,22],
+   [5,30],[16,30],[25,35],[37,35],
+   [10,44],[22,40],[35,42],[44,40]].forEach(([px,py]) => {
     if (m[py] && m[py][px] === 0) m[py][px] = 4;
   });
-  // Sandbags
-  [[13,6],[21,14],[10,18],[18,23],[27,20],[7,10]].forEach(([px,py]) => {
+  
+  // Sandbag fortifications
+  [[4,6],[15,6],[21,10],[33,10],[41,6],
+   [4,15],[21,15],[33,15],[44,18],
+   [4,28],[15,28],[21,28],[33,28],[44,32],
+   [4,38],[15,38],[21,38],[33,38],[44,38]].forEach(([px,py]) => {
     if (m[py] && m[py][px] === 0) m[py][px] = 5;
   });
+  
   return m;
 }
 
@@ -555,7 +597,7 @@ function findSpawn(cx, cz) {
   }
   return [cx + 0.5, cz + 0.5];
 }
-const [spawnX, spawnZ] = findSpawn(16, 16);
+const [spawnX, spawnZ] = findSpawn(24, 24);
 yawObj.position.set(spawnX, STATE.playerHeight, spawnZ);
 
 // ── Skybox Stars ──
@@ -793,9 +835,9 @@ mapGroup.children.forEach(obj => {
 
 // ── Capture Zones ──
 const zoneConfigs = [
-  { name: 'A', target: [8, 8], color: 0x3333ff },
-  { name: 'B', target: [24, 8], color: 0x33ff33 },
-  { name: 'C', target: [16, 24], color: 0xffff33 }
+  { name: 'A', target: [12, 12], color: 0x3333ff },
+  { name: 'B', target: [36, 12], color: 0x33ff33 },
+  { name: 'C', target: [24, 36], color: 0xffff33 }
 ];
 zoneConfigs.forEach(cfg => {
   const [sx, sz] = findSpawn(cfg.target[0], cfg.target[1]);
@@ -879,7 +921,7 @@ function buildWeaponModel(type) {
     // Grip area
     const grip = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.06, 0.04), new THREE.MeshStandardMaterial({ color: 0x4a2a0a, roughness: 0.6 }));
     grip.position.set(0.015, -0.06, 0.04); grip.rotation.x = 0.25; g.add(grip);
-  } else { // pistol
+  } else if (type === 'pistol') {
     // Slide
     const slide = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.04, 0.18), new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.85, roughness: 0.2 }));
     slide.position.set(0, 0.02, -0.03); g.add(slide);
@@ -898,6 +940,69 @@ function buildWeaponModel(type) {
     // Front sight
     const fsight = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.012, 0.006), new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9 }));
     fsight.position.set(0, 0.045, -0.1); g.add(fsight);
+  } else if (type === 'sniper') {
+    // Long barrel
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.016, 0.55, 8), new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.9, roughness: 0.15 }));
+    barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.025, -0.45); g.add(barrel);
+    // Suppressor
+    const supp = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.7, roughness: 0.3 }));
+    supp.rotation.x = Math.PI/2; supp.position.set(0, 0.025, -0.73); g.add(supp);
+    // Receiver
+    const recv = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.065, 0.25), new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.3 }));
+    recv.position.set(0, 0, -0.05); g.add(recv);
+    // Scope
+    const scopeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.14, 8), new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.2 }));
+    scopeBody.rotation.x = Math.PI/2; scopeBody.position.set(0, 0.06, -0.1); g.add(scopeBody);
+    // Scope lens
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(0.016, 8), new THREE.MeshBasicMaterial({ color: 0x3366ff, transparent: true, opacity: 0.5 }));
+    lens.position.set(0, 0.06, -0.17); g.add(lens);
+    // Stock (long)
+    const stock = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 0.25), new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7 }));
+    stock.position.set(0, -0.01, 0.22); g.add(stock);
+    // Cheek rest
+    const cheek = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.025, 0.08), new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7 }));
+    cheek.position.set(0, 0.02, 0.22); g.add(cheek);
+    // Bipod legs (folded)
+    [-0.02, 0.02].forEach(bx => {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.06, 0.006), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 }));
+      leg.position.set(bx, -0.04, -0.3); leg.rotation.x = 0.5; g.add(leg);
+    });
+    // Magazine
+    const mag = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.08, 0.04), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.7 }));
+    mag.position.set(0, -0.07, -0.02); g.add(mag);
+    // Grip
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.06, 0.025), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 }));
+    grip.position.set(0, -0.065, 0.05); grip.rotation.x = 0.25; g.add(grip);
+  } else if (type === 'lmg') {
+    // Heavy barrel
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.02, 0.4, 8), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.85, roughness: 0.2 }));
+    barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.02, -0.35); g.add(barrel);
+    // Barrel shroud with holes
+    const shroud = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.25, 8), new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.7, roughness: 0.3 }));
+    shroud.rotation.x = Math.PI/2; shroud.position.set(0, 0.02, -0.28); g.add(shroud);
+    // Receiver (boxy, heavy)
+    const recv = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.075, 0.22), new THREE.MeshStandardMaterial({ color: 0x282828, metalness: 0.75, roughness: 0.3 }));
+    recv.position.set(0, 0, -0.03); g.add(recv);
+    // Top cover
+    const cover = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.02, 0.12), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 }));
+    cover.position.set(0, 0.045, -0.05); g.add(cover);
+    // Box magazine (ammo box hanging below)
+    const ammoBox = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.06), new THREE.MeshStandardMaterial({ color: 0x3a3a2a, roughness: 0.6 }));
+    ammoBox.position.set(0, -0.08, -0.04); g.add(ammoBox);
+    // Stock
+    const stock = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.065, 0.2), new THREE.MeshStandardMaterial({ color: 0x333322, roughness: 0.6 }));
+    stock.position.set(0, -0.01, 0.18); g.add(stock);
+    // Carry handle
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.03, 0.08), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 }));
+    handle.position.set(0, 0.06, -0.08); g.add(handle);
+    // Bipod
+    [-0.03, 0.03].forEach(bx => {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.1, 0.008), new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 }));
+      leg.position.set(bx, -0.06, -0.32); leg.rotation.x = 0.4; g.add(leg);
+    });
+    // Grip
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.06, 0.028), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 }));
+    grip.position.set(0, -0.065, 0.04); grip.rotation.x = 0.25; g.add(grip);
   }
   return g;
 }
@@ -2136,15 +2241,8 @@ function switchWeapon(weaponKey) {
   STATE.shootRate = w.fireRate;
   STATE.reloadTime = w.reloadTime;
   updateWeaponVisuals();
-    if (STATE.shake > 0) {
-      STATE.shake -= dt * 3;
-      if (STATE.shake < 0) STATE.shake = 0;
-      camera.position.x = (Math.random() - 0.5) * STATE.shake;
-      camera.position.y = (Math.random() - 0.5) * STATE.shake;
-    } else {
-      camera.position.x = 0;
-      camera.position.y = 0;
-    }
+  STATE.aiming = false;
+  STATE.targetFov = 75;
   updateHUD();
   
   const nameEl = document.getElementById('weaponName');
@@ -2226,6 +2324,8 @@ window.addEventListener('keydown', e => {
   if (e.key === '1') switchWeapon('rifle');
   if (e.key === '2') switchWeapon('shotgun');
   if (e.key === '3') switchWeapon('pistol');
+  if (e.key === '4') switchWeapon('sniper');
+  if (e.key === '5') switchWeapon('lmg');
   if (e.key === 'Tab') {
     e.preventDefault();
     const mm = document.getElementById('minimap');
@@ -2260,12 +2360,20 @@ window.addEventListener('mousemove', e => {
   pitchObj.rotation.x = -STATE.mouse.y;
 });
 
-window.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (STATE.started && !STATE.paused && STATE.alive) {
+    if (STATE.weapon === 'sniper') {
+      STATE.aiming = !STATE.aiming;
+      STATE.targetFov = STATE.aiming ? 30 : 75;
+    }
+  }
+});
 window.addEventListener('mousedown', e => {
-  if (e.button === 2) STATE.aiming = true;
+  if (e.button === 2 && STATE.weapon !== 'sniper') STATE.aiming = true;
 });
 window.addEventListener('mouseup', e => {
-  if (e.button === 2) STATE.aiming = false;
+  if (e.button === 2 && STATE.weapon !== 'sniper') STATE.aiming = false;
 });
 window.addEventListener('click', () => {
   initAudio();
