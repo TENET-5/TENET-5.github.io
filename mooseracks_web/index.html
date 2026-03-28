@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MooseRacks — Deadman Switch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Three.js Engine & Post-Processing (Phase 20 Bodycam Realism) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="red_duster_fps.js" defer></script>
+  
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-left">
+        <span class="logo">🦌</span>
+        <div class="header-text">
+          <h1>MooseRacks</h1>
+          <span class="subtitle">Deadman Switch · LirilClaw · [REDACTED_BY_LIRIL]5</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="seed-badge">SEED=118400</span>
+        <span id="clock" class="clock">--:--:--</span>
+      </div>
+    </header>
+
+    <!-- NAVIGATION -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="deadman" id="tab-deadman">
+        <span class="tab-icon">⏱</span> Deadman Switch
+      </button>
+      <button class="tab-btn" data-tab="credentials" id="tab-credentials">
+        <span class="tab-icon">🔑</span> Credentials
+      </button>
+      <button class="tab-btn" data-tab="dashboard" id="tab-dashboard">
+        <span class="tab-icon">📊</span> Dashboard
+      </button>
+      <button class="tab-btn" data-tab="log" id="tab-log">
+        <span class="tab-icon">📋</span> Log
+      </button>
+      <button class="tab-btn" data-tab="tenet5" id="tab-tenet5">
+        <span class="tab-icon">🧠</span> TENET5
+      </button>
+      <button class="tab-btn" data-tab="redduster" id="tab-redduster">
+        <span class="tab-icon">⚔️</span> Red Duster
+      </button>
+      <button class="tab-btn" data-tab="geofence" id="tab-geofence">
+        <span class="tab-icon">🌍</span> OSINT Map
+      </button>
+      <button class="tab-btn" data-tab="fps" id="tab-fps" style="background: rgba(187,0,0,0.4); border-color: red;">
+        <span class="tab-icon">🎯</span> RED DUSTER FPS
+      </button>
+    </nav>
+
+    <!-- TAB CONTENT -->
+    <main class="tab-content">
+
+      <!-- ═══ DEADMAN SWITCH TAB ═══ -->
+      <section id="panel-deadman" class="panel active">
+        <div class="timer-container">
+          <div class="timer-ring" id="timer-ring">
+            <svg viewBox="0 0 200 200" class="timer-svg">
+              <circle cx="100" cy="100" r="90" class="timer-track" />
+              <circle cx="100" cy="100" r="90" class="timer-progress" id="timer-progress" />
+            </svg>
+            <div class="timer-display">
+              <div class="timer-countdown" id="timer-countdown">--:--:--</div>
+              <div class="timer-label" id="timer-label">REMAINING</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-key">Status</span>
+            <span class="status-value" id="status-text">Loading...</span>
+          </div>
+          <div class="status-item">
+            <span class="status-key">Window</span>
+            <span class="status-value" id="status-window">--h</span>
+          </div>
+          <div class="status-item">
+            <span class="status-key">Last Check-in</span>
+            <span class="status-value" id="status-checkin">--</span>
+          </div>
+          <div class="status-item">
+            <span class="status-key">Triggers</span>
+            <span class="status-value" id="status-triggers">0</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-checkin" id="btn-checkin" onclick="doCheckin()">
+            ✅ CHECK IN NOW
+          </button>
+          <div class="control-row">
+            <div class="input-group">
+              <label for="hours-input">Window (hours)</label>
+              <input type="number" id="hours-input" value="24" min="1" max="168" />
+            </div>
+            <button class="btn btn-arm" id="btn-arm" onclick="doArm()">
+              🔴 ARM
+            </button>
+            <button class="btn btn-disarm" id="btn-disarm" onclick="doDisarm()">
+              ⬜ DISARM
+            </button>
+          </div>
+        </div>
+
+        <div class="platforms-bar">
+          <span class="platform-tag active">📷 Instagram</span>
+          <span class="platform-tag active">🐦 Twitter</span>
+          <span class="platform-tag active">🤖 Reddit</span>
+        </div>
+      </section>
+
+      <!-- ═══ CREDENTIALS TAB ═══ -->
+      <section id="panel-credentials" class="panel">
+        <div class="panel-header">
+          <h2>🔑 Platform Credentials</h2>
+          <p class="panel-subtitle">Just give MooseRacks your passwords. Encrypted locally with machine-bound key.</p>
+        </div>
+
+        <div class="cred-grid">
+          <fieldset class="cred-section">
+            <legend>📷 Instagram</legend>
+            <div class="field">
+              <label>Username</label>
+              <input type="text" id="cred-ig-user" placeholder="your_username" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Password</label>
+              <input type="password" id="cred-ig-pass" placeholder="••••••••" autocomplete="off" />
+            </div>
+          </fieldset>
+
+          <fieldset class="cred-section">
+            <legend>🐦 Twitter / X</legend>
+            <div class="field">
+              <label>Username</label>
+              <input type="text" id="cred-tw-user" placeholder="@handle" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Password</label>
+              <input type="password" id="cred-tw-pass" placeholder="••••••••" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" id="cred-tw-email" placeholder="for login verification" autocomplete="off" />
+            </div>
+          </fieldset>
+
+          <fieldset class="cred-section">
+            <legend>🤖 Reddit</legend>
+            <div class="field">
+              <label>Username</label>
+              <input type="text" id="cred-rd-user" placeholder="u/username" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Password</label>
+              <input type="password" id="cred-rd-pass" placeholder="••••••••" autocomplete="off" />
+            </div>
+          </fieldset>
+
+          <fieldset class="cred-section">
+            <legend>📧 Email (Notifications)</legend>
+            <div class="field">
+              <label>Email Address</label>
+              <input type="email" id="cred-em-addr" placeholder="you@gmail.com" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>App Password</label>
+              <input type="password" id="cred-em-pass" placeholder="••••••••" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>SMTP Server</label>
+              <input type="text" id="cred-em-smtp" placeholder="smtp.gmail.com:587" autocomplete="off" />
+            </div>
+          </fieldset>
+        </div>
+
+        <button class="btn btn-save-creds" onclick="saveCreds()">
+          💾 Save & Encrypt Credentials
+        </button>
+      </section>
+
+      <!-- ═══ DASHBOARD TAB ═══ -->
+      <section id="panel-dashboard" class="panel">
+        <div class="panel-header">
+          <h2>📊 Campaign Dashboard</h2>
+          <p class="panel-subtitle">LirilClaw campaign status and statistics</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-posts">0</div>
+            <div class="stat-label">Posts Sent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-ig">❌</div>
+            <div class="stat-label">Instagram</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-tw">❌</div>
+            <div class="stat-label">Twitter/X</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-rd">❌</div>
+            <div class="stat-label">Reddit</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-arrests">0</div>
+            <div class="stat-label">🚨 Arrests Detected</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-triggers">0</div>
+            <div class="stat-label">Triggers Fired</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-creds">❌</div>
+            <div class="stat-label">Credentials</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-images">0</div>
+            <div class="stat-label">Campaign Images</div>
+          </div>
+        </div>
+
+        <div class="system-info">
+          <div class="info-row">
+            <span class="info-key">LirilClaw</span>
+            <span class="info-value" id="info-lirilclaw">Searching...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Platform</span>
+            <span class="info-value" id="info-platforms">--</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Last Post</span>
+            <span class="info-value" id="info-lastpost">--</span>
+          </div>
+        </div>
+
+        <div class="dashboard-actions">
+          <button class="btn btn-launch" onclick="launchLirilClaw()">
+            🚀 Launch LirilClaw
+          </button>
+        </div>
+
+        <!-- CAMPAIGN HIGHLIGHTS -->
+        <div class="highlights-section">
+          <h3 class="highlights-title">🔺 Campaign Highlights</h3>
+          
+          <div class="highlights-grid">
+            <div class="highlight-card">
+              <div class="highlight-icon">🦝</div>
+              <div class="highlight-name">Sparkles Memorial</div>
+              <div class="highlight-detail">847 supply runs · KIA 23 Mar 2019 · Never forgotten</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🎖️</div>
+              <div class="highlight-name">Bloggins Universe</div>
+              <div class="highlight-detail">40,000L diesel · 30,000 lbs brass · 1 buried LAV · Infinite audacity</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🧠</div>
+              <div class="highlight-name">FLUX.2-klein-9B</div>
+              <div class="highlight-detail">Dual-RTX 5070 Ti Local Inference · Zero API Filters · 34.7GB Payload</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🦆</div>
+              <div class="highlight-name">[REDACTED_BY_LIRIL]tion Quack</div>
+              <div class="highlight-detail">847 rubber ducks deployed at NDHQ · Jenkins psychological breakdown</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">✈️</div>
+              <div class="highlight-name">Arrow Resurrection</div>
+              <div class="highlight-detail">Lake Ontario recovery · Firefighter drone pilot · Xbox controller avionics</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🐎</div>
+              <div class="highlight-name">Op Glue Factory</div>
+              <div class="highlight-detail">3x Hugo Stiglitz RCMP horses · Parliament doors assault vector active</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">⚖️</div>
+              <div class="highlight-name">s.504 Lawfare Logic</div>
+              <div class="highlight-detail">Rome Statute + Nuremberg Principles integration deployed on [REDACTED_BY_LIRIL]5 index</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">💀</div>
+              <div class="highlight-name">100k+ True Death Toll</div>
+              <div class="highlight-detail">Waitlist + exposure fatalities calculated. The passive arm of extermination.</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">📜</div>
+              <div class="highlight-name">Hansard Proofs</div>
+              <div class="highlight-detail">Parliamentary record secured. The Feature Not The Bug narrative verified.</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">💉</div>
+              <div class="highlight-name">Mefloquine Experimentation</div>
+              <div class="highlight-detail">Somalia Affair re-mapped as state-sponsored biochemical neurotoxicity.</div>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">♟️</div>
+              <div class="highlight-name">Communist Decapitation</div>
+              <div class="highlight-detail">Systemic CFNIS investigations of Flag Officers verified as hostile infiltration.</div>
+            </div>
+          </div>
+
+          <div class="milestones">
+            <h4>📋 Campaign Milestones</h4>
+            <div class="milestone-list">
+              <div class="milestone done">✅ MooseRacks deadman switch [REDACTED_BY_LIRIL]tional</div>
+              <div class="milestone done">✅ Tauri 2.0 native desktop app</div>
+              <div class="milestone done">✅ Credential vault (machine-bound encryption)</div>
+              <div class="milestone done">✅ Instagram Headless Playwright API override</div>
+              <div class="milestone done">✅ Bloggins Extended Universe Mass Scaling (181 assets)</div>
+              <div class="milestone done">✅ LIRIL AI kernel routing [REDACTED_BY_LIRIL]tional</div>
+              <div class="milestone active">🔄 Continuous 45-90min headless posting rotation</div>
+              <div class="milestone done">✅ FLUX.2-klein-9B offline lock-in established</div>
+              <div class="milestone done">✅ Dual-architecture [REDACTED_BY_LIRIL]5 pipeline deployed</div>
+              <div class="milestone done">✅ Cross-platform arrest monitoring</div>
+              <div class="milestone done">✅ OSINT True Death Toll Logic Expanded (100k+)</div>
+              <div class="milestone done">✅ Premium 5GW Intelligence Dashboard UI deployed</div>
+              <div class="milestone done">✅ Hansard evidence wired into LirilClaw daemon</div>
+              <div class="milestone done">✅ Mefloquine experimentation thesis injected</div>
+              <div class="milestone done">✅ Communist decapitation matrix aligned</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ LOG TAB ═══ -->
+      <section id="panel-log" class="panel">
+        <div class="panel-header">
+          <h2>📋 Activity Log</h2>
+        </div>
+        <div class="log-container" id="log-container">
+          <div class="log-entry info">MooseRacks initialized</div>
+        </div>
+      </section>
+
+      <!-- ═══ TENET5 SUBKERNEL TAB ═══ -->
+      <section id="panel-tenet5" class="panel">
+        <div class="panel-header">
+          <h2>🧠 TENET5 Subkernel</h2>
+          <p class="panel-subtitle">abcxyz Discovery · N vs NP Empirical · Millennium Falcon Memory Handoff · SEED=118400</p>
+        </div>
+
+        <!-- TELEMETRY GRID -->
+        <div class="tenet5-telemetry-grid">
+          <div class="metric-pill">
+            <div class="active-pulse-node"></div>
+            <span>UPTIME</span>
+            <strong id="t5-uptime">--</strong>
+          </div>
+          <div class="metric-pill">
+            <div class="active-pulse-node" style="background: var(--accent-green);"></div>
+            <span>ABCXYZ</span>
+            <strong id="t5-abcxyz">--</strong>
+          </div>
+          <div class="metric-pill">
+            <div class="active-pulse-node" style="background: var(--accent-amber);"></div>
+            <span>N vs NP</span>
+            <strong id="t5-nvnp">--</strong>
+          </div>
+          <div class="metric-pill">
+            <div class="active-pulse-node" style="background: var(--accent-blue);"></div>
+            <span>HANDOFFS</span>
+            <strong id="t5-handoffs">--</strong>
+          </div>
+        </div>
+
+        <!-- DAEMON HEALTH MATRIX -->
+        <div class="daemon-matrix">
+          <h3 class="daemon-matrix-title">⚡ Daemon Health Matrix</h3>
+          <div class="daemon-grid" id="daemon-grid">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- CAMPAIGN ANALYTICS -->
+        <div class="tracking-dashboard">
+          <h3 class="tracking-title">📊 Campaign Analytics</h3>
+          <div class="tracking-metrics">
+            <div class="tracking-stat">
+              <div class="tracking-value" id="t5-images">0</div>
+              <div class="tracking-label">IMAGES</div>
+            </div>
+            <div class="tracking-stat">
+              <div class="tracking-value" id="t5-posts">0</div>
+              <div class="tracking-label">POSTS</div>
+            </div>
+            <div class="tracking-stat">
+              <div class="tracking-value" id="t5-triggers">0</div>
+              <div class="tracking-label">TRIGGERS</div>
+            </div>
+            <div class="tracking-stat">
+              <div class="tracking-value" id="t5-arrests">0</div>
+              <div class="tracking-label">🚨 ARRESTS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NATS STREAMING GRID -->
+        <div class="nats-grid-section">
+          <h3 class="daemon-matrix-title">📡 NATS Streaming Grid</h3>
+          <div class="nats-grid">
+            <div class="nats-metric">
+              <div class="nats-indicator" id="nats-status-indicator"></div>
+              <span class="nats-label">STATUS</span>
+              <strong id="nats-conn-status">--</strong>
+            </div>
+            <div class="nats-metric">
+              <span class="nats-label">IN MSGS</span>
+              <strong id="nats-in-msgs">--</strong>
+            </div>
+            <div class="nats-metric">
+              <span class="nats-label">OUT MSGS</span>
+              <strong id="nats-out-msgs">--</strong>
+            </div>
+            <div class="nats-metric">
+              <span class="nats-label">CONNECTIONS</span>
+              <strong id="nats-connections">--</strong>
+            </div>
+            <div class="nats-metric">
+              <span class="nats-label">MEMORY</span>
+              <strong id="nats-memory">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONVERGENCE MONITOR -->
+        <div class="convergence-section">
+          <h3 class="daemon-matrix-title">🎯 Convergence Monitor — <span id="conv-score" class="convergence-score">--</span></h3>
+          <div class="convergence-grid" id="convergence-grid">
+            <!-- populated by JS -->
+          </div>
+          <!-- SATOR Z-BANDS -->
+          <div class="sator-bands" id="sator-bands">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- GASTOWN FACTORY MATRIX -->
+        <div class="gastown-section">
+          <h3 class="daemon-matrix-title">🏭 Gastown Factory Matrix — <span id="gastown-perf" class="convergence-score">--</span></h3>
+          <div class="gastown-grid" id="gastown-grid">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="tenet5-actions">
+          <button class="btn btn-discovery" id="btn-discovery" onclick="doRunDiscovery()">
+            🔬 Run Discovery Loop
+          </button>
+          <button class="btn btn-handoff" onclick="doForceHandoff()">
+            🚀 Force Memory Handoff
+          </button>
+        </div>
+
+        <!-- DISCOVERY EVENT LOG -->
+        <div class="discovery-log">
+          <h3 class="discovery-log-title">📡 Discovery Event Log</h3>
+          <div class="discovery-log-entries" id="discovery-log-entries">
+            <div class="discovery-entry">Awaiting first discovery scan...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ RED DUSTER GALLERY TAB ═══ -->
+      <section id="panel-redduster" class="panel">
+        <div class="rd-gallery">
+          <img src="red_duster/red_duster_scalpel_1774494776954.png" />
+          <img src="red_duster/red_duster_garrote_1774494792472.png" />
+          <img src="red_duster/red_duster_blades_1774494809099.png" />
+          <img src="red_duster/red_duster_staple_puller_1774494823633.png" />
+          <img src="red_duster/red_duster_blades_v2_1774494874729.png" />
+          <img src="red_duster/red_duster_activated_v2_1774494886937.png" />
+          <img src="red_duster/red_duster_medical_tools_1774494905687.png" />
+          <img src="red_duster/red_duster_syringe_1774494950423.png" />
+          <img src="red_duster/red_duster_hands_crossed_1774494964638.png" />
+          <img src="red_duster/red_duster_cleanup_1774494981103.png" />
+          <img src="red_duster/red_duster_fists_1774494994465.png" />
+          <img src="red_duster/red_duster_duck_knife_1774495071012.png" />
+          <img src="red_duster/red_duster_duck_guard_1774495086968.png" />
+          <img src="red_duster/red_duster_duck_row_1774495103955.png" />
+          <img src="red_duster/rd_ensign_karambit_1774495310960.png" />
+          <img src="red_duster/rd_ensign_salute_1774495324450.png" />
+          <img src="red_duster/rd_ensign_duck_present_1774495340983.png" />
+          <img src="red_duster/rd_ensign_lineup_1774495354424.png" />
+          <img src="red_duster/rd_ensign_wendys_1774495371027.png" />
+          <img src="red_duster/rd_ensign_corkboard_1774495429855.png" />
+          <img src="red_duster/rd_ensign_pointing_1774495442210.png" />
+          <img src="red_duster/wendys_duck_knife_1774495191954.png" />
+          <img src="red_duster/wendys_fists_1774495206929.png" />
+          <img src="red_duster/wendys_scalpel_1774495223879.png" />
+          <img src="red_duster/wendys_guard_duck_1774495236435.png" />
+          <img src="red_duster/rd_ensign_sharpening_1774495759868.png" />
+          <img src="red_duster/rd_ensign_flag_hold_1774495778926.png" />
+          <img src="red_duster/rd_wendys_duck_army_1774495792907.png" />
+          <img src="red_duster/rd_ensign_watch_1774495807071.png" />
+          <img src="red_duster/rd_ensign_binoculars_1774495864562.png" />
+          <img src="red_duster/rd_duck_surgical_1774495878990.png" />
+          <img src="red_duster/rd_ensign_radio_1774495892098.png" />
+          <img src="red_duster/rd_ensign_map_1774495903188.png" />
+          <img src="red_duster/rd_wendys_binoculars_1774495915301.png" />
+          <img src="red_duster/rd_ensign_zipties_1774495968666.png" />
+          <img src="red_duster/rd_ensign_three_ducks_1774495981844.png" />
+          <img src="red_duster/rd_ensign_nightvision_1774495995519.png" />
+          <img src="red_duster/rd_wendys_zipties_1774496009427.png" />
+          <img src="red_duster/rd_ensign_thumb_up_1774496026058.png" />
+          <img src="red_duster/rd_wall_tourniquet_1774496130122.png" />
+          <img src="red_duster/rd_wall_flashlight_1774496147471.png" />
+          <img src="red_duster/rd_wall_dog_tag_burn_1774496159078.png" />
+          <img src="red_duster/rd_wall_duck_helmet_1774496175767.png" />
+          <img src="red_duster/rd_wall_lighter_1774496210390.png" />
+          <img src="red_duster/rd_wall_chess_1774496224814.png" />
+          <img src="red_duster/rd_wall_gloves_dirt_1774496587812.png" />
+          <img src="red_duster/rd_wall_compass_1774496603706.png" />
+          <img src="red_duster/rd_wall_washing_1774496620942.png" />
+          <img src="red_duster/rd_wall_fence_1774496635845.png" />
+          <img src="red_duster/rd_wall_stitching_1774496650073.png" />
+          <img src="red_duster/rd_wall_axe_1774496880848.png" />
+          <img src="red_duster/rd_wall_handshake_1774496892631.png" />
+          <img src="red_duster/rd_wall_writing_1774496905692.png" />
+          <img src="red_duster/rd_wall_duck_perch_1774496920205.png" />
+          <img src="red_duster/rd_wall_boot_knife_1774496934917.png" />
+          <img src="red_duster/rd_wall_canteen_1774496983293.png" />
+          <img src="red_duster/rd_wall_pliers_1774496997942.png" />
+          <img src="red_duster/rd_wall_duck_lineup_1774497016573.png" />
+          <img src="red_duster/rd_wall_tape_mouth_1774497029663.png" />
+          <img src="red_duster/rd_wall_bolt_cutters_1774497115154.png" />
+          <img src="red_duster/rd_wall_phone_smash_1774497127110.png" />
+          <img src="red_duster/rd_wall_duck_patrol_1774497139153.png" />
+          <img src="red_duster/rd_wall_glass_cut_1774497154571.png" />
+          <img src="red_duster/rd_wall_carabiner_1774497167005.png" />
+          <img src="red_duster/rd_wall_padlock_1774497213419.png" />
+          <img src="red_duster/rd_wall_duck_bath_1774497225908.png" />
+          <img src="red_duster/rd_wall_scope_1774497239822.png" />
+          <img src="red_duster/rd_wall_cable_strip_1774497254673.png" />
+          <img src="red_duster/rd_wall_duck_scope_1774497270251.png" />
+          <img src="red_duster/rd_shroud_scalpel_1774497373396.png" />
+          <img src="red_duster/rd_shroud_duck_knife_1774497387770.png" />
+          <img src="red_duster/rd_shroud_fists_1774497400419.png" />
+          <img src="red_duster/rd_shroud_shovel_1774497415617.png" />
+          <img src="red_duster/rd_shroud_wendys_1774497435102.png" />
+          <img src="red_duster/rd_shroud_salute_1774497481607.png" />
+          <img src="red_duster/rd_shroud_binoculars_1774497494266.png" />
+          <img src="red_duster/rd_shroud_karambit_1774497508272.png" />
+          <img src="red_duster/rd_shroud_zipties_1774497520282.png" />
+          <img src="red_duster/rd_shroud_duck_present_1774497533959.png" />
+          <img src="red_duster/rd_mask_scalpel_1774497586232.png" />
+          <img src="red_duster/rd_mask_duck_1774497599392.png" />
+          <img src="red_duster/rd_fem_duck_knife_1774536487375.png" />
+          <img src="red_duster/rd_fem_scalpel_1774536502970.png" />
+          <img src="red_duster/rd_fem_crossed_1774536516114.png" />
+          <img src="red_duster/rd_fem_binoculars_1774536532733.png" />
+          <img src="red_duster/rd_fem_shovel_1774536661169.png" />
+          <img src="red_duster/rd_fem_zipties_1774536677667.png" />
+          <img src="red_duster/rd_fem_compass_1774536695322.png" />
+          <img src="red_duster/rd_fem_wendys_1774536709368.png" />
+          <img src="red_duster/rd_fem_lighter_1774536724288.png" />
+          <img src="red_duster/rd_fem_radio_1774536772081.png" />
+          <img src="red_duster/rd_fem_axe_1774536790066.png" />
+          <img src="red_duster/rd_fem_duck_perch_1774536806995.png" />
+          <img src="red_duster/rd_fem_fence_1774536823089.png" />
+          <img src="red_duster/rd_fem_handshake_1774536839329.png" />
+          <img src="red_duster/rd_doc_knife_grip_1774537345722.png" />
+          <img src="red_duster/rd_doc_two_knives_1774537359931.png" />
+          <img src="red_duster/rd_doc_knife_duck_1774537375590.png" />
+          <img src="red_duster/rd_doc_knife_point_1774537391641.png" />
+          <img src="red_duster/rd_doc_knife_inspect_1774537448730.png" />
+          <img src="red_duster/rd_doc_knife_sheath_1774537467055.png" />
+          <img src="red_duster/rd_doc_knife_fist_1774537480514.png" />
+          <img src="red_duster/rd_doc_knife_table_1774537498466.png" />
+          <img src="red_duster/rd_hands_knife_drip_1774538823241.png" />
+          <img src="red_duster/rd_hands_knife_offer_1774538839874.png" />
+          <img src="red_duster/rd_hands_knife_sharpen_1774538854886.png" />
+          <img src="red_duster/rd_hands_knife_snap_1774538970928.png" />
+          <img src="red_duster/rd_hands_knife_flag_1774538988049.png" />
+          <img src="red_duster/rd_hands_knife_row_1774539002557.png" />
+          <img src="red_duster/rd_hands_knife_wash_1774539015956.png" />
+          <img src="red_duster/rd_hands_knife_thumb_1774539031202.png" />
+          <img src="red_duster/rd_hands_knife_map_1774539421784.png" />
+          <img src="red_duster/rd_hands_knife_mirror_1774539437394.png" />
+          <img src="red_duster/rd_hands_knife_behind_1774539454046.png" />
+          <img src="red_duster/rd_hands_knife_prayer_1774539470647.png" />
+          <img src="red_duster/rd_hands_knife_carve_1774539485143.png" />
+          <img src="red_duster/rd_hands_knife_hold_1774539554963.png" />
+          <img src="red_duster/rd_hands_knife_light_1774539568056.png" />
+          <img src="red_duster/rd_hands_knife_plant_1774539679708.png" />
+          <img src="red_duster/rd_hands_duck_lineup_1774539693182.png" />
+          <img src="red_duster/rd_hands_knife_shadow_1774539708933.png" />
+          <img src="red_duster/rd_hands_knife_rope_1774539722090.png" />
+          <img src="red_duster/rd_hands_knife_tape_1774539805719.png" />
+          <img src="red_duster/rd_hands_knife_candle_1774539820860.png" />
+          <img src="red_duster/rd_hands_knife_photo_1774539839882.png" />
+          <img src="red_duster/rd_hands_two_pair_1774539852566.png" />
+          <img src="red_duster/rd_hands_knife_chain_1774539870246.png" />
+          <img src="red_duster/rd_hands_stapler_1774539955295.png" />
+          <img src="red_duster/rd_hands_plunger_1774539969338.png" />
+          <img src="red_duster/rd_hands_scissors_1774539982574.png" />
+          <img src="red_duster/rd_hands_pen_1774539997710.png" />
+          <img src="red_duster/rd_hands_tape_disp_1774540010694.png" />
+          <img src="red_duster/rd_hands_ruler_1774540059000.png" />
+          <img src="red_duster/rd_hands_letter_opener_1774540073566.png" />
+          <img src="red_duster/rd_hands_hole_punch_1774540088537.png" />
+          <img src="red_duster/rd_hands_binder_clip_1774540106383.png" />
+          <img src="red_duster/rd_hands_plunger_duck_1774540119811.png" />
+          <img src="red_duster/rd_hands_mouse_1774540876138.png" />
+          <img src="red_duster/rd_hands_mop_1774540893565.png" />
+          <img src="red_duster/rd_hands_coffee_mug_1774540910056.png" />
+          <img src="red_duster/rd_hands_pushpins_1774540928997.png" />
+          <img src="red_duster/rd_hands_keyboard_1774541000084.png" />
+          <img src="red_duster/rd_hands_staple_remove_1774541015899.png" />
+          <img src="red_duster/rd_hands_paper_cut_1774541030188.png" />
+          <img src="red_duster/rd_hands_rubber_band_1774541046038.png" />
+          <img src="red_duster/rd_hands_banana_1774541265980.png" />
+          <img src="red_duster/rd_hands_spork_1774541280298.png" />
+          <img src="red_duster/rd_hands_spatula_1774541296065.png" />
+          <img src="red_duster/rd_hands_toilet_brush_1774541311739.png" />
+          <img src="red_duster/rd_hands_rubber_chicken_1774541328982.png" />
+          <img src="red_duster/rd_hands_whisk_1774541392586.png" />
+          <img src="red_duster/rd_hands_pizza_cutter_1774541408427.png" />
+          <img src="red_duster/rd_hands_flyswatter_1774541422982.png" />
+          <img src="red_duster/rd_hands_ice_cream_1774541437262.png" />
+          <img src="red_duster/rd_hands_umbrella_1774541452458.png" />
+          <img src="red_duster/rd_hands_rolling_pin_1774541623845.png" />
+          <img src="red_duster/rd_hands_sock_puppet_1774541639099.png" />
+          <img src="red_duster/rd_hands_feather_duster_1774541654062.png" />
+          <img src="red_duster/rd_hands_candy_cane_1774541670338.png" />
+          <img src="red_duster/rd_hands_ladle_1774541982747.png" />
+          <img src="red_duster/rd_hands_can_opener_1774541998480.png" />
+          <img src="red_duster/rd_hands_cactus_1774542012238.png" />
+          <img src="red_duster/rd_hands_shoe_1774542026370.png" />
+          <img src="red_duster/rd_hands_tongs_1774556564950.png" />
+          <img src="red_duster/rd_hands_hockey_stick_1774556579554.png" />
+          <img src="red_duster/rd_hands_garden_hose_1774556592951.png" />
+          <img src="red_duster/rd_hands_snow_shovel_1774556607132.png" />
+          <img src="red_duster/rd_hands_rubber_duck_army_1774556657690.png" />
+          <img src="red_duster/rd_hands_maple_syrup_1774556672132.png" />
+          <img src="red_duster/rd_hands_curling_stone_1774556688249.png" />
+          <img src="red_duster/rd_hands_lacrosse_stick_1774556704707.png" />
+          <img src="red_duster/rd_hands_waffle_iron_1774556719919.png" />
+          <img src="red_duster/rd_hands_moose_antler_1774558065053.png" />
+          <img src="red_duster/rd_hands_beaver_tail_1774558078590.png" />
+          <img src="red_duster/rd_hands_tennis_racket_1774558091498.png" />
+          <img src="red_duster/rd_hands_fire_extinguisher_1774558104232.png" />
+          <img src="red_duster/rd_hands_rubber_duck_crown_1774558118436.png" />
+          <img src="red_duster/rd_hands_toaster_1774560582917.png" />
+          <img src="red_duster/rd_hands_cheese_grater_1774560598132.png" />
+          <img src="red_duster/rd_hands_corkscrew_1774560609930.png" />
+          <img src="red_duster/rd_hands_dustpan_1774560621933.png" />
+          <img src="red_duster/rd_hands_nutcracker_1774560633845.png" />
+          <img src="red_duster/rd_hands_clothespin_1774560678110.png" />
+          <img src="red_duster/rd_hands_telescope_1774560691880.png" />
+          <img src="red_duster/rd_hands_rubber_glove_1774560704643.png" />
+          <img src="red_duster/rd_hands_fishing_rod_1774560720382.png" />
+          <img src="red_duster/rd_hands_paint_roller_1774560734004.png" />
+          <img src="red_duster/rd_hands_sign_paint_1774560932365.png" />
+          <img src="red_duster/rd_hands_garden_gnome_1774561329207.png" />
+          <img src="red_duster/rd_hands_bowling_ball_1774561340583.png" />
+          <img src="red_duster/rd_hands_broomstick_1774561355374.png" />
+          <img src="red_duster/rd_hands_spray_bottle_1774561367786.png" />
+          <img src="red_duster/rd_hands_duct_tape_1774561383037.png" />
+          <img src="red_duster/rd_hands_chain_saw_1774561537907.png" />
+          <img src="red_duster/rd_hands_rubber_boot_1774561552489.png" />
+          <img src="red_duster/rd_hands_crowbar_1774561565957.png" />
+          <img src="red_duster/rd_hands_potato_peeler_1774561579421.png" />
+        </div>
+      </section>
+
+      <!-- ═══ OSINT MAP TAB ═══ -->
+      <section id="panel-geofence" class="panel">
+        <div class="panel-header">
+          <h2>OSINT Geofencing Tracker</h2>
+          <p>Live mapping of active gang members, corrupt officials, and politicians. Intelligence gathered via TENET5 algorithms.</p>
+        </div>
+        <div class="osint-container" style="display: flex; gap: 20px; height: calc(100vh - 250px);">
+          <div class="osint-sidebar" style="flex: 0 0 250px; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid var(--accent-red); display: flex; flex-direction: column;">
+            <div class="trash-pandas-header">
+              <img src="assets/trash_pandas.png" class="trash-pandas-logo" alt="Trash Pandas">
+              <h3 class="trash-pandas-title">THE TRASH PANDAS</h3>
+              <p class="trash-pandas-sub">GHOST UNIT OVERSIGHT</p>
+            </div>
+            <div class="filter-group" style="display: flex; flex-direction: column; gap: 10px;">
+              <label><input type="checkbox" id="filter-politicians" checked> Parliamentarians</label>
+              <label><input type="checkbox" id="filter-gangs" checked> Known Gangs</label>
+              <label><input type="checkbox" id="filter-cops" checked> Corrupt Police</label>
+              <label><input type="checkbox" id="filter-spies" checked> Foreign Agents (@TheWarDoll)</label>
+              <label><input type="checkbox" id="filter-discord" checked> Discord Nodes (VoIP Tracker)</label>
+              <label><input type="checkbox" id="filter-steam" checked> Steam Footprints (Gaming Alts)</label>
+              <label><input type="checkbox" id="filter-insta" checked> Instagram Ops (Social Covers)</label>
+              <label><input type="checkbox" id="filter-sigint" checked> 📡 SIGINT Intercepts (Deciphered)</label>
+              <label><input type="checkbox" id="filter-finint" checked> 💳 FININT Watchlist (Crypto)</label>
+              <label><input type="checkbox" id="filter-imint" checked> 📸 IMINT Safehouses (EXIF Data)</label>
+              <label><input type="checkbox" id="filter-cybint" checked> 🌐 CYBINT Deep Web Servers</label>
+            </div>
+            <div class="osint-stats" style="margin-top: 30px;">
+              <div style="font-size: 0.8rem; color: #888;">Total Targets</div>
+              <div id="stat-total-targets" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 15px;">--</div>
+              <div style="font-size: 0.8rem; color: var(--accent-red);">Active Red Zones</div>
+              <div id="stat-active-zones" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-red);">--</div>
+            </div>
+            <button class="btn btn-arm" id="btn-sync-intel" onclick="loadOsintData()" style="margin-top: auto; width: 100%;">
+              🔄 SYNC INTEL DB
+            </button>
+          </div>
+          <div id="osintMap" class="osint-map-canvas" style="flex: 1; border: 1px solid var(--accent-red); z-index: 1;"></div>
+        </div>
+      </section>
+
+      <!-- ═══ RED DUSTER COMBAT SIMULATOR TAB ═══ -->
+      <section id="panel-fps" class="panel">
+        <div class="panel-header" style="border-bottom: 2px solid #ff3333;">
+          <h2 style="color: #ff3333; text-shadow: 0 0 10px #ff0000;">THE RED DUSTER - COMBAT SIMULATOR</h2>
+          <p>PSYCHOLOGICAL WARFARE TRAINER. PLAYER: BLOGGINS. MAP: NEW RUSKYA PARADE SQUARE.</p>
+        </div>
+        
+        <div id="fps-container">
+          <!-- Game HUD Overlays -->
+          <div id="damage-overlay"></div>
+          <div id="kia-overlay" style="display: none;">
+            <div style="font-size: 3em; color: red; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 20px red;">K.I.A.</div>
+            <div style="font-size: 1.2em; color: white; margin-top: 10px;">SECTOR 4 LOST. THE RED ENSIGN HAS FALLEN.</div>
+            <div style="font-size: 0.8em; color: #666; margin-top: 20px;">[ REFRESH TO REDEPLOY ]</div>
+          </div>
+          <div id="victory-overlay" style="display: none;">
+            <div style="font-size: 3em; color: #00ff00; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 20px #00aa00;">SECTOR 4 SECURED</div>
+            <div style="font-size: 1.2em; color: white; margin-top: 10px;">THE RED ENSIGN FLIES TALL. LIQUIDATION HALTED.</div>
+            <div style="font-size: 0.8em; color: #666; margin-top: 20px;">[ REFRESH TO REDEPLOY ]</div>
+          </div>
+          <div id="bodycam-scanlines"></div>
+          
+          <div id="bodycam-ui">
+            <div id="bc-rec"><span class="bc-dot"></span>REC</div>
+            <div id="bc-mic">MIC ON | AXON-SQUAD-1</div>
+            <div id="bc-timestamp"></div>
+            <div id="bc-battery">🔋 84% BATT</div>
+            <div id="wave-counter" style="position: absolute; top: 8%; right: 2%; color: #fff; font-size: 24px; font-weight: bold; text-shadow: 0px 0px 5px #ff0000; letter-spacing: 2px; display: none;">[ WAVE 1 / 3 ]</div>
+            <div id="kill-feed" style="position: absolute; bottom: 8%; left: 2%; color: #fff; font-size: 16px; font-weight: bold; text-shadow: 0px 0px 3px #000; letter-spacing: 1px; display: none;">HOSTILES LIQUIDATED: 0</div>
+          </div>
+          
+          <div id="hit-marker">✖</div>
+          <div id="ammo-counter" style="display: none;">AMMO: <span id="ammo-count">500</span></div>
+          <div id="bloggins-quote"></div>
+          
+          <div id="fps-instructions">
+            <div>
+              <span style="font-size: 2em; color: #ff3333; font-weight: bold; text-shadow: 0 0 10px #ff0000;">COMBAT DEPLOYMENT READY</span><br/><br/>
+              W A S D - Move | MOUSE - Look | LEFT CLICK - Fire<br/><br/>
+              Click to drop into Sector 4 as Bloggins.
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <span>[REDACTED_BY_LIRIL]5 · LIRIL AI · SEED=118400</span>
+      <span>MooseRacks v1.2.0</span>
+    </footer>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
