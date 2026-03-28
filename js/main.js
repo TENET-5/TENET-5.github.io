@@ -4,6 +4,13 @@
 (function () {
   'use strict';
 
+  // ── Horror Atmosphere Layers ────────────────────────────────────────────
+  ['horror-pulse', 'horror-flicker', 'horror-scanlines', 'horror-glitch', 'horror-vignette', 'horror-redflash'].forEach(function(cls) {
+    var el = document.createElement('div');
+    el.className = cls;
+    document.body.appendChild(el);
+  });
+
   // ── Scroll Progress Bar ──────────────────────────────────────────────────
   const progressBar = document.createElement('div');
   progressBar.className = 'scroll-progress';
