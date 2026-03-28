@@ -706,15 +706,18 @@ function updateWeaponVisuals() {
 // ── Enemy System ──
 function spawnEnemy(type = 'grunt') {
   const enemyData = {
-    grunt: { color: 0x33cc33, scale: 1, hp: 100, speed: 2.5, damage: 15, score: 10, ranged: false },
-    heavy: { color: 0x993333, scale: 1.5, hp: 300, speed: 1.5, damage: 25, score: 30, ranged: false },
-    ranger: { color: 0x996633, scale: 0.8, hp: 80, speed: 2.2, damage: 10, score: 20, ranged: true, shootCooldown: 0 }
+    grunt:    { color: 0xffffff, tex: 'img/red-duster/enemy_commie.png', scale: 1, hp: 100, speed: 2.5, damage: 15, score: 10, ranged: false },
+    heavy:    { color: 0xffaaaa, tex: 'img/red-duster/enemy_cfnis.png',  scale: 1.2, hp: 300, speed: 1.5, damage: 25, score: 30, ranged: false },
+    ranger:   { color: 0xcccccc, tex: 'img/red-duster/enemy_commie.png', scale: 0.85, hp: 80, speed: 2.2, damage: 10, score: 20, ranged: true, shootCooldown: 0 }
   };
   const data = enemyData[type];
   
-  const geo = new THREE.BoxGeometry(0.6 * data.scale, 1.8 * data.scale, 0.6 * data.scale);
-  const mat = new THREE.MeshStandardMaterial({ color: data.color, roughness: 0.7, metalness: 0.2 });
-  const mesh = new THREE.Mesh(geo, mat);
+  const mapUrl = data.tex;
+  const texLoader = new THREE.TextureLoader();
+  const tex = texLoader.load(mapUrl);
+  const mat = new THREE.SpriteMaterial({ map: tex, color: data.color });
+  const mesh = new THREE.Sprite(mat);
+  mesh.scale.set(1.4 * data.scale, 2.5 * data.scale, 1);
   
   let spawnX, spawnZ;
   do {
@@ -722,23 +725,35 @@ function spawnEnemy(type = 'grunt') {
     spawnZ = Math.random() * (MAP_H - 4) + 2;
   } while (isColliding(spawnX, spawnZ, 0.5) || distXZ(spawnX, spawnZ, yawObj.position.x, yawObj.position.z) < 8);
   
-  mesh.position.set(spawnX, 0.9 * data.scale, spawnZ);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
+  mesh.position.set(spawnX, 1.2 * data.scale, spawnZ);
   scene.add(mesh);
   
   STATE.enemies.push({
     mesh, type, hp: data.hp, maxHp: data.hp, speed: data.speed, damage: data.damage, score: data.score,
-    x: spawnX, z: spawnZ, ranged: data.ranged, shootCooldown: 0
+    x: spawnX, z: spawnZ, baseScale: data.scale, ranged: data.ranged, shootCooldown: 0, dead: false, deathTime: 0
   });
 }
 
 function updateEnemies(dt) {
   const playerX = yawObj.position.x;
   const playerZ = yawObj.position.z;
+  const now = performance.now();
   
   for (let i = STATE.enemies.length - 1; i >= 0; i--) {
     const e = STATE.enemies[i];
+    
+    if (e.dead) {
+      e.deathTime -= dt;
+      e.mesh.position.y -= dt * 2.5; 
+      e.mesh.material.opacity = Math.max(0, e.deathTime);
+      e.mesh.scale.y = Math.max(0.1, e.mesh.scale.y - dt * 5);
+      if (e.deathTime <= 0) {
+        scene.remove(e.mesh);
+        STATE.enemies.splice(i, 1);
+      }
+      continue;
+    }
+
     const dx = playerX - e.x;
     const dz = playerZ - e.z;
     const dist = Math.sqrt(dx*dx + dz*dz);
@@ -752,6 +767,7 @@ function updateEnemies(dt) {
     }
     
     const stopDist = e.ranged ? 6 : 1.2;
+    let isMoving = false;
     if (dist > stopDist) {
       const moveX = (dx / dist) * e.speed * dt;
       const moveZ = (dz / dist) * e.speed * dt;
@@ -762,12 +778,15 @@ function updateEnemies(dt) {
         e.z = newZ;
         e.mesh.position.x = e.x;
         e.mesh.position.z = e.z;
+        isMoving = true;
       }
     } else if (!e.ranged && dist < 1.5) {
       damagePlayer(e.damage * dt);
     }
     
-    e.mesh.lookAt(playerX, e.mesh.position.y, playerZ);
+    // Locomotion bobbing
+    const baseY = 1.2 * e.baseScale;
+    e.mesh.position.y = isMoving ? baseY + Math.abs(Math.sin(now * 0.01 * e.speed)) * 0.15 : baseY;
   }
 }
 
@@ -811,6 +830,7 @@ function updateProjectiles(dt) {
 }
 
 function killEnemy(enemy, headshot = false) {
+  if (enemy.dead) return;
   const scoreAdd = enemy.score * (headshot ? 3 : 1) * Math.max(1, STATE.combo);
   STATE.score += scoreAdd;
   STATE.kills++;
@@ -824,19 +844,20 @@ function killEnemy(enemy, headshot = false) {
   STATE.lastKillTime = now;
   STATE.comboTimer = 2;
   
-  scene.remove(enemy.mesh);
-  STATE.enemies.splice(STATE.enemies.indexOf(enemy), 1);
+  enemy.dead = true;
+  enemy.deathTime = 1.0;
+  enemy.mesh.material.color.setHex(0xff0000);
   
   playSound('death');
   if (headshot) {
     playSound('headshot');
     addKillFeed(`HEADSHOT +${scoreAdd}`);
   } else {
-    addKillFeed(`KILL +${scoreAdd}`);
+    addKillFeed(`LIQUIDATED +${scoreAdd}`);
   }
   
-  for (let i = 0; i < 8; i++) {
-    addParticle(enemy.x, 1, enemy.z, 0xff3333);
+  for (let i = 0; i < 15; i++) {
+    addParticle(enemy.x, enemy.mesh.position.y, enemy.z, 0xff0000);
   }
   
   updateHUD();
@@ -1131,6 +1152,8 @@ function updatePlayer(dt) {
       STATE.footstepTimer = 0;
     }
     
+    weapon.position.y = -0.12 + Math.abs(Math.sin(performance.now() * 0.01)) * 0.02;
+
     const len = Math.sqrt(vx*vx + vz*vz);
     vx = (vx / len) * speed * dt;
     vz = (vz / len) * speed * dt;
@@ -1166,8 +1189,16 @@ function shoot() {
   STATE.shootCooldown = w.fireRate;
   playSound('shoot');
   
-  weapon.position.z = -0.25;
-  setTimeout(() => { weapon.position.z = -0.3; }, 50);
+  weapon.position.z = -0.20;
+  weapon.position.y = -0.10;
+  document.getElementById('dmgFlash').style.background = 'radial-gradient(ellipse, transparent 40%, rgba(255,200,0,0.3))';
+  document.getElementById('dmgFlash').style.opacity = '1';
+  setTimeout(() => { 
+      weapon.position.z = -0.3; 
+      weapon.position.y = -0.12; 
+      document.getElementById('dmgFlash').style.opacity = '0';
+      setTimeout(() => document.getElementById('dmgFlash').style.background = 'radial-gradient(ellipse, transparent 50%, rgba(255,0,0,0.4))', 100);
+  }, 50);
   
   const raycaster = new THREE.Raycaster();
   
