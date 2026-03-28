@@ -89,15 +89,118 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Grain — barely there, cinematic */
+/* ═══ HORROR ATMOSPHERE — grain + flicker + blood pulse + glitch ═══ */
+
+/* Layer 1: Film grain — heavier than before, VHS quality */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 99999;
   pointer-events: none;
-  opacity: 0.018;
+  opacity: 0.04;
   background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grainShift 0.15s steps(3) infinite;
+}
+@keyframes grainShift {
+  0%   { transform: translate(0, 0); }
+  33%  { transform: translate(-2px, 1px); }
+  66%  { transform: translate(1px, -2px); }
+  100% { transform: translate(2px, 1px); }
+}
+
+/* Layer 2: Blood-red ambient pulse — slow, barely visible */
+.horror-pulse {
+  position: fixed;
+  inset: 0;
+  z-index: 99997;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(139,0,0,0.06) 0%, transparent 70%);
+  animation: bloodPulse 8s ease-in-out infinite;
+}
+@keyframes bloodPulse {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+
+/* Layer 3: Screen flicker — rare, unsettling */
+.horror-flicker {
+  position: fixed;
+  inset: 0;
+  z-index: 99996;
+  pointer-events: none;
+  background: rgba(255,255,255,0.015);
+  opacity: 0;
+  animation: screenFlicker 12s linear infinite;
+}
+@keyframes screenFlicker {
+  0%, 95%, 100%  { opacity: 0; }
+  95.5%          { opacity: 1; }
+  96%            { opacity: 0; }
+  96.3%          { opacity: 0.7; }
+  96.5%          { opacity: 0; }
+}
+
+/* Layer 4: VHS scanlines — horizontal lines */
+.horror-scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 99995;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  opacity: 0.5;
+}
+
+/* Layer 5: Horizontal glitch tear — very rare */
+.horror-glitch {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 99998;
+  pointer-events: none;
+  background: rgba(196,30,58,0.3);
+  opacity: 0;
+  animation: glitchTear 15s linear infinite;
+}
+@keyframes glitchTear {
+  0%, 93%, 100%  { opacity: 0; top: 30%; }
+  93.2%          { opacity: 1; top: 30%; transform: translateX(-5px); }
+  93.4%          { opacity: 1; top: 31%; transform: translateX(8px); }
+  93.5%          { opacity: 0; top: 45%; }
+  93.7%          { opacity: 0.8; top: 60%; transform: translateX(-3px); }
+  93.8%          { opacity: 0; }
+}
+
+/* Layer 6: Corner vignette — dark edges, spotlight center */
+.horror-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 99994;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.4) 100%);
+}
+
+/* Layer 7: Occasional red flash — very rare, very brief */
+.horror-redflash {
+  position: fixed;
+  inset: 0;
+  z-index: 99993;
+  pointer-events: none;
+  background: rgba(139,0,0,0.08);
+  opacity: 0;
+  animation: redFlash 25s linear infinite;
+}
+@keyframes redFlash {
+  0%, 97%, 100% { opacity: 0; }
+  97.1%         { opacity: 1; }
+  97.3%         { opacity: 0; }
 }
 
 ::selection { background: var(--accent); color: #fff; }
