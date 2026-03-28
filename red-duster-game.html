@@ -416,7 +416,7 @@ function generateMap() {
     }
   });
   // Pillars
-  [[10,5],[16,16],[25,15],[6,18],[20,10],[28,25]].forEach(([px,py]) => {
+  [[10,5],[25,15],[6,18],[20,10],[28,25]].forEach(([px,py]) => {
     if (m[py] && m[py][px] === 0) m[py][px] = 2;
   });
   // Crates
@@ -455,7 +455,22 @@ const pitchObj = new THREE.Object3D();
 yawObj.add(pitchObj);
 pitchObj.add(camera);
 scene.add(yawObj);
-yawObj.position.set(16, STATE.playerHeight, 16);
+// Safe spawn — find a clear cell near center
+function findSpawn(cx, cz) {
+  if (MAP[cz] && MAP[cz][cx] === 0) return [cx + 0.5, cz + 0.5];
+  for (let r = 1; r < 8; r++) {
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        const tx = cx + dx, tz = cz + dy;
+        if (tx > 0 && tx < MAP_W-1 && tz > 0 && tz < MAP_H-1 && MAP[tz][tx] === 0)
+          return [tx + 0.5, tz + 0.5];
+      }
+    }
+  }
+  return [cx + 0.5, cz + 0.5];
+}
+const [spawnX, spawnZ] = findSpawn(16, 16);
+yawObj.position.set(spawnX, STATE.playerHeight, spawnZ);
 
 // ── Skybox Stars ──
 const starsGeo = new THREE.BufferGeometry();
@@ -1471,8 +1486,7 @@ function startGame() {
     p.respawnTimer = 0;
   });
   
-  yawObj.position.set(16, STATE.playerHeight, 16);
-  
+  yawObj.position.set(spawnX, STATE.playerHeight, spawnZ);
   updateWeaponVisuals();
   updateHUD();
   
