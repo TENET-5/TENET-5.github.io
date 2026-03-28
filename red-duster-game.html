@@ -104,7 +104,7 @@ canvas#gameCanvas { display: block; }
   </div>
   <button id="startBtn">DEPLOY</button>
   <div class="controls">
-    WASD — Move &nbsp;|&nbsp; MOUSE — Aim &nbsp;|&nbsp; CLICK — Fire &nbsp;|&nbsp; R — Reload<br>
+    WASD — Move &nbsp;|&nbsp; MOUSE — Aim &nbsp;|&nbsp; CLICK — Fire &nbsp;|&nbsp; R — Reload &nbsp;|&nbsp; F — AIRSTRIKE<br>
     SPACE — Jump &nbsp;|&nbsp; SHIFT — Sprint &nbsp;|&nbsp; TAB — Map &nbsp;|&nbsp; ESC — Release
   </div>
 </div>
@@ -669,6 +669,179 @@ function reload() {
       updateHUD();
     }
   }, 30);
+}
+
+// ── Airstrike (F key) ──
+let airstrikeCooldown = 0;
+const AIRSTRIKE_CD = 30; // 30 seconds between airstrikes
+
+function callAirstrike() {
+  const now = performance.now() / 1000;
+  if (now < airstrikeCooldown) {
+    // Show cooldown message
+    addKillFeed('AIRSTRIKE: ' + Math.ceil(airstrikeCooldown - now) + 's COOLDOWN');
+    return;
+  }
+  airstrikeCooldown = now + AIRSTRIKE_CD;
+
+  // ── Warning siren ──
+  if (audioCtx) {
+    const o1 = audioCtx.createOscillator();
+    const g1 = audioCtx.createGain();
+    o1.type = 'sawtooth';
+    o1.frequency.setValueAtTime(200, audioCtx.currentTime);
+    o1.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.5);
+    o1.frequency.linearRampToValueAtTime(200, audioCtx.currentTime + 1.0);
+    g1.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    g1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+    o1.connect(g1); g1.connect(audioCtx.destination);
+    o1.start(); o1.stop(audioCtx.currentTime + 1.5);
+  }
+
+  addKillFeed('★ AIRSTRIKE INBOUND ★');
+
+  // ── Screen shake ──
+  const shakeStart = performance.now();
+  const origY = yawObj.position.y;
+  function shake() {
+    const elapsed = performance.now() - shakeStart;
+    if (elapsed < 2000) {
+      const intensity = Math.max(0, 1 - elapsed / 2000) * 0.5;
+      camera.rotation.z = (Math.random() - 0.5) * intensity;
+      camera.position.x = (Math.random() - 0.5) * intensity * 2;
+      camera.position.y = (Math.random() - 0.5) * intensity * 2;
+      requestAnimationFrame(shake);
+    } else {
+      camera.rotation.z = 0;
+      camera.position.x = 0;
+      camera.position.y = 0;
+    }
+  }
+
+  // ── Missiles rain down after 0.5s delay ──
+  setTimeout(() => {
+    shake();
+
+    // Explosion sound — deep bass
+    if (audioCtx) {
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(60 + Math.random() * 40, audioCtx.currentTime);
+          o.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.5);
+          g.gain.setValueAtTime(0.4, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(); o.stop(audioCtx.currentTime + 0.8);
+        }, i * 150);
+      }
+    }
+
+    // ── Missile impact VFX — red columns of light ──
+    const missileCount = 8 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < missileCount; i++) {
+      setTimeout(() => {
+        // Random impact point within 80m of player
+        const px = yawObj.position.x + (Math.random() - 0.5) * 160;
+        const pz = yawObj.position.z + (Math.random() - 0.5) * 160;
+        const impactPos = new THREE.Vector3(px, 0, pz);
+
+        // Explosion light
+        const expLight = new THREE.PointLight(0xff4400, 8, 60);
+        expLight.position.set(px, 5, pz);
+        scene.add(expLight);
+        setTimeout(() => scene.remove(expLight), 400);
+
+        // Explosion particles — massive
+        for (let p = 0; p < 30; p++) {
+          const geo = new THREE.SphereGeometry(0.2 + Math.random() * 0.3, 4, 4);
+          const colors = [0xff4400, 0xff0000, 0xffaa00, 0xff6600, 0x880000];
+          const mat = new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random() * colors.length)] });
+          const particle = new THREE.Mesh(geo, mat);
+          particle.position.copy(impactPos);
+          particle.position.y = Math.random() * 3;
+          const vel = new THREE.Vector3(
+            (Math.random() - 0.5) * 30,
+            5 + Math.random() * 20,
+            (Math.random() - 0.5) * 30
+          );
+          scene.add(particle);
+          // Animate particle
+          let life = 60;
+          function animParticle() {
+            if (life-- <= 0) { scene.remove(particle); return; }
+            vel.y -= 0.5;
+            particle.position.add(vel.clone().multiplyScalar(0.016));
+            if (particle.position.y < 0) particle.position.y = 0;
+            requestAnimationFrame(animParticle);
+          }
+          animParticle();
+        }
+
+        // Scorch mark
+        const scorchGeo = new THREE.CircleGeometry(3 + Math.random() * 3, 12);
+        const scorchMat = new THREE.MeshBasicMaterial({ color: 0x111111, transparent: true, opacity: 0.8 });
+        const scorch = new THREE.Mesh(scorchGeo, scorchMat);
+        scorch.rotation.x = -Math.PI / 2;
+        scorch.position.set(px, 0.06, pz);
+        scene.add(scorch);
+
+        // Kill enemies in blast radius (25m)
+        const blastRadius = 25;
+        for (let j = enemies.length - 1; j >= 0; j--) {
+          const e = enemies[j];
+          const dist = e.position.distanceTo(impactPos);
+          if (dist < blastRadius) {
+            // Blood explosion
+            for (let b = 0; b < 20; b++) {
+              const bGeo = new THREE.SphereGeometry(0.15, 4, 4);
+              const bColors = [0xff0000, 0x880000, 0x440000];
+              const bMat = new THREE.MeshBasicMaterial({ color: bColors[Math.floor(Math.random() * bColors.length)] });
+              const bp = new THREE.Mesh(bGeo, bMat);
+              bp.position.copy(e.position);
+              bp.position.y += 2;
+              const bVel = new THREE.Vector3((Math.random()-0.5)*20, Math.random()*15, (Math.random()-0.5)*20);
+              scene.add(bp);
+              let bLife = 50;
+              function animBlood() {
+                if (bLife-- <= 0) { scene.remove(bp); return; }
+                bVel.y -= 0.4;
+                bp.position.add(bVel.clone().multiplyScalar(0.016));
+                if (bp.position.y < 0) bp.position.y = 0;
+                requestAnimationFrame(animBlood);
+              }
+              animBlood();
+            }
+
+            // Blood pool
+            const poolGeo = new THREE.CircleGeometry(1.5 + Math.random(), 8);
+            const poolMat = new THREE.MeshBasicMaterial({ color: 0x440000, transparent: true, opacity: 0.6 });
+            const pool = new THREE.Mesh(poolGeo, poolMat);
+            pool.rotation.x = -Math.PI / 2;
+            pool.position.set(e.position.x, 0.05, e.position.z);
+            scene.add(pool);
+
+            scene.remove(e);
+            enemies.splice(j, 1);
+            STATE.kills++;
+            STATE.score += 200;
+            addKillFeed('★ AIRSTRIKE KILL ★');
+          }
+        }
+      }, i * 200); // Stagger missile impacts
+    }
+
+    // Flash overlay
+    document.getElementById('dmgFlash').style.background = 'rgba(255,100,0,0.4)';
+    document.getElementById('dmgFlash').style.opacity = '1';
+    setTimeout(() => {
+      document.getElementById('dmgFlash').style.opacity = '0';
+      setTimeout(() => { document.getElementById('dmgFlash').style.background = ''; }, 300);
+    }, 500);
+
+  }, 500); // 0.5s delay after siren
 }
 
 // ── Damage ──
