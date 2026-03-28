@@ -160,11 +160,38 @@ canvas#gameCanvas { display: block; }
   <h1>RED DUSTER</h1>
   <h2>F R O N T L I N E</h2>
   <div class="info">
-    Defend the town of Maplewood against waves of hostile forces.<br>
-    A fictional scenario in a hypothetical conflict zone.<br>
-    <span style="color:#ff6633">TENET5 Studios — Three.js WebGL Engine v3.3</span>
+    Canada is under siege. Communist infiltrators have seized key infrastructure.<br>
+    You are Sergeant Perry, 3 PPCLI — signals operator, Afghanistan veteran.<br>
+    Your squad is all that stands between Canada and total subversion.<br>
+    <span style="color:#ff6633">TENET5 Studios — Three.js WebGL Engine v3.4</span>
   </div>
-  <button id="startBtn">DEPLOY</button>
+  <div style="display:flex;gap:12px;justify-content:center;margin-bottom:1.5em;">
+    <button id="campaignBtn" style="padding:15px 40px;font-size:1.2em;font-family:'Courier New',monospace;background:#cc0000;color:#fff;border:2px solid #ff3333;cursor:pointer;letter-spacing:0.15em;">CAMPAIGN</button>
+    <button id="startBtn" style="padding:15px 40px;font-size:1.2em;font-family:'Courier New',monospace;background:#333;color:#fff;border:2px solid #666;cursor:pointer;letter-spacing:0.15em;">SURVIVAL</button>
+  </div>
+  <div id="missionSelect" style="display:none;max-width:600px;text-align:left;margin-bottom:1.5em;">
+    <div style="color:#ff6633;font-size:0.9em;letter-spacing:0.2em;margin-bottom:0.8em;">SELECT MISSION</div>
+    <div class="mission-item" data-mission="1" style="background:#1a0000;border:1px solid #ff333388;padding:12px 16px;margin-bottom:6px;cursor:pointer;">
+      <span style="color:#ff3333;font-weight:bold;">01 — FIRST LIGHT</span><br>
+      <span style="color:#888;font-size:0.85em;">Secure the signals station at CFB Petawawa. Link up with your squad and clear the compound.</span>
+    </div>
+    <div class="mission-item" data-mission="2" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">02 — PARLIAMENT FALLS</span><br>
+      <span style="color:#888;font-size:0.85em;">Fight through Wellington Street to the Peace Tower. Extract the intelligence package.</span>
+    </div>
+    <div class="mission-item" data-mission="3" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">03 — RED HIGHWAY</span><br>
+      <span style="color:#888;font-size:0.85em;">Destroy the roadblock on the Trans-Canada. Reopen supply lines to the Maritimes.</span>
+    </div>
+    <div class="mission-item" data-mission="4" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">04 — SIGNAL FIRE</span><br>
+      <span style="color:#888;font-size:0.85em;">Reach the CN Tower. Restore military comms. Canada needs to hear the truth.</span>
+    </div>
+    <div class="mission-item" data-mission="5" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">05 — THE RED DUSTER</span><br>
+      <span style="color:#888;font-size:0.85em;">Storm the command post. Raise the Red Ensign over Parliament Hill. End this.</span>
+    </div>
+  </div>
   <div class="controls">
     WASD — Move &nbsp;|&nbsp; MOUSE — Aim &nbsp;|&nbsp; CLICK — Fire &nbsp;|&nbsp; R — Reload<br>
     F — Airstrike &nbsp;|&nbsp; G — Grenade &nbsp;|&nbsp; 1/2/3 — Weapons<br>
@@ -435,7 +462,7 @@ const STATE = {
   waveDelay: 0, waveActive: false, spawnQueue: 0,
   damageFlashTime: 0, fov: 75, shake: 0, targetFov: 75,
   grenadeCount: 3, maxGrenades: 3,
-  combo: 0, comboTimer: 0, lastKillTime: 0,
+  combo: 0, comboTimer: 0, aiming: false, lastKillTime: 0,
   footstepTimer: 0,
   sprint: 100, maxSprint: 100, sprinting: false,
   corpses: [], bloodDecals: [],
@@ -740,6 +767,11 @@ moonLight.shadow.camera.bottom = -20;
 moonLight.shadow.mapSize.width = 2048;
 moonLight.shadow.mapSize.height = 2048;
 scene.add(moonLight);
+const flashLight = new THREE.SpotLight(0xccddff, 10, 40, Math.PI/7, 0.8, 1);
+flashLight.position.set(0.1, -0.2, 0);
+flashLight.target.position.set(0, 0, -1);
+camera.add(flashLight);
+camera.add(flashLight.target);
 
 const fillLight = new THREE.DirectionalLight(0xff5522, 0.35);
 fillLight.position.set(-10, 10, -10);
@@ -1075,9 +1107,9 @@ function buildSoldier(type) {
 
 function spawnEnemy(type = 'grunt') {
   const stats = {
-    grunt:  { hp: 100, speed: 7.5, damage: 15, score: 10, ranged: false, scale: 1.0 },
-    heavy:  { hp: 300, speed: 4.5, damage: 25, score: 30, ranged: false, scale: 1.2 },
-    ranger: { hp: 80,  speed: 6.6, damage: 10, score: 20, ranged: true,  scale: 0.9 }
+    grunt:  { hp: 40, speed: 2.2, damage: 15, score: 10, ranged: false, scale: 1.0 },
+    heavy:  { hp: 100, speed: 1.5, damage: 25, score: 30, ranged: false, scale: 1.2 },
+    ranger: { hp: 30,  speed: 1.8, damage: 10, score: 20, ranged: true,  scale: 0.9 }
   };
   const data = stats[type];
   const mesh = buildSoldier(type);
@@ -1834,7 +1866,10 @@ function shoot() {
   if (STATE.ammo <= 0) {
     setTimeout(() => reload(), 300);
   }
-  STATE.shootCooldown = w.fireRate; STATE.shake = 0.4;
+  STATE.shootCooldown = w.fireRate; 
+  // Muzzle Rise Recoil
+  pitchObj.rotation.x += STATE.weapon === 'shotgun' ? 0.12 : 0.04 + Math.random()*0.02;
+  STATE.shake = 0.05;
   playSound('shoot');
   
   // Muzzle flash
@@ -1866,8 +1901,9 @@ function shoot() {
   const raycaster = new THREE.Raycaster();
   
   for (let pellet = 0; pellet < w.pellets; pellet++) {
-    const spreadX = (Math.random() - 0.5) * w.spread;
-    const spreadY = (Math.random() - 0.5) * w.spread;
+    const trueSpread = STATE.aiming ? (w.spread * 0.2) : (w.spread * 4.0);
+    const spreadX = (Math.random() - 0.5) * trueSpread;
+    const spreadY = (Math.random() - 0.5) * trueSpread;
     
     const dir = new THREE.Vector3(spreadX, spreadY, -1).normalize();
     dir.applyQuaternion(camera.quaternion);
@@ -2224,6 +2260,13 @@ window.addEventListener('mousemove', e => {
   pitchObj.rotation.x = -STATE.mouse.y;
 });
 
+window.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('mousedown', e => {
+  if (e.button === 2) STATE.aiming = true;
+});
+window.addEventListener('mouseup', e => {
+  if (e.button === 2) STATE.aiming = false;
+});
 window.addEventListener('click', () => {
   initAudio();
   if (STATE.started && !STATE.paused) shoot();
@@ -2307,7 +2350,7 @@ function startGame() {
   document.getElementById('hud').style.display = 'block';
   document.getElementById('hud-top').style.display = 'block';
   document.getElementById('healthBar').style.display = 'block';
-  document.getElementById('crosshair').style.display = 'block';
+  //  // ARCADE UI NUKED
   document.getElementById('killFeed').style.display = 'block';
   document.getElementById('grenadeHud').style.display = 'block';
   document.getElementById('sprintBar').style.display = 'block';
