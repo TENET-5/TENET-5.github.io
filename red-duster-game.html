@@ -1853,6 +1853,7 @@ function shoot() {
         const damage = w.damage * (isHeadshot ? 3 : 1);
         
         enemy.hp -= damage;
+        enemy.recentlyHit = true; // Trigger suppression AI
         playSound('hit');
         const hm = document.getElementById('hitMarker');
         hm.style.display = 'block';
@@ -1860,12 +1861,25 @@ function shoot() {
         hm.textContent = isHeadshot ? '☠' : '✕';
         setTimeout(() => { hm.style.display = 'none'; }, 150);
         addDamageNumber(enemy.x, hits[0].point.y, enemy.z, damage, isHeadshot);
-        
+
+        // Flinch — push enemy back on hit
+        const pushDist = isHeadshot ? 0.3 : 0.12;
+        const pdx = enemy.x - yawObj.position.x;
+        const pdz = enemy.z - yawObj.position.z;
+        const pdd = Math.sqrt(pdx*pdx + pdz*pdz) || 1;
+        if (!isColliding(enemy.x + (pdx/pdd)*pushDist, enemy.z + (pdz/pdd)*pushDist, 0.4)) {
+          enemy.x += (pdx/pdd)*pushDist;
+          enemy.z += (pdz/pdd)*pushDist;
+          enemy.mesh.position.x = enemy.x;
+          enemy.mesh.position.z = enemy.z;
+        }
+
         if (enemy.hp <= 0) {
           killEnemy(enemy, isHeadshot);
         } else {
-          for (let i = 0; i < 3; i++) {
-            addParticle(enemy.x, 1.2, enemy.z, 0xff6666);
+          const particleCount = isHeadshot ? 8 : 3;
+          for (let i = 0; i < particleCount; i++) {
+            addParticle(enemy.x, isHeadshot ? 1.7 : 1.2, enemy.z, isHeadshot ? 0xff0000 : 0xff6666);
           }
         }
       }
