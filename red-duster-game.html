@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Red Duster: Frontline v3.2 — TENET5 Studios</title>
+<title>Red Duster: Frontline v3.3 — TENET5 Studios</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #fff; }
@@ -61,7 +61,13 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 #reloadFill { height: 100%; background: #ffcc00; width: 0%; }
 #crosshair {
   position: fixed; top: 50%; left: 50%; z-index: 50;
+  width: 30px; height: 30px;
   transform: translate(-50%, -50%); display: none; pointer-events: none;
+}
+#hitMarker {
+  position: fixed; top: 50%; left: 50%; z-index: 52;
+  transform: translate(-50%, -50%); pointer-events: none; display: none;
+  font-size: 24px; color: #ff3333; text-shadow: 0 0 5px #ff0000;
 }
 #dmgFlash {
   position: fixed; inset: 0; z-index: 45; pointer-events: none;
@@ -156,7 +162,7 @@ canvas#gameCanvas { display: block; }
   <div class="info">
     Defend the town of Maplewood against waves of hostile forces.<br>
     A fictional scenario in a hypothetical conflict zone.<br>
-    <span style="color:#ff6633">TENET5 Studios — Three.js WebGL Engine v3.2</span>
+    <span style="color:#ff6633">TENET5 Studios — Three.js WebGL Engine v3.3</span>
   </div>
   <button id="startBtn">DEPLOY</button>
   <div class="controls">
@@ -177,13 +183,14 @@ canvas#gameCanvas { display: block; }
 <div id="healthBar"><div id="healthFill" style="width:100%"></div></div>
 <div id="reloadBar"><div id="reloadFill"></div></div>
 
-<svg id="crosshair" width="32" height="32" viewBox="0 0 32 32">
-  <line x1="16" y1="4" x2="16" y2="12" stroke="#0f0" stroke-width="2" opacity="0.8"/>
-  <line x1="16" y1="20" x2="16" y2="28" stroke="#0f0" stroke-width="2" opacity="0.8"/>
-  <line x1="4" y1="16" x2="12" y2="16" stroke="#0f0" stroke-width="2" opacity="0.8"/>
-  <line x1="20" y1="16" x2="28" y2="16" stroke="#0f0" stroke-width="2" opacity="0.8"/>
-  <circle cx="16" cy="16" r="2" fill="none" stroke="#0f0" stroke-width="1" opacity="0.5"/>
-</svg>
+<div id="crosshair">
+  <div style="position:absolute;width:2px;height:12px;background:rgba(255,255,255,0.8);left:50%;top:0;transform:translateX(-50%)"></div>
+  <div style="position:absolute;width:2px;height:12px;background:rgba(255,255,255,0.8);left:50%;bottom:0;transform:translateX(-50%)"></div>
+  <div style="position:absolute;width:12px;height:2px;background:rgba(255,255,255,0.8);top:50%;left:0;transform:translateY(-50%)"></div>
+  <div style="position:absolute;width:12px;height:2px;background:rgba(255,255,255,0.8);top:50%;right:0;transform:translateY(-50%)"></div>
+  <div style="position:absolute;width:2px;height:2px;background:rgba(255,80,80,0.9);left:50%;top:50%;transform:translate(-50%,-50%)"></div>
+</div>
+<div id="hitMarker">✕</div>
 
 <div id="dmgFlash"></div>
 <div id="lowHealthPulse"></div>
@@ -426,14 +433,15 @@ const STATE = {
   enemies: [], particles: [], projectiles: [], grenades: [], pickups: [],
   keys: {}, mouse: { x: 0, y: 0 },
   waveDelay: 0, waveActive: false, spawnQueue: 0,
-  damageFlashTime: 0, fov: 75, targetFov: 75,
+  damageFlashTime: 0, fov: 75, shake: 0, targetFov: 75,
   grenadeCount: 3, maxGrenades: 3,
   combo: 0, comboTimer: 0, lastKillTime: 0,
   footstepTimer: 0,
   sprint: 100, maxSprint: 100, sprinting: false,
   corpses: [], bloodDecals: [],
   captureZones: [], damageIndicators: [],
-  screenShake: 0, shakeIntensity: 0
+  screenShake: 0, shakeIntensity: 0,
+  damageNumbers: []
 };
 
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
@@ -1047,9 +1055,9 @@ function buildSoldier(type) {
 
 function spawnEnemy(type = 'grunt') {
   const stats = {
-    grunt:  { hp: 100, speed: 2.5, damage: 15, score: 10, ranged: false, scale: 1.0 },
-    heavy:  { hp: 300, speed: 1.5, damage: 25, score: 30, ranged: false, scale: 1.2 },
-    ranger: { hp: 80,  speed: 2.2, damage: 10, score: 20, ranged: true,  scale: 0.9 }
+    grunt:  { hp: 100, speed: 7.5, damage: 15, score: 10, ranged: false, scale: 1.0 },
+    heavy:  { hp: 300, speed: 4.5, damage: 25, score: 30, ranged: false, scale: 1.2 },
+    ranger: { hp: 80,  speed: 6.6, damage: 10, score: 20, ranged: true,  scale: 0.9 }
   };
   const data = stats[type];
   const mesh = buildSoldier(type);
@@ -1066,17 +1074,39 @@ function spawnEnemy(type = 'grunt') {
   });
 }
 
+// ── AI State Machine ──
+// States: ADVANCE, TAKE_COVER, PEEK_FIRE, FLANK, RUSH, SUPPRESSED
+function findCoverSpot(ex, ez, px, pz) {
+  // Find nearest wall/crate that blocks line to player
+  const dx = ex - px, dz = ez - pz;
+  const dist = Math.sqrt(dx*dx + dz*dz);
+  const nx = dx/dist, nz = dz/dist;
+  // Try spots behind nearby obstacles relative to player
+  for (let r = 2; r <= 5; r++) {
+    for (let angle = -1.2; angle <= 1.2; angle += 0.4) {
+      const cx = ex + Math.cos(Math.atan2(nz,nx) + angle) * r;
+      const cz = ez + Math.sin(Math.atan2(nz,nx) + angle) * r;
+      if (cx > 1 && cx < MAP_W-1 && cz > 1 && cz < MAP_H-1 && !isColliding(cx, cz, 0.5)) {
+        // Check if there's a wall between this spot and the player
+        const midX = (cx + px) / 2, midZ = (cz + pz) / 2;
+        if (isColliding(midX, midZ, 0.3)) return { x: cx, z: cz };
+      }
+    }
+  }
+  return null;
+}
+
 function updateEnemies(dt) {
   const playerX = yawObj.position.x;
   const playerZ = yawObj.position.z;
   const now = performance.now();
+  const aliveEnemies = STATE.enemies.filter(e => !e.dead);
 
   for (let i = STATE.enemies.length - 1; i >= 0; i--) {
     const e = STATE.enemies[i];
 
     if (e.dead) {
       e.deathTime -= dt;
-      // Collapse sideways and sink
       e.mesh.rotation.z = Math.min(Math.PI / 2, e.mesh.rotation.z + dt * 4);
       e.mesh.position.y = Math.max(-0.5, e.mesh.position.y - dt * 0.8);
       if (e.deathTime <= 0) {
@@ -1090,31 +1120,130 @@ function updateEnemies(dt) {
     const dz = playerZ - e.z;
     const dist = Math.sqrt(dx * dx + dz * dz);
 
-    // Face the player
-    e.mesh.rotation.y = Math.atan2(dx, dz);
+    // Face the player (smooth turn)
+    const targetRot = Math.atan2(dx, dz);
+    let rotDiff = targetRot - e.mesh.rotation.y;
+    while (rotDiff > Math.PI) rotDiff -= Math.PI*2;
+    while (rotDiff < -Math.PI) rotDiff += Math.PI*2;
+    e.mesh.rotation.y += rotDiff * Math.min(1, dt * 6);
 
-    if (e.ranged && dist > 3 && dist < 15) {
+    // Show health bar if damaged
+    if (!e.healthBar && e.hp < e.maxHp) {
+      const barBg = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.06), new THREE.MeshBasicMaterial({ color: 0x333333, depthTest: false, transparent: true, opacity: 0.7 }));
+      const barFg = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.05), new THREE.MeshBasicMaterial({ color: 0xff3333, depthTest: false, transparent: true, opacity: 0.9 }));
+      barBg.position.set(0, 2.0 * (e.baseScale || 1), 0);
+      barFg.position.set(0, 2.0 * (e.baseScale || 1), 0.001);
+      barBg.renderOrder = 999;
+      barFg.renderOrder = 1000;
+      e.mesh.add(barBg);
+      e.mesh.add(barFg);
+      e.healthBar = barFg;
+      e.healthBarBg = barBg;
+    }
+    if (e.healthBar) {
+      const hpPct = Math.max(0, e.hp / e.maxHp);
+      e.healthBar.scale.x = hpPct;
+      e.healthBar.position.x = -(1 - hpPct) * 0.25;
+      if (hpPct > 0.5) e.healthBar.material.color.setHex(0x33ff33);
+      else if (hpPct > 0.25) e.healthBar.material.color.setHex(0xffcc00);
+      else e.healthBar.material.color.setHex(0xff3333);
+      e.healthBar.lookAt(camera.getWorldPosition(new THREE.Vector3()));
+      e.healthBarBg.lookAt(camera.getWorldPosition(new THREE.Vector3()));
+    }
+
+    // Ranged enemy shooting
+    if (e.ranged) {
       e.shootCooldown -= dt;
-      if (e.shootCooldown <= 0) {
-        shootProjectile(e.x, e.z, playerX, playerZ);
-        e.shootCooldown = 2 + Math.random();
+      if (e.shootCooldown <= 0 && dist < 18) {
+        const inaccuracy = 0.5 + (dist * 0.03);
+        shootProjectile(e.x, e.z, playerX + (Math.random()-0.5)*inaccuracy, playerZ + (Math.random()-0.5)*inaccuracy);
+        e.shootCooldown = 0.8 + Math.random() * 1.2;
+        playSound('shoot');
       }
     }
 
-    const stopDist = e.ranged ? 6 : 1.2;
+    // ── Improved AI Movement ──
+    const stopDist = e.ranged ? 8 : 1.2;
     let isMoving = false;
+
+    if (!e.aiTimer) e.aiTimer = 0;
+    if (!e.strafeDir) e.strafeDir = Math.random() > 0.5 ? 1 : -1;
+    if (!e.stuckTimer) e.stuckTimer = 0;
+    if (!e.stuckAngle) e.stuckAngle = 0;
+
+    e.aiTimer += dt;
+    if (e.aiTimer > 2 + Math.random()) {
+      e.strafeDir *= -1;
+      e.aiTimer = 0;
+    }
+
     if (dist > stopDist) {
-      const moveX = (dx / dist) * e.speed * dt;
-      const moveZ = (dz / dist) * e.speed * dt;
+      let moveX = (dx / dist) * e.speed * dt;
+      let moveZ = (dz / dist) * e.speed * dt;
+
+      // Heavy charge boost
+      if (e.type === 'heavy' && dist < 8) {
+        moveX *= 1.5;
+        moveZ *= 1.5;
+      }
+
+      // Ranger strafe — maintain distance and circle
+      if (e.ranged && dist < 10) {
+        const perpX = -dz / dist * e.strafeDir;
+        const perpZ = dx / dist * e.strafeDir;
+        moveX = perpX * e.speed * dt;
+        moveZ = perpZ * e.speed * dt;
+        if (dist < 6) {
+          moveX -= (dx / dist) * e.speed * dt * 0.5;
+          moveZ -= (dz / dist) * e.speed * dt * 0.5;
+        }
+      }
+
+      // Grunt separation — avoid stacking
+      if (!e.ranged && e.type !== 'heavy') {
+        STATE.enemies.forEach(other => {
+          if (other === e || other.dead) return;
+          const sepDx = e.x - other.x;
+          const sepDz = e.z - other.z;
+          const sepDist = Math.sqrt(sepDx*sepDx + sepDz*sepDz);
+          if (sepDist < 1.5 && sepDist > 0.01) {
+            moveX += (sepDx / sepDist) * e.speed * dt * 0.4;
+            moveZ += (sepDz / sepDist) * e.speed * dt * 0.4;
+          }
+        });
+      }
+
       const newX = e.x + moveX;
       const newZ = e.z + moveZ;
+
       if (!isColliding(newX, newZ, 0.4)) {
-        e.x = newX;
-        e.z = newZ;
-        e.mesh.position.x = e.x;
-        e.mesh.position.z = e.z;
+        e.x = newX; e.z = newZ;
         isMoving = true;
+        e.stuckTimer = 0;
+      } else if (!isColliding(newX, e.z, 0.4)) {
+        e.x = newX;
+        isMoving = true;
+        e.stuckTimer = 0;
+      } else if (!isColliding(e.x, newZ, 0.4)) {
+        e.z = newZ;
+        isMoving = true;
+        e.stuckTimer = 0;
+      } else {
+        // Stuck — try perpendicular escape
+        e.stuckTimer += dt;
+        if (e.stuckTimer > 0.3) {
+          if (e.stuckTimer > 0.35) { e.stuckAngle = (Math.random() - 0.5) * Math.PI; e.stuckTimer = 0; }
+          const escX = e.x + Math.cos(e.stuckAngle) * e.speed * dt;
+          const escZ = e.z + Math.sin(e.stuckAngle) * e.speed * dt;
+          if (!isColliding(escX, escZ, 0.4)) {
+            e.x = escX; e.z = escZ;
+            isMoving = true;
+          }
+        }
       }
+
+      e.mesh.position.x = e.x;
+      e.mesh.position.z = e.z;
     } else if (!e.ranged && dist < 1.5) {
       damagePlayer(e.damage * dt, e.x, e.z);
     }
@@ -1123,7 +1252,7 @@ function updateEnemies(dt) {
     if (isMoving) {
       e.mesh.position.y = Math.sin(now * 0.008 * e.speed) * 0.06;
     } else {
-      e.mesh.position.y = 0;
+      e.mesh.position.y = Math.sin(now * 0.003) * 0.02; // Idle sway
     }
   }
 }
@@ -1136,6 +1265,8 @@ function shootProjectile(fromX, fromZ, toX, toZ) {
   const mat = new THREE.MeshBasicMaterial({ color: 0xff3333 });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(fromX, 1, fromZ);
+  const pLight = new THREE.PointLight(0xff3333, 2, 5);
+  mesh.add(pLight);
   scene.add(mesh);
   STATE.projectiles.push({
     mesh, x: fromX, z: fromZ, vx: (dx/dist)*8, vz: (dz/dist)*8, damage: 10
@@ -1663,7 +1794,10 @@ function shoot() {
   
   const w = WEAPONS[STATE.weapon];
   STATE.ammo--;
-  STATE.shootCooldown = w.fireRate;
+  if (STATE.ammo <= 0) {
+    setTimeout(() => reload(), 300);
+  }
+  STATE.shootCooldown = w.fireRate; STATE.shake = 0.4;
   playSound('shoot');
   
   // Muzzle flash
@@ -1720,6 +1854,12 @@ function shoot() {
         
         enemy.hp -= damage;
         playSound('hit');
+        const hm = document.getElementById('hitMarker');
+        hm.style.display = 'block';
+        hm.style.color = isHeadshot ? '#ffff00' : '#ff3333';
+        hm.textContent = isHeadshot ? '☠' : '✕';
+        setTimeout(() => { hm.style.display = 'none'; }, 150);
+        addDamageNumber(enemy.x, hits[0].point.y, enemy.z, damage, isHeadshot);
         
         if (enemy.hp <= 0) {
           killEnemy(enemy, isHeadshot);
@@ -1799,6 +1939,25 @@ function callAirstrike() {
   }, 1500);
 }
 
+function addDamageNumber(x, y, z, damage, isHeadshot) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = isHeadshot ? '#ffff00' : '#ff4444';
+  ctx.shadowColor = '#000'; ctx.shadowBlur = 3;
+  ctx.font = 'bold 24px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(Math.round(damage).toString(), 32, 24);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.position.set(x + (Math.random()-0.5)*0.3, y + 1.8, z + (Math.random()-0.5)*0.3);
+  sprite.scale.set(0.4, 0.2, 1);
+  sprite.renderOrder = 1001;
+  scene.add(sprite);
+  STATE.damageNumbers.push({ sprite, life: 1.0, vy: 1.5 });
+}
+
 // ── Wave System ──
 function startWave() {
   STATE.wave++;
@@ -1811,12 +1970,33 @@ function startWave() {
   
   addKillFeed(`WAVE ${STATE.wave} START`);
   
-  const baseCount = 5 + STATE.wave * 2;
-  for (let i = 0; i < baseCount; i++) {
-    let type = 'grunt';
-    if (STATE.wave >= 3 && Math.random() < 0.3) type = 'heavy';
-    else if (STATE.wave >= 2 && Math.random() < 0.25) type = 'ranger';
-    spawnEnemy(type);
+  // Wave composition
+  const baseCount = 4 + STATE.wave * 2;
+  const heavyCount = STATE.wave >= 3 ? Math.floor(STATE.wave / 2) : 0;
+  const rangerCount = STATE.wave >= 2 ? Math.floor(STATE.wave / 1.5) : 0;
+  const gruntCount = Math.max(1, baseCount - heavyCount - rangerCount);
+  
+  for (let i = 0; i < gruntCount; i++) spawnEnemy('grunt');
+  for (let i = 0; i < heavyCount; i++) spawnEnemy('heavy');
+  for (let i = 0; i < rangerCount; i++) spawnEnemy('ranger');
+  
+  // Boss wave every 5 waves — extra heavies
+  if (STATE.wave % 5 === 0) {
+    addKillFeed('BOSS WAVE \u2014 HEAVY REINFORCEMENTS');
+    for (let i = 0; i < 3 + Math.floor(STATE.wave / 5); i++) spawnEnemy('heavy');
+  }
+  
+  // Mid-wave reinforcements after 10 seconds
+  if (STATE.wave >= 3) {
+    setTimeout(() => {
+      if (!STATE.alive || STATE.paused) return;
+      const reinforcements = Math.floor(STATE.wave / 2);
+      addKillFeed('REINFORCEMENTS INCOMING');
+      for (let i = 0; i < reinforcements; i++) {
+        const type = Math.random() < 0.3 ? 'ranger' : 'grunt';
+        spawnEnemy(type);
+      }
+    }, 10000 + Math.random() * 5000);
   }
   
   updateHUD();
@@ -1869,6 +2049,15 @@ function switchWeapon(weaponKey) {
   STATE.shootRate = w.fireRate;
   STATE.reloadTime = w.reloadTime;
   updateWeaponVisuals();
+    if (STATE.shake > 0) {
+      STATE.shake -= dt * 3;
+      if (STATE.shake < 0) STATE.shake = 0;
+      camera.position.x = (Math.random() - 0.5) * STATE.shake;
+      camera.position.y = (Math.random() - 0.5) * STATE.shake;
+    } else {
+      camera.position.x = 0;
+      camera.position.y = 0;
+    }
   updateHUD();
   
   const nameEl = document.getElementById('weaponName');
@@ -2033,6 +2222,8 @@ function startGame() {
   STATE.corpses.length = 0;
   STATE.bloodDecals.forEach(d => scene.remove(d));
   STATE.bloodDecals.length = 0;
+  STATE.damageNumbers.forEach(d => scene.remove(d.sprite));
+  STATE.damageNumbers.length = 0;
   STATE.captureZones.forEach(z => { z.captured = false; z.progress = 0; z.mesh.material.opacity = 0.3; });
   airstrikeCooldown = 0;
   
@@ -2048,6 +2239,15 @@ function startGame() {
   
   yawObj.position.set(spawnX, STATE.playerHeight, spawnZ);
   updateWeaponVisuals();
+    if (STATE.shake > 0) {
+      STATE.shake -= dt * 3;
+      if (STATE.shake < 0) STATE.shake = 0;
+      camera.position.x = (Math.random() - 0.5) * STATE.shake;
+      camera.position.y = (Math.random() - 0.5) * STATE.shake;
+    } else {
+      camera.position.x = 0;
+      camera.position.y = 0;
+    }
   updateHUD();
   
   document.getElementById('menu').style.display = 'none';
@@ -2092,6 +2292,18 @@ function animate() {
     updateGrenades(dt);
     updateCorpses(dt);
     updateCaptureZones(dt);
+    
+    // Damage numbers
+    for (let i = STATE.damageNumbers.length - 1; i >= 0; i--) {
+      const d = STATE.damageNumbers[i];
+      d.life -= dt * 1.5;
+      d.sprite.position.y += d.vy * dt;
+      d.sprite.material.opacity = Math.max(0, d.life);
+      if (d.life <= 0) {
+        scene.remove(d.sprite);
+        STATE.damageNumbers.splice(i, 1);
+      }
+    }
     
     // Muzzle flash fade
     if (flashTimer > 0) {
