@@ -1,19 +1,15 @@
 /**
- * Spotify iFrame API player — Dead Kennedys albums.
- * Plays full albums through. Press play, read the evidence.
+ * Spotify iFrame API player — Classical Villain playlist.
+ * The soundtrack to 1,005 records of government failure.
  * https://developer.spotify.com/documentation/embeds/references/iframe-api
  */
 (function() {
-  // Full DK albums — plays through track by track
+  // Classical Villain playlist — ominous orchestral
   var tracks = [
-    'spotify:album:2x5IF6C5TgCyp3zasMUYgG', // User's requested album (plays first)
-    'spotify:album:39RCMjmOBYGJOdCWe1GSEN', // Fresh Fruit for Rotting Vegetables (1980)
-    'spotify:album:6gQKAYf1VhWRCV8gMBBXHq', // Plastic Surgery Disasters (1982)
-    'spotify:album:2m7CEzEMpkbCxiJwFBadAn', // Frankenchrist (1985)
-    'spotify:album:6VnEKzr2E68eJC8e0n6MHq'  // Bedtime for Democracy (1986)
+    'spotify:playlist:4xoVsdgLvChQU8yrI0ISVv'  // Classical Villain playlist
   ];
 
-  var idx = 0; // Always start with Give Me Convenience or Give Me Death
+  var idx = 0;
   var ctrl = null;
   var playing = false;
 
