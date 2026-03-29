@@ -4589,7 +4589,98 @@ function updateCorpses(dt) {
   }
 }
 
+// ── MULTIPLAYER LISTEN SERVER SYNC ──
+function ensurePeerMesh(id) {
+  if (!MPParams.peers[id]) {
+    const geo = new THREE.CylinderGeometry(0.4, 0.4, 1.7, 8);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x2244aa, roughness: 0.8 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+    scene.add(mesh);
+    MPParams.peers[id] = { mesh: mesh, id: id, lastSync: performance.now() };
+  }
+  return MPParams.peers[id];
+}
+
+function applyClientInput(msg) {
+  const peer = ensurePeerMesh(msg.id);
+  peer.mesh.position.set(msg.pos[0], msg.pos[1], msg.pos[2]);
+  peer.mesh.rotation.y = msg.rot;
+  peer.lastSync = performance.now();
+  if (msg.shoot) {
+    if (typeof playSound !== 'undefined') playSound('shoot');
+    const pz = new THREE.Vector3(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0), msg.rot);
+    if (typeof launchScientificProjectile !== 'undefined') launchScientificProjectile(peer.mesh.position.clone().add(new THREE.Vector3(0,0.5,0)), pz, WEAPONS.rifle);
+  }
+}
+
+function syncClientState(msg) {
+  if (msg.p) {
+    msg.p.forEach(pl => {
+      const peer = ensurePeerMesh(pl.id);
+      peer.mesh.position.set(pl.x, pl.y, pl.z);
+      peer.mesh.rotation.y = pl.r;
+      peer.lastSync = performance.now();
+    });
+  }
+  if (msg.e && typeof STATE.enemies !== 'undefined') {
+    msg.e.forEach(hostE => {
+      let e = STATE.enemies.find(en => en.id === hostE.id);
+      if (!e && typeof spawnEnemy !== 'undefined') {
+        const type = Math.random() > 0.5 ? 'commie' : 'heavy';
+        e = spawnEnemy(type, hostE.x, hostE.z);
+        if (e) e.id = hostE.id; 
+      }
+      if (e && e.mesh) {
+        e.mesh.position.set(hostE.x, hostE.y, hostE.z);
+        e.health = hostE.h;
+      }
+    });
+  }
+}
+
+let lastMQTTSync = 0;
+let lastLobbyBeep = 0;
+
 function animate() {
+    requestAnimationFrame(animate);
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
+    if (typeof MPParams !== 'undefined' && MPParams.isConnected && mqttClient) {
+      if (MPParams.isHost) {
+        if (now - lastLobbyBeep > 1000) {
+           mqttClient.publish(MPParams.topicLobby, JSON.stringify({ type: 'hostBeat', id: MPParams.myId }), { qos: 0 });
+           lastLobbyBeep = now;
+        }
+        if (now - lastMQTTSync > 66) {
+           const stateBlock = { e: [], p: [] };
+           if (typeof STATE.enemies !== 'undefined') {
+               STATE.enemies.forEach(e => {
+                 if (e.health > 0 && e.mesh) {
+                    if (!e.id) e.id = Math.random().toString(36).substr(2,6);
+                    stateBlock.e.push({ id: e.id, x: e.mesh.position.x, y: e.mesh.position.y, z: e.mesh.position.z, h: e.health });
+                 }
+               });
+           }
+           Object.values(MPParams.peers).forEach(peer => {
+             if (now - peer.lastSync < 3000) stateBlock.p.push({ id: peer.id, x: peer.mesh.position.x, y: peer.mesh.position.y, z: peer.mesh.position.z, r: peer.mesh.rotation.y });
+           });
+           if (typeof yawObj !== 'undefined') stateBlock.p.push({ id: MPParams.myId, x: yawObj.position.x, y: yawObj.position.y, z: yawObj.position.z, r: yawObj.rotation.y });
+           mqttClient.publish(MPParams.topicState, JSON.stringify(stateBlock), { qos: 0 });
+           lastMQTTSync = now;
+        }
+      } else {
+        if (now - lastMQTTSync > 66 && STATE.alive && STATE.started && typeof yawObj !== 'undefined') {
+           mqttClient.publish(MPParams.topicInput, JSON.stringify({
+             id: MPParams.myId,
+             pos: [yawObj.position.x, yawObj.position.y, yawObj.position.z],
+             rot: yawObj.rotation.y,
+             shoot: typeof mouseHeld !== 'undefined' ? mouseHeld && STATE.shootCooldown <= 0 : false
+           }), { qos: 0 });
+           lastMQTTSync = now;
+        }
+      }
+    }
   requestAnimationFrame(animate);
   
   if (airstrikeCooldown > 0) airstrikeCooldown -= 0.016;
