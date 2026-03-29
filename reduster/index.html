@@ -380,6 +380,87 @@
     dots[cur].classList.add('active');
   }, 5000);
 })();
+
+// ── FALLBACK: Wire up lobby buttons if module init fails ──
+// The Vite module chain (PeerJS dynamic import) can fail silently,
+// leaving initLobby() uncalled and all buttons dead.
+(function() {
+  let moduleInitialized = false;
+
+  // The module sets window._lobbyStartGameFn when initLobby runs
+  const checkInterval = setInterval(() => {
+    if (window._lobbyStartGameFn) {
+      moduleInitialized = true;
+      clearInterval(checkInterval);
+    }
+  }, 500);
+
+  // After 3 seconds, if module hasn't initialized, force-wire buttons
+  setTimeout(() => {
+    if (moduleInitialized) return;
+    clearInterval(checkInterval);
+    console.warn('[RED DUSTER] Module init failed — activating fallback button handlers');
+
+    const lobby = document.getElementById('lobby');
+    const menu = document.getElementById('menu');
+    const soloBtn = document.getElementById('soloBtn');
+    const hostBtn = document.getElementById('hostBtn');
+    const startBtn = document.getElementById('startBtn');
+    const campaignBtn = document.getElementById('campaignBtn');
+    const respawnBtn = document.getElementById('respawnBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+
+    function showMenu() {
+      if (lobby) lobby.style.display = 'none';
+      if (menu) menu.style.display = 'flex';
+    }
+
+    // Solo button — hide lobby, show main menu
+    if (soloBtn && !soloBtn._fallbackWired) {
+      soloBtn._fallbackWired = true;
+      soloBtn.addEventListener('click', () => {
+        console.log('[RED DUSTER] Solo — bypassing lobby');
+        showMenu();
+      });
+    }
+
+    // Host button — show error since PeerJS is unavailable
+    if (hostBtn && !hostBtn._fallbackWired) {
+      hostBtn._fallbackWired = true;
+      hostBtn.addEventListener('click', () => {
+        const err = document.getElementById('lobby-error');
+        if (err) {
+          err.style.display = 'block';
+          err.textContent = 'MULTIPLAYER UNAVAILABLE — PLAY SOLO';
+        }
+      });
+    }
+
+    // If main menu buttons also need wiring (startBtn = SURVIVAL)
+    if (startBtn && !startBtn._fallbackWired) {
+      startBtn._fallbackWired = true;
+      startBtn.addEventListener('click', () => {
+        if (menu) menu.style.display = 'none';
+        // Try to trigger the game via the module's handler
+        if (typeof window._gameStartFn === 'function') {
+          window._gameStartFn('survival');
+        }
+      });
+    }
+
+    if (campaignBtn && !campaignBtn._fallbackWired) {
+      campaignBtn._fallbackWired = true;
+      campaignBtn.addEventListener('click', () => {
+        const missionSelect = document.getElementById('missionSelect');
+        if (missionSelect) {
+          missionSelect.style.display = missionSelect.style.display === 'none' ? 'block' : 'none';
+        }
+      });
+    }
+
+    console.log('[RED DUSTER] Fallback handlers active — Solo play enabled');
+  }, 3000);
+})();
 </script></body>
 </html>
 
