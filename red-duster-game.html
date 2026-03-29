@@ -537,7 +537,7 @@ const WEAPONS = {
   sniper: { name: 'SNIPER RIFLE', mag: 5, damage: 150, fireRate: 1200, reloadTime: 2500, spread: 0.002, pellets: 1, color: 0x2a2a2a, recoil: 0.06 },
   lmg: { name: 'LIGHT MG', mag: 100, damage: 18, fireRate: 70, reloadTime: 3500, spread: 0.025, pellets: 1, color: 0x444433, recoil: 0.015 },
   flamethrower: { name: 'FLAMETHROWER', mag: 250, damage: 6, fireRate: 50, reloadTime: 4000, spread: 0.25, pellets: 1, color: 0xff4400, recoil: 0 },
-  chainsaw: { name: 'CHAINSAW', mag: 999, damage: 35, fireRate: 80, reloadTime: 100, spread: 0.1, pellets: 1, color: 0xaa1111, recoil: 0 },
+  chainsaw: { name: 'CHAINSAW', mag: 999, damage: 50, fireRate: 60, reloadTime: 100, spread: 0.15, pellets: 1, color: 0xaa1111, recoil: 0.005, isChainsaw: true },
   wand_fire: { name: 'WAND OF FIRE', mag: 50, damage: 1000, fireRate: 800, reloadTime: 1000, spread: 0, pellets: 1, color: 0xff4400, isWand: true },
   wand_ice: { name: 'WAND OF ICE', mag: 50, damage: 10, fireRate: 100, reloadTime: 1000, spread: 0, pellets: 1, color: 0x00ffff, isWand: true },
   wand_lightning: { name: 'WAND OF LIGHTNING', mag: 50, damage: 150, fireRate: 400, reloadTime: 1000, spread: 0, pellets: 1, color: 0xffffaa, isWand: true },
@@ -2304,6 +2304,67 @@ function buildWeaponModel(type) {
     belt.position.set(0, -0.035, -0.04);
     belt.rotation.z = 0.15;
     g.add(belt);
+
+  } else if (type === 'chainsaw') {
+    // ═══ ECHO INDUSTRIAL CHAINSAW ═══
+    const engineMat = new THREE.MeshPhysicalMaterial({ color: 0xcc1100, metalness: 0.2, roughness: 0.4, clearcoat: 0.3 });
+    const eShape = new THREE.Shape();
+    eShape.moveTo(-0.06, -0.05);
+    eShape.lineTo(0.08, -0.05);
+    eShape.lineTo(0.06, 0.06);
+    eShape.lineTo(-0.04, 0.08);
+    eShape.closePath();
+    const eGeo = new THREE.ExtrudeGeometry(eShape, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.005, bevelSize: 0.005, bevelSegments: 3 });
+    eGeo.center();
+    const engine = new THREE.Mesh(eGeo, engineMat);
+    g.add(engine);
+
+    // Guide Bar (long metallic plate)
+    const barMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.4 });
+    const bar = extBox(0.01, 0.07, 0.4, barMat, 0.9);
+    bar.position.set(0, -0.015, -0.28);
+    g.add(bar);
+
+    // Dynamic Chain Texture (Jagged scrolling teeth)
+    const cCanvas = document.createElement('canvas');
+    cCanvas.width = 128; cCanvas.height = 16;
+    const cCtx = cCanvas.getContext('2d');
+    cCtx.fillStyle = '#222'; cCtx.fillRect(0, 0, 128, 16);
+    cCtx.fillStyle = '#aaa'; 
+    for(let i=0; i<8; i++) {
+      cCtx.beginPath(); cCtx.moveTo(i*16, 16); cCtx.lineTo(i*16+8, 0); cCtx.lineTo(i*16+16, 16); cCtx.fill();
+    }
+    const chainTex = new THREE.CanvasTexture(cCanvas);
+    chainTex.wrapS = THREE.RepeatWrapping;
+    chainTex.repeat.set(8, 1);
+    const chainMat = new THREE.MeshStandardMaterial({ map: chainTex, roughness: 0.5, metalness: 0.6 });
+    
+    // Chain Mesh (wraps around the guide bar edges)
+    const chainGeo = new THREE.BoxGeometry(0.012, 0.074, 0.41);
+    const chainMesh = new THREE.Mesh(chainGeo, chainMat);
+    chainMesh.position.set(0, -0.015, -0.28);
+    g.add(chainMesh);
+    g.userData.chainMat = chainMat; // Store for animation in render loop!
+
+    // Front Handle (Tubular wraparound)
+    const fHandle = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.008, 8, SEG, Math.PI), rubberMat);
+    fHandle.position.set(0, 0.01, -0.08);
+    fHandle.rotation.y = Math.PI / 2;
+    fHandle.rotation.z = Math.PI / 2;
+    g.add(fHandle);
+
+    // Rear Trigger Grip
+    const rGrip = extBox(0.03, 0.08, 0.12, polymerMat, 1.0);
+    rGrip.position.set(0, 0.02, 0.1);
+    rGrip.rotation.x = -0.2;
+    g.add(rGrip);
+    
+    // Pull Start mechanism
+    const pullBase = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.01, SEG), polymerMat);
+    pullBase.position.set(-0.05, 0.0, 0.0);
+    pullBase.rotation.z = Math.PI/2;
+    g.add(pullBase);
+
   } else if (WEAPONS[type].isWand) {
     const s = 1.0;
     const woodMat = new THREE.MeshStandardMaterial({ color: 0x442211, roughness: 0.9 });
@@ -2320,6 +2381,123 @@ function buildWeaponModel(type) {
     const wandLight = new THREE.PointLight(WEAPONS[type].color, 5, 2);
     wandLight.position.set(0, 0, -0.5);
     g.add(wandLight);
+  }
+
+  // ═══ CHAINSAW — Detailed Stihl-style model ═══
+  if (type === 'chainsaw') {
+    const SEG2 = 16;
+    const orangeMat = new THREE.MeshStandardMaterial({color: 0xff6600, roughness: 0.5, metalness: 0.1});
+    const blackMat = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.8, metalness: 0.1});
+    const steelMat = new THREE.MeshStandardMaterial({color: 0x888899, roughness: 0.3, metalness: 0.7});
+    const chainMat = new THREE.MeshStandardMaterial({color: 0x555555, roughness: 0.4, metalness: 0.8});
+
+    // Engine housing — main body
+    const housing = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.22), orangeMat);
+    housing.position.set(0, 0, -0.2);
+    g.add(housing);
+
+    // Engine cylinder bump on top
+    const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.08, SEG2), blackMat);
+    cylinder.position.set(0, 0.07, -0.16);
+    g.add(cylinder);
+
+    // Pull starter housing (round disc on side)
+    const starter = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.02, SEG2), orangeMat);
+    starter.rotation.z = Math.PI/2;
+    starter.position.set(-0.07, 0.02, -0.18);
+    g.add(starter);
+
+    // Pull cord handle
+    const cordHandle = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.015, 0.04), blackMat);
+    cordHandle.position.set(-0.1, 0.02, -0.18);
+    g.add(cordHandle);
+
+    // Front handle (top bar)
+    const frontHandleShape = new THREE.Shape();
+    frontHandleShape.absarc(0, 0, 0.008, 0, Math.PI, false);
+    const frontHandleGeo = new THREE.ExtrudeGeometry(frontHandleShape, {depth: 0.14, bevelEnabled: false});
+    const frontHandle = new THREE.Mesh(frontHandleGeo, blackMat);
+    frontHandle.position.set(-0.06, 0.06, -0.28);
+    frontHandle.rotation.z = Math.PI/2;
+    g.add(frontHandle);
+
+    // Chain brake (front of top handle)
+    const brake = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.003, 0.04), blackMat);
+    brake.position.set(0, 0.09, -0.3);
+    g.add(brake);
+
+    // Guide bar — the flat blade
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.06, 0.35), steelMat);
+    bar.position.set(0, -0.01, -0.48);
+    g.add(bar);
+
+    // Bar nose (rounded tip)
+    const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.006, SEG2), steelMat);
+    nose.rotation.x = Math.PI/2;
+    nose.position.set(0, -0.01, -0.65);
+    g.add(nose);
+
+    // Chain — links along the bar edges (top and bottom)
+    for (let side = -1; side <= 1; side += 2) {
+      for (let i = 0; i < 18; i++) {
+        const link = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.008, 0.015), chainMat);
+        link.position.set(0, side * 0.032 - 0.01, -0.31 - i * 0.02);
+        g.add(link);
+      }
+    }
+
+    // Chain teeth (cutting teeth on bottom edge)
+    for (let i = 0; i < 9; i++) {
+      const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.012, 0.008), steelMat);
+      tooth.position.set(0, -0.045, -0.32 - i * 0.04);
+      tooth.rotation.z = 0.3;
+      g.add(tooth);
+    }
+
+    // Rear handle (pistol grip with trigger)
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.09, 0.06), orangeMat);
+    grip.position.set(0, -0.07, -0.12);
+    grip.rotation.x = -0.2;
+    g.add(grip);
+
+    // Trigger
+    const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.025, 0.008), blackMat);
+    trigger.position.set(0, -0.04, -0.14);
+    g.add(trigger);
+
+    // Trigger guard
+    const guard = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.003, 4, 8, Math.PI), blackMat);
+    guard.position.set(0, -0.04, -0.135);
+    guard.rotation.y = Math.PI/2;
+    g.add(guard);
+
+    // Exhaust muffler (small cylinder on back)
+    const muffler = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.04, SEG2), steelMat);
+    muffler.rotation.z = Math.PI/2;
+    muffler.position.set(0.07, -0.02, -0.1);
+    g.add(muffler);
+
+    // Fuel cap (small circle on top)
+    const fuelCap = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.005, SEG2), blackMat);
+    fuelCap.position.set(0.02, 0.055, -0.22);
+    g.add(fuelCap);
+
+    // Oil cap
+    const oilCap = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.005, SEG2), blackMat);
+    oilCap.position.set(-0.02, 0.055, -0.22);
+    g.add(oilCap);
+
+    // Stihl-style logo stripe (thin orange bar on side)
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.001, 0.015, 0.18), new THREE.MeshBasicMaterial({color: 0xffaa00}));
+    stripe.position.set(0.062, 0.02, -0.2);
+    g.add(stripe);
+
+    // Store reference for chain animation
+    g.userData.isChainsaw = true;
+    g.userData.chainLinks = [];
+    g.children.forEach(c => {
+      if (c.material === chainMat) g.userData.chainLinks.push(c);
+    });
   }
 
   return g;
@@ -2364,6 +2542,14 @@ function buildGloveHand(side) {
   const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.02, 8), gloveMat);
   cuff.position.set(0, 0, 0.04);
   hand.add(cuff);
+
+  // Phase 93: Camouflage Jacket Sleeves
+  const sleeveMat = new THREE.MeshStandardMaterial({ map: cadpatTex, roughness: 0.95 });
+  const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.18, 8), sleeveMat);
+  sleeve.position.set(0, 0, 0.12);
+  sleeve.rotation.x = Math.PI / 2;
+  hand.add(sleeve);
+
   return hand;
 }
 
@@ -2387,8 +2573,28 @@ function updateWeaponVisuals() {
     STATE.weapon === 'pistol' ? -0.16 : -0.14,
     -0.3
   );
+
+  // Adjust hand positions dynamically
+  if (STATE.weapon === 'chainsaw') {
+    rightHand.position.set(0.0, 0.02, 0.1);
+    rightHand.rotation.x = 0;
+    leftHand.position.set(-0.05, 0.04, -0.08);
+    leftHand.rotation.x = 0.1;
+  } else if (WEAPONS[STATE.weapon].isWand) {
+    rightHand.position.set(0.0, 0.0, 0.0);
+    leftHand.position.set(0.0, 50.0, 0.0); // hide left hand
+  } else {
+    // Standard rifle/shotgun grip
+    rightHand.position.set(0.0, -0.035, -0.05);
+    rightHand.rotation.x = 0.15;
+    leftHand.position.set(0.0, -0.02, -0.28);
+    leftHand.rotation.x = 0.1;
+  }
+
+  weapon.add(rightHand);
+  weapon.add(leftHand);
+
   camera.add(weapon);
-  // Re-attach ammo sprite
   ammoSprite.position.set(0, 0.06, -0.1);
   weapon.add(ammoSprite);
 }
@@ -4497,6 +4703,19 @@ function animate() {
   } else {
     camera.position.x = 0;
     camera.position.y = 0;
+  }
+
+  // ── Chainsaw vibration + chain animation ──
+  if (weapon && weapon.userData && weapon.userData.isChainsaw && STATE.weapon === 'chainsaw') {
+    // Constant engine vibration
+    weapon.position.x += (Math.random()-0.5) * 0.004;
+    weapon.position.y += (Math.random()-0.5) * 0.003;
+    // Chain links oscillate along bar
+    if (weapon.userData.chainLinks) {
+      weapon.userData.chainLinks.forEach((link, i) => {
+        link.position.x = Math.sin(performance.now() * 0.03 + i) * 0.002;
+      });
+    }
   }
 
   // ── Weapon bob & sway ──
