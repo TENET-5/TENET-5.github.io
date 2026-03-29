@@ -255,14 +255,28 @@ var _S504_TEXT =
   '28. NDA s.129 — service offence (Criminal Code)\n' +
   '29. NDA s.130 — service offence committed in Canada\n\n' +
   's.21 (party to offence) applies IN TOTALITY across all 29 counts.\n\n' +
+  '═══════════════════════════════════════════════════\n' +
+  'WHERE IS CAPTAIN COVEY\'S COURT MARTIAL?\n' +
+  '═══════════════════════════════════════════════════\n\n' +
+  'As of March 2026, the upcoming courts martial list includes:\n' +
+  '- Cpl charged with stealing\n' +
+  '- Cpl charged with assault and drunkenness\n' +
+  '- MCpl charged with striking superior officer\n' +
+  '- Maj charged with assault causing bodily harm\n\n' +
+  'Captain Rebecca Covey (CFNIS) — 29 criminal counts filed —\n' +
+  'is NOT on the list. Not scheduled. Not charged. Not investigated.\n\n' +
+  'Corporals face courts martial for stealing and drunkenness.\n' +
+  'A Captain with 29 counts including attempted murder, torture,\n' +
+  'and high treason faces nothing.\n\n' +
+  'Source: https://www.canada.ca/en/chief-military-judge/services/upcoming-courts-martial.html\n\n' +
   'Full filing: https://tenet-5.github.io/legal.html#s504\n' +
-  'Accountability database (608+ records): https://tenet-5.github.io/accountability.html\n\n' +
+  'Accountability database (1,005+ records): https://tenet-5.github.io/accountability.html\n\n' +
   'Daniel Perry — Canadian Forces Combat Veteran\n' +
   'Former Signals Operator — Afghanistan\n';
 
 function s504Action() {
   var recipients = 'commission@mpcc-cppm.gc.ca,information@forces.gc.ca,mnd-mdn@forces.gc.ca,ppcli.assn@shaw.ca,ppcliassociation@gmail.com';
-  var subject = encodeURIComponent('FORMAL s.504 NOTIFICATION — 29 Criminal Counts — Capt. Rebecca Covey (CFNIS)');
+  var subject = encodeURIComponent('WHERE IS COVEY\'S COURT MARTIAL? — 29 Counts Filed, Zero Action — s.504');
   var body = encodeURIComponent(_S504_TEXT);
   window.open('mailto:' + recipients + '?subject=' + subject + '&body=' + body);
   setTimeout(function() { window.print(); }, 1500);
