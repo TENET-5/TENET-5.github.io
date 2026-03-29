@@ -206,31 +206,7 @@ canvas#gameCanvas { display: block; }
     </div>
   </div>
   <div style="display:flex;gap:12px;justify-content:center;margin-bottom:1.5em;">
-    <button id="campaignBtn" style="padding:15px 40px;font-size:1.2em;font-family:'Courier New',monospace;background:#cc0000;color:#fff;border:2px solid #ff3333;cursor:pointer;letter-spacing:0.15em;">CAMPAIGN</button>
-    <button id="startBtn" style="padding:15px 40px;font-size:1.2em;font-family:'Courier New',monospace;background:#333;color:#fff;border:2px solid #666;cursor:pointer;letter-spacing:0.15em;">SURVIVAL</button>
-  </div>
-  <div id="missionSelect" style="display:none;max-width:600px;text-align:left;margin-bottom:1.5em;">
-    <div style="color:#ff6633;font-size:0.9em;letter-spacing:0.2em;margin-bottom:0.8em;">SELECT MISSION</div>
-    <div class="mission-item" data-mission="1" style="background:#1a0000;border:1px solid #ff333388;padding:12px 16px;margin-bottom:6px;cursor:pointer;">
-      <span style="color:#ff3333;font-weight:bold;">01 — FIRST LIGHT</span><br>
-      <span style="color:#888;font-size:0.85em;">Secure the signals station at CFB Petawawa. Link up with your squad and clear the compound.</span>
-    </div>
-    <div class="mission-item" data-mission="2" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
-      <span style="color:#ff3333;font-weight:bold;">02 — PARLIAMENT FALLS</span><br>
-      <span style="color:#888;font-size:0.85em;">Fight through Wellington Street to the Peace Tower. Extract the intelligence package.</span>
-    </div>
-    <div class="mission-item" data-mission="3" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
-      <span style="color:#ff3333;font-weight:bold;">03 — RED HIGHWAY</span><br>
-      <span style="color:#888;font-size:0.85em;">Destroy the roadblock on the Trans-Canada. Reopen supply lines to the Maritimes.</span>
-    </div>
-    <div class="mission-item" data-mission="4" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
-      <span style="color:#ff3333;font-weight:bold;">04 — SIGNAL FIRE</span><br>
-      <span style="color:#888;font-size:0.85em;">Reach the CN Tower. Restore military comms. Canada needs to hear the truth.</span>
-    </div>
-    <div class="mission-item" data-mission="5" style="background:#1a0000;border:1px solid #ff333344;padding:12px 16px;margin-bottom:6px;cursor:pointer;opacity:0.5;">
-      <span style="color:#ff3333;font-weight:bold;">05 — THE RED DUSTER</span><br>
-      <span style="color:#888;font-size:0.85em;">Storm the command post. Raise the Red Ensign over Parliament Hill. End this.</span>
-    </div>
+    <button id="startBtn" style="padding:15px 60px;font-size:1.5em;font-family:'Courier New',monospace;background:#cc0000;color:#fff;border:2px solid #ff3333;cursor:pointer;letter-spacing:0.3em;box-shadow:0 0 20px #ff000055;transition:all 0.2s;" onmouseover="this.style.background='#ff0000'" onmouseout="this.style.background='#cc0000'">DEPLOY</button>
   </div>
   <div class="controls">
     WASD — Move &nbsp;|&nbsp; MOUSE — Aim &nbsp;|&nbsp; CLICK — Fire &nbsp;|&nbsp; R — Reload<br>
@@ -320,8 +296,44 @@ canvas#gameCanvas { display: block; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js" crossorigin="anonymous"></script>
 <script>
 'use strict';
+
+// ── MULTIPLAYER LISTEN SERVER & VOIP STATE ──
+const MPParams = {
+  hostId: null,
+  myId: Math.random().toString(36).substr(2, 9),
+  isHost: false,
+  isConnected: false,
+  peers: {}, // { id: { mesh, lastPos, lastRot, hp } }
+  brokerURL: 'wss://broker.emqx.io:8084/mqtt',
+  topicLobby: 'tn5/reduster/lobby',
+  topicState: 'tn5/reduster/state',
+  topicInput: 'tn5/reduster/input',
+  topicVoice: 'tn5/reduster/voice',
+  audioInputCtx: null,
+  audioSourceNode: null,
+  audioScriptNode: null,
+  voiceBuffers: {}
+};
+let mqttClient = null;
+
+// Base64 Audio Codecs
+function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+function base64ToArrayBuffer(base64) {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = binary_string.charCodeAt(i);
+  return bytes.buffer;
+}
+
 window.onerror = function(msg, url, lineNo, columnNo, error) {
   console.error("V8 FATAL TRACE:", msg, "AT LINE:", lineNo, ":", columnNo);
   if (error && error.stack) console.error(error.stack);
@@ -610,15 +622,103 @@ function selectPrimary(w) {
   event.currentTarget.classList.add('selected');
 }
 function confirmLoadout() {
-  document.getElementById('loadout').style.display = 'none';
+  // Update Loadout UI to visually lock
+  document.getElementById('loadout').innerHTML = '<h1 style="color:#ffcc00; text-shadow:0 0 30px #ff6600;">ESTABLISHING UPLINK</h1><h3 style="color:#aaa;">ALLOW MICROPHONE FOR VOIP...</h3>';
+  
   // Map weapon selection
   if(myPrimary==='C7A2') WEAPONS.rifle = { name:'C7A2 RIFLE', rate:100, dmg:45, hdmg:150, mag:30, rl:2000, sp:0.01, pel:1, auto:1, vel: 900, mass: 0.004, cd: 0.295 };
   if(myPrimary==='C8SFW') WEAPONS.rifle = { name:'C8SFW', rate:80, dmg:40, hdmg:130, mag:30, rl:1800, sp:0.02, pel:1, auto:1, vel: 850, mass: 0.004, cd: 0.295 };
   if(myPrimary==='C9A2') WEAPONS.rifle = { name:'C9A2 LMG', rate:70, dmg:38, hdmg:110, mag:200, rl:5000, sp:0.03, pel:1, auto:1, vel: 915, mass: 0.004, cd: 0.295 };
   if(myPrimary==='M870') WEAPONS.rifle = { name:'REMINGTON 870', rate:600, dmg:20, hdmg:50, mag:8, rl:3500, sp:0.1, pel:8, auto:0, vel: 400, mass: 0.003, cd: 0.1 };
 
-  // Actually start the game — reset state, spawn enemies, lock mouse
-  startGame();
+  initMatchmaking();
+}
+
+function initMatchmaking() {
+  initAudio();
+  
+  // 1. Microphone VoIP Pipeline
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    MPParams.audioInputCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 11025 });
+    MPParams.audioSourceNode = MPParams.audioInputCtx.createMediaStreamSource(stream);
+    MPParams.audioScriptNode = MPParams.audioInputCtx.createScriptProcessor(4096, 1, 1);
+    
+    MPParams.audioSourceNode.connect(MPParams.audioScriptNode);
+    MPParams.audioScriptNode.connect(MPParams.audioInputCtx.destination);
+    
+    MPParams.audioScriptNode.onaudioprocess = function(audioProcessingEvent) {
+      if (!MPParams.isConnected || !mqttClient) return;
+      const inputBuffer = audioProcessingEvent.inputBuffer.getChannelData(0);
+      const outputBuffer = new Float32Array(inputBuffer.length);
+      outputBuffer.set(inputBuffer);
+      // Downsample and Base64 compress
+      const b64 = arrayBufferToBase64(outputBuffer.buffer);
+      mqttClient.publish(MPParams.topicVoice, JSON.stringify({ id: MPParams.myId, b: b64 }), { qos: 0 });
+    };
+  }).catch(err => {
+    console.warn("VOIP ACCESS DENIED:", err);
+  });
+
+  // 2. Broker Connection
+  document.getElementById('loadout').innerHTML = '<h1 style="color:#33ff33; text-shadow:0 0 30px #00ff00;">CONNECTING TO LIRIL SATOR GRID</h1><h3 style="color:#aaa;">NEGOTIATING BROKER PROTOCOLS...</h3>';
+  mqttClient = mqtt.connect(MPParams.brokerURL, { clientId: 'tenet5-' + MPParams.myId });
+
+  mqttClient.on('connect', () => {
+    MPParams.isConnected = true;
+    mqttClient.subscribe(MPParams.topicLobby);
+    mqttClient.subscribe(MPParams.topicState);
+    mqttClient.subscribe(MPParams.topicInput);
+    mqttClient.subscribe(MPParams.topicVoice);
+    
+    document.getElementById('loadout').innerHTML = '<h1 style="color:#ffcc00; text-shadow:0 0 30px #ffaa00;">AWAITING HOST PEER</h1><h3 style="color:#aaa;">STANDBY...</h3>';
+    
+    // Listen for 1.5 seconds to see if a Host is broadcasting
+    setTimeout(() => {
+      document.getElementById('loadout').style.display = 'none';
+      if (!MPParams.hostId) {
+        MPParams.isHost = true;
+        MPParams.hostId = MPParams.myId;
+      }
+      lirilSay("Tactical uplink secured. Commencing operation.");
+      startGame();
+    }, 1500);
+  });
+
+  mqttClient.on('message', (topic, payload) => {
+    try {
+      const msg = JSON.parse(payload.toString());
+      if (msg.id === MPParams.myId) return; // ignore self
+      
+      if (topic === MPParams.topicLobby && msg.type === 'hostBeat') {
+        MPParams.hostId = msg.id; // Mark host immediately
+      }
+      else if (topic === MPParams.topicState && !MPParams.isHost) {
+        // We are Client. Receive world state from Host.
+        syncClientState(msg);
+      }
+      else if (topic === MPParams.topicInput && MPParams.isHost) {
+        // We are Host. Receive input from Clients.
+        applyClientInput(msg);
+      }
+      else if (topic === MPParams.topicVoice) {
+        // Playback incoming VOIP
+        playRemoteVoice(msg.id, msg.b);
+      }
+    } catch(e) {}
+  });
+}
+
+function playRemoteVoice(peerId, b64) {
+  if (!audioCtx) return;
+  const rawBytes = base64ToArrayBuffer(b64);
+  const floatArr = new Float32Array(rawBytes);
+  const audioBuffer = audioCtx.createBuffer(1, floatArr.length, 11025);
+  audioBuffer.getChannelData(0).set(floatArr);
+  
+  const source = audioCtx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(audioCtx.destination);
+  source.start();
 }
 
 // Override Blockers to show Loadout first
