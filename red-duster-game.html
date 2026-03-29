@@ -2455,6 +2455,65 @@ function updateEnemies(dt) {
   }
 }
 
+// ── HORIZONTAL COMBAT: TERRORIST KICK & MELEE FINISHERS ──
+function terroristKick() {
+  if (!STATE.alive || STATE.paused || !STATE.started) return;
+  playSound('hit'); 
+  const kickDir = dir.clone();
+  kickDir.y = 0; kickDir.normalize();
+  
+  // Invisible Bowling Sphere
+  const sphereGeo = new THREE.SphereGeometry(1.5, 4, 4);
+  const sphereMat = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, visible: false});
+  const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+  sphere.position.copy(yawObj.position);
+  scene.add(sphere);
+  
+  STATE.projectiles.push({
+    mesh: sphere,
+    x: sphere.position.x, z: sphere.position.z, // Need initial coords for projectile iter
+    vx: kickDir.x * 40, vy: 0, vz: kickDir.z * 40,
+    life: 0.6, isBowling: true, radius: 2.0, dir: kickDir
+  });
+  
+  STATE.screenShake = 0.4;
+  STATE.shakeIntensity = 0.15;
+  const hm = document.getElementById('hitMarker');
+  hm.textContent = '🥾'; hm.style.display = 'block'; hm.style.color = '#ffffff';
+  setTimeout(()=>hm.style.display='none', 200);
+}
+
+const mkImages = [
+  'C:/Users/Xbxac/.gemini/antigravity/brain/a16d8803-67ed-4532-8475-417158802a59/pil_rd_brass_knuckles.png',
+  'C:/Users/Xbxac/.gemini/antigravity/brain/a16d8803-67ed-4532-8475-417158802a59/pil_rd_nunchucks.png',
+  'C:/Users/Xbxac/.gemini/antigravity/brain/a16d8803-67ed-4532-8475-417158802a59/pil_rd_parker_pen.png'
+];
+function meleeFinisher() {
+  if (!STATE.alive || STATE.paused || !STATE.started) return;
+  let hit = false;
+  STATE.enemies.forEach(e => {
+    if (e.dead) return;
+    const dx = e.x - yawObj.position.x;
+    const dz = e.z - yawObj.position.z;
+    const dist = Math.sqrt(dx*dx + dz*dz) || 1;
+    const dot = (dx/dist)*dir.x + (dz/dist)*dir.z;
+    if (dist < 3.5 && dot > 0.6) {
+      hit = true;
+      e.hp -= 500;
+      killEnemy(e, true, new THREE.Vector3(dir.x*5, 5, dir.z*5));
+    }
+  });
+  if (hit) {
+    const mkDiv = document.getElementById('mkFinisher');
+    mkDiv.style.backgroundImage = `url('file:///${mkImages[Math.floor(Math.random() * mkImages.length)]}')`;
+    mkDiv.style.display = 'block';
+    setTimeout(() => { mkDiv.style.display = 'none'; }, 250);
+    STATE.screenShake = 0.3;
+    STATE.shakeIntensity = 0.2;
+    playSound('headshot');
+  }
+}
+
 // ── SHOOT SYSTEM ──
 function shoot() {
   const w = WEAPONS[STATE.weapon];
@@ -3235,7 +3294,24 @@ function updateProjectiles(dt) {
   const playerX = yawObj.position.x, playerZ = yawObj.position.z;
   for (let i = STATE.projectiles.length - 1; i >= 0; i--) {
     const p = STATE.projectiles[i];
-    if (p.isTracer) {
+    if (p.isBowling) {
+      p.x += p.vx * dt;
+      p.z += p.vz * dt;
+      p.mesh.position.x = p.x;
+      p.mesh.position.z = p.z;
+      p.life -= dt;
+      if (p.life <= 0) { scene.remove(p.mesh); STATE.projectiles.splice(i, 1); continue; }
+      
+      STATE.enemies.forEach(e => {
+        if (e.dead) return;
+        const dx = e.x - p.x;
+        const dz = e.z - p.z;
+        if (dx*dx + dz*dz < p.radius * p.radius) {
+          killEnemy(e, false, new THREE.Vector3(p.vx * 0.8, 12, p.vz * 0.8));
+          p.vx *= 0.9; p.vz *= 0.9;
+        }
+      });
+    } else if (p.isTracer) {
       p.mesh.position.x += p.vx * dt;
       p.mesh.position.y += (p.vy||0) * dt;
       p.mesh.position.z += p.vz * dt;
