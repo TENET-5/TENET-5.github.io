@@ -210,7 +210,7 @@ canvas#gameCanvas { display: block; }
     <div class="hud-item hud-score"><div class="hud-label">S. 504 COUNTS</div><div class="hud-value" id="scoreVal">0</div></div>
   </div>
 </div>
-<div id="hud-top"><span class="hud-wave">WAVE <span id="waveVal">1</span> &nbsp;—&nbsp; HOSTILES: <span id="enemyCount">0</span></span></div>
+<div id="hud-top"><span class="hud-wave">WAVE <span id="waveVal">1</span> &nbsp;—&nbsp; HOSTILES: <span id="enemyCount">0</span></span> &nbsp;|&nbsp; <span id="timeOfDay" style="color:#aabbcc;font-size:0.85em;"></span></div>
 <div id="healthBar"><div id="healthFill" style="width:100%"></div></div>
 <div id="reloadBar"><div id="reloadFill"></div></div>
 
@@ -1011,6 +1011,173 @@ scene.add(fillLight);
 
 const hemiLight = new THREE.HemisphereLight(0x6688cc, 0x443322, 0.3);
 scene.add(hemiLight);
+
+// ── Day / Night Cycle ──────────────────────────────────────────────────────
+const DAY_LENGTH = 120; // seconds per full cycle
+let dayTime = 0.25;     // start at dawn (0=midnight, 0.25=dawn, 0.5=noon, 0.75=dusk)
+
+const SKY_COLORS = [
+  { t: 0.00, sky: new THREE.Color(0x000510), fog: new THREE.Color(0x000510), ambient: 0.05, sunCol: new THREE.Color(0x102030) }, // midnight
+  { t: 0.22, sky: new THREE.Color(0x0a0820), fog: new THREE.Color(0x0a0820), ambient: 0.1,  sunCol: new THREE.Color(0x1a1040) }, // pre-dawn
+  { t: 0.28, sky: new THREE.Color(0x4a1a0a), fog: new THREE.Color(0x3a1208), ambient: 0.35, sunCol: new THREE.Color(0xff6633) }, // dawn
+  { t: 0.35, sky: new THREE.Color(0x6699cc), fog: new THREE.Color(0x446688), ambient: 0.7,  sunCol: new THREE.Color(0xffeebb) }, // morning
+  { t: 0.50, sky: new THREE.Color(0x7aaecc), fog: new THREE.Color(0x4488aa), ambient: 1.0,  sunCol: new THREE.Color(0xffffff) }, // noon
+  { t: 0.65, sky: new THREE.Color(0x6699cc), fog: new THREE.Color(0x446688), ambient: 0.7,  sunCol: new THREE.Color(0xffeebb) }, // afternoon
+  { t: 0.75, sky: new THREE.Color(0x6b2a0a), fog: new THREE.Color(0x5a2208), ambient: 0.3,  sunCol: new THREE.Color(0xff4422) }, // dusk
+  { t: 0.82, sky: new THREE.Color(0x0a0820), fog: new THREE.Color(0x0a0818), ambient: 0.1,  sunCol: new THREE.Color(0x1a1040) }, // twilight
+  { t: 1.00, sky: new THREE.Color(0x000510), fog: new THREE.Color(0x000510), ambient: 0.05, sunCol: new THREE.Color(0x102030) }, // midnight again
+];
+
+function sampleDayCycle(t) {
+  t = ((t % 1) + 1) % 1;
+  let a = SKY_COLORS[SKY_COLORS.length - 2], b = SKY_COLORS[SKY_COLORS.length - 1];
+  for (let i = 0; i < SKY_COLORS.length - 1; i++) {
+    if (t >= SKY_COLORS[i].t && t < SKY_COLORS[i+1].t) { a = SKY_COLORS[i]; b = SKY_COLORS[i+1]; break; }
+  }
+  const f = (t - a.t) / (b.t - a.t + 0.0001);
+  return {
+    sky: a.sky.clone().lerp(b.sky, f),
+    fog: a.fog.clone().lerp(b.fog, f),
+    ambient: a.ambient + (b.ambient - a.ambient) * f,
+    sunCol: a.sunCol.clone().lerp(b.sunCol, f),
+  };
+}
+
+// Sun/moon orb
+const sunGeo = new THREE.SphereGeometry(0.8, 12, 12);
+const sunMesh = new THREE.Mesh(sunGeo, new THREE.MeshBasicMaterial({ color: 0xffee88 }));
+scene.add(sunMesh);
+const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 10),
+  new THREE.MeshBasicMaterial({ color: 0xddeeff }));
+scene.add(moonMesh);
+
+function updateDayNight(dt) {
+  if (!STATE.started) return;
+  dayTime = (dayTime + dt / DAY_LENGTH) % 1;
+
+  const { sky, fog, ambient, sunCol } = sampleDayCycle(dayTime);
+  scene.background = sky;
+  scene.fog.color.copy(fog);
+  ambientLight.intensity = ambient;
+  moonLight.color.copy(sunCol);
+  moonLight.intensity = 0.4 + ambient * 1.2;
+
+  // Sun/moon position — orbit around map center
+  const angle = dayTime * Math.PI * 2;
+  const cx = MAP_W / 2, cz = MAP_H / 2, radius = 45, height = 30;
+  sunMesh.position.set(cx + Math.cos(angle) * radius, height * Math.sin(angle), cz + Math.sin(angle) * 5);
+  moonMesh.position.set(cx - Math.cos(angle) * radius, height * Math.sin(angle + Math.PI), cz - Math.sin(angle) * 5);
+  moonLight.position.copy(sunMesh.position);
+
+  // Show/hide based on time
+  sunMesh.visible  = dayTime > 0.2 && dayTime < 0.8;
+  moonMesh.visible = dayTime < 0.2 || dayTime > 0.8;
+
+  stars.material.opacity = dayTime < 0.25 || dayTime > 0.75 ? 0.8 : Math.max(0, 1 - Math.abs(dayTime - 0.5) * 8);
+
+  // Time label
+  const hour = Math.floor(dayTime * 24);
+  const mins = Math.floor((dayTime * 24 - hour) * 60);
+  const label = dayTime < 0.22 || dayTime > 0.78 ? '🌙 NIGHT' :
+                dayTime < 0.28 ? '🌅 DAWN' :
+                dayTime < 0.72 ? '☀ DAY' : '🌇 DUSK';
+  const todEl = document.getElementById('timeOfDay');
+  if (todEl) todEl.textContent = `${label}  ${String(hour).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
+}
+
+const isNight = () => dayTime < 0.22 || dayTime > 0.78;
+
+// ── Raccoon Skull Mob ──────────────────────────────────────────────────────
+function buildRaccoonMob() {
+  const g = new THREE.Group();
+
+  // Skull body (flattened sphere)
+  const skullGeo = new THREE.SphereGeometry(0.35, 10, 8);
+  skullGeo.scale(1, 0.85, 0.9);
+  const skullMat = new THREE.MeshStandardMaterial({ color: 0xd4c8b0, roughness: 0.8, metalness: 0.05 });
+  const skull = new THREE.Mesh(skullGeo, skullMat);
+  skull.position.y = 1.3;
+  g.add(skull);
+
+  // Eye sockets — glowing neon orange
+  [-0.14, 0.14].forEach(ox => {
+    const socket = new THREE.Mesh(
+      new THREE.SphereGeometry(0.09, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xff6600 })
+    );
+    socket.position.set(ox, 1.32, -0.27);
+    const glow = new THREE.PointLight(0xff4400, 0.8, 1.2);
+    glow.position.copy(socket.position);
+    g.add(socket); g.add(glow);
+  });
+
+  // Antler tines (4 per side)
+  [-1, 1].forEach(side => {
+    for (let t = 0; t < 4; t++) {
+      const tineGeo = new THREE.CylinderGeometry(0.025, 0.015, 0.3 + t * 0.1, 4);
+      const tine = new THREE.Mesh(tineGeo, new THREE.MeshStandardMaterial({ color: 0x7a5c2a, roughness: 0.9 }));
+      tine.position.set(side * (0.3 + t * 0.06), 1.5 + t * 0.12, 0.05 * t);
+      tine.rotation.z = side * (-0.4 + t * 0.15);
+      tine.rotation.x = -0.2 + t * 0.1;
+      g.add(tine);
+    }
+  });
+
+  // Body (hunched dark torso)
+  const bodyMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.7, 0.35),
+    new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 })
+  );
+  bodyMesh.position.y = 0.7;
+  g.add(bodyMesh);
+
+  // Legs
+  [-0.12, 0.12].forEach(lx => {
+    const leg = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.07, 0.06, 0.6, 6),
+      new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
+    );
+    leg.position.set(lx, 0.3, 0);
+    g.add(leg);
+  });
+
+  g.userData.isRaccoon = true;
+  return g;
+}
+
+let raccoonSpawnTimer = 0;
+const RACCOON_SPAWN_INTERVAL = 25; // seconds between spawns at night
+
+function spawnRaccoonMob() {
+  const mesh = buildRaccoonMob();
+  let sx, sz;
+  let attempts = 0;
+  do {
+    sx = Math.random() * (MAP_W - 4) + 2;
+    sz = Math.random() * (MAP_H - 4) + 2;
+    attempts++;
+  } while (attempts < 30 && (isColliding(sx, sz, 0.5) || distXZ(sx, sz, yawObj.position.x, yawObj.position.z) < 8));
+  mesh.position.set(sx, 0, sz);
+  scene.add(mesh);
+  STATE.enemies.push({
+    mesh, type: 'raccoon',
+    hp: 8, maxHp: 8, speed: 3.5, damage: 15, score: 50,
+    x: sx, z: sz, baseScale: 1.0, ranged: false,
+    shootCooldown: 0, dead: false, deathTime: 0,
+    aiState: 'ADVANCE', coverSpot: null, suppressionTimer: 0
+  });
+}
+
+function updateRaccoonSpawner(dt) {
+  if (!STATE.started || !isNight()) { raccoonSpawnTimer = 0; return; }
+  raccoonSpawnTimer += dt;
+  if (raccoonSpawnTimer >= RACCOON_SPAWN_INTERVAL) {
+    raccoonSpawnTimer = 0;
+    const count = 1 + Math.floor(STATE.wave / 3);
+    for (let i = 0; i < count; i++) spawnRaccoonMob();
+    addKillFeed('⚠ RACCOON SKULLS EMERGING FROM THE DARK');
+  }
+}
 
 // ── Barrel Point Lights (atmospheric glow) ──
 const barrelLights = [];
@@ -2407,9 +2574,10 @@ function killEnemy(enemy, headshot = false, impulse) {
 
 function spawnEnemy(type = 'grunt') {
   const stats = {
-    grunt:  { hp: 15, speed: 2.5, damage: 12, score: 10, ranged: false, scale: 1.0 },
-    heavy:  { hp: 40, speed: 1.6, damage: 20, score: 30, ranged: false, scale: 1.2 },
-    ranger: { hp: 10,  speed: 2.0, damage: 8, score: 20, ranged: true,  scale: 0.9 }
+    grunt:   { hp: 15, speed: 2.5, damage: 12, score: 10,  ranged: false, scale: 1.0 },
+    heavy:   { hp: 40, speed: 1.6, damage: 20, score: 30,  ranged: false, scale: 1.2 },
+    ranger:  { hp: 10, speed: 2.0, damage:  8, score: 20,  ranged: true,  scale: 0.9 },
+    raccoon: { hp:  8, speed: 3.5, damage: 15, score: 50,  ranged: false, scale: 1.0 }
   };
   const data = stats[type];
   const mesh = buildSoldier(type);
@@ -2448,9 +2616,7 @@ function findCoverSpot(ex, ez, px, pz) {
   return null;
 }
 
-function updateEnemies(dt) {
 function getEnemyMuzzlePos(e) {
-  // Return approximate weapon tip for AI
   return new THREE.Vector3(e.x, 1.4, e.z);
 }
 
@@ -2869,9 +3035,6 @@ function shoot() {
     }
   }
 }
-
-}
-
 function reload() {
   if (STATE.reloading || STATE.ammo === STATE.maxAmmo || STATE.paused) return;
   STATE.reloading = true;
@@ -2925,13 +3088,25 @@ function die() {
   document.exitPointerLock();
 }
 
-// ── Airstrike ──
+// ── Airstrike (Phase 79: Avro Arrow) ──
 let airstrikeCooldown = 0;
-function callAirstrike() {
+let fHeld = false;
+let fLaser = null;
+let fTarget = null;
+
+function spawnAvroArrow(targetPoint) {
   if (airstrikeCooldown > 0 || STATE.paused) return;
-  airstrikeCooldown = 20;
-  lirilSay('airstrike');
-  addKillFeed('ARROW INBOUND — STAND CLEAR');
+  airstrikeCooldown = 40;
+  
+  // Simulated LIRIL AI Voice (NVIDIA style)
+  try {
+    const lirilSpeak = new SpeechSynthesisUtterance("Powered by LIRIL A.I. Guided by TENET 5. Target locked. Avro payload delivered. FAG.");
+    lirilSpeak.pitch = 0.5; // Deep tactical voice
+    lirilSpeak.rate = 1.1;
+    window.speechSynthesis.speak(lirilSpeak);
+  } catch(e) { console.log(e); }
+  
+  addKillFeed('AVRO ARROW MISSILE INBOUND');
 
   // ── BUILD AVRO ARROW CF-105 ──
   const arrow = new THREE.Group();
@@ -2939,128 +3114,64 @@ function callAirstrike() {
   const arrowDark = new THREE.MeshPhysicalMaterial({ color: 0x333333, metalness: 0.6, roughness: 0.2 });
   const arrowRed = new THREE.MeshPhysicalMaterial({ color: 0xcc0000, metalness: 0.3, roughness: 0.4 });
 
-  // Fuselage — long sleek cylinder tapering to nose
-  const fuseGeo = new THREE.CylinderGeometry(0.3, 0.15, 6, 12);
-  fuseGeo.rotateX(Math.PI/2);
-  const fuse = new THREE.Mesh(fuseGeo, arrowWhite);
-  arrow.add(fuse);
-
-  // Nose cone
-  const noseGeo = new THREE.ConeGeometry(0.15, 1.5, 12);
-  noseGeo.rotateX(-Math.PI/2);
-  const nose = new THREE.Mesh(noseGeo, arrowDark);
-  nose.position.z = -3.75;
-  arrow.add(nose);
-
-  // Delta wings — large triangular
-  const wingShape = new THREE.Shape();
-  wingShape.moveTo(0, 0);
-  wingShape.lineTo(2.5, -1.2);
-  wingShape.lineTo(0.3, -2);
-  wingShape.lineTo(0, -1.8);
-  wingShape.closePath();
+  const fuseGeo = new THREE.CylinderGeometry(0.3, 0.15, 6, 12); fuseGeo.rotateX(Math.PI/2);
+  const fuse = new THREE.Mesh(fuseGeo, arrowWhite); arrow.add(fuse);
+  const noseGeo = new THREE.ConeGeometry(0.15, 1.5, 12); noseGeo.rotateX(-Math.PI/2);
+  const nose = new THREE.Mesh(noseGeo, arrowDark); nose.position.z = -3.75; arrow.add(nose);
+  const wingShape = new THREE.Shape(); wingShape.moveTo(0, 0); wingShape.lineTo(2.5, -1.2); wingShape.lineTo(0.3, -2); wingShape.lineTo(0, -1.8); wingShape.closePath();
   const wingGeo = new THREE.ExtrudeGeometry(wingShape, { depth: 0.04, bevelEnabled: false });
-  [-1, 1].forEach(side => {
-    const wing = new THREE.Mesh(wingGeo, arrowWhite);
-    wing.scale.x = side;
-    wing.position.set(0, -0.1, 0.5);
-    wing.rotation.x = Math.PI/2;
-    arrow.add(wing);
-  });
-
-  // Tail fin
-  const tailShape = new THREE.Shape();
-  tailShape.moveTo(0, 0);
-  tailShape.lineTo(0, 1.2);
-  tailShape.lineTo(-0.8, 0.3);
-  tailShape.closePath();
+  [-1, 1].forEach(side => { const wing = new THREE.Mesh(wingGeo, arrowWhite); wing.scale.x = side; wing.position.set(0, -0.1, 0.5); wing.rotation.x = Math.PI/2; arrow.add(wing); });
+  const tailShape = new THREE.Shape(); tailShape.moveTo(0, 0); tailShape.lineTo(0, 1.2); tailShape.lineTo(-0.8, 0.3); tailShape.closePath();
   const tailGeo = new THREE.ExtrudeGeometry(tailShape, { depth: 0.03, bevelEnabled: false });
-  const tail = new THREE.Mesh(tailGeo, arrowWhite);
-  tail.position.set(-0.015, 0.25, 2);
-  arrow.add(tail);
+  const tail = new THREE.Mesh(tailGeo, arrowWhite); tail.position.set(-0.015, 0.25, 2); arrow.add(tail);
+  [-0.15, 0.15].forEach(x => { const exhaust = new THREE.Mesh(new THREE.CircleGeometry(0.12, 8), new THREE.MeshBasicMaterial({ color: 0xff6600, blending: THREE.AdditiveBlending })); exhaust.position.set(x, 0, 3); arrow.add(exhaust); });
 
-  // Engine exhausts — two orange glowing circles
-  [-0.15, 0.15].forEach(x => {
-    const exhaust = new THREE.Mesh(
-      new THREE.CircleGeometry(0.12, 8),
-      new THREE.MeshBasicMaterial({ color: 0xff6600, blending: THREE.AdditiveBlending })
-    );
-    exhaust.position.set(x, 0, 3);
-    arrow.add(exhaust);
-  });
-
-  // RCAF roundel on fuselage (red circle)
-  const roundel = new THREE.Mesh(
-    new THREE.CircleGeometry(0.2, 12),
-    arrowRed
-  );
-  roundel.position.set(0.31, 0, 0);
-  roundel.rotation.y = Math.PI/2;
-  arrow.add(roundel);
-
-  // "RL-206" marking
-  const markCanvas = document.createElement('canvas');
-  markCanvas.width = 128; markCanvas.height = 32;
-  const mCtx = markCanvas.getContext('2d');
-  mCtx.fillStyle = '#cc0000';
-  mCtx.font = 'bold 20px monospace';
-  mCtx.fillText('RL-206', 10, 22);
-  const markTex = new THREE.CanvasTexture(markCanvas);
-  const markMat = new THREE.MeshBasicMaterial({ map: markTex, transparent: true });
-  const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.2), markMat);
-  mark.position.set(-0.31, 0.1, -1);
-  mark.rotation.y = -Math.PI/2;
-  arrow.add(mark);
-
-  // Position: fly in from the side at high altitude
-  const px = yawObj.position.x;
-  const pz = yawObj.position.z;
-  arrow.position.set(px - 40, 15, pz);
+  // Spawn high above and behind target
+  const startPos = targetPoint.clone();
+  startPos.y = 80; 
+  startPos.z += 40;
+  arrow.position.copy(startPos);
+  arrow.lookAt(targetPoint);
   arrow.scale.setScalar(1.5);
   scene.add(arrow);
 
-  // Animate the Arrow flyover
+  // Animate the Arrow missile crash
   let arrowT = 0;
   const arrowInterval = setInterval(() => {
     arrowT += 0.016;
-    arrow.position.x += 1.8; // fly across at speed
-    arrow.position.z += 0.3;
+    arrow.position.lerp(targetPoint, 0.08); // accelerates toward target
+    arrow.lookAt(targetPoint);
+    
     // Engine trail particles
     if (Math.random() > 0.5) {
-      addParticle(arrow.position.x, arrow.position.y - 0.5, arrow.position.z + 3, 0xff8833);
-      addParticle(arrow.position.x, arrow.position.y - 0.3, arrow.position.z + 2.5, 0xffcc66);
+      addParticle(arrow.position.x, arrow.position.y, arrow.position.z, 0xff8833);
     }
 
-    // Drop bombs at midpoint
-    if (arrowT > 0.8 && arrowT < 0.85) {
+    // Impact
+    if (arrow.position.distanceTo(targetPoint) < 2.0 && arrowT > 0.2) {
       playSound('explosion');
-      STATE.screenShake = 0.8;
-      STATE.shakeIntensity = 0.15;
-      // Kill enemies in strike zone
+      STATE.screenShake = 1.5;
+      STATE.shakeIntensity = 0.4;
+      
       for (let i = STATE.enemies.length - 1; i >= 0; i--) {
         const e = STATE.enemies[i];
-        const dist = distXZ(e.x, e.z, px, pz);
-        if (dist > 5 && dist < 25) {
-          killEnemy(e, true);
-          for (let j = 0; j < 15; j++) {
-            addParticle(e.x, 2 + Math.random()*3, e.z, Math.random() > 0.5 ? 0xff4400 : 0xffaa00);
-          }
+        if (distXZ(e.x, e.z, targetPoint.x, targetPoint.z) < 15) {
+          killEnemy(e, true, new THREE.Vector3(0, 40, 0)); // Launch them all!
         }
       }
       // Ground explosion particles
-      for (let j = 0; j < 40; j++) {
-        const ex = px + (Math.random()-0.5)*20;
-        const ez = pz + (Math.random()-0.5)*20;
-        addParticle(ex, Math.random()*4, ez, Math.random() > 0.3 ? 0xff6600 : 0xff2200);
+      for (let j = 0; j < 100; j++) {
+        const ex = targetPoint.x + (Math.random()-0.5)*30;
+        const ez = targetPoint.z + (Math.random()-0.5)*30;
+        addParticle(ex, Math.random()*8, ez, Math.random() > 0.3 ? 0xff6600 : 0xff2200);
       }
-      addKillFeed('AVRO ARROW — BOMBS AWAY');
-    }
-
-    // Remove after flyover
-    if (arrowT > 2.5) {
+      
       scene.remove(arrow);
       clearInterval(arrowInterval);
     }
+    
+    // Timeout
+    if (arrowT > 5.0) { scene.remove(arrow); clearInterval(arrowInterval); }
   }, 16);
 }
 
@@ -3269,7 +3380,16 @@ function drawMinimap() {
 window.addEventListener('keydown', e => {
   STATE.keys[e.key.toLowerCase()] = true;
   if (e.key.toLowerCase() === 'r') reload();
-  if (e.key.toLowerCase() === 'f') callAirstrike();
+  if (e.key.toLowerCase() === 'f') {
+    if (!STATE.started || STATE.paused || !STATE.alive) return;
+    fHeld = true;
+    if (!fLaser) {
+      const mat = new THREE.LineBasicMaterial({color: 0x00ff00, linewidth: 3});
+      const geo = new THREE.BufferGeometry().setFromPoints([yawObj.position, yawObj.position]);
+      fLaser = new THREE.Line(geo, mat);
+      scene.add(fLaser);
+    }
+  }
   if (e.key.toLowerCase() === 'g') throwGrenade();
   if (e.key.toLowerCase() === 'c' || e.key === 'Control') STATE.crouching = true;
     if (e.key === '1') switchWeapon('rifle');
@@ -3307,6 +3427,7 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => {
   STATE.keys[e.key.toLowerCase()] = false;
   if (e.key.toLowerCase() === 'c' || e.key === 'Control') STATE.crouching = false;
+  if (e.key.toLowerCase() === 'f') fHeld = false;
 });
 
 window.addEventListener('mousemove', e => {
@@ -3636,6 +3757,31 @@ function updateCorpses(dt) {
 function animate() {
   requestAnimationFrame(animate);
   
+  if (airstrikeCooldown > 0) airstrikeCooldown -= 0.016;
+
+  if (!STATE.started || STATE.paused || !STATE.alive) {
+    if (fLaser) { scene.remove(fLaser); fLaser = null; fTarget = null; fHeld = false; }
+  } else {
+    // Phase 79: Laser Designator Logistics
+    if (fHeld && airstrikeCooldown <= 0) {
+      if (!fLaser) {
+        fLaser = new THREE.Line(new THREE.BufferGeometry().setFromPoints([yawObj.position, yawObj.position]), new THREE.LineBasicMaterial({color: 0x00ff00, linewidth: 3}));
+        scene.add(fLaser);
+      }
+      const rc = new THREE.Raycaster(); rc.setFromCamera(new THREE.Vector2(0,0), camera);
+      const intersects = rc.intersectObjects(scene.children, true);
+      let tp = rc.ray.at(100);
+      for(let i=0;i<intersects.length;i++) { if(intersects[i].object.name !== 'bullet') { tp = intersects[i].point; break; } }
+      fTarget = tp;
+      fLaser.geometry.setFromPoints([yawObj.position.clone().add(new THREE.Vector3(0,-0.2,0)), tp]);
+    } else {
+      if (fLaser) {
+        scene.remove(fLaser); fLaser = null;
+        if (fTarget) { spawnAvroArrow(fTarget); fTarget = null; }
+      }
+    }
+  }
+  
   const now = performance.now();
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
@@ -3649,6 +3795,8 @@ function animate() {
     updatePickups(dt);
     updateGrenades(dt);
     updateCaptureZones(dt);
+    updateDayNight(dt);
+    updateRaccoonSpawner(dt);
     
     // Damage numbers
     for (let i = STATE.damageNumbers.length - 1; i >= 0; i--) {
