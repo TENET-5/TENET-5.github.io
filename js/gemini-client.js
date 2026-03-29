@@ -7,7 +7,8 @@
 let genAI = null;
 let model = null;
 
-const MODEL_NAME = 'gemini-2.0-flash';
+const MODEL_NAME = 'gemini-3.1-pro';
+const FAST_MODEL = 'nanobanana-2'; // Combining Pro capabilities with lightning-fast speed
 
 const SYSTEM_PROMPT = `You are LIRIL, a human rights legal documentation assistant embedded in the LirilClaw platform.
 Your purpose is to help people who are being politically prosecuted document their case
