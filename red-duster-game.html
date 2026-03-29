@@ -1,99 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Red Duster - Tactical Simulator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Courier+New:wght@700&display=swap" rel="stylesheet">
-  
-  <style>
-    body { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Courier New', monospace; outline: none; }
-    
-    /* ═══ THE RED DUSTER FPS HUD (BODYCAM SQUAD REALISM) ═══ */
-    #fps-container { position: relative; width: 100vw; height: 100vh; background: #000; overflow: hidden; cursor: none; border: 2px solid #ff3333; outline: none; }
-    #damage-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, transparent 40%, rgba(255,0,0,0.8) 100%); opacity: 0; pointer-events: none; transition: opacity 0.1s ease; z-index: 10; }
-    #kia-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; }
-    #victory-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,20,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; border: 4px solid #00ff00; }
-    #bloggins-quote { position: absolute; bottom: 120px; width: 100%; text-align: center; color: #ff0000; font-size: 1.5em; font-weight: bold; text-shadow: 2px 2px 0 #000, 0 0 10px #ff0000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 12; letter-spacing: 2px; }
-    #fps-instructions { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; text-align: center; color: white; cursor: pointer; z-index: 20; flex-direction: column; border: 4px solid #330000; }
-    #fps-instructions:hover { background: rgba(50,0,0,0.8); }
-
-    /* Bodycam Interface */
-    #bodycam-ui { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 15; font-weight: bold; color: #fff; text-shadow: 1px 1px 0 #000; }
-    #bc-rec { position: absolute; top: 30px; right: 40px; font-size: 24px; display: flex; align-items: center; letter-spacing: 2px; }
-    .bc-dot { width: 16px; height: 16px; background: red; border-radius: 50%; margin-right: 10px; animation: blinker 1s linear infinite; box-shadow: 0 0 10px red; }
-    #bc-mic { position: absolute; top: 65px; right: 40px; font-size: 14px; opacity: 0.8; }
-    #bc-timestamp { position: absolute; bottom: 30px; left: 40px; font-size: 20px; letter-spacing: 1px; }
-    #bc-battery { position: absolute; bottom: 65px; left: 40px; font-size: 16px; opacity: 0.9; }
-    #bc-mag { position: absolute; bottom: 100px; right: 40px; font-size: 24px; color: #fff; text-shadow: 0 0 5px #ff0000; }
-    #reloading-text { position: absolute; bottom: 130px; right: 40px; font-size: 18px; color: #ffaa00; display: none; animation: blinker 0.5s infinite; }
-    #bodycam-scanlines { position: absolute; top:0; left:0; width:100%; height:100%; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px); pointer-events: none; z-index: 16; opacity: 0.6; }
-
-    @keyframes blinker { 50% { opacity: 0; } }
-  </style>
-
-  <!-- Three.js Engine & Post-Processing (Phase 20 Bodycam Realism) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-  <script src="red_duster_fps.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RED DUSTER — Anti-Communist Survival Simulator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;font-family:monospace}
+canvas{display:block}
+#blocker{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:100;cursor:pointer}
+#menu{text-align:center;color:#fff}
+#menu h1{font-size:3em;color:#c41e3a;letter-spacing:8px;margin-bottom:10px;text-shadow:0 0 30px #c41e3a}
+#menu h2{font-size:1.2em;color:#666;letter-spacing:4px;margin-bottom:30px}
+#menu .start{font-size:1.5em;color:#ff4444;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+#menu .controls{color:#555;font-size:0.8em;margin-top:20px;line-height:2}
+#crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;color:rgba(255,255,255,0.6);z-index:11;pointer-events:none}
+#hp{position:fixed;bottom:30px;left:30px;z-index:11;pointer-events:none}
+#hp-bar{width:200px;height:8px;background:#333;border:1px solid #555}
+#hp-fill{width:100%;height:100%;background:#22cc44;transition:width 0.2s}
+#ammo{position:fixed;bottom:30px;right:30px;font-size:24px;color:#fff;z-index:11;pointer-events:none;font-family:monospace}
+#wave{position:fixed;top:30px;left:50%;transform:translateX(-50%);font-size:18px;color:#ff4444;z-index:11;pointer-events:none;letter-spacing:3px}
+#kills{position:fixed;top:60px;left:50%;transform:translateX(-50%);font-size:14px;color:#888;z-index:11;pointer-events:none}
+#hit{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;color:#ff0;z-index:12;pointer-events:none;opacity:0;transition:opacity 0.1s}
+#dmg{position:fixed;inset:0;pointer-events:none;z-index:9;opacity:0;background:radial-gradient(transparent 40%,rgba(255,0,0,0.5));transition:opacity 0.15s}
+#dead{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:100;cursor:pointer}
+#dead h1{font-size:4em;color:#c41e3a;letter-spacing:5px}
+#dead p{color:#888;margin-top:20px;font-size:1.2em}
+#dead .stats{color:#ff4444;margin-top:10px}
+#msg{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);font-size:16px;color:#ffaa00;z-index:11;pointer-events:none;opacity:0;transition:opacity 0.3s;text-shadow:0 0 10px #ffaa00;letter-spacing:2px}
+#disclaimer{color:#333;font-size:0.65em;margin-top:30px}
+</style>
 </head>
 <body>
+<div id="blocker"><div id="menu">
+<h1>RED DUSTER</h1>
+<h2>ANTI-COMMUNIST SURVIVAL SIMULATOR</h2>
+<div class="start">[ CLICK TO DEPLOY ]</div>
+<div class="controls">WASD Move | MOUSE Aim | CLICK Fire | R Reload | 1/2/3 Weapon | SHIFT Sprint</div>
+<div id="disclaimer">* The communists in this simulator are fictional but modeled on real communists.</div>
+</div></div>
+<div id="crosshair">+</div>
+<div id="hp"><div id="hp-bar"><div id="hp-fill"></div></div></div>
+<div id="ammo">C7 | 30</div>
+<div id="wave">WAVE 1</div>
+<div id="kills">KILLS: 0</div>
+<div id="hit">✕</div>
+<div id="dmg"></div>
+<div id="msg"></div>
+<div id="dead" onclick="location.reload()"><h1>K.I.A.</h1><p>Click to redeploy</p><div class="stats" id="final-stats"></div></div>
 
-  <div id="fps-container">
-    <div id="damage-overlay"></div>
-    <div id="kia-overlay" style="display: none;">
-      <div style="font-size: 3em; color: red; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 20px red;">K.I.A.</div>
-      <div style="font-size: 1.2em; color: white; margin-top: 10px;">TACTICAL LINK LOST.</div>
-      <div style="font-size: 0.8em; color: #666; margin-top: 20px;" onclick="location.reload()" style="cursor:pointer">[ CLICK TO REDEPLOY ]</div>
-    </div>
-    <div id="victory-overlay" style="display: none;">
-      <div style="font-size: 3em; color: #00ff00; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 20px #00aa00;">SECTOR SECURED</div>
-      <div style="font-size: 1.2em; color: white; margin-top: 10px;">LIQUIDATION HALTED.</div>
-      <div style="font-size: 0.8em; color: #666; margin-top: 20px;" onclick="location.reload()" style="cursor:pointer">[ CLICK TO REDEPLOY ]</div>
-    </div>
-    <div id="bodycam-scanlines"></div>
-    
-    <div id="bodycam-ui">
-      <div id="bc-rec"><span class="bc-dot"></span>REC</div>
-      <div id="bc-mic">MIC ON | AXON-SQUAD-1</div>
-      <div id="bc-timestamp"></div>
-      <div id="bc-battery">🔋 84% BATT</div>
-      <div id="bc-mag">MAG: 30</div>
-      <div id="reloading-text">RELOADING...</div>
-    </div>
-    
-    <div id="bloggins-quote"></div>
-    
-    <div id="fps-instructions">
-      <div>
-        <span style="font-size: 2em; color: #ff3333; font-weight: bold; text-shadow: 0 0 10px #ff0000;">COMBAT DEPLOYMENT READY</span><br/><br/>
-        W A S D - Move | MOUSE - Look | LEFT CLICK - Fire | R - Reload<br/><br/>
-        Click to drop into the Open Town Procedural Matrix.<br/><br/>
-        <span style="font-size: 0.8em; color: #aaa;">[ 100% REALISM MODE. ARCADE HUD SYSTEM DISABLED. ]</span>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    window.addEventListener('load', () => {
-      // Execute the Three.js runtime bound to this document
-      if (typeof initFPS === 'function') {
-        initFPS();
-      } else {
-        setTimeout(() => { if(typeof initFPS === 'function') initFPS(); }, 500);
-      }
-    });
-
-    setInterval(() => { 
-      const ts = document.getElementById('bc-timestamp'); 
-      if(ts) ts.innerText = new Date().toLocaleString() + ' EST'; 
-    }, 1000);
-  </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+const W=[
+{name:'C7 RIFLE',rate:90,dmg:30,hdmg:120,mag:30,rl:2000,sp:0.01,pel:1,auto:1},
+{name:'SHOTGUN',rate:500,dmg:12,hdmg:60,mag:8,rl:2500,sp:0.08,pel:8,auto:0},
+{name:'RPG',rate:1500,dmg:300,hdmg:500,mag:1,rl:3500,sp:0,pel:1,auto:0}
+];
+let sc,cam,ren,clk,yaw,pit;
+let hp=100,am=30,ki=0,wv=0,alive=1,go=0,wi=0,rld=0,ls=0,md=0;
+let en=[],gi=[],dc=[];
+let fw=0,bk=0,lt=0,rt=0,sp=0;
+const vel=new THREE.Vector3();
+const S=18,SS=30,EY=1.7;
+let rt2=0,st=0;
+const mo=[];
+let actx;
+function sn(t){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();const o=actx.createOscillator(),g=actx.createGain(),f=actx.createBiquadFilter();o.connect(f);f.connect(g);g.connect(actx.destination);const n=actx.currentTime;if(t==='s'){o.type='square';f.type='lowpass';f.frequency.value=900;o.frequency.setValueAtTime(120,n);o.frequency.exponentialRampToValueAtTime(30,n+.08);g.gain.setValueAtTime(.6,n);g.gain.exponentialRampToValueAtTime(.01,n+.08);o.start(n);o.stop(n+.08)}else if(t==='h'){o.type='triangle';f.type='highpass';f.frequency.value=2000;o.frequency.setValueAtTime(3000,n);o.frequency.exponentialRampToValueAtTime(800,n+.08);g.gain.setValueAtTime(.8,n);g.gain.exponentialRampToValueAtTime(.01,n+.08);o.start(n);o.stop(n+.08)}else if(t==='d'){o.type='sine';o.frequency.setValueAtTime(40,n);o.frequency.linearRampToValueAtTime(20,n+.3);g.gain.setValueAtTime(.8,n);g.gain.exponentialRampToValueAtTime(.01,n+.3);o.start(n);o.stop(n+.3)}else if(t==='f'){o.type='triangle';f.type='lowpass';f.frequency.value=120;o.frequency.setValueAtTime(60,n);o.frequency.exponentialRampToValueAtTime(20,n+.1);g.gain.setValueAtTime(.15,n);g.gain.exponentialRampToValueAtTime(.01,n+.1);o.start(n);o.stop(n+.1)}else if(t==='sg'){o.type='square';f.type='lowpass';f.frequency.value=600;o.frequency.setValueAtTime(200,n);o.frequency.exponentialRampToValueAtTime(20,n+.15);g.gain.setValueAtTime(.9,n);g.gain.exponentialRampToValueAtTime(.01,n+.15);o.start(n);o.stop(n+.15)}else if(t==='b'){o.type='sawtooth';f.type='lowpass';f.frequency.value=200;o.frequency.setValueAtTime(80,n);o.frequency.exponentialRampToValueAtTime(15,n+.4);g.gain.setValueAtTime(1,n);g.gain.exponentialRampToValueAtTime(.01,n+.4);o.start(n);o.stop(n+.4)}}
+function init(){
+sc=new THREE.Scene();sc.background=new THREE.Color(0x0a0a18);sc.fog=new THREE.FogExp2(0x0a0a18,0.012);
+cam=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,500);
+ren=new THREE.WebGLRenderer({antialias:1});ren.setSize(innerWidth,innerHeight);ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.shadowMap.enabled=1;ren.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(ren.domElement);
+yaw=new THREE.Object3D();pit=new THREE.Object3D();yaw.add(pit);pit.add(cam);yaw.position.set(0,EY,0);sc.add(yaw);
+clk=new THREE.Clock();
+sc.add(new THREE.AmbientLight(0x334455,0.5));
+const mn=new THREE.DirectionalLight(0x8899bb,0.8);mn.position.set(80,150,40);mn.castShadow=1;mn.shadow.mapSize.set(2048,2048);const ss=120;mn.shadow.camera.left=-ss;mn.shadow.camera.right=ss;mn.shadow.camera.top=ss;mn.shadow.camera.bottom=-ss;mn.shadow.camera.far=400;sc.add(mn);
+sc.add(new THREE.HemisphereLight(0x2233aa,0x221100,0.3));
+for(let i=0;i<6;i++){const r=new THREE.PointLight(0xff2200,2,40);r.position.set((Math.random()-.5)*80,6,(Math.random()-.5)*80);sc.add(r)}
+bMap();bWep();
+document.addEventListener('mousemove',e=>{if(!go||!alive)return;yaw.rotation.y-=e.movementX*.002;pit.rotation.x=Math.max(-1.5,Math.min(1.5,pit.rotation.x-e.movementY*.002))});
+document.addEventListener('mousedown',()=>{md=1;if(go&&alive&&!W[wi].auto)shoot()});
+document.addEventListener('mouseup',()=>{md=0});
+document.addEventListener('keydown',e=>{if(!go)return;switch(e.code){case'KeyW':fw=1;break;case'KeyS':bk=1;break;case'KeyA':lt=1;break;case'KeyD':rt=1;break;case'ShiftLeft':sp=1;break;case'KeyR':rl();break;case'Digit1':sw(0);break;case'Digit2':if(wv>=3)sw(1);break;case'Digit3':if(wv>=5)sw(2);break}});
+document.addEventListener('keyup',e=>{switch(e.code){case'KeyW':fw=0;break;case'KeyS':bk=0;break;case'KeyA':lt=0;break;case'KeyD':rt=0;break;case'ShiftLeft':sp=0;break}});
+window.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();ren.setSize(innerWidth,innerHeight)});
+document.getElementById('blocker').addEventListener('click',()=>{ren.domElement.requestPointerLock()});
+document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement){if(!go){go=1;document.getElementById('blocker').style.display='none';nw()}}else{if(go&&alive)document.getElementById('blocker').style.display='flex'}});
+anim()}
+function bMap(){
+const gnd=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x2a2a28,roughness:.9}));gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=1;sc.add(gnd);
+const wm=new THREE.MeshStandardMaterial({color:0x553322,roughness:.85});
+const cm=new THREE.MeshStandardMaterial({color:0x444444,roughness:.9});
+const cr=new THREE.MeshStandardMaterial({color:0x554433,roughness:.95});
+for(let x=-3;x<=3;x++)for(let z=-3;z<=3;z++){if(Math.abs(x)<=1&&Math.abs(z)<=1)continue;if(Math.random()<.3)continue;const w=8+Math.random()*8,d=8+Math.random()*8,h=4+Math.random()*8;const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wm);b.position.set(x*22+(Math.random()-.5)*4,h/2,z*22+(Math.random()-.5)*4);b.castShadow=1;b.receiveShadow=1;sc.add(b);mo.push(b)}
+for(let i=0;i<40;i++){const s=1+Math.random()*2;const c=new THREE.Mesh(new THREE.BoxGeometry(s,s,s),cr);c.position.set((Math.random()-.5)*80,s/2,(Math.random()-.5)*80);c.castShadow=1;c.receiveShadow=1;sc.add(c);mo.push(c)}
+for(let i=0;i<20;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(4,1.2,.6),cm);b.position.set((Math.random()-.5)*70,.6,(Math.random()-.5)*70);b.rotation.y=Math.random()*Math.PI;b.castShadow=1;b.receiveShadow=1;sc.add(b);mo.push(b)}}
+let wg;
+function bWep(){
+wg=new THREE.Group();
+const gm=new THREE.MeshStandardMaterial({color:0x2244aa,roughness:.6});
+wg.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.08,.06,.15),gm),{position:new THREE.Vector3(.06,-.08,-.2)}));
+wg.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.08,.06,.12),gm),{position:new THREE.Vector3(-.04,-.06,-.25)}));
+const gn=new THREE.MeshStandardMaterial({color:0x111111,roughness:.4,metalness:.6});
+wg.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.04,.06,.4),gn),{position:new THREE.Vector3(.02,-.06,-.3)}));
+const br=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.2,6),gn);br.rotation.x=Math.PI/2;br.position.set(.02,-.04,-.55);wg.add(br);
+wg.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.03,.1,.06),new THREE.MeshStandardMaterial({color:0x222222,roughness:.8})),{position:new THREE.Vector3(.02,-.13,-.28)}));
+cam.add(wg);wg.position.set(.15,-.12,-.3)}
+function se(pos){
+const g=new THREE.Group();
+const bm=new THREE.MeshStandardMaterial({color:0x662222,roughness:.8});
+const t=new THREE.Mesh(new THREE.BoxGeometry(.6,.9,.4),bm);t.position.y=1.15;t.castShadow=1;g.add(t);
+const hd=new THREE.Mesh(new THREE.SphereGeometry(.2,8,6),new THREE.MeshStandardMaterial({color:0x886655,roughness:.7}));hd.position.y=1.8;hd.castShadow=1;hd.userData.isHead=1;g.add(hd);
+const lm=new THREE.MeshStandardMaterial({color:0x333322});
+g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.2,.7,.25),lm),{position:new THREE.Vector3(-.15,.35,0)}));
+g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.2,.7,.25),lm),{position:new THREE.Vector3(.15,.35,0)}));
+g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.06,.06,.5),new THREE.MeshStandardMaterial({color:0x111111})),{position:new THREE.Vector3(.3,1.1,.2)}));
+g.position.copy(pos);sc.add(g);
+const hs=1+(wv-1)*.12;
+en.push({m:g,hp:Math.round(35*hs),x:pos.x,z:pos.z,spd:2+Math.random()*1.5,lf:0})}
+function nw(){
+wv++;const c=Math.min(30,5+wv*2);
+for(let i=0;i<c;i++){const a=Math.random()*Math.PI*2,d=30+Math.random()*40;se(new THREE.Vector3(Math.cos(a)*d,0,Math.sin(a)*d))}
+if(wv%5===0){se(new THREE.Vector3((Math.random()-.5)*20,0,-30));const b=en[en.length-1];b.hp=Math.round(200*(1+wv*.1));b.m.children[0].material.color.setHex(0xaa0000);b.m.children[0].scale.set(1.4,1.4,1.4);mg('BOSS WAVE')}
+document.getElementById('wave').textContent='WAVE '+wv;
+if(wv===3)mg('SHOTGUN UNLOCKED — Press 2');
+if(wv===5)mg('RPG UNLOCKED — Press 3');
+if(wv>1&&wv%3===0){hp=Math.min(100,hp+25);mg('MEDKIT +25HP')}
+uh()}
+function shoot(){
+if(!alive||rld)return;const w=W[wi];const n=performance.now();if(n-ls<w.rate)return;if(am<=0){rl();return}
+ls=n;am--;sn(wi===1?'sg':wi===2?'b':'s');
+pit.rotation.x+=(0.02+Math.random()*.02)*(wi===2?3:wi===1?2:1);
+yaw.rotation.y+=(Math.random()-.5)*.01;wg.position.z+=.03;
+const rc=new THREE.Raycaster();
+for(let p=0;p<w.pel;p++){
+const sv=new THREE.Vector2((Math.random()-.5)*w.sp,(Math.random()-.5)*w.sp);
+rc.setFromCamera(sv,cam);
+const am2=[];en.forEach(e=>e.m.traverse(c=>{if(c.isMesh){c.userData.er=e;am2.push(c)}}));
+const h=rc.intersectObjects(am2);
+if(h.length>0){const e=h[0].object.userData.er;if(e&&e.hp>0){const hs=!!h[0].object.userData.isHead;e.hp-=hs?w.hdmg:w.dmg;sn('h');
+const hm=document.getElementById('hit');hm.textContent=hs?'☠':'✕';hm.style.color=hs?'#ff0':'#f33';hm.style.opacity='1';setTimeout(()=>hm.style.opacity='0',100);
+for(let i=0;i<(hs?12:4);i++)sg(h[0].point,0xaa0000,.04,8,.5);
+if(e.hp<=0)ke(e)}}
+else{const wh=rc.intersectObjects(mo);if(wh.length>0&&wh[0].distance<100)for(let i=0;i<3;i++)sg(wh[0].point,0xffaa00,.02,12,.3)}}
+uh()}
+function ke(e){
+ki++;const p=e.m.position;
+for(let i=0;i<15;i++)sg(new THREE.Vector3(p.x+(Math.random()-.5)*.5,1+Math.random(),p.z+(Math.random()-.5)*.5),i<8?0xaa0000:0x553322,.06+Math.random()*.1,6+Math.random()*8,2+Math.random()*2);
+sn('d');
+const d=new THREE.Mesh(new THREE.CircleGeometry(.5+Math.random()*.5,8),new THREE.MeshStandardMaterial({color:0x440000}));d.rotation.x=-Math.PI/2;d.position.set(p.x,.02,p.z);sc.add(d);dc.push(d);if(dc.length>30)sc.remove(dc.shift());
+sc.remove(e.m);en.splice(en.indexOf(e),1);
+const q=["LIQUIDATED","GET SOME","QUACK QUACK","RED DUSTER SENDS ITS REGARDS","COMMIE DOWN"];
+if(Math.random()>.6)mg(q[Math.floor(Math.random()*q.length)]);
+uh();if(en.length===0)setTimeout(nw,2000)}
+function sg(pos,col,sz,spd,life){const g=new THREE.Mesh(new THREE.BoxGeometry(sz,sz,sz),new THREE.MeshBasicMaterial({color:col}));g.position.copy(pos);sc.add(g);gi.push({m:g,vx:(Math.random()-.5)*spd,vy:2+Math.random()*spd,vz:(Math.random()-.5)*spd,l:life,s:{x:Math.random()*8-4,y:Math.random()*8-4,z:Math.random()*8-4}})}
+function rl(){if(rld||am===W[wi].mag)return;rld=1;wg.position.y-=.1;setTimeout(()=>{am=W[wi].mag;rld=0;wg.position.y+=.1;uh()},W[wi].rl)}
+function sw(i){if(i===wi||rld)return;wi=i;am=W[i].mag;uh();mg(W[i].name+' EQUIPPED')}
+function mg(t){const m=document.getElementById('msg');m.textContent=t;m.style.opacity='1';clearTimeout(m._t);m._t=setTimeout(()=>m.style.opacity='0',2500)}
+function uh(){document.getElementById('ammo').textContent=W[wi].name+' | '+am;document.getElementById('kills').textContent='KILLS: '+ki;document.getElementById('hp-fill').style.width=Math.max(0,hp)+'%';document.getElementById('hp-fill').style.background=hp>50?'#22cc44':hp>25?'#ccaa22':'#cc2222'}
+function td(a){hp-=a;rt2=0;document.getElementById('dmg').style.opacity='.8';setTimeout(()=>document.getElementById('dmg').style.opacity='0',150);uh();if(hp<=0&&alive){alive=0;document.getElementById('dead').style.display='flex';document.getElementById('final-stats').textContent='Wave '+wv+' | Kills: '+ki;document.exitPointerLock()}}
+function anim(){
+requestAnimationFrame(anim);const dt=Math.min(clk.getDelta(),.05);
+if(!go||!alive){ren.render(sc,cam);return}
+const spd=sp?SS:S;const dir=new THREE.Vector3();
+if(fw)dir.z-=1;if(bk)dir.z+=1;if(lt)dir.x-=1;if(rt)dir.x+=1;
+dir.normalize();dir.applyAxisAngle(new THREE.Vector3(0,1,0),yaw.rotation.y);
+yaw.position.x+=dir.x*spd*dt;yaw.position.z+=dir.z*spd*dt;
+if(dir.length()>.1){st+=dt;if(st>(sp?.3:.45)){sn('f');st=0}wg.position.y=-.12+Math.sin(performance.now()*.008)*.003}
+wg.position.z+=(-0.3-wg.position.z)*8*dt;
+if(md&&W[wi].auto)shoot();
+en.forEach(e=>{const dx=yaw.position.x-e.x,dz=yaw.position.z-e.z,dist=Math.sqrt(dx*dx+dz*dz),nx=dx/dist,nz=dz/dist;
+e.m.lookAt(yaw.position.x,1,yaw.position.z);
+if(dist>12){e.x+=nx*e.spd*dt;e.z+=nz*e.spd*dt}else{const s=Math.sin(performance.now()*.002+e.x)*e.spd*.5*dt;e.x+=-nz*s;e.z+=nx*s}
+e.m.position.x=e.x;e.m.position.z=e.z;
+const now=performance.now();if(dist<50&&now-e.lf>1500+Math.random()*2000){e.lf=now;if(Math.random()>.03+dist*.003){td(5+Math.floor(wv*.5));sn('h')}}});
+for(let i=gi.length-1;i>=0;i--){const g=gi[i];g.m.position.x+=g.vx*dt;g.vy-=15*dt;g.m.position.y+=g.vy*dt;g.m.position.z+=g.vz*dt;g.m.rotation.x+=g.s.x*dt;g.m.rotation.y+=g.s.y*dt;if(g.m.position.y<.03){g.m.position.y=.03;g.vy=Math.abs(g.vy)*.2;g.vx*=.5;g.vz*=.5}g.l-=dt;if(g.l<=0){sc.remove(g.m);gi.splice(i,1)}}
+rt2+=dt;if(rt2>4&&hp<100&&hp>0){hp=Math.min(100,hp+8*dt);uh()}
+yaw.position.x=Math.max(-95,Math.min(95,yaw.position.x));yaw.position.z=Math.max(-95,Math.min(95,yaw.position.z));yaw.position.y=EY;
+ren.render(sc,cam)}
+init();
+</script>
 </body>
 </html>
