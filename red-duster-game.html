@@ -125,7 +125,8 @@ window.PointerLockControls = PointerLockControls;
 const WEAPONS = [
   { name:'C7A2', rate:90, dmg:35, hdmg:140, mag:30, reload:2200, spread:0.012, pellets:1, auto:true },
   { name:'M870', rate:600, dmg:15, hdmg:80, mag:8, reload:2800, spread:0.09, pellets:8, auto:false },
-  { name:'M72 LAW', rate:2000, dmg:400, hdmg:600, mag:1, reload:4000, spread:0, pellets:1, auto:false }
+  { name:'M72 LAW', rate:2000, dmg:400, hdmg:600, mag:1, reload:4000, spread:0, pellets:1, auto:false },
+  { name:'CHAINSAW', rate:45, dmg:50, hdmg:100, mag:999, reload:0, spread:0.05, pellets:5, auto:true, range:2.5 }
 ];
 
 let scene, camera, renderer, controls;
@@ -204,9 +205,32 @@ function init(){
   document.addEventListener('mouseup',()=>{mouseDown=false;});
   window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
-  document.getElementById('blocker').addEventListener('click',()=>{controls.lock();});
-  controls.addEventListener('lock',()=>{if(!started){started=true;document.getElementById('blocker').style.display='none';startWave();}});
-  controls.addEventListener('unlock',()=>{if(started&&alive)document.getElementById('blocker').style.display='flex';});
+  // Click to start — multiple fallbacks for pointer lock
+  function tryLock() {
+    try { controls.lock(); } catch(e) {
+      try { renderer.domElement.requestPointerLock(); } catch(e2) {
+        try { document.body.requestPointerLock(); } catch(e3) {}
+      }
+    }
+  }
+  document.getElementById('blocker').addEventListener('click', tryLock);
+  renderer.domElement.addEventListener('click', ()=>{ if(!controls.isLocked) tryLock(); });
+
+  // Pointer lock state changes
+  document.addEventListener('pointerlockchange', ()=>{
+    if(document.pointerLockElement) {
+      if(!started){started=true; document.getElementById('blocker').style.display='none'; startWave();}
+    } else {
+      if(started&&alive) document.getElementById('blocker').style.display='flex';
+    }
+  });
+  controls.addEventListener('lock', ()=>{if(!started){started=true;document.getElementById('blocker').style.display='none';startWave();}});
+  controls.addEventListener('unlock', ()=>{if(started&&alive)document.getElementById('blocker').style.display='flex';});
+
+  // Debug — show if Three.js loaded
+  console.log('RED DUSTER: init() complete. THREE version:', THREE.REVISION);
+  console.log('RED DUSTER: Controls created:', !!controls);
+  console.log('RED DUSTER: Scene objects:', scene.children.length);
 
   animate();
 }
