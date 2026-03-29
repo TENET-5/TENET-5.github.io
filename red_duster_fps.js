@@ -679,33 +679,128 @@ function animate() {
     
     if (controls.isLocked === true && gameState === "COMBAT") {
         velocity.x -= velocity.x * 8.0 * delta; velocity.z -= velocity.z * 8.0 * delta; velocity.y -= 9.8 * 120.0 * delta;
-        direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); direction.normalize(); 
+        direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); direction.normalize();
 
-        const speed = isSprinting ? 500.0 : 250.0;
+        const isMoving = moveForward || moveBackward || moveLeft || moveRight;
+        const speed = isSprinting ? 520.0 : 250.0;
         if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
         if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
-        
-        if ((moveForward || moveBackward || moveLeft || moveRight) && !leanLeft && !leanRight) {
-            if (time - lastStepTime > 450) { playCombatAcoustic("footstep"); lastStepTime = time; }
+
+        // ── PROCEDURAL MOVEMENT ──────────────────────────────────────────────
+        const lateralSpeed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+        prevSpeed = lateralSpeed;
+
+        if (isMoving) {
+            const bobFreq  = isSprinting ? 14.0 : 7.0;   // sprint bobs faster
+            const bobAmtY  = isSprinting ? 1.2 : 0.45;   // vertical head bob
+            const bobAmtX  = isSprinting ? 0.6 : 0.18;   // side sway
+            bobTime += delta * bobFreq;
+            // camera bob (applied via camera offset, restored each frame)
+            const bobY = Math.sin(bobTime)         * bobAmtY;
+            const bobX = Math.sin(bobTime * 0.5)   * bobAmtX;
+            controls.getObject().position.y = 10 + bobY;
+
+            // Footstep timing — faster when sprinting
+            const stepInterval = isSprinting ? 260 : 450;
+            if (time - lastStepTime > stepInterval) { playCombatAcoustic("footstep"); lastStepTime = time; }
+
+            // Sprint: lean forward + slight barrel roll
+            if (isSprinting) {
+                sprintTime += delta;
+                // Lean camera forward
+                camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, -0.08, 0.12);
+                // Breathing sway while sprinting
+                camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, Math.sin(bobTime * 0.5) * 0.03, 0.15);
+                // Vignette pump (bodycam lens compress)
+                if(customPass) customPass.uniforms["amount"].value = 0.95 + Math.abs(Math.sin(bobTime)) * 0.08;
+            } else {
+                sprintTime = 0;
+                if(customPass) customPass.uniforms["amount"].value = THREE.MathUtils.lerp(customPass.uniforms["amount"].value, 0.9, 0.08);
+            }
+        } else {
+            bobTime *= 0.85; // decay bob smoothly when stopping
+            sprintTime = 0;
+            isSprinting = false;
+            controls.getObject().position.y = THREE.MathUtils.lerp(controls.getObject().position.y, 10, 0.15);
+            if(customPass) customPass.uniforms["amount"].value = THREE.MathUtils.lerp(customPass.uniforms["amount"].value, 0.9, 0.08);
         }
 
-        controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta); controls.getObject().position.y += (velocity.y * delta);
+        // ── BODY CHECK ───────────────────────────────────────────────────────
+        if (isSprinting && lateralSpeed > BODYCHECK_THRESHOLD) {
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const en = enemies[i];
+                if (!en.userData.active) continue;
+                const dist = controls.getObject().position.distanceTo(en.position);
+                if (dist < 8) {
+                    // BODY CHECK — Bloggins ragdolls enemy into gibs
+                    triggerQuote("BODY CHECK! CANADA'S STILL STANDING!", "#ff6600");
+                    playCombatAcoustic("headshot");
+                    // Launch enemy backward in player's forward direction
+                    const launch = new THREE.Vector3();
+                    controls.getObject().getWorldDirection(launch);
+                    launch.y = 0.6;
+                    launch.normalize().multiplyScalar(35);
+                    // Spawn a big blood burst at impact then gib
+                    spawnBlood(en.position.clone().add(new THREE.Vector3(0,5,0)), true);
+                    spawnBlood(en.position.clone().add(new THREE.Vector3(0,5,0)), true);
+                    // Gib the enemy (launched gibs)
+                    const pos = en.position.clone(); pos.y += 5;
+                    for (let g = 0; g < 15; g++) {
+                        const size = 0.6 + Math.random() * 1.8;
+                        const gib = new THREE.Mesh(
+                            new THREE.BoxGeometry(size, size, size),
+                            new THREE.MeshStandardMaterial({color: g < 8 ? 0xaa0000 : 0x660000, roughness: 0.9})
+                        );
+                        gib.position.copy(pos);
+                        gib.userData = {
+                            vel: new THREE.Vector3(
+                                launch.x * (0.5 + Math.random()) + (Math.random()-0.5)*20,
+                                launch.y * (8 + Math.random()*12),
+                                launch.z * (0.5 + Math.random()) + (Math.random()-0.5)*20
+                            ),
+                            life: 4 + Math.random()*3,
+                            spin: new THREE.Vector3((Math.random()-0.5)*12,(Math.random()-0.5)*12,(Math.random()-0.5)*12),
+                            isGib: true
+                        };
+                        scene.add(gib); particles.push(gib);
+                    }
+                    // Remove enemy
+                    const hitboxIdx = objects.findIndex(o => o.userData.parentRef === en);
+                    if (hitboxIdx > -1) objects.splice(hitboxIdx, 1);
+                    scene.remove(en);
+                    enemies.splice(i, 1);
+                    kills++; enemiesLeft--;
+                    const magEl = document.getElementById('bc-mag');
+                    if(magEl) magEl.innerText = `${weaponNames[currentWeaponIdx]}: ${ammo} | KILLS: ${kills}`;
+                    if (enemiesLeft <= 0) setTimeout(() => startWave(currentWave + 1), 3000);
+                    // Knockback camera (impact shake)
+                    camera.rotation.x += (Math.random()-0.5) * 0.25;
+                    camera.rotation.y += (Math.random()-0.5) * 0.12;
+                }
+            }
+        }
+
+        controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
         if (controls.getObject().position.y < 10) { velocity.y = 0; controls.getObject().position.y = 10; }
 
         let targetZ = 0, targetX = 0;
         if (leanLeft) { targetZ = 0.25; targetX = -2; } else if (leanRight) { targetZ = -0.25; targetX = 2; }
-        camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetZ, 0.1);
-        // Update chest light to follow camera (safely)
-        const camIdx = scene.children.indexOf(camera);
-        if (camIdx > 0) {
-            const prev = scene.children[camIdx - 1];
-            if (prev && prev.position) prev.position.copy(camera.position);
-        }
+        if (!isSprinting) camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetZ, 0.1);
 
+        // Gun — bob and sway procedurally
         const gunTargetPos = camera.position.clone();
         const gunOffset = new THREE.Vector3(2.5 + targetX, -2.5, -5); gunOffset.applyQuaternion(camera.quaternion);
         gunTargetPos.add(gunOffset);
-        if (moveForward || moveBackward || moveLeft || moveRight) gunTargetPos.y += Math.sin(time * 0.01) * 0.3;
+        if (isMoving) {
+            const gunBobAmt = isSprinting ? 1.2 : 0.3;
+            gunTargetPos.y += Math.sin(bobTime) * gunBobAmt;
+            gunTargetPos.x += Math.sin(bobTime * 0.5) * gunBobAmt * 0.5;
+            if (isSprinting) {
+                // Gun holstered low when sprinting
+                gunTargetPos.y -= 1.5;
+                gunTargetPos.x += 0.8;
+            }
+        }
         activeWeapon.position.lerp(gunTargetPos, 0.15); activeWeapon.quaternion.slerp(camera.quaternion, 0.2);
 
         // Tactical Cover AI Algorithm
