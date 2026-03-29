@@ -1034,6 +1034,32 @@ scene.add(fillLight);
 const hemiLight = new THREE.HemisphereLight(0x6688cc, 0x443322, 0.3);
 scene.add(hemiLight);
 
+// ── Core Utility Functions ──────────────────────────────────────────────────
+function distXZ(x1, z1, x2, z2) {
+  const dx = x1 - x2, dz = z1 - z2;
+  return Math.sqrt(dx * dx + dz * dz);
+}
+
+function isColliding(x, z, radius) {
+  const mx = Math.floor(x), mz = Math.floor(z);
+  for (let dz = -1; dz <= 1; dz++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const nx = mx + dx, nz = mz + dz;
+      if (nx < 0 || nx >= MAP_W || nz < 0 || nz >= MAP_H) continue;
+      const cell = MAP[nz] && MAP[nz][nx];
+      if (cell === 1 || cell === 2) {
+        // AABB vs circle
+        const cx = nx + 0.5, cz = nz + 0.5;
+        const nearX = Math.max(nx, Math.min(cx + 0.5, x));
+        const nearZ = Math.max(nz, Math.min(cz + 0.5, z));
+        const dist = distXZ(x, z, nearX, nearZ);
+        if (dist < radius) return true;
+      }
+    }
+  }
+  return false;
+}
+
 // ── Day / Night Cycle ──────────────────────────────────────────────────────
 const DAY_LENGTH = 120; // seconds per full cycle
 let dayTime = 0.25;     // start at dawn (0=midnight, 0.25=dawn, 0.5=noon, 0.75=dusk)
