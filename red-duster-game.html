@@ -1212,22 +1212,67 @@ mapGroup.children.forEach(obj => {
   }
 });
 
-// ── Capture Zones ──
+// ── Phase 76: Information Warfare Hubs ──
 const zoneConfigs = [
-  { name: 'A', target: [12, 12], color: 0x3333ff },
-  { name: 'B', target: [36, 12], color: 0x33ff33 },
-  { name: 'C', target: [24, 36], color: 0xffff33 }
+  { name: 'ALPHA', target: [12, 12] },
+  { name: 'BRAVO', target: [36, 12] },
+  { name: 'CHARLIE', target: [24, 36] }
 ];
+
 zoneConfigs.forEach(cfg => {
   const [sx, sz] = findSpawn(cfg.target[0], cfg.target[1]);
-  const geo = new THREE.CylinderGeometry(1.5, 1.5, 0.1, 24);
-  const mat = new THREE.MeshBasicMaterial({ color: cfg.color, transparent: true, opacity: 0.3, depthWrite: false });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.set(sx, 0.05, sz);
-  scene.add(mesh);
+  
+  const hubGroup = new THREE.Group();
+  
+  // 1. Radio Tower Lattice (Tall and metallic)
+  const towerGeo = new THREE.CylinderGeometry(0.2, 0.6, 8, 8);
+  const towerMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9, roughness: 0.2, wireframe: true });
+  const tower = new THREE.Mesh(towerGeo, towerMat);
+  tower.position.y = 4;
+  hubGroup.add(tower);
+  
+  // 2. Solid Base / Crate (Collision mapped via MAP array)
+  const baseGeo = new THREE.BoxGeometry(2, 1, 2);
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.8, roughness: 0.3 });
+  const base = new THREE.Mesh(baseGeo, baseMat);
+  base.position.y = 0.5;
+  hubGroup.add(base);
+
+  // 3. Tactical Laptop / Terminal
+  const lapGeo = new THREE.BoxGeometry(0.6, 0.05, 0.4);
+  const lapMat = new THREE.MeshStandardMaterial({ color: 0x050505 });
+  const laptop = new THREE.Mesh(lapGeo, lapMat);
+  laptop.position.set(0, 1.05, 0.4);
+  laptop.rotation.x = 0.2;
+  hubGroup.add(laptop);
+
+  const screenGeo = new THREE.PlaneGeometry(0.5, 0.3);
+  const screenMat = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Starts red (uncaptured)
+  const screen = new THREE.Mesh(screenGeo, screenMat);
+  screen.position.set(0, 1.2, 0.25);
+  screen.rotation.x = -0.2;
+  hubGroup.add(screen);
+
+  // 4. Warning Beacon (PointLight & Mesh)
+  const beaconLight = new THREE.PointLight(0xff0000, 2, 15);
+  beaconLight.position.set(0, 8.2, 0);
+  hubGroup.add(beaconLight);
+  
+  const beaconMat = new THREE.MeshBasicMaterial({color: 0xff0000});
+  const beaconMesh = new THREE.Mesh(new THREE.SphereGeometry(0.2), beaconMat);
+  beaconMesh.position.set(0, 8.2, 0);
+  hubGroup.add(beaconMesh);
+
+  hubGroup.position.set(sx, 0, sz);
+  scene.add(hubGroup);
+
+  // Inject hard collision directly into the native map array
+  MAP[Math.floor(sz)][Math.floor(sx)] = 3; 
+
   STATE.captureZones.push({
-    name: cfg.name, x: sx, z: sz, mesh,
-    captured: false, progress: 0, color: cfg.color
+    name: cfg.name, x: sx, z: sz, 
+    group: hubGroup, screen: screenMat, beacon: beaconLight, beaconMesh: beaconMat,
+    captured: false, progress: 0
   });
 });
 
@@ -3736,7 +3781,44 @@ function updateGrenades(dt) {
 }
 
 function updateCaptureZones(dt) {
-  // Capture zones are optional — no-op if none exist
+  const px = yawObj.position.x;
+  const pz = yawObj.position.z;
+  
+  STATE.captureZones.forEach(zone => {
+    // Pulse the beacon light organically
+    zone.beacon.intensity = 1.5 + Math.sin(performance.now() / 200) * 0.5;
+    
+    if (zone.captured) return;
+
+    const dx = px - zone.x;
+    const dz = pz - zone.z;
+    const distSq = dx*dx + dz*dz;
+    
+    // 4-unit upload radius
+    if (distSq < 16) {
+      zone.progress += dt * 0.2; // 5 seconds continuous proximity to capture
+      
+      // Flicker the laptop screen to show data transfer protocol
+      zone.screen.color.setHex(Math.random() > 0.5 ? 0xffea00 : 0xff0000);
+      
+      if (zone.progress >= 1) {
+        zone.captured = true;
+        zone.progress = 1;
+        // Lock to Hacker Green
+        zone.screen.color.setHex(0x00ff00);
+        zone.beacon.color.setHex(0x00ff00);
+        zone.beaconMesh.color.setHex(0x00ff00);
+        
+        addKillFeed(`SEC 504 DECRYPTED: HUB ${zone.name} BROADCASTING`);
+        playSound('pickup');
+      }
+    } else {
+      if (zone.progress > 0) {
+        zone.progress = Math.max(0, zone.progress - dt * 0.1); 
+        zone.screen.color.setHex(0xff0000); // Reset screen to aggressive red
+      }
+    }
+  });
 }
 
 // ── Game Loop ──
