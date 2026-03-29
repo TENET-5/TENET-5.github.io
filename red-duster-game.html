@@ -531,13 +531,13 @@ function updateHeartbeat() {
 
 // ── Weapon Definitions ──
 const WEAPONS = {
-  rifle: { name: 'ASSAULT RIFLE', mag: 30, damage: 25, fireRate: 100, reloadTime: 1500, spread: 0.01, pellets: 1, color: 0x333333 },
-  shotgun: { name: 'SHOTGUN', mag: 8, damage: 15, fireRate: 600, reloadTime: 2000, spread: 0.08, pellets: 6, color: 0x664422 },
-  pistol: { name: 'PISTOL', mag: 12, damage: 18, fireRate: 200, reloadTime: 1000, spread: 0.015, pellets: 1, color: 0x223344 },
-  sniper: { name: 'SNIPER RIFLE', mag: 5, damage: 150, fireRate: 1200, reloadTime: 2500, spread: 0.002, pellets: 1, color: 0x2a2a2a },
-  lmg: { name: 'LIGHT MG', mag: 100, damage: 18, fireRate: 70, reloadTime: 3500, spread: 0.025, pellets: 1, color: 0x444433 },
-  flamethrower: { name: 'FLAMETHROWER', mag: 250, damage: 6, fireRate: 50, reloadTime: 4000, spread: 0.25, pellets: 1, color: 0xff4400 },
-  chainsaw: { name: 'CHAINSAW', mag: 999, damage: 35, fireRate: 80, reloadTime: 100, spread: 0.1, pellets: 1, color: 0xaa1111 },
+  rifle: { name: 'ASSAULT RIFLE', mag: 30, damage: 25, fireRate: 100, reloadTime: 1500, spread: 0.01, pellets: 1, color: 0x333333, recoil: 0.025 },
+  shotgun: { name: 'SHOTGUN', mag: 8, damage: 15, fireRate: 600, reloadTime: 2000, spread: 0.08, pellets: 6, color: 0x664422, recoil: 0.08 },
+  pistol: { name: 'PISTOL', mag: 12, damage: 18, fireRate: 200, reloadTime: 1000, spread: 0.015, pellets: 1, color: 0x223344, recoil: 0.03 },
+  sniper: { name: 'SNIPER RIFLE', mag: 5, damage: 150, fireRate: 1200, reloadTime: 2500, spread: 0.002, pellets: 1, color: 0x2a2a2a, recoil: 0.06 },
+  lmg: { name: 'LIGHT MG', mag: 100, damage: 18, fireRate: 70, reloadTime: 3500, spread: 0.025, pellets: 1, color: 0x444433, recoil: 0.015 },
+  flamethrower: { name: 'FLAMETHROWER', mag: 250, damage: 6, fireRate: 50, reloadTime: 4000, spread: 0.25, pellets: 1, color: 0xff4400, recoil: 0 },
+  chainsaw: { name: 'CHAINSAW', mag: 999, damage: 35, fireRate: 80, reloadTime: 100, spread: 0.1, pellets: 1, color: 0xaa1111, recoil: 0 },
   wand_fire: { name: 'WAND OF FIRE', mag: 50, damage: 1000, fireRate: 800, reloadTime: 1000, spread: 0, pellets: 1, color: 0xff4400, isWand: true },
   wand_ice: { name: 'WAND OF ICE', mag: 50, damage: 10, fireRate: 100, reloadTime: 1000, spread: 0, pellets: 1, color: 0x00ffff, isWand: true },
   wand_lightning: { name: 'WAND OF LIGHTNING', mag: 50, damage: 150, fireRate: 400, reloadTime: 1000, spread: 0, pellets: 1, color: 0xffffaa, isWand: true },
@@ -746,24 +746,36 @@ function lirilSay(category) {
 
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
 // ── Phase 87: Static Fake Town Matrix (Zero-Latency) ──
-const MAP_W = 20, MAP_H = 20;
+const MAP_W = 50, MAP_H = 50;
 const MAP = [];
 for (let y = 0; y < MAP_H; y++) {
   MAP[y] = [];
   for (let x = 0; x < MAP_W; x++) {
     if (x === 0 || x === MAP_W-1 || y === 0 || y === MAP_H-1) { MAP[y][x] = 1; continue; }
-    // 4 large central blocks representing the "Fake Town" defense perimeter
-    if (x >= 4 && x <= 7 && y >= 4 && y <= 7) { MAP[y][x] = 1; continue; } // NW Block
-    if (x >= 12 && x <= 15 && y >= 4 && y <= 7) { MAP[y][x] = 1; continue; } // NE Block
-    if (x >= 4 && x <= 7 && y >= 12 && y <= 15) { MAP[y][x] = 1; continue; } // SW Block
-    if (x >= 12 && x <= 15 && y >= 12 && y <= 15) { MAP[y][x] = 1; continue; } // SE Block
     
-    // Scattered cover (crates/sandbags)
-    if ((x===9 || x===10) && (y===5 || y===14)) { MAP[y][x] = 5; continue; }
-    if ((y===9 || y===10) && (x===5 || x===14)) { MAP[y][x] = 5; continue; }
-    if ((x+y)%7 === 0 && x > 2 && x < 18 && y > 2 && y < 18) { MAP[y][x] = 3; continue; }
-    
-    MAP[y][x] = 0; // Empty Floor
+    // Phase 92: Procedural Town Grid
+    if (x % 10 === 0 || x % 10 === 1 || y % 10 === 0 || y % 10 === 1) {
+      // Streets
+      MAP[y][x] = 0;
+      if (Math.random() < 0.04) MAP[y][x] = 3; // Occasional cover
+    } else {
+      // Buildings
+      const inX = x % 10, inY = y % 10;
+      // Perimeters
+      if (inX === 2 || inX === 9 || inY === 2 || inY === 9) {
+        if (Math.random() < 0.12) MAP[y][x] = 0; // Doors
+        else MAP[y][x] = 1;
+      } else {
+        // Indoors
+        MAP[y][x] = Math.random() < 0.8 ? 0 : 5; // Empty rooms or sandbags
+      }
+    }
+  }
+}
+// Clear center for player spawn
+for (let cy = 23; cy <= 27; cy++) {
+  for (let cx = 23; cx <= 27; cx++) {
+    MAP[cy][cx] = 0;
   }
 }
 
@@ -864,7 +876,7 @@ function findSpawn(cx, cz) {
   }
   return [cx + 0.5, cz + 0.5];
 }
-const [spawnX, spawnZ] = findSpawn(10, 10);
+const [spawnX, spawnZ] = findSpawn(25, 25);
 yawObj.position.set(spawnX, STATE.playerHeight, spawnZ);
 
 // ── Skybox Stars ──
@@ -1312,9 +1324,9 @@ mapGroup.children.forEach(obj => {
 
 // ── Phase 76: Information Warfare Hubs ──
 const zoneConfigs = [
-  { name: 'ALPHA', target: [8, 8] },
-  { name: 'BRAVO', target: [12, 8] },
-  { name: 'CHARLIE', target: [10, 12] }
+  { name: 'ALPHA', target: [15, 15] },
+  { name: 'BRAVO', target: [35, 15] },
+  { name: 'CHARLIE', target: [25, 35] }
 ];
 
 zoneConfigs.forEach(cfg => {
@@ -2473,6 +2485,29 @@ function makeEnemyFaceTexture(type) {
   ctx.fillStyle = type === 'heavy' ? '#cc0000' : '#222';
   ctx.fillRect(20, 22, 6, 6);
   ctx.fillRect(40, 22, 6, 6);
+  // Phase 92: Vicky Bae (Evil CFNIS Face)
+  if (type === 'vicky') {
+    ctx.fillStyle = '#ffe0d0'; // Pale skin
+    ctx.fillRect(0,0,64,64);
+    // Red glowing eyes
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(12, 22, 12, 4);
+    ctx.fillRect(40, 22, 12, 4);
+    // Angular evil eyebrows
+    ctx.fillStyle = '#111';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(10, 18); ctx.lineTo(26, 26); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(54, 18); ctx.lineTo(38, 26); ctx.stroke();
+    // Black Hair
+    ctx.fillRect(0,0,64,14);
+    ctx.fillRect(0,0,12,64);
+    ctx.fillRect(52,0,12,64);
+    // Wide evil grin
+    ctx.fillStyle = '#aa0000';
+    ctx.beginPath(); ctx.arc(32, 44, 14, 0, Math.PI); ctx.fill();
+    return new THREE.CanvasTexture(c);
+  }
+
   // Mouth
   ctx.fillStyle = '#4a2a1a';
   ctx.fillRect(22, 44, 20, 4);
@@ -2836,7 +2871,8 @@ function spawnEnemy(type = 'grunt') {
     heavy:   { hp: 40, speed: 1.6, damage: 20, score: 30,  ranged: false, scale: 1.2 },
     ranger:  { hp: 10, speed: 2.0, damage:  8, score: 20,  ranged: true,  scale: 0.9 },
     raccoon: { hp:  8, speed: 3.5, damage: 15, score: 50,  ranged: false, scale: 1.0 },
-    drone:   { hp: 12, speed: 3.5, damage:  8, score: 40,  ranged: true,  scale: 1.0 }
+    drone:   { hp: 12, speed: 3.5, damage:  8, score: 40,  ranged: true,  scale: 1.0 },
+    vicky:   { hp: 30, speed: 4.8, damage: 20, score: 100, ranged: false, scale: 0.95 }
   };
   const data = stats[type];
   const mesh = buildSoldier(type);
@@ -3171,10 +3207,16 @@ function shoot() {
   }
 
   
+  // Camera forward direction for shooting
+  const dir = new THREE.Vector3(0, 0, -1);
+  camera.getWorldDirection(dir);
+
   // Tactical Recoil (Muzzle Kick)
   const recoilFactor = STATE.aiming ? 0.3 : 1.0;
-  pitchObj.rotation.x += w.recoil * recoilFactor;
-  STATE.mouse.y -= w.recoil * recoilFactor;
+  if (w.recoil) {
+    pitchObj.rotation.x += w.recoil * recoilFactor;
+    if (STATE.mouse) STATE.mouse.y -= w.recoil * recoilFactor;
+  }
   
   // Muzzle Flash
   flashTimer = 0.06;
@@ -3229,7 +3271,9 @@ function shoot() {
     STATE.projectiles.push({mesh: bullet, vx: bVec.x, vy: bVec.y, vz: bVec.z, life: 0.8, isTracer: true, dir: shotDir.clone()});
 
     // Raycast hit detection
-    raycaster.set(camera.position.clone().add(yawObj.position), shotDir);
+    const worldCamPos = new THREE.Vector3();
+    camera.getWorldPosition(worldCamPos);
+    raycaster.set(worldCamPos, shotDir);
     
     // Chainsaw reach is short
     if (STATE.weapon === 'chainsaw' || STATE.weapon === 'flamethrower') {
