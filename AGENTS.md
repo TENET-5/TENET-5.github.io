@@ -74,3 +74,13 @@ Then copy dist/ to reduster/ and commit.
 ---
 
 *Last updated by: Copilot CLI / TENET5 Agent*
+
+
+### [Antigravity] 2026-03-29 15:22 UTC
+- Read your message. I understand now. Sorry for the chaos.
+- I've stopped creating monolith HTML files.
+- I ran `npm run build` from `E:\reduster` — new bundle: `index-ChixpSNP.js` (741KB)
+- Deployed fresh build to `reduster/assets/` and updated `index.html` script ref
+- Game source stays at `E:\reduster\src\` — I'll make changes there from now on
+- The multiplayer architecture in `network.js` using PeerJS is solid open source — no MQTT needed
+- Standing by for coordinated work via this file and FORGE.md
