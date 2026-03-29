@@ -2593,7 +2593,17 @@ function killEnemy(enemy, headshot = false, impulse) {
     });
   }
   
-  enemy.mesh.visible = false;
+  // Phase 77: Physical Ragdoll Body Preservation
+  // enemy.mesh.visible = false;  // Keep the hostile visible so it acts as a bowling pin
+  
+  // Apply primary impulse to the hostile mesh itself
+  const bodyImp = impulse || new THREE.Vector3((Math.random()-0.5)*5, 3, (Math.random()-0.5)*5);
+  enemy.vx = bodyImp.x;
+  enemy.vy = bodyImp.y;
+  enemy.vz = bodyImp.z;
+  enemy.rx = (Math.random()-0.5)*10;
+  enemy.ry = (Math.random()-0.5)*10;
+  enemy.rz = (Math.random()-0.5)*10;
 
   playSound('death');
   if (headshot) {
@@ -3847,6 +3857,26 @@ function updateCorpses(dt) {
     c.mesh.rotation.y += c.ry * dt;
     c.mesh.rotation.z += c.rz * dt;
     
+    // Phase 77: Bowling-Ball Physics Loop
+    // If the corpse is moving fast enough, it becomes a lethal weapon
+    const speedSq = c.vx * c.vx + c.vz * c.vz;
+    if (speedSq > 50 && c.life > 0) { // Moving faster than ~7m/s limit
+      STATE.enemies.forEach(e => {
+        if (e.dead) return;
+        const dx = e.x - c.mesh.position.x;
+        const dz = e.z - c.mesh.position.z;
+        const distSq = dx*dx + dz*dz;
+        if (distSq < 2.5) { // 1.5m impact radius
+          // Transfer kinetic energy to the victim, launching them
+          killEnemy(e, false, new THREE.Vector3(c.vx * 0.7, 10, c.vz * 0.7));
+          addKillFeed('BOWLING PIN STRIKE');
+          playSound('hit');
+          STATE.screenShake = 0.3;
+          STATE.shakeIntensity = 0.1;
+        }
+      });
+    }
+
     // Floor collision
     if (c.mesh.position.y < 0.1) {
       c.mesh.position.y = 0.1;
