@@ -321,8 +321,9 @@ canvas#gameCanvas { display: block; }
 <div id="objectivesHud">OBJECTIVES: A[_] B[_] C[_]</div>
 <div id="resupplyBanner">WAVE CLEARED — RESUPPLY</div>
 
-<script src="three.min.js"></script>
-<script>if(typeof THREE==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script><script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script><script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"><\/script>')}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script>
 'use strict';
 
@@ -563,7 +564,7 @@ function confirmLoadout() {
 }
 
 // Override Blockers to show Loadout first
-document.getElementById('menu').querySelector('.start').onclick = function(e){
+document.getElementById('startBtn').onclick = function(e){
   e.stopPropagation();
   document.getElementById('menu').style.display = 'none';
   document.getElementById('loadout').style.display = 'flex';
@@ -743,7 +744,6 @@ function lirilSay(category) {
 }
 
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
-const MAP_W = 48, MAP_H = 48;
 // ── Phase 87: Static Fake Town Matrix (Zero-Latency) ──
 const MAP_W = 20, MAP_H = 20;
 const MAP = [];
@@ -1305,9 +1305,9 @@ mapGroup.children.forEach(obj => {
 
 // ── Phase 76: Information Warfare Hubs ──
 const zoneConfigs = [
-  { name: 'ALPHA', target: [12, 12] },
-  { name: 'BRAVO', target: [36, 12] },
-  { name: 'CHARLIE', target: [24, 36] }
+  { name: 'ALPHA', target: [8, 8] },
+  { name: 'BRAVO', target: [12, 8] },
+  { name: 'CHARLIE', target: [10, 12] }
 ];
 
 zoneConfigs.forEach(cfg => {
@@ -2743,12 +2743,58 @@ function killEnemy(enemy, headshot = false, impulse) {
   updateHUD();
 }
 
+function spawnDrone() {
+  // Communist attack drone — flies overhead, strafes the player
+  const droneGroup = new THREE.Group();
+  const bodyMat = new THREE.MeshStandardMaterial({color: 0x333333, roughness: 0.4, metalness: 0.6});
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.8), bodyMat);
+  droneGroup.add(body);
+  // 4 arms
+  for (let i = 0; i < 4; i++) {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.05, 0.08), bodyMat);
+    arm.position.set(Math.cos(i*Math.PI/2)*0.6, 0, Math.sin(i*Math.PI/2)*0.6);
+    arm.rotation.y = i * Math.PI/2;
+    droneGroup.add(arm);
+    // Rotor disc
+    const rotor = new THREE.Mesh(new THREE.CircleGeometry(0.2, 8), new THREE.MeshBasicMaterial({color:0x666666, transparent:true, opacity:0.4, side:THREE.DoubleSide}));
+    rotor.position.set(Math.cos(i*Math.PI/2)*0.6, 0.1, Math.sin(i*Math.PI/2)*0.6);
+    rotor.rotation.x = -Math.PI/2;
+    rotor.userData.isRotor = true;
+    droneGroup.add(rotor);
+  }
+  // Red light
+  const redLight = new THREE.Mesh(new THREE.SphereGeometry(0.05, 4, 4), new THREE.MeshBasicMaterial({color:0xff0000}));
+  redLight.position.y = -0.15;
+  droneGroup.add(redLight);
+  // Camera/gun
+  const gun = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.3, 4), new THREE.MeshStandardMaterial({color:0x111111}));
+  gun.position.set(0, -0.2, 0.3);
+  gun.rotation.x = Math.PI/2;
+  droneGroup.add(gun);
+
+  let sx = Math.random() * (MAP_W - 4) + 2;
+  let sz = Math.random() * (MAP_H - 4) + 2;
+  const flyHeight = 5 + Math.random() * 4;
+  droneGroup.position.set(sx, flyHeight, sz);
+  scene.add(droneGroup);
+
+  const hpScale = 1 + (STATE.wave - 1) * 0.1;
+  STATE.enemies.push({
+    mesh: droneGroup, type: 'drone', hp: Math.round(12 * hpScale), maxHp: Math.round(12 * hpScale),
+    speed: 3.5 + Math.random(), damage: 8, score: 40,
+    x: sx, z: sz, y: flyHeight, baseScale: 1.0, ranged: true,
+    shootCooldown: 0, dead: false, deathTime: 0, isDrone: true,
+    orbitAngle: Math.random() * Math.PI * 2, orbitSpeed: 1 + Math.random()
+  });
+}
+
 function spawnEnemy(type = 'grunt') {
   const stats = {
     grunt:   { hp: 15, speed: 2.5, damage: 12, score: 10,  ranged: false, scale: 1.0 },
     heavy:   { hp: 40, speed: 1.6, damage: 20, score: 30,  ranged: false, scale: 1.2 },
     ranger:  { hp: 10, speed: 2.0, damage:  8, score: 20,  ranged: true,  scale: 0.9 },
-    raccoon: { hp:  8, speed: 3.5, damage: 15, score: 50,  ranged: false, scale: 1.0 }
+    raccoon: { hp:  8, speed: 3.5, damage: 15, score: 50,  ranged: false, scale: 1.0 },
+    drone:   { hp: 12, speed: 3.5, damage:  8, score: 40,  ranged: true,  scale: 1.0 }
   };
   const data = stats[type];
   const mesh = buildSoldier(type);
@@ -2919,6 +2965,33 @@ function updateEnemies(dt) {
         if (e.mesh.userData.limbs['rLeg']) e.mesh.userData.limbs['rLeg'].rotation.x = -swing;
         if (e.mesh.userData.limbs['lArm']) e.mesh.userData.limbs['lArm'].rotation.x = -swing;
         if (e.mesh.userData.limbs['rArm']) e.mesh.userData.limbs['rArm'].rotation.x = swing;
+      }
+    }
+
+    // ── DRONE AI — orbit player, strafe, bob, spin rotors ──
+    if (e.isDrone) {
+      const px = yawObj.position.x, pz = yawObj.position.z;
+      // Orbit around player
+      e.orbitAngle += e.orbitSpeed * dt;
+      const orbitRadius = 8 + Math.sin(time * 0.5) * 3;
+      const targetX = px + Math.cos(e.orbitAngle) * orbitRadius;
+      const targetZ = pz + Math.sin(e.orbitAngle) * orbitRadius;
+      e.x += (targetX - e.x) * 2 * dt;
+      e.z += (targetZ - e.z) * 2 * dt;
+      // Bob up and down
+      const targetY = (e.y || 6) + Math.sin(time * 2 + e.orbitAngle) * 0.5;
+      e.mesh.position.set(e.x, targetY, e.z);
+      // Face player
+      e.mesh.lookAt(px, targetY, pz);
+      // Spin rotors
+      e.mesh.children.forEach(c => {
+        if (c.userData && c.userData.isRotor) c.rotation.z += 30 * dt;
+      });
+      // Drone shooting — burst fire
+      e.shootCooldown -= dt;
+      if (e.shootCooldown <= 0) {
+        e.shootCooldown = 2 + Math.random() * 2;
+        shootProjectile(e.x, e.z, px, pz);
       }
     }
   }
@@ -3403,11 +3476,19 @@ function startWave() {
   for (let i = 0; i < gruntCount; i++) spawnEnemy('grunt');
   for (let i = 0; i < heavyCount; i++) spawnEnemy('heavy');
   for (let i = 0; i < rangerCount; i++) spawnEnemy('ranger');
-  
-  // Boss wave every 5 waves — extra heavies
+
+  // DRONE WAVES — start wave 4, increase every wave
+  if (STATE.wave >= 4) {
+    const droneCount = Math.min(8, Math.floor((STATE.wave - 3) * 1.5));
+    for (let i = 0; i < droneCount; i++) spawnDrone();
+    addKillFeed(`${droneCount} COMMUNIST DRONES DEPLOYED — LOOK UP`);
+  }
+
+  // Boss wave every 5 waves — extra heavies + drone swarm
   if (STATE.wave % 5 === 0) {
-    addKillFeed('BOSS WAVE \u2014 HEAVY REINFORCEMENTS');
+    addKillFeed('BOSS WAVE \u2014 HEAVY REINFORCEMENTS + DRONE SWARM');
     for (let i = 0; i < 3 + Math.floor(STATE.wave / 5); i++) spawnEnemy('heavy');
+    for (let i = 0; i < 4; i++) spawnDrone(); // Extra drones on boss waves
   }
   
   // Mid-wave reinforcements after 10 seconds
