@@ -161,6 +161,9 @@ canvas#gameCanvas { display: block; }
   <h2 style="letter-spacing:0.2em;">ANTI-COMMUNIST TRAINING SIMULATOR</h2>
   <div style="color:#ff3333;font-size:0.75em;letter-spacing:0.3em;margin-bottom:1.5em;border:1px solid #ff333366;display:inline-block;padding:4px 16px;">FOR EDUCATIONAL PURPOSES ONLY *</div>
   <div class="info">
+    <div style="color:#ffcc00; font-weight:bold; margin-bottom: 12px; font-size: 1.1em;">
+      The federal government tried to make me out as a terrorist,<br>so instead I just play my Red Duster Communist removal training simulator.
+    </div>
     Communist infiltrators have seized key Canadian infrastructure.<br>
     Lead your squad. Take it back.<br>
     <span style="color:#ff6633">TENET5 Studios</span><br>
@@ -204,7 +207,7 @@ canvas#gameCanvas { display: block; }
   <div class="hud-row">
     <div class="hud-item hud-health"><div class="hud-label">HEALTH</div><div class="hud-value" id="healthVal">100</div></div>
     <div class="hud-item hud-ammo"><div class="hud-label">AMMO</div><div class="hud-value"><span id="ammoVal">30</span> / <span id="ammoMax">30</span></div></div>
-    <div class="hud-item hud-score"><div class="hud-label">SCORE</div><div class="hud-value" id="scoreVal">0</div></div>
+    <div class="hud-item hud-score"><div class="hud-label">S. 504 COUNTS</div><div class="hud-value" id="scoreVal">0</div></div>
   </div>
 </div>
 <div id="hud-top"><span class="hud-wave">WAVE <span id="waveVal">1</span> &nbsp;—&nbsp; HOSTILES: <span id="enemyCount">0</span></span></div>
@@ -225,7 +228,7 @@ canvas#gameCanvas { display: block; }
 <div id="waveBanner">WAVE 1</div>
 <div id="deathScreen">
   <h2>K.I.A.</h2>
-  <p>Score: <span id="finalScore">0</span> &nbsp;|&nbsp; Wave: <span id="finalWave">1</span> &nbsp;|&nbsp; Kills: <span id="finalKills">0</span></p>
+  <p>S. 504 Counts: <span id="finalScore">0</span> &nbsp;|&nbsp; Wave: <span id="finalWave">1</span> &nbsp;|&nbsp; Eliminations: <span id="finalKills">0</span></p>
   <button id="respawnBtn">REDEPLOY</button>
 </div>
 <div id="pauseMenu">
@@ -2114,7 +2117,61 @@ function buildSoldier(type) {
   return g;
 }
 
-// ── Kill Enemy — Gib Death System ──
+// ── Phase 75: SEC 504 LEGAL EXPLODE MATRIX ──
+function getRandomLegalDocumentMaterial() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 160;
+  const ctx = canvas.getContext('2d');
+  
+  // Paper background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 128, 160);
+  
+  // Header line (red)
+  ctx.fillStyle = '#cc0000';
+  ctx.fillRect(0, 0, 128, 20);
+  
+  // Text configuration
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 16px Courier New';
+  
+  const texts = [
+    { top: "FORM 2", mid: "JUSTICE", bot: "FILED" },
+    { top: "TREASON", mid: "SEC 46", bot: "GUILTY" },
+    { top: "MURDER", mid: "SEC 231(4)", bot: "ACCESSORY" },
+    { top: "VALUATION", mid: "$1,954", bot: "LIQUIDATED" },
+    { top: "CFNIS", mid: "CORRUPTION", bot: "EXPOSED" },
+    { top: "OATH", mid: "BROKEN", bot: "TRAITOR" }
+  ];
+  
+  const t = texts[Math.floor(Math.random() * texts.length)];
+  
+  // Top text in red header
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(t.top, 64, 15);
+  
+  // Middle text (large red/black)
+  ctx.fillStyle = Math.random() > 0.5 ? '#000000' : '#cc0000';
+  ctx.font = 'bold 18px Courier New';
+  ctx.fillText(t.mid, 64, 80);
+  
+  // Bottom text
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 16px Courier New';
+  ctx.fillText(t.bot, 64, 140);
+  
+  // Simulated lines of legal text
+  ctx.fillStyle = '#cccccc';
+  for(let i=0; i<8; i++) {
+    if(i !== 3 && i !== 4 && i !== 7) {
+      ctx.fillRect(10, 30 + i*12, 20 + Math.random()*80, 4);
+    }
+  }
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  return new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+}
+
 function killEnemy(enemy, headshot = false, impulse) {
   if (enemy.dead) return;
   const scoreAdd = enemy.score * (headshot ? 3 : 1) * Math.max(1, STATE.combo);
@@ -2127,34 +2184,42 @@ function killEnemy(enemy, headshot = false, impulse) {
   enemy.dead = true;
   enemy.deathTime = 1.0;
 
-  // GIB SYSTEM — enemy explodes into chunks
-  const gibCount = headshot ? 14 : 8;
-  const ex = enemy.x, ez = enemy.z, ey = 0.8;
-  for (let i = 0; i < gibCount; i++) {
-    const gibGeo = new THREE.BoxGeometry(0.06+Math.random()*0.1, 0.06+Math.random()*0.1, 0.06+Math.random()*0.1);
-    const gibMat = new THREE.MeshStandardMaterial({color: i < gibCount/2 ? 0xcc0000 : 0x882222, roughness: 0.8});
-    const gib = new THREE.Mesh(gibGeo, gibMat);
-    gib.position.set(ex+(Math.random()-0.5)*0.3, ey+Math.random()*0.5, ez+(Math.random()-0.5)*0.3);
-    gib.castShadow = true;
-    scene.add(gib);
+  // Phase 75: SEC 504 LEGAL DOCUMENT EXPLOSION
+  const docCount = headshot ? 24 : 12;
+  const ex = enemy.x, ez = enemy.z, ey = 1.0;
+  for (let i = 0; i < docCount; i++) {
+    const docMat = getRandomLegalDocumentMaterial();
+    const docGeo = new THREE.PlaneGeometry(0.3, 0.38);
+    const doc = new THREE.Mesh(docGeo, docMat);
+    doc.position.set(ex+(Math.random()-0.5)*0.5, ey+Math.random()*0.5, ez+(Math.random()-0.5)*0.5);
+    scene.add(doc);
+    
+    // Determine scatter impulse
     const imp = impulse || new THREE.Vector3((Math.random()-0.5)*5, 3, (Math.random()-0.5)*5);
-    STATE.particles.push({
-      mesh: gib, x: gib.position.x, y: gib.position.y, z: gib.position.z,
-      vx: imp.x*(0.5+Math.random()), vy: 2+Math.random()*4, vz: imp.z*(0.5+Math.random()),
-      spin: {x:Math.random()*8-4, y:Math.random()*8-4, z:Math.random()*8-4},
-      life: 3+Math.random()*2, isGib: true
+    
+    // Push to corpses array to handle kinematic spin and flutter fall
+    STATE.corpses.push({
+      mesh: doc,
+      life: 8 + Math.random()*4,
+      vx: imp.x * (0.3 + Math.random()*0.5),
+      vy: 3 + Math.random()*4,
+      vz: imp.z * (0.3 + Math.random()*0.5),
+      rx: Math.random()*10 - 5,
+      ry: Math.random()*10 - 5,
+      rz: Math.random()*10 - 5
     });
   }
+  
   enemy.mesh.visible = false;
 
   playSound('death');
   if (headshot) {
     playSound('headshot');
-    addKillFeed('OBLITERATED +' + scoreAdd);
+    addKillFeed('INDICTMENT SEC 504 FILED +' + scoreAdd);
     STATE.screenShake = 0.2;
     STATE.shakeIntensity = 0.05;
   } else {
-    addKillFeed('LIQUIDATED +' + scoreAdd);
+    addKillFeed('CHARGE: ACCESSORY TO MURDER +' + scoreAdd);
   }
 
   for (let i = 0; i < 20; i++) {
@@ -2170,6 +2235,22 @@ function killEnemy(enemy, headshot = false, impulse) {
   enemy.deathTime = 8;
   STATE.corpses.push(enemy);
   while (STATE.corpses.length > 20) { const oldest = STATE.corpses.shift(); scene.remove(oldest.mesh); }
+
+  // Random pickup drops — 25% chance
+  if (Math.random() < 0.25) {
+    const types = ['health', 'ammo', 'ammo', 'grenade'];
+    const pType = types[Math.floor(Math.random() * types.length)];
+    const colors = {health: 0x00ff44, ammo: 0xffaa00, grenade: 0xffff00};
+    const pGeo = pType === 'grenade'
+      ? new THREE.SphereGeometry(0.15, 8, 8)
+      : new THREE.BoxGeometry(0.2, 0.2, 0.2);
+    const pMat = new THREE.MeshStandardMaterial({color: colors[pType], emissive: colors[pType], emissiveIntensity: 0.5});
+    const pMesh = new THREE.Mesh(pGeo, pMat);
+    pMesh.position.set(enemy.x, 0.5, enemy.z);
+    scene.add(pMesh);
+    STATE.pickups.push({mesh: pMesh, x: enemy.x, z: enemy.z, type: pType});
+  }
+
   updateHUD();
 }
 
@@ -2722,12 +2803,28 @@ function startWave() {
   STATE.wave++;
   STATE.waveActive = true;
   
+  // Wave narrative — CoD-style briefings
+  const briefings = [
+    '', // wave 0 unused
+    'CONTACT! Communist infiltrators spotted. Clear the area.',
+    'More hostiles inbound. They know we\'re here.',
+    'They\'re sending everything. Hold the line.',
+    'Enemy snipers deployed. Watch the rooftops.',
+    'BOSS WAVE — Heavy armor incoming. Use explosives.',
+    'Intel says their command post is nearby. Push forward.',
+    'Reinforcements from the east. Dig in.',
+    'They\'re getting desperate. Expect human waves.',
+    'Almost through their line. One more push.',
+    'FINAL ASSAULT — Everything they\'ve got. Make it count.',
+  ];
+  const briefing = briefings[Math.min(STATE.wave, briefings.length-1)] || `Wave ${STATE.wave} — They keep coming.`;
+
   const banner = document.getElementById('waveBanner');
-  banner.textContent = `WAVE ${STATE.wave}`;
+  banner.innerHTML = `<div style="font-size:2em;margin-bottom:8px;">WAVE ${STATE.wave}</div><div style="font-size:0.7em;color:#cc9966;letter-spacing:0.1em;">${briefing}</div>`;
   banner.style.display = 'block';
-  setTimeout(() => { banner.style.display = 'none'; }, 2000);
-  
-  addKillFeed(`WAVE ${STATE.wave} START`);
+  setTimeout(() => { banner.style.display = 'none'; }, 3000);
+
+  addKillFeed(`WAVE ${STATE.wave} — ${briefing}`);
   
   // Wave composition — overwhelming numbers, one-shot fodder
   const baseCount = 8 + STATE.wave * 4;
