@@ -1802,20 +1802,32 @@ function updateAmmoSprite() {
   ammoTex.needsUpdate = true;
 }
 
-// ── Muzzle Flash ──
-const flashGeo = new THREE.PlaneGeometry(0.15, 0.15);
-const flashMat = new THREE.MeshBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+// ── Muzzle Flash — Multi-layer with dynamic light ──
+const flashGeo = new THREE.PlaneGeometry(0.22, 0.22);
+const flashMat = new THREE.MeshBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
 const muzzleFlash = new THREE.Mesh(flashGeo, flashMat);
 muzzleFlash.position.set(0, 0.02, -0.55);
 muzzleFlash.rotation.z = Math.random() * Math.PI;
 camera.add(muzzleFlash);
 
-const flashGeo2 = new THREE.PlaneGeometry(0.1, 0.1);
-const flashMat2 = new THREE.MeshBasicMaterial({ color: 0xffffcc, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+const flashGeo2 = new THREE.PlaneGeometry(0.16, 0.16);
+const flashMat2 = new THREE.MeshBasicMaterial({ color: 0xffffcc, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
 const muzzleFlash2 = new THREE.Mesh(flashGeo2, flashMat2);
 muzzleFlash2.position.set(0, 0.02, -0.55);
 muzzleFlash2.rotation.y = Math.PI/2;
 camera.add(muzzleFlash2);
+
+// Third flash layer — large soft glow
+const flashGeo3 = new THREE.PlaneGeometry(0.35, 0.35);
+const flashMat3 = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
+const muzzleFlash3 = new THREE.Mesh(flashGeo3, flashMat3);
+muzzleFlash3.position.set(0, 0.02, -0.56);
+camera.add(muzzleFlash3);
+
+// Dynamic muzzle light — illuminates the world on each shot
+const muzzleLight = new THREE.PointLight(0xff8833, 0, 8, 2);
+muzzleLight.position.set(0, 0, -0.6);
+camera.add(muzzleLight);
 
 let flashTimer = 0;
 
@@ -2806,14 +2818,20 @@ function shoot() {
   STATE.shake = 0.05;
   playSound('shoot');
   
-  // Muzzle flash
-  flashTimer = 0.05;
+  // Muzzle flash — 3 layers + dynamic world light
+  const flashScale = STATE.weapon === 'shotgun' ? 2.2 : STATE.weapon === 'lmg' ? 1.3 : STATE.weapon === 'pistol' ? 0.8 : 1.1;
+  flashTimer = 0.06;
   muzzleFlash.material.opacity = 1;
-  muzzleFlash.rotation.z = Math.random() * Math.PI;
-  muzzleFlash.scale.setScalar(STATE.weapon === 'shotgun' ? 1.8 : STATE.weapon === 'pistol' ? 0.7 : 1.0);
-  muzzleFlash2.material.opacity = 0.8;
-  muzzleFlash2.rotation.z = Math.random() * Math.PI;
-  muzzleFlash2.scale.setScalar(STATE.weapon === 'shotgun' ? 1.8 : STATE.weapon === 'pistol' ? 0.7 : 1.0);
+  muzzleFlash.rotation.z = Math.random() * Math.PI * 2;
+  muzzleFlash.scale.setScalar(flashScale);
+  muzzleFlash2.material.opacity = 0.9;
+  muzzleFlash2.rotation.z = Math.random() * Math.PI * 2;
+  muzzleFlash2.scale.setScalar(flashScale * 0.8);
+  muzzleFlash3.material.opacity = 0.5;
+  muzzleFlash3.rotation.z = Math.random() * Math.PI * 2;
+  muzzleFlash3.scale.setScalar(flashScale * 1.5);
+  // Dynamic light illuminates surroundings on each shot
+  muzzleLight.intensity = STATE.weapon === 'shotgun' ? 4 : STATE.weapon === 'sniper' ? 5 : 2.5;
   
   const recoilZ = STATE.weapon === 'shotgun' ? -0.12 : STATE.weapon === 'pistol' ? -0.22 : -0.18;
   const recoilY = STATE.weapon === 'shotgun' ? -0.08 : -0.10;
@@ -2911,23 +2929,51 @@ function shoot() {
         const wallHits = raycaster.intersectObjects(mapGroup.children, true);
         if (wallHits.length > 0 && wallHits[0].distance < 50) {
           const hp = wallHits[0].point;
-          for (let s = 0; s < 5; s++) {
-            addParticle(hp.x + (Math.random()-0.5)*0.1, hp.y + (Math.random()-0.5)*0.1, hp.z + (Math.random()-0.5)*0.1, 0xffaa00);
+          // Shower of sparks — orange and white hot
+          for (let s = 0; s < 12; s++) {
+            const sparkColor = Math.random() > 0.4 ? 0xffaa00 : 0xffffcc;
+            addParticle(
+              hp.x + (Math.random()-0.5)*0.05,
+              hp.y + (Math.random()-0.5)*0.05,
+              hp.z + (Math.random()-0.5)*0.05,
+              sparkColor
+            );
           }
-          // Ricochet — spawn a bounced tracer
+          // Bullet hole decal (dark circle on wall)
+          const holeGeo = new THREE.CircleGeometry(0.02, 6);
+          const holeMat = new THREE.MeshBasicMaterial({color: 0x111111, transparent: true, opacity: 0.7, depthWrite: false});
+          const hole = new THREE.Mesh(holeGeo, holeMat);
+          hole.position.copy(hp);
           if (wallHits[0].face) {
+            const n = wallHits[0].face.normal.clone().transformDirection(wallHits[0].object.matrixWorld);
+            hole.position.add(n.multiplyScalar(0.01));
+            hole.lookAt(hole.position.clone().add(wallHits[0].face.normal));
+          }
+          scene.add(hole);
+          // Ricochet tracer — bounced bullet with random deflection
+          if (wallHits[0].face && Math.random() > 0.3) {
             const normal = wallHits[0].face.normal.clone();
             normal.transformDirection(wallHits[0].object.matrixWorld);
             const reflected = dir.clone().reflect(normal);
-            const ricGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.25, 3);
+            // Add randomness to ricochet direction
+            reflected.x += (Math.random()-0.5)*0.3;
+            reflected.y += (Math.random()-0.5)*0.3;
+            reflected.z += (Math.random()-0.5)*0.3;
+            reflected.normalize();
+            const ricGeo = new THREE.CylinderGeometry(0.006, 0.003, 0.3, 3);
             ricGeo.rotateX(Math.PI/2);
-            const ricMat = new THREE.MeshBasicMaterial({color: 0xff8800});
+            const ricMat = new THREE.MeshBasicMaterial({color: 0xff6600, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.8});
             const ric = new THREE.Mesh(ricGeo, ricMat);
             ric.position.copy(hp);
             scene.add(ric);
-            const rv = reflected.multiplyScalar(60);
-            STATE.projectiles.push({mesh: ric, vx: rv.x, vy: rv.y, vz: rv.z, life: 0.3, isTracer: true, dir: reflected});
+            const rv = reflected.multiplyScalar(45 + Math.random()*30);
+            STATE.projectiles.push({mesh: ric, vx: rv.x, vy: rv.y + 2, vz: rv.z, life: 0.4 + Math.random()*0.3, isTracer: true, dir: reflected});
           }
+          // Brief spark light at impact point
+          const sparkLight = new THREE.PointLight(0xff8833, 2, 3);
+          sparkLight.position.copy(hp);
+          scene.add(sparkLight);
+          setTimeout(() => { scene.remove(sparkLight); }, 60);
         }
       }
     }
@@ -3233,15 +3279,15 @@ window.addEventListener('contextmenu', e => {
     }
   }
 });
+// ── FULL AUTO — hold mouse to spray ──
+let mouseHeld = false;
 window.addEventListener('mousedown', e => {
+  if (e.button === 0) { mouseHeld = true; initAudio(); if (STATE.started && !STATE.paused) shoot(); }
   if (e.button === 2 && STATE.weapon !== 'sniper') STATE.aiming = true;
 });
 window.addEventListener('mouseup', e => {
+  if (e.button === 0) mouseHeld = false;
   if (e.button === 2 && STATE.weapon !== 'sniper') STATE.aiming = false;
-});
-window.addEventListener('click', () => {
-  initAudio();
-  if (STATE.started && !STATE.paused) shoot();
 });
 
 window.addEventListener('resize', () => {
@@ -3374,9 +3420,16 @@ function animate() {
     // Muzzle flash fade
     if (flashTimer > 0) {
       flashTimer -= dt;
+      const flashFade = Math.max(0, flashTimer / 0.06);
+      muzzleFlash.material.opacity = flashFade;
+      muzzleFlash2.material.opacity = flashFade * 0.9;
+      muzzleFlash3.material.opacity = flashFade * 0.5;
+      muzzleLight.intensity *= 0.85; // rapid light falloff
       if (flashTimer <= 0) {
         muzzleFlash.material.opacity = 0;
         muzzleFlash2.material.opacity = 0;
+        muzzleFlash3.material.opacity = 0;
+        muzzleLight.intensity = 0;
       }
     }
     
@@ -3385,6 +3438,8 @@ function animate() {
     document.getElementById('sprintFill').style.width = sprintPct + '%';
     
     if (STATE.shootCooldown > 0) STATE.shootCooldown = Math.max(0, STATE.shootCooldown - dt * 1000);
+    // FULL AUTO — keep shooting while mouse held
+    if (mouseHeld && STATE.shootCooldown <= 0 && STATE.started && !STATE.paused && STATE.alive) shoot();
     if (airstrikeCooldown > 0) airstrikeCooldown -= dt;
     
     if (STATE.reloading) {
