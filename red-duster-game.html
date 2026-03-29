@@ -235,7 +235,7 @@ canvas#gameCanvas { display: block; }
 <canvas id="minimap"></canvas>
 <div id="killFeed"></div>
 <div id="weaponName"></div>
-<div id="grenadeHud">GRENADES: <span id="grenadeCount">3</span></div>
+<div id="grenadeHud">🦆 DUCKS: <span id="grenadeCount">3</span></div>
 <div id="comboText"></div>
 <div id="sprintBar"><div id="sprintFill"></div></div>
 <div id="objectivesHud">OBJECTIVES: A[_] B[_] C[_]</div>
@@ -1765,6 +1765,55 @@ let weapon = buildWeaponModel('rifle');
 weapon.position.set(0.18, -0.14, -0.3);
 camera.add(weapon);
 
+// ── BLUE LATEX GLOVE HANDS ──
+const gloveMat = new THREE.MeshPhysicalMaterial({
+  color: 0x2255cc, metalness: 0.0, roughness: 0.35,
+  clearcoat: 0.6, clearcoatRoughness: 0.2, // shiny latex look
+  sheen: 0.3, sheenColor: new THREE.Color(0x4488ff)
+});
+
+function buildGloveHand(side) {
+  const hand = new THREE.Group();
+  // Palm
+  const palm = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.025, 0.06), gloveMat);
+  hand.add(palm);
+  // Thumb
+  const thumb = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.007, 0.035, 8), gloveMat);
+  thumb.position.set(side * 0.025, 0.005, 0.02);
+  thumb.rotation.z = side * 0.6;
+  thumb.rotation.x = 0.3;
+  hand.add(thumb);
+  // 4 fingers curled around grip
+  for (let i = 0; i < 4; i++) {
+    const finger = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.005, 0.04, 6), gloveMat);
+    finger.position.set(side * -0.005, -0.018, -0.02 + i * 0.014);
+    finger.rotation.x = 1.2; // curled around grip
+    finger.rotation.z = side * 0.1;
+    hand.add(finger);
+    // Knuckle bump
+    const knuckle = new THREE.Mesh(new THREE.SphereGeometry(0.007, 6, 6), gloveMat);
+    knuckle.position.set(side * -0.005, -0.008, -0.02 + i * 0.014);
+    hand.add(knuckle);
+  }
+  // Wrist/cuff
+  const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.02, 8), gloveMat);
+  cuff.position.set(0, 0, 0.04);
+  hand.add(cuff);
+  return hand;
+}
+
+// Right hand on grip
+const rightHand = buildGloveHand(1);
+rightHand.position.set(0.0, -0.035, -0.05);
+rightHand.rotation.x = 0.15;
+weapon.add(rightHand);
+
+// Left hand on handguard
+const leftHand = buildGloveHand(-1);
+leftHand.position.set(0.0, -0.02, -0.28);
+leftHand.rotation.x = 0.1;
+weapon.add(leftHand);
+
 function updateWeaponVisuals() {
   camera.remove(weapon);
   weapon = buildWeaponModel(STATE.weapon);
@@ -2554,9 +2603,40 @@ function throwGrenade() {
   dir.applyQuaternion(camera.quaternion);
   dir.applyQuaternion(yawObj.quaternion);
   
-  const geo = new THREE.SphereGeometry(0.15, 8, 8);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x33aa33, roughness: 0.5, metalness: 0.3 });
-  const mesh = new THREE.Mesh(geo, mat);
+  // ── RUBBER DUCK GRENADE ──
+  const duckGroup = new THREE.Group();
+  const duckYellow = new THREE.MeshPhysicalMaterial({ color: 0xffdd00, roughness: 0.3, metalness: 0, clearcoat: 0.5 });
+  const duckOrange = new THREE.MeshPhysicalMaterial({ color: 0xff6600, roughness: 0.4, metalness: 0 });
+  const duckWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+  const duckBlack = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  // Body
+  const dBody = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 12), duckYellow);
+  dBody.scale.set(1, 0.85, 1.1);
+  duckGroup.add(dBody);
+  // Head
+  const dHead = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 10), duckYellow);
+  dHead.position.set(0, 0.1, 0.06);
+  duckGroup.add(dHead);
+  // Beak
+  const dBeak = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.05, 6), duckOrange);
+  dBeak.rotation.x = -Math.PI/2;
+  dBeak.position.set(0, 0.095, 0.13);
+  duckGroup.add(dBeak);
+  // Eyes
+  [-1, 1].forEach(side => {
+    const eyeW = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 6), duckWhite);
+    eyeW.position.set(side * 0.035, 0.12, 0.09);
+    duckGroup.add(eyeW);
+    const eyeB = new THREE.Mesh(new THREE.SphereGeometry(0.008, 6, 6), duckBlack);
+    eyeB.position.set(side * 0.035, 0.12, 0.1);
+    duckGroup.add(eyeB);
+  });
+  // Tail
+  const dTail = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.05, 6), duckYellow);
+  dTail.rotation.x = Math.PI/3;
+  dTail.position.set(0, 0.06, -0.1);
+  duckGroup.add(dTail);
+  const mesh = duckGroup;
   mesh.position.copy(yawObj.position);
   mesh.position.y = STATE.playerHeight;
   scene.add(mesh);
@@ -2633,7 +2713,7 @@ function explodeGrenade(x, y, z) {
   
   checkBarrelExplosions(x, z, 5);
   
-  addKillFeed('GRENADE BLAST');
+  addKillFeed('DUCK BLAST — QUACK');
 }
 
 // ── Barrel Explosions ──
@@ -3022,23 +3102,137 @@ let airstrikeCooldown = 0;
 function callAirstrike() {
   if (airstrikeCooldown > 0 || STATE.paused) return;
   airstrikeCooldown = 20;
-  
-  setTimeout(() => {
-    playSound('explosion');
-    STATE.screenShake = 0.5;
-    STATE.shakeIntensity = 0.12;
-    for (let i = STATE.enemies.length - 1; i >= 0; i--) {
-      const e = STATE.enemies[i];
-      const dist = distXZ(e.x, e.z, yawObj.position.x, yawObj.position.z);
-      if (dist > 8 && dist < 20) {
-        killEnemy(e);
-        for (let j = 0; j < 10; j++) {
-          addParticle(e.x, 2, e.z, 0xff9933);
+  addKillFeed('ARROW INBOUND — STAND CLEAR');
+
+  // ── BUILD AVRO ARROW CF-105 ──
+  const arrow = new THREE.Group();
+  const arrowWhite = new THREE.MeshPhysicalMaterial({ color: 0xeeeeee, metalness: 0.4, roughness: 0.3 });
+  const arrowDark = new THREE.MeshPhysicalMaterial({ color: 0x333333, metalness: 0.6, roughness: 0.2 });
+  const arrowRed = new THREE.MeshPhysicalMaterial({ color: 0xcc0000, metalness: 0.3, roughness: 0.4 });
+
+  // Fuselage — long sleek cylinder tapering to nose
+  const fuseGeo = new THREE.CylinderGeometry(0.3, 0.15, 6, 12);
+  fuseGeo.rotateX(Math.PI/2);
+  const fuse = new THREE.Mesh(fuseGeo, arrowWhite);
+  arrow.add(fuse);
+
+  // Nose cone
+  const noseGeo = new THREE.ConeGeometry(0.15, 1.5, 12);
+  noseGeo.rotateX(-Math.PI/2);
+  const nose = new THREE.Mesh(noseGeo, arrowDark);
+  nose.position.z = -3.75;
+  arrow.add(nose);
+
+  // Delta wings — large triangular
+  const wingShape = new THREE.Shape();
+  wingShape.moveTo(0, 0);
+  wingShape.lineTo(2.5, -1.2);
+  wingShape.lineTo(0.3, -2);
+  wingShape.lineTo(0, -1.8);
+  wingShape.closePath();
+  const wingGeo = new THREE.ExtrudeGeometry(wingShape, { depth: 0.04, bevelEnabled: false });
+  [-1, 1].forEach(side => {
+    const wing = new THREE.Mesh(wingGeo, arrowWhite);
+    wing.scale.x = side;
+    wing.position.set(0, -0.1, 0.5);
+    wing.rotation.x = Math.PI/2;
+    arrow.add(wing);
+  });
+
+  // Tail fin
+  const tailShape = new THREE.Shape();
+  tailShape.moveTo(0, 0);
+  tailShape.lineTo(0, 1.2);
+  tailShape.lineTo(-0.8, 0.3);
+  tailShape.closePath();
+  const tailGeo = new THREE.ExtrudeGeometry(tailShape, { depth: 0.03, bevelEnabled: false });
+  const tail = new THREE.Mesh(tailGeo, arrowWhite);
+  tail.position.set(-0.015, 0.25, 2);
+  arrow.add(tail);
+
+  // Engine exhausts — two orange glowing circles
+  [-0.15, 0.15].forEach(x => {
+    const exhaust = new THREE.Mesh(
+      new THREE.CircleGeometry(0.12, 8),
+      new THREE.MeshBasicMaterial({ color: 0xff6600, blending: THREE.AdditiveBlending })
+    );
+    exhaust.position.set(x, 0, 3);
+    arrow.add(exhaust);
+  });
+
+  // RCAF roundel on fuselage (red circle)
+  const roundel = new THREE.Mesh(
+    new THREE.CircleGeometry(0.2, 12),
+    arrowRed
+  );
+  roundel.position.set(0.31, 0, 0);
+  roundel.rotation.y = Math.PI/2;
+  arrow.add(roundel);
+
+  // "RL-206" marking
+  const markCanvas = document.createElement('canvas');
+  markCanvas.width = 128; markCanvas.height = 32;
+  const mCtx = markCanvas.getContext('2d');
+  mCtx.fillStyle = '#cc0000';
+  mCtx.font = 'bold 20px monospace';
+  mCtx.fillText('RL-206', 10, 22);
+  const markTex = new THREE.CanvasTexture(markCanvas);
+  const markMat = new THREE.MeshBasicMaterial({ map: markTex, transparent: true });
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.2), markMat);
+  mark.position.set(-0.31, 0.1, -1);
+  mark.rotation.y = -Math.PI/2;
+  arrow.add(mark);
+
+  // Position: fly in from the side at high altitude
+  const px = yawObj.position.x;
+  const pz = yawObj.position.z;
+  arrow.position.set(px - 40, 15, pz);
+  arrow.scale.setScalar(1.5);
+  scene.add(arrow);
+
+  // Animate the Arrow flyover
+  let arrowT = 0;
+  const arrowInterval = setInterval(() => {
+    arrowT += 0.016;
+    arrow.position.x += 1.8; // fly across at speed
+    arrow.position.z += 0.3;
+    // Engine trail particles
+    if (Math.random() > 0.5) {
+      addParticle(arrow.position.x, arrow.position.y - 0.5, arrow.position.z + 3, 0xff8833);
+      addParticle(arrow.position.x, arrow.position.y - 0.3, arrow.position.z + 2.5, 0xffcc66);
+    }
+
+    // Drop bombs at midpoint
+    if (arrowT > 0.8 && arrowT < 0.85) {
+      playSound('explosion');
+      STATE.screenShake = 0.8;
+      STATE.shakeIntensity = 0.15;
+      // Kill enemies in strike zone
+      for (let i = STATE.enemies.length - 1; i >= 0; i--) {
+        const e = STATE.enemies[i];
+        const dist = distXZ(e.x, e.z, px, pz);
+        if (dist > 5 && dist < 25) {
+          killEnemy(e, true);
+          for (let j = 0; j < 15; j++) {
+            addParticle(e.x, 2 + Math.random()*3, e.z, Math.random() > 0.5 ? 0xff4400 : 0xffaa00);
+          }
         }
       }
+      // Ground explosion particles
+      for (let j = 0; j < 40; j++) {
+        const ex = px + (Math.random()-0.5)*20;
+        const ez = pz + (Math.random()-0.5)*20;
+        addParticle(ex, Math.random()*4, ez, Math.random() > 0.3 ? 0xff6600 : 0xff2200);
+      }
+      addKillFeed('AVRO ARROW — BOMBS AWAY');
     }
-    addKillFeed('AIRSTRIKE DEPLOYED');
-  }, 1500);
+
+    // Remove after flyover
+    if (arrowT > 2.5) {
+      scene.remove(arrow);
+      clearInterval(arrowInterval);
+    }
+  }, 16);
 }
 
 function addDamageNumber(x, y, z, damage, isHeadshot) {
