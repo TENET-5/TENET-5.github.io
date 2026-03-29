@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIRIL OSINT — Live Intelligence Map | TENET-5</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <style>
+    body { overflow: hidden; margin: 0; padding: 0; background: #000; }
+    .site-nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--accent-red); padding: 0 1rem; height: 50px; display: flex; align-items: center; justify-content: space-between; }
+    
+    #osint-container {
+      position: relative;
+      width: 100vw;
+      height: calc(100vh - 50px);
+      margin-top: 50px;
+      display: flex;
+    }
+    
+    /* Control Panel */
+    #osint-controls {
+      width: 320px;
+      background: #0a0a0a;
+      border-right: 2px solid var(--accent-red);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+    
+    .panel-header {
+      text-align: center;
+      border-bottom: 1px solid #ffd700;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .panel-title {
+      font-family: 'Courier New', monospace;
+      color: #ffd700;
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-shadow: 0 0 5px #ffd700;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+    .panel-sub { color: #888; font-size: 0.75rem; letter-spacing: 1px; margin-top: 5px; }
+
+    /* Filter Checkboxes */
+    .filter-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+    .filter-group label {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Courier New', monospace; font-size: 0.85rem; color: #ccc;
+      cursor: pointer;
+    }
+    .filter-group input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-red); }
+    
+    /* Map Container */
+    #osintMap { flex: 1; height: 100%; background: #111; }
+    
+    /* Custom Leaflet Popups */
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #111 !important; color: #eee !important; border: 1px solid var(--accent-red); box-shadow: 0 0 15px rgba(255, 0, 0, 0.2); }
+    .leaflet-container a.leaflet-popup-close-button { color: #fff !important; }
+
+    /* Animated Laser Polylines for node edges */
+    .animate-neon-line { stroke-dasharray: 10, 10; animation: neon-flow 1.5s linear infinite; }
+    @keyframes neon-flow { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
+
+    /* Icons */
+    .custom-icon-pol, .custom-icon-gang, .custom-icon-cop, .custom-icon-spy, 
+    .custom-icon-discord, .custom-icon-steam, .custom-icon-insta, .custom-icon-sigint,
+    .custom-icon-crypto, .custom-icon-imint, .custom-icon-cybint {
+      font-size: 24px; text-shadow: 0 0 5px rgba(255,255,255,0.5);
+    }
+    .custom-icon-crypto { filter: drop-shadow(0 0 5px #ffd700); }
+    .custom-icon-spy { filter: drop-shadow(0 0 5px #39ff14); }
+    .custom-icon-cybint { filter: drop-shadow(0 0 5px #ff00ff); }
+    .custom-icon-imint { filter: drop-shadow(0 0 5px #ff3333); }
+
+    .stat-row { display: flex; justify-content: space-between; font-family: monospace; color: #00ff00; padding: 4px 0; border-bottom: 1px solid #222; }
+    .stat-row span:first-child { color: #888; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar (Imported from TENET-5 structure) -->
+  <nav class="site-nav">
+    <a href="index.html" class="brand active">TENET‑5</a>
+    <div style="color: #fff; font-family: 'Courier New', monospace; font-size: 0.9rem; font-weight: bold; letter-spacing: 1px;">
+      <span style="color:#ff3333">LIVE LIRILCLAW INTELLIGENCE FEED</span> | CLEARANCE: PUBLIC | ENCRYPTION: NONE
+    </div>
+    <div></div>
+  </nav>
+
+  <div id="osint-container">
+    
+    <!-- Left Sidebar Controls -->
+    <div id="osint-controls">
+      <div class="panel-header">
+        <h2 class="panel-title">THE TRASH PANDAS<br>GHOST UNIT</h2>
+        <div class="panel-sub">AUTONOMOUS GEOFENCING MATRIX</div>
+      </div>
+      
+      <div style="font-family: monospace; color: #ff3333; font-weight: bold; margin-bottom: 10px;">► ACTIVE INTEL VECTORS</div>
+      
+      <div class="filter-group">
+        <label><input type="checkbox" id="filter-politicians" checked> 🏛️ Corrupt Politicians</label>
+        <label><input type="checkbox" id="filter-gangs" checked> 💀 Hostile Gang Nodes</label>
+        <label><input type="checkbox" id="filter-cops" checked> 🚓 CFNIS / Corrupt Police</label>
+        <label><input type="checkbox" id="filter-spies" checked> 👁️ Foreign Agents (WarDoll)</label>
+      </div>
+
+      <div style="font-family: monospace; color: #ffd700; font-weight: bold; margin-bottom: 10px;">► DIGITAL SIGNATURES</div>
+      
+      <div class="filter-group">
+        <label><input type="checkbox" id="filter-discord" checked> 🎧 Discord VoIP Comm Links</label>
+        <label><input type="checkbox" id="filter-steam" checked> 🎮 Steam Alias Wash Networks</label>
+        <label><input type="checkbox" id="filter-insta" checked> 📷 Instagram Operation Cells</label>
+      </div>
+
+      <div style="font-family: monospace; color: #ff00ff; font-weight: bold; margin-bottom: 10px;">► CLASSIFIED DEEP-WEB INTEL</div>
+
+      <div class="filter-group">
+        <label><input type="checkbox" id="filter-sigint" checked> 📡 SIGINT Number Stations</label>
+        <label><input type="checkbox" id="filter-finint" checked> 💰 FININT Crypto Ledgers</label>
+        <label><input type="checkbox" id="filter-imint" checked> 📸 IMINT EXIF Safehouses</label>
+        <label><input type="checkbox" id="filter-cybint" checked> 🌐 CYBINT Dark Web Relays</label>
+      </div>
+
+      <div style="margin-top: auto;">
+        <div style="font-family: monospace; font-size: 0.8rem; margin-bottom: 5px; color: #ff3333;">// LIRIL AI OSINT TELEMETRY</div>
+        <div class="stat-row"><span>Mapped Targets:</span> <span id="stat-total-targets">0</span></div>
+        <div class="stat-row"><span>Active Geofences:</span> <span id="stat-active-zones">0</span></div>
+      </div>
+    </div>
+
+    <!-- The Map -->
+    <div id="osintMap"></div>
+  </div>
+
+  <script>
+    let osintMap = null;
+    let targetMarkers = [];
+    let targetZones = [];
+
+    // Custom marker icons
+    window.customIcons = {
+      politician: L.divIcon({ className: 'custom-icon-pol', html: '🏛️', iconSize: [24, 24] }),
+      gang: L.divIcon({ className: 'custom-icon-gang', html: '💀', iconSize: [24, 24] }),
+      cops: L.divIcon({ className: 'custom-icon-cop', html: '🚓', iconSize: [24, 24] }),
+      spy: L.divIcon({ className: 'custom-icon-spy', html: '👁️', iconSize: [24, 24] }),
+      discord: L.divIcon({ className: 'custom-icon-discord', html: '🎧', iconSize: [24, 24] }),
+      steam: L.divIcon({ className: 'custom-icon-steam', html: '🎮', iconSize: [24, 24] }),
+      insta: L.divIcon({ className: 'custom-icon-insta', html: '📷', iconSize: [24, 24] }),
+      sigint: L.divIcon({ className: 'custom-icon-sigint', html: '📡', iconSize: [28, 28] }),
+      crypto: L.divIcon({ className: 'custom-icon-crypto', html: '💰', iconSize: [24, 24] }),
+      imint: L.divIcon({ className: 'custom-icon-imint', html: '📸', iconSize: [28, 28] }),
+      cybint: L.divIcon({ className: 'custom-icon-cybint', html: '🌐', iconSize: [28, 28] })
+    };
+
+    function initOsintMap() {
+      if (osintMap) return;
+      // Center roughly on Ottawa, Canada (capital)
+      osintMap = L.map('osintMap').setView([45.4215, -75.6972], 13);
+      
+      // Load dark-themed Carto CDN map tiles
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap contributors © CARTO',
+      }).addTo(osintMap);
+    }
+
+    async function loadOsintData() {
+      initOsintMap();
+      try {
+        const response = await fetch('data/osint_targets.json');
+        if (!response.ok) throw new Error("Network latency or missing JSON file.");
+        const data = await response.json();
+        
+        targetMarkers.forEach(m => osintMap.removeLayer(m));
+        targetZones.forEach(z => osintMap.removeLayer(z));
+        targetMarkers = [];
+        targetZones = [];
+        
+        const filters = {
+          politician: document.getElementById('filter-politicians').checked,
+          gang: document.getElementById('filter-gangs').checked,
+          cops: document.getElementById('filter-cops').checked,
+          foreign_agent: document.getElementById('filter-spies').checked,
+          discord_node: document.getElementById('filter-discord').checked,
+          steam_footprint: document.getElementById('filter-steam').checked,
+          instagram_op: document.getElementById('filter-insta').checked,
+          sigint_intercept: document.getElementById('filter-sigint').checked,
+          crypto_wallet: document.getElementById('filter-finint').checked,
+          imint_exif: document.getElementById('filter-imint').checked,
+          cybint_onion: document.getElementById('filter-cybint').checked
+        };
+        
+        let plotted = 0;
+        let zones = 0;
+        
+        data.targets.forEach(t => {
+          if (!filters[t.type]) return;
+          
+          let color = '#fff';
+          let icon = window.customIcons.politician;
+          
+          // Apply matching colors and icons based on threat type
+          if (t.type === 'politician') { color = '#ff3333'; icon = window.customIcons.politician; }
+          else if (t.type === 'gang') { color = '#6600cc'; icon = window.customIcons.gang; }
+          else if (t.type === 'cops') { color = '#0066ff'; icon = window.customIcons.cops; }
+          else if (t.type === 'foreign_agent') { color = '#39ff14'; icon = window.customIcons.spy; }
+          else if (t.type === 'discord_node') { color = '#5865F2'; icon = window.customIcons.discord; }
+          else if (t.type === 'steam_footprint') { color = '#00adee'; icon = window.customIcons.steam; }
+          else if (t.type === 'instagram_op') { color = '#E1306C'; icon = window.customIcons.insta; }
+          else if (t.type === 'sigint_intercept') { color = '#ffaa00'; icon = window.customIcons.sigint; }
+          else if (t.type === 'crypto_wallet') { color = '#ffd700'; icon = window.customIcons.crypto; }
+          else if (t.type === 'imint_exif') { color = '#ff3333'; icon = window.customIcons.imint; }
+          else if (t.type === 'cybint_onion') { color = '#ff00ff'; icon = window.customIcons.cybint; }
+          
+          if (t.radius_m) {
+            const zone = L.circle([t.lat, t.lng], { color: color, fillColor: color, fillOpacity: 0.1, radius: t.radius_m, dashArray: '5, 5' }).addTo(osintMap);
+            targetZones.push(zone);
+            zones++;
+          }
+          
+          const marker = L.marker([t.lat, t.lng], { icon: icon }).addTo(osintMap);
+          marker._osintId = t.id;
+          
+          const popupHtml = `
+            <div style="font-family:'Courier New', monospace; padding:5px; width:220px;">
+              <strong style="color:${color}; font-size:1.1rem; border-bottom:1px solid ${color}; display:block; margin-bottom:5px;">${t.name}</strong>
+              <div style="color:#aaa; font-size:0.8rem; margin-bottom:8px;">[ID: ${t.id}]<br>TYPE: ${t.type.toUpperCase()}</div>
+              <div style="color:#eee; font-size:0.9rem;">${t.intel}</div>
+            </div>
+          `;
+          marker.bindPopup(popupHtml);
+          targetMarkers.push(marker);
+          plotted++;
+        });
+        
+        if (data.edges) {
+          data.edges.forEach(edge => {
+            const sourceMarker = targetMarkers.find(m => m._osintId === edge.source);
+            const targetMarker = targetMarkers.find(m => m._osintId === edge.target);
+            if (sourceMarker && targetMarker) {
+              const sLatLng = sourceMarker.getLatLng();
+              const tLatLng = targetMarker.getLatLng();
+              
+              let edgeColor = '#39ff14';
+              if (edge.type.includes('Discord') || edge.type.includes('VoIP')) edgeColor = '#5865F2';
+              if (edge.type.includes('Steam') || edge.type.includes('Alias')) edgeColor = '#00adee';
+              if (edge.type.includes('Insta') || edge.type.includes('Drop')) edgeColor = '#E1306C';
+              if (edge.type.includes('Radio') || edge.type.includes('Station')) edgeColor = '#ffaa00';
+              if (edge.type.includes('Finance') || edge.type.includes('Ledger')) edgeColor = '#ffd700';
+              if (edge.type.includes('Physical') || edge.type.includes('Rally')) edgeColor = '#ff3333';
+              if (edge.type.includes('Tor') || edge.type.includes('Onion')) edgeColor = '#ff00ff';
+              
+              const polyline = L.polyline([sLatLng, tLatLng], { color: edgeColor, weight: 2, opacity: 0.6, className: 'animate-neon-line' }).addTo(osintMap);
+              polyline.bindPopup(`<strong style="color:${edgeColor}; font-family:monospace;">Edge Metric:</strong><br>${edge.type}`);
+              targetZones.push(polyline);
+            }
+          });
+        }
+        
+        document.getElementById('stat-total-targets').textContent = plotted;
+        document.getElementById('stat-active-zones').textContent = zones;
+        
+      } catch(e) {
+        console.error("OSINT map error:", e);
+      }
+    }
+
+    // Attach hot-reload listeners to the checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(box => {
+      box.addEventListener('change', loadOsintData);
+    });
+
+    // Boot system on window load
+    window.onload = loadOsintData;
+  </script>
+</body>
+</html>
