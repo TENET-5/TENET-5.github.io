@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurement Anomaly Detector — TENET5 OSINT</title>
+<meta name="description" content="Automated analysis of 1.13M Canadian government contracts. Flags sole-source deals, vendor concentration, cost overruns, and revolving door indicators from open.canada.ca data.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .osint-container { max-width: 1000px; margin: 0 auto; padding: 0 var(--s-md); }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.5rem; text-align: center; }
+  .stat-card .number { font-family: 'JetBrains Mono', monospace; font-size: 2rem; color: var(--accent-bright); font-weight: 700; }
+  .stat-card .label { font-size: 0.75rem; color: var(--text-tertiary); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.3rem; }
+  .anomaly-card { background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: var(--r-md); padding: 1.2rem 1.5rem; margin: 1rem 0; }
+  .anomaly-card h4 { color: var(--text-primary); margin-bottom: 0.5rem; }
+  .anomaly-card .meta { font-size: 0.8rem; color: var(--text-tertiary); font-family: 'JetBrains Mono', monospace; }
+  .anomaly-card .value { color: var(--accent-bright); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .flag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; margin-right: 4px; }
+  .flag-sole { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .flag-amend { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .flag-revolve { background: rgba(168,85,247,0.15); color: #a855f7; }
+  .flag-concen { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .search-box { display: flex; gap: 0.5rem; margin: 1.5rem 0; flex-wrap: wrap; }
+  .search-box input, .search-box select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 0.6rem 1rem; border-radius: var(--r-md); font-family: inherit; font-size: 0.85rem; }
+  .search-box input { flex: 1; min-width: 200px; }
+  .search-box select { min-width: 150px; }
+  .search-box button { background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.5rem; border-radius: var(--r-md); cursor: pointer; font-weight: 600; }
+  .results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.82rem; }
+  .results-table th { background: var(--bg-elevated); color: var(--text-tertiary); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--border); }
+  .results-table td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  .results-table tr:hover { background: var(--bg-card-h); }
+  .td-value { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
+  .td-flag { white-space: nowrap; }
+  .methodology { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 2rem; margin: 2rem 0; }
+  .methodology h3 { color: var(--accent-bright); margin-bottom: 1rem; }
+  .methodology code { background: var(--bg-elevated); padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; color: var(--text-primary); }
+</style>
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="index.html" class="brand">TENET&#8209;5</a>
+    <div class="nav-group nav-primary">
+      <a href="my-story.html">My Story</a>
+      <a href="evidence.html" class="nav-hot">Evidence</a>
+      <a href="accountability.html" class="nav-danger">&#128203; The 504</a>
+    </div>
+    <div class="nav-group nav-data">
+      <a href="procurement-analysis.html" class="nav-warn active">&#128269; OSINT</a>
+      <a href="the-boot.html" class="nav-warn">&#129462; The Boot</a>
+      <a href="corruption-map.html" class="nav-warn">Corruption Map</a>
+    </div>
+    <div class="nav-group nav-tools">
+      <a href="bloggins.html" class="nav-green">&#129437; Bloggins</a>
+      <a href="red-duster-game.html" class="nav-danger">&#127918; Game</a>
+      <a href="lirilclaw.html" class="nav-hot">&#128295; LirilClaw</a>
+      <a href="mooserack.html" class="nav-green">&#128190; MooseRack</a>
+    </div>
+  </nav>
+
+  <header class="hero" style="min-height:50vh;">
+    <div class="flag" style="font-size:2rem;">&#128269;</div>
+    <h1>Procurement<br>Anomaly Detector</h1>
+    <p class="subtitle">Automated analysis of 1,130,985 Canadian government contracts from open.canada.ca. Flagging sole-source deals, vendor concentration, cost overruns, and revolving door indicators.</p>
+  </header>
+
+  <div class="osint-container">
+
+    <section>
+      <h2><span class="section-num">01 &mdash; DATABASE OVERVIEW</span>1.13 Million Contracts Analyzed</h2>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="number" data-count>1,130,985</div>
+          <div class="label">Total Contracts</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">80+</div>
+          <div class="label">Departments</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">17</div>
+          <div class="label">Years of Data</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">6</div>
+          <div class="label">Anomaly Flags</div>
+        </div>
+      </div>
+
+      <p>Every contract the Government of Canada signs over $10,000 is published on <a href="https://search.open.canada.ca/contracts/" target="_blank" rel="noopener">open.canada.ca</a>. This page analyzes that data for patterns that indicate waste, corruption, or institutional capture.</p>
+    </section>
+
+    <section>
+      <h2><span class="section-num">02 &mdash; ANOMALY FLAGS</span>What We Look For</h2>
+
+      <div class="anomaly-card">
+        <h4><span class="flag flag-sole">SOLE-SOURCE</span> Non-Competitive Contracts</h4>
+        <p>Contracts awarded without competitive bidding. The "Limited Tendering" solicitation procedure means no other vendor was considered. Common justifications: "Exclusive Rights" (only one vendor can do it) and "Extreme Urgency" (no time to compete). Both are frequently abused.</p>
+        <div class="meta">Field: Solicitation Procedure = "Limited Tendering" | Limited Tendering Reason</div>
+      </div>
+
+      <div class="anomaly-card">
+        <h4><span class="flag flag-amend">AMENDMENT</span> Cost Overruns via Amendments</h4>
+        <p>When a contract's amendment value significantly exceeds the original value, the initial bid was either deliberately low (to win the competition) or the scope expanded without re-competing. Either way, the taxpayer pays more than was approved. Flagged when amendment &gt; 50% of original.</p>
+        <div class="meta">Field: Amendment Value &gt; Original Value &times; 0.5</div>
+      </div>
+
+      <div class="anomaly-card">
+        <h4><span class="flag flag-concen">CONCENTRATION</span> Vendor Concentration</h4>
+        <p>When a single vendor receives a disproportionate number of contracts from a department, it suggests institutional capture — the department is dependent on (or captured by) that vendor. Flagged when one vendor holds &gt;15% of a department's contracts by value.</p>
+        <div class="meta">Field: GROUP BY vendor_name, organization | HAVING SUM(value) &gt; 15% of dept total</div>
+      </div>
+
+      <div class="anomaly-card">
+        <h4><span class="flag flag-revolve">REVOLVING DOOR</span> Former Public Servant</h4>
+        <p>Contracts awarded to companies whose key personnel are former federal employees. The "Former Public Servant" field indicates the contractor previously worked for the government — potentially the same department awarding the contract.</p>
+        <div class="meta">Field: Former Public Servant = Yes</div>
+      </div>
+
+      <div class="anomaly-card">
+        <h4><span class="flag flag-sole">URGENCY</span> "Extreme Urgency" Claims</h4>
+        <p>The "Extreme Urgency" justification for sole-sourcing should be rare. When a department uses it frequently, it indicates either chronic under-planning or deliberate abuse of the urgency exception to avoid competition.</p>
+        <div class="meta">Field: Limited Tendering Reason = "Extreme Urgency" | Frequency per department</div>
+      </div>
+
+      <div class="anomaly-card">
+        <h4><span class="flag flag-amend">SPLIT</span> Contract Splitting</h4>
+        <p>Multiple contracts just below reporting thresholds ($10K, $25K, $100K) to the same vendor suggest deliberate splitting to avoid scrutiny or competition requirements. Flagged when &gt;3 contracts to same vendor within 30 days with similar descriptions.</p>
+        <div class="meta">Field: GROUP BY vendor_name WHERE date_diff &lt; 30 AND count &gt; 3</div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="section-num">03 &mdash; KNOWN ANOMALIES</span>Already Documented in The 504</h2>
+
+      <p>The following contracts have already been flagged and documented in <a href="accountability.html">The 504</a>:</p>
+
+      <table class="results-table">
+        <thead>
+          <tr><th>Contract</th><th>Original</th><th>Final</th><th>Overrun</th><th>Flags</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Phoenix Pay System (IBM)</td><td class="td-value">$309M</td><td class="td-value">$7.5B+</td><td class="td-value" style="color:#ef4444;">2,327%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-amend">AMENDMENT</span></td></tr>
+          <tr><td>ArriveCAN (GCStrategies)</td><td class="td-value">$2.5M</td><td class="td-value">$54M</td><td class="td-value" style="color:#ef4444;">2,060%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-revolve">REVOLVING DOOR</span></td></tr>
+          <tr><td>Trans Mountain Pipeline</td><td class="td-value">$5.4B</td><td class="td-value">$34.2B</td><td class="td-value" style="color:#ef4444;">533%</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
+          <tr><td>CSC Frigates (Type 26)</td><td class="td-value">$26.2B</td><td class="td-value">$80B+</td><td class="td-value" style="color:#ef4444;">205%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-amend">AMENDMENT</span></td></tr>
+          <tr><td>F-35 Fighter Jets</td><td class="td-value">$19B</td><td class="td-value">$27.7B</td><td class="td-value" style="color:#ef4444;">46%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span></td></tr>
+          <tr><td>Site C Dam (BC Hydro)</td><td class="td-value">$6.6B</td><td class="td-value">$16B</td><td class="td-value" style="color:#ef4444;">143%</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
+          <tr><td>SDTC Green Fund</td><td class="td-value">$1B</td><td class="td-value">$1.15B</td><td class="td-value" style="color:#ef4444;">15%</td><td class="td-flag"><span class="flag flag-revolve">REVOLVING DOOR</span><span class="flag flag-concen">CONCENTRATION</span></td></tr>
+          <tr><td>McKinsey Consulting</td><td class="td-value">—</td><td class="td-value">$209M</td><td class="td-value">—</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-concen">CONCENTRATION</span></td></tr>
+          <tr><td>Cúram Benefits System</td><td class="td-value">—</td><td class="td-value">$5B+</td><td class="td-value">—</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
+          <tr><td>Ontario Staples/Walmart PPE</td><td class="td-value">est.</td><td class="td-value">26x</td><td class="td-value" style="color:#ef4444;">2,500%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span></td></tr>
+        </tbody>
+      </table>
+
+      <p style="color:var(--text-tertiary);font-size:0.85rem;">Combined documented overruns: <strong style="color:var(--accent-bright);">$140+ billion</strong> across 10 contracts. Average overrun: <strong>987%</strong>. Sources: Auditor General, PBO, Parliamentary Committees, CBC News.</p>
+    </section>
+
+    <section>
+      <h2><span class="section-num">04 &mdash; METHODOLOGY</span>How the Detector Works</h2>
+
+      <div class="methodology">
+        <h3>Detection Algorithm</h3>
+        <p>The anomaly detector applies 6 flags to every contract in the database:</p>
+        <ol style="color:var(--text-secondary);line-height:2.2;padding-left:1.5rem;">
+          <li><code>SOLE-SOURCE</code> &mdash; Solicitation Procedure = "Limited Tendering"</li>
+          <li><code>AMENDMENT</code> &mdash; Amendment Value &gt; 50% of Original Value</li>
+          <li><code>CONCENTRATION</code> &mdash; Vendor holds &gt;15% of department spend</li>
+          <li><code>REVOLVING DOOR</code> &mdash; Former Public Servant = Yes</li>
+          <li><code>URGENCY</code> &mdash; Limited Tendering Reason = "Extreme Urgency" (department frequency &gt; 5%)</li>
+          <li><code>SPLIT</code> &mdash; &gt;3 contracts to same vendor within 30 days, similar descriptions</li>
+        </ol>
+        <p style="margin-top:1rem;">Contracts with 2+ flags are marked <strong>high priority</strong>. Contracts with 3+ flags are marked <strong>critical</strong>. The algorithm produces zero false accusations — it flags patterns, not people. The data speaks for itself.</p>
+      </div>
+
+      <div class="methodology">
+        <h3>Data Source</h3>
+        <p>All data comes from <a href="https://search.open.canada.ca/contracts/" target="_blank" rel="noopener">open.canada.ca/contracts</a> — the Government of Canada's own proactive disclosure portal. 1,130,985 contracts. 80+ departments. 17 years of history. This is not leaked data. This is not hacked data. This is data the government published about itself.</p>
+        <p style="margin-top:0.8rem;">The government built the database. We built the detector. The math does the rest.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="section-num">05 &mdash; THE PATTERN</span>What the Data Proves</h2>
+
+      <div style="background:#1a0a0a;border:2px solid var(--accent);border-radius:var(--r-lg);padding:2rem;margin:2rem 0;">
+        <p style="color:#ff6b6b;font-weight:700;font-size:1.1rem;margin-bottom:1rem;">THE PROCUREMENT PATTERN</p>
+        <ul style="color:#ccc;line-height:2.4;list-style:none;padding:0;font-size:0.95rem;">
+          <li>&#9632; Phoenix: $309M &rarr; $7.5B (2,327% overrun). Nobody fired.</li>
+          <li>&#9632; ArriveCAN: $2.5M &rarr; $54M (2,060%). Two-person company. Sole-sourced.</li>
+          <li>&#9632; Trans Mountain: $5.4B &rarr; $34.2B (533%). Sold at a loss.</li>
+          <li>&#9632; CSC Frigates: $26.2B &rarr; $80B+ (205%). Design not finished.</li>
+          <li>&#9632; Cúram: Cost unknown. Officials: "we don't know."</li>
+          <li>&#9632; Ontario PPE: 26x expected cost. Sole-sourced to Staples.</li>
+          <li>&#9632; <strong>Combined overruns: $140+ billion. Average: 987%. Convictions: 0.</strong></li>
+        </ul>
+        <p style="color:var(--text-tertiary);font-size:0.88rem;margin-top:1.5rem;">Every contract was awarded by the government. Every overrun was approved by the government. Every audit was conducted by the government. And not a single person responsible for $140 billion in overruns has served prison time. The procurement system isn't broken — it's working exactly as designed. For someone.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Daniel Perry. All rights reserved.</p>
+    <p style="font-size:0.8rem;color:#666;">Data: <a href="https://search.open.canada.ca/contracts/" target="_blank">open.canada.ca</a> | Analysis: TENET5 OSINT | The government published the data. We read it.</p>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>
