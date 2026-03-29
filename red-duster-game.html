@@ -3225,6 +3225,26 @@ window.addEventListener('resize', () => {
 
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('respawnBtn').addEventListener('click', startGame);
+
+// Campaign button — show mission select
+document.getElementById('campaignBtn').addEventListener('click', () => {
+  const ms = document.getElementById('missionSelect');
+  ms.style.display = ms.style.display === 'none' ? 'block' : 'none';
+});
+
+// Mission item clicks — only mission 1 is unlocked
+document.querySelectorAll('.mission-item').forEach(el => {
+  el.addEventListener('click', () => {
+    const mission = parseInt(el.getAttribute('data-mission'));
+    if (mission !== 1) {
+      el.style.animation = 'none';
+      el.style.borderColor = '#ff3333';
+      setTimeout(() => { el.style.borderColor = ''; }, 600);
+      return;
+    }
+    startGame();
+  });
+});
 document.getElementById('resumeBtn').addEventListener('click', () => {
   STATE.paused = false;
   document.getElementById('pauseMenu').style.display = 'none';
@@ -3278,15 +3298,6 @@ function startGame() {
   
   yawObj.position.set(spawnX, STATE.playerHeight, spawnZ);
   updateWeaponVisuals();
-    if (STATE.shake > 0) {
-      STATE.shake -= dt * 3;
-      if (STATE.shake < 0) STATE.shake = 0;
-      camera.position.x = (Math.random() - 0.5) * STATE.shake;
-      camera.position.y = (Math.random() - 0.5) * STATE.shake;
-    } else {
-      camera.position.x = 0;
-      camera.position.y = 0;
-    }
   updateHUD();
   
   document.getElementById('menu').style.display = 'none';
@@ -3295,7 +3306,7 @@ function startGame() {
   document.getElementById('hud').style.display = 'block';
   document.getElementById('hud-top').style.display = 'block';
   document.getElementById('healthBar').style.display = 'block';
-  //  // ARCADE UI NUKED
+  document.getElementById('crosshair').style.display = 'block';
   document.getElementById('killFeed').style.display = 'block';
   document.getElementById('grenadeHud').style.display = 'block';
   document.getElementById('sprintBar').style.display = 'block';
@@ -3511,10 +3522,9 @@ function animate() {
     updateEnemies(dt);
     updateProjectiles(dt);
     updateParticles(dt);
-  updateCorpses(dt);
+    updateCorpses(dt);
     updatePickups(dt);
     updateGrenades(dt);
-    updateCorpses(dt);
     updateCaptureZones(dt);
     
     // Damage numbers
