@@ -1826,6 +1826,22 @@ function buildWeaponModel(type) {
     belt.position.set(0, -0.035, -0.04);
     belt.rotation.z = 0.15;
     g.add(belt);
+  } else if (WEAPONS[type].isWand) {
+    const s = 1.0;
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x442211, roughness: 0.9 });
+    const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.015*s, 0.01*s, 0.6*s, 8), woodMat);
+    stick.rotation.x = Math.PI/2;
+    stick.position.set(0, 0, -0.2);
+    g.add(stick);
+    
+    const coreMat = new THREE.MeshBasicMaterial({ color: WEAPONS[type].color });
+    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.04*s, 1), coreMat);
+    core.position.set(0, 0, -0.5);
+    g.add(core);
+    
+    const wandLight = new THREE.PointLight(WEAPONS[type].color, 5, 2);
+    wandLight.position.set(0, 0, -0.5);
+    g.add(wandLight);
   }
 
   return g;
@@ -2530,6 +2546,62 @@ function shoot() {
     updateHUD();
   }
   STATE.shootCooldown = w.fireRate;
+  
+  // Phase 78: Elemental Wand Spells
+  if (w.isWand) {
+    playSound('shoot'); 
+    const rc = new THREE.Raycaster();
+    rc.setFromCamera(new THREE.Vector2(0,0), camera);
+    const intersects = rc.intersectObjects(scene.children, true);
+    let hitPoint = rc.ray.at(100);
+    for (let i=0; i<intersects.length; i++) {
+      if (intersects[i].object.name !== 'bullet') { hitPoint = intersects[i].point; break; }
+    }
+    
+    if (STATE.weapon === 'wand_fire') {
+      STATE.screenShake = 0.5; STATE.shakeIntensity = 0.3;
+      STATE.enemies.forEach(e => {
+        if (!e.dead && e.mesh.position.distanceTo(hitPoint) < 8) {
+          killEnemy(e, false, new THREE.Vector3((e.x - hitPoint.x)*10, 20, (e.z - hitPoint.z)*10));
+        }
+      });
+      for(let i=0; i<30; i++) addParticle(hitPoint.x, hitPoint.y+1, hitPoint.z, 0xff4400);
+    } else if (STATE.weapon === 'wand_ice') {
+      const geo = new THREE.BoxGeometry(0.1, 0.1, hitPoint.distanceTo(yawObj.position));
+      const mat = new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0.6});
+      const beam = new THREE.Mesh(geo, mat);
+      beam.position.copy(yawObj.position).lerp(hitPoint, 0.5);
+      beam.position.y = camera.position.y - 0.2;
+      beam.lookAt(hitPoint);
+      scene.add(beam); setTimeout(()=>scene.remove(beam), 200);
+      STATE.enemies.forEach(e => {
+        if (!e.dead && e.mesh.position.distanceTo(hitPoint) < 4) {
+          e.frozen = true; e.speed = 0;
+          e.mesh.children.forEach(c => { if(c.material) { c.material = c.material.clone(); c.material.color.setHex(0x0088ff); } });
+        }
+      });
+    } else if (STATE.weapon === 'wand_lightning') {
+      STATE.enemies.forEach(e => {
+        if (!e.dead && e.mesh.position.distanceTo(hitPoint) < 15) {
+          killEnemy(e, true, new THREE.Vector3(0,5,0));
+          const mat = new THREE.LineBasicMaterial({color: 0xffffaa, linewidth: 3});
+          const pts = [yawObj.position.clone().add(new THREE.Vector3(0,camera.position.y-0.2,0)), e.mesh.position.clone().add(new THREE.Vector3(0,1,0))];
+          const geo = new THREE.BufferGeometry().setFromPoints(pts);
+          const line = new THREE.Line(geo, mat);
+          scene.add(line); setTimeout(()=>scene.remove(line), 150);
+        }
+      });
+    } else if (STATE.weapon === 'wand_earth') {
+      STATE.screenShake = 0.8; STATE.shakeIntensity = 0.5;
+      STATE.enemies.forEach(e => {
+        if (!e.dead && e.mesh.position.distanceTo(yawObj.position) < 12) {
+          killEnemy(e, false, new THREE.Vector3(0, 40, 0)); 
+        }
+      });
+    }
+    return;
+  }
+
   
   // Tactical Recoil (Muzzle Kick)
   const recoilFactor = STATE.aiming ? 0.3 : 1.0;
