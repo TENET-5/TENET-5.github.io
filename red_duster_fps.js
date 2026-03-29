@@ -30,11 +30,20 @@ let lastStepTime = 0;
 const particles = [];
 let chainGunBarrels;
 
-// Phase 23 Wave Survival
+// Phase 23 Wave Survival — Endless Mode
 let currentWave = 1;
-const maxWaves = 3;
+const maxWaves = 99; // Effectively endless
 let kills = 0;
 let enemiesLeft = 0;
+let hasPlayedBefore = false;
+let healthRegenTimer = 0;
+let currentWeaponIdx = 0;
+const weaponNames = ['C7 RIFLE', 'SHOTGUN', 'RPG'];
+const weaponStats = [
+  { fireRate: 120, damage: 25, headDmg: 150, mag: 30, reloadTime: 2500, spread: 0.03, pellets: 1 },
+  { fireRate: 600, damage: 15, headDmg: 80, mag: 8, reloadTime: 3000, spread: 0.12, pellets: 8 },
+  { fireRate: 1500, damage: 200, headDmg: 500, mag: 1, reloadTime: 4000, spread: 0, pellets: 1, explosive: true }
+];
 
 function generateNoiseTexture(baseColor, noiseColors, scale=1) {
     const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
