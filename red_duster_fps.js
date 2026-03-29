@@ -29,6 +29,7 @@ let lastStepTime = 0;
 // Phase 22 Visual Upgrades
 const particles = [];
 let chainGunBarrels;
+let hasChainGun = false;
 
 // Phase 23 Wave Survival — Endless Mode
 let currentWave = 1;
@@ -674,7 +675,12 @@ function animate() {
         let targetZ = 0, targetX = 0;
         if (leanLeft) { targetZ = 0.25; targetX = -2; } else if (leanRight) { targetZ = -0.25; targetX = 2; }
         camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetZ, 0.1);
-        scene.children[scene.children.indexOf(camera) - 1].position.copy(camera.position); 
+        // Update chest light to follow camera (safely)
+        const camIdx = scene.children.indexOf(camera);
+        if (camIdx > 0) {
+            const prev = scene.children[camIdx - 1];
+            if (prev && prev.position) prev.position.copy(camera.position);
+        }
 
         const gunTargetPos = camera.position.clone();
         const gunOffset = new THREE.Vector3(2.5 + targetX, -2.5, -5); gunOffset.applyQuaternion(camera.quaternion);
