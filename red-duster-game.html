@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RED DUSTER — Anti-Communist Training Simulator | TENET5</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{overflow:hidden;background:#000;font-family:'Courier New',monospace;color:#fff}
+canvas{display:block;width:100%;height:100%;outline:none}
+#splash{position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#1a0000,#0a0a0a,#1a0000);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#splash .inner{text-align:center;max-width:600px;padding:2rem}
+#splash h1{font-size:4em;color:#c41e3a;letter-spacing:8px;text-shadow:0 0 40px #c41e3a,0 0 80px #880000;margin-bottom:0.2em}
+#splash h2{color:#cc9966;letter-spacing:6px;font-size:1.1em;margin-bottom:1.5em}
+#splash .desc{color:#888;line-height:1.6;margin-bottom:2em;font-size:0.9em}
+#splash .go{font-size:1.6em;color:#ff4444;animation:pulse 1.5s infinite}
+#splash .disclaimer{color:#444;font-size:0.7em;margin-top:1.5em}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+#cross{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:11;pointer-events:none;font-size:24px;color:rgba(255,255,255,.6)}
+#stats{position:fixed;bottom:20px;left:20px;font-size:18px;z-index:11;text-shadow:0 0 8px #000}
+#ammo{position:fixed;bottom:20px;right:20px;font-size:20px;z-index:11;text-shadow:0 0 8px #000}
+#wave{position:fixed;top:20px;width:100%;text-align:center;font-size:16px;color:#c41e3a;letter-spacing:4px;z-index:11;text-shadow:0 0 10px #c41e3a}
+#hit{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;z-index:12;pointer-events:none;opacity:0;transition:opacity 0.1s}
+#hurt{position:fixed;inset:0;pointer-events:none;z-index:9;opacity:0;background:radial-gradient(transparent 40%,rgba(255,0,0,.4));transition:opacity .15s}
+#dead{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer}
+#dead h1{font-size:5em;color:#c41e3a;text-shadow:0 0 40px #c41e3a}
+#dead p{color:#888;margin-top:20px;font-size:1.2em}
+#dead .stats{color:#666;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="splash" onclick="startGame()"><div class="inner">
+  <h1>RED DUSTER</h1>
+  <h2>ANTI-COMMUNIST TRAINING SIMULATOR</h2>
+  <div class="desc">
+    Young Castro's Vanguard has seized key Canadian infrastructure.<br>
+    Lead your squad. Take it back.<br><br>
+    <span style="color:#ffcc00;font-weight:bold">The federal government tried to make me out as a terrorist,<br>
+    so instead I just play my Red Duster Communist removal training simulator.</span>
+  </div>
+  <div style="color:#555;font-size:.78em;margin-bottom:1em">
+    WASD — Move &nbsp;|&nbsp; MOUSE — Aim &nbsp;|&nbsp; CLICK — Shoot &nbsp;|&nbsp; R — Reload &nbsp;|&nbsp; SHIFT — Sprint
+  </div>
+  <div class="go">[ CLICK TO DEPLOY ]</div>
+  <div class="disclaimer">* The communists in this simulator are fictional but modeled on real communists.<br>
+  Powered by <span style="color:#ff6633">Babylon.js</span> Open Source &bull; <span style="color:#ff6633">TENET5 Studios</span></div>
+</div></div>
+
+<div id="ui">
+  <div id="cross">+</div>
+  <div id="stats">HP: 100 | KILLS: 0</div>
+  <div id="ammo">C7A2 | 30/30</div>
+  <div id="wave">WAVE 1</div>
+  <div id="hit"></div>
+  <div id="hurt"></div>
+</div>
+<div id="dead" onclick="location.reload()">
+  <h1>K.I.A.</h1>
+  <p id="deathMsg">KILLED IN ACTION</p>
+  <div class="stats" id="deathStats"></div>
+  <p style="color:#555;margin-top:30px">Click to redeploy</p>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script>
+'use strict';
+
+// ── STATE ──
+let hp=100, ammo=30, maxAmmo=30, kills=0, headshots=0, wave=0, alive=true, started=false;
+let reloading=false, lastShot=0, enemies=[], gibs=[], audioCtx=null;
+let fw=0,bk=0,lt=0,rt=0,sprint=0,mouseDown=0;
+let yaw=0, pitch=0;
+let scene, engine, camera, canvas;
+
+// ── AUDIO ──
+function snd(type){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  const t=audioCtx.currentTime;
+  if(type==='shoot'){o.type='square';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(30,t+.07);g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.07);o.start(t);o.stop(t+.07)}
+  if(type==='hit'){o.type='triangle';o.frequency.setValueAtTime(3000,t);o.frequency.exponentialRampToValueAtTime(500,t+.06);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);o.start(t);o.stop(t+.06)}
+  if(type==='die'){o.type='sine';o.frequency.setValueAtTime(40,t);o.frequency.linearRampToValueAtTime(15,t+.3);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.start(t);o.stop(t+.3)}
+  if(type==='headshot'){o.type='sawtooth';o.frequency.setValueAtTime(4000,t);o.frequency.exponentialRampToValueAtTime(200,t+.1);g.gain.setValueAtTime(.6,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);o.start(t);o.stop(t+.1)}
+}
+
+// ── START ──
+function startGame(){
+  document.getElementById('splash').style.display='none';
+  canvas=document.getElementById('gameCanvas');
+  engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:true,stencil:true});
+  scene=new BABYLON.Scene(engine);
+  scene.clearColor=new BABYLON.Color3(.03,.03,.06);
+  scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogDensity=0.012;
+  scene.fogColor=new BABYLON.Color3(.03,.03,.06);
+  scene.collisionsEnabled=true;
+  scene.gravity=new BABYLON.Vector3(0,-9.81,0);
+
+  // Camera (FPS)
+  camera=new BABYLON.UniversalCamera('cam',new BABYLON.Vector3(0,1.7,0),scene);
+  camera.minZ=0.1;
+  camera.fov=1.2;
+  camera.speed=0;
+  camera.ellipsoid=new BABYLON.Vector3(0.5,0.85,0.5);
+  camera.checkCollisions=true;
+  camera.applyGravity=true;
+
+  // Lights
+  const hemi=new BABYLON.HemisphericLight('hemi',new BABYLON.Vector3(0,1,0),scene);
+  hemi.intensity=0.5;
+  hemi.groundColor=new BABYLON.Color3(0.1,0.05,0.02);
+  const sun=new BABYLON.DirectionalLight('sun',new BABYLON.Vector3(-1,-2,-1),scene);
+  sun.intensity=0.8;
+  sun.diffuse=new BABYLON.Color3(0.5,0.55,0.7);
+
+  // Point lights (fires)
+  for(let i=0;i<6;i++){
+    const pl=new BABYLON.PointLight('fire'+i,new BABYLON.Vector3((Math.random()-.5)*80,4,(Math.random()-.5)*80),scene);
+    pl.diffuse=new BABYLON.Color3(1,.3,0);
+    pl.intensity=3;
+    pl.range=25;
+  }
+
+  // Ground
+  const ground=BABYLON.MeshBuilder.CreateGround('ground',{width:200,height:200},scene);
+  const gmat=new BABYLON.StandardMaterial('gmat',scene);
+  gmat.diffuseColor=new BABYLON.Color3(.16,.16,.14);
+  gmat.specularColor=BABYLON.Color3.Black();
+  ground.material=gmat;
+  ground.checkCollisions=true;
+
+  // Buildings
+  const bmat=new BABYLON.StandardMaterial('bmat',scene);
+  bmat.diffuseColor=new BABYLON.Color3(.35,.23,.13);
+  bmat.specularColor=BABYLON.Color3.Black();
+  const cmat=new BABYLON.StandardMaterial('cmat',scene);
+  cmat.diffuseColor=new BABYLON.Color3(.27,.27,.28);
+  cmat.specularColor=BABYLON.Color3.Black();
+
+  for(let gx=-3;gx<=3;gx++) for(let gz=-3;gz<=3;gz++){
+    if(Math.abs(gx)<=1&&Math.abs(gz)<=1)continue;
+    if(Math.random()<.25)continue;
+    const w=6+Math.random()*10, d=6+Math.random()*10, h=3+Math.random()*8;
+    const b=BABYLON.MeshBuilder.CreateBox('b'+gx+'_'+gz,{width:w,height:h,depth:d},scene);
+    b.position=new BABYLON.Vector3(gx*20+(Math.random()-.5)*4,h/2,gz*20+(Math.random()-.5)*4);
+    b.material=Math.random()>.5?bmat:cmat;
+    b.checkCollisions=true;
+  }
+  // Debris
+  for(let i=0;i<40;i++){
+    const s=.8+Math.random()*2;
+    const c=BABYLON.MeshBuilder.CreateBox('debris'+i,{size:s},scene);
+    c.position=new BABYLON.Vector3((Math.random()-.5)*80,s/2,(Math.random()-.5)*80);
+    c.material=cmat;
+    c.checkCollisions=true;
+  }
+
+  // Pointer lock
+  canvas.addEventListener('click',()=>{if(started&&alive)canvas.requestPointerLock()});
+  document.addEventListener('pointerlockchange',()=>{
+    if(!document.pointerLockElement&&started&&alive){/*paused*/}
+  });
+
+  // Mouse look
+  document.addEventListener('mousemove',e=>{
+    if(!started||!alive||!document.pointerLockElement)return;
+    yaw-=e.movementX*.002;
+    pitch-=e.movementY*.002;
+    pitch=Math.max(-1.4,Math.min(1.4,pitch));
+  });
+
+  // Keys
+  document.addEventListener('keydown',e=>{
+    if(e.code==='KeyW')fw=1;if(e.code==='KeyS')bk=1;
+    if(e.code==='KeyA')lt=1;if(e.code==='KeyD')rt=1;
+    if(e.code==='ShiftLeft')sprint=1;
+    if(e.code==='KeyR'&&!reloading&&ammo<maxAmmo){reloading=true;setTimeout(()=>{ammo=maxAmmo;reloading=false;updateHUD()},2000)}
+  });
+  document.addEventListener('keyup',e=>{
+    if(e.code==='KeyW')fw=0;if(e.code==='KeyS')bk=0;
+    if(e.code==='KeyA')lt=0;if(e.code==='KeyD')rt=0;
+    if(e.code==='ShiftLeft')sprint=0;
+  });
+  document.addEventListener('mousedown',()=>{mouseDown=1});
+  document.addEventListener('mouseup',()=>{mouseDown=0});
+
+  canvas.requestPointerLock();
+  started=true;
+  spawnWave();
+
+  // Render loop
+  let regen=0, lastTime=performance.now();
+  engine.runRenderLoop(()=>{
+    const now=performance.now();
+    const dt=Math.min((now-lastTime)/1000,0.05);
+    lastTime=now;
+    if(!started||!alive){scene.render();return}
+
+    // Camera rotation
+    camera.rotation.y=yaw;
+    camera.rotation.x=pitch;
+
+    // Movement
+    const spd=(sprint?22:12)*dt;
+    let dx=0,dz=0;
+    if(fw){dx-=Math.sin(yaw)*spd;dz-=Math.cos(yaw)*spd}
+    if(bk){dx+=Math.sin(yaw)*spd;dz+=Math.cos(yaw)*spd}
+    if(lt){dx-=Math.cos(yaw)*spd;dz+=Math.sin(yaw)*spd}
+    if(rt){dx+=Math.cos(yaw)*spd;dz-=Math.sin(yaw)*spd}
+    camera.position.x=Math.max(-95,Math.min(95,camera.position.x+dx));
+    camera.position.z=Math.max(-95,Math.min(95,camera.position.z+dz));
+    camera.position.y=1.7;
+
+    // Auto fire
+    if(mouseDown) shoot();
+
+    // Enemy AI
+    const px=camera.position.x, pz=camera.position.z;
+    enemies.forEach(e=>{
+      if(e.hp<=0)return;
+      const ddx=px-e.x, ddz=pz-e.z;
+      const dist=Math.sqrt(ddx*ddx+ddz*ddz)||1;
+      e.mesh.lookAt(new BABYLON.Vector3(px,1,pz));
+
+      if(dist>8){
+        e.x+=(ddx/dist)*e.spd*dt;
+        e.z+=(ddz/dist)*e.spd*dt;
+      } else {
+        const strafe=Math.sin(now*.002+e.x)*e.spd*.3*dt;
+        e.x+=(-ddz/dist)*strafe;
+        e.z+=(ddx/dist)*strafe;
+      }
+      e.mesh.position.x=e.x;
+      e.mesh.position.z=e.z;
+
+      // Enemy shoots
+      if(dist<40&&now-e.lastFire>1500+Math.random()*2000){
+        e.lastFire=now;
+        if(Math.random()>.15){
+          hp-=3+wave*.3;
+          regen=0;
+          document.getElementById('hurt').style.opacity=.6;
+          setTimeout(()=>document.getElementById('hurt').style.opacity=0,120);
+          updateHUD();
+          if(hp<=0&&alive){
+            alive=false;
+            document.getElementById('dead').style.display='flex';
+            document.getElementById('deathStats').textContent='Wave '+wave+' | Kills: '+kills+' | Headshots: '+headshots;
+            document.exitPointerLock();
+          }
+        }
+      }
+    });
+
+    // Gibs physics
+    for(let i=gibs.length-1;i>=0;i--){
+      const g=gibs[i];
+      g.mesh.position.x+=g.vx*dt;
+      g.vy-=14*dt;
+      g.mesh.position.y+=g.vy*dt;
+      g.mesh.position.z+=g.vz*dt;
+      g.mesh.rotation.x+=5*dt;
+      g.mesh.rotation.z+=3*dt;
+      if(g.mesh.position.y<.02){g.mesh.position.y=.02;g.vy=Math.abs(g.vy)*.2;g.vx*=.5;g.vz*=.5}
+      g.ttl-=dt;
+      if(g.ttl<=0){g.mesh.dispose();gibs.splice(i,1)}
+    }
+
+    // Regen
+    regen+=dt;
+    if(regen>3&&hp<100){hp=Math.min(100,hp+5*dt);updateHUD()}
+
+    scene.render();
+  });
+
+  window.addEventListener('resize',()=>engine.resize());
+}
+
+// ── SHOOT ──
+function shoot(){
+  if(!alive||reloading||ammo<=0)return;
+  const now=performance.now();
+  if(now-lastShot<100)return;
+  lastShot=now;ammo--;snd('shoot');
+
+  // Babylon.js raycast from camera center
+  const ray=scene.createPickingRay(engine.getRenderWidth()/2,engine.getRenderHeight()/2,BABYLON.Matrix.Identity(),camera);
+  let bestDist=Infinity, bestEnemy=null, isHead=false;
+
+  enemies.forEach(e=>{
+    if(e.hp<=0)return;
+    // Check body
+    const bodyHit=ray.intersectsMesh(e.body);
+    if(bodyHit.hit&&bodyHit.distance<bestDist){bestDist=bodyHit.distance;bestEnemy=e;isHead=false}
+    // Check head
+    const headHit=ray.intersectsMesh(e.head);
+    if(headHit.hit&&headHit.distance<bestDist){bestDist=headHit.distance;bestEnemy=e;isHead=true}
+  });
+
+  if(bestEnemy){
+    const dmg=isHead?100:35;
+    bestEnemy.hp-=dmg;
+    snd(isHead?'headshot':'hit');
+    const hm=document.getElementById('hit');
+    hm.textContent=isHead?'☠':'✕';
+    hm.style.color=isHead?'#ffff00':'#ff3333';
+    hm.style.opacity=1;
+    setTimeout(()=>hm.style.opacity=0,80);
+    if(isHead) headshots++;
+    if(bestEnemy.hp<=0) killEnemy(bestEnemy);
+  }
+  updateHUD();
+}
+
+// ── KILL ──
+function killEnemy(e){
+  kills++;
+  const pos=e.mesh.position;
+
+  // Gibs
+  const gibMat=new BABYLON.StandardMaterial('gibm'+kills,scene);
+  gibMat.diffuseColor=new BABYLON.Color3(.6,0,0);
+  gibMat.specularColor=BABYLON.Color3.Black();
+  const gibMat2=new BABYLON.StandardMaterial('gibm2'+kills,scene);
+  gibMat2.diffuseColor=new BABYLON.Color3(.33,.2,.13);
+  gibMat2.specularColor=BABYLON.Color3.Black();
+
+  for(let i=0;i<12;i++){
+    const sz=.04+Math.random()*.06;
+    const gb=BABYLON.MeshBuilder.CreateBox('gib'+kills+'_'+i,{size:sz},scene);
+    gb.position=new BABYLON.Vector3(pos.x+(Math.random()-.5)*.3,1+Math.random(),pos.z+(Math.random()-.5)*.3);
+    gb.material=i<6?gibMat:gibMat2;
+    gibs.push({mesh:gb,vx:(Math.random()-.5)*6,vy:2+Math.random()*5,vz:(Math.random()-.5)*6,ttl:2+Math.random()*2});
+  }
+
+  snd('die');
+  e.mesh.dispose();
+  const idx=enemies.indexOf(e);
+  if(idx!==-1)enemies.splice(idx,1);
+  updateHUD();
+  if(enemies.every(en=>en.hp<=0)||enemies.length===0){
+    setTimeout(spawnWave,2000);
+  }
+}
+
+// ── SPAWN WAVE ──
+function spawnWave(){
+  wave++;
+  const count=Math.min(30,5+wave*3);
+
+  const bodyMat=new BABYLON.StandardMaterial('ebody'+wave,scene);
+  bodyMat.diffuseColor=new BABYLON.Color3(.4,.13,.13);
+  bodyMat.specularColor=BABYLON.Color3.Black();
+  const headMat=new BABYLON.StandardMaterial('ehead'+wave,scene);
+  headMat.diffuseColor=new BABYLON.Color3(.53,.4,.33);
+  headMat.specularColor=BABYLON.Color3.Black();
+  const legMat=new BABYLON.StandardMaterial('eleg'+wave,scene);
+  legMat.diffuseColor=new BABYLON.Color3(.17,.17,.13);
+  legMat.specularColor=BABYLON.Color3.Black();
+
+  for(let i=0;i<count;i++){
+    const a=Math.random()*Math.PI*2, r=25+Math.random()*40;
+    const x=Math.cos(a)*r, z=Math.sin(a)*r;
+
+    const root=new BABYLON.TransformNode('enemy'+wave+'_'+i,scene);
+    root.position=new BABYLON.Vector3(x,0,z);
+
+    // Body
+    const body=BABYLON.MeshBuilder.CreateBox('ebody'+wave+'_'+i,{width:.5,height:.8,depth:.35},scene);
+    body.position.y=1.1;body.parent=root;body.material=bodyMat;
+    body.isPickable=true;
+
+    // Head
+    const head=BABYLON.MeshBuilder.CreateSphere('ehead'+wave+'_'+i,{diameter:.34,segments:6},scene);
+    head.position.y=1.7;head.parent=root;head.material=headMat;
+    head.isPickable=true;
+
+    // Legs
+    const ll=BABYLON.MeshBuilder.CreateBox('ll'+wave+'_'+i,{width:.16,height:.6,depth:.2},scene);
+    ll.position=new BABYLON.Vector3(-.12,.3,0);ll.parent=root;ll.material=legMat;
+    const rl=BABYLON.MeshBuilder.CreateBox('rl'+wave+'_'+i,{width:.16,height:.6,depth:.2},scene);
+    rl.position=new BABYLON.Vector3(.12,.3,0);rl.parent=root;rl.material=legMat;
+
+    enemies.push({mesh:root,body:body,head:head,hp:25+wave*5,x:x,z:z,spd:1.8+Math.random()*1.5,lastFire:0});
+  }
+  document.getElementById('wave').textContent='WAVE '+wave;
+  updateHUD();
+}
+
+function updateHUD(){
+  document.getElementById('stats').textContent='HP: '+Math.max(0,Math.round(hp))+' | KILLS: '+kills;
+  document.getElementById('ammo').textContent='C7A2 | '+ammo+'/'+maxAmmo;
+}
+</script>
+</body>
+</html>
