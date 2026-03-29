@@ -570,7 +570,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = 1.2;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 if (!document.getElementById('gameCanvas')) document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -797,7 +798,10 @@ for (let y = 0; y < MAP_H; y++) {
 }
 
 // ── Lighting ──
-const ambientLight = new THREE.AmbientLight(0x334466, 0.6);
+// Atmospheric fog — adds depth and hides draw distance
+scene.fog = new THREE.FogExp2(0x0a0a12, 0.04);
+
+const ambientLight = new THREE.AmbientLight(0x334466, 0.5);
 scene.add(ambientLight);
 
 const moonLight = new THREE.DirectionalLight(0xccddff, 0.9);
@@ -807,8 +811,9 @@ moonLight.shadow.camera.left = -20;
 moonLight.shadow.camera.right = 20;
 moonLight.shadow.camera.top = 20;
 moonLight.shadow.camera.bottom = -20;
-moonLight.shadow.mapSize.width = 2048;
-moonLight.shadow.mapSize.height = 2048;
+moonLight.shadow.mapSize.width = 4096;
+moonLight.shadow.mapSize.height = 4096;
+moonLight.shadow.bias = -0.0002;
 scene.add(moonLight);
 const flashLight = new THREE.SpotLight(0xccddff, 10, 40, Math.PI/7, 0.8, 1);
 flashLight.position.set(0.1, -0.2, 0);
@@ -3474,7 +3479,128 @@ function animate() {
     l.intensity = 0.4 + Math.random() * 0.3;
   });
   
-  renderer.render(scene, camera);
+  // ── POST-PROCESSING — render to texture, then apply fullscreen shader ──
+  if (typeof ppSetup !== 'undefined' && ppSetup) {
+    renderer.setRenderTarget(ppRT);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+    ppUniforms.tDiffuse.value = ppRT.texture;
+    ppUniforms.uTime.value = performance.now() * 0.001;
+    renderer.render(ppScene, ppCamera);
+  } else {
+    renderer.render(scene, camera);
+  }
+}
+
+// ── Post-Processing Setup ──
+let ppSetup, ppRT, ppScene, ppCamera, ppUniforms;
+try {
+  ppRT = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+    format: THREE.RGBAFormat, type: THREE.HalfFloatType
+  });
+
+  const ppVert = `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position, 1.0); }`;
+  const ppFrag = `
+    uniform sampler2D tDiffuse;
+    uniform float uTime;
+    varying vec2 vUv;
+
+    // Vignette
+    float vignette(vec2 uv) {
+      vec2 d = uv - 0.5;
+      return 1.0 - dot(d, d) * 1.8;
+    }
+
+    // Film grain
+    float grain(vec2 uv, float t) {
+      return fract(sin(dot(uv * t, vec2(12.9898, 78.233))) * 43758.5453) * 0.06 - 0.03;
+    }
+
+    // Simple bloom (sample blur around bright pixels)
+    vec3 bloom(sampler2D tex, vec2 uv) {
+      vec3 c = vec3(0.0);
+      float total = 0.0;
+      for (float x = -3.0; x <= 3.0; x += 1.0) {
+        for (float y = -3.0; y <= 3.0; y += 1.0) {
+          vec2 off = vec2(x, y) * 0.002;
+          vec3 s = texture2D(tex, uv + off).rgb;
+          float brightness = dot(s, vec3(0.299, 0.587, 0.114));
+          float w = max(brightness - 0.7, 0.0) * 2.0;
+          c += s * w;
+          total += w;
+        }
+      }
+      return total > 0.0 ? c / total * 0.35 : vec3(0.0);
+    }
+
+    // Color grading — slightly desaturated, contrast boost, teal shadows
+    vec3 grade(vec3 c) {
+      // Desaturate slightly
+      float lum = dot(c, vec3(0.299, 0.587, 0.114));
+      c = mix(vec3(lum), c, 0.85);
+      // Contrast S-curve
+      c = c * c * (3.0 - 2.0 * c);
+      // Teal in shadows, warm in highlights
+      c.r += (1.0 - lum) * 0.02;
+      c.g += (1.0 - lum) * 0.03;
+      c.b += (1.0 - lum) * 0.05;
+      c.r += lum * 0.03;
+      return c;
+    }
+
+    void main() {
+      vec3 col = texture2D(tDiffuse, vUv).rgb;
+
+      // Add bloom
+      col += bloom(tDiffuse, vUv);
+
+      // Color grade
+      col = grade(col);
+
+      // Vignette
+      col *= vignette(vUv);
+
+      // Film grain
+      col += grain(vUv, uTime);
+
+      // Chromatic aberration (subtle)
+      float ca = 0.001;
+      col.r = texture2D(tDiffuse, vUv + vec2(ca, 0.0)).r * 0.3 + col.r * 0.7;
+      col.b = texture2D(tDiffuse, vUv - vec2(ca, 0.0)).b * 0.3 + col.b * 0.7;
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  ppUniforms = {
+    tDiffuse: { value: null },
+    uTime: { value: 0 }
+  };
+
+  const ppMat = new THREE.ShaderMaterial({
+    uniforms: ppUniforms,
+    vertexShader: ppVert,
+    fragmentShader: ppFrag,
+    depthTest: false, depthWrite: false
+  });
+
+  ppScene = new THREE.Scene();
+  ppCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const ppQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), ppMat);
+  ppScene.add(ppQuad);
+  ppSetup = true;
+
+  // Handle resize
+  const origResize = window.onresize;
+  window.addEventListener('resize', function() {
+    ppRT.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  console.log('[RED DUSTER] Post-processing: bloom + vignette + grain + color grade + chromatic aberration');
+} catch(e) {
+  ppSetup = false;
+  console.warn('[RED DUSTER] Post-processing unavailable:', e.message);
 }
 
 animate();
