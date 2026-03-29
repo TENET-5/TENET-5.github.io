@@ -198,6 +198,9 @@ function initFPS() {
             case 'KeyQ': leanLeft = true; break;
             case 'KeyE': leanRight = true; break;
             case 'KeyR': handleReload(); break;
+            case 'Digit1': switchWeapon(0); break;
+            case 'Digit2': if(currentWave >= 3) switchWeapon(1); break;
+            case 'Digit3': if(currentWave >= 6) switchWeapon(2); break;
         }
     };
     const onKeyUp = (e) => {
@@ -340,28 +343,40 @@ function spawnSingleEnemy(forcePos) {
 }
 
 function startWave(waveNum) {
-    if(waveNum > maxWaves) {
-        gameState = "KIA"; // Borrow KIA lock
-        document.getElementById('victory-overlay').style.display = 'flex';
-        controls.unlock();
-        return;
-    }
     currentWave = waveNum;
-    triggerQuote(`WAVE ${currentWave} INBOUND`, "#ff0000");
-    
-    const numEnemies = waveNum === 1 ? 8 : (waveNum === 2 ? 15 : 25);
-    enemiesLeft = numEnemies + (waveNum === 3 ? 1 : 0);
-    
+    triggerQuote(`WAVE ${currentWave} — HOSTILES INBOUND`, "#ff0000");
+
+    // Scale: 6 + wave*3 enemies, capped at 40 for performance
+    const numEnemies = Math.min(40, 6 + waveNum * 3);
+    // Enemy HP scales with waves
+    const hpScale = 1 + (waveNum - 1) * 0.15;
+    enemiesLeft = numEnemies + (waveNum % 5 === 0 ? 1 : 0);
+
+    const spawnRadius = Math.min(400, 150 + waveNum * 20);
     for(let i=0; i<numEnemies; i++) {
-        spawnSingleEnemy(new THREE.Vector3((Math.random()-0.5)*200, 0, (Math.random()-0.5)*200));
+        const e = spawnSingleEnemy(new THREE.Vector3((Math.random()-0.5)*spawnRadius, 0, (Math.random()-0.5)*spawnRadius));
+        e.userData.health = Math.round(40 * hpScale);
     }
-    
-    if(waveNum === 3) {
-        const commander = spawnSingleEnemy(new THREE.Vector3(0, 5, -40));
-        commander.userData.health = 250; 
-        commander.children[0].material.color.setHex(0xaa0000); // Unique color
+
+    // Boss every 5 waves
+    if(waveNum % 5 === 0) {
+        triggerQuote('BOSS WAVE — HEAVY CONTACT', '#ffaa00');
+        const commander = spawnSingleEnemy(new THREE.Vector3((Math.random()-0.5)*100, 5, (Math.random()-0.5)*100));
+        commander.userData.health = Math.round(250 * hpScale);
+        commander.children[0].material.color.setHex(0xaa0000);
+        commander.children[0].scale.set(1.5, 1.5, 1.5);
     }
-    
+
+    // Health pack every 3 waves
+    if(waveNum > 1 && waveNum % 3 === 0) {
+        playerHealth = Math.min(100, playerHealth + 30);
+        triggerQuote('MEDKIT ACQUIRED +30HP', '#00ff00');
+    }
+
+    // Unlock weapons at certain waves
+    if(waveNum === 3 && currentWeaponIdx === 0) triggerQuote('SHOTGUN UNLOCKED — Press 2', '#ffaa00');
+    if(waveNum === 6 && currentWeaponIdx < 2) triggerQuote('RPG UNLOCKED — Press 3', '#ffaa00');
+
     enemies.forEach(e => e.userData.active = true);
 }
 
@@ -391,8 +406,16 @@ function spawnDecal(pos) {
 
 function startIntroSequence() {
     if (gameState !== "INTRO") return;
+    if (hasPlayedBefore) {
+        // Skip intro on replay — go straight to combat
+        gameState = "COMBAT";
+        hasPlayedBefore = true;
+        startWave(1);
+        return;
+    }
+    hasPlayedBefore = true;
     introDialogue.forEach(diag => { setTimeout(() => triggerQuote(diag.text, diag.text.includes("BLOGGINS") ? '#ffaa00' : '#ff0000'), diag.time); });
-    setTimeout(() => { gameState = "ACQUIRE_WEAPON"; triggerQuote("CLICK TO SEIZE THE CHAIN GUN", "#ffffff"); }, 20000);
+    setTimeout(() => { gameState = "ACQUIRE_WEAPON"; triggerQuote("CLICK TO SEIZE YOUR WEAPON", "#ffffff"); }, 20000);
 }
 
 document.addEventListener('mousedown', () => {
@@ -403,51 +426,60 @@ document.addEventListener('mousedown', () => {
 });
 
 function handleReload() {
-    if(isReloading || ammo === 30 || gameState !== "COMBAT") return;
+    const w = weaponStats[currentWeaponIdx];
+    if(isReloading || ammo === w.mag || gameState !== "COMBAT") return;
     isReloading = true;
     document.getElementById('reloading-text').style.display = 'block';
-    
+
     // Animate weapon down
     activeWeapon.position.y -= 3;
     activeWeapon.rotation.x += 0.5;
-    
+
     setTimeout(() => {
-        ammo = 30;
-        document.getElementById('bc-mag').innerText = 'MAG: 30';
+        ammo = w.mag;
+        document.getElementById('bc-mag').innerText = `${weaponNames[currentWeaponIdx]}: ${ammo} | KILLS: ${kills}`;
         document.getElementById('reloading-text').style.display = 'none';
         activeWeapon.position.y += 3;
         activeWeapon.rotation.x -= 0.5;
         isReloading = false;
-    }, 2500);
+    }, w.reloadTime);
 }
 
 function handleShooting(time) {
-    if (gameState !== "COMBAT" || !isShooting || isReloading || time - lastFireTime < fireRate) return;
-    if (ammo <= 0) { 
-        playCombatAcoustic("damage"); // Dry fire click 
-        isShooting = false; return; 
+    const w = weaponStats[currentWeaponIdx];
+    if (gameState !== "COMBAT" || !isShooting || isReloading || time - lastFireTime < w.fireRate) return;
+    if (ammo <= 0) {
+        playCombatAcoustic("damage"); // Dry fire click
+        handleReload(); return;
     }
-    
+
     lastFireTime = time; ammo--;
-    document.getElementById('bc-mag').innerText = `MAG: ${ammo}`;
-    playCombatAcoustic("incoming_crack"); // Rifle blast mapping
-    
-    // Brutal Recoil & Pitch
-    camera.rotation.x += (Math.random() * 0.05) + 0.03; // Massive climb
-    camera.rotation.y += (Math.random() - 0.5) * 0.03;
+    document.getElementById('bc-mag').innerText = `${weaponNames[currentWeaponIdx]}: ${ammo} | KILLS: ${kills}`;
+    playCombatAcoustic(currentWeaponIdx === 1 ? "chain_gun" : "incoming_crack");
+
+    // Weapon-specific recoil
+    const recoilUp = currentWeaponIdx === 1 ? 0.08 : (currentWeaponIdx === 2 ? 0.15 : 0.04);
+    camera.rotation.x += (Math.random() * recoilUp) + recoilUp;
+    camera.rotation.y += (Math.random() - 0.5) * (recoilUp * 0.6);
     
     muzzleFlash.material.opacity = 0.8 + Math.random() * 0.2; activeWeapon.position.z += 2.0;
     muzzlePointLight.intensity = 15.0;
     setTimeout(() => { muzzleFlash.material.opacity = 0; muzzlePointLight.intensity = 0; }, 40);
     
-    raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+    // Fire pellets (shotgun fires 8, others fire 1)
+    for(let pellet = 0; pellet < w.pellets; pellet++) {
+    const spreadVec = new THREE.Vector2(
+        (Math.random()-0.5) * w.spread,
+        (Math.random()-0.5) * w.spread
+    );
+    raycaster.setFromCamera(spreadVec, camera);
     const intersects = raycaster.intersectObjects(objects);
-    
+
     if (intersects.length > 0) {
         const hitData = intersects[0];
         if (hitData.object.userData.isEnemy) {
             const isHeadshot = hitData.object.geometry && hitData.object.geometry.type === "SphereGeometry";
-            const dmg = isHeadshot ? 150 : 25; 
+            const dmg = isHeadshot ? w.headDmg : w.damage;
             
             const t = hitData.object.userData.parentRef; t.userData.health -= dmg;
             t.children.forEach(c => { if(c.material && c.material.color) c.material.color.setHex(0xffffff); }); 
@@ -461,22 +493,27 @@ function handleShooting(time) {
             
             if (t.userData.health <= 0) {
                 t.userData.active = false;
-                t.rotation.x = -Math.PI / 2; t.position.y = 1;
-                
+
                 const hitboxIndex = objects.indexOf(hitData.object);
                 if(hitboxIndex > -1) objects.splice(hitboxIndex, 1);
-                
+
                 enemies.splice(enemies.indexOf(t), 1);
                 spawnDecal(t.position);
+                gibEnemy(t); // EXPLODE into chunks
                 kills++; enemiesLeft--;
-                
-                if (Math.random() > 0.85) triggerQuote(combatQuotes[Math.floor(Math.random() * combatQuotes.length)], "#ff3333");
-                if (enemiesLeft <= 0) setTimeout(() => startWave(currentWave + 1), 4000);
+
+                // Update HUD kill counter
+                const magEl = document.getElementById('bc-mag');
+                if(magEl) magEl.innerText = `${weaponNames[currentWeaponIdx]}: ${ammo} | KILLS: ${kills}`;
+
+                if (Math.random() > 0.7) triggerQuote(combatQuotes[Math.floor(Math.random() * combatQuotes.length)], "#ff3333");
+                if (enemiesLeft <= 0) setTimeout(() => startWave(currentWave + 1), 3000);
             }
         } else {
             spawnSpark(hitData.point);
         }
     }
+    } // end pellet loop
 }
 
 function enemyFire(enemy, time) {
@@ -512,6 +549,43 @@ function showHitMarker() {
     if(hm) { hm.style.opacity = 1; hm.style.transform = "translate(-50%, -50%) scale(2)"; setTimeout(() => { hm.style.opacity = 0; hm.style.transform = "translate(-50%, -50%) scale(1)"; }, 50); }
 }
 
+function switchWeapon(idx) {
+    if(idx === currentWeaponIdx || isReloading) return;
+    currentWeaponIdx = idx;
+    const w = weaponStats[idx];
+    fireRate = w.fireRate;
+    ammo = w.mag;
+    document.getElementById('bc-mag').innerText = `${weaponNames[idx]}: ${ammo}`;
+    triggerQuote(weaponNames[idx] + ' EQUIPPED', '#ffaa00');
+}
+
+function gibEnemy(enemy) {
+    // Explode enemy into chunks
+    const pos = enemy.position.clone();
+    pos.y += 5;
+    for(let i = 0; i < 10; i++) {
+        const size = 0.5 + Math.random() * 1.5;
+        const gib = new THREE.Mesh(
+            new THREE.BoxGeometry(size, size, size),
+            new THREE.MeshStandardMaterial({color: i < 5 ? 0xaa0000 : 0x440000, roughness: 0.9})
+        );
+        gib.position.copy(pos);
+        gib.position.x += (Math.random()-0.5) * 2;
+        gib.position.z += (Math.random()-0.5) * 2;
+        gib.castShadow = true;
+        gib.userData = {
+            vel: new THREE.Vector3((Math.random()-0.5)*25, 10 + Math.random()*20, (Math.random()-0.5)*25),
+            life: 3 + Math.random()*3,
+            spin: new THREE.Vector3((Math.random()-0.5)*8, (Math.random()-0.5)*8, (Math.random()-0.5)*8),
+            isGib: true
+        };
+        scene.add(gib);
+        particles.push(gib);
+    }
+    // Remove original mesh
+    scene.remove(enemy);
+}
+
 function onWindowResize() {
     const container = document.getElementById('fps-container'); if (!container) return;
     camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix();
@@ -525,13 +599,35 @@ function animate() {
 
     let delta = Math.min((time - prevTime) / 1000, 0.1);
 
-    // Particle Loops
+    // Particle Loops (blood + gibs)
     for(let i=particles.length-1; i>=0; i--) {
         let p = particles[i];
-        p.position.addScaledVector(p.userData.vel, delta || 0.016);
-        p.userData.vel.y -= 80 * (delta || 0.016);
-        p.userData.life -= (delta || 0.016);
-        if(p.userData.life <= 0 || p.position.y < 0) { scene.remove(p); particles.splice(i,1); }
+        const dt2 = delta || 0.016;
+        p.position.addScaledVector(p.userData.vel, dt2);
+        p.userData.vel.y -= (p.userData.isGib ? 30 : 80) * dt2; // Gibs fall slower for visibility
+        p.userData.life -= dt2;
+        // Gib spin
+        if(p.userData.spin) {
+            p.rotation.x += p.userData.spin.x * dt2;
+            p.rotation.y += p.userData.spin.y * dt2;
+            p.rotation.z += p.userData.spin.z * dt2;
+        }
+        // Floor bounce for gibs
+        if(p.userData.isGib && p.position.y < 0.5) {
+            p.position.y = 0.5;
+            p.userData.vel.y = Math.abs(p.userData.vel.y) * 0.25;
+            p.userData.vel.x *= 0.5;
+            p.userData.vel.z *= 0.5;
+        }
+        if(p.userData.life <= 0 || (!p.userData.isGib && p.position.y < 0)) { scene.remove(p); particles.splice(i,1); }
+    }
+
+    // Health regen — slow regen after 5 seconds without damage
+    if(gameState === 'COMBAT' && playerHealth < 100 && playerHealth > 0) {
+        healthRegenTimer += delta;
+        if(healthRegenTimer > 5.0) {
+            playerHealth = Math.min(100, playerHealth + 5 * delta);
+        }
     }
 
     // Process Tracers
@@ -540,6 +636,7 @@ function animate() {
         t.mesh.position.add(t.dir.clone().multiplyScalar(4.0));
         if(t.mesh.position.distanceTo(camera.position) < 5) {
             playerHealth -= 10;
+            healthRegenTimer = 0; // Reset regen on damage
             camera.rotation.x += (Math.random() - 0.5) * 0.4; camera.rotation.y += (Math.random() - 0.5) * 0.4; // Flinch
             velocity.x *= 0.1; velocity.z *= 0.1; // Halt Momentum
             scene.remove(t.mesh); tracers.splice(i, 1);
