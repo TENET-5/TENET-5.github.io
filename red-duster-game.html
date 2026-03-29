@@ -847,7 +847,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
 if (!document.getElementById('gameCanvas')) document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -857,15 +857,9 @@ scene.fog = new THREE.FogExp2(0x0a0a12, 0.025);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 
-// ── Phase 90: GLTFLoader & MQTT Variables ──
+// Soldier model — built from primitives (no GLTF dependency)
 let soldierModel = null;
-const gltfLoader = new THREE.GLTFLoader();
-gltfLoader.load('models/Soldier.glb', function(gltf) {
-  soldierModel = gltf.scene;
-  soldierModel.scale.set(0.9, 0.9, 0.9);
-  soldierModel.traverse(c => { if (c.isMesh) { c.castShadow = true; } });
-  console.log("Soldier Model Loaded.");
-});
+console.log("RED DUSTER: Scene initialized. THREE r" + THREE.REVISION);
 
 // MQTT Sync
 let myUUID = 'OP-' + Math.floor(Math.random()*100000);
