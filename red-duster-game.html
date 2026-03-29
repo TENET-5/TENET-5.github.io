@@ -497,6 +497,119 @@ const STATE = {
   headshots: 0, bestCombo: 0
 };
 
+// ── LIRIL AI Voice — British Female Tactical Callouts ──
+const lirilVoice = {
+  synth: window.speechSynthesis,
+  voice: null,
+  queue: [],
+  lastSpoke: 0,
+  minInterval: 3000, // Don't spam — 3 second minimum between callouts
+
+  init() {
+    // Find British female voice — prefer en-GB, female
+    const loadVoices = () => {
+      const voices = this.synth.getVoices();
+      // Priority: en-GB female > en-GB any > en-US female > any female
+      this.voice = voices.find(v => v.lang.startsWith('en-GB') && v.name.toLowerCase().includes('female')) ||
+                   voices.find(v => v.lang.startsWith('en-GB') && (v.name.includes('Hazel') || v.name.includes('Sonia') || v.name.includes('Amy'))) ||
+                   voices.find(v => v.lang.startsWith('en-GB')) ||
+                   voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female')) ||
+                   voices.find(v => v.lang.startsWith('en')) ||
+                   voices[0];
+      if (this.voice) console.log('LIRIL Voice: ' + this.voice.name + ' (' + this.voice.lang + ')');
+    };
+    loadVoices();
+    if (this.synth.onvoiceschanged !== undefined) this.synth.onvoiceschanged = loadVoices;
+  },
+
+  speak(text, priority = false) {
+    const now = Date.now();
+    if (!priority && now - this.lastSpoke < this.minInterval) return;
+    if (!this.voice) return;
+
+    this.synth.cancel(); // Clear queue — only latest matters
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.voice = this.voice;
+    utt.rate = 1.1; // Slightly fast — tactical urgency
+    utt.pitch = 1.05; // Slightly higher — female
+    utt.volume = 0.8;
+    this.synth.speak(utt);
+    this.lastSpoke = now;
+  }
+};
+
+// LIRIL callout lines — contextual tactical voice
+const LIRIL_CALLOUTS = {
+  waveStart: [
+    'Contacts ahead. Stay sharp.',
+    'Hostiles inbound. Weapons free.',
+    'New wave. Keep your head down.',
+    'Movement detected. Engage at will.',
+    'Here they come. Give them nothing.',
+  ],
+  bossWave: [
+    'Heavy armour incoming. Use explosives.',
+    'Boss wave. This is going to be loud.',
+    'Armoured targets. Aim for the head.',
+  ],
+  kill: [
+    'Target down.',
+    'Hostile eliminated.',
+    'Good kill.',
+    'Scratch one.',
+  ],
+  headshot: [
+    'Headshot. Clean.',
+    'Right between the eyes.',
+    'Perfect shot.',
+    'That one felt personal.',
+  ],
+  multiKill: [
+    'Multiple contacts down. Impressive.',
+    'Double kill. Keep it up.',
+    'You are on fire.',
+  ],
+  lowHealth: [
+    'You are hit. Find cover.',
+    'Taking damage. Get behind something.',
+    'Medic. You need to heal.',
+  ],
+  reload: [
+    'Reloading. Cover me.',
+    'Mag change.',
+    'Going dry. Reloading.',
+  ],
+  airstrike: [
+    'Avro Arrow inbound. Danger close.',
+    'Airstrike confirmed. Get clear.',
+    'Arrow on station. Bombs away.',
+  ],
+  grenade: [
+    'Quack quack. Duck out.',
+    'Rubber duck deployed.',
+    'Duck grenade. Fire in the hole.',
+  ],
+  pickup: [
+    'Supplies acquired.',
+    'Health pack. Good.',
+    'Ammo resupply.',
+  ],
+  death: [
+    'Soldier down. We will remember you.',
+    'K I A. Rest now.',
+  ],
+  highCombo: [
+    'Killstreak. You are unstoppable.',
+    'Combo multiplier active. Keep pushing.',
+  ],
+};
+
+function lirilSay(category) {
+  const lines = LIRIL_CALLOUTS[category];
+  if (!lines || !lines.length) return;
+  lirilVoice.speak(lines[Math.floor(Math.random() * lines.length)], category === 'death' || category === 'bossWave');
+}
+
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
 const MAP_W = 48, MAP_H = 48;
 const MAP = generateMap();
@@ -2253,8 +2366,11 @@ function killEnemy(enemy, headshot = false, impulse) {
     addKillFeed('OBLITERATED +' + scoreAdd);
     STATE.screenShake = 0.2;
     STATE.shakeIntensity = 0.05;
+    lirilSay('headshot');
   } else {
-    addKillFeed('CHARGE: ACCESSORY TO MURDER +' + scoreAdd);
+    addKillFeed('LIQUIDATED +' + scoreAdd);
+    if (STATE.combo >= 3) lirilSay('multiKill');
+    else if (Math.random() < 0.2) lirilSay('kill'); // 20% chance callout on regular kills
   }
 
   for (let i = 0; i < 20; i++) {
@@ -2761,6 +2877,7 @@ function reload() {
   STATE.reloading = true;
   STATE.reloadStart = performance.now();
   playSound('reload');
+  if (Math.random() < 0.3) lirilSay('reload');
   document.getElementById('reloadBar').style.display = 'block';
 }
 
@@ -2769,11 +2886,13 @@ function damagePlayer(amount, sourceX, sourceZ) {
   if (!STATE.alive) return;
   STATE.health = Math.max(0, STATE.health - amount);
   STATE.damageFlashTime = 0.3;
-  
+
   if (sourceX !== undefined && sourceZ !== undefined) {
     showDamageIndicator(sourceX, sourceZ);
   }
-  
+
+  if (STATE.health < 30 && STATE.health > 0) lirilSay('lowHealth');
+
   updateHUD();
   updateHeartbeat();
   
@@ -2784,6 +2903,7 @@ function damagePlayer(amount, sourceX, sourceZ) {
 }
 
 function die() {
+  lirilSay('death');
   document.getElementById('deathScreen').style.display = 'flex';
   document.getElementById('finalScore').textContent = STATE.score.toLocaleString();
   document.getElementById('finalWave').textContent = STATE.wave;
@@ -2810,6 +2930,7 @@ let airstrikeCooldown = 0;
 function callAirstrike() {
   if (airstrikeCooldown > 0 || STATE.paused) return;
   airstrikeCooldown = 20;
+  lirilSay('airstrike');
   addKillFeed('ARROW INBOUND — STAND CLEAR');
 
   // ── BUILD AVRO ARROW CF-105 ──
@@ -2989,6 +3110,7 @@ function startWave() {
   setTimeout(() => { banner.style.display = 'none'; }, 3000);
 
   addKillFeed(`WAVE ${STATE.wave} — ${briefing}`);
+  lirilSay(STATE.wave % 5 === 0 ? 'bossWave' : 'waveStart');
   
   // Wave composition — overwhelming numbers, one-shot fodder
   const baseCount = 8 + STATE.wave * 4;
@@ -3254,6 +3376,7 @@ document.getElementById('resumeBtn').addEventListener('click', () => {
 function startGame() {
   initAudio();
   startAmbient();
+  lirilVoice.init();
   
   STATE.health = STATE.maxHealth;
   STATE.weapon = 'rifle';
