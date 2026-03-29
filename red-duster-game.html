@@ -473,7 +473,8 @@ const STATE = {
   corpses: [], bloodDecals: [],
   captureZones: [], damageIndicators: [],
   screenShake: 0, shakeIntensity: 0,
-  damageNumbers: []
+  damageNumbers: [],
+  crouching: false, regenCooldown: 0
 };
 
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
@@ -2113,6 +2114,65 @@ function buildSoldier(type) {
   return g;
 }
 
+// ── Kill Enemy — Gib Death System ──
+function killEnemy(enemy, headshot = false, impulse) {
+  if (enemy.dead) return;
+  const scoreAdd = enemy.score * (headshot ? 3 : 1) * Math.max(1, STATE.combo);
+  STATE.score += scoreAdd;
+  STATE.kills++;
+  const now = performance.now();
+  if (now - STATE.lastKillTime < 2000) { STATE.combo = Math.min(STATE.combo + 1, 4); } else { STATE.combo = 1; }
+  STATE.lastKillTime = now;
+  STATE.comboTimer = 2;
+  enemy.dead = true;
+  enemy.deathTime = 1.0;
+
+  // GIB SYSTEM — enemy explodes into chunks
+  const gibCount = headshot ? 14 : 8;
+  const ex = enemy.x, ez = enemy.z, ey = 0.8;
+  for (let i = 0; i < gibCount; i++) {
+    const gibGeo = new THREE.BoxGeometry(0.06+Math.random()*0.1, 0.06+Math.random()*0.1, 0.06+Math.random()*0.1);
+    const gibMat = new THREE.MeshStandardMaterial({color: i < gibCount/2 ? 0xcc0000 : 0x882222, roughness: 0.8});
+    const gib = new THREE.Mesh(gibGeo, gibMat);
+    gib.position.set(ex+(Math.random()-0.5)*0.3, ey+Math.random()*0.5, ez+(Math.random()-0.5)*0.3);
+    gib.castShadow = true;
+    scene.add(gib);
+    const imp = impulse || new THREE.Vector3((Math.random()-0.5)*5, 3, (Math.random()-0.5)*5);
+    STATE.particles.push({
+      mesh: gib, x: gib.position.x, y: gib.position.y, z: gib.position.z,
+      vx: imp.x*(0.5+Math.random()), vy: 2+Math.random()*4, vz: imp.z*(0.5+Math.random()),
+      spin: {x:Math.random()*8-4, y:Math.random()*8-4, z:Math.random()*8-4},
+      life: 3+Math.random()*2, isGib: true
+    });
+  }
+  enemy.mesh.visible = false;
+
+  playSound('death');
+  if (headshot) {
+    playSound('headshot');
+    addKillFeed('OBLITERATED +' + scoreAdd);
+    STATE.screenShake = 0.2;
+    STATE.shakeIntensity = 0.05;
+  } else {
+    addKillFeed('LIQUIDATED +' + scoreAdd);
+  }
+
+  for (let i = 0; i < 20; i++) {
+    addParticle(ex, ey, ez, headshot ? 0xff0000 : 0xcc2222);
+  }
+
+  // Blood splatter decals
+  addBloodDecal(ex, ez);
+  if (headshot) { addBloodDecal(ex+(Math.random()-0.5)*0.8, ez+(Math.random()-0.5)*0.8); }
+
+  const eIdx = STATE.enemies.indexOf(enemy);
+  if (eIdx !== -1) STATE.enemies.splice(eIdx, 1);
+  enemy.deathTime = 8;
+  STATE.corpses.push(enemy);
+  while (STATE.corpses.length > 20) { const oldest = STATE.corpses.shift(); scene.remove(oldest.mesh); }
+  updateHUD();
+}
+
 function spawnEnemy(type = 'grunt') {
   const stats = {
     grunt:  { hp: 15, speed: 2.5, damage: 12, score: 10, ranged: false, scale: 1.0 },
@@ -2157,54 +2217,227 @@ function findCoverSpot(ex, ez, px, pz) {
 }
 
 function updateEnemies(dt) {
+function getEnemyMuzzlePos(e) {
+  // Return approximate weapon tip for AI
+  return new THREE.Vector3(e.x, 1.4, e.z);
+}
+
+function updateEnemies(dt) {
   const playerX = yawObj.position.x;
   const playerZ = yawObj.position.z;
   const now = performance.now();
-  const aliveEnemies = STATE.enemies.filter(e => !e.dead);
 
   for (let i = STATE.enemies.length - 1; i >= 0; i--) {
     const e = STATE.enemies[i];
-
     if (e.dead) {
       STATE.enemies.splice(i, 1);
       continue;
     }
-    
-    if (STATE.weapon === 'chainsaw') {
-      yawObj.position.x += (Math.random()-0.5)*0.03;
-      yawObj.position.z += (Math.random()-0.5)*0.03;
-      const hits = raycaster.intersectObjects(STATE.enemies.map(e => e.mesh), true);
-      if (hits.length > 0 && hits[0].distance < 3.0) {
-        const enemy = STATE.enemies.find(e => {
-          let p = hits[0].object;
-          while (p) { if (p === e.mesh) return true; p = p.parent; }
-          return false;
-        });
-        if (enemy && !enemy.dead) {
-          enemy.hp -= w.damage;
-          playSound('hit');
-          for(let i=0; i<15; i++) addParticle(enemy.x, 1.3, enemy.z, 0xaa0000);
-          document.getElementById('dmgFlash').style.background = 'radial-gradient(ellipse, transparent 20%, rgba(150,0,0,0.8))';
-          document.getElementById('dmgFlash').style.opacity = '1';
-          setTimeout(()=> document.getElementById('dmgFlash').style.opacity=0, 50);
-          if (enemy.hp <= 0) killEnemy(enemy, true, dir.clone().multiplyScalar(3));
-        }
-      }
-      continue;
+
+    // STATE MACHINE INITIALIZATION
+    if (!e.aiState) {
+      e.aiState = Math.random() < 0.3 ? 'FLANK' : 'ADVANCE';
+      e.coverSpot = null;
+      e.suppressionTimer = 0;
+      e.peekTimer = 0;
     }
 
+    // Calculate Direct LOS Vector
+    let dx = playerX - e.x;
+    let dz = playerZ - e.z;
+    let dist = Math.sqrt(dx*dx + dz*dz) || 1;
+    let nx = dx/dist;
+    let nz = dz/dist;
+    let hasLOS = !isColliding((e.x + playerX)/2, (e.z + playerZ)/2, 0.3);
 
-    // ── VISIBLE BULLET TRACER ──
+    // Suppression Decay
+    if (e.suppressionTimer > 0) {
+      e.suppressionTimer -= dt;
+      if (e.suppressionTimer <= 0) e.aiState = 'ADVANCE';
+    }
+
+    // Hit reaction overrides AI priorities
+    if (e.recentlyHit) {
+      e.recentlyHit = false;
+      e.aiState = 'SUPPRESSED';
+      e.suppressionTimer = 2.0;
+      e.coverSpot = findCoverSpot(e.x, e.z, playerX, playerZ);
+    }
+
+    let moveSpeed = e.speed * dt;
+    let tgtX = e.x;
+    let tgtZ = e.z;
+
+    if (e.aiState === 'SUPPRESSED') {
+      // Drop to cover y=-0.5
+      e.mesh.position.y = THREE.MathUtils.lerp(e.mesh.position.y, -0.6, dt * 8);
+      
+      // If cover found, scramble towards it
+      if (e.coverSpot) {
+        let cx = e.coverSpot.x - e.x, cz = e.coverSpot.z - e.z;
+        let cd = Math.sqrt(cx*cx + cz*cz) || 1;
+        if (cd > 0.5) {
+          tgtX += (cx/cd) * moveSpeed * 1.5;
+          tgtZ += (cz/cd) * moveSpeed * 1.5;
+        } else {
+          e.coverSpot = null; // Reached cover
+        }
+      }
+    } else if (e.aiState === 'FLANK') {
+      e.mesh.position.y = THREE.MathUtils.lerp(e.mesh.position.y, 0, dt * 5);
+      // Move perpendicular to player
+      tgtX += -nz * moveSpeed;
+      tgtZ += nx * moveSpeed;
+      if (dist < 8) e.aiState = 'ADVANCE';
+    } else if (e.aiState === 'ADVANCE') {
+      e.mesh.position.y = THREE.MathUtils.lerp(e.mesh.position.y, 0, dt * 5);
+      if (dist > 3) {
+        tgtX += nx * moveSpeed;
+        tgtZ += nz * moveSpeed;
+      } else {
+        // Melee range
+        if (now - e.shootCooldown > 1500) {
+          e.shootCooldown = now;
+          damagePlayer(e.damage);
+          playSound('hit');
+        }
+      }
+      if (hasLOS && dist < 15 && Math.random() < 0.05) e.aiState = 'PEEK_FIRE';
+    } else if (e.aiState === 'PEEK_FIRE') {
+      // Stand still and shoot
+      e.mesh.position.y = THREE.MathUtils.lerp(e.mesh.position.y, 0, dt * 5);
+      if (hasLOS && e.ranged && now - e.shootCooldown > 2000) {
+        e.shootCooldown = now;
+        // Shoot player
+        playSound('shoot');
+        const bGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.6, 4);
+        bGeo.rotateX(Math.PI/2);
+        const bMat = new THREE.MeshBasicMaterial({color: 0xff4444});
+        const tracer = new THREE.Mesh(bGeo, bMat);
+        const startP = getEnemyMuzzlePos(e);
+        tracer.position.copy(startP);
+        
+        let errX = (Math.random()-0.5)*0.5;
+        let errY = (Math.random()-0.5)*0.5;
+        let errZ = (Math.random()-0.5)*0.5;
+        const targetP = new THREE.Vector3(playerX + errX, camera.position.y + errY, playerZ + errZ);
+        
+        tracer.lookAt(targetP);
+        scene.add(tracer);
+        
+        const bDir = new THREE.Vector3().subVectors(targetP, startP).normalize();
+        STATE.projectiles.push({mesh: tracer, vx: bDir.x*40, vy: bDir.y*40, vz: bDir.z*40, life: 1.0, isTracer: true, dir: bDir});
+        
+        if (Math.random() > 0.5) damagePlayer(e.damage, e.x, e.z);
+      }
+      if (Math.random() < 0.02) e.aiState = 'ADVANCE';
+    }
+
+    // Apply movement with simple collision sliding
+    if (!isColliding(tgtX, e.z, 0.5)) e.x = tgtX;
+    if (!isColliding(e.x, tgtZ, 0.5)) e.z = tgtZ;
+
+    e.mesh.position.x = e.x;
+    e.mesh.position.z = e.z;
+    e.mesh.lookAt(playerX, e.mesh.position.y, playerZ);
+
+    // Procedural animation (kinematic walking)
+    if (e.aiState !== 'PEEK_FIRE' && e.suppressionTimer <= 0) {
+      if (e.mesh.userData.limbs) {
+        const time = now * 0.008;
+        const swing = Math.sin(time) * 0.8;
+        if (e.mesh.userData.limbs['lLeg']) e.mesh.userData.limbs['lLeg'].rotation.x = swing;
+        if (e.mesh.userData.limbs['rLeg']) e.mesh.userData.limbs['rLeg'].rotation.x = -swing;
+        if (e.mesh.userData.limbs['lArm']) e.mesh.userData.limbs['lArm'].rotation.x = -swing;
+        if (e.mesh.userData.limbs['rArm']) e.mesh.userData.limbs['rArm'].rotation.x = swing;
+      }
+    }
+  }
+}
+
+// ── SHOOT SYSTEM ──
+function shoot() {
+  const w = WEAPONS[STATE.weapon];
+  if (STATE.ammo <= 0) {
+    if (STATE.weapon !== 'chainsaw') {
+      playSound('hit'); // click
+      reload();
+    }
+    return;
+  }
+  
+  if (STATE.weapon !== 'chainsaw' && STATE.weapon !== 'flamethrower') {
+    STATE.ammo--;
+    updateHUD();
+  }
+  STATE.shootCooldown = w.fireRate;
+  
+  // Tactical Recoil (Muzzle Kick)
+  const recoilFactor = STATE.aiming ? 0.3 : 1.0;
+  pitchObj.rotation.x += w.recoil * recoilFactor;
+  STATE.mouse.y -= w.recoil * recoilFactor;
+  
+  // Muzzle Flash
+  flashTimer = 0.06;
+  muzzleFlash.rotation.z = Math.random() * Math.PI;
+  muzzleFlash.material.opacity = 1;
+  muzzleFlash2.material.opacity = 1;
+  muzzleFlash3.material.opacity = 0.5;
+  muzzleLight.intensity = 8;
+  
+  // Audio
+  playSound('shoot');
+
+  // Shotgun multi-pellet
+  const pellets = STATE.weapon === 'shotgun' ? 8 : 1;
+  const spreadBase = STATE.aiming ? w.spread * 0.2 : w.spread * 4.0; // Huge hipfire penalty
+  
+  // Flamethrower / Chainsaw continuous fire
+  if (STATE.weapon === 'chainsaw') {
+    yawObj.position.x += (Math.random()-0.5)*0.03;
+    yawObj.position.z += (Math.random()-0.5)*0.03;
+  }
+  
+  if (STATE.weapon === 'flamethrower') {
+    STATE.ammo -= 0.5;
+    for (let i = 0; i < 4; i++) {
+      addParticle(
+        yawObj.position.x + dir.x * 0.5,
+        camera.position.y - 0.2,
+        yawObj.position.z + dir.z * 0.5,
+        Math.random() > 0.5 ? 0xff4400 : 0xffaa00,
+        dir.clone().add(new THREE.Vector3((Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5)).multiplyScalar(15)
+      );
+    }
+  }
+
+  for (let p = 0; p < pellets; p++) {
+    const sX = (Math.random() - 0.5) * spreadBase;
+    const sY = (Math.random() - 0.5) * spreadBase;
+    const shotDir = dir.clone().add(new THREE.Vector3(sX, sY, 0).applyQuaternion(camera.quaternion)).normalize();
+
+    // Spawn Bullet Tracer
     const bulletGeo = new THREE.CylinderGeometry(0.008, 0.008, 0.4, 4);
     bulletGeo.rotateX(Math.PI/2);
     const bulletMat = new THREE.MeshBasicMaterial({color: 0xffdd44});
     const bullet = new THREE.Mesh(bulletGeo, bulletMat);
     bullet.position.copy(yawObj.position);
+    bullet.position.y = camera.position.y - 0.1;
     bullet.quaternion.copy(camera.quaternion);
     bullet.quaternion.premultiply(yawObj.quaternion);
     scene.add(bullet);
-    const bDir = dir.clone().multiplyScalar(120);
-    STATE.projectiles.push({mesh: bullet, vx: bDir.x, vy: bDir.y, vz: bDir.z, life: 0.8, isTracer: true, dir: dir.clone()});
+    const bVec = shotDir.clone().multiplyScalar(120);
+    STATE.projectiles.push({mesh: bullet, vx: bVec.x, vy: bVec.y, vz: bVec.z, life: 0.8, isTracer: true, dir: shotDir.clone()});
+
+    // Raycast hit detection
+    raycaster.set(camera.position.clone().add(yawObj.position), shotDir);
+    
+    // Chainsaw reach is short
+    if (STATE.weapon === 'chainsaw' || STATE.weapon === 'flamethrower') {
+       raycaster.far = STATE.weapon === 'chainsaw' ? 4.0 : 15.0;
+    } else {
+       raycaster.far = Infinity;
+    }
 
     const hits = raycaster.intersectObjects(STATE.enemies.map(e => e.mesh), true);
     if (hits.length > 0) {
@@ -2215,13 +2448,15 @@ function updateEnemies(dt) {
         while (p) { if (p === e.mesh) return true; p = p.parent; }
         return false;
       });
+      
       if (enemy) {
         const hitY = hits[0].point.y;
-        const isHeadshot = hitY > 1.5;
+        const isHeadshot = hitY > 1.5 && STATE.weapon !== 'chainsaw' && STATE.weapon !== 'flamethrower';
         const damage = w.damage * (isHeadshot ? 3 : 1);
         
         enemy.hp -= damage;
-        enemy.recentlyHit = true; // Trigger suppression AI
+        enemy.recentlyHit = true; // Trigger Suppression AI State
+        
         playSound('hit');
         const hm = document.getElementById('hitMarker');
         hm.style.display = 'block';
@@ -2230,87 +2465,64 @@ function updateEnemies(dt) {
         setTimeout(() => { hm.style.display = 'none'; }, 150);
         addDamageNumber(enemy.x, hits[0].point.y, enemy.z, damage, isHeadshot);
 
-        // Flinch — push enemy back on hit
+        // Kinetic Flinch
         const pushDist = isHeadshot ? 0.3 : 0.12;
-        const pdx = enemy.x - yawObj.position.x;
-        const pdz = enemy.z - yawObj.position.z;
-        const pdd = Math.sqrt(pdx*pdx + pdz*pdz) || 1;
-        if (!isColliding(enemy.x + (pdx/pdd)*pushDist, enemy.z + (pdz/pdd)*pushDist, 0.4)) {
-          enemy.x += (pdx/pdd)*pushDist;
-          enemy.z += (pdz/pdd)*pushDist;
-          enemy.mesh.position.x = enemy.x;
-          enemy.mesh.position.z = enemy.z;
+        const pdx = shotDir.x, pdz = shotDir.z;
+        if (!isColliding(enemy.x + pdx*pushDist, enemy.z + pdz*pushDist, 0.4)) {
+          enemy.x += pdx*pushDist;
+          enemy.z += pdz*pushDist;
         }
 
         if (enemy.hp <= 0) {
-          killEnemy(enemy, isHeadshot);
+          killEnemy(enemy, isHeadshot, shotDir.clone().multiplyScalar(isHeadshot ? 6 : 3));
         } else {
-          const particleCount = isHeadshot ? 8 : 3;
-          for (let i = 0; i < particleCount; i++) {
-            addParticle(enemy.x, isHeadshot ? 1.7 : 1.2, enemy.z, isHeadshot ? 0xff0000 : 0xff6666);
+          for (let i = 0; i < (isHeadshot ? 8 : 3); i++) {
+            addParticle(enemy.x, hits[0].point.y, enemy.z, isHeadshot ? 0xff0000 : 0xff6666);
           }
         }
+        
+        // Suppress grouped enemies automatically with near misses or impacts
+        STATE.enemies.forEach(other => {
+          if (!other.dead && other !== enemy) {
+            let cx = other.x - hits[0].point.x;
+            let cz = other.z - hits[0].point.z;
+            if (cx*cx + cz*cz < 9) other.recentlyHit = true; // 3 radius suppression
+          }
+        });
+
       }
     } else {
-      const barrelHits = raycaster.intersectObjects(mapGroup.children.filter(c => c.userData.explosive));
-      if (barrelHits.length > 0) {
-        explodeBarrel(barrelHits[0].object);
-      } else {
-        // ── RICOCHET SPARKS on wall hits ──
-        const wallHits = raycaster.intersectObjects(mapGroup.children, true);
-        if (wallHits.length > 0 && wallHits[0].distance < 50) {
-          const hp = wallHits[0].point;
-          // Shower of sparks — orange and white hot
-          for (let s = 0; s < 12; s++) {
-            const sparkColor = Math.random() > 0.4 ? 0xffaa00 : 0xffffcc;
-            addParticle(
-              hp.x + (Math.random()-0.5)*0.05,
-              hp.y + (Math.random()-0.5)*0.05,
-              hp.z + (Math.random()-0.5)*0.05,
-              sparkColor
-            );
-          }
-          // Bullet hole decal (dark circle on wall)
-          const holeGeo = new THREE.CircleGeometry(0.02, 6);
-          const holeMat = new THREE.MeshBasicMaterial({color: 0x111111, transparent: true, opacity: 0.7, depthWrite: false});
-          const hole = new THREE.Mesh(holeGeo, holeMat);
-          hole.position.copy(hp);
-          if (wallHits[0].face) {
-            const n = wallHits[0].face.normal.clone().transformDirection(wallHits[0].object.matrixWorld);
-            hole.position.add(n.multiplyScalar(0.01));
-            hole.lookAt(hole.position.clone().add(wallHits[0].face.normal));
-          }
-          scene.add(hole);
-          // Ricochet tracer — bounced bullet with random deflection
-          if (wallHits[0].face && Math.random() > 0.3) {
-            const normal = wallHits[0].face.normal.clone();
-            normal.transformDirection(wallHits[0].object.matrixWorld);
-            const reflected = dir.clone().reflect(normal);
-            // Add randomness to ricochet direction
-            reflected.x += (Math.random()-0.5)*0.3;
-            reflected.y += (Math.random()-0.5)*0.3;
-            reflected.z += (Math.random()-0.5)*0.3;
-            reflected.normalize();
-            const ricGeo = new THREE.CylinderGeometry(0.006, 0.003, 0.3, 3);
-            ricGeo.rotateX(Math.PI/2);
-            const ricMat = new THREE.MeshBasicMaterial({color: 0xff6600, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.8});
-            const ric = new THREE.Mesh(ricGeo, ricMat);
-            ric.position.copy(hp);
-            scene.add(ric);
-            const rv = reflected.multiplyScalar(45 + Math.random()*30);
-            STATE.projectiles.push({mesh: ric, vx: rv.x, vy: rv.y + 2, vz: rv.z, life: 0.4 + Math.random()*0.3, isTracer: true, dir: reflected});
-          }
-          // Brief spark light at impact point
-          const sparkLight = new THREE.PointLight(0xff8833, 2, 3);
-          sparkLight.position.copy(hp);
-          scene.add(sparkLight);
-          setTimeout(() => { scene.remove(sparkLight); }, 60);
+      // Ricochet off geometry
+      const wallHits = raycaster.intersectObjects(mapGroup.children, true);
+      if (wallHits.length > 0 && wallHits[0].distance < 50 && STATE.weapon !== 'chainsaw' && STATE.weapon !== 'flamethrower') {
+        const hp = wallHits[0].point;
+        for (let s = 0; s < 6; s++) {
+          addParticle(hp.x, hp.y, hp.z, Math.random() > 0.4 ? 0xffaa00 : 0xffffcc);
         }
+        const holeGeo = new THREE.CircleGeometry(0.02, 6);
+        const holeMat = new THREE.MeshBasicMaterial({color: 0x111111, transparent: true, opacity: 0.7, depthWrite: false});
+        const hole = new THREE.Mesh(holeGeo, holeMat);
+        hole.position.copy(hp);
+        if (wallHits[0].face) {
+          const n = wallHits[0].face.normal.clone().transformDirection(wallHits[0].object.matrixWorld);
+          hole.position.add(n.multiplyScalar(0.01));
+          hole.lookAt(hole.position.clone().add(wallHits[0].face.normal));
+        }
+        scene.add(hole);
+
+        // Near-miss suppression hook for geometry wall impacts
+        STATE.enemies.forEach(other => {
+          if (!other.dead) {
+            let cx = other.x - hp.x;
+            let cz = other.z - hp.z;
+            if (cx*cx + cz*cz < 16) other.recentlyHit = true; // suppression effect
+          }
+        });
       }
     }
   }
-  
-  updateHUD();
+}
+
 }
 
 function reload() {
@@ -2676,6 +2888,7 @@ window.addEventListener('keydown', e => {
   if (e.key.toLowerCase() === 'r') reload();
   if (e.key.toLowerCase() === 'f') callAirstrike();
   if (e.key.toLowerCase() === 'g') throwGrenade();
+  if (e.key.toLowerCase() === 'c' || e.key === 'Control') STATE.crouching = true;
     if (e.key === '1') switchWeapon('rifle');
   if (e.key === '2') switchWeapon('shotgun');
   if (e.key === '3') switchWeapon('pistol');
@@ -2705,6 +2918,7 @@ window.addEventListener('keydown', e => {
 
 window.addEventListener('keyup', e => {
   STATE.keys[e.key.toLowerCase()] = false;
+  if (e.key.toLowerCase() === 'c' || e.key === 'Control') STATE.crouching = false;
 });
 
 window.addEventListener('mousemove', e => {
@@ -2833,6 +3047,136 @@ document.addEventListener('pointerlockchange', () => {
   }
 });
 
+// ── Missing Core Functions (restored) ──
+
+function addParticle(x, y, z, color) {
+  const geo = new THREE.SphereGeometry(0.03 + Math.random()*0.03, 4, 4);
+  const mat = new THREE.MeshBasicMaterial({color: color || 0xff0000});
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  scene.add(mesh);
+  STATE.particles.push({
+    mesh, x, y, z,
+    vx: (Math.random()-0.5)*4, vy: 1+Math.random()*3, vz: (Math.random()-0.5)*4,
+    life: 0.5+Math.random()*0.5, isGib: false
+  });
+}
+
+function addBloodDecal(x, z) {
+  const size = 0.2 + Math.random() * 0.4;
+  const geo = new THREE.CircleGeometry(size, 8);
+  const mat = new THREE.MeshStandardMaterial({color: 0x660000, transparent: true, opacity: 0.7, depthWrite: false, roughness: 1});
+  const decal = new THREE.Mesh(geo, mat);
+  decal.rotation.x = -Math.PI/2;
+  decal.position.set(x, 0.01, z);
+  scene.add(decal);
+  STATE.bloodDecals.push(decal);
+  while (STATE.bloodDecals.length > 50) { scene.remove(STATE.bloodDecals.shift()); }
+}
+
+function updateParticles(dt) {
+  for (let i = STATE.particles.length - 1; i >= 0; i--) {
+    const p = STATE.particles[i];
+    p.x += p.vx * dt;
+    p.vy -= 12 * dt; // gravity
+    p.y += p.vy * dt;
+    p.z += p.vz * dt;
+    p.mesh.position.set(p.x, p.y, p.z);
+    if (p.isGib && p.spin) {
+      p.mesh.rotation.x += p.spin.x * dt;
+      p.mesh.rotation.y += p.spin.y * dt;
+      p.mesh.rotation.z += p.spin.z * dt;
+      if (p.y < 0.05) { p.y = 0.05; p.vy = Math.abs(p.vy) * 0.25; p.vx *= 0.5; p.vz *= 0.5; }
+    }
+    p.life -= dt;
+    if (p.life <= 0 || p.y < -1) {
+      scene.remove(p.mesh);
+      STATE.particles.splice(i, 1);
+    }
+  }
+}
+
+function updateProjectiles(dt) {
+  const playerX = yawObj.position.x, playerZ = yawObj.position.z;
+  for (let i = STATE.projectiles.length - 1; i >= 0; i--) {
+    const p = STATE.projectiles[i];
+    if (p.isTracer) {
+      p.mesh.position.x += p.vx * dt;
+      p.mesh.position.y += (p.vy||0) * dt;
+      p.mesh.position.z += p.vz * dt;
+      p.life -= dt;
+      if (p.life <= 0) { scene.remove(p.mesh); STATE.projectiles.splice(i, 1); }
+    } else {
+      p.x += p.vx * dt;
+      p.z += p.vz * dt;
+      p.mesh.position.x = p.x;
+      p.mesh.position.z = p.z;
+      const dist = Math.sqrt((p.x-playerX)**2 + (p.z-playerZ)**2);
+      if (dist < 0.5) {
+        damagePlayer(p.damage || 10, p.x, p.z);
+        scene.remove(p.mesh);
+        STATE.projectiles.splice(i, 1);
+        continue;
+      }
+      if (isColliding(p.x, p.z, 0.1)) {
+        scene.remove(p.mesh);
+        STATE.projectiles.splice(i, 1);
+      }
+    }
+  }
+}
+
+function updatePickups(dt) {
+  for (let i = STATE.pickups.length - 1; i >= 0; i--) {
+    const p = STATE.pickups[i];
+    p.mesh.rotation.y += dt * 2;
+    p.mesh.position.y = 0.5 + Math.sin(performance.now()/500) * 0.1;
+    const dx = p.x - yawObj.position.x, dz = p.z - yawObj.position.z;
+    if (dx*dx + dz*dz < 1.5) {
+      if (p.type === 'health') STATE.health = Math.min(100, STATE.health + 50);
+      else if (p.type === 'ammo') { STATE.ammo = STATE.maxAmmo; }
+      else if (p.type === 'grenade') { STATE.grenadeCount = Math.min(STATE.maxGrenades, STATE.grenadeCount + 2); }
+      playSound('pickup');
+      scene.remove(p.mesh);
+      STATE.pickups.splice(i, 1);
+      updateHUD();
+    }
+  }
+}
+
+function updateGrenades(dt) {
+  for (let i = STATE.grenades.length - 1; i >= 0; i--) {
+    const g = STATE.grenades[i];
+    g.x += g.vx * dt;
+    g.vy -= 15 * dt;
+    g.y += g.vy * dt;
+    g.z += g.vz * dt;
+    g.mesh.position.set(g.x, g.y, g.z);
+    g.mesh.rotation.x += dt * 5;
+    g.mesh.rotation.z += dt * 3;
+    if (g.y < 0.15) { g.y = 0.15; g.vy = Math.abs(g.vy) * 0.3; g.vx *= 0.7; g.vz *= 0.7; }
+    g.life -= dt;
+    if (g.life <= 0) {
+      // Explode
+      playSound('explosion');
+      for (let j = 0; j < 30; j++) addParticle(g.x, g.y, g.z, Math.random() > 0.5 ? 0xff6600 : 0xffcc00);
+      STATE.enemies.forEach(e => {
+        if (e.dead) return;
+        const d = Math.sqrt((e.x-g.x)**2 + (e.z-g.z)**2);
+        if (d < 5) { e.hp -= 80 * (1 - d/5); if (e.hp <= 0) killEnemy(e, false); }
+      });
+      addBloodDecal(g.x, g.z);
+      STATE.screenShake = 0.3; STATE.shakeIntensity = 0.08;
+      scene.remove(g.mesh);
+      STATE.grenades.splice(i, 1);
+    }
+  }
+}
+
+function updateCaptureZones(dt) {
+  // Capture zones are optional — no-op if none exist
+}
+
 // ── Game Loop ──
 let lastTime = performance.now();
 
@@ -2918,6 +3262,26 @@ function animate() {
       }
     }
     
+    // Health regen — CoD style, starts after 4 seconds of no damage
+    if (!STATE.regenCooldown) STATE.regenCooldown = 0;
+    if (STATE.damageFlashTime > 0) {
+      STATE.regenCooldown = 4.0; // 4 second delay after taking damage
+    } else {
+      STATE.regenCooldown = Math.max(0, STATE.regenCooldown - dt);
+      if (STATE.regenCooldown <= 0 && STATE.health < 100) {
+        STATE.health = Math.min(100, STATE.health + 25 * dt); // 25 HP/sec regen
+        updateHUD();
+        updateHeartbeat();
+      }
+    }
+
+    // Crouch
+    if (STATE.crouching) {
+      yawObj.position.y = THREE.MathUtils.lerp(yawObj.position.y, 0.9, dt * 10);
+    } else {
+      yawObj.position.y = THREE.MathUtils.lerp(yawObj.position.y, 1.6, dt * 10);
+    }
+
     // Sprint bar HUD
     const sprintPct = (STATE.sprint / STATE.maxSprint) * 100;
     document.getElementById('sprintFill').style.width = sprintPct + '%';
