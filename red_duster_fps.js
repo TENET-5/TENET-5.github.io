@@ -146,13 +146,37 @@ function initFPS() {
 
     controls = new THREE.PointerLockControls(camera, document.body);
     const blocker = document.getElementById('fps-instructions');
-    blocker.addEventListener('click', () => { if(gameState !== "KIA") controls.lock(); });
+
+    blocker.addEventListener('click', () => {
+        if(gameState !== "KIA") {
+            try {
+                controls.lock();
+            } catch(e) {
+                console.warn('[RED DUSTER] Pointer lock failed, retrying...', e);
+                // Fallback — try again after a frame
+                requestAnimationFrame(() => {
+                    try { controls.lock(); } catch(e2) {
+                        console.error('[RED DUSTER] Pointer lock unavailable. Try clicking again or check browser permissions.');
+                        blocker.innerHTML = '<div><span style="font-size:1.5em;color:#ff3333;">CLICK AGAIN TO DEPLOY</span><br><br><span style="font-size:0.8em;color:#aaa;">Browser blocked pointer lock. Click directly on this screen.</span></div>';
+                    }
+                });
+            }
+        }
+    });
 
     controls.addEventListener('lock', () => {
+        console.log('[RED DUSTER] Pointer lock acquired — deploying');
         blocker.style.display = 'none';
         if (gameState === "INTRO") startIntroSequence();
     });
     controls.addEventListener('unlock', () => { if(gameState !== "KIA") blocker.style.display = 'flex'; });
+
+    // Also handle pointer lock errors globally
+    document.addEventListener('pointerlockerror', () => {
+        console.warn('[RED DUSTER] Pointer lock error — click the game screen directly');
+        blocker.innerHTML = '<div><span style="font-size:1.5em;color:#ff3333;">CLICK HERE TO DEPLOY</span><br><br><span style="font-size:0.8em;color:#ffaa00;">⚠ Browser blocked mouse capture. Click directly on this screen.</span></div>';
+        blocker.style.display = 'flex';
+    });
     scene.add(controls.getObject());
 
     const onKeyDown = (e) => {
