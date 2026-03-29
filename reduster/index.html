@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>window.addEventListener('contextmenu', e => e.preventDefault());</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Red Duster: Co-op Communist Survival — Team up with Canadian veterans and defend the town. Free browser FPS.">
+  <title>Red Duster: Anti-Communist Training Simulator — TENET5 Studios</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #fff; }
+
+    /* ── Menu ── */
+    #menu {
+      position: fixed; inset: 0; z-index: 100;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #1a0000 0%, #0a0a0a 50%, #1a0000 100%);
+      overflow-y: auto;
+    }
+    #menu h1 { font-size: 4em; color: #ff3333; text-shadow: 0 0 30px #ff0000, 0 0 60px #cc0000; letter-spacing: 0.1em; margin-bottom: 0.1em; }
+    #menu h2 { font-size: 1.5em; color: #cc9966; letter-spacing: 0.3em; margin-bottom: 2em; }
+    #menu .info { color: #888; font-size: 0.9em; margin-bottom: 2em; text-align: center; line-height: 1.6; max-width: 600px; }
+    #menu .controls { margin-top: 2em; color: #666; font-size: 0.8em; text-align: center; line-height: 2; }
+
+    /* ── Buttons ── */
+    #startBtn, #respawnBtn, #resumeBtn {
+      padding: 12px 40px; font-size: 1.2em; font-family: 'Courier New', monospace;
+      background: #cc0000; color: #fff; border: 2px solid #ff3333; cursor: pointer; letter-spacing: 0.2em;
+    }
+    #startBtn { padding: 15px 40px; font-size: 1.2em; background: #333; border-color: #666; }
+    #startBtn:hover, #respawnBtn:hover, #resumeBtn:hover { background: #ff0000; box-shadow: 0 0 30px #ff000088; }
+    #campaignBtn { padding: 15px 40px; font-size: 1.2em; font-family: 'Courier New', monospace; background: #cc0000; color: #fff; border: 2px solid #ff3333; cursor: pointer; letter-spacing: 0.15em; }
+
+    /* ── HUD ── */
+    #hud {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      display: none; padding: 10px 20px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    }
+    #hud-top { position: fixed; top: 10px; left: 0; right: 0; z-index: 50; display: none; text-align: center; }
+    .hud-row { display: flex; justify-content: space-between; align-items: flex-end; }
+    .hud-item { text-shadow: 0 0 10px #000; }
+    .hud-label { font-size: 0.7em; color: #888; }
+    .hud-value { font-size: 1.8em; font-weight: bold; }
+    .hud-health .hud-value { color: #33ff33; }
+    .hud-ammo .hud-value { color: #ffcc00; }
+    .hud-score .hud-value { color: #ff3333; }
+    .hud-wave { font-size: 1.2em; color: #ff6633; text-shadow: 0 0 20px #ff3300; }
+
+    /* ── Health / Reload bars ── */
+    #healthBar { position: fixed; bottom: 60px; left: 20px; z-index: 50; width: 200px; height: 8px; background: #333; border: 1px solid #555; display: none; }
+    #healthFill { height: 100%; background: #33ff33; transition: width 0.3s, background 0.3s; }
+    #reloadBar { position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); z-index: 50; width: 150px; height: 4px; background: #333; display: none; }
+    #reloadFill { height: 100%; background: #ffcc00; width: 0%; }
+
+    /* ── Sprint bar ── */
+    #sprintBar { position: fixed; bottom: 48px; left: 20px; z-index: 50; width: 200px; height: 5px; background: #333; border: 1px solid #555; display: none; }
+    #sprintFill { height: 100%; background: #33ccff; width: 100%; }
+
+    /* ── Drone Radar ── */
+    #droneRadar {
+      position: fixed; top: 170px; right: 10px; z-index: 51;
+      display: none; flex-direction: column; align-items: center;
+      background: rgba(0,0,0,0.75); border: 1px solid #ff4400;
+      padding: 6px 10px; border-radius: 4px; pointer-events: none;
+      animation: droneAlert 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes droneAlert { from { border-color: #ff4400; } to { border-color: #ff8800; box-shadow: 0 0 8px #ff4400; } }
+    #droneRadar .drone-icon { font-size: 1.4em; }
+    #droneRadar .drone-count { font-size: 0.75em; color: #ff8844; letter-spacing: 0.1em; }
+
+    /* ── Crosshair ── */
+    #crosshair { position: fixed; top: 50%; left: 50%; z-index: 50; width: 30px; height: 30px; transform: translate(-50%, -50%); display: none; pointer-events: none; }
+    #hitMarker { position: fixed; top: 50%; left: 50%; z-index: 52; transform: translate(-50%, -50%); pointer-events: none; display: none; font-size: 24px; color: #ff3333; text-shadow: 0 0 5px #ff0000; }
+    #dmgFlash { position: fixed; inset: 0; z-index: 45; pointer-events: none; background: radial-gradient(ellipse, transparent 50%, rgba(255,0,0,0.4)); opacity: 0; transition: opacity 0.1s; }
+    #lowHealthPulse { position: fixed; inset: 0; z-index: 44; pointer-events: none; background: radial-gradient(ellipse at center, transparent 40%, rgba(150,0,0,0.3)); opacity: 0; }
+
+    /* ── Overlays ── */
+    #waveBanner { position: fixed; top: 30%; left: 50%; transform: translate(-50%,-50%); z-index: 55; font-size: 3em; color: #ff3333; display: none; text-shadow: 0 0 40px #ff0000; letter-spacing: 0.2em; pointer-events: none; }
+    #deathScreen { position: fixed; inset: 0; z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(80,0,0,0.85); }
+    #deathScreen h2 { font-size: 3em; color: #ff0000; margin-bottom: 0.5em; }
+    #deathScreen p { color: #ccc; margin-bottom: 1em; font-size: 1.2em; }
+    #pauseMenu { position: fixed; inset: 0; z-index: 95; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); }
+    #pauseMenu h2 { font-size: 3em; color: #ff3333; margin-bottom: 1em; letter-spacing: 0.2em; }
+
+    /* ── Minimap ── */
+    #minimap { position: fixed; top: 10px; right: 10px; z-index: 50; width: 150px; height: 150px; display: none; border: 2px solid #ff333388; background: rgba(0,0,0,0.6); }
+
+    /* ── Kill feed ── */
+    #killFeed { position: fixed; top: 10px; right: 180px; z-index: 51; width: 300px; display: none; pointer-events: none; text-align: right; font-size: 0.85em; }
+    .killFeedEntry { background: rgba(0,0,0,0.7); padding: 4px 8px; margin-bottom: 2px; border-left: 3px solid #ff3333; color: #fff; animation: feedSlideIn 0.3s ease-out, feedFadeOut 0.5s ease-in 2.5s forwards; }
+    @keyframes feedSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes feedFadeOut { to { opacity: 0; transform: translateX(20px); } }
+
+    /* ── Weapon name / grenades / combo / objectives ── */
+    #weaponName { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 51; font-size: 1.2em; color: #ffcc00; display: none; pointer-events: none; text-shadow: 0 0 10px #000; opacity: 0; transition: opacity 0.3s; }
+    #grenadeHud { position: fixed; bottom: 20px; right: 20px; z-index: 51; font-size: 1.2em; color: #33ff33; display: none; text-shadow: 0 0 10px #000; }
+    #comboText { position: fixed; top: 180px; left: 50%; transform: translateX(-50%); z-index: 52; font-size: 2em; color: #ffcc00; display: none; pointer-events: none; text-shadow: 0 0 20px #ff6600; letter-spacing: 0.1em; }
+    #objectivesHud { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 52; font-size: 0.9em; color: #ffcc00; display: none; text-shadow: 0 0 10px #000; letter-spacing: 0.15em; pointer-events: none; }
+    #resupplyBanner { position: fixed; top: 35%; left: 50%; transform: translate(-50%,-50%); z-index: 56; font-size: 2em; color: #33ff33; display: none; text-shadow: 0 0 30px #00ff00; letter-spacing: 0.15em; pointer-events: none; }
+    #waveSummary { display:none; }
+    #mkFinisher { position: fixed; inset: 0; z-index: 99; display: none; background: center/contain no-repeat; pointer-events: none; }
+
+    /* ── Mission select ── */
+    .mission-item { background: #1a0000; border: 1px solid #ff333388; padding: 12px 16px; margin-bottom: 6px; cursor: pointer; }
+    .mission-item:hover { background: #2a0000; }
+
+    canvas { display: block; }
+    .lore-card { transition: opacity 0.5s; }
+    .lore-dot { transition: background 0.3s; }
+    .lore-dot.active { background: #c41e3a !important; }
+  </style>
+  <script type="module" crossorigin src="/reduster/assets/index-DgdXjpMH.js"></script>
+</head>
+<body>
+
+<!-- ── Multiplayer Lobby ── -->
+<div id="lobby" style="
+  position:fixed; inset:0; z-index:200;
+  background:linear-gradient(135deg,#0a0a0a 0%,#1a0000 50%,#0a0a0a 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Courier New',monospace; color:#fff;
+">
+  <div style="font-size:3.5em;color:#ff3333;font-weight:900;letter-spacing:0.1em;text-shadow:0 0 30px #ff0000;">
+    🍁 RED DUSTER
+  </div>
+  <div style="color:#cc9966;letter-spacing:0.3em;margin-bottom:2em;font-size:1.1em;">
+    CO-OP COMMUNIST SURVIVAL
+  </div>
+  <div style="color:#888;max-width:500px;text-align:center;margin-bottom:2em;line-height:1.6;">
+    Canadian veterans defend the town against relentless communist infiltration.<br>
+    <strong style="color:#fff;">Team up. Hold the line. Raise the Duster.</strong>
+  </div>
+
+  <!-- Lore cards -->
+  <div id="loreCards" style="max-width:500px;min-height:90px;text-align:center;margin-bottom:1.5em;position:relative;">
+    <div class="lore-card" style="color:#ccc;line-height:1.7;font-size:0.88em;">
+      <span style="color:#ffcc00;font-weight:700;display:block;margin-bottom:0.4em;">WHY WE FIGHT — I</span>
+      The federal government tried to label a combat veteran as a terrorist for flying the Red Ensign and speaking out against foreign interference. He had no other option. So he built a training simulator instead.
+    </div>
+    <div class="lore-card" style="display:none;color:#ccc;line-height:1.7;font-size:0.88em;">
+      <span style="color:#ff4444;font-weight:700;display:block;margin-bottom:0.4em;">THE DRONE THREAT — II</span>
+      Communist infiltrators had targeting coordinates on every Canadian battalion position. Every FOB. Every supply line. The drone swarm was minutes out. The soldier had four minutes, no radio, no air support, and one chance to stop it.
+    </div>
+    <div class="lore-card" style="display:none;color:#ccc;line-height:1.7;font-size:0.88em;">
+      <span style="color:#33ff99;font-weight:700;display:block;margin-bottom:0.4em;">THE LINE HOLDS — III</span>
+      Veterans abandoned by the institutions they served. A flag that was banned. A country being hollowed out from the inside. The Red Duster flies here.
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;justify-content:center;margin-bottom:1.5em;" id="loreIndicators">
+    <div style="width:8px;height:8px;border-radius:50%;background:#c41e3a;" class="lore-dot active"></div>
+    <div style="width:8px;height:8px;border-radius:50%;background:#444;" class="lore-dot"></div>
+    <div style="width:8px;height:8px;border-radius:50%;background:#444;" class="lore-dot"></div>
+  </div>
+
+  <div id="lobby-main" style="display:flex;flex-direction:column;align-items:center;gap:1rem;width:320px;">
+    <button id="hostBtn" style="width:100%;padding:14px;font-size:1.2em;font-family:'Courier New',monospace;
+      background:#c41e3a;color:#fff;border:2px solid #ff3333;cursor:pointer;letter-spacing:0.15em;
+      transition:all 0.2s;" onmouseover="this.style.background='#ff1a1a'" onmouseout="this.style.background='#c41e3a'">
+      ⚔ HOST GAME
+    </button>
+    <div style="color:#666;font-size:0.8em;">— OR —</div>
+    <div style="display:flex;gap:0.5rem;width:100%;">
+      <input id="roomInput" placeholder="ROOM CODE" maxlength="6"
+        style="flex:1;padding:12px;font-size:1.1em;font-family:'Courier New',monospace;
+        background:#111;color:#fff;border:2px solid #444;text-align:center;letter-spacing:0.3em;text-transform:uppercase;"
+      />
+      <button id="joinBtn" style="padding:12px 20px;font-size:1.1em;font-family:'Courier New',monospace;
+        background:#003366;color:#fff;border:2px solid #0066cc;cursor:pointer;letter-spacing:0.1em;
+        transition:all 0.2s;" onmouseover="this.style.background='#004488'" onmouseout="this.style.background='#003366'">
+        JOIN
+      </button>
+    </div>
+    <button id="soloBtn" style="width:100%;padding:10px;font-size:0.9em;font-family:'Courier New',monospace;
+      background:transparent;color:#666;border:1px solid #333;cursor:pointer;letter-spacing:0.1em;">
+      PLAY SOLO (NO MULTIPLAYER)
+    </button>
+  </div>
+
+  <div id="lobby-hosting" style="display:none;flex-direction:column;align-items:center;gap:1rem;width:320px;">
+    <div style="color:#33ff33;font-size:1.1em;">HOSTING GAME — SHARE THIS CODE:</div>
+    <div id="roomCodeDisplay" style="font-size:3em;font-weight:900;letter-spacing:0.4em;color:#ffcc00;
+      text-shadow:0 0 20px #ffaa00;background:#111;padding:0.5rem 1.5rem;border:2px solid #ffaa00;">
+      ------
+    </div>
+    <div style="color:#888;font-size:0.8em;text-align:center;">
+      Other players enter this code to join.<br>Waiting for players...
+    </div>
+    <div id="lobby-player-list" style="color:#aaa;font-size:0.85em;text-align:center;min-height:2em;"></div>
+    <button id="startGameBtn" style="width:100%;padding:14px;font-size:1.2em;font-family:'Courier New',monospace;
+      background:#1a5c1a;color:#fff;border:2px solid #33cc33;cursor:pointer;letter-spacing:0.15em;">
+      ▶ START GAME
+    </button>
+  </div>
+
+  <div id="lobby-connecting" style="display:none;color:#ffaa00;font-size:1.1em;">
+    CONNECTING...
+  </div>
+  <div id="lobby-error" style="display:none;color:#ff3333;font-size:0.9em;margin-top:1rem;"></div>
+</div>
+
+<!-- ── Main Menu ── -->
+<div id="menu">
+  <h1>RED DUSTER</h1>
+  <h2>ANTI-COMMUNIST TRAINING SIMULATOR</h2>
+  <div style="color:#ff3333;font-size:0.75em;letter-spacing:0.3em;margin-bottom:1.5em;border:1px solid #ff333366;display:inline-block;padding:4px 16px;">FOR EDUCATIONAL PURPOSES ONLY *</div>
+  <div class="info">
+    <div style="color:#ffcc00;font-weight:bold;margin-bottom:12px;font-size:1.1em;">
+      The federal government tried to make me out as a terrorist,<br>
+      so instead I just play my Red Duster Communist removal training simulator.
+    </div>
+    Young Castro's Vanguard has seized key Canadian infrastructure.<br>
+    Lead your squad. Take it back.<br>
+    <span style="color:#ff6633">TENET5 Studios</span><br>
+    <span style="color:#666;font-size:0.8em;">* The communists in this simulator are fictional but modeled on real communists.</span>
+  </div>
+
+  <!-- LIRIL AI Banner -->
+  <div style="background:#0a1a0a;border:1px solid #336633;padding:15px;margin-bottom:1.5em;max-width:600px;text-align:center;font-family:'Courier New',monospace;font-size:0.9em;box-shadow:0 0 15px rgba(50,255,50,0.2);">
+    <div style="color:#33ff33;font-weight:bold;letter-spacing:0.1em;margin-bottom:8px;font-size:1.1em;">█ LIRIL A.I. TACTICAL COMBAT SUITE █</div>
+    <div style="color:#88dd88;line-height:1.4;">
+      Powered by <span style="color:#fff;font-weight:bold;">LIRIL AI</span> &bull; Guided by <span style="color:#fff;font-weight:bold;">TENET-5</span><br>
+      Autonomous defense matrices and orbital Avro Arrow targeting systems for sale exclusively to authorized <b>NATO</b> and <b>Commonwealth</b> nations.<br><br>
+      <span style="color:#ff5555;font-size:0.85em;">REQUIREMENTS: Must NOT breach the Nuremberg Code. Must NOT practice Communism.</span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;justify-content:center;margin-bottom:1.5em;">
+    <button id="campaignBtn">CAMPAIGN</button>
+    <button id="startBtn">SURVIVAL</button>
+  </div>
+
+  <div id="missionSelect" style="display:none;max-width:600px;text-align:left;margin-bottom:1.5em;">
+    <div style="color:#ff6633;font-size:0.9em;letter-spacing:0.2em;margin-bottom:0.8em;">SELECT MISSION</div>
+    <div class="mission-item" data-mission="1">
+      <span style="color:#ff3333;font-weight:bold;">01 — FIRST LIGHT</span><br>
+      <span style="color:#888;font-size:0.85em;">Secure the signals station at CFB Petawawa. Link up with your squad and clear the compound.</span>
+    </div>
+    <div class="mission-item" data-mission="2" style="opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">02 — PARLIAMENT FALLS</span><br>
+      <span style="color:#888;font-size:0.85em;">Fight through Wellington Street to the Peace Tower. Extract the intelligence package.</span>
+    </div>
+    <div class="mission-item" data-mission="3" style="opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">03 — RED HIGHWAY</span><br>
+      <span style="color:#888;font-size:0.85em;">Destroy the roadblock on the Trans-Canada. Reopen supply lines to the Maritimes.</span>
+    </div>
+    <div class="mission-item" data-mission="4" style="opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">04 — SIGNAL FIRE</span><br>
+      <span style="color:#888;font-size:0.85em;">Reach the CN Tower. Restore military comms. Canada needs to hear the truth.</span>
+    </div>
+    <div class="mission-item" data-mission="5" style="opacity:0.5;">
+      <span style="color:#ff3333;font-weight:bold;">05 — THE RED DUSTER</span><br>
+      <span style="color:#888;font-size:0.85em;">Storm the command post. Raise the Red Ensign over Parliament Hill. End this.</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    WASD — Move &nbsp;|&nbsp; MOUSE — Aim &nbsp;|&nbsp; RIGHT-CLICK — Fire &nbsp;|&nbsp; R — Reload<br>
+    F — Airstrike &nbsp;|&nbsp; G — Grenade &nbsp;|&nbsp; X — EMP GRENADE &nbsp;|&nbsp; 1-9 — Weapons<br>
+    SPACE — Kick &nbsp;|&nbsp; SHIFT — Sprint &nbsp;|&nbsp; TAB — Map &nbsp;|&nbsp; ESC — Pause
+  </div>
+</div>
+
+<!-- ── HUD ── -->
+<div id="hud">
+  <div class="hud-row">
+    <div class="hud-item hud-health"><div class="hud-label">HEALTH</div><div class="hud-value" id="healthVal">100</div></div>
+    <div class="hud-item hud-ammo"><div class="hud-label">AMMO</div><div class="hud-value"><span id="ammoVal">30</span> / <span id="ammoMax">30</span></div></div>
+    <div class="hud-item hud-score"><div class="hud-label">S. 504 COUNTS</div><div class="hud-value" id="scoreVal">0</div></div>
+  </div>
+</div>
+<div id="hud-top">
+  <span class="hud-wave">WAVE <span id="waveVal">1</span> &nbsp;—&nbsp; HOSTILES: <span id="enemyCount">0</span></span>
+  &nbsp;|&nbsp; <span id="timeOfDay" style="color:#aabbcc;font-size:0.85em;"></span>
+</div>
+<div id="healthBar"><div id="healthFill" style="width:100%"></div></div>
+<div id="reloadBar"><div id="reloadFill"></div></div>
+<div id="sprintBar"><div id="sprintFill"></div></div>
+
+<!-- ── Crosshair ── -->
+<div id="crosshair">
+  <div style="position:absolute;width:2px;height:12px;background:rgba(255,255,255,0.8);left:50%;top:0;transform:translateX(-50%)"></div>
+  <div style="position:absolute;width:2px;height:12px;background:rgba(255,255,255,0.8);left:50%;bottom:0;transform:translateX(-50%)"></div>
+  <div style="position:absolute;width:12px;height:2px;background:rgba(255,255,255,0.8);top:50%;left:0;transform:translateY(-50%)"></div>
+  <div style="position:absolute;width:12px;height:2px;background:rgba(255,255,255,0.8);top:50%;right:0;transform:translateY(-50%)"></div>
+  <div style="position:absolute;width:2px;height:2px;background:rgba(255,80,80,0.9);left:50%;top:50%;transform:translate(-50%,-50%)"></div>
+</div>
+<div id="hitMarker">✕</div>
+<div id="mkFinisher"></div>
+
+<!-- ── Effects ── -->
+<div id="dmgFlash"></div>
+<div id="lowHealthPulse"></div>
+
+<!-- ── Banners ── -->
+<div id="waveBanner">WAVE 1</div>
+<div id="resupplyBanner">WAVE CLEARED — RESUPPLY</div>
+
+<!-- ── Death Screen ── -->
+<div id="deathScreen">
+  <h2 style="text-shadow:0 0 40px #ff0000,0 0 80px #cc0000;">K.I.A.</h2>
+  <div style="font-size:0.8em;color:#ff6666;letter-spacing:0.3em;margin-bottom:1.5em;">KILLED IN ACTION</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5em;margin-bottom:1.5em;max-width:500px;">
+    <div style="text-align:center;"><div style="color:#666;font-size:0.7em;letter-spacing:0.2em;">SCORE</div><div id="finalScore" style="font-size:2em;color:#ff3333;">0</div></div>
+    <div style="text-align:center;"><div style="color:#666;font-size:0.7em;letter-spacing:0.2em;">WAVE</div><div id="finalWave" style="font-size:2em;color:#ffaa00;">1</div></div>
+    <div style="text-align:center;"><div style="color:#666;font-size:0.7em;letter-spacing:0.2em;">KILLS</div><div id="finalKills" style="font-size:2em;color:#ff6600;">0</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1em;margin-bottom:1.5em;max-width:400px;">
+    <div style="text-align:center;"><div style="color:#666;font-size:0.65em;letter-spacing:0.2em;">HEADSHOTS</div><div id="finalHeadshots" style="font-size:1.4em;color:#ffff00;">0</div></div>
+    <div style="text-align:center;"><div style="color:#666;font-size:0.65em;letter-spacing:0.2em;">BEST COMBO</div><div id="finalCombo" style="font-size:1.4em;color:#ff00ff;">0</div></div>
+  </div>
+  <div id="highScoreMsg" style="color:#ffdd00;font-size:1.1em;letter-spacing:0.15em;margin-bottom:1em;display:none;">★ NEW HIGH SCORE ★</div>
+  <div style="color:#555;font-size:0.7em;margin-bottom:1.5em;">HIGH SCORE: <span id="highScoreVal">0</span></div>
+  <button id="respawnBtn">REDEPLOY</button>
+</div>
+
+<!-- ── Pause Menu ── -->
+<div id="pauseMenu">
+  <h2>PAUSED</h2>
+  <button id="resumeBtn">RESUME</button>
+      <a href="https://tenet-5.github.io" target="_blank" rel="noopener"
+        style="margin-top:1rem;color:#ffcc00;font-family:'Courier New',monospace;font-size:0.9em;letter-spacing:0.1em;text-decoration:none;border:1px solid #ffaa0066;padding:8px 20px;">
+        🍁 TENET-5.github.io — THE REAL FIGHT
+      </a>
+      <div style="color:#444;font-size:0.7em;margin-top:0.5rem;letter-spacing:0.1em;">TENET5 STUDIOS</div>
+</div>
+
+<!-- ── Side UI ── -->
+<canvas id="minimap"></canvas>
+
+<!-- Drone Radar -->
+<div id="droneRadar">
+  <div class="drone-icon">⚠🛸</div>
+  <div class="drone-count" id="droneCount">0 DRONES</div>
+</div>
+<div id="killFeed"></div>
+<div id="weaponName"></div>
+<div id="grenadeHud">🦆 DUCKS: <span id="grenadeCount">3</span></div>
+<div id="empHud" style="position:fixed;bottom:42px;right:20px;z-index:51;font-size:1em;color:#00aaff;display:none;text-shadow:0 0 10px #0066ff;"><span id="empCount">⚡1</span></div>
+<div id="comboText"></div>
+<div id="objectivesHud">COMMAND: [_]</div>
+
+<!-- ── Wave Intro Overlay ── -->
+<div id="waveIntroOverlay" style="display:none;position:fixed;inset:0;z-index:180;pointer-events:none;
+  align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.45);">
+  <style>
+    .wi-inner { text-align:center; font-family:'Courier New',monospace; letter-spacing:0.15em; }
+    .wi-label { font-size:0.9em; color:#cc9966; margin-bottom:0.3em; }
+    .wi-num   { font-size:3.5em; color:#fff; font-weight:700; text-shadow:0 0 40px #ff3333; }
+    .wi-sub   { font-size:0.8em; color:#aaa; margin-top:0.4em; }
+    .wi-boss .wi-num { color:#ff2200; text-shadow:0 0 60px #ff0000,0 0 120px #cc0000; }
+    .wi-boss .wi-label { color:#ff6600; }
+  </style>
+</div>
+
+<!-- ── Multiplayer HUD ── -->
+<div id="player-list"></div>
+<div id="player-count" style="position:fixed;top:10px;right:170px;color:#33ff33;font-family:monospace;font-size:0.85em;z-index:100;display:none;text-shadow:0 0 8px #00ff00;letter-spacing:0.1em;">PLAYERS: 1</div>
+<div id="respawn-timer" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#ff3333;font-size:3em;font-family:'Courier New',monospace;z-index:200;text-shadow:0 0 30px #ff0000;letter-spacing:0.15em;text-align:center;"></div>
+
+<!-- ── Entry Point ── -->
+<script>
+// Lore card rotation
+(function() {
+  const cards = document.querySelectorAll('.lore-card');
+  const dots = document.querySelectorAll('.lore-dot');
+  let cur = 0;
+  setInterval(() => {
+    cards[cur].style.display = 'none';
+    dots[cur].classList.remove('active');
+    cur = (cur + 1) % cards.length;
+    cards[cur].style.display = 'block';
+    dots[cur].classList.add('active');
+  }, 5000);
+})();
+</script></body>
+</html>
+
