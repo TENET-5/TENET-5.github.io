@@ -9,6 +9,11 @@ const tracers = [];
 let raycaster;
 let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
 let leanLeft = false, leanRight = false;
+let isSprinting = false;
+let sprintTime = 0;        // accumulated sprint duration for screen effects
+let bobTime = 0;           // head bob accumulator
+let prevSpeed = 0;         // for body check detection
+const BODYCHECK_THRESHOLD = 380; // units/s to trigger body check
 let prevTime = performance.now();
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
@@ -143,15 +148,37 @@ function initFPS() {
     if (!container) return;
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000); 
-    scene.fog = new THREE.FogExp2(0x000000, 0.06); 
+    scene.background = new THREE.Color(0x111122);
+    scene.fog = new THREE.FogExp2(0x111122, 0.008);
 
-    camera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 10, 80);
 
-    const chestLight = new THREE.SpotLight(0xffffff, 5.0, 180, Math.PI/4, 0.5, 1);
-    chestLight.castShadow = true; chestLight.shadow.mapSize.width = 1024; chestLight.shadow.mapSize.height = 1024;
+    // AMBIENT — so you can actually see
+    scene.add(new THREE.AmbientLight(0x445566, 0.6));
+
+    // MOONLIGHT — illuminates everything from above
+    const moon = new THREE.DirectionalLight(0x8899bb, 1.0);
+    moon.position.set(50, 200, 50);
+    moon.castShadow = true;
+    moon.shadow.mapSize.set(2048, 2048);
+    moon.shadow.camera.near = 1; moon.shadow.camera.far = 500;
+    moon.shadow.camera.left = -200; moon.shadow.camera.right = 200;
+    moon.shadow.camera.top = 200; moon.shadow.camera.bottom = -200;
+    scene.add(moon);
+
+    // FLASHLIGHT — brighter, wider cone
+    const chestLight = new THREE.SpotLight(0xffffff, 8.0, 250, Math.PI/3, 0.4, 1);
+    chestLight.castShadow = true; chestLight.shadow.mapSize.set(1024, 1024);
     camera.add(chestLight); camera.add(chestLight.target); chestLight.target.position.set(0, 0, -1);
+
+    // RED WARNING LIGHTS across the map
+    for (let i = 0; i < 8; i++) {
+        const rl = new THREE.PointLight(0xff2200, 3, 80, 2);
+        rl.position.set((Math.random()-0.5)*300, 15, (Math.random()-0.5)*300);
+        scene.add(rl);
+    }
+
     scene.add(camera);
 
     controls = new THREE.PointerLockControls(camera, document.body);
@@ -199,6 +226,7 @@ function initFPS() {
             case 'KeyQ': leanLeft = true; break;
             case 'KeyE': leanRight = true; break;
             case 'KeyR': handleReload(); break;
+            case 'ShiftLeft': case 'ShiftRight': isSprinting = true; break;
             case 'Digit1': switchWeapon(0); break;
             case 'Digit2': if(currentWave >= 3) switchWeapon(1); break;
             case 'Digit3': if(currentWave >= 6) switchWeapon(2); break;
@@ -213,6 +241,7 @@ function initFPS() {
             case 'ArrowRight': case 'KeyD': moveRight = false; break;
             case 'KeyQ': leanLeft = false; break;
             case 'KeyE': leanRight = false; break;
+            case 'ShiftLeft': case 'ShiftRight': isSprinting = false; break;
         }
     };
 
@@ -407,24 +436,15 @@ function spawnDecal(pos) {
 
 function startIntroSequence() {
     if (gameState !== "INTRO") return;
-    if (hasPlayedBefore) {
-        // Skip intro on replay — go straight to combat
-        gameState = "COMBAT";
-        hasPlayedBefore = true;
-        startWave(1);
-        return;
-    }
+    // SKIP INTRO — go straight to combat. Nobody wants to wait 20 seconds.
+    gameState = "COMBAT";
     hasPlayedBefore = true;
-    introDialogue.forEach(diag => { setTimeout(() => triggerQuote(diag.text, diag.text.includes("BLOGGINS") ? '#ffaa00' : '#ff0000'), diag.time); });
-    setTimeout(() => { gameState = "ACQUIRE_WEAPON"; triggerQuote("CLICK TO SEIZE YOUR WEAPON", "#ffffff"); }, 20000);
+    hasChainGun = true;
+    triggerQuote("HOSTILES DETECTED — WEAPONS FREE", "#ff3333");
+    startWave(1);
 }
 
-document.addEventListener('mousedown', () => {
-    if (gameState === "ACQUIRE_WEAPON" && controls.isLocked) {
-        hasChainGun = true; gameState = "COMBAT";
-        startWave(1);
-    }
-});
+// ACQUIRE_WEAPON state removed — game goes straight to combat
 
 function handleReload() {
     const w = weaponStats[currentWeaponIdx];
@@ -661,7 +681,7 @@ function animate() {
         velocity.x -= velocity.x * 8.0 * delta; velocity.z -= velocity.z * 8.0 * delta; velocity.y -= 9.8 * 120.0 * delta;
         direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); direction.normalize(); 
 
-        const speed = 250.0;
+        const speed = isSprinting ? 500.0 : 250.0;
         if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
         if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
         
