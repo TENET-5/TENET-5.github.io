@@ -222,13 +222,25 @@ canvas#gameCanvas { display: block; }
   <div style="position:absolute;width:2px;height:2px;background:rgba(255,80,80,0.9);left:50%;top:50%;transform:translate(-50%,-50%)"></div>
 </div>
 <div id="hitMarker">✕</div>
+<div id="mkFinisher" style="position:fixed;inset:0;z-index:99;display:none;background:center/contain no-repeat;pointer-events:none;"></div>
 
 <div id="dmgFlash"></div>
 <div id="lowHealthPulse"></div>
 <div id="waveBanner">WAVE 1</div>
 <div id="deathScreen">
-  <h2>K.I.A.</h2>
-  <p>S. 504 Counts: <span id="finalScore">0</span> &nbsp;|&nbsp; Wave: <span id="finalWave">1</span> &nbsp;|&nbsp; Eliminations: <span id="finalKills">0</span></p>
+  <h2 style="text-shadow:0 0 40px #ff0000,0 0 80px #cc0000;">K.I.A.</h2>
+  <div style="font-size:0.8em;color:#ff6666;letter-spacing:0.3em;margin-bottom:1.5em;">KILLED IN ACTION</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5em;margin-bottom:1.5em;max-width:500px;">
+    <div style="text-align:center;"><div style="color:#666;font-size:0.7em;letter-spacing:0.2em;">SCORE</div><div id="finalScore" style="font-size:2em;color:#ff3333;">0</div></div>
+    <div style="text-align:center;"><div style="color:#666;font-size:0.7em;letter-spacing:0.2em;">WAVE</div><div id="finalWave" style="font-size:2em;color:#ffaa00;">1</div></div>
+    <div style="text-align:center;"><div style="color:#666;font-size:0.7em;letter-spacing:0.2em;">KILLS</div><div id="finalKills" style="font-size:2em;color:#ff6600;">0</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1em;margin-bottom:1.5em;max-width:400px;">
+    <div style="text-align:center;"><div style="color:#666;font-size:0.65em;letter-spacing:0.2em;">HEADSHOTS</div><div id="finalHeadshots" style="font-size:1.4em;color:#ffff00;">0</div></div>
+    <div style="text-align:center;"><div style="color:#666;font-size:0.65em;letter-spacing:0.2em;">BEST COMBO</div><div id="finalCombo" style="font-size:1.4em;color:#ff00ff;">0</div></div>
+  </div>
+  <div id="highScoreMsg" style="color:#ffdd00;font-size:1.1em;letter-spacing:0.15em;margin-bottom:1em;display:none;">★ NEW HIGH SCORE ★</div>
+  <div style="color:#555;font-size:0.7em;margin-bottom:1.5em;">HIGH SCORE: <span id="highScoreVal">0</span></div>
   <button id="respawnBtn">REDEPLOY</button>
 </div>
 <div id="pauseMenu">
@@ -454,7 +466,11 @@ const WEAPONS = {
   sniper: { name: 'SNIPER RIFLE', mag: 5, damage: 150, fireRate: 1200, reloadTime: 2500, spread: 0.002, pellets: 1, color: 0x2a2a2a },
   lmg: { name: 'LIGHT MG', mag: 100, damage: 18, fireRate: 70, reloadTime: 3500, spread: 0.025, pellets: 1, color: 0x444433 },
   flamethrower: { name: 'FLAMETHROWER', mag: 250, damage: 6, fireRate: 50, reloadTime: 4000, spread: 0.25, pellets: 1, color: 0xff4400 },
-  chainsaw: { name: 'CHAINSAW', mag: 999, damage: 35, fireRate: 80, reloadTime: 100, spread: 0.1, pellets: 1, color: 0xaa1111 }
+  chainsaw: { name: 'CHAINSAW', mag: 999, damage: 35, fireRate: 80, reloadTime: 100, spread: 0.1, pellets: 1, color: 0xaa1111 },
+  wand_fire: { name: 'WAND OF FIRE', mag: 50, damage: 1000, fireRate: 800, reloadTime: 1000, spread: 0, pellets: 1, color: 0xff4400, isWand: true },
+  wand_ice: { name: 'WAND OF ICE', mag: 50, damage: 10, fireRate: 100, reloadTime: 1000, spread: 0, pellets: 1, color: 0x00ffff, isWand: true },
+  wand_lightning: { name: 'WAND OF LIGHTNING', mag: 50, damage: 150, fireRate: 400, reloadTime: 1000, spread: 0, pellets: 1, color: 0xffffaa, isWand: true },
+  wand_earth: { name: 'WAND OF EARTH', mag: 50, damage: 50, fireRate: 1000, reloadTime: 1000, spread: 0, pellets: 1, color: 0x88aa44, isWand: true }
 };
 
 // ── Game State ──
@@ -477,7 +493,8 @@ const STATE = {
   captureZones: [], damageIndicators: [],
   screenShake: 0, shakeIntensity: 0,
   damageNumbers: [],
-  crouching: false, regenCooldown: 0
+  crouching: false, regenCooldown: 0,
+  headshots: 0, bestCombo: 0
 };
 
 // ── Map Layout (1=wall, 0=floor, 2=pillar, 3=crate, 4=barrel, 5=sandbag) ──
@@ -2179,6 +2196,7 @@ function killEnemy(enemy, headshot = false, impulse) {
   STATE.kills++;
   const now = performance.now();
   if (now - STATE.lastKillTime < 2000) { STATE.combo = Math.min(STATE.combo + 1, 4); } else { STATE.combo = 1; }
+  STATE.bestCombo = Math.max(STATE.bestCombo || 0, STATE.combo);
   STATE.lastKillTime = now;
   STATE.comboTimer = 2;
   enemy.dead = true;
@@ -2215,7 +2233,8 @@ function killEnemy(enemy, headshot = false, impulse) {
   playSound('death');
   if (headshot) {
     playSound('headshot');
-    addKillFeed('INDICTMENT SEC 504 FILED +' + scoreAdd);
+    STATE.headshots = (STATE.headshots || 0) + 1;
+    addKillFeed('OBLITERATED +' + scoreAdd);
     STATE.screenShake = 0.2;
     STATE.shakeIntensity = 0.05;
   } else {
@@ -2635,9 +2654,23 @@ function damagePlayer(amount, sourceX, sourceZ) {
 
 function die() {
   document.getElementById('deathScreen').style.display = 'flex';
-  document.getElementById('finalScore').textContent = STATE.score;
+  document.getElementById('finalScore').textContent = STATE.score.toLocaleString();
   document.getElementById('finalWave').textContent = STATE.wave;
   document.getElementById('finalKills').textContent = STATE.kills;
+  document.getElementById('finalHeadshots').textContent = STATE.headshots || 0;
+  document.getElementById('finalCombo').textContent = STATE.bestCombo || 0;
+
+  // High score tracking
+  const prevHigh = parseInt(localStorage.getItem('redDusterHighScore') || '0');
+  if (STATE.score > prevHigh) {
+    localStorage.setItem('redDusterHighScore', STATE.score.toString());
+    document.getElementById('highScoreMsg').style.display = 'block';
+    document.getElementById('highScoreVal').textContent = STATE.score.toLocaleString();
+  } else {
+    document.getElementById('highScoreMsg').style.display = 'none';
+    document.getElementById('highScoreVal').textContent = prevHigh.toLocaleString();
+  }
+
   document.exitPointerLock();
 }
 
@@ -2993,6 +3026,11 @@ window.addEventListener('keydown', e => {
   if (e.key === '5') switchWeapon('lmg');
   if (e.key === '6') switchWeapon('flamethrower');
   if (e.key === '7') switchWeapon('chainsaw');
+  if (e.key === '8') switchWeapon('wand_fire');
+  if (e.key === '9') switchWeapon('wand_ice');
+  if (e.key === '0') switchWeapon('wand_lightning');
+  if (e.key === '-') switchWeapon('wand_earth');
+  if (e.code === 'Space') { e.preventDefault(); terroristKick(); }
   if (e.key === 'Tab') {
     e.preventDefault();
     const mm = document.getElementById('minimap');
@@ -3040,12 +3078,12 @@ window.addEventListener('contextmenu', e => {
 // ── FULL AUTO — hold mouse to spray ──
 let mouseHeld = false;
 window.addEventListener('mousedown', e => {
-  if (e.button === 0) { mouseHeld = true; initAudio(); if (STATE.started && !STATE.paused) shoot(); }
-  if (e.button === 2 && STATE.weapon !== 'sniper') STATE.aiming = true;
+  // P77: Left-Click = Finisher, Right-Click = Shoot
+  if (e.button === 2) { mouseHeld = true; initAudio(); if (STATE.started && !STATE.paused) shoot(); }
+  if (e.button === 0 && STATE.started && !STATE.paused && STATE.alive) meleeFinisher();
 });
 window.addEventListener('mouseup', e => {
-  if (e.button === 0) mouseHeld = false;
-  if (e.button === 2 && STATE.weapon !== 'sniper') STATE.aiming = false;
+  if (e.button === 2) mouseHeld = false;
 });
 
 window.addEventListener('resize', () => {
