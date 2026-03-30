@@ -35,6 +35,7 @@ let currentWave = 1;
 const maxWaves = 3;
 let kills = 0;
 let enemiesLeft = 0;
+let spawnBounds = 1200;
 
 function generateNoiseTexture(baseColor, noiseColors, scale=1) {
     const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
@@ -187,7 +188,7 @@ function initFPS() {
     rustTex = generateNoiseTexture('#332222', ['#442222','#221111','#553311'], 1); rustTex.repeat.set(2, 2);
     gridTex = generateNoiseTexture('#050505', ['#220000','#110000','#330000'], 4); gridTex.repeat.set(20, 20);
 
-    buildOpenTown();
+    loadMission(window._mission || 1);
     createC7Rifle();
     // Do not spawn enemies here, handled by INTRO -> COMBAT state
 
@@ -256,6 +257,133 @@ function buildOpenTown() {
     table.position.set(0, 3, 70); table.castShadow = true; table.receiveShadow = true; scene.add(table); objects.push(table);
 }
 
+function loadMission(id) {
+    // Generate the generic floor regardless of mission
+    const floorGeo = new THREE.PlaneGeometry(1500, 1500, 100, 100); floorGeo.rotateX(-Math.PI / 2);
+    let pos = floorGeo.attributes.position; for (let i = 0; i < pos.count; i++) { pos.setY(i, Math.random() * 0.4); } 
+    const floor = new THREE.Mesh(floorGeo, new THREE.MeshStandardMaterial({ map: gridTex, wireframe: false, roughness: 0.9 }));
+    floor.receiveShadow = true; scene.add(floor);
+
+    if (id === 1 || id === 5) {
+        spawnBounds = 1200;
+        buildOpenTown();
+    } else if (id === 2) {
+        spawnBounds = 400; // tighter corridor
+        buildParliament();
+    } else if (id === 3) {
+        spawnBounds = 600; // long strip
+        buildRedHighway();
+    } else if (id === 4) {
+        spawnBounds = 800; // downtown core
+        buildCNTower();
+    } else {
+        spawnBounds = 1200;
+        buildOpenTown();
+    }
+}
+
+function buildParliament() {
+    const buildingMat = new THREE.MeshStandardMaterial({ map: concTex, roughness: 1.0, color: 0x777777 });
+    const rustMat = new THREE.MeshStandardMaterial({ map: rustTex, roughness: 0.8 });
+    
+    // Wellington Street Corridor
+    for (let z = -400; z <= 200; z += 100) {
+        for (let x of [-150, 150]) {
+            const bGeo = new THREE.BoxGeometry(100, 60 + Math.random()*20, 80);
+            const b = new THREE.Mesh(bGeo, buildingMat);
+            b.position.set(x, 30, z); b.castShadow = true; b.receiveShadow = true;
+            scene.add(b); objects.push(b);
+        }
+    }
+    
+    // Blockade barriers
+    for(let i=0; i<15; i++) {
+        const barrier = new THREE.Mesh(new THREE.BoxGeometry(15, 8, 15), rustMat);
+        barrier.position.set((Math.random()-0.5)*150, 4, (Math.random()-0.5)*300);
+        barrier.rotation.y = Math.random() * Math.PI;
+        scene.add(barrier); objects.push(barrier);
+    }
+    
+    // The Peace Tower
+    const towerMat = new THREE.MeshStandardMaterial({ map: rustTex, color: 0x444444 });
+    const towerBase = new THREE.Mesh(new THREE.BoxGeometry(80, 150, 80), towerMat);
+    towerBase.position.set(0, 75, -500); towerBase.castShadow = true; towerBase.receiveShadow = true;
+    scene.add(towerBase); objects.push(towerBase);
+    
+    const towerSpire = new THREE.Mesh(new THREE.ConeGeometry(40, 100, 4), towerMat);
+    towerSpire.position.set(0, 200, -500); towerSpire.rotation.y = Math.PI/4;
+    scene.add(towerSpire); objects.push(towerSpire);
+}
+
+function buildRedHighway() {
+    const rustMat = new THREE.MeshStandardMaterial({ map: rustTex, roughness: 0.8 });
+    
+    // Massive abandoned convoy blockade
+    for(let i=0; i<40; i++) {
+        const isTruck = Math.random() > 0.5;
+        const width = isTruck ? 15 : 10;
+        const height = isTruck ? 15 : 8;
+        const length = isTruck ? 40 : 20;
+        const v = new THREE.Mesh(new THREE.BoxGeometry(width, height, length), rustMat);
+        
+        const zPos = (Math.random()-0.5) * 800;
+        const xPos = (Math.random()-0.5) * 200;
+        v.position.set(xPos, height/2, zPos);
+        v.rotation.y = Math.random() * Math.PI / 4; // slight tilt
+        v.castShadow = true; v.receiveShadow = true;
+        scene.add(v); objects.push(v);
+    }
+    
+    // Concrete divider
+    const divGeo = new THREE.BoxGeometry(4, 6, 1500);
+    const divider = new THREE.Mesh(divGeo, new THREE.MeshStandardMaterial({ color: 0x222222 }));
+    divider.position.set(0, 3, 0); divider.castShadow = true; divider.receiveShadow = true;
+    scene.add(divider); objects.push(divider);
+}
+
+function buildCNTower() {
+    const buildingMat = new THREE.MeshStandardMaterial({ map: concTex, roughness: 1.0, color: 0x333333 });
+    const rustMat = new THREE.MeshStandardMaterial({ map: rustTex, roughness: 0.8 });
+    
+    // Downtown clustered grid
+    for (let x = -400; x <= 400; x += 120) {
+        for (let z = -400; z <= 400; z += 120) {
+            if (Math.abs(x) < 150 && Math.abs(z) < 150) continue; // Clear central plaza
+            if (Math.random() < 0.3) continue;
+            
+            const bGeo = new THREE.BoxGeometry(60, 100 + Math.random() * 100, 60);
+            const b = new THREE.Mesh(bGeo, buildingMat);
+            b.position.set(x + (Math.random()-0.5)*20, 50, z + (Math.random()-0.5)*20);
+            b.castShadow = true; b.receiveShadow = true;
+            scene.add(b); objects.push(b);
+        }
+    }
+    
+    // Colossal CN Tower Structure
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.5, metalness: 0.5 });
+    
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(40, 60, 300, 16), towerMat);
+    base.position.set(0, 150, -200); base.castShadow = true; base.receiveShadow = true;
+    scene.add(base); objects.push(base);
+    
+    const observationDeck = new THREE.Mesh(new THREE.TorusGeometry(50, 15, 16, 32), towerMat);
+    observationDeck.position.set(0, 300, -200); observationDeck.rotation.x = Math.PI/2;
+    observationDeck.castShadow = true;
+    scene.add(observationDeck); objects.push(observationDeck);
+    
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 200, 8), towerMat);
+    spire.position.set(0, 400, -200); spire.castShadow = true;
+    scene.add(spire); objects.push(spire);
+    
+    // Scattered debris
+    for(let i=0; i<20; i++) {
+        const debris = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 10), rustMat);
+        debris.position.set((Math.random()-0.5)*200, 2.5, (Math.random()-0.5)*200);
+        debris.rotation.y = Math.random() * Math.PI;
+        scene.add(debris); objects.push(debris);
+    }
+}
+
 function createC7Rifle() {
     activeWeapon = new THREE.Group();
     activeWeapon.position.set(0, 7, 70); 
@@ -287,7 +415,7 @@ function createC7Rifle() {
 function spawnSingleEnemy(forcePos) {
     const enemy = new THREE.Group();
     // Vastly increased spawn dispersion to match open 1500x1500 town bounds
-    enemy.position.copy(forcePos || new THREE.Vector3((Math.random() - 0.5) * 1200, 0, (Math.random() - 0.5) * 1200));
+    enemy.position.copy(forcePos || new THREE.Vector3((Math.random() - 0.5) * spawnBounds, 0, (Math.random() - 0.5) * spawnBounds));
     
     const torso = new THREE.Mesh(new THREE.BoxGeometry(4, 7, 3), new THREE.MeshStandardMaterial({ color: 0x660000, roughness: 0.9 }));
     torso.position.y = 3.5; torso.castShadow = true; torso.receiveShadow = true;
