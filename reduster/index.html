@@ -127,6 +127,36 @@
     #waveBanner { position: fixed; top: 30%; left: 50%; transform: translate(-50%,-50%); z-index: 55; font-size: 3em; color: #ff3333; display: none; text-shadow: 0 0 40px #ff0000; letter-spacing: 0.2em; pointer-events: none; }
     #nvgOverlay { position: fixed; inset: 0; z-index: 43; pointer-events: none; display: none; background: radial-gradient(rgba(0,0,0,0), rgba(0,20,0,0.8)); backdrop-filter: sepia(100%) hue-rotate(70deg) saturate(300%) contrast(160%) brightness(1.5); }
     #nvgOverlay::after { content:''; position:absolute; inset:0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,50,0,0.2) 2px, rgba(0,50,0,0.2) 4px); opacity:0.4; }
+    /* ── Elcan Specter DR ADS overlay ── */
+    #elcanOverlay {
+      position: fixed; inset: 0; z-index: 44; pointer-events: none;
+      display: none; align-items: center; justify-content: center;
+    }
+    /* Black vignette mask — opaque surround, clear centre circle */
+    #elcanOverlay::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle 18vmin at 50% 50%,
+        transparent 0%, transparent 17.5vmin,
+        rgba(0,0,0,0.97) 18.5vmin, rgba(0,0,0,0.97) 100%);
+    }
+    /* Scope tube rim ring */
+    #elcanOverlay::after {
+      content: '';
+      position: absolute;
+      width: 36vmin; height: 36vmin;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2.5px solid rgba(180,200,180,0.25);
+      box-shadow: 0 0 0 1.5px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.3);
+    }
+    /* Elcan Specter DR Chevron reticle (SVG canvas) */
+    #elcanReticle {
+      position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: 200px; height: 200px;
+      pointer-events: none;
+    }
     #deathScreen { position: fixed; inset: 0; z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(80,0,0,0.85); }
     #deathScreen h2 { font-size: 3em; color: #ff0000; margin-bottom: 0.5em; }
     #deathScreen p { color: #ccc; margin-bottom: 1em; font-size: 1.2em; }
@@ -163,7 +193,7 @@
     canvas { display: block; }
     @keyframes bleedPulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 </style>
-  <script type="module" crossorigin src="/reduster/assets/index-cX7Zxf6P.js"></script>
+  <script type="module" crossorigin src="/reduster/assets/index-Y4G1AIeo.js"></script>
   <link rel="modulepreload" crossorigin href="/reduster/assets/three-vendor-6Q66QO8c.js">
   <link rel="modulepreload" crossorigin href="/reduster/assets/peer-Dr3pS1qk.js">
 </head>
@@ -337,6 +367,25 @@
 <div id="nvgOverlay"></div>
 <div id="dmgFlash"></div>
 <div id="lowHealthPulse"></div>
+<!-- Elcan Specter DR scope overlay -->
+<div id="elcanOverlay">
+  <svg id="elcanReticle" viewBox="-100 -100 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Horizontal stadia lines (ranging) -->
+    <line x1="-38" y1="0" x2="-8" y2="0" stroke="#e8ffe0" stroke-width="0.8" opacity="0.75"/>
+    <line x1="8"  y1="0" x2="38"  y2="0" stroke="#e8ffe0" stroke-width="0.8" opacity="0.75"/>
+    <!-- Vertical post (top) -->
+    <line x1="0" y1="-38" x2="0" y2="-8" stroke="#e8ffe0" stroke-width="0.8" opacity="0.75"/>
+    <!-- Chevron (characteristic Elcan DR reticle) -->
+    <polyline points="-7,8 0,18 7,8" fill="none" stroke="#e8ffe0" stroke-width="1.4" stroke-linejoin="round" opacity="0.95"/>
+    <!-- Centre dot -->
+    <circle cx="0" cy="0" r="0.9" fill="#e8ffe0" opacity="0.90"/>
+    <!-- Range stadia marks on lower post -->
+    <line x1="-3" y1="28" x2="3" y2="28" stroke="#e8ffe0" stroke-width="0.7" opacity="0.55"/>
+    <line x1="-2" y1="38" x2="2" y2="38" stroke="#e8ffe0" stroke-width="0.7" opacity="0.45"/>
+    <!-- Magnification ring ticks (simulating tube glass edge) -->
+    <circle cx="0" cy="0" r="72" fill="none" stroke="rgba(180,200,180,0.12)" stroke-width="1"/>
+  </svg>
+</div>
 
 <!-- ── Banners ── -->
 <div id="waveBanner">WAVE 1</div>
