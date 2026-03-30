@@ -3,85 +3,169 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RED DUSTER: Anti-Communist Training Simulator</title>
+  <title>Red Duster — Anti-Communist Training Simulator | TENET-5 Studios</title>
+  <meta name="description" content="Red Duster: Co-op tactical survival FPS. FarCry + DayZ + Squad realism in your browser. No install. Canadian veterans defend the wilderness against communist occupation.">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #050505; color: #fff; font-family: 'Courier New', monospace;
-      margin: 0; padding: 0; min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background-image: radial-gradient(circle at center, rgba(30,0,0,0.8) 0%, #000 80%);
+      background: #050505; color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh; overflow-x: hidden;
     }
-    .container {
-      max-width: 800px; text-align: center; padding: 40px;
-      border: 1px solid #ff3333; background: rgba(10,0,0,0.8);
-      box-shadow: 0 0 30px rgba(255,0,0,0.2) inset, 0 0 20px rgba(255,0,0,0.5);
-      position: relative; overflow: hidden;
+    .bg {
+      position: fixed; inset: 0;
+      background: radial-gradient(circle at 60% 40%, rgba(60,0,0,0.7) 0%, #050505 75%);
+      z-index: 0;
     }
     .scanlines {
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.25) 50%);
-      background-size: 100% 4px; pointer-events: none; z-index: 2; opacity: 0.6;
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
     }
+    .content { position: relative; z-index: 10; max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
+
+    /* Header */
+    .header { border-bottom: 2px solid #330000; padding-bottom: 2rem; margin-bottom: 3rem; }
+    .studio { font-size: 0.8rem; letter-spacing: 0.4em; color: #cc4444; margin-bottom: 0.5rem; text-transform: uppercase; }
     h1 {
-      font-family: 'Black Ops One', system-ui; font-size: 4rem; color: #ff2222;
-      text-shadow: 0 0 20px rgba(255,0,0,0.5); margin-bottom: 5px;
-      letter-spacing: 2px; position: relative; z-index: 10;
+      font-family: 'Black Ops One', system-ui;
+      font-size: clamp(3rem, 8vw, 6rem);
+      color: #ff2222;
+      text-shadow: 0 0 30px rgba(255,0,0,0.4), 0 2px 0 #440000;
+      letter-spacing: 2px; line-height: 1;
     }
-    h2 {
-      font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; color: #cc8855;
-      letter-spacing: 0.3em; margin-bottom: 30px; border-bottom: 2px solid #551111;
-      padding-bottom: 15px; position: relative; z-index: 10;
+    .tagline { font-size: 1.2rem; color: #cc8855; letter-spacing: 0.2em; margin-top: 0.5rem; font-weight: 600; }
+
+    /* Play section */
+    .play-section { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 3rem; }
+    .play-main { flex: 1; min-width: 280px; }
+    .play-btn {
+      display: inline-block;
+      background: #cc0000; color: #fff;
+      font-family: 'Black Ops One', system-ui;
+      font-size: 1.6rem; letter-spacing: 3px;
+      padding: 1.1rem 3rem; text-decoration: none;
+      border: none; cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      transition: background 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 20px rgba(200,0,0,0.4);
+      text-transform: uppercase;
     }
-    .lore {
-      font-size: 1rem; line-height: 1.6; color: #ccc; margin-bottom: 40px;
-      text-align: justify; position: relative; z-index: 10;
+    .play-btn:hover { background: #ff0000; box-shadow: 0 0 40px rgba(255,0,0,0.7); }
+
+    .play-sub { margin-top: 1rem; font-size: 0.9rem; color: #667; letter-spacing: 0.1em; }
+    .play-sub span { color: #44aa44; }
+
+    /* Feature grid */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+    .feat {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,0,0,0.15);
+      padding: 1.4rem; border-left: 3px solid #cc0000;
     }
-    .alert {
-      color: #ffaa00; font-weight: bold; border-left: 4px solid #ffaa00;
-      padding-left: 15px; margin-bottom: 40px; text-align: left;
-      position: relative; z-index: 10;
-    }
-    .launch-btn {
-      display: inline-block; background: #c41e3a; color: #fff;
-      padding: 15px 40px; font-family: 'Rajdhani', sans-serif;
-      font-size: 1.8rem; font-weight: 700; text-decoration: none;
-      letter-spacing: 0.15em; border: 2px solid #ff3333;
-      transition: all 0.2s; position: relative; z-index: 10;
-    }
-    .launch-btn:hover {
-      background: #ff2222; box-shadow: 0 0 25px rgba(255,0,0,0.8);
-      transform: scale(1.05);
-    }
-    .back-link {
-      display: inline-block; margin-top: 30px; color: #888; text-decoration: none;
-      position: relative; z-index: 10;
-    }
-    .back-link:hover { color: #fff; text-decoration: underline; }
+    .feat-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .feat h3 { font-size: 1rem; letter-spacing: 0.15em; color: #ff8888; margin-bottom: 0.4rem; text-transform: uppercase; }
+    .feat p { font-size: 0.85rem; color: #999; line-height: 1.5; }
+
+    /* Specs */
+    .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+    .spec { text-align: center; padding: 1rem; background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.1); }
+    .spec-val { font-family: 'Black Ops One'; font-size: 2rem; color: #ff3333; }
+    .spec-label { font-size: 0.75rem; color: #666; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 0.3rem; }
+
+    /* Controls */
+    .controls-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 3rem; }
+    .controls-table th { text-align: left; padding: 0.6rem 1rem; background: rgba(255,0,0,0.1); color: #ff4444; letter-spacing: 0.15em; text-transform: uppercase; }
+    .controls-table td { padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #aaa; }
+    .controls-table td:first-child { color: #ffcc44; font-family: monospace; font-size: 1rem; }
+
+    /* Footer */
+    footer { border-top: 1px solid #1a0000; padding-top: 2rem; font-size: 0.8rem; color: #444; letter-spacing: 0.1em; }
+    footer a { color: #cc3333; text-decoration: none; }
   </style>
 </head>
 <body>
+  <div class="bg"></div>
+  <div class="scanlines"></div>
+  <div class="content">
 
-  <div class="container">
-    <div class="scanlines"></div>
-    <h1>RED DUSTER</h1>
-    <h2>ANTI-COMMUNIST TRAINING SIMULATOR</h2>
-
-    <div class="lore">
-      <p>Young Castro's Vanguard has seized key Canadian infrastructure. The institutional safety mechanisms are compromised. The federal apparatus has authorized the demographic liquidation of the civilian population under the guise of an "emergency mandate."</p>
-      <p style="margin-top: 15px;">It is time to take back the nation. Under Canadian law, enemy spies operating on Canadian soil without uniform are functioning as unlawful enemy combatants. Upon detection of a spy operating to kill Canadians, citizens face a recognized act of defensive war and are justified in utilizing lethal force on the spot under the doctrine of absolute self-defense.</p>
-      <p style="margin-top: 15px; color: #ff5555; text-shadow: 0 0 10px #ff0000;">Operating under the TENET-5 Base 42 logic protocol, this tactical simulator is designed to hone combat reflexes, situational awareness, and the moral fortitude required to neutralize these hostile subversives.</p>
+    <div class="header">
+      <div class="studio">TENET-5 Studios · Canadian Forces Veteran Project</div>
+      <h1>RED DUSTER</h1>
+      <div class="tagline">ANTI-COMMUNIST TRAINING SIMULATOR</div>
     </div>
 
-    <div class="alert">
-      > SYSTEM NOTICE: This simulation employs LIRIL NPU TRI-Gate AI for dynamic enemy maneuver computation. Network connection required for advanced squad telemetry. Ensure local port 11840 is initialized for maximum fidelity.
+    <div class="play-section">
+      <div class="play-main">
+        <a class="play-btn" href="https://tenet-5.github.io/reduster/" target="_blank">▶ PLAY NOW — FREE</a>
+        <div class="play-sub">
+          Browser-native · No download · No install<br>
+          <span>✓ Works in Chrome / Edge / Firefox</span>
+        </div>
+      </div>
     </div>
 
-    <a href="reduster/index.html" class="launch-btn">ENTER SIMULATION</a>
-    
-    <br>
-    <a href="index.html" class="back-link">Return to TENET-5 Archive</a>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-icon">🍁</div>
+        <h3>Open World</h3>
+        <p>10 km² procedural Canadian wilderness. Boreal forest, frozen lakes, mountain passes, small towns under occupation.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🎯</div>
+        <h3>Squad Realism</h3>
+        <p>Canadian Forces weapons: C7A2, C8 Carbine, C6 GPMG, C14 Timberwolf. Realistic ballistics, suppression, injury system.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🤝</div>
+        <h3>Co-op Multiplayer</h3>
+        <p>Up to 8 players. P2P — no server needed. Squad roles: Rifleman, Medic, Engineer, Marksman, Anti-Armour.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🏕</div>
+        <h3>DayZ Survival</h3>
+        <p>Hunger, thirst, hypothermia, arterial bleeding. Death has weight. Loot scarcity. Base building and sleeping bags.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🏴</div>
+        <h3>Liberation System</h3>
+        <p>FarCry-style: capture outposts, raise the Red Ensign, push The Collective back. Every objective frees more of Canada.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🌩</div>
+        <h3>Dynamic World</h3>
+        <p>Day/night cycle. Weather: blizzard, fog, rain. Night vision. Avro Arrow airstrike. Communist drones and armoured vehicles.</p>
+      </div>
+    </div>
+
+    <div class="specs-grid">
+      <div class="spec"><div class="spec-val">8</div><div class="spec-label">Max Players</div></div>
+      <div class="spec"><div class="spec-val">10km²</div><div class="spec-label">Map Size</div></div>
+      <div class="spec"><div class="spec-val">5+</div><div class="spec-label">Weapons</div></div>
+      <div class="spec"><div class="spec-val">FREE</div><div class="spec-label">No Install</div></div>
+    </div>
+
+    <table class="controls-table">
+      <thead><tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>WASD</td><td>Move</td><td>SHIFT</td><td>Sprint / Body Check</td></tr>
+        <tr><td>MOUSE</td><td>Aim</td><td>R</td><td>Reload / Refuel vehicle</td></tr>
+        <tr><td>LMB</td><td>Fire</td><td>E</td><td>Interact / Enter vehicle</td></tr>
+        <tr><td>RMB</td><td>Aim Down Sights</td><td>F</td><td>Hold: Airstrike laser</td></tr>
+        <tr><td>G</td><td>C13 Grenade</td><td>4</td><td>Apply IFAK tourniquet</td></tr>
+        <tr><td>H</td><td>Smoke Grenade</td><td>N</td><td>Night Vision Goggles</td></tr>
+        <tr><td>TAB</td><td>Inventory</td><td>M</td><td>Full map</td></tr>
+        <tr><td>B</td><td>Place campfire</td><td>ESC</td><td>Pause</td></tr>
+      </tbody>
+    </table>
+
+    <footer>
+      <p>Red Duster is built by a Canadian Forces veteran. All weapon designations are Canadian Armed Forces nomenclature.
+      &nbsp;·&nbsp; <a href="https://github.com/TENET-5/reduster" target="_blank">Source on GitHub</a>
+      &nbsp;·&nbsp; <a href="/">← TENET-5 Main Site</a>
+      </p>
+    </footer>
+
   </div>
-
 </body>
 </html>
+
