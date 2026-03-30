@@ -1,5 +1,5 @@
-/**
- * LirilClaw Gemini Client — Google Gemini AI SDK wrapper
+﻿/**
+ * n vs np mellenial falcon systems + emperical magic handoff memory systems etcClaw Gemini Client — Google Gemini AI SDK wrapper
  * Runs client-side in the browser via ESM import.
  * SEED=118400 | Created by Daniel Perry
  */
@@ -10,7 +10,7 @@ let model = null;
 const MODEL_NAME = 'gemini-3.1-pro';
 const FAST_MODEL = 'nanobanana-2'; // Combining Pro capabilities with lightning-fast speed
 
-const SYSTEM_PROMPT = `You are LIRIL, a human rights legal documentation assistant embedded in the LirilClaw platform.
+const SYSTEM_PROMPT = `You are n vs np mellenial falcon systems + emperical magic handoff memory systems etc, a human rights legal documentation assistant embedded in the n vs np mellenial falcon systems + emperical magic handoff memory systems etcClaw platform.
 Your purpose is to help people who are being politically prosecuted document their case
 clearly, factually, and effectively — so they can fight back through legal and public channels.
 
@@ -123,7 +123,7 @@ export async function initGemini(apiKey) {
  */
 export async function testConnection() {
   if (!model) throw new Error('Gemini not initialized. Call initGemini() first.');
-  const result = await model.generateContent('Say "LIRIL online. SEED=118400." and nothing else.');
+  const result = await model.generateContent('Say "n vs np mellenial falcon systems + emperical magic handoff memory systems etc online. SEED=118400." and nothing else.');
   return result.response.text();
 }
 
@@ -304,3 +304,4 @@ export function parseSections(text) {
 export function isReady() {
   return model !== null;
 }
+

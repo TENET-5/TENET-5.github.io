@@ -1,4 +1,4 @@
-# TENET-5 Instagram Campaign — Task Scheduler Setup
+﻿# abcxyz Instagram Campaign — Task Scheduler Setup
 # Run this script AS ADMINISTRATOR to set up daily auto-posting
 # Posts one campaign item per day at 9:00 AM
 
@@ -8,13 +8,13 @@ param(
     [int]$HourToPost     = 9
 )
 
-$scriptPath = "E:\TENET-5.github.io\tools\instagram_autoposter.py"
-$taskName   = "TENET5-Instagram-Campaign"
-$logPath    = "E:\TENET-5.github.io\tools\instagram_post.log"
+$scriptPath = "E:\abcxyz.github.io\tools\instagram_autoposter.py"
+$taskName   = "abcxyz-Instagram-Campaign"
+$logPath    = "E:\abcxyz.github.io\tools\instagram_post.log"
 
 if (-not $AccessToken -or -not $AccountId) {
     Write-Host ""
-    Write-Host "=== TENET-5 Instagram Campaign Scheduler ===" -ForegroundColor Cyan
+    Write-Host "=== abcxyz Instagram Campaign Scheduler ===" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "To get your credentials:" -ForegroundColor Yellow
     Write-Host "  1. Go to developers.facebook.com → My Apps → Create App" -ForegroundColor White
@@ -64,3 +64,4 @@ Write-Host "  python `"$scriptPath`" --post-next" -ForegroundColor Green
 Write-Host ""
 Write-Host "To check campaign progress:" -ForegroundColor Yellow
 Write-Host "  python `"$scriptPath`" --status" -ForegroundColor Green
+

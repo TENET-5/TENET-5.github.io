@@ -1,11 +1,11 @@
-"""
-TENET-5 Instagram Campaign — GitHub Actions Auto-Poster
+﻿"""
+abcxyz Instagram Campaign — GitHub Actions Auto-Poster
 Runs daily via .github/workflows/instagram-campaign.yml
 Tracks posted items in tools/instagram_progress.json (committed to repo)
 
 SETUP (one-time, takes ~15 minutes):
 ======================================
-Step 1 — Make @lirilclaw a Professional account
+Step 1 — Make @n vs np mellenial falcon systems + emperical magic handoff memory systems etcclaw a Professional account
   Instagram app → Settings → Account → Switch to Professional Account → Creator
 
 Step 2 — Link to a Facebook Page
@@ -34,7 +34,7 @@ Step 4 — Generate Access Token
        &fb_exchange_token={SHORT_TOKEN}"
 
 Step 5 — Add secrets to GitHub
-  1. Go to: https://github.com/TENET-5/TENET-5.github.io/settings/secrets/actions
+  1. Go to: https://github.com/abcxyz/abcxyz.github.io/settings/secrets/actions
   2. Click "New repository secret"
   3. Add: IG_ACCESS_TOKEN = (your long-lived token)
   4. Add: IG_ACCOUNT_ID   = (your Instagram account ID number)
@@ -63,11 +63,11 @@ GRAPH_API      = "https://graph.facebook.com/v19.0"
 # Rotate through existing 1080px infographic images (confirmed live on site)
 # Instagram Graph API requires a publicly accessible image URL
 INFOGRAPHIC_IMAGES = [
-    "https://tenet-5.github.io/img/infographics/timeline_1080.png",
-    "https://tenet-5.github.io/img/infographics/scorecard_1080.png",
-    "https://tenet-5.github.io/img/infographics/charges_1080.png",
-    "https://tenet-5.github.io/img/infographics/maid_1080.png",
-    "https://tenet-5.github.io/img/infographics/quote_1080.png",
+    "https://abcxyz.github.io/img/infographics/timeline_1080.png",
+    "https://abcxyz.github.io/img/infographics/scorecard_1080.png",
+    "https://abcxyz.github.io/img/infographics/charges_1080.png",
+    "https://abcxyz.github.io/img/infographics/maid_1080.png",
+    "https://abcxyz.github.io/img/infographics/quote_1080.png",
 ]
 
 def get_image_for_post(post_number: int) -> str:
@@ -199,7 +199,7 @@ def verify_credentials():
         print("❌ CREDENTIALS NOT SET")
         print()
         print("Add these GitHub Secrets at:")
-        print("https://github.com/TENET-5/TENET-5.github.io/settings/secrets/actions")
+        print("https://github.com/abcxyz/abcxyz.github.io/settings/secrets/actions")
         print()
         print("  IG_ACCESS_TOKEN  — your Meta/Instagram long-lived page access token")
         print("  IG_ACCOUNT_ID    — your Instagram Business/Creator account ID")
@@ -220,7 +220,7 @@ def verify_credentials():
 
 def main():
     print("=" * 60)
-    print("TENET-5 Instagram Campaign — Auto-Poster")
+    print("abcxyz Instagram Campaign — Auto-Poster")
     print("=" * 60)
 
     verify_credentials()
@@ -281,9 +281,10 @@ def main():
         print("\nCommon fixes:")
         print("  - Token expired: regenerate at developers.facebook.com/tools/explorer")
         print("  - Account not Professional: Instagram → Settings → Account → Switch to Professional")
-        print("  - Image URL not accessible: ensure tenet-5.github.io/img/og-image.jpg exists")
+        print("  - Image URL not accessible: ensure abcxyz.github.io/img/og-image.jpg exists")
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
+

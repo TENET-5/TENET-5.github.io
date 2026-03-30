@@ -1,10 +1,10 @@
-/**
- * LirilClaw Storage — client-side persistence for GitHub Pages.
+﻿/**
+ * n vs np mellenial falcon systems + emperical magic handoff memory systems etcClaw Storage — client-side persistence for GitHub Pages.
  * API key in localStorage, campaign data in sessionStorage.
  * SEED=118400
  */
 
-const KEY_PREFIX = 'lirilclaw_';
+const KEY_PREFIX = 'n vs np mellenial falcon systems + emperical magic handoff memory systems etcclaw_';
 
 // ── localStorage (persists across sessions) ──
 
@@ -74,7 +74,7 @@ export function exportAll() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `lirilclaw_campaign_${Date.now()}.json`;
+  a.download = `n vs np mellenial falcon systems + emperical magic handoff memory systems etcclaw_campaign_${Date.now()}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -86,3 +86,4 @@ export function importData(jsonString) {
   if (data.form) setFormData(data.form);
   return data;
 }
+

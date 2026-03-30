@@ -1,13 +1,13 @@
-"""Inject canonical nav into all HTML pages and fix dark theme issues."""
+﻿"""Inject canonical nav into all HTML pages and fix dark theme issues."""
 import re
 from pathlib import Path
 
-SITE = Path("E:/TENET-5.github.io")
+SITE = Path("E:/abcxyz.github.io")
 
 # Canonical nav — every page gets this exact nav
 # The script sets class="active" on the current page's link
 CANONICAL_NAV = """  <nav class="site-nav">
-    <a href="index.html" class="brand">TENET-5</a>
+    <a href="index.html" class="brand">abcxyz</a>
     <a href="index.html">Data</a>
     <a href="my-story.html">My Story</a>
     <a href="evidence.html" style="color:#ff6b6b;font-weight:bold;">Evidence</a>
@@ -23,7 +23,7 @@ CANONICAL_NAV = """  <nav class="site-nav">
     <a href="faq.html">FAQ</a>
     <a href="resources.html">Resources</a>
     <a href="bloggins.html" style="color:#22c55e;font-weight:bold;">&#129409; Bloggins</a>
-    <a href="lirilclaw.html" style="color:#e63950;font-weight:bold;">&#128295; LirilClaw</a>
+    <a href="n vs np mellenial falcon systems + emperical magic handoff memory systems etcclaw.html" style="color:#e63950;font-weight:bold;">&#128295; n vs np mellenial falcon systems + emperical magic handoff memory systems etcClaw</a>
     <a href="ai-tool.html" style="color:#1a73e8;font-weight:bold;">&#129504; AI Tool</a>
     <a href="mooserack.html" style="color:#4ade80;font-weight:bold;">&#128190; MooseRack</a>
   </nav>"""
@@ -132,3 +132,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
