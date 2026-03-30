@@ -1,5 +1,5 @@
-"""
-TENET-5 Instagram Auto-Poster
+﻿"""
+abcxyz Instagram Auto-Poster
 Uses Instagram Graph API (Meta Business Suite)
 Reads captions from instagram-campaign.md and posts one per scheduled run.
 
@@ -15,7 +15,7 @@ SETUP REQUIRED:
 6. Run: python instagram_autoposter.py
 
 For automated daily posting, add to Windows Task Scheduler:
-  Action: python E:\TENET-5.github.io\tools\instagram_autoposter.py --post-next
+  Action: python E:\abcxyz.github.io\tools\instagram_autoposter.py --post-next
 """
 
 import os
@@ -33,8 +33,8 @@ IG_ACCESS_TOKEN = os.environ.get("IG_ACCESS_TOKEN", "PASTE_YOUR_ACCESS_TOKEN_HER
 IG_ACCOUNT_ID   = os.environ.get("IG_ACCOUNT_ID",   "PASTE_YOUR_IG_BUSINESS_ACCOUNT_ID_HERE")
 
 # Which image to use for posts (must be a publicly accessible URL)
-# tenet-5.github.io images work. Change per post or use a default.
-DEFAULT_IMAGE_URL = "https://tenet-5.github.io/img/infographics/timeline_1080.png"
+# abcxyz.github.io images work. Change per post or use a default.
+DEFAULT_IMAGE_URL = "https://abcxyz.github.io/img/infographics/timeline_1080.png"
 
 CAMPAIGN_FILE  = Path(__file__).parent.parent / "instagram-campaign.md"
 PROGRESS_FILE  = Path(__file__).parent / "instagram_progress.json"
@@ -197,7 +197,7 @@ def cmd_status():
     posts    = load_posts()
     progress = load_progress()
     posted   = set(progress.get("posted", []))
-    print(f"\n📊 TENET-5 Instagram Campaign Status")
+    print(f"\n📊 abcxyz Instagram Campaign Status")
     print(f"   Total posts: {len(posts)}")
     print(f"   Posted:      {len(posted)}")
     print(f"   Remaining:   {len(posts) - len(posted)}")
@@ -228,7 +228,7 @@ def cmd_setup_check():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="TENET-5 Instagram Auto-Poster")
+    parser = argparse.ArgumentParser(description="abcxyz Instagram Auto-Poster")
     parser.add_argument("--post-next",    action="store_true", help="Post next unposted campaign item")
     parser.add_argument("--status",       action="store_true", help="Show campaign progress")
     parser.add_argument("--setup-check",  action="store_true", help="Verify API credentials")
@@ -249,4 +249,5 @@ if __name__ == "__main__":
         print("  python instagram_autoposter.py --status        # show progress")
         print()
         print("For daily auto-posting, add to Windows Task Scheduler:")
-        print("  python E:\\TENET-5.github.io\\tools\\instagram_autoposter.py --post-next")
+        print("  python E:\\abcxyz.github.io\\tools\\instagram_autoposter.py --post-next")
+

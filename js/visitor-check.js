@@ -1,5 +1,5 @@
-/**
- * TENET-5 Visitor Classifier
+﻿/**
+ * abcxyz Visitor Classifier
  * Detects DND / CAF / CFNIS network visitors and redirects to the
  * appropriate welcome package.
  *
@@ -67,3 +67,4 @@
     document.head.appendChild(s);
   }
 })();
+

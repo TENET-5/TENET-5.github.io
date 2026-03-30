@@ -1,12 +1,12 @@
-import asyncio
+﻿import asyncio
 from playwright.async_api import async_playwright
 import time
 import subprocess
 import os
 
 async def run():
-    os.chdir(r'E:\TENET-5.github.io')
-    server = subprocess.Popen([r'E:\S.L.A.T.E\tenet5\.venv\Scripts\python.exe', '-m', 'http.server', '8080'])
+    os.chdir(r'E:\abcxyz.github.io')
+    server = subprocess.Popen([r'E:\S.L.A.T.E\abcxyz\.venv\Scripts\python.exe', '-m', 'http.server', '8080'])
     time.sleep(2)
     
     try:
@@ -53,3 +53,4 @@ async def run():
         server.terminate()
 
 asyncio.run(run())
+
