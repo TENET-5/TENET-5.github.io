@@ -1,4 +1,4 @@
-import{aw as t}from"./babylon-vendor-IqsUILzT.js";const e="volumetricLightingRenderVolumeVertexShader",o=`#include<sceneUboDeclaration>
+import{ay as t}from"./babylon-vendor-CKtOZKgd.js";const e="volumetricLightingRenderVolumeVertexShader",o=`#include<sceneUboDeclaration>
 #include<meshUboDeclaration>
 attribute position : vec3f;varying vWorldPos: vec4f;@vertex
 fn main(input : VertexInputs)->FragmentInputs {let worldPos=mesh.world*vec4f(vertexInputs.position,1.0);vertexOutputs.vWorldPos=worldPos;vertexOutputs.position=scene.viewProjection*worldPos;}
