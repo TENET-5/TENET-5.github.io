@@ -1,5 +1,5 @@
 ﻿# ABCXYZ Instagram Campaign — 30 Ready-to-Post Captions
-**Profile**: [@Lirilclaw](https://www.instagram.com/Lirilclaw/)
+**Profile**: [@toolkit](https://www.instagram.com/toolkit/)
 **Campaign**: #The504 — 339 confirmed public-record Canadian government failures. Every one sourced.
 
 > Instagram doesn't support URL share buttons. Use these captions manually.
@@ -308,5 +308,5 @@ POST #30 — THE 504
 ---
 
 *Generated for the ABCXYZ civic transparency campaign. All facts sourced from official Canadian government records.*
-*Profile: [@Lirilclaw](https://www.instagram.com/Lirilclaw/) | Site: [ABCXYZ.github.io](https://ABCXYZ.github.io)*
+*Profile: [@toolkit](https://www.instagram.com/toolkit/) | Site: [ABCXYZ.github.io](https://ABCXYZ.github.io)*
 
