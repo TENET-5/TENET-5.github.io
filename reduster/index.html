@@ -8,83 +8,111 @@
   <title>Red Duster — Communist Eradication Sandbox</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&display=swap');
+    @keyframes bleedPulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #fff; }
-    /* ── Unified Main Menu ── */
+    /* ── Premium Start Menu ── */
     #mainMenu {
       position: fixed; inset: 0; z-index: 200;
-      background: #050505;
-      color: #fff; font-family: 'Rajdhani', sans-serif;
-      overflow: hidden;
-      display: flex;
+      background: #000; color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow: hidden; display: flex;
     }
-    .menu-bg {
-      position: absolute; inset: 0;
-      background: radial-gradient(circle at 70% 50%, rgba(40,0,0,0.8) 0%, #050505 80%);
-      z-index: 1;
+    .menu-bg-animated {
+      position: absolute; inset: 0; z-index: 1;
+      background: radial-gradient(circle at 50% 50%, #1a0000 0%, #050000 100%);
+      background-size: 200% 200%;
+      animation: bgPulse 15s ease infinite;
+    }
+    @keyframes bgPulse {
+      0% { background-position: 0% 50%; background: radial-gradient(circle at 10% 50%, #2a0000 0%, #050000 100%); }
+      50% { background-position: 100% 50%; background: radial-gradient(circle at 90% 50%, #1a0500 0%, #000000 100%); }
+      100% { background-position: 0% 50%; background: radial-gradient(circle at 10% 50%, #2a0000 0%, #050000 100%); }
     }
     .menu-scanlines {
       position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
-      background-size: 100% 4px;
-      z-index: 2; pointer-events: none; opacity: 0.4;
+      background: repeating-linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px);
+      z-index: 2; pointer-events: none; opacity: 0.6;
     }
     .menu-content {
       position: relative; z-index: 10;
-      display: flex; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 100%; height: 100%; padding: 2rem;
     }
-    .menu-left {
-      flex: 0 0 45%; padding: 4rem 3rem;
-      display: flex; flex-direction: column; justify-content: flex-start;
-      background: linear-gradient(90deg, rgba(10,0,0,0.9) 0%, rgba(10,0,0,0.4) 100%);
-      backdrop-filter: blur(8px); border-right: 1px solid rgba(255,0,0,0.2);
+    .glass-panel {
+      background: rgba(15, 0, 0, 0.4);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 50, 50, 0.2);
+      border-radius: 12px; padding: 3rem 4rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex; flex-direction: column; align-items: center;
+      max-width: 600px; width: 100%;
+      animation: floatIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0; transform: translateY(30px);
     }
+    @keyframes floatIn { to { opacity: 1; transform: translateY(0); } }
+    .menu-title-wrapper { text-align: center; margin-bottom: 2.5rem; width: 100%; border-bottom: 2px solid rgba(255, 50, 50, 0.3); padding-bottom: 1.5rem; position: relative; }
+    .menu-title-wrapper::after { content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); width: 30%; height: 2px; background: #ff3333; box-shadow: 0 0 10px #ff0000; }
     .menu-title {
-      font-family: 'Black Ops One', system-ui; font-size: 5.5rem; color: #ff2222;
-      text-shadow: 0 0 20px rgba(255,0,0,0.5); margin-bottom: 0px; line-height: 1; letter-spacing: 2px;
+      font-family: 'Black Ops One', system-ui; font-size: 5rem; color: #ff2a2a;
+      text-shadow: 0 0 20px rgba(255, 0, 0, 0.6), 0 0 40px rgba(255, 0, 0, 0.2);
+      margin-bottom: 0px; line-height: 1.1; letter-spacing: 4px;
     }
     .menu-subtitle {
-      font-size: 1.4rem; color: #cc8855; font-weight: 600; letter-spacing: 0.3em;
-      margin-bottom: 2rem; border-bottom: 2px solid #551111; padding-bottom: 1rem;
+      font-size: 1.3rem; color: #cc8855; font-weight: 600; letter-spacing: 0.4em;
+      margin-top: 0.5rem; text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(204, 136, 85, 0.5);
     }
-    .menu-btn-group { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+    .menu-btn-group { display: flex; flex-direction: column; gap: 1rem; width: 100%; position: relative; }
     .menu-btn {
-      background: transparent; border: 1px solid #ff3333; color: #fff;
-      padding: 1rem 1.5rem; font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700;
-      text-align: left; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      background: rgba(255, 25, 25, 0.05);
+      border: 1px solid rgba(255, 50, 50, 0.3);
+      color: #fff; border-radius: 6px;
+      padding: 1.2rem; font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700;
+      text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       letter-spacing: 0.15em; text-transform: uppercase; position: relative; overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 100%;
     }
     .menu-btn::before {
       content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,50,50,0.4), transparent);
-      transition: left 0.4s;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s; transform: skewX(-20deg);
     }
     .menu-btn:hover::before { left: 150%; }
-    .menu-btn:hover { background: rgba(255, 30, 30, 0.15); box-shadow: 0 0 20px rgba(255,0,0,0.4); border-left: 10px solid #ff3333; transform: translateX(5px); }
-    .join-group { display: flex; gap: 10px; margin-top: 1rem; }
-    .menu-input { 
-      flex: 1; background: rgba(20,0,0,0.6); border: 1px solid #ff3333; color: #ffcc00; 
-      padding: 0.8rem 1rem; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 600; 
-      letter-spacing: 0.2em; text-transform: uppercase; outline: none; transition: box-shadow 0.2s;
+    .menu-btn:hover { 
+      background: rgba(255, 30, 30, 0.2); 
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.5); 
+      border-color: #ff3333; transform: translateY(-2px); color: #fff;
     }
-    .menu-input:focus { box-shadow: 0 0 15px rgba(255,0,0,0.6); }
+    .menu-btn:active { transform: translateY(1px); box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+    .join-group { display: flex; gap: 10px; width: 100%; margin-top: 0.5rem; }
+    .menu-input { 
+      flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 50, 50, 0.4); color: #ffcc00; 
+      padding: 0 1rem; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 600; 
+      letter-spacing: 0.2em; text-transform: uppercase; outline: none; transition: all 0.3s;
+      border-radius: 6px; text-align: center;
+    }
+    .menu-input:focus { box-shadow: 0 0 15px rgba(255,0,0,0.3); border-color: #ff3333; background: rgba(25,0,0,0.7); }
     .menu-btn-sm { 
       background: #c41e3a; border: 1px solid #ff3333; color: #fff; padding: 0 1.5rem;
-      font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+      font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 700; cursor: pointer; transition: 0.3s;
+      border-radius: 6px; display: flex; align-items: center; justify-content: center; min-width: 100px;
     }
-    .menu-btn-sm:hover { background: #ff2222; box-shadow: 0 0 15px rgba(255,0,0,0.6); }
-    .menu-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem; }
-    .TENET5-terminal {
-      width: 100%; max-width: 500px;
-      background: rgba(10,20,10,0.8); border: 1px solid #336633; padding: 1.5rem;
-      box-shadow: 0 0 20px rgba(50,255,50,0.1) inset; border-radius: 4px; position: relative;
+    .menu-btn-sm:hover { background: #ff2222; box-shadow: 0 0 20px rgba(255,0,0,0.5); transform: translateY(-2px); }
+    #lobby-hosting {
+      background: rgba(30,0,0,0.8); border: 1px solid #ff3333; border-radius: 8px;
+      padding: 2rem; width: 100%; text-align: center; margin-top: 1rem;
+      box-shadow: inset 0 0 20px rgba(255,0,0,0.2);
     }
-    .TENET5-terminal::after {
-      content: ''; position: absolute; inset: 0; border: 1px solid rgba(50,255,50,0.3);
-      filter: blur(2px); pointer-events: none;
+    .mission-select-panel { 
+      margin-top: 1.5rem; background: rgba(0,0,0,0.6); padding: 1.5rem; border: 1px solid rgba(255,50,50,0.2); 
+      border-radius: 8px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .lt-header { color: #33ff33; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem; font-size: 1.2rem; font-family: 'Courier New', monospace; }
-    .lt-body { color: #88dd88; font-family: 'Courier New', monospace; font-size: 0.95rem; line-height: 1.5; }
+    .ms-header { color: #ff6633; font-weight: 700; letter-spacing: 0.2em; margin-bottom: 1rem; text-transform: uppercase; text-align: center; }
+    .mission-item { background: rgba(30,0,0,0.6); border-left: 4px solid #ff3333; border-radius: 0 4px 4px 0; padding: 12px 15px; margin-bottom: 8px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; text-align: left; }
+    .mission-item:hover { background: rgba(80,0,0,0.8); border-left-color: #ffaaaa; transform: translateX(5px); }
+    .ms-title { color: #fff; font-weight: 700; font-size: 1.1em; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .ms-desc { color: #aaa; font-size: 0.9em; font-family: 'Courier New', monospace; line-height: 1.4; }
     /* ── Overlays ── */
     #hud {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
@@ -192,26 +220,27 @@
     .ms-title { color: #fff; font-weight: 700; font-size: 1.1em; letter-spacing: 0.05em; }
     .ms-desc { color: #888; font-size: 0.85em; font-family: 'Courier New', monospace; margin-top: 4px; }
     canvas { display: block; }
-    @keyframes bleedPulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 </style>
-  <script type="module" crossorigin src="/reduster/assets/index-B96RaweW.js"></script>
-  <link rel="modulepreload" crossorigin href="/reduster/assets/three-vendor-eg-dgxWn.js">
-  <link rel="modulepreload" crossorigin href="/reduster/assets/peer-Dr3pS1qk.js">
+  <script type="module" crossorigin src="/reduster/assets/index-gooFUz0G.js"></script>
+  <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-vendor-CKtOZKgd.js">
+  <link rel="modulepreload" crossorigin href="/reduster/assets/peer-LoqbJEPl.js">
 </head>
 <body>
 
 <!-- ── Unified Main Menu ── -->
 <div id="mainMenu">
-  <div class="menu-bg"></div>
+  <div class="menu-bg-animated"></div>
   <div class="menu-scanlines"></div>
   
   <div class="menu-content">
-    <div class="menu-left">
-      <h1 class="menu-title">RED DUSTER</h1>
-      <h2 class="menu-subtitle">ANTI-COMMUNIST TRAINING SIMULATOR</h2>
+    <div class="glass-panel">
+      <div class="menu-title-wrapper">
+        <h1 class="menu-title">RED DUSTER</h1>
+        <h2 class="menu-subtitle">ANTI-COMMUNIST TRAINING SIMULATOR</h2>
+      </div>
       
       <div class="menu-btn-group">
-        <div id="lobby-main" style="display:flex; flex-direction:column; gap:1rem;">
+        <div id="lobby-main" style="display:flex; flex-direction:column; gap:1.2rem; width:100%;">
           <button id="soloBtn" class="menu-btn">▶ DEPLOY INCURSION (SOLO)</button>
           <button id="campaignBtn" class="menu-btn">📂 CAMPAIGN LOGS</button>
           <button id="hostBtn" class="menu-btn">⚔ HOST CO-OP NET</button>
@@ -222,17 +251,18 @@
           </div>
         </div>
         
-        <div id="lobby-hosting" style="display:none; background:rgba(40,0,0,0.8); border:1px solid #ff3333; padding:1.5rem; margin-top:0.5rem;">
-          <div style="color:#ffcc00; font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700; letter-spacing:0.2em; margin-bottom:1rem;">
-            AWAITING SQUAD...
+        <div id="lobby-hosting" style="display:none;">
+          <div style="color:#ffcc00; font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700; letter-spacing:0.2em; margin-bottom:1.5rem;">
+            AWAITING SQUAD UPLINK...
             <br><br>
-            ROOM RANK / CODE: <span id="roomCodeDisplay" style="font-size:1.8em; color:#fff; text-shadow:0 0 10px #fff;">...</span>
+            ROOM RANK / CODE: <br>
+            <span id="roomCodeDisplay" style="display:inline-block; margin-top:0.8rem; font-size:2.5rem; color:#fff; text-shadow:0 0 15px #fff; letter-spacing:0.1em;">...</span>
           </div>
           <button id="startGameBtn" class="menu-btn" style="width:100%;">🔥 INITIATE DROP</button>
         </div>
         
-        <div id="lobby-error" style="display:none;color:#ff3333;font-size:0.9em;margin-top:1rem;font-weight:bold;"></div>
-        <div id="lobby-connecting" style="display:none;color:#ffcc00;font-size:0.9em;margin-top:1rem;font-weight:bold;">ESTABLISHING UPLINK...</div>
+        <div id="lobby-error" style="display:none;color:#ff4444;font-size:1rem;margin-top:1rem;font-weight:bold;text-align:center;text-shadow:0 0 5px #ff0000;"></div>
+        <div id="lobby-connecting" style="display:none;color:#ffcc00;font-size:1rem;margin-top:1rem;font-weight:bold;text-align:center;letter-spacing:0.1em;animation:pulse 1.5s infinite;">ESTABLISHING UPLINK...</div>
       </div>
       
       <div id="missionSelect" class="mission-select-panel" style="display:none;">
@@ -256,26 +286,6 @@
         <div class="mission-item" data-mission="5" style="opacity:0.5;pointer-events:none;">
           <div class="ms-title">05 — THE RED DUSTER</div>
           <div class="ms-desc">Storm the command post. Raise the Red Ensign.</div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="menu-right">
-      <div class="TENET5-terminal">
-        <div class="lt-header">█ TACTICAL A.I. COMBAT SUITE █</div>
-        <div class="lt-body">
-          <p>> INITIALIZING TACTICAL OS...</p>
-          <p>> LINKING TACTICAL NET <span style="color:#00ff00;">[OK]</span></p>
-          <p>> LOCAL HOST DETECTED: 127.0.0.1</p>
-          <p>> CPL. BLOGGINS PERSONALITY LOADED</p>
-          <br>
-          <p>> <span style="color:#fff;">SITREP:</span> Young Castro's Vanguard has seized key Canadian infrastructure. Local police units compromised. Military response paralyzed by political interference.</p>
-          <br>
-          <p>> <span style="color:#ffcc00; font-weight:bold;">COMBATANT STATUS:</span> Enemy spies operating on Canadian soil are recognized as hostile combatants. Elimination is classified as lawful self-defense under defensive warfare doctrine.</p>
-          <br>
-          <p>> Lead your squad. Take it back. <span style="color:#ffcc00">Trust your rifle, not the CBC.</span></p>
-          <br>
-          <p style="color:#ff3333;">! REQUIREMENTS: MUST NOT BREACH THE NUREMBERG CODE. MUST NOT PRACTICE COMMUNISM.</p>
         </div>
       </div>
     </div>
@@ -425,11 +435,7 @@
 <div id="pauseMenu">
   <h2>PAUSED</h2>
   <button id="resumeBtn">RESUME</button>
-      <a href="https://tenet-5.github.io" target="_blank" rel="noopener"
-        style="margin-top:1rem;color:#ffcc00;font-family:'Courier New',monospace;font-size:0.9em;letter-spacing:0.1em;text-decoration:none;border:1px solid #ffaa0066;padding:8px 20px;">
-        🍁 tenet-5.github.io
-      </a>
-      <div style="color:#444;font-size:0.7em;margin-top:0.5rem;letter-spacing:0.1em;">TENET-5</div>
+  <div style="color:#555;font-size:0.7em;margin-top:1rem;letter-spacing:0.1em;">🍁 RED DUSTER</div>
 </div>
 
 <!-- ── Side UI ── -->
@@ -460,12 +466,8 @@
 </div>
 <div id="objectivesHud" style="display:none;position:fixed;top:10px;left:14px;z-index:55;background:rgba(0,10,20,0.75);border:1px solid rgba(100,180,255,0.25);border-radius:4px;padding:8px 12px;min-width:220px;max-width:280px;font-family:'Courier New',monospace;pointer-events:none;"></div>
 
-<!-- ── Wave Intro Overlay (disabled — DayZ mode) ── -->
+<!-- Wave intro disabled for DayZ mode -->
 <div id="waveIntroOverlay" style="display:none;"></div>
-  @keyframes bleedPulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-</style>
-</div>
-
 <!-- ── Multiplayer HUD ── -->
 <div id="player-list"></div>
 <div id="player-count" style="position:fixed;top:10px;right:170px;color:#33ff33;font-family:monospace;font-size:0.85em;z-index:100;display:none;text-shadow:0 0 8px #00ff00;letter-spacing:0.1em;">PLAYERS: 1</div>

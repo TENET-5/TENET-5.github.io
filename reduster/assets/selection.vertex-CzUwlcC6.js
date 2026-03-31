@@ -1,4 +1,4 @@
-import{aw as i}from"./babylon-vendor-IqsUILzT.js";const e="selectionVertexShader",t=`attribute vec3 position;
+import{ay as i}from"./babylon-vendor-CKtOZKgd.js";const e="selectionVertexShader",t=`attribute vec3 position;
 #ifdef INSTANCES
 attribute float instanceSelectionId;
 #endif
