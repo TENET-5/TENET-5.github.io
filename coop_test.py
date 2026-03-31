@@ -5,8 +5,8 @@ import subprocess
 import os
 
 async def run():
-    os.chdir(r'E:\abcxyz.github.io')
-    server = subprocess.Popen([r'E:\S.L.A.T.E\abcxyz\.venv\Scripts\python.exe', '-m', 'http.server', '8080'])
+    os.chdir(r'E:\ABCXYZ.github.io')
+    server = subprocess.Popen([r'E:\S.L.A.T.E\ABCXYZ\.venv\Scripts\python.exe', '-m', 'http.server', '8080'])
     time.sleep(2)
     
     try:

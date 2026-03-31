@@ -2,12 +2,12 @@
 import re
 from pathlib import Path
 
-SITE = Path("E:/abcxyz.github.io")
+SITE = Path("E:/ABCXYZ.github.io")
 
 # Canonical nav — every page gets this exact nav
 # The script sets class="active" on the current page's link
 CANONICAL_NAV = """  <nav class="site-nav">
-    <a href="index.html" class="brand">abcxyz</a>
+    <a href="index.html" class="brand">ABCXYZ</a>
     <a href="index.html">Data</a>
     <a href="my-story.html">My Story</a>
     <a href="evidence.html" style="color:#ff6b6b;font-weight:bold;">Evidence</a>
