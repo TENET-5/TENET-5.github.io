@@ -194,55 +194,6 @@
     .ms-desc { color: #888; font-size: 0.85em; font-family: 'Courier New', monospace; margin-top: 4px; }
     canvas { display: block; }
 </style>
-  <script>
-  // Detect when lobby buttons get wired by init() and show loading state until then
-  (function() {
-    var _orig = EventTarget.prototype.addEventListener;
-    EventTarget.prototype.addEventListener = function(type, fn, opts) {
-      _orig.call(this, type, fn, opts);
-      if (type === 'click' && this && this.id === 'soloBtn') window.__lobbyReady = true;
-    };
-    document.addEventListener('DOMContentLoaded', function() {
-      var soloBtn = document.getElementById('soloBtn');
-      var hostBtn = document.getElementById('hostBtn');
-      var joinBtn = document.getElementById('joinBtn');
-      var campaignBtn = document.getElementById('campaignBtn');
-      var loadEl = document.createElement('div');
-      loadEl.style.cssText = 'color:#ffcc00;font-family:Rajdhani,sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.15em;text-align:center;padding:0.4rem 0 0.8rem;';
-      loadEl.textContent = '\u29D7 INITIALIZING WORLD\u2026';
-      [soloBtn, hostBtn, joinBtn, campaignBtn].forEach(function(b) {
-        if (b) { b.disabled = true; b.style.opacity = '0.45'; b.style.cursor = 'not-allowed'; }
-      });
-      if (soloBtn && soloBtn.parentNode) soloBtn.parentNode.insertBefore(loadEl, soloBtn);
-      var t = 0;
-      var dots = ['\u2022', '\u2022\u2022', '\u2022\u2022\u2022'];
-      var poll = setInterval(function() {
-        t += 300;
-        loadEl.textContent = '\u29D7 INITIALIZING WORLD ' + dots[Math.floor(t/300) % 3];
-        if (window.__lobbyReady) {
-          clearInterval(poll);
-          loadEl.remove();
-          [soloBtn, hostBtn, joinBtn, campaignBtn].forEach(function(b) {
-            if (b) { b.disabled = false; b.style.opacity = ''; b.style.cursor = ''; }
-          });
-        }
-        if (t >= 90000) {
-          clearInterval(poll);
-          loadEl.style.color = '#ff4444';
-          loadEl.innerHTML = '\u26A0 WORLD LOAD FAILED \u2014 <span onclick="location.reload()" style="cursor:pointer;text-decoration:underline;">RELOAD</span>';
-        }
-      }, 300);
-      window.addEventListener('unhandledrejection', function(e) {
-        clearInterval(poll);
-        var msg = e.reason && (e.reason.message || String(e.reason)) || 'unknown error';
-        loadEl.style.color = '#ff4444';
-        loadEl.innerHTML = '\u26A0 INIT ERROR: ' + msg.substring(0, 80) + ' \u2014 <span onclick="location.reload()" style="cursor:pointer;text-decoration:underline;">RELOAD</span>';
-        var errEl = document.getElementById('lobby-error');
-        if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'INIT ERROR: ' + msg; }
-      });
-    });
-  })();
-  </script>
   <script type="module" crossorigin src="/reduster/assets/index-Ok6an1TK.js"></script>
   <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-vendor-DcaB1x0C.js">
   <link rel="modulepreload" crossorigin href="/reduster/assets/peer-LoqbJEPl.js">
@@ -526,6 +477,5 @@
 // Lore card rotation removed as lore cards no longer exist
 </script></body>
 </html>
-
 
 
