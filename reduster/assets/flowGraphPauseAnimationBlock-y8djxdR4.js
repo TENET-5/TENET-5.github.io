@@ -1,0 +1,1 @@
+import{aZ as t,aP as e,q as i}from"./index-B4NgycvP.js";class o extends t{constructor(a){super(a),this.animationToPause=this.registerDataInput("animationToPause",e)}_execute(a){this.animationToPause.getValue(a).pause(),this.out._activateSignal(a)}getClassName(){return"FlowGraphPauseAnimationBlock"}}i("FlowGraphPauseAnimationBlock",o);export{o as FlowGraphPauseAnimationBlock};
