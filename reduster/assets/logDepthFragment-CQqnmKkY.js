@@ -1,0 +1,4 @@
+import{v as e}from"./index-UOSFY8sf.js";const t="logDepthFragment",r=`#ifdef LOGARITHMICDEPTH
+fragmentOutputs.fragDepth=log2(fragmentInputs.vFragmentDepth)*uniforms.logarithmicDepthConstant*0.5;
+#endif
+`;e.IncludesShadersStoreWGSL[t]||(e.IncludesShadersStoreWGSL[t]=r);
