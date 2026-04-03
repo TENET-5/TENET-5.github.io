@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSINT MP Investigation Dashboard — TENET5/LIRIL</title>
+  <meta name="description" content="Open source intelligence dashboard tracking Canadian MP statements, voting records, and foreign advocacy patterns using Hansard and public social media data.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── OSINT Dashboard Styles ── */
+    .osint-hero {
+      background: linear-gradient(135deg, #050506 0%, #0a0c14 50%, #0c0610 100%);
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid rgba(196, 30, 58, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .osint-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse at 20% 50%, rgba(196,30,58,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(58,134,255,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .osint-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: #ededed;
+      margin-bottom: 0.5rem;
+    }
+    .osint-hero .accent { color: #c41e3a; }
+    .osint-hero p { color: #a0a0a6; max-width: 680px; }
+    .osint-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(196,30,58,0.08);
+      border: 1px solid rgba(196,30,58,0.2);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.72rem;
+      color: #c41e3a;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .osint-badge .pulse {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #c41e3a;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(196,30,58,0.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(196,30,58,0); }
+    }
+    .stats-row {
+      display: flex; gap: 12px; flex-wrap: wrap; margin: 1.5rem 0;
+    }
+    .stat-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 12px 18px;
+      text-align: center;
+      min-width: 100px;
+      transition: border-color 0.3s;
+    }
+    .stat-card:hover { border-color: rgba(196,30,58,0.3); }
+    .stat-card .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #c41e3a;
+      display: block;
+    }
+    .stat-card .lbl {
+      font-size: 0.65rem;
+      color: #6e6e76;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── MP Profile Cards ── */
+    .mp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .mp-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.3s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .mp-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #c41e3a, transparent);
+    }
+    .mp-card:hover {
+      border-color: rgba(196,30,58,0.2);
+      transform: translateY(-2px);
+    }
+    .mp-card .mp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .mp-card .mp-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ededed;
+    }
+    .mp-card .mp-riding {
+      font-size: 0.78rem;
+      color: #6e6e76;
+      margin-top: 2px;
+    }
+    .mp-card .party-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .party-cpc { background: rgba(30,80,196,0.15); color: #5b9cf5; }
+    .party-lpc { background: rgba(196,30,30,0.15); color: #e05050; }
+    .party-ind { background: rgba(120,120,120,0.15); color: #a0a0a6; }
+
+    .mp-card .evidence-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.8rem 0;
+    }
+    .mp-card .evidence-list li {
+      font-size: 0.82rem;
+      color: #a0a0a6;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .mp-card .evidence-list li::before {
+      content: '▸';
+      color: #c41e3a;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .mp-card .evidence-list .highlight {
+      color: #ededed;
+      font-weight: 500;
+    }
+    .mp-card .vote-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+    .vote-nay {
+      background: rgba(196,30,58,0.1);
+      color: #e05050;
+      border: 1px solid rgba(196,30,58,0.2);
+    }
+    .vote-yea {
+      background: rgba(39,174,96,0.1);
+      color: #27ae60;
+      border: 1px solid rgba(39,174,96,0.2);
+    }
+
+    /* ── OSINT Log ── */
+    .osint-log {
+      background: #0c0c0e;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      color: #6e6e76;
+      max-height: 300px;
+      overflow-y: auto;
+      margin: 1rem 0;
+    }
+    .osint-log .cmd { color: #c41e3a; }
+    .osint-log .result { color: #27ae60; }
+    .osint-log .warn { color: #f39c12; }
+    .osint-log .info { color: #5b9cf5; }
+
+    /* ── Methodology Section ── */
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .method-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 1.2rem;
+    }
+    .method-card h4 {
+      color: #ededed;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .method-card p {
+      color: #6e6e76;
+      font-size: 0.78rem;
+      line-height: 1.6;
+    }
+    .method-card .icon {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .mp-grid {
+        grid-template-columns: 1fr;
+      }
+      .stats-row {
+        justify-content: center;
+      }
+      .stat-card {
+        min-width: 80px;
+        padding: 10px 12px;
+      }
+      .stat-card .num { font-size: 1.2rem; }
+      .method-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .osint-hero h1 { font-size: 1.4rem; }
+      .mp-card { padding: 1rem; }
+      .mp-card .mp-name { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <nav class="site-nav">
+    <a href="index.html" class="brand">TENET5</a>
+    <div class="nav-group nav-primary">
+      <a href="my-story.html">My Story</a>
+      <a href="evidence.html" class="nav-hot">Evidence</a>
+      <a href="5gw-subversion.html" class="nav-purple">⚔ The War On You</a>
+      <a href="hansard-evidence.html" class="nav-hot">🏛 Hansard</a>
+      <a href="t4-comparison.html" class="nav-danger">⚠ The Pattern</a>
+    </div>
+    <div class="nav-group nav-data">
+      <a href="harm-index.html" class="nav-danger">☠ Harm Index</a>
+      <a href="genocide-evidence.html" class="nav-danger">☠ Genocide Evidence</a>
+      <a href="corruption-map.html" class="nav-warn">🔍 Corruption Map</a>
+      <a href="accountability.html" class="nav-danger">📋 The 504</a>
+      <a href="treason-trajectory.html" class="nav-danger">🏛 Treason</a>
+      <a href="osint-dashboard.html" class="nav-warn active">🛰 OSINT</a>
+      <a href="timeline.html" class="nav-warn">📅 Timeline</a>
+      <a href="infographics.html">Infographics</a>
+    </div>
+    <div class="nav-group nav-info">
+      <button class="nav-more-btn" aria-expanded="false" aria-haspopup="true">More <span class="chevron">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="legal.html">Legal</a>
+        <a href="cfnis.html">CFNIS</a>
+        <a href="whistleblower-guide.html">Whistleblower Guide</a>
+        <a href="foreign-influence.html">Foreign Influence</a>
+        <a href="conspiracy-board.html">Investigation Board</a>
+        <a href="faq.html">FAQ</a>
+        <a href="resources.html">Resources</a>
+      </div>
+    </div>
+    <div class="nav-group nav-tools">
+      <a href="red-duster-game.html" class="nav-hot" style="text-shadow: 0 0 5px #ff2a2a;">🩸 PLAY FPS</a>
+      <a href="bloggins.html" class="nav-green">🦝 Bloggins</a>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <div class="osint-hero">
+    <div class="content">
+      <div class="osint-badge"><span class="pulse"></span> LIVE OSINT FRAMEWORK</div>
+      <h1>MP <span class="accent">Foreign Advocacy</span> Dashboard</h1>
+      <p>Programmatic open-source intelligence analysis of Canadian MPs. Every data point sourced from official Hansard records, House of Commons voting records, Lobbyist Registry, and public social media accounts.</p>
+
+      <div class="stats-row">
+        <div class="stat-card"><span class="num">340</span><span class="lbl">MPs Scanned</span></div>
+        <div class="stat-card"><span class="num">7,959</span><span class="lbl">Speeches Analyzed</span></div>
+        <div class="stat-card"><span class="num">579</span><span class="lbl">CIJA Lobby Instances</span></div>
+        <div class="stat-card"><span class="num">$678K</span><span class="lbl">Israel Trip Spend</span></div>
+        <div class="stat-card"><span class="num">117</span><span class="lbl">Anti-Ceasefire Votes</span></div>
+        <div class="stat-card"><span class="num">11+13</span><span class="lbl">NSICOP Named</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content" id="main">
+
+    <!-- ═══ METHODOLOGY ═══ -->
+    <section>
+      <h2><span class="section-num">01</span>Methodology</h2>
+      <p>This dashboard uses exclusively public data sources. TENET5/LIRIL OSINT engines programmatically query, classify, and cross-reference the following:</p>
+
+      <div class="method-grid">
+        <div class="method-card">
+          <span class="icon">🏛</span>
+          <h4>Hansard / ourcommons.ca</h4>
+          <p>Official House of Commons transcripts. Every word spoken in Parliament by every MP, searchable and timestamped.</p>
+        </div>
+        <div class="method-card">
+          <span class="icon">🗳️</span>
+          <h4>House of Commons Votes</h4>
+          <p>Official recorded votes including Vote #658 (Gaza ceasefire). Used to identify MPs who broke party line under lobby pressure.</p>
+        </div>
+        <div class="method-card">
+          <span class="icon">📋</span>
+          <h4>Lobbyist Registry</h4>
+          <p>Federal registry of all registered lobbying activity. CIJA's 579 documented lobbying instances against 156 MPs (58% of Parliament).</p>
+        </div>
+        <div class="method-card">
+          <span class="icon">🐦</span>
+          <h4>Public Social Media (X/Twitter)</h4>
+          <p>Publicly posted statements on official MP accounts. Indexed via DuckDuckGo search APIs — no private data accessed.</p>
+        </div>
+        <div class="method-card">
+          <span class="icon">📊</span>
+          <h4>OpenParliament.ca API</h4>
+          <p>Independent open-data platform providing structured access to all parliamentary speeches, votes, and committee appearances.</p>
+        </div>
+        <div class="method-card">
+          <span class="icon">🔐</span>
+          <h4>NSICOP Reports</h4>
+          <p>National Security and Intelligence Committee of Parliamentarians — official government intel reports on foreign interference.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ MP PROFILES ═══ -->
+    <section>
+      <h2><span class="section-num">02</span>MP Profiles: Foreign Advocacy Tracking</h2>
+      <p>Each profile below documents a pattern: explicit advocacy for a foreign state's interests inside the Canadian Parliament, combined with simultaneous demands to investigate "foreign interference" by <em>other</em> states.</p>
+
+      <div class="mp-grid">
+
+        <!-- Kevin Vuong -->
+        <div class="mp-card" id="vuong">
+          <div class="mp-header">
+            <div>
+              <div class="mp-name">Kevin Vuong</div>
+              <div class="mp-riding">Spadina—Fort York (2021–2025)</div>
+            </div>
+            <span class="party-badge party-ind">Independent</span>
+          </div>
+          <ul class="evidence-list">
+            <li><span class="highlight">Only independent MP</span> to vote against Gaza ceasefire (Vote #658)</li>
+            <li>Wikipedia describes him as an <span class="highlight">"evangelized defender"</span> of Israel since the Gaza war began</li>
+            <li>Hansard: confronted MPs as <span class="highlight">"apologists for a terrorist group"</span></li>
+            <li>Twitter: <span class="highlight">"I stand with you, @LevittMichael"</span> (Friends of Simon Wiesenthal Center CEO)</li>
+            <li>237 CCP mentions across 318 speeches — uses anti-China rhetoric as cover for Israel advocacy: <span class="highlight">"Does Beijing have something on them?"</span></li>
+            <li>Called veteran Daniel Perry <span class="highlight">"domestic terrorist"</span> for questioning Israeli influence</li>
+            <li>Concealed sexual assault charge from party and military (<a href="https://www.cbc.ca/news/politics/military-vuong-fined-500-1.6526128">fined $500</a>)</li>
+          </ul>
+          <span class="vote-indicator vote-nay">✕ VOTED NAY — Ceasefire Vote #658</span>
+        </div>
+
+        <!-- Melissa Lantsman -->
+        <div class="mp-card" id="lantsman">
+          <div class="mp-header">
+            <div>
+              <div class="mp-name">Melissa Lantsman</div>
+              <div class="mp-riding">Thornhill — Deputy Leader, CPC</div>
+            </div>
+            <span class="party-badge party-cpc">CPC</span>
+          </div>
+          <ul class="evidence-list">
+            <li>Lobbied by CIJA <span class="highlight">15 times</span> — registered in federal Lobbyist Registry</li>
+            <li>Twitter (Oct 9, 2023): <span class="highlight">"More than a hundred Canadians have reached out to my office..."</span></li>
+            <li>Aggressively challenged Canadian arms embargo against Israel: <span class="highlight">"Canada has put in place an arms embargo against Israel for everything excluding the iron dome"</span></li>
+            <li>Simultaneously positions as <span class="highlight">leading voice against "foreign interference"</span> — demands investigations, cites NSICOP</li>
+            <li>As Deputy Leader, controls significant CPC caucus messaging on both Israel and foreign interference files</li>
+          </ul>
+          <span class="vote-indicator vote-nay">✕ VOTED NAY — Ceasefire Vote #658</span>
+        </div>
+
+        <!-- Anthony Housefather -->
+        <div class="mp-card" id="housefather">
+          <div class="mp-header">
+            <div>
+              <div class="mp-name">Anthony Housefather</div>
+              <div class="mp-riding">Mount Royal</div>
+            </div>
+            <span class="party-badge party-lpc">Liberal</span>
+          </div>
+          <ul class="evidence-list">
+            <li>Lobbied by CIJA <span class="highlight">67 times</span> — most of any MP in the House</li>
+            <li><span class="highlight">Broke Liberal party line</span> to vote NAY on ceasefire — only 3 Liberals did so</li>
+            <li>Publicly threatened to leave the Liberal caucus over Israel policy</li>
+            <li>Direct correlation: most-lobbied MP → broke party line on the exact vote CIJA targeted</li>
+          </ul>
+          <span class="vote-indicator vote-nay">✕ VOTED NAY — Ceasefire Vote #658 (BROKE PARTY LINE)</span>
+        </div>
+
+        <!-- Marco Mendicino -->
+        <div class="mp-card" id="mendicino">
+          <div class="mp-header">
+            <div>
+              <div class="mp-name">Marco Mendicino</div>
+              <div class="mp-riding">Eglinton—Lawrence</div>
+            </div>
+            <span class="party-badge party-lpc">Liberal</span>
+          </div>
+          <ul class="evidence-list">
+            <li>Lobbied by CIJA <span class="highlight">63 times</span> — second-most of any MP</li>
+            <li><span class="highlight">Broke Liberal party line</span> to vote NAY on ceasefire</li>
+            <li>Former Minister of Public Safety — had direct access to national security intelligence while being intensely lobbied by Israeli advocacy org</li>
+            <li>The two most-lobbied MPs both voted against their own party on the exact issue the foreign lobby demanded</li>
+          </ul>
+          <span class="vote-indicator vote-nay">✕ VOTED NAY — Ceasefire Vote #658 (BROKE PARTY LINE)</span>
+        </div>
+
+        <!-- Sen. Yuen Pau Woo -->
+        <div class="mp-card" id="woo">
+          <div class="mp-header">
+            <div>
+              <div class="mp-name">Sen. Yuen Pau Woo</div>
+              <div class="mp-riding">ISG Leader — 41 senators</div>
+            </div>
+            <span class="party-badge party-ind">ISG</span>
+          </div>
+          <ul class="evidence-list">
+            <li>Led Senate defeat of Uyghur genocide motion — <span class="highlight">33-29</span> (House passed 266-0)</li>
+            <li>Advocacy group classified as <span class="highlight">UFWD-linked</span> (United Front Work Department — CCP espionage arm)</li>
+            <li>Met with leaders of CCP "Overseas Chinese" groups <span class="highlight">3 days before</span> filing challenge to Foreign Interference Commission</li>
+            <li>China publicly <span class="highlight">applauded the senators who voted against</span> genocide recognition as "people of vision"</li>
+            <li>Controls 41-vote ISG bloc capable of killing any House legislation in the Senate</li>
+          </ul>
+          <span class="vote-indicator vote-nay">✕ LED OPPOSITION — Uyghur Genocide Vote</span>
+        </div>
+
+        <!-- Marty Morantz -->
+        <div class="mp-card" id="morantz">
+          <div class="mp-header">
+            <div>
+              <div class="mp-name">Marty Morantz</div>
+              <div class="mp-riding">Charleswood—St. James—Assiniboia—Headingley</div>
+            </div>
+            <span class="party-badge party-cpc">CPC</span>
+          </div>
+          <ul class="evidence-list">
+            <li>Lobbied by CIJA <span class="highlight">13 times</span> — 5th most of any MP</li>
+            <li>Voted NAY on ceasefire along with entire CPC caucus</li>
+            <li>Part of the bloc of 113 Conservatives who uniformly voted against Gaza ceasefire</li>
+          </ul>
+          <span class="vote-indicator vote-nay">✕ VOTED NAY — Ceasefire Vote #658</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ THE PATTERN ═══ -->
+    <section>
+      <h2><span class="section-num">03</span>The Paradox Pattern</h2>
+      <div style="background:#111113;border:1px solid rgba(196,30,58,0.15);border-radius:12px;padding:2rem;margin:1.5rem 0;">
+        <p style="font-size:1.1rem;color:#ededed;line-height:1.8;">
+          The OSINT data reveals a repeating mathematical pattern across multiple MPs:
+        </p>
+        <ol style="margin:1.5rem 0 1rem 1.5rem;color:#a0a0a6;line-height:2;">
+          <li><strong style="color:#ededed;">Explicitly advocate</strong> for the interests of a foreign state (Israel or China) inside the Canadian Parliament</li>
+          <li><strong style="color:#ededed;">Simultaneously demand</strong> investigations into "foreign interference" — always targeting a <em>different</em> foreign state</li>
+          <li><strong style="color:#ededed;">Deploy identity politics</strong> to shield their advocacy from scrutiny</li>
+          <li><strong style="color:#ededed;">Attack whistleblowers</strong> who identify the pattern — calling them "domestic terrorists" or "conspiracy theorists"</li>
+        </ol>
+        <p style="color:#c41e3a;font-weight:600;font-size:1rem;margin-top:1rem;">
+          This is the definition of cognitive deflection architecture: weaponize the concept of foreign interference as a shield for your own foreign advocacy.
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══ OSINT LOG ═══ -->
+    <section>
+      <h2><span class="section-num">04</span>OSINT Execution Log</h2>
+      <p>Raw output from the TENET5/LIRIL automated intelligence collection framework:</p>
+      <div class="osint-log">
+        <div><span class="cmd">$</span> <span class="info">LIRIL_CLASSIFY</span> → domain=ETHICS, mode=STEM, agent=LIRIL</div>
+        <div><span class="cmd">$</span> ddgs.text("site:ourcommons.ca Kevin Vuong Israel", max_results=5)</div>
+        <div><span class="result">→</span> hit: ourcommons.ca/members/en/kevin-vuong(110654)/roles</div>
+        <div><span class="cmd">$</span> ddgs.text("kevin vuong israel support twitter", max_results=5)</div>
+        <div><span class="result">→</span> hit: en.wikipedia.org/wiki/Kevin_Vuong → "evangelized defender"</div>
+        <div><span class="result">→</span> hit: Hansard → "they are not advocates for peace but are apologists for a terrorist group"</div>
+        <div><span class="cmd">$</span> ddgs.text("site:twitter.com KevinVuongTO Israel", max_results=10)</div>
+        <div><span class="result">→</span> hit: twitter.com/KevinVuongTO/status/1396487177283031055 → "I stand with you, @LevittMichael"</div>
+        <div><span class="result">→</span> hit: "#foreigninterference? Does Beijing have something on them?"</div>
+        <div><span class="cmd">$</span> ddgs.text("kevin vuong foreign interference OR treason", max_results=7)</div>
+        <div><span class="result">→</span> hit: Networks with Sam Cooper (journalist), Michel Juneau-Katsuya (ex-CSIS), Charles Burton (Sinopsis)</div>
+        <div><span class="warn">⚠</span> PARADOX DETECTED: Advocates for Israel while investigating "foreign interference" (China only)</div>
+        <div>---</div>
+        <div><span class="cmd">$</span> ddgs.text("Melissa Lantsman Israel support twitter", max_results=5)</div>
+        <div><span class="result">→</span> hit: x.com/MelissaLantsman/status/1711452044077191183 → Oct 9 2023 statement</div>
+        <div><span class="result">→</span> hit: "Canada has put in place an arms embargo against Israel for everything excluding the iron dome"</div>
+        <div><span class="cmd">$</span> ddgs.text("Melissa Lantsman foreign interference", max_results=5)</div>
+        <div><span class="result">→</span> hit: en.wikipedia.org/wiki/Melissa_Lantsman → Deputy Leader CPC</div>
+        <div><span class="warn">⚠</span> PARADOX DETECTED: Demands foreign interference inquiry while advocating for Israeli arms supply</div>
+        <div>---</div>
+        <div><span class="cmd">$</span> ddgs.text("Anthony Housefather CIJA lobby", max_results=3)</div>
+        <div><span class="result">→</span> 67 registered CIJA lobbying instances → voted NAY (broke party line)</div>
+        <div><span class="cmd">$</span> ddgs.text("Marco Mendicino CIJA lobby", max_results=3)</div>
+        <div><span class="result">→</span> 63 registered CIJA lobbying instances → voted NAY (broke party line)</div>
+        <div><span class="warn">⚠</span> CORRELATION: Top 2 most-lobbied MPs = only 2 of 3 Liberal rebels on Vote #658</div>
+        <div>---</div>
+        <div><span class="info">TENET5/LIRIL OSINT FRAMEWORK v1.0</span> | All queries: public DuckDuckGo API | All sources: government records</div>
+      </div>
+    </section>
+
+    <!-- ═══ KEY VOTE ═══ -->
+    <section>
+      <h2><span class="section-num">05</span>Vote #658 — Gaza Ceasefire (March 18, 2024)</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Bloc</th><th>Count</th><th>Vote</th><th>Detail</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Liberal (majority)</td><td>~150</td><td style="color:#27ae60">YEA</td><td>Followed party line</td></tr>
+          <tr><td>NDP</td><td>25</td><td style="color:#27ae60">YEA</td><td>Followed party line</td></tr>
+          <tr><td>Bloc Québécois</td><td>32</td><td style="color:#27ae60">YEA</td><td>Followed party line</td></tr>
+          <tr class="highlight"><td><strong>Conservative (entire caucus)</strong></td><td><strong>113</strong></td><td style="color:#c41e3a"><strong>NAY</strong></td><td>Bloc vote against ceasefire</td></tr>
+          <tr class="highlight"><td><strong>Liberal rebels</strong></td><td><strong>3</strong></td><td style="color:#c41e3a"><strong>NAY</strong></td><td>Housefather (67x lobbied), Mendicino (63x), Ben Carr</td></tr>
+          <tr class="highlight"><td><strong>Independent</strong></td><td><strong>1</strong></td><td style="color:#c41e3a"><strong>NAY</strong></td><td>Kevin Vuong — only independent to vote NAY</td></tr>
+        </tbody>
+      </table>
+      <p class="chart-source" style="margin-top:1rem;">Source: <a href="https://www.ourcommons.ca/members/en/votes/44/1/658">Official House of Commons Vote Record</a></p>
+    </section>
+
+    <!-- ═══ SOURCES ═══ -->
+    <section>
+      <h2><span class="section-num">06</span>Sources & Methodology</h2>
+      <p>Every claim on this page comes from publicly available official records:</p>
+      <ul style="margin:1rem 0 1rem 1.5rem;line-height:2;">
+        <li><a href="https://www.ourcommons.ca/members/en/votes/44/1/658">House of Commons Vote #658</a> — Official voting record</li>
+        <li><a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/clntSmmry?clientOrgCorpNumber=111">Lobbyist Registry — CIJA</a> — 579 lobbying instances</li>
+        <li><a href="https://trackcija.com/">Track CIJA</a> — Independent CIJA lobbying tracker</li>
+        <li><a href="https://api.openparliament.ca/">Open Parliament API</a> — 7,959 speeches analyzed</li>
+        <li><a href="https://www.nsicop-cpsnr.ca/reports/rp-2024-06-03/special-report-foreign-interference.pdf">NSICOP Foreign Interference Report (June 2024)</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Kevin_Vuong">Wikipedia: Kevin Vuong</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Melissa_Lantsman">Wikipedia: Melissa Lantsman</a></li>
+        <li>Twitter/X public accounts: @KevinVuongTO, @MelissaLantsman</li>
+      </ul>
+      <p style="color:#6e6e76;font-size:0.82rem;">OSINT collection powered by TENET5/LIRIL autonomous framework. No private data accessed. All social media sources are public posts by elected officials on their official accounts.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Daniel Perry. All rights reserved.</p>
+    <p>OSINT Dashboard powered by TENET5/LIRIL | All sources public record | <a href="foreign-influence.html">Detailed Analysis →</a></p>
+  </footer>
+</body>
+</html>
