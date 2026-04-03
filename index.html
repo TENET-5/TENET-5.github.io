@@ -3,33 +3,324 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[CLASSIFIED] Protocol Locked - ABCXYZ</title>
+  <meta name="description" content="Red Duster — Open World Survival in Communist-Occupied Canada. Hunt. Craft. Fight back.">
+  <title>Red Duster</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
-    body {
-      background: #000; color: #ff3333; font-family: 'JetBrains Mono', monospace;
-      margin: 0; padding: 0; min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center;
+    @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    #cesiumContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    canvas#gameCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; display: block; touch-action: none; outline: none; background: transparent; }
+    /* ── Main Menu ── */
+    #mainMenu {
+      position: fixed; inset: 0; z-index: 200;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0505 50%, #0a0a0a 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
     }
-    .container {
-      max-width: 600px; padding: 40px;
-      border: 1px solid #ff3333; background: rgba(10,0,0,0.8);
-      box-shadow: 0 0 30px rgba(255,0,0,0.2) inset, 0 0 20px rgba(255,0,0,0.5);
+    .menu-container {
+      text-align: center; max-width: 600px; padding: 2rem;
     }
-    h1 { font-size: 2rem; margin-bottom: 20px; letter-spacing: 2px; }
-    p { font-size: 1rem; line-height: 1.6; color: #ccc; }
-    .footer { margin-top: 40px; font-size: 0.8rem; color: #555; }
+    .menu-title {
+      font-family: 'Black Ops One', system-ui; font-size: 5rem; color: #cc2200;
+      text-shadow: 0 0 40px rgba(200,30,0,0.4), 0 4px 8px rgba(0,0,0,0.8);
+      letter-spacing: 4px; line-height: 1;
+    }
+    .menu-subtitle {
+      font-size: 1.1rem; color: #886644; letter-spacing: 0.4em;
+      font-weight: 600; margin: 0.5rem 0 2rem; text-transform: uppercase;
+    }
+    .menu-tagline {
+      font-size: 0.95rem; color: #998877; margin-bottom: 2.5rem;
+      line-height: 1.6; max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+    .menu-btn {
+      display: block; width: 100%; max-width: 360px; margin: 0.8rem auto;
+      background: transparent; border: 1px solid #cc2200; color: #fff;
+      padding: 1rem 2rem; font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .menu-btn:hover {
+      background: rgba(200,30,0,0.15); border-color: #ff4422;
+      box-shadow: 0 0 20px rgba(200,30,0,0.3);
+      transform: translateY(-1px);
+    }
+    .menu-version {
+      margin-top: 2rem; font-size: 0.75rem; color: #444;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* ── Loading Overlay ── */
+    #loadingOverlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: #0a0a0a; display: none;
+      align-items: center; justify-content: center; flex-direction: column;
+      font-family: 'Rajdhani', sans-serif; color: #cc8855;
+    }
+    #loadingOverlay .loading-text { font-size: 1.4rem; letter-spacing: 0.2em; }
+    #loadingOverlay .loading-bar-bg {
+      width: 300px; height: 4px; background: #222; margin-top: 1.5rem; border-radius: 2px;
+    }
+    #loadingOverlay .loading-bar {
+      height: 100%; width: 0%; background: #cc2200; border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    /* ── HUD ── */
+    #hud {
+      position: fixed; inset: 0; z-index: 100; pointer-events: none;
+      font-family: 'JetBrains Mono', monospace; display: none;
+    }
+    /* Crosshair */
+    .crosshair {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 2px; height: 2px; background: rgba(255,255,255,0.7);
+      box-shadow: 0 -8px 0 rgba(255,255,255,0.5), 0 8px 0 rgba(255,255,255,0.5),
+                  -8px 0 0 rgba(255,255,255,0.5), 8px 0 0 rgba(255,255,255,0.5);
+    }
+    /* Bottom-left survival bars */
+    .survival-panel {
+      position: absolute; bottom: 20px; left: 20px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .surv-row { display: flex; align-items: center; gap: 8px; }
+    .surv-label { font-size: 0.65rem; color: #888; width: 42px; text-align: right; }
+    .surv-bar-bg { width: 120px; height: 5px; background: #1a1a1a; border-radius: 2px; }
+    .surv-bar { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+    .surv-val { font-size: 0.6rem; color: #666; width: 36px; }
+    /* Bottom-right weapon info */
+    .weapon-panel {
+      position: absolute; bottom: 20px; right: 20px; text-align: right;
+    }
+    .wpn-name { font-size: 0.75rem; color: #666; letter-spacing: 0.2em; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+    .wpn-ammo { font-size: 2.4rem; color: #fff; font-weight: 700; font-family: 'Rajdhani', sans-serif; line-height: 1; text-shadow: 0 0 20px rgba(255,200,0,0.3); }
+    .wpn-ammo-reserve { font-size: 0.85rem; color: #555; font-family: 'Rajdhani', sans-serif; }
+    /* Top-right compass + time */
+    .info-panel {
+      position: absolute; top: 16px; right: 20px;
+      font-size: 0.7rem; color: #666; text-align: right;
+    }
+    /* Top-left zone/status */
+    .status-panel {
+      position: absolute; top: 16px; left: 20px;
+      font-size: 0.7rem; color: #887744; font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    }
+    .status-kills { font-size: 1.1rem; color: #cc3333; font-weight: 700; letter-spacing: 0.1em; }
+    /* Interaction prompt */
+    .interact-prompt {
+      position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
+      font-size: 0.85rem; color: #cc8855; letter-spacing: 0.1em; display: none;
+    }
+    /* Damage flash */
+    .damage-flash {
+      position: fixed; inset: 0; background: radial-gradient(ellipse, transparent 40%, rgba(180,0,0,0.4) 100%);
+      pointer-events: none; opacity: 0; transition: opacity 0.1s;
+    }
+    /* ── Character Select ── */
+    #characterSelect {
+      position: fixed; inset: 0; z-index: 250;
+      background: linear-gradient(135deg, #110505 0%, #0a0a0a 100%);
+      display: none; align-items: center; justify-content: center; flex-direction: column;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
+    }
+    .char-title {
+      font-family: 'Black Ops One', system-ui; font-size: 3rem; color: #cc2200;
+      letter-spacing: 2px; margin-bottom: 2rem;
+    }
+    .char-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 900px;
+    }
+    .char-card {
+      background: rgba(20,20,20,0.8); border: 1px solid #442222; padding: 1rem;
+      cursor: pointer; transition: all 0.2s; text-align: left;
+    }
+    .char-card:hover {
+      background: rgba(200,30,0,0.15); border-color: #ff4422; transform: translateY(-2px);
+    }
+    .char-callsign {
+      font-family: 'Black Ops One', system-ui; font-size: 1.5rem; color: #cc8855;
+    }
+    .char-region {
+      font-size: 0.8rem; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;
+    }
+    .char-desc {
+      font-size: 0.9rem; color: #aaa; line-height: 1.4;
+    }
+    .char-btn-back {
+      margin-top: 2rem; background: transparent; border: none; color: #888;
+      font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; cursor: pointer;
+    }
+    .char-btn-back:hover { color: #fff; }
+    /* ── Death Screen ── */
+    #deathScreen {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0); backdrop-filter: blur(0px);
+      align-items: center; justify-content: center; flex-direction: column;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
+      transition: background 1.2s ease, backdrop-filter 1.2s ease;
+    }
+    #deathScreen.visible {
+      background: rgba(10,0,0,0.88); backdrop-filter: blur(6px);
+    }
+    .death-title {
+      font-family: 'Black Ops One', system-ui; font-size: 4rem; color: #cc2200;
+      text-shadow: 0 0 60px rgba(200,0,0,0.6); letter-spacing: 4px;
+      opacity: 0; transform: translateY(-20px);
+      transition: opacity 0.8s ease 0.4s, transform 0.8s ease 0.4s;
+    }
+    #deathScreen.visible .death-title { opacity: 1; transform: translateY(0); }
+    .death-stats {
+      margin: 1.5rem 0; font-size: 1.1rem; color: #888; text-align: center;
+      line-height: 2; letter-spacing: 0.1em;
+      opacity: 0; transition: opacity 0.6s ease 0.9s;
+    }
+    #deathScreen.visible .death-stats { opacity: 1; }
+    .death-stat-val { color: #fff; font-weight: 700; font-size: 1.3rem; }
+    .death-btn {
+      display: block; width: 280px; margin: 0.5rem auto;
+      background: transparent; border: 1px solid #cc2200; color: #fff;
+      padding: 0.85rem 2rem; font-family: 'Rajdhani', sans-serif;
+      font-size: 1.2rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s; opacity: 0; transition: opacity 0.6s ease 1.2s, background 0.2s, box-shadow 0.2s;
+    }
+    #deathScreen.visible .death-btn { opacity: 1; }
+    .death-btn:hover { background: rgba(200,30,0,0.2); box-shadow: 0 0 20px rgba(200,30,0,0.3); }
   </style>
+  <script type="module" crossorigin src="./assets/index-DBapcjwp.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/babylon-CYdGx1Em.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-CGNOqgEs.css">
 </head>
 <body>
-  <div class="container">
-    <h1>[ABCXYZ] PROTOCOL LOCKED</h1>
-    <p>The PPCLI Lawsuit intelligence has been archived offline to protect target tracking assets from CFNIS and CCP proxy detection.</p>
-    <p>We keep all of our discoveries protected.</p>
-    <p style="color: #ffcc00; margin-top: 20px;">ACCESS DENIED</p>
-    <div class="footer">ABCXYZ Accountability Engine</div>
+  <div id="cesiumContainer"></div>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Main Menu -->
+  <div id="mainMenu">
+    <div class="menu-container">
+      <h1 class="menu-title">RED DUSTER</h1>
+      <h2 class="menu-subtitle">Occupied Canada</h2>
+      <p class="menu-tagline">
+        The communists have seized power. Supply routes cut. Death squads patrol the highways.
+        You are alone in the Canadian wilderness. Hunt. Fish. Scavenge. Build weapons. Fight back.
+      </p>
+      <button id="btnSurvive" class="menu-btn">SURVIVE</button>
+      <button id="btnHost" class="menu-btn">HOST SERVER</button>
+      <button id="btnJoin" class="menu-btn">JOIN SERVER</button>
+      <div class="menu-version">RED DUSTER v2.0 // BABYLON.JS 9 // ABCXYZ STUDIOS</div>
+    </div>
   </div>
+
+  <!-- Character Selection -->
+  <div id="characterSelect">
+    <h1 class="char-title">CHOOSE OPERATOR</h1>
+    <div class="char-grid">
+      <div class="char-card" data-op="skoden">
+        <div class="char-callsign">"SKODEN"</div>
+        <div class="char-region">First Nations / Scout</div>
+        <div class="char-desc">Wilderness survival expert. If the communists thought the winter was bad, wait until the Aunties find out they're on the land. Tax exempt and ready to brawl.</div>
+      </div>
+      <div class="char-card" data-op="screech">
+        <div class="char-callsign">"SCREECH"</div>
+        <div class="char-region">Newfoundland / Heavy</div>
+        <div class="char-desc">Kissed the cod, drank the rum, and now he's here to scatter the red menace. Tough as nails and incomprehensible over the radio.</div>
+      </div>
+      <div class="char-card" data-op="puck">
+        <div class="char-callsign">"PUCK"</div>
+        <div class="char-region">Alberta / Rig Pig</div>
+        <div class="char-desc">Used to pull wrenches on the rigs in Fort Mac. Brought his lifted truck attitude to the resistance. Fueled entirely by Berta beef and spite.</div>
+      </div>
+      <div class="char-card" data-op="poutine">
+        <div class="char-callsign">"POUTINE"</div>
+        <div class="char-region">Quebec / CQB</div>
+        <div class="char-desc">Swears exclusively in church words. The occupier's worst nightmare in close quarters. Tabarnak.</div>
+      </div>
+      <div class="char-card" data-op="trashpanda">
+        <div class="char-callsign">"TRASH PANDA"</div>
+        <div class="char-region">Toronto / Scavenger</div>
+        <div class="char-desc">Survived the TTC for years, so urban warfare is basically a lateral move. Excellent at finding loot in dumpsters.</div>
+      </div>
+      <div class="char-card" data-op="granola">
+        <div class="char-callsign">"GRANOLA"</div>
+        <div class="char-region">BC / Medic</div>
+        <div class="char-desc">Hippie turned resistance fighter. Will patch your bullet wounds, but will also judge your carbon footprint while doing it.</div>
+      </div>
+    </div>
+    <button id="btnBackToMenu" class="char-btn-back">[ ESC ] BACK TO MENU</button>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingOverlay">
+    <div class="loading-text">DEPLOYING...</div>
+    <div class="loading-bar-bg"><div class="loading-bar" id="loadBar"></div></div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="crosshair"></div>
+
+    <div class="survival-panel">
+      <div class="surv-row">
+        <span class="surv-label">HP</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barHP" style="width:100%;background:#cc2200;"></div></div>
+        <span class="surv-val" id="valHP">100</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">FOOD</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barFood" style="width:100%;background:#cc8800;"></div></div>
+        <span class="surv-val" id="valFood">100</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">H2O</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barWater" style="width:100%;background:#2288cc;"></div></div>
+        <span class="surv-val" id="valWater">100</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">TEMP</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barTemp" style="width:60%;background:#22aa44;"></div></div>
+        <span class="surv-val" id="valTemp">+5C</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">STAM</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barStamina" style="width:100%;background:#dddddd;"></div></div>
+        <span class="surv-val" id="valStamina">100</span>
+      </div>
+    </div>
+
+    <div class="weapon-panel">
+      <div class="wpn-name" id="wpnName">C7A2</div>
+      <div class="wpn-ammo"><span id="wpnAmmo">30</span></div>
+      <div class="wpn-ammo-reserve"><span id="wpnReserve">120</span> reserve</div>
+    </div>
+
+    <div class="info-panel">
+      <div id="timeDisplay">12:00</div>
+      <div id="compassDisplay">N</div>
+    </div>
+
+    <div class="status-panel">
+      <div id="zoneDisplay">CANADIAN WILDERNESS</div>
+      <div class="status-kills">☠ <span id="killDisplay">0</span> KILLS</div>
+    </div>
+
+    <div class="interact-prompt" id="interactPrompt">[F] INTERACT</div>
+    <div class="damage-flash" id="damageFlash"></div>
+
+    <!-- Tactical Minimap -->
+    <canvas id="minimapCanvas" width="180" height="180" style="position:absolute;bottom:90px;right:20px;width:140px;height:140px;border-radius:50%;border:2px solid rgba(204,34,0,0.6);background:rgba(10,10,10,0.75);pointer-events:none;"></canvas>
+  </div>
+
+  <!-- Death Screen -->
+  <div id="deathScreen">
+    <div class="death-title">YOU DIED</div>
+    <div class="death-stats">
+      KILLS &nbsp;<span class="death-stat-val" id="deathKills">0</span><br>
+      SURVIVED &nbsp;<span class="death-stat-val" id="deathTime">0:00</span><br>
+      CAUSE &nbsp;<span class="death-stat-val" id="deathCause">UNKNOWN</span>
+    </div>
+    <button class="death-btn" id="btnRespawn">RESPAWN</button>
+    <button class="death-btn" id="btnDeathMenu" style="border-color:#555;color:#888;">MAIN MENU</button>
+  </div>
+
 </body>
 </html>
-
