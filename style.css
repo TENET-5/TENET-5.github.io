@@ -223,6 +223,34 @@ strong { color: var(--text-primary); font-weight: 600; }
   background: rgba(5, 5, 6, 0.95);
   box-shadow: 0 1px 20px rgba(0,0,0,0.4);
 }
+/* nav.js wrapper — flex row on desktop */
+.nav-content {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  height: 100%;
+}
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--r-sm);
+  z-index: 99999;
+}
 .site-nav::-webkit-scrollbar { display: none; }
 
 /* Brand */
@@ -354,6 +382,15 @@ strong { color: var(--text-primary); font-weight: 600; }
   display: flex;
   animation: fadeInUp 0.2s var(--ease) both;
 }
+/* JS-driven dropdowns via aria-expanded */
+.nav-dropdown-group { position: relative; height: 100%; }
+.nav-more-btn[aria-expanded="true"] + .nav-dropdown {
+  display: flex;
+  animation: fadeInUp 0.2s var(--ease) both;
+}
+.nav-more-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+.nav-more-btn.active-section { color: var(--text-primary); }
+
 .nav-dropdown a {
   display: block;
   padding: 8px 14px !important;
@@ -371,6 +408,31 @@ strong { color: var(--text-primary); font-weight: 600; }
   color: var(--text-primary) !important;
   background: var(--accent-soft) !important;
 }
+
+/* ── Hamburger Menu ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: auto;
+  z-index: 10001;
+}
+.nav-hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 1px;
+  transition: all 0.3s var(--ease);
+}
+.nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
 
 /* Color classes — replace inline styles */
 .nav-hot { color: #ff6b6b !important; font-weight: 600 !important; }
@@ -986,7 +1048,7 @@ footer {
 .nav-hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
 
 @media (max-width: 900px) {
-  .nav-hamburger { display: block; }
+  .nav-hamburger { display: flex; }
 
   .site-nav {
     flex-wrap: wrap;
@@ -996,6 +1058,7 @@ footer {
     gap: 0;
   }
 
+  /* Legacy: direct .nav-group children */
   .nav-group {
     display: none;
     width: 100%;
@@ -1011,10 +1074,30 @@ footer {
     display: flex;
   }
 
+  /* New: nav.js wrapper (.nav-content) */
+  .nav-content {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    padding-bottom: 12px;
+  }
+  .nav-content.nav-open {
+    display: flex;
+  }
+  .nav-content .nav-group {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
   /* On mobile, show dropdown links inline — no floating dropdown */
   .nav-info .nav-more-btn { display: none; }
-  .nav-info .nav-dropdown {
-    display: flex !important;
+  .nav-info .nav-dropdown,
+  .nav-dropdown-group .nav-dropdown {
     position: static;
     transform: none;
     background: transparent;
@@ -1027,6 +1110,23 @@ footer {
     flex-direction: column;
     width: 100%;
   }
+  /* On mobile, clicking the dropdown button still works */
+  .nav-dropdown-group { height: auto; }
+  .nav-dropdown-group .nav-more-btn {
+    width: 100%;
+    justify-content: space-between;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .nav-dropdown-group .nav-dropdown {
+    display: none;
+    padding-left: 12px;
+  }
+  .nav-dropdown-group .nav-more-btn[aria-expanded="true"] + .nav-dropdown {
+    display: flex;
+  }
+
   .nav-dropdown a {
     padding: 8px 12px !important;
     width: 100%;
