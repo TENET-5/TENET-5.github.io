@@ -26,6 +26,7 @@
           { label: '☠ Genocide Evidence', href: 'genocide-evidence.html' },
           { label: '🔍 Corruption Map', href: 'corruption-map.html' },
           { label: '🛰 OSINT Dashboard', href: 'osint-dashboard.html' },
+          { label: '🗂 Dossier Viewer', href: 'dossier-viewer.html' },
           { label: '📊 Infographics', href: 'infographics.html' }
         ]
       },

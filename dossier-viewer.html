@@ -207,31 +207,71 @@
         return;
       }
 
-      // Title Generation
-      let rawName = file.split('/').pop().replace('.md', '').toUpperCase();
+      // Title + JSON vs MD detection
+      const isJSON = file.endsWith('.json');
+      let rawName = file.split('/').pop().replace(/\.(md|json)$/, '').replace(/_/g, ' ').toUpperCase();
       titleSpan.innerText = rawName;
-
-      // Ensure marked is ready
-      if (typeof marked === 'undefined') {
-        container.innerHTML = '<div style="color:#e05050;text-align:center;">ERROR: MARKED CDN FAILED TO LOAD. CORE CORRUPTION.</div>';
-        return;
-      }
 
       fetch(file)
         .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status} - TARGET NOT FOUND`);
-          }
-          return response.text();
+          if (!response.ok) throw new Error(`HTTP ${response.status} — TARGET NOT FOUND`);
+          return isJSON ? response.json() : response.text();
         })
-        .then(text => {
-          // Render the markdown using marked.js
-          const htmlContent = marked.parse(text);
-          container.innerHTML = htmlContent;
+        .then(data => {
+          if (isJSON) {
+            container.innerHTML = renderJSON(data);
+          } else {
+            if (typeof marked === 'undefined') {
+              container.innerHTML = '<div style="color:#e05050;text-align:center;">ERROR: MARKED CDN FAILED TO LOAD.</div>';
+              return;
+            }
+            container.innerHTML = marked.parse(data);
+          }
         })
         .catch(err => {
           container.innerHTML = `<div style="color:#e05050;text-align:center;font-family:'JetBrains Mono';">ERROR: FAILED TO DECRYPT DOSSIER.<br><br>${err.message}</div>`;
         });
+
+      function renderJSON(d) {
+        const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const linkify = s => /^https?:\/\//.test(s) ? `<a href="${esc(s)}" target="_blank" rel="noopener" style="color:#5b9cf5;">${esc(s)}</a>` : esc(s);
+        function val(v, depth) {
+          if (v === null) return '<span style="color:#555">null</span>';
+          if (typeof v === 'boolean') return `<span style="color:#5b9cf5">${v}</span>`;
+          if (typeof v === 'number') return `<span style="color:#f5a623">${v.toLocaleString()}</span>`;
+          if (typeof v === 'string') return `<span style="color:#a8d8a8">${linkify(v)}</span>`;
+          if (Array.isArray(v)) {
+            if (!v.length) return '<span style="color:#555">—</span>';
+            return '<ul style="margin:4px 0 4px 1.2rem;padding:0;">' +
+              v.map(item => `<li style="margin:3px 0;">${val(item, depth+1)}</li>`).join('') + '</ul>';
+          }
+          if (typeof v === 'object') return renderObj(v, depth+1);
+          return esc(String(v));
+        }
+        function renderObj(o, depth) {
+          const entries = Object.entries(o);
+          if (!entries.length) return '<span style="color:#555">{}</span>';
+          const bg = depth === 0 ? 'rgba(255,255,255,0.03)' : depth === 1 ? 'rgba(255,255,255,0.015)' : 'transparent';
+          const border = depth <= 1 ? 'border:1px solid rgba(255,255,255,0.07);border-radius:8px;' : 'border-left:2px solid rgba(196,30,58,0.2);';
+          let h = `<div style="background:${bg};${border}padding:${depth<=1?'1rem':'0.4rem 0.75rem'};margin:${depth<=1?'1rem 0':'4px 0'};">`;
+          for (const [k, v] of entries) {
+            const kLabel = k.replace(/_/g,' ').toUpperCase();
+            h += `<div style="margin:6px 0;"><span style="color:#c41e3a;font-weight:700;font-size:0.75rem;letter-spacing:0.5px;">${esc(kLabel)}</span>`;
+            if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+              h += renderObj(v, depth+1);
+            } else {
+              h += `<span style="color:#444;margin:0 6px;">-></span>${val(v, depth)}`;
+            }
+            h += '</div>';
+          }
+          h += '</div>';
+          return h;
+        }
+        if (d.meta && d.meta.name) titleSpan.innerText = d.meta.name.toUpperCase() + ' — LIRIL DOSSIER';
+        else if (d.name) titleSpan.innerText = String(d.name).toUpperCase() + ' — LIRIL DOSSIER';
+        else if (d.title) titleSpan.innerText = String(d.title).toUpperCase();
+        return `<div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.7;max-width:900px;margin:0 auto;padding:2rem;">${renderObj(d, 0)}</div>`;
+      }
     });
   </script>
 </body>
