@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foreign Influence in Canadian Politics — TENET5 Research</title>
+  <meta name="description" content="Objective evidence-based analysis of foreign state influence in Canadian politics. Data sourced from Hansard, openparliament.ca, Hogue Commission, and Elections Canada.">
+  <meta property="og:title" content="Foreign Influence in Canadian Politics — TENET5 Research">
+  <meta property="og:description" content="Pattern analysis of CCP and Israel-linked influence on federal MPs. All data from public government records.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/foreign-influence.html">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://tenet-5.github.io/foreign-influence.html">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --bg: #070a0f;
+      --surface: rgba(10,20,40,0.85);
+      --border: rgba(0,170,255,0.25);
+      --cyan: #00aaff;
+      --amber: #ffaa00;
+      --red: #ff4444;
+      --green: #00ff88;
+      --text: #c8d8e8;
+      --text-dim: #6a8a9a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.6;
+      padding: 0 0 60px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #070a0f 0%, #0a1428 60%, #0d1a2e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 20px 40px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.8rem);
+      color: #fff;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--cyan); }
+    .hero .subtitle {
+      color: var(--text-dim);
+      font-size: 1.05rem;
+      max-width: 700px;
+      margin: 0 auto 24px;
+    }
+    .disclaimer-box {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255,170,0,0.08);
+      border: 1px solid rgba(255,170,0,0.3);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 0.88rem;
+      color: #cc9900;
+      text-align: left;
+    }
+    .disclaimer-box strong { color: var(--amber); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    .section { margin-top: 48px; }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--cyan);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title .badge {
+      background: rgba(0,170,255,0.15);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    /* Theory cards */
+    .theory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .theory-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+    }
+    .theory-card.ccp { border-color: rgba(255,68,68,0.4); }
+    .theory-card.israel { border-color: rgba(0,160,255,0.4); }
+    .theory-card.coord { border-color: rgba(255,170,0,0.4); }
+    .theory-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .theory-card .flag { font-size: 1.5rem; margin-right: 8px; }
+    .theory-card p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 14px; }
+    .confidence-bar {
+      background: rgba(255,255,255,0.08);
+      border-radius: 6px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .confidence-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 1.2s ease;
+    }
+    .confidence-fill.ccp { background: linear-gradient(90deg, #ff4444, #ff8800); }
+    .confidence-fill.israel { background: linear-gradient(90deg, #0088ff, #00aaff); }
+    .confidence-fill.coord { background: linear-gradient(90deg, #ffaa00, #ffcc44); }
+    .confidence-label { color: var(--text-dim); font-size: 0.8rem; }
+    .support-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .support-strong { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+    .support-moderate { background: rgba(255,170,0,0.15); color: var(--amber); border: 1px solid rgba(255,170,0,0.3); }
+    .support-weak { background: rgba(255,68,68,0.1); color: #ff8888; border: 1px solid rgba(255,68,68,0.25); }
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .data-table th {
+      background: rgba(0,170,255,0.1);
+      color: var(--cyan);
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+    .data-table tr:hover td { background: rgba(0,170,255,0.04); }
+    .pct-cell { font-weight: 700; }
+    .pct-high { color: #ff6666; }
+    .pct-mid { color: var(--amber); }
+    .pct-low { color: var(--text-dim); }
+    .party-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .party-CPC, .party-Conservative { background: rgba(0,100,255,0.2); color: #66aaff; }
+    .party-Lib, .party-Liberal { background: rgba(255,0,100,0.2); color: #ff88aa; }
+    .party-NDP { background: rgba(255,100,0,0.2); color: #ffaa66; }
+    .party-BQ, .party-Bloc { background: rgba(0,200,200,0.2); color: #66ffee; }
+    .party-Green { background: rgba(0,200,0,0.2); color: #88ff88; }
+    /* Hogue Commission box */
+    .hogue-box {
+      background: rgba(255,68,68,0.07);
+      border: 1px solid rgba(255,68,68,0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .hogue-box h4 { color: #ff8888; margin-bottom: 10px; }
+    .hogue-box p { color: var(--text-dim); font-size: 0.9rem; }
+    .hogue-box .hogue-item {
+      display: inline-block;
+      background: rgba(255,68,68,0.12);
+      border: 1px solid rgba(255,68,68,0.3);
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin: 3px;
+      font-size: 0.82rem;
+      color: #ff9999;
+    }
+    /* Sources */
+    .sources-list { list-style: none; }
+    .sources-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.88rem;
+      color: var(--text-dim);
+    }
+    .sources-list a { color: var(--cyan); text-decoration: none; }
+    .sources-list a:hover { text-decoration: underline; }
+    /* Nav */
+    nav {
+      background: rgba(7,10,15,0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--cyan); }
+    nav .brand { color: var(--cyan); font-weight: 800; font-size: 1rem; margin-right: 10px; }
+    /* Loading state */
+    .loading { color: var(--text-dim); font-style: italic; padding: 20px; text-align: center; }
+    .error-box {
+      background: rgba(255,68,68,0.08);
+      border: 1px solid rgba(255,68,68,0.3);
+      border-radius: 8px;
+      padding: 16px;
+      color: #ff9999;
+      font-size: 0.88rem;
+    }
+    .scan-btn {
+      background: linear-gradient(135deg, rgba(0,100,255,0.3), rgba(0,200,255,0.2));
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 10px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin-right: 10px;
+    }
+    .scan-btn:hover { background: rgba(0,170,255,0.25); }
+    .methodology {
+      background: rgba(0,170,255,0.05);
+      border: 1px solid rgba(0,170,255,0.15);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+    .methodology h4 { color: var(--cyan); margin-bottom: 12px; }
+    .methodology p { color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; }
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .method-item {
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .method-item .weight { font-size: 1.5rem; font-weight: 800; color: var(--cyan); }
+    .method-item .label { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+    @media (max-width: 600px) {
+      .theory-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">TENET5</span>
+  <a href="/">Home</a>
+  <a href="/accountability.html">504 Database</a>
+  <a href="/foreign-influence.html" class="active">Foreign Influence</a>
+  <a href="/evidence.html">Evidence</a>
+  <a href="/hansard-evidence.html">Hansard</a>
+</nav>
+
+<div class="hero">
+  <h1>Foreign Influence in<br><span>Canadian Politics</span></h1>
+  <p class="subtitle">
+    Objective pattern analysis of foreign state influence on federal MPs.<br>
+    All data sourced from public government records.
+  </p>
+  <div class="disclaimer-box">
+    <strong>⚖️ Methodology Disclosure:</strong> Scores represent statistical alignment with documented foreign state
+    interests based on publicly available voting records, Hansard speeches, and the Hogue Commission's published findings.
+    Scores do <em>not</em> imply intent, corruption, or criminal conduct. All evidence is cited and verifiable.
+    Hypothesis testing framework — results updated as new data becomes available.
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Hypotheses -->
+  <div class="section">
+    <div class="section-title">
+      Hypothesis Testing
+      <span class="badge">OBJECTIVE ANALYSIS</span>
+    </div>
+    <div class="theory-grid">
+      <div class="theory-card israel">
+        <h3><span class="flag">🇮🇱</span> Israel → Conservative Party</h3>
+        <p>
+          Pattern hypothesis: Israel-linked lobby groups (CIJA, B'nai Brith) disproportionately
+          engaged Conservative MPs on anti-BDS legislation, IHRA adoption, and opposition to
+          ceasefire motions.
+        </p>
+        <div class="confidence-bar"><div class="confidence-fill israel" id="israel-bar" style="width:0%"></div></div>
+        <div class="confidence-label" id="israel-label">Loading voting data...</div>
+        <div id="israel-support" class="support-chip support-weak">Calculating...</div>
+        <p style="margin-top:12px;font-size:0.82rem;color:#6a8a9a;">
+          Key bills: Anti-BDS motions, IHRA definition adoption, ceasefire votes, arms export votes
+        </p>
+      </div>
+
+      <div class="theory-card ccp">
+        <h3><span class="flag">🇨🇳</span> CCP → Liberal Party</h3>
+        <p>
+          Pattern hypothesis: CCP-linked influence operations (United Front, Confucius Institutes,
+          documented in Hogue Commission 2024) disproportionately targeted Liberal candidates and
+          opposed foreign agent registry legislation.
+        </p>
+        <div class="confidence-bar"><div class="confidence-fill ccp" id="ccp-bar" style="width:0%"></div></div>
+        <div class="confidence-label" id="ccp-label">Loading voting data...</div>
+        <div id="ccp-support" class="support-chip support-weak">Calculating...</div>
+        <p style="margin-top:12px;font-size:0.82rem;color:#6a8a9a;">
+          Key bills: Foreign agent registry, Uyghur genocide motion, Huawei 5G ban, Hong Kong sanctions
+        </p>
+      </div>
+
+      <div class="theory-card coord">
+        <h3><span class="flag">🔗</span> Coordinated Dual-Track Operation</h3>
+        <p>
+          Hypothesis: Israel-linked and CCP-linked influence operations operate simultaneously,
+          effectively splitting Canadian political focus and preventing unified national security responses.
+        </p>
+        <div class="confidence-bar"><div class="confidence-fill coord" style="width:15%"></div></div>
+        <div class="confidence-label">Insufficient public evidence to score objectively</div>
+        <div class="support-chip support-weak">Insufficient data — see Hogue Commission Vol 2</div>
+        <p style="margin-top:12px;font-size:0.82rem;color:#6a8a9a;">
+          Source: Hogue Commission Vol 1 documents only one state actor conclusively — more data needed
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hogue Commission -->
+  <div class="section">
+    <div class="section-title">Hogue Commission Findings <span class="badge">OFFICIAL</span></div>
+    <div class="hogue-box">
+      <h4>🏛️ Public Record — Foreign Interference Commission (2024)</h4>
+      <p>
+        Justice Hogue's commission documented specific ridings and individuals as targets of CCP foreign interference.
+        The following names and ridings appear in the public record:
+      </p>
+      <div style="margin-top:12px;" id="hogue-names">
+        <span class="hogue-item">Han Dong (resigned Liberal caucus)</span>
+        <span class="hogue-item">Michael Chan (BC — documented PRC contacts)</span>
+      </div>
+      <div style="margin-top:14px;">
+        <strong style="color:#ff9999;">Documented Targeted Ridings:</strong><br>
+        <div style="margin-top:8px;" id="hogue-ridings">
+          <span class="hogue-item">Don Valley North</span>
+          <span class="hogue-item">Steveston–Richmond East</span>
+          <span class="hogue-item">Don Valley West</span>
+          <span class="hogue-item">Scarborough North</span>
+          <span class="hogue-item">Markham–Unionville</span>
+          <span class="hogue-item">Richmond Hill</span>
+          <span class="hogue-item">Burnaby North–Seymour</span>
+          <span class="hogue-item">Vancouver Granville</span>
+        </div>
+      </div>
+      <p style="margin-top:14px;font-size:0.82rem;">
+        Source: <a href="https://foreigninterferencecommission.ca/" target="_blank" rel="noopener" style="color:var(--cyan)">
+          foreigninterferencecommission.ca
+        </a> — Public Volume 1 Report (2024)
+      </p>
+    </div>
+  </div>
+
+  <!-- MP Scores Table -->
+  <div class="section">
+    <div class="section-title">
+      MP Pattern Analysis
+      <span class="badge" id="scores-badge">LOADING</span>
+    </div>
+    <div style="margin-bottom:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
+      <button class="scan-btn" onclick="filterScores('ccp')">Sort: CCP Alignment</button>
+      <button class="scan-btn" onclick="filterScores('israel')">Sort: Israel Alignment</button>
+      <button class="scan-btn" onclick="filterScores('all')">Show All</button>
+      <span style="color:var(--text-dim);font-size:0.85rem;">Min. 2 relevant votes analyzed</span>
+    </div>
+    <div id="scores-container">
+      <div class="loading">⏳ Loading voting data from openparliament.ca... Run FIIS scan to populate.</div>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  <div class="section">
+    <div class="section-title">Scoring Methodology</div>
+    <div class="methodology">
+      <h4>📊 Composite Evidence Score</h4>
+      <p>
+        Each MP receives two independent scores: CCP alignment % and Israel alignment %.
+        Scores are composite metrics — higher scores indicate more voting/speech patterns
+        consistent with that state's documented political interests. This is not an accusation;
+        it is pattern analysis of public government records.
+      </p>
+      <div class="method-grid">
+        <div class="method-item"><div class="weight">55%</div><div class="label">Voting Record<br>(openparliament.ca)</div></div>
+        <div class="method-item"><div class="weight">25%</div><div class="label">Hansard Speeches<br>(keyword frequency)</div></div>
+        <div class="method-item"><div class="weight">15%</div><div class="label">Hogue Commission<br>(official findings)</div></div>
+        <div class="method-item"><div class="weight">5%</div><div class="label">Lobbying Registry<br>(lobbycanada.gc.ca)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <div class="section">
+    <div class="section-title">Primary Sources</div>
+    <ul class="sources-list">
+      <li>🏛️ <a href="https://openparliament.ca/votes/" target="_blank" rel="noopener">openparliament.ca</a> — House of Commons votes and Hansard debates (public API)</li>
+      <li>🔍 <a href="https://foreigninterferencecommission.ca/" target="_blank" rel="noopener">foreigninterferencecommission.ca</a> — Hogue Commission public findings (2024)</li>
+      <li>📋 <a href="https://lobbycanada.gc.ca/" target="_blank" rel="noopener">lobbycanada.gc.ca</a> — Office of the Commissioner of Lobbying of Canada</li>
+      <li>🗳️ <a href="https://www.elections.ca/" target="_blank" rel="noopener">elections.ca</a> — Elections Canada financial returns and donor records</li>
+      <li>📜 <a href="https://www.ourcommons.ca/en/parliamentary-business/house-publications" target="_blank" rel="noopener">ourcommons.ca</a> — House of Commons Hansard official record</li>
+      <li>🔒 <a href="https://www.canada.ca/en/national-security-intelligence-committee-parliamentarians.html" target="_blank" rel="noopener">NSICOP reports</a> — National Security and Intelligence Committee of Parliamentarians</li>
+    </ul>
+  </div>
+
+  <!-- Run scan prompt -->
+  <div class="section">
+    <div class="methodology" style="text-align:center;padding:30px;">
+      <h4 style="margin-bottom:10px;">🔄 FIIS Live Data</h4>
+      <p>This page loads live data from the TENET5 FIIS engine when available.<br>
+      Data is sourced from government APIs and updated on demand.</p>
+      <p style="margin-top:10px;color:#6a8a9a;font-size:0.85rem;">
+        TENET5 FIIS v1.0 | SYSTEM_SEED=118400 | Data: openparliament.ca + Hogue Commission
+      </p>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+const API = 'http://127.0.0.1:8520';
+let _scores = [];
+let _currentSort = 'all';
+
+async function loadFIISData() {
+  try {
+    const r = await fetch(`${API}/api/fiis/status`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+
+    if (data.status === 'no_data') {
+      document.getElementById('scores-container').innerHTML =
+        `<div class="error-box">No FIIS scan data yet. Run the scan from the TENET5 Aurora dashboard, or use:<br>
+        <code style="font-family:monospace;color:#00aaff">python -m tools.fiis.run_fiis --quick</code></div>`;
+      return;
+    }
+
+    // Update hypothesis bars
+    const hyp = data.hypothesis || {};
+
+    const israelTheory = hyp.israel_conservative_theory || {};
+    const cpcIsrael = israelTheory.cpc_avg_israel_pct || 0;
+    const libIsrael = israelTheory.lib_avg_israel_pct || 0;
+    const israelDiff = cpcIsrael - libIsrael;
+    animateBar('israel-bar', Math.min(cpcIsrael, 100));
+    document.getElementById('israel-label').textContent =
+      `CPC avg ${cpcIsrael?.toFixed(1) ?? '?'}% vs Lib avg ${libIsrael?.toFixed(1) ?? '?'}%`;
+    setSupport('israel-support', israelTheory.support || '');
+
+    const ccpTheory = hyp.ccp_liberal_theory || {};
+    const libCCP = ccpTheory.lib_avg_ccp_pct || 0;
+    const cpcCCP = ccpTheory.cpc_avg_ccp_pct || 0;
+    animateBar('ccp-bar', Math.min(libCCP, 100));
+    document.getElementById('ccp-label').textContent =
+      `Lib avg ${libCCP?.toFixed(1) ?? '?'}% vs CPC avg ${cpcCCP?.toFixed(1) ?? '?'}%`;
+    setSupport('ccp-support', ccpTheory.support || '');
+
+    // Badge
+    const badge = document.getElementById('scores-badge');
+    const updated = data.generated ? new Date(data.generated).toLocaleDateString('en-CA') : 'unknown';
+    badge.textContent = `${data.total_mps || 0} MPs — ${updated}`;
+
+    // Combine top lists
+    const combined = {};
+    (data.top_ccp || []).forEach(mp => {
+      if (!combined[mp.name]) combined[mp.name] = {...mp, ccp_pct: 0, israel_pct: 0};
+      combined[mp.name].ccp_pct = mp.ccp_pct || 0;
+    });
+    (data.top_israel || []).forEach(mp => {
+      if (!combined[mp.name]) combined[mp.name] = {...mp, ccp_pct: 0, israel_pct: 0};
+      combined[mp.name].israel_pct = mp.israel_pct || 0;
+    });
+    _scores = Object.values(combined);
+    renderTable(_scores, _currentSort);
+
+  } catch(e) {
+    document.getElementById('scores-container').innerHTML =
+      `<div class="error-box">Could not connect to TENET5 Aurora API (${API}).<br>
+      This page shows live data when the Aurora dashboard is running locally.<br>
+      <span style="color:#6a8a9a;font-size:0.85rem">Error: ${e.message}</span></div>`;
+    // Still show static Hogue data which is already in the HTML
+  }
+}
+
+function animateBar(id, pct) {
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = Math.min(Math.max(pct, 2), 100) + '%';
+  }, 300);
+}
+
+function setSupport(id, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (text.includes('STRONG')) {
+    el.className = 'support-chip support-strong';
+    el.textContent = '✅ ' + text;
+  } else if (text.includes('MODERATE')) {
+    el.className = 'support-chip support-moderate';
+    el.textContent = '⚠️ ' + text;
+  } else {
+    el.className = 'support-chip support-weak';
+    el.textContent = '❓ ' + text;
+  }
+}
+
+function filterScores(sort) {
+  _currentSort = sort;
+  renderTable(_scores, sort);
+}
+
+function partyClass(party) {
+  if (!party) return '';
+  if (party.includes('Conservative') || party === 'CPC') return 'party-CPC';
+  if (party.includes('Liberal') || party === 'Lib') return 'party-Lib';
+  if (party.includes('NDP')) return 'party-NDP';
+  if (party.includes('Bloc') || party === 'BQ') return 'party-BQ';
+  if (party.includes('Green')) return 'party-Green';
+  return '';
+}
+
+function pctClass(pct) {
+  if (pct >= 50) return 'pct-high';
+  if (pct >= 25) return 'pct-mid';
+  return 'pct-low';
+}
+
+function renderTable(scores, sort) {
+  const container = document.getElementById('scores-container');
+  if (!scores || scores.length === 0) {
+    container.innerHTML = '<div class="loading">No score data available yet.</div>';
+    return;
+  }
+
+  let sorted = [...scores];
+  if (sort === 'ccp') sorted.sort((a,b) => (b.ccp_pct||0) - (a.ccp_pct||0));
+  else if (sort === 'israel') sorted.sort((a,b) => (b.israel_pct||0) - (a.israel_pct||0));
+  else sorted.sort((a,b) => Math.max(b.ccp_pct||0, b.israel_pct||0) - Math.max(a.ccp_pct||0, a.israel_pct||0));
+
+  const rows = sorted.map(mp => {
+    const ccp = (mp.ccp_pct || 0).toFixed(1);
+    const isr = (mp.israel_pct || 0).toFixed(1);
+    const pc = partyClass(mp.party);
+    return `<tr>
+      <td>${mp.name || '—'}</td>
+      <td><span class="party-chip ${pc}">${mp.party || '?'}</span></td>
+      <td>${mp.riding || '—'}</td>
+      <td class="pct-cell ${pctClass(mp.ccp_pct||0)}">${ccp}%</td>
+      <td class="pct-cell ${pctClass(mp.israel_pct||0)}">${isr}%</td>
+      <td style="color:#6a8a9a;font-size:0.8rem">${mp.votes_analyzed || '?'}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `<table class="data-table">
+    <thead><tr>
+      <th>MP</th><th>Party</th><th>Riding</th>
+      <th>🇨🇳 CCP Alignment</th><th>🇮🇱 Israel Alignment</th><th>Votes</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <p style="color:#6a8a9a;font-size:0.78rem;margin-top:10px;text-align:right">
+    Source: openparliament.ca | Methodology: composite voting + Hansard + Hogue Commission
+  </p>`;
+}
+
+document.addEventListener('DOMContentLoaded', loadFIISData);
+</script>
+</body>
+</html>
