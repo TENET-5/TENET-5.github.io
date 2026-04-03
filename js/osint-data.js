@@ -49,7 +49,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "✕ VOTED NAY — Ceasefire Vote #658 (BROKE PARTY LINE)",
-    dossier: null
+    dossier: "dossier-viewer.html?file=evidence/profiles/housefather_osint_dossier.md"
   },
   {
     id: "mendicino",
@@ -65,7 +65,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "✕ VOTED NAY — Ceasefire Vote #658 (BROKE PARTY LINE)",
-    dossier: null
+    dossier: "dossier-viewer.html?file=evidence/profiles/mendicino_osint_dossier.md"
   },
   {
     id: "woo",
