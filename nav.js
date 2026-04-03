@@ -25,8 +25,6 @@
           { label: '☠ Harm Index', href: 'harm-index.html' },
           { label: '☠ Genocide Evidence', href: 'genocide-evidence.html' },
           { label: '🔍 Corruption Map', href: 'corruption-map.html' },
-          { label: '🛰 OSINT Dashboard', href: 'osint-dashboard.html' },
-          { label: '🗂 Dossier Viewer', href: 'dossier-viewer.html' },
           { label: '📊 Infographics', href: 'infographics.html' }
         ]
       },
@@ -45,7 +43,6 @@
         label: '🎖 Military & Legal',
         items: [
           { label: '⚖ Legal Proceedings', href: 'legal.html' },
-          { label: '⚔ Combat Law', href: 'combat-law.html' },
           { label: '🎖 Veterans', href: 'veterans.html' },
           { label: '📜 PPCLI Lawsuit', href: 'lawsuit-ppcli.html' },
           { label: '💰 Procurement Registry', href: 'procurement-registry.html' },
