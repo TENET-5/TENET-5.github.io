@@ -172,6 +172,11 @@
         btn.setAttribute('aria-expanded', 'false');
       });
     });
+
+    // Subkernel Injection - Phase 117
+    const lirilScript = document.createElement('script');
+    lirilScript.src = "js/liril-widget.js";
+    document.body.appendChild(lirilScript);
   }
 
   // Run on DOM ready
