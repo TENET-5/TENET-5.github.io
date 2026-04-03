@@ -16,7 +16,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "✕ VOTED NAY — Ceasefire Vote #658",
-    dossier: "evidence/profiles/vuong_osint_dossier.md"
+    dossier: "dossier-viewer.html?file=evidence/profiles/vuong_osint_dossier.md"
   },
   {
     id: "lantsman",
@@ -33,7 +33,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "✕ VOTED NAY — Ceasefire Vote #658",
-    dossier: "evidence/profiles/lantsman_osint_dossier.md"
+    dossier: "dossier-viewer.html?file=evidence/profiles/lantsman_osint_dossier.md"
   },
   {
     id: "housefather",
@@ -78,7 +78,9 @@ const osintManifest = [
       { text: "Advocacy group classified as UFWD-linked (United Front Work Department — CCP espionage arm)", highlight: "UFWD-linked" },
       { text: "Met with leaders of CCP \"Overseas Chinese\" groups 3 days before filing challenge to Foreign Interference Commission", highlight: "3 days before" },
       { text: "China publicly applauded the senators who voted against genocide recognition as \"people of vision\"", highlight: "applauded the senators who voted against" },
-      { text: "Controls 41-vote ISG bloc capable of killing any House legislation in the Senate", highlight: "" }
+      { text: "Controls 41-vote ISG bloc capable of killing any House legislation in the Senate", highlight: "" },
+      { text: "Proposed amendment to <span class=\"highlight\">weaken Bill C-70's foreign agent registry</span> — same senator already UFWD-linked, led Uyghur genocide defeat, met CCP espionage groups (<a href=\"https://senatoryuenpauwoo.ca/en/parliamentary-activities/speeches/an-amendment-to-bill-c-70-an-act-respecting-countering-foreign-interference/\">source</a>)", highlight: "" },
+      { text: "Canada has <span class=\"highlight\">575 CCP United Front-linked organizations</span> — highest per-capita density among Western democracies, <span class=\"highlight\">5× the rate of the United States</span> (<a href=\"https://www.thebureau.news/p/canadian-senators-advocacy-group\">The Bureau</a>)", highlight: "" }
     ],
     voteClass: "vote-nay",
     voteText: "✕ LED OPPOSITION — Uyghur Genocide Vote",
