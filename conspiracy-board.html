@@ -1,327 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Board — Follow the Money, Follow the Connections</title>
-  <meta name="description" content="Interactive conspiracy board mapping documented connections between government contracts, lobbying, corporate directorships, campaign donations, and ethics violations. All public record.">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .board-container { position: relative; width: 100%; min-height: 80vh; background: #0a0a0c; border: 1px solid #1a1a1e; border-radius: 12px; overflow: hidden; margin: 2rem auto; }
-    .board-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(196,30,58,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(196,30,58,0.03) 1px, transparent 1px); background-size: 40px 40px; }
-    .node { position: absolute; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem; font-size: 0.78rem; cursor: move; z-index: 10; max-width: 200px; transition: border-color 0.2s, box-shadow 0.2s; user-select: none; }
-    .node:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); z-index: 20; }
-    .node-title { font-weight: 700; color: var(--text-primary); font-size: 0.82rem; margin-bottom: 4px; }
-    .node-detail { color: var(--text-tertiary); font-size: 0.72rem; line-height: 1.5; }
-    .node-amount { color: #ff6b6b; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem; }
-    .node-type { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .type-contract { background: rgba(239,68,68,0.15); color: #ef4444; }
-    .type-lobby { background: rgba(168,85,247,0.15); color: #a855f7; }
-    .type-donation { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .type-ethics { background: rgba(251,191,36,0.15); color: #fbbf24; }
-    .type-corporate { background: rgba(59,130,246,0.15); color: #3b82f6; }
-    .type-person { background: rgba(236,72,153,0.15); color: #ec4899; }
-    svg.threads { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
-    svg.threads line { stroke: #c41e3a; stroke-width: 1.5; opacity: 0.4; }
-    svg.threads line.highlight { stroke: #ff4444; stroke-width: 2.5; opacity: 0.8; filter: drop-shadow(0 0 4px rgba(255,68,68,0.5)); }
-    .board-legend { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.5rem; background: var(--bg-elevated); border-bottom: 1px solid var(--border); font-size: 0.78rem; }
-    .legend-item { display: flex; align-items: center; gap: 6px; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .board-controls { padding: 1rem 1.5rem; background: var(--bg-elevated); border-top: 1px solid var(--border); display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .board-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
-    .board-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-    .board-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-bright); }
-    .stat-row { display: flex; gap: 2rem; justify-content: center; padding: 1.5rem; flex-wrap: wrap; }
-    .stat-box { text-align: center; }
-    .stat-box .num { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--accent-bright); }
-    .stat-box .label { font-size: 0.75rem; color: var(--text-tertiary); margin-top: 4px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investigation Board — Foreign Influence in Canadian Politics</title>
+<meta name="description" content="Interactive investigation board mapping foreign state influence on Canadian politics. All data from public government records.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06080c;--surface:#0c1018;--card:#111820;--card-hover:#161e2a;--border:#1a2535;--border-active:#2a3a50;--text:#c8d6e5;--text-dim:#5a6a7a;--text-bright:#e8f0f8;--red:#e63946;--blue:#3a86ff;--green:#06d6a0;--yellow:#ffd60a;--purple:#8338ec;--pink:#ff006e;--orange:#fb5607;--cyan:#00b4d8;--radius:10px;--font:'Inter',-apple-system,sans-serif;--mono:'JetBrains Mono',monospace}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;overflow-x:hidden}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.nav{background:rgba(12,16,24,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:10px 20px;position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.nav-brand{font-weight:900;font-size:0.9rem;color:var(--red);letter-spacing:1px}
+.nav a{color:var(--text-dim);font-size:0.78rem;transition:color 0.2s}.nav a:hover,.nav a.active{color:var(--text-bright);text-decoration:none}
+.nav-spacer{flex:1}
+.hamburger{display:none;background:none;border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:1rem}
+.header{padding:24px 20px 16px;max-width:1200px;margin:0 auto}
+.header h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;color:var(--red);letter-spacing:2px;margin-bottom:4px}
+.header p{font-size:0.8rem;color:var(--text-dim);max-width:700px}
+.warning{background:rgba(255,214,10,0.06);border-left:3px solid var(--yellow);padding:8px 14px;margin:12px 0;font-size:0.75rem;color:var(--text-dim);border-radius:0 var(--radius) var(--radius) 0}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;text-align:center;min-width:80px}
+.stat .num{font-family:var(--mono);font-size:1.2rem;font-weight:700;color:var(--red);display:block}
+.stat .lbl{font-size:0.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px}
+.controls{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0;padding:0 20px;max-width:1200px;margin-left:auto;margin-right:auto}
+.filter-btn{background:var(--card);border:1px solid var(--border);color:var(--text-dim);padding:5px 12px;border-radius:20px;font-size:0.72rem;cursor:pointer;font-family:var(--font);transition:all 0.2s}
+.filter-btn:hover,.filter-btn.active{background:var(--card-hover);color:var(--text-bright);border-color:var(--border-active)}
+.filter-btn[data-f="israel"].active{border-color:var(--blue);color:var(--blue)}
+.filter-btn[data-f="ccp"].active{border-color:var(--red);color:var(--red)}
+.filter-btn[data-f="india"].active{border-color:var(--orange);color:var(--orange)}
+.filter-btn[data-f="cfnis"].active{border-color:var(--yellow);color:var(--yellow)}
+.filter-btn[data-f="media"].active{border-color:var(--purple);color:var(--purple)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:0 20px;margin:8px auto;max-width:1200px}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--text-dim)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.board{position:relative;width:100%;max-width:1200px;margin:16px auto;min-height:85vh;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;touch-action:none}
+.board-grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(26,37,53,0.3) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.board svg line{stroke-linecap:round;transition:opacity 0.3s}
+.board svg text{font-family:var(--mono);font-size:8px;fill:var(--text-dim);pointer-events:none}
+.node{position:absolute;max-width:180px;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px;cursor:grab;z-index:10;transition:border-color 0.2s,box-shadow 0.2s,opacity 0.3s;user-select:none}
+.node:hover{border-color:var(--border-active);box-shadow:0 4px 20px rgba(0,0,0,0.4);z-index:20}
+.node:active{cursor:grabbing}
+.node.hidden{opacity:0.08;pointer-events:none}
+.node .type-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.node .title{font-size:0.82rem;font-weight:700;color:var(--text-bright);line-height:1.3}
+.node .subtitle{font-size:0.65rem;color:var(--text-dim);margin-top:1px}
+.node .detail{font-size:0.65rem;color:var(--text-dim);margin-top:6px;line-height:1.4;display:none}
+.node:hover .detail{display:block}
+.node .link-btn{display:inline-block;margin-top:6px;font-size:0.6rem;color:var(--blue)}
+.type-person .type-badge{background:rgba(255,0,110,0.15);color:var(--pink)}
+.type-org .type-badge{background:rgba(131,56,236,0.15);color:var(--purple)}
+.type-event .type-badge{background:rgba(255,214,10,0.15);color:var(--yellow)}
+.type-evidence .type-badge{background:rgba(6,214,160,0.15);color:var(--green)}
+.type-person{border-left:3px solid var(--pink)}
+.type-org{border-left:3px solid var(--purple)}
+.type-event{border-left:3px solid var(--yellow)}
+.type-evidence{border-left:3px solid var(--green)}
+@media(max-width:768px){
+.hamburger{display:block}
+.nav-links{display:none;width:100%}.nav.open .nav-links{display:flex;flex-direction:column;gap:8px;padding:8px 0}
+.board{min-height:auto;display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--bg);border:none}
+.board-grid,.board svg{display:none}
+.node{position:static!important;max-width:100%;min-width:0;width:100%;transform:none!important}
+.node .detail{display:block}
+.node.hidden{display:none}
+.stats{justify-content:center}.stat{flex:1;min-width:70px}
+.header h1{font-size:1.2rem}
+}
+.footer{text-align:center;padding:20px;font-size:0.65rem;color:var(--text-dim)}
+</style>
 </head>
 <body>
-  <nav class="site-nav">
-    <a href="index.html" class="brand">TENET5</a>
-    <div class="nav-group nav-primary">
-      <a href="my-story.html">My Story</a>
-      <a href="evidence.html" class="nav-hot">Evidence</a>
-      <a href="accountability.html" class="nav-danger">&#128203; The 504</a>
-      <a href="conspiracy-board.html" class="nav-warn active">&#128204; The Board</a>
-    </div>
-    <div class="nav-group nav-tools">
-      <a href="red-duster-game.html" class="nav-hot" style="text-shadow: 0 0 5px #ff2a2a;">🩸 PLAY FPS</a>
-      <a href="bloggins.html" class="nav-green">&#129437; Bloggins</a>
-      <a href="the-boot.html" class="nav-warn">&#129462; The Boot</a>    </div>
-  </nav>
-
-  <header class="hero" style="min-height:40vh;">
-    <h1>The Board</h1>
-    <p class="subtitle">Follow the money. Follow the connections. Every node is public record.</p>
-  </header>
-
-  <div class="content" style="max-width:1200px;margin:0 auto;padding:0 1rem;">
-
-    <div class="stat-row">
-      <div class="stat-box"><div class="num" id="node-count">0</div><div class="label">Nodes</div></div>
-      <div class="stat-box"><div class="num" id="thread-count">0</div><div class="label">Connections</div></div>
-      <div class="stat-box"><div class="num" id="total-amount">$0</div><div class="label">Total $ Documented</div></div>
-    </div>
-
-    <div class="board-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> Contracts</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div> Lobbying</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div> Donations</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;"></div> Ethics Violations</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div> Corporate Links</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> Key Actors</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#c41e3a;"></div> &#8212; Red Thread (connection)</div>
-    </div>
-
-    <div class="board-controls">
-      <button class="board-btn active" onclick="filterBoard('all')">All</button>
-      <button class="board-btn" onclick="filterBoard('contract')">Contracts</button>
-      <button class="board-btn" onclick="filterBoard('lobby')">Lobbying</button>
-      <button class="board-btn" onclick="filterBoard('donation')">Donations</button>
-      <button class="board-btn" onclick="filterBoard('ethics')">Ethics</button>
-      <button class="board-btn" onclick="filterBoard('corporate')">Corporate</button>
-    </div>
-
-    <div class="board-container" id="board">
-      <div class="board-bg"></div>
-      <svg class="threads" id="threads"></svg>
-    </div>
-
-    <div class="verdict-box" style="margin-top:2rem;">
-      <h3>How to Read The Board</h3>
-      <p style="color:#ccc; line-height:1.8; font-size:0.9rem;">
-        Every node on this board represents a documented public record: a government contract, a lobbying registration, a campaign donation, a corporate directorship, or an ethics violation. The red threads connect entities that share documented relationships &#8212; money flows, corporate links, lobbying relationships, or ethics findings.
-        <br><br>
-        <strong>Sources:</strong> BuyAndSell.gc.ca (federal procurement), Elections Canada (campaign finance), Office of the Commissioner of Lobbying (lobbyist registry), provincial corporate registries, Ethics Commissioner rulings, Auditor General reports, Charbonneau Commission evidence, and court records.
-        <br><br>
-        <strong>This is not speculation. Every connection is sourced from public record.</strong>
-      </p>
-    </div>
-  </div>
-
-  <footer>
-    <p>&copy; 2026 Daniel Perry. All rights reserved.</p>
-  </footer>
-
-  <script>
-// ── Board Data ── All from public record
-var NODES = [
-  // SNC-Lavalin network
-  {id:'snc', x:150, y:80, type:'corporate', title:'SNC-Lavalin', detail:'Engineering firm. Convicted of fraud (Libyan bribes). Got DPA. $9.4B revenue.', amount:'$4.1B in subsidies'},
-  {id:'snc_gpr', x:350, y:60, type:'contract', title:'SNC GPR Contracts', detail:'Ground-penetrating radar at residential school sites. Same company convicted of fraud.', amount:''},
-  {id:'snc_dpa', x:150, y:200, type:'ethics', title:'SNC Deferred Prosecution', detail:'Bill C-74 created DPA regime. PMO pressured AG. Wilson-Raybould fired.', amount:''},
-  {id:'jwb', x:350, y:200, type:'person', title:'Jody Wilson-Raybould', detail:'AG fired after refusing to intervene in SNC prosecution. Testified to committee.', amount:''},
-  {id:'pmo_snc', x:250, y:140, type:'ethics', title:'PMO Pressure', detail:'11 contacts from PMO to AG office. Ethics Commissioner: PM violated s.9.', amount:''},
-
-  // McKinsey network
-  {id:'mckinsey', x:550, y:80, type:'contract', title:'McKinsey & Company', detail:'$209M in federal contracts. No-bid. DND, IRCC, PHAC.', amount:'$209M'},
-  {id:'mckinsey_dnd', x:700, y:60, type:'contract', title:'McKinsey &#8594; DND', detail:'Contracts with Department of National Defence. Consulting on procurement.', amount:'$100M+'},
-  {id:'mckinsey_ircc', x:700, y:140, type:'contract', title:'McKinsey &#8594; IRCC', detail:'Immigration consulting contracts.', amount:'$30M+'},
-  {id:'carney_mckinsey', x:550, y:200, type:'person', title:'Mark Carney', detail:'PM. Former McKinsey consultant. Now oversees departments that gave McKinsey $209M.', amount:''},
-
-  // ArriveCAN
-  {id:'arrivecan', x:150, y:350, type:'contract', title:'ArriveCAN App', detail:'$54M for a border app. AG: should have cost $4-5M.', amount:'$54M'},
-  {id:'gcstrat', x:350, y:350, type:'corporate', title:'GC Strategies', detail:'2-person firm. $20M+ in ArriveCAN subcontracts. Middlemen.', amount:'$20M+'},
-  {id:'arrivecan_ag', x:250, y:430, type:'ethics', title:'AG Audit Finding', detail:'Should have cost $4-5M. Paid $54M. Documentation "concerning."', amount:'$49M overpaid'},
-
-  // WE Charity
-  {id:'we', x:550, y:350, type:'ethics', title:'WE Charity &#8594; PM Family', detail:'$912M grant to WE. Trudeau family received $500K+ in fees from WE events.', amount:'$912M grant'},
-  {id:'we_family', x:700, y:350, type:'person', title:'Trudeau Family', detail:'Mother, brother received $500K+ from WE speaking engagements.', amount:'$500K+'},
-  {id:'we_morneau', x:700, y:430, type:'ethics', title:'Bill Morneau', detail:'Finance Minister. Family had financial ties to WE. Resigned.', amount:''},
-
-  // Aga Khan
-  {id:'agakhan', x:150, y:520, type:'ethics', title:'Aga Khan Foundation', detail:'Hundreds of millions in federal grants. PM vacationed on private island.', amount:'$300M+ grants'},
-  {id:'agakhan_ethics', x:350, y:520, type:'ethics', title:'4 Ethics Violations', detail:'PM violated ss. 5, 11, 12, 21 of Conflict of Interest Act. First sitting PM.', amount:''},
-
-  // Telecom oligopoly
-  {id:'rogers', x:550, y:520, type:'corporate', title:'Rogers', detail:'$15B revenue. Highest telecom prices in developed world. July 2022: nationwide outage.', amount:''},
-  {id:'bell', x:700, y:520, type:'corporate', title:'Bell', detail:'$23B revenue. Laid off 6,000 while profitable. Highest prices globally.', amount:''},
-  {id:'crtc_capture', x:625, y:600, type:'ethics', title:'CRTC Capture', detail:'Chair Ian Scott: came from Telus. Ruled for Big Three consistently.', amount:''},
-
-  // Loblaw
-  {id:'loblaw', x:150, y:650, type:'corporate', title:'Loblaw / Weston', detail:'$1.99B profit (2023). Bread price fixing 14 years. Shrinkflation.', amount:'$4.9B class action'},
-  {id:'loblaw_bread', x:350, y:650, type:'ethics', title:'Bread Price Fixing', detail:'14 years of price fixing. $25 gift cards as "compensation."', amount:'$4.9B'},
-  {id:'grocery_code', x:250, y:730, type:'ethics', title:'Voluntary Grocery Code', detail:'No enforcement. No penalties. Loblaw initially refused to sign.', amount:''},
-
-  // CIB
-  {id:'cib', x:550, y:650, type:'contract', title:'Canada Infrastructure Bank', detail:'$35B mandate. 11 projects completed. Parliament said abolish.', amount:'$35B'},
-  {id:'cib_pbo', x:700, y:650, type:'ethics', title:'PBO: Will Miss Target by $20B', detail:'Only $14.9B disbursed by 2028. Private investment: failed.', amount:'$20B shortfall'},
-
-  // Phoenix
-  {id:'phoenix', x:400, y:800, type:'contract', title:'Phoenix Pay System', detail:'$7.5B total. 10 years. Still broken. Workers lost homes.', amount:'$7.5B'},
-  {id:'ibm_phoenix', x:550, y:800, type:'corporate', title:'IBM Canada', detail:'Built Phoenix. $185M contract. System never worked properly.', amount:'$185M contract'},
-
-  // ── CFNIS / Covey Network ──
-  {id:'covey', x:900, y:80, type:'person', title:'Capt. Rebecca Covey', detail:'CFNIS. 29 criminal counts in s.504. Politically prosecuted a combat veteran.', amount:''},
-  {id:'cfnis', x:1050, y:80, type:'corporate', title:'CFNIS', detail:'Canadian Forces National Investigation Service. Investigated the whistleblower, not the threat.', amount:''},
-  {id:'perry', x:900, y:200, type:'person', title:'Daniel Perry', detail:'Combat veteran. Signals Operator. Afghanistan. Reported foreign interference. Prosecuted instead.', amount:''},
-  {id:'selhi', x:1050, y:200, type:'person', title:'Dr. Zoe Selhi', detail:'Providence Care. Labeled veteran "delusional" for stating Health Canada facts. Forced medication.', amount:''},
-  {id:'bae', x:1050, y:300, type:'person', title:'Vicky Bae', detail:'Withheld motions, sanitized evidence, suppressed disclosure. Stinchcombe violation.', amount:''},
-  {id:'hedge', x:900, y:300, type:'person', title:'Hedge', detail:'Federal apparatus. s.21 party to offence. Political prosecution chain.', amount:''},
-  {id:'dwan', x:975, y:380, type:'ethics', title:'DWAN Suppression', detail:'Phone confiscated. Communications monitored. Filing suppressed.', amount:''},
-
-  // ── Winnipeg Lab / Foreign Interference ──
-  {id:'qiu', x:900, y:480, type:'person', title:'Xiangguo Qiu', detail:'Winnipeg NML. Transferred Ebola sequence to China. Fled to China under new name.', amount:''},
-  {id:'cheng', x:1050, y:480, type:'person', title:'Keding Cheng', detail:'Qiu&#39;s husband. Co-conspirator. Also fled to China.', amount:''},
-  {id:'nml', x:975, y:560, type:'corporate', title:'National Microbiology Lab', detail:'Level 4. Canada&#39;s most secure lab. Espionage confirmed by CSIS.', amount:''},
-  {id:'csis_nml', x:900, y:640, type:'ethics', title:'CSIS Assessment', detail:'"Intentionally transferred scientific knowledge to China." "One of most serious breaches."', amount:''},
-  {id:'chinese_police', x:1050, y:640, type:'ethics', title:'Chinese Police Stations', detail:'Operating on Canadian soil. Toronto, Vancouver. Govt slow to act.', amount:''},
-  {id:'nsicop', x:975, y:720, type:'ethics', title:'NSICOP Report', detail:'MPs identified as assisting foreign states. Names classified. Canadians can&#39;t know who.', amount:''},
-  {id:'foreign_registry', x:1100, y:720, type:'ethics', title:'No Foreign Agent Registry', detail:'US: FARA since 1938. Australia: 2018. Canada: still debating.', amount:''},
-
-  // ── Charbonneau ──
-  {id:'charbonneau', x:150, y:900, type:'ethics', title:'Charbonneau Commission', detail:'$500M in misappropriated municipal funds. 114 convictions. Montreal construction cartel.', amount:'$500M'},
-  {id:'vaillancourt', x:350, y:900, type:'person', title:'Gilles Vaillancourt', detail:'Laval mayor. Convicted. Repaid $8.5M. Kickback scheme with construction firms.', amount:'$8.5M repaid'},
-  {id:'montreal_mafia', x:250, y:980, type:'corporate', title:'Construction Cartel', detail:'Firms colluded on $billions in contracts. 10-15% kickbacks. Decades.', amount:'$Billions'},
-
-  // ── MAID / Aktion T4 ──
-  {id:'maid', x:550, y:900, type:'ethics', title:'MAID Program', detail:'76,475 dead. 16,499 in 2024 alone. 45/day. PBO: saves $149.5M/year.', amount:'$149.5M "saved"'},
-  {id:'bill_c7', x:700, y:900, type:'ethics', title:'Bill C-7', detail:'Removed "reasonably foreseeable" death requirement. Track 2 opened.', amount:''},
-  {id:'maid_veterans', x:625, y:980, type:'ethics', title:'Veterans Offered MAID', detail:'VAC employees offered death instead of support. Multiple documented cases.', amount:''},
-
-  // ── Housing / Immigration ──
-  {id:'housing', x:900, y:900, type:'ethics', title:'Housing Crisis', detail:'$663K average. $1M Toronto. 1.2M new residents. 240K homes built.', amount:'$663K avg'},
-  {id:'tfw', x:1050, y:900, type:'ethics', title:'TFW Program', detail:'Amnesty: "exploitation is a feature." Tied permits. Wage suppression.', amount:''},
-  {id:'ircc', x:975, y:980, type:'ethics', title:'IRCC Backlog', detail:'958K applications. 56% within standard (target: 80%). Start-Up Visa: suspended for fraud.', amount:'958K backlog'},
-];
-
-var THREADS = [
-  // SNC network
-  ['snc', 'snc_gpr'], ['snc', 'snc_dpa'], ['snc_dpa', 'jwb'], ['snc_dpa', 'pmo_snc'], ['pmo_snc', 'jwb'],
-  // McKinsey
-  ['mckinsey', 'mckinsey_dnd'], ['mckinsey', 'mckinsey_ircc'], ['mckinsey', 'carney_mckinsey'],
-  // ArriveCAN
-  ['arrivecan', 'gcstrat'], ['arrivecan', 'arrivecan_ag'],
-  // WE
-  ['we', 'we_family'], ['we', 'we_morneau'],
-  // Aga Khan
-  ['agakhan', 'agakhan_ethics'],
-  // Telecom
-  ['rogers', 'crtc_capture'], ['bell', 'crtc_capture'],
-  // Loblaw
-  ['loblaw', 'loblaw_bread'], ['loblaw', 'grocery_code'], ['loblaw_bread', 'grocery_code'],
-  // CIB
-  ['cib', 'cib_pbo'],
-  // Phoenix
-  ['phoenix', 'ibm_phoenix'],
-  // Cross-network: consulting ↔ contracts
-  ['mckinsey', 'cib'], ['carney_mckinsey', 'cib'],
-  // Cross-network: ethics
-  ['pmo_snc', 'we'], ['agakhan_ethics', 'pmo_snc'],
-  // CFNIS / Covey
-  ['covey', 'cfnis'], ['covey', 'perry'], ['cfnis', 'perry'], ['selhi', 'perry'],
-  ['bae', 'perry'], ['hedge', 'covey'], ['hedge', 'cfnis'], ['dwan', 'perry'],
-  ['bae', 'hedge'], ['selhi', 'dwan'],
-  // Winnipeg Lab / Foreign interference
-  ['qiu', 'cheng'], ['qiu', 'nml'], ['cheng', 'nml'], ['nml', 'csis_nml'],
-  ['chinese_police', 'nsicop'], ['nsicop', 'foreign_registry'],
-  ['csis_nml', 'nsicop'],
-  // Cross: foreign interference ↔ CFNIS (Perry reported this)
-  ['perry', 'nml'], ['cfnis', 'csis_nml'],
-  // Charbonneau
-  ['charbonneau', 'vaillancourt'], ['charbonneau', 'montreal_mafia'],
-  ['vaillancourt', 'montreal_mafia'],
-  // Cross: SNC was in the construction cartel world
-  ['snc', 'montreal_mafia'], ['snc', 'charbonneau'],
-  // MAID
-  ['maid', 'bill_c7'], ['maid', 'maid_veterans'], ['bill_c7', 'maid_veterans'],
-  // Housing / Immigration
-  ['housing', 'tfw'], ['housing', 'ircc'], ['tfw', 'ircc'],
-  // Cross: MAID ↔ housing (people choosing death over poverty)
-  ['maid', 'housing'],
-];
-
-// ── Render ──
-var board = document.getElementById('board');
-var svg = document.getElementById('threads');
-var nodeMap = {};
-
-NODES.forEach(function(n) {
-  var el = document.createElement('div');
-  el.className = 'node';
-  el.id = 'node-' + n.id;
-  el.dataset.type = n.type;
-  el.style.left = n.x + 'px';
-  el.style.top = n.y + 'px';
-  el.innerHTML =
-    '<div class="node-title">' + n.title + '</div>' +
-    (n.amount ? '<div class="node-amount">' + n.amount + '</div>' : '') +
-    '<div class="node-detail">' + n.detail + '</div>' +
-    '<span class="node-type type-' + n.type + '">' + n.type + '</span>';
-  board.appendChild(el);
-  nodeMap[n.id] = {el: el, x: n.x, y: n.y};
-});
-
-function drawThreads() {
-  svg.innerHTML = '';
-  svg.setAttribute('width', board.scrollWidth);
-  svg.setAttribute('height', board.scrollHeight);
-  THREADS.forEach(function(t) {
-    var a = nodeMap[t[0]], b = nodeMap[t[1]];
-    if (!a || !b) return;
-    var aEl = a.el, bEl = b.el;
-    if (aEl.style.display === 'none' || bEl.style.display === 'none') return;
-    var ax = aEl.offsetLeft + aEl.offsetWidth/2;
-    var ay = aEl.offsetTop + aEl.offsetHeight/2;
-    var bx = bEl.offsetLeft + bEl.offsetWidth/2;
-    var by = bEl.offsetTop + bEl.offsetHeight/2;
-    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', ax); line.setAttribute('y1', ay);
-    line.setAttribute('x2', bx); line.setAttribute('y2', by);
-    svg.appendChild(line);
-  });
-}
-
-function filterBoard(type) {
-  document.querySelectorAll('.board-btn').forEach(function(b) { b.classList.remove('active'); });
-  event.target.classList.add('active');
-  document.querySelectorAll('.node').forEach(function(n) {
-    n.style.display = (type === 'all' || n.dataset.type === type) ? '' : 'none';
-  });
-  drawThreads();
-}
-
-// ── Drag nodes ──
-var dragging = null, dragOff = {x:0,y:0};
-board.addEventListener('mousedown', function(e) {
-  var n = e.target.closest('.node');
-  if (!n) return;
-  dragging = n;
-  dragOff.x = e.clientX - n.offsetLeft;
-  dragOff.y = e.clientY - n.offsetTop;
-  n.style.zIndex = 30;
-});
-document.addEventListener('mousemove', function(e) {
-  if (!dragging) return;
-  dragging.style.left = (e.clientX - dragOff.x) + 'px';
-  dragging.style.top = (e.clientY - dragOff.y) + 'px';
-  drawThreads();
-});
-document.addEventListener('mouseup', function() {
-  if (dragging) dragging.style.zIndex = 10;
-  dragging = null;
-});
-
-// ── Stats ──
-document.getElementById('node-count').textContent = NODES.length;
-document.getElementById('thread-count').textContent = THREADS.length;
-var totalAmt = 0;
-NODES.forEach(function(n) {
-  var m = (n.amount || '').match(/\$([\d.]+)([BMK]?)/);
-  if (m) {
-    var v = parseFloat(m[1]);
-    if (m[2] === 'B') v *= 1e9;
-    else if (m[2] === 'M') v *= 1e6;
-    else if (m[2] === 'K') v *= 1e3;
-    totalAmt += v;
-  }
-});
-document.getElementById('total-amount').textContent = '$' + (totalAmt/1e9).toFixed(1) + 'B';
-
-drawThreads();
-  </script>
+<nav class="nav" id="nav">
+<span class="nav-brand">INVESTIGATION BOARD</span>
+<button class="hamburger" onclick="this.closest('.nav').classList.toggle('open')">&#9776;</button>
+<div class="nav-links" style="display:flex;gap:12px;align-items:center">
+<a href="index.html">Home</a>
+<a href="foreign-influence.html">Detailed Analysis</a>
+<a href="accountability.html">504 Database</a>
+<a href="cfnis.html">CFNIS</a>
+<a href="evidence.html">Evidence</a>
+<a href="conspiracy-board.html" class="active" style="color:var(--red)">The Board</a>
+</div>
+</nav>
+<div class="header">
+<h1>THE BOARD</h1>
+<p>Interactive investigation map of foreign state influence on Canadian politics. Every node sourced from official government records. Drag nodes to rearrange. Click for details.</p>
+<div class="warning">All data from publicly available sources: House of Commons votes, Senate records, Lobbyist Registry, NSICOP reports, court rulings, CBC News.</div>
+<div class="stats" id="stats"></div>
+</div>
+<div class="legend">
+<div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div> Person</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> Organization</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Event</div>
+<div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Evidence</div>
+</div>
+<div class="controls" id="controls"></div>
+<div class="board" id="board">
+<div class="board-grid"></div>
+<svg id="threads"></svg>
+</div>
+<div class="footer">Investigation by Daniel Perry | Data: LIRIL/TENET5 | All sources public record | SEED=118400</div>
+<script>
+(async function(){
+let DATA;
+try{const r=await fetch('data/investigation_board.json');DATA=await r.json()}catch(e){document.getElementById('board').innerHTML='<p style="padding:40px;color:var(--red)">Failed to load data.</p>';return}
+const board=document.getElementById('board'),svg=document.getElementById('threads'),nodes=DATA.nodes,threads=DATA.threads,nodeEls={};let activeFilter='all';
+const sEl=document.getElementById('stats');
+sEl.innerHTML=`<div class="stat"><span class="num">${nodes.length}</span><span class="lbl">Nodes</span></div><div class="stat"><span class="num">${threads.length}</span><span class="lbl">Connections</span></div><div class="stat"><span class="num">${nodes.filter(n=>n.type==='person').length}</span><span class="lbl">People</span></div><div class="stat"><span class="num">${nodes.filter(n=>n.type==='org').length}</span><span class="lbl">Orgs</span></div>`;
+const cats=new Set();nodes.forEach(n=>(n.categories||[]).forEach(c=>cats.add(c)));
+document.getElementById('controls').innerHTML='<button class="filter-btn active" data-f="all" onclick="filt(\'all\',this)">All</button>'+[...cats].map(c=>`<button class="filter-btn" data-f="${c}" onclick="filt('${c}',this)">${c.toUpperCase()}</button>`).join('');
+const mob=window.innerWidth<768;
+nodes.forEach(n=>{const el=document.createElement('div');el.className=`node type-${n.type}`;el.dataset.id=n.id;el.dataset.cats=(n.categories||[]).join(',');if(!mob){el.style.left=n.x+'%';el.style.top=n.y+'%'}el.innerHTML=`<span class="type-badge">${n.type}</span><div class="title">${n.label}</div><div class="subtitle">${n.subtitle||''}</div><div class="detail">${n.detail||''}</div>${n.link?`<a class="link-btn" href="${n.link}">View evidence &rarr;</a>`:''}`;board.appendChild(el);nodeEls[n.id]=el});
+function draw(){if(mob)return;svg.innerHTML='';const bR=board.getBoundingClientRect();threads.forEach(t=>{const f=nodeEls[t.from],o=nodeEls[t.to];if(!f||!o||f.classList.contains('hidden')||o.classList.contains('hidden'))return;const fR=f.getBoundingClientRect(),tR=o.getBoundingClientRect();const x1=fR.left+fR.width/2-bR.left,y1=fR.top+fR.height/2-bR.top,x2=tR.left+tR.width/2-bR.left,y2=tR.top+tR.height/2-bR.top;const s=t.strength||1;const c={3:'rgba(230,57,70,0.4)',2:'rgba(58,134,255,0.3)',1:'rgba(90,106,122,0.2)'};const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',c[s]||c[1]);l.setAttribute('stroke-width',s);svg.appendChild(l);if(t.label){const tx=document.createElementNS('http://www.w3.org/2000/svg','text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',(y1+y2)/2-4);tx.setAttribute('text-anchor','middle');tx.textContent=t.label;svg.appendChild(tx)}})}
+setTimeout(draw,100);
+window.filt=function(cat,btn){activeFilter=cat;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');nodes.forEach(n=>{const el=nodeEls[n.id];if(!el)return;if(cat==='all'||(n.categories||[]).includes(cat)){el.classList.remove('hidden');if(mob)el.style.display=''}else{el.classList.add('hidden');if(mob)el.style.display='none'}});draw()};
+if(!mob){let d=null,ox=0,oy=0;board.addEventListener('pointerdown',e=>{const n=e.target.closest('.node');if(!n)return;d=n;const r=n.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;n.style.zIndex=100;n.setPointerCapture(e.pointerId)});board.addEventListener('pointermove',e=>{if(!d)return;const bR=board.getBoundingClientRect();d.style.left=((e.clientX-bR.left-ox)/bR.width*100)+'%';d.style.top=((e.clientY-bR.top-oy)/bR.height*100)+'%';draw()});board.addEventListener('pointerup',()=>{if(d)d.style.zIndex=10;d=null})}
+window.addEventListener('resize',draw);
+})();
+</script>
 </body>
 </html>
-
