@@ -9,8 +9,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #cesiumContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-    canvas#gameCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; display: block; touch-action: none; outline: none; background: transparent; }
+    canvas#gameCanvas { width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
     /* ── Main Menu ── */
     #mainMenu {
       position: fixed; inset: 0; z-index: 200;
@@ -116,41 +115,6 @@
       position: fixed; inset: 0; background: radial-gradient(ellipse, transparent 40%, rgba(180,0,0,0.4) 100%);
       pointer-events: none; opacity: 0; transition: opacity 0.1s;
     }
-    /* ── Character Select ── */
-    #characterSelect {
-      position: fixed; inset: 0; z-index: 250;
-      background: linear-gradient(135deg, #110505 0%, #0a0a0a 100%);
-      display: none; align-items: center; justify-content: center; flex-direction: column;
-      font-family: 'Rajdhani', sans-serif; color: #fff;
-    }
-    .char-title {
-      font-family: 'Black Ops One', system-ui; font-size: 3rem; color: #cc2200;
-      letter-spacing: 2px; margin-bottom: 2rem;
-    }
-    .char-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 900px;
-    }
-    .char-card {
-      background: rgba(20,20,20,0.8); border: 1px solid #442222; padding: 1rem;
-      cursor: pointer; transition: all 0.2s; text-align: left;
-    }
-    .char-card:hover {
-      background: rgba(200,30,0,0.15); border-color: #ff4422; transform: translateY(-2px);
-    }
-    .char-callsign {
-      font-family: 'Black Ops One', system-ui; font-size: 1.5rem; color: #cc8855;
-    }
-    .char-region {
-      font-size: 0.8rem; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;
-    }
-    .char-desc {
-      font-size: 0.9rem; color: #aaa; line-height: 1.4;
-    }
-    .char-btn-back {
-      margin-top: 2rem; background: transparent; border: none; color: #888;
-      font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; cursor: pointer;
-    }
-    .char-btn-back:hover { color: #fff; }
     /* ── Death Screen ── */
     #deathScreen {
       display: none; position: fixed; inset: 0; z-index: 500;
@@ -186,13 +150,59 @@
     }
     #deathScreen.visible .death-btn { opacity: 1; }
     .death-btn:hover { background: rgba(200,30,0,0.2); box-shadow: 0 0 20px rgba(200,30,0,0.3); }
+    /* ── Settings / Pause overlay ── */
+    #settingsOverlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
+    }
+    #settingsOverlay.open { display: flex; }
+    .settings-box {
+      background: #0d0d0d; border: 1px solid #cc2200;
+      padding: 2.2rem 2.8rem; min-width: 380px; max-width: 460px;
+      box-shadow: 0 0 40px rgba(200,30,0,0.25);
+    }
+    .settings-title {
+      font-family: 'Black Ops One', system-ui; font-size: 1.6rem;
+      color: #cc2200; letter-spacing: 3px; margin-bottom: 1.6rem;
+      text-align: center;
+    }
+    .settings-row {
+      display: flex; align-items: center; margin-bottom: 1.1rem;
+      gap: 0.8rem;
+    }
+    .settings-label {
+      flex: 0 0 130px; font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: #aaa;
+    }
+    .settings-row input[type=range] {
+      flex: 1; accent-color: #cc2200; cursor: pointer;
+    }
+    .settings-row input[type=checkbox] {
+      width: 18px; height: 18px; accent-color: #cc2200; cursor: pointer;
+    }
+    .settings-val {
+      flex: 0 0 40px; text-align: right; font-size: 0.82rem; color: #cc8866;
+    }
+    .settings-divider {
+      border: none; border-top: 1px solid #2a2a2a; margin: 1.2rem 0;
+    }
+    .settings-close-btn {
+      display: block; width: 100%; margin-top: 1.4rem;
+      background: transparent; border: 1px solid #cc2200; color: #fff;
+      padding: 0.7rem 1rem; font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .settings-close-btn:hover { background: rgba(200,30,0,0.2); }
   </style>
-  <script type="module" crossorigin src="./assets/index-DBapcjwp.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/babylon-CYdGx1Em.js">
-  <link rel="stylesheet" crossorigin href="./assets/index-CGNOqgEs.css">
+  <script type="module" crossorigin src="/reduster/assets/index-ChfL8FmU.js"></script>
+  <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-core-D_xmaB0l.js">
+  <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-loaders-QpaDJygb.js">
 </head>
 <body>
-  <div id="cesiumContainer"></div>
   <canvas id="gameCanvas"></canvas>
 
   <!-- Main Menu -->
@@ -207,53 +217,36 @@
       <button id="btnSurvive" class="menu-btn">SURVIVE</button>
       <button id="btnHost" class="menu-btn">HOST SERVER</button>
       <button id="btnJoin" class="menu-btn">JOIN SERVER</button>
-      <div class="menu-version">RED DUSTER v2.0 // BABYLON.JS 9 // TENET5 STUDIOS</div>
+      <div class="menu-version">RED DUSTER v2.0 // BABYLON.JS 9 // TENET-5</div>
     </div>
-  </div>
-
-  <!-- Character Selection -->
-  <div id="characterSelect">
-    <h1 class="char-title">CHOOSE OPERATOR</h1>
-    <div class="char-grid">
-      <div class="char-card" data-op="skoden">
-        <div class="char-callsign">"SKODEN"</div>
-        <div class="char-region">First Nations / Scout</div>
-        <div class="char-desc">Wilderness survival expert. If the communists thought the winter was bad, wait until the Aunties find out they're on the land. Tax exempt and ready to brawl.</div>
-      </div>
-      <div class="char-card" data-op="screech">
-        <div class="char-callsign">"SCREECH"</div>
-        <div class="char-region">Newfoundland / Heavy</div>
-        <div class="char-desc">Kissed the cod, drank the rum, and now he's here to scatter the red menace. Tough as nails and incomprehensible over the radio.</div>
-      </div>
-      <div class="char-card" data-op="puck">
-        <div class="char-callsign">"PUCK"</div>
-        <div class="char-region">Alberta / Rig Pig</div>
-        <div class="char-desc">Used to pull wrenches on the rigs in Fort Mac. Brought his lifted truck attitude to the resistance. Fueled entirely by Berta beef and spite.</div>
-      </div>
-      <div class="char-card" data-op="poutine">
-        <div class="char-callsign">"POUTINE"</div>
-        <div class="char-region">Quebec / CQB</div>
-        <div class="char-desc">Swears exclusively in church words. The occupier's worst nightmare in close quarters. Tabarnak.</div>
-      </div>
-      <div class="char-card" data-op="trashpanda">
-        <div class="char-callsign">"TRASH PANDA"</div>
-        <div class="char-region">Toronto / Scavenger</div>
-        <div class="char-desc">Survived the TTC for years, so urban warfare is basically a lateral move. Excellent at finding loot in dumpsters.</div>
-      </div>
-      <div class="char-card" data-op="granola">
-        <div class="char-callsign">"GRANOLA"</div>
-        <div class="char-region">BC / Medic</div>
-        <div class="char-desc">Hippie turned resistance fighter. Will patch your bullet wounds, but will also judge your carbon footprint while doing it.</div>
-      </div>
-    </div>
-    <button id="btnBackToMenu" class="char-btn-back">[ ESC ] BACK TO MENU</button>
   </div>
 
   <!-- Loading -->
   <div id="loadingOverlay">
     <div class="loading-text">DEPLOYING...</div>
     <div class="loading-bar-bg"><div class="loading-bar" id="loadBar"></div></div>
+    <div id="loadingTip" style="margin-top:15px;font-size:0.75rem;color:#556;font-style:italic;max-width:400px;text-align:center"></div>
   </div>
+  <script>
+  (function(){
+    const tips = [
+      'Press H for controls reference',
+      'RMB to aim down sights — reduces recoil by 55%',
+      'Place a campfire (B) to warm up and recover fatigue',
+      'Loot cabins for food, water, and medical supplies (F)',
+      'Night vision goggles (N) — essential after dark',
+      'Vehicles (E) — drive between locations faster',
+      'Check objectives (J) for mission rewards',
+      'Grenades (G) are lethal within 8 metres — watch your distance',
+      'The minimap (M) shows nearby enemies as red dots',
+      'Sprint (SHIFT) drains stamina — manage it carefully',
+      'Crouch (C) reduces detection range from enemies',
+      'Hypothermia kills — stay near campfires at night',
+    ];
+    const el = document.getElementById('loadingTip');
+    if(el) { let i=0; el.textContent=tips[0]; setInterval(()=>{i=(i+1)%tips.length;el.textContent=tips[i];},3000); }
+  })();
+  </script>
 
   <!-- HUD -->
   <div id="hud">
@@ -291,7 +284,9 @@
       <div class="wpn-name" id="wpnName">C7A2</div>
       <div class="wpn-ammo"><span id="wpnAmmo">30</span></div>
       <div class="wpn-ammo-reserve"><span id="wpnReserve">120</span> reserve</div>
+      <div class="wpn-ammo-reserve" style="margin-top:4px;color:#ff6644"><span id="grenadeCount">3</span> frags [G]</div>
     </div>
+    <div id="vehicleHUD" style="display:none;position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);border:1px solid #ff4422;border-radius:6px;padding:8px 20px;color:#fff;font-family:monospace;font-size:0.9rem;z-index:800"></div>
 
     <div class="info-panel">
       <div id="timeDisplay">12:00</div>
@@ -304,14 +299,29 @@
     </div>
 
     <div class="interact-prompt" id="interactPrompt">[F] INTERACT</div>
+    <div id="killFeed" style="position:fixed;top:60px;left:12px;width:320px;pointer-events:none;font-family:'Rajdhani',sans-serif;font-size:12px;"></div>
+    <div id="hudMsg" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);color:#ffcc44;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.1em;text-align:center;pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,0.8);"></div>
     <div class="damage-flash" id="damageFlash"></div>
-
-    <!-- Tactical Minimap -->
-    <canvas id="minimapCanvas" width="180" height="180" style="position:absolute;bottom:90px;right:20px;width:140px;height:140px;border-radius:50%;border:2px solid rgba(204,34,0,0.6);background:rgba(10,10,10,0.75);pointer-events:none;"></canvas>
+    <div id="reloadBar" style="position:fixed;bottom:52px;left:50%;transform:translateX(-50%);width:160px;height:4px;background:rgba(0,0,0,0.5);border:1px solid #555;display:none;border-radius:2px;">
+      <div id="reloadFill" style="height:100%;width:0%;background:#f0a500;border-radius:2px;transition:width 0.05s linear;"></div>
+    </div>
+    <!-- Hit marker (crosshair flash on hit) -->
+    <div id="hitMarker" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;color:#ff3333;display:none;pointer-events:none;text-shadow:0 0 6px rgba(0,0,0,0.9);"></div>
+    <!-- Weapon name toast -->
+    <div id="weaponName" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%);color:#ddbb88;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;display:none;pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,0.9);transition:opacity 0.3s;"></div>
+    <!-- Low-health vignette pulse -->
+    <div id="lowHealthPulse" style="position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 60%,rgba(180,0,0,0.55) 100%);opacity:0;transition:opacity 0.2s;"></div>
+    <!-- Bleed indicator -->
+    <div id="bleedIndicator" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;background:#cc0000;border-radius:50%;opacity:0;pointer-events:none;box-shadow:0 0 8px #ff0000;"></div>
+    <!-- Sleep veil -->
+    <div id="sleepVeil" style="position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:900;transition:opacity 0.8s;"></div>
+    <div style="position:fixed;bottom:12px;left:12px;font-size:10px;color:#555;font-family:'Rajdhani',sans-serif;letter-spacing:0.05em;">
+      WASD move &bull; SHIFT sprint &bull; C crouch &bull; F interact &bull; R reload &bull; Q melee &bull; 1-7 weapons &bull; ESC settings
+    </div>
   </div>
 
   <!-- Death Screen -->
-  <div id="deathScreen">
+  <div id="deathScreen" style="display:none;">
     <div class="death-title">YOU DIED</div>
     <div class="death-stats">
       KILLS &nbsp;<span class="death-stat-val" id="deathKills">0</span><br>
@@ -321,6 +331,138 @@
     <button class="death-btn" id="btnRespawn">RESPAWN</button>
     <button class="death-btn" id="btnDeathMenu" style="border-color:#555;color:#888;">MAIN MENU</button>
   </div>
+
+  <!-- Settings / Pause Overlay (Esc) -->
+  <div id="settingsOverlay">
+    <div class="settings-box">
+      <div class="settings-title">⚙ SETTINGS</div>
+
+      <div class="settings-row">
+        <span class="settings-label">Master Volume</span>
+        <input type="range" id="setVolume" min="0" max="100" value="80">
+        <span class="settings-val" id="setVolumeVal">80</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Mouse Sensitivity</span>
+        <input type="range" id="setSensitivity" min="500" max="4000" step="100" value="2000">
+        <span class="settings-val" id="setSensitivityVal">2000</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Field of View</span>
+        <input type="range" id="setFOV" min="60" max="120" step="5" value="80">
+        <span class="settings-val" id="setFOVVal">80°</span>
+      </div>
+
+      <hr class="settings-divider">
+
+      <div class="settings-row">
+        <span class="settings-label">Bloom</span>
+        <input type="checkbox" id="setBloom" checked>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">FXAA</span>
+        <input type="checkbox" id="setFXAA" checked>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Vignette</span>
+        <input type="checkbox" id="setVignette" checked>
+      </div>
+
+      <button class="settings-close-btn" id="btnSettingsClose">RESUME [ ESC ]</button>
+    </div>
+  </div>
 
+  <script>
+    // ── Settings overlay logic ──
+    (function() {
+      const overlay  = document.getElementById('settingsOverlay');
+      let _pp = null; // post-processing pipeline ref set by game
+      window._setPP = function(pp) { _pp = pp; };
+
+      function openSettings() {
+        if (document.pointerLockElement) document.exitPointerLock();
+        overlay.classList.add('open');
+      }
+      function closeSettings() {
+        overlay.classList.remove('open');
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas && document.getElementById('hud')?.style.display !== 'none') {
+          canvas.requestPointerLock();
+        }
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Escape') {
+          if (overlay.classList.contains('open')) closeSettings();
+          else if (document.getElementById('mainMenu')?.style.display === 'none' &&
+                   document.getElementById('deathScreen')?.style.display !== 'flex') {
+            openSettings();
+          }
+        }
+      });
+      document.getElementById('btnSettingsClose').addEventListener('click', closeSettings);
+
+      // Live slider feedback
+      function bindSlider(id, valId, suffix, onChange) {
+        const sl = document.getElementById(id);
+        const vl = document.getElementById(valId);
+        if (!sl) return;
+        sl.addEventListener('input', () => {
+          vl.textContent = sl.value + (suffix || '');
+          onChange && onChange(Number(sl.value));
+        });
+      }
+      bindSlider('setVolume', 'setVolumeVal', '', v => {
+        if (window._masterGain) window._masterGain.gain.value = v / 100;
+      });
+      bindSlider('setSensitivity', 'setSensitivityVal', '', v => {
+        if (window._camera) window._camera.angularSensibility = v;
+      });
+      bindSlider('setFOV', 'setFOVVal', '°', v => {
+        if (window._camera) window._camera.fov = (v * Math.PI) / 180;
+      });
+
+      // Toggle checkboxes
+      document.getElementById('setBloom').addEventListener('change', e => {
+        if (_pp) _pp.bloomEnabled = e.target.checked;
+      });
+      document.getElementById('setFXAA').addEventListener('change', e => {
+        if (_pp) _pp.fxaaEnabled = e.target.checked;
+      });
+      document.getElementById('setVignette').addEventListener('change', e => {
+        if (_pp) _pp.imageProcessingEnabled = e.target.checked;
+      });
+    })();
+  </script>
+<div id="controlsOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9500;font-family:monospace;color:#c8d6e5;padding:40px;overflow-y:auto">
+<div style="max-width:600px;margin:0 auto">
+<h2 style="color:#ff4422;letter-spacing:2px;margin-bottom:15px">CONTROLS</h2>
+<div style="font-size:0.7rem;color:#556;margin-bottom:15px">Press H to close</div>
+<table style="width:100%;font-size:0.8rem;border-collapse:collapse">
+<tr><th style="text-align:left;color:#ff4422;padding:4px 8px;border-bottom:1px solid #1e2a3a">Key</th><th style="text-align:left;color:#ff4422;padding:4px 8px;border-bottom:1px solid #1e2a3a">Action</th></tr>
+<tr><td style="padding:4px 8px;color:#fff">WASD</td><td style="padding:4px 8px">Move</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">Mouse</td><td style="padding:4px 8px">Look</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">LMB</td><td style="padding:4px 8px">Shoot</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">RMB (hold)</td><td style="padding:4px 8px">Aim Down Sights</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">R</td><td style="padding:4px 8px">Reload</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">G</td><td style="padding:4px 8px">Throw Grenade</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">Q</td><td style="padding:4px 8px">Melee Attack</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">E</td><td style="padding:4px 8px">Enter/Exit Vehicle</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">F</td><td style="padding:4px 8px">Interact (Loot/Search)</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">B</td><td style="padding:4px 8px">Place Campfire</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">K</td><td style="padding:4px 8px">Sleep (near sleeping bag)</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">N</td><td style="padding:4px 8px">Night Vision Goggles</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">M</td><td style="padding:4px 8px">Minimap / Full Map</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">J</td><td style="padding:4px 8px">Objectives</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">TAB</td><td style="padding:4px 8px">Inventory</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">C</td><td style="padding:4px 8px">Crouch</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">SHIFT</td><td style="padding:4px 8px">Sprint</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">1-7</td><td style="padding:4px 8px">Switch Weapon</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">H</td><td style="padding:4px 8px">This Help Screen</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">ESC</td><td style="padding:4px 8px">Settings</td></tr>
+</table>
+<p style="margin-top:20px;font-size:0.7rem;color:#334">RED DUSTER v2.0 | Babylon.js 9 | TENET5</p>
+</div>
+</div>
 </body>
 </html>
