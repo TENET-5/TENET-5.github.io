@@ -1,4 +1,4 @@
-﻿# ABCXYZ Instagram Campaign — 30 Ready-to-Post Captions
+# TENET5 Instagram Campaign — 30 Ready-to-Post Captions
 **Profile**: [@toolkit](https://www.instagram.com/toolkit/)
 **Campaign**: #The504 — 339 confirmed public-record Canadian government failures. Every one sourced.
 
@@ -13,7 +13,7 @@ POST #1 — MAID DEATHS
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Transparency #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -23,7 +23,7 @@ POST #2 — OPIOID CRISIS
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Democracy #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -33,7 +33,7 @@ POST #3 — LTC COVID DEATHS
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Transparency #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -43,7 +43,7 @@ POST #4 — AIR INDIA BOMBING
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #CriminalJustice #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -53,7 +53,7 @@ POST #5 — TAINTED BLOOD
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #CriminalJustice #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -63,7 +63,7 @@ POST #6 — RESIDENTIAL SCHOOLS
 .
 .
 #Accountability #CdnPoli #ResidentialSchools #IndigenousRights #TRC #Reconciliation #The504 #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -73,7 +73,7 @@ POST #7 — KAMLOOPS
 .
 .
 #Accountability #CdnPoli #ResidentialSchools #IndigenousRights #TRC #Reconciliation #The504 #MMIWG
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -83,7 +83,7 @@ Maher Arar: Canadian citizen. Tortured in Syria for a year. The RCMP gave wrong 
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #JusticeSystem #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -93,7 +93,7 @@ Omar Khadr was 15 when captured. The Supreme Court of Canada found the Charter w
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #JusticeSystem #CriminalJustice
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -103,7 +103,7 @@ Afghan interpreters saved Canadian soldiers' lives. When the Taliban came, Canad
 .
 .
 #Accountability #CdnPoli #Canada #Veterans #CAF #GovernmentFailure #The504 #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -113,7 +113,7 @@ Vice-Admiral Mark Norman faced 90 charges. The government withheld disclosure. D
 .
 .
 #Accountability #CdnPoli #Canada #CAF #GovernmentFailure #PublicRecord #The504 #JusticeSystem
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -123,7 +123,7 @@ The Ethics Commissioner found Trudeau "improperly furthered" SNC-Lavalin's inter
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Democracy #Transparency
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -133,7 +133,7 @@ Helena Guergis was removed from cabinet on anonymous allegations. The RCMP clear
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Democracy #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -143,7 +143,7 @@ Neil Stonechild was 17 years old. Found frozen. Saskatoon Police left Indigenous
 .
 .
 #Accountability #CdnPoli #IndigenousRights #MMIWG #The504 #JusticeSystem #CriminalJustice #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -153,7 +153,7 @@ Donald Marshall Jr. was 17 when wrongfully convicted. He spent 11 years in priso
 .
 .
 #Accountability #CdnPoli #WrongfulConviction #JusticeSystem #IndigenousRights #The504 #CriminalJustice #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -163,7 +163,7 @@ David Milgaard spent 23 years wrongfully imprisoned. DNA evidence exonerated him
 .
 .
 #Accountability #CdnPoli #WrongfulConviction #JusticeSystem #PublicRecord #The504 #CriminalJustice #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -173,7 +173,7 @@ POST #17 — G20 MASS ARRESTS
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Democracy #CivicAction
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -183,7 +183,7 @@ $54 million for an app. A 2-person firm received $19.1 million of it. The Audito
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Transparency #Democracy
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -193,7 +193,7 @@ POST #19 — PHOENIX PAY SYSTEM
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Transparency #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -203,7 +203,7 @@ $1 billion in HRDC grants. 87% of files had deficiencies. The minister resigned.
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Transparency #Democracy
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -213,7 +213,7 @@ Canada started replacing the CF-18 in 1997. The contract was signed in 2023. The
 .
 .
 #Accountability #CdnPoli #Canada #CAF #Veterans #GovernmentFailure #The504 #CanadianMilitary
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -223,7 +223,7 @@ Canada's Arctic is undefended against modern missiles. The NORAD commander confi
 .
 .
 #Accountability #CdnPoli #Canada #CAF #CanadianMilitary #GovernmentFailure #The504 #VeteransRights
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -233,7 +233,7 @@ Kashechewan First Nation has been under a boil water advisory for decades. The P
 .
 .
 #Accountability #CdnPoli #IndigenousRights #Reconciliation #TRC #GovernmentFailure #The504 #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -243,7 +243,7 @@ Jordan River Anderson was born with a disability. He died in hospital at age 2, 
 .
 .
 #Accountability #CdnPoli #IndigenousRights #Reconciliation #TRC #GovernmentFailure #The504 #MMIWG
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -253,7 +253,7 @@ POST #25 — INDIGENOUS CHILD WELFARE
 .
 .
 #Accountability #CdnPoli #IndigenousRights #Reconciliation #TRC #GovernmentFailure #The504 #MMIWG
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -263,7 +263,7 @@ The Hogue Commission confirmed foreign interference in both the 2019 and 2021 Ca
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Democracy #Transparency
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -273,7 +273,7 @@ Minister Sajjan knew about Gen. Vance's misconduct allegations in 2018. Said not
 .
 .
 #Accountability #CdnPoli #CAF #CanadianMilitary #CFNIS #GovernmentFailure #The504 #VeteransRights
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -283,7 +283,7 @@ Loblaws ran a 14-year bread price-fixing scheme. Canadians were overcharged on a
 .
 .
 #Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Transparency #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -293,7 +293,7 @@ POST #29 — TRC CALLS TO ACTION
 .
 .
 #Accountability #CdnPoli #TRC #Reconciliation #IndigenousRights #MMIWG #The504 #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
@@ -302,11 +302,11 @@ POST #30 — THE 504
 .
 .
 .
-#Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Democracy #ABCXYZ #CivicAction #TruthMatters
-[Source: https://ABCXYZ.github.io/accountability.html]
+#Accountability #CdnPoli #Canada #GovernmentFailure #PublicRecord #The504 #Democracy #TENET5 #CivicAction #TruthMatters
+[Source: https://tenet-5.github.io/accountability.html]
 
 ---
 
-*Generated for the ABCXYZ civic transparency campaign. All facts sourced from official Canadian government records.*
-*Profile: [@toolkit](https://www.instagram.com/toolkit/) | Site: [ABCXYZ.github.io](https://ABCXYZ.github.io)*
+*Generated for the TENET5 civic transparency campaign. All facts sourced from official Canadian government records.*
+*Profile: [@toolkit](https://www.instagram.com/toolkit/) | Site: [tenet-5.github.io](https://tenet-5.github.io)*
 
