@@ -15,4 +15,7 @@ try {
     eval(scriptContent);
     document.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
     console.log("Nav HTML Output length:", document.getElementById('site-nav').innerHTML.length);
-    console.log("Nav HTML Preview:", document.getElementById('site-nav').innerHTML.substring(0, 20
+    console.log("Nav HTML Preview:", document.getElementById('site-nav').innerHTML.substring(0, 200));
+} catch (e) {
+    console.error("Error executing nav.js:", e);
+}
