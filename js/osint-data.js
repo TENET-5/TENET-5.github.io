@@ -84,7 +84,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "✕ LED OPPOSITION — Uyghur Genocide Vote",
-    dossier: null
+    dossier: "dossier-viewer.html?file=data/dossier_senator_woo.json"
   },
   {
     id: "morantz",
@@ -117,7 +117,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "✕ ENTIRE CPC VOTED NAY — Ceasefire Vote #658",
-    dossier: null
+    dossier: "dossier-viewer.html?file=data/pierre_poilievre_profile.json"
   },
   {
     id: "genuis",
@@ -183,7 +183,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "⚖ GOVERNMENT ENVOY — Shields Israel advocacy from scrutiny",
-    dossier: null
+    dossier: "dossier-viewer.html?file=data/irwin_cotler_profile.json"
   },
   {
     id: "han_dong",
@@ -201,7 +201,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "⚡ EXPELLED — CCP interference (consequences applied)",
-    dossier: null
+    dossier: "dossier-viewer.html?file=data/han_dong_profile.json"
   },
   {
     id: "chong",
@@ -219,7 +219,7 @@ const osintManifest = [
     ],
     voteClass: "vote-nay",
     voteText: "🎯 TARGETED BY CHINA — (genuine foreign interference victim)",
-    dossier: null
+    dossier: "dossier-viewer.html?file=data/michael_chong_profile.json"
   }
 ];
 
