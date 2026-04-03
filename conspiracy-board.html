@@ -36,7 +36,8 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
 .legend{display:flex;gap:12px;flex-wrap:wrap;padding:0 20px;margin:8px auto;max-width:1200px}
 .legend-item{display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--text-dim)}
 .legend-dot{width:10px;height:10px;border-radius:50%}
-.board{position:relative;width:100%;max-width:1200px;margin:16px auto;min-height:85vh;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;touch-action:none}
+.board-wrap{position:relative;width:100%;max-width:100%;margin:16px auto;height:80vh;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.board{position:absolute;inset:0;width:3000px;height:2400px;transform-origin:0 0;touch-action:none}
 .board-grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(26,37,53,0.3) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
 .board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 .board svg line{stroke-linecap:round;transition:opacity 0.3s}
@@ -100,23 +101,52 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
 <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Evidence</div>
 </div>
 <div class="controls" id="controls"></div>
+<div style="display:flex;gap:8px;padding:4px 20px;max-width:100%">
+<button onclick="zoomBoard(1.2)" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:1rem">+</button>
+<button onclick="zoomBoard(0.8)" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:1rem">−</button>
+<button onclick="zoomBoard('fit')" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:0.7rem">FIT</button>
+<button onclick="zoomBoard('reset')" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:0.7rem">100%</button>
+<span id="zoomLevel" style="color:var(--text-dim);font-size:0.7rem;align-self:center">100%</span>
+</div>
+<div class="board-wrap" id="boardWrap">
 <div class="board" id="board">
 <div class="board-grid"></div>
 <svg id="threads"></svg>
 </div>
+</div>
 <div class="footer">Investigation by Daniel Perry | Data: LIRIL/TENET5 | All sources public record | SEED=118400</div>
 <script>
+let _zoom = 0.45;
+function zoomBoard(factor) {
+  const board = document.getElementById('board');
+  if (factor === 'fit') _zoom = 0.35;
+  else if (factor === 'reset') _zoom = 1;
+  else _zoom = Math.max(0.15, Math.min(2, _zoom * factor));
+  board.style.transform = `scale(${_zoom})`;
+  document.getElementById('zoomLevel').textContent = Math.round(_zoom * 100) + '%';
+  setTimeout(draw, 50);
+}
 (async function(){
 let DATA;
 try{const r=await fetch('data/investigation_board.json');DATA=await r.json()}catch(e){document.getElementById('board').innerHTML='<p style="padding:40px;color:var(--red)">Failed to load data.</p>';return}
-const board=document.getElementById('board'),svg=document.getElementById('threads'),nodes=DATA.nodes,threads=DATA.threads,nodeEls={};let activeFilter='all';
+const board=document.getElementById('board'),svg=document.getElementById('threads'),wrap=document.getElementById('boardWrap'),nodes=DATA.nodes,threads=DATA.threads,nodeEls={};let activeFilter='all';
+// Initial zoom to fit
+board.style.transform = `scale(${_zoom})`;
+document.getElementById('zoomLevel').textContent = Math.round(_zoom * 100) + '%';
+// Pan support
+let isPanning=false, panX=0, panY=0, startX=0, startY=0;
+wrap.addEventListener('pointerdown',e=>{if(e.target===wrap||e.target.classList.contains('board-grid')){isPanning=true;startX=e.clientX-panX;startY=e.clientY-panY;wrap.style.cursor='grabbing'}});
+wrap.addEventListener('pointermove',e=>{if(!isPanning)return;panX=e.clientX-startX;panY=e.clientY-startY;board.style.transform=`scale(${_zoom}) translate(${panX/_zoom}px,${panY/_zoom}px)`});
+wrap.addEventListener('pointerup',()=>{isPanning=false;wrap.style.cursor=''});
+// Mouse wheel zoom
+wrap.addEventListener('wheel',e=>{e.preventDefault();zoomBoard(e.deltaY<0?1.15:0.87)},{passive:false});
 const sEl=document.getElementById('stats');
 sEl.innerHTML=`<div class="stat"><span class="num">${nodes.length}</span><span class="lbl">Nodes</span></div><div class="stat"><span class="num">${threads.length}</span><span class="lbl">Connections</span></div><div class="stat"><span class="num">${nodes.filter(n=>n.type==='person').length}</span><span class="lbl">People</span></div><div class="stat"><span class="num">${nodes.filter(n=>n.type==='org').length}</span><span class="lbl">Orgs</span></div>`;
 const cats=new Set();nodes.forEach(n=>(n.categories||[]).forEach(c=>cats.add(c)));
 document.getElementById('controls').innerHTML='<button class="filter-btn active" data-f="all" onclick="filt(\'all\',this)">All</button>'+[...cats].map(c=>`<button class="filter-btn" data-f="${c}" onclick="filt('${c}',this)">${c.toUpperCase()}</button>`).join('');
 const mob=window.innerWidth<768;
 nodes.forEach(n=>{const el=document.createElement('div');el.className=`node type-${n.type}`;el.dataset.id=n.id;el.dataset.cats=(n.categories||[]).join(',');if(!mob){el.style.left=n.x+'%';el.style.top=n.y+'%'}el.innerHTML=`<span class="type-badge">${n.type}</span><div class="title">${n.label}</div><div class="subtitle">${n.subtitle||''}</div><div class="detail">${n.detail||''}</div>${n.link?`<a class="link-btn" href="${n.link}">View evidence &rarr;</a>`:''}`;board.appendChild(el);nodeEls[n.id]=el});
-function draw(){if(mob)return;svg.innerHTML='';const bR=board.getBoundingClientRect();threads.forEach(t=>{const f=nodeEls[t.from],o=nodeEls[t.to];if(!f||!o||f.classList.contains('hidden')||o.classList.contains('hidden'))return;const fR=f.getBoundingClientRect(),tR=o.getBoundingClientRect();const x1=fR.left+fR.width/2-bR.left,y1=fR.top+fR.height/2-bR.top,x2=tR.left+tR.width/2-bR.left,y2=tR.top+tR.height/2-bR.top;const s=t.strength||1;const c={3:'rgba(230,57,70,0.4)',2:'rgba(58,134,255,0.3)',1:'rgba(90,106,122,0.2)'};const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',c[s]||c[1]);l.setAttribute('stroke-width',s);svg.appendChild(l);if(t.label){const tx=document.createElementNS('http://www.w3.org/2000/svg','text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',(y1+y2)/2-4);tx.setAttribute('text-anchor','middle');tx.textContent=t.label;svg.appendChild(tx)}})}
+function draw(){if(mob)return;svg.innerHTML='';svg.setAttribute('width',3000);svg.setAttribute('height',2400);threads.forEach(t=>{const f=nodeEls[t.from],o=nodeEls[t.to];if(!f||!o||f.classList.contains('hidden')||o.classList.contains('hidden'))return;const x1=parseFloat(f.style.left)/100*3000+65,y1=parseFloat(f.style.top)/100*2400+20;const x2=parseFloat(o.style.left)/100*3000+65,y2=parseFloat(o.style.top)/100*2400+20;const s=t.strength||1;const c={3:'rgba(230,57,70,0.5)',2:'rgba(58,134,255,0.4)',1:'rgba(90,106,122,0.25)'};const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',c[s]||c[1]);l.setAttribute('stroke-width',s*1.5);svg.appendChild(l);if(t.label){const tx=document.createElementNS('http://www.w3.org/2000/svg','text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',(y1+y2)/2-5);tx.setAttribute('text-anchor','middle');tx.setAttribute('fill','rgba(200,214,229,0.5)');tx.setAttribute('font-size','10');tx.textContent=t.label;svg.appendChild(tx)}})}
 setTimeout(draw,100);
 window.filt=function(cat,btn){activeFilter=cat;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');nodes.forEach(n=>{const el=nodeEls[n.id];if(!el)return;if(cat==='all'||(n.categories||[]).includes(cat)){el.classList.remove('hidden');if(mob)el.style.display=''}else{el.classList.add('hidden');if(mob)el.style.display='none'}});draw()};
 if(!mob){let d=null,ox=0,oy=0;board.addEventListener('pointerdown',e=>{const n=e.target.closest('.node');if(!n)return;d=n;const r=n.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;n.style.zIndex=100;n.setPointerCapture(e.pointerId)});board.addEventListener('pointermove',e=>{if(!d)return;const bR=board.getBoundingClientRect();d.style.left=((e.clientX-bR.left-ox)/bR.width*100)+'%';d.style.top=((e.clientY-bR.top-oy)/bR.height*100)+'%';draw()});board.addEventListener('pointerup',()=>{if(d)d.style.zIndex=10;d=null})}
