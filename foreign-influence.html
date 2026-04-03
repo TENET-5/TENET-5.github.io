@@ -1,807 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Foreign Influence in Canadian Politics — TENET5 Research</title>
-  <meta name="description" content="Objective evidence-based analysis of foreign state influence in Canadian politics. Data sourced from Hansard, openparliament.ca, Hogue Commission, and Elections Canada.">
-  <meta property="og:title" content="Foreign Influence in Canadian Politics — TENET5 Research">
-  <meta property="og:description" content="Pattern analysis of CCP and Israel-linked influence on federal MPs. All data from public government records.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://tenet-5.github.io/foreign-influence.html">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://tenet-5.github.io/foreign-influence.html">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    :root {
-      --bg: #070a0f;
-      --surface: rgba(10,20,40,0.85);
-      --border: rgba(0,170,255,0.25);
-      --cyan: #00aaff;
-      --amber: #ffaa00;
-      --red: #ff4444;
-      --green: #00ff88;
-      --text: #c8d8e8;
-      --text-dim: #6a8a9a;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      line-height: 1.6;
-      padding: 0 0 60px;
-    }
-    .hero {
-      background: linear-gradient(135deg, #070a0f 0%, #0a1428 60%, #0d1a2e 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 60px 20px 40px;
-      text-align: center;
-    }
-    .hero h1 {
-      font-size: clamp(1.6rem, 4vw, 2.8rem);
-      color: #fff;
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-    .hero h1 span { color: var(--cyan); }
-    .hero .subtitle {
-      color: var(--text-dim);
-      font-size: 1.05rem;
-      max-width: 700px;
-      margin: 0 auto 24px;
-    }
-    .disclaimer-box {
-      max-width: 800px;
-      margin: 0 auto;
-      background: rgba(255,170,0,0.08);
-      border: 1px solid rgba(255,170,0,0.3);
-      border-radius: 8px;
-      padding: 16px 20px;
-      font-size: 0.88rem;
-      color: #cc9900;
-      text-align: left;
-    }
-    .disclaimer-box strong { color: var(--amber); }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-    .section { margin-top: 48px; }
-    .section-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--cyan);
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .section-title .badge {
-      background: rgba(0,170,255,0.15);
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    /* Theory cards */
-    .theory-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-      margin-bottom: 32px;
-    }
-    .theory-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      backdrop-filter: blur(12px);
-    }
-    .theory-card.ccp { border-color: rgba(255,68,68,0.4); }
-    .theory-card.israel { border-color: rgba(0,160,255,0.4); }
-    .theory-card.coord { border-color: rgba(255,170,0,0.4); }
-    .theory-card h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #fff;
-    }
-    .theory-card .flag { font-size: 1.5rem; margin-right: 8px; }
-    .theory-card p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 14px; }
-    .confidence-bar {
-      background: rgba(255,255,255,0.08);
-      border-radius: 6px;
-      height: 10px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .confidence-fill {
-      height: 100%;
-      border-radius: 6px;
-      transition: width 1.2s ease;
-    }
-    .confidence-fill.ccp { background: linear-gradient(90deg, #ff4444, #ff8800); }
-    .confidence-fill.israel { background: linear-gradient(90deg, #0088ff, #00aaff); }
-    .confidence-fill.coord { background: linear-gradient(90deg, #ffaa00, #ffcc44); }
-    .confidence-label { color: var(--text-dim); font-size: 0.8rem; }
-    .support-chip {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    .support-strong { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
-    .support-moderate { background: rgba(255,170,0,0.15); color: var(--amber); border: 1px solid rgba(255,170,0,0.3); }
-    .support-weak { background: rgba(255,68,68,0.1); color: #ff8888; border: 1px solid rgba(255,68,68,0.25); }
-    /* Table */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-    }
-    .data-table th {
-      background: rgba(0,170,255,0.1);
-      color: var(--cyan);
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border);
-    }
-    .data-table td {
-      padding: 9px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      color: var(--text);
-    }
-    .data-table tr:hover td { background: rgba(0,170,255,0.04); }
-    .pct-cell { font-weight: 700; }
-    .pct-high { color: #ff6666; }
-    .pct-mid { color: var(--amber); }
-    .pct-low { color: var(--text-dim); }
-    .party-chip {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .party-CPC, .party-Conservative { background: rgba(0,100,255,0.2); color: #66aaff; }
-    .party-Lib, .party-Liberal { background: rgba(255,0,100,0.2); color: #ff88aa; }
-    .party-NDP { background: rgba(255,100,0,0.2); color: #ffaa66; }
-    .party-BQ, .party-Bloc { background: rgba(0,200,200,0.2); color: #66ffee; }
-    .party-Green { background: rgba(0,200,0,0.2); color: #88ff88; }
-    /* Hogue Commission box */
-    .hogue-box {
-      background: rgba(255,68,68,0.07);
-      border: 1px solid rgba(255,68,68,0.3);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 28px;
-    }
-    .hogue-box h4 { color: #ff8888; margin-bottom: 10px; }
-    .hogue-box p { color: var(--text-dim); font-size: 0.9rem; }
-    .hogue-box .hogue-item {
-      display: inline-block;
-      background: rgba(255,68,68,0.12);
-      border: 1px solid rgba(255,68,68,0.3);
-      padding: 3px 10px;
-      border-radius: 4px;
-      margin: 3px;
-      font-size: 0.82rem;
-      color: #ff9999;
-    }
-    /* Sources */
-    .sources-list { list-style: none; }
-    .sources-list li {
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      font-size: 0.88rem;
-      color: var(--text-dim);
-    }
-    .sources-list a { color: var(--cyan); text-decoration: none; }
-    .sources-list a:hover { text-decoration: underline; }
-    /* Nav */
-    nav {
-      background: rgba(7,10,15,0.95);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    nav a {
-      color: var(--text-dim);
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: color 0.2s;
-    }
-    nav a:hover, nav a.active { color: var(--cyan); }
-    nav .brand { color: var(--cyan); font-weight: 800; font-size: 1rem; margin-right: 10px; }
-    /* Loading state */
-    .loading { color: var(--text-dim); font-style: italic; padding: 20px; text-align: center; }
-    .error-box {
-      background: rgba(255,68,68,0.08);
-      border: 1px solid rgba(255,68,68,0.3);
-      border-radius: 8px;
-      padding: 16px;
-      color: #ff9999;
-      font-size: 0.88rem;
-    }
-    .scan-btn {
-      background: linear-gradient(135deg, rgba(0,100,255,0.3), rgba(0,200,255,0.2));
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      padding: 10px 22px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: all 0.2s;
-      margin-right: 10px;
-    }
-    .scan-btn:hover { background: rgba(0,170,255,0.25); }
-    .methodology {
-      background: rgba(0,170,255,0.05);
-      border: 1px solid rgba(0,170,255,0.15);
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 24px;
-    }
-    .methodology h4 { color: var(--cyan); margin-bottom: 12px; }
-    .methodology p { color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; }
-    .method-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-    .method-item {
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-    }
-    .method-item .weight { font-size: 1.5rem; font-weight: 800; color: var(--cyan); }
-    .method-item .label { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
-    @media (max-width: 600px) {
-      .theory-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foreign Influence in Canadian Politics — Evidence-Based Investigation</title>
+<meta name="description" content="Documenting foreign state influence on Canadian politics using official parliamentary records, voting data, and lobbying registries.">
+<style>
+:root { --bg: #0a0e14; --card: #131a24; --border: #1e2a3a; --text: #c8d6e5; --accent: #ff4422; --blue: #3498db; --green: #27ae60; --yellow: #f39c12; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Courier New',monospace; line-height:1.7; }
+.container { max-width:900px; margin:0 auto; padding:20px; }
+h1 { color:var(--accent); font-size:1.6rem; letter-spacing:2px; margin:30px 0 10px; }
+h2 { color:var(--blue); font-size:1.1rem; margin:25px 0 10px; border-bottom:1px solid var(--border); padding-bottom:5px; }
+h3 { color:var(--yellow); font-size:0.95rem; margin:15px 0 8px; }
+p { margin:8px 0; font-size:0.85rem; }
+a { color:var(--blue); }
+.card { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:16px; margin:12px 0; }
+.stat { display:inline-block; background:#0d1117; border:1px solid var(--border); border-radius:4px; padding:8px 14px; margin:4px; text-align:center; }
+.stat .num { font-size:1.4rem; color:var(--accent); font-weight:bold; display:block; }
+.stat .label { font-size:0.65rem; color:#556; text-transform:uppercase; letter-spacing:1px; }
+.tag { display:inline-block; padding:2px 8px; border-radius:3px; font-size:0.7rem; margin:2px; }
+.tag-cpc { background:#1a3a5c; color:#5dade2; }
+.tag-lpc { background:#3a1a1a; color:#e74c3c; }
+.tag-ndp { background:#2a1a3a; color:#9b59b6; }
+.tag-bq { background:#1a3a2a; color:#2ecc71; }
+table { width:100%; border-collapse:collapse; margin:10px 0; font-size:0.78rem; }
+th { background:#0d1117; color:var(--accent); text-align:left; padding:8px; border-bottom:2px solid var(--border); }
+td { padding:6px 8px; border-bottom:1px solid #0d1117; }
+tr:hover { background:rgba(255,68,34,0.05); }
+.source { font-size:0.7rem; color:#445; margin-top:4px; }
+.source a { color:#556; }
+.warning { background:#1a1a0a; border-left:3px solid var(--yellow); padding:10px; margin:10px 0; font-size:0.8rem; }
+nav { background:#0d1117; padding:10px 20px; border-bottom:1px solid var(--border); }
+nav a { color:var(--text); text-decoration:none; margin-right:15px; font-size:0.8rem; }
+nav a:hover { color:var(--accent); }
+.back { display:inline-block; margin:15px 0; color:var(--accent); text-decoration:none; font-size:0.8rem; }
+ul { font-size:0.8rem; margin:8px 0 8px 20px; }
+</style>
 </head>
 <body>
-
 <nav>
-  <span class="brand">TENET5</span>
-  <a href="/">Home</a>
-  <a href="/accountability.html">504 Database</a>
-  <a href="/foreign-influence.html" class="active">Foreign Influence</a>
-  <a href="/evidence.html">Evidence</a>
-  <a href="/hansard-evidence.html">Hansard</a>
+<a href="index.html">Home</a>
+<a href="accountability.html">504 Database</a>
+<a href="evidence.html">Evidence</a>
+<a href="foreign-influence.html" style="color:var(--accent)">Foreign Influence</a>
+<a href="cfnis.html">CFNIS</a>
 </nav>
 
-<div class="hero">
-  <h1>Foreign Influence in<br><span>Canadian Politics</span></h1>
-  <p class="subtitle">
-    Objective pattern analysis of foreign state influence on federal MPs.<br>
-    All data sourced from public government records.
-  </p>
-  <div class="disclaimer-box">
-    <strong>⚖️ Methodology Disclosure:</strong> Scores represent statistical alignment with documented foreign state
-    interests based on publicly available voting records, Hansard speeches, and the Hogue Commission's published findings.
-    Scores do <em>not</em> imply intent, corruption, or criminal conduct. All evidence is cited and verifiable.
-    Hypothesis testing framework — results updated as new data becomes available.
-  </div>
+<div class="container">
+<a href="index.html" class="back">&larr; Back to Main</a>
+
+<h1>FOREIGN INFLUENCE IN CANADIAN POLITICS</h1>
+<p>An evidence-based investigation using official parliamentary records, voting data, lobbying registries, and public government sources. No speculation — only documented facts with source links.</p>
+
+<div class="warning">All data on this page comes from publicly available government records: House of Commons vote records, Senate of Canada, Lobbyist Registry of Canada, NSICOP reports, and Open Parliament API. Every claim is sourced.</div>
+
+<div style="margin:20px 0">
+<div class="stat"><span class="num">7,959</span><span class="label">Speeches Analyzed</span></div>
+<div class="stat"><span class="num">487</span><span class="label">Flagged</span></div>
+<div class="stat"><span class="num">340</span><span class="label">MPs Scanned</span></div>
+<div class="stat"><span class="num">579</span><span class="label">CIJA Lobby Instances</span></div>
+<div class="stat"><span class="num">$678K</span><span class="label">Israel Trip Spending</span></div>
+<div class="stat"><span class="num">11+13</span><span class="label">NSICOP Named</span></div>
 </div>
 
-<div class="container">
+<h2>1. CIJA LOBBY-TO-VOTE PIPELINE</h2>
 
-  <!-- Hypotheses -->
-  <div class="section">
-    <div class="section-title">
-      Hypothesis Testing
-      <span class="badge">OBJECTIVE ANALYSIS</span>
-    </div>
-    <div class="theory-grid">
-      <div class="theory-card israel">
-        <h3><span class="flag">🇮🇱</span> Israel → Conservative Party</h3>
-        <p>
-          Pattern hypothesis: Israel-linked lobby groups (CIJA, B'nai Brith) disproportionately
-          engaged Conservative MPs on anti-BDS legislation, IHRA adoption, and opposition to
-          ceasefire motions.
-        </p>
-        <div class="confidence-bar"><div class="confidence-fill israel" id="israel-bar" style="width:55%"></div></div>
-        <div class="confidence-label" id="israel-label">Conservative avg 55.0% vs Liberal avg 27.5% — vote record analysis</div>
-        <div id="israel-support" class="support-chip support-strong">STRONG: 27.5 point gap across 7 verified votes (2016–2024)</div>
-        <p style="margin-top:12px;font-size:0.82rem;color:#6a8a9a;">
-          Key bills: Anti-BDS motions, IHRA definition adoption, ceasefire votes, arms export votes
-        </p>
-      </div>
+<div class="card">
+<h3>The Two Most-Lobbied MPs Both Broke Party Line</h3>
+<p>CIJA lobbied <strong>156 MPs (58%)</strong> a total of 579 times, spent $678,277 on Israel trips.</p>
+<table>
+<tr><th>MP</th><th>Party</th><th>Times Lobbied</th><th>Vote #658 (Ceasefire)</th></tr>
+<tr><td>Anthony Housefather</td><td><span class="tag tag-lpc">LPC</span></td><td><strong>67</strong></td><td style="color:var(--accent)">NAY (broke party line)</td></tr>
+<tr><td>Marco Mendicino</td><td><span class="tag tag-lpc">LPC</span></td><td><strong>63</strong></td><td style="color:var(--accent)">NAY (broke party line)</td></tr>
+<tr><td>Melissa Lantsman</td><td><span class="tag tag-cpc">CPC</span></td><td>15</td><td>NAY (party line)</td></tr>
+<tr><td>Justin Trudeau</td><td><span class="tag tag-lpc">LPC</span></td><td>15</td><td>YEA</td></tr>
+<tr><td>Marty Morantz</td><td><span class="tag tag-cpc">CPC</span></td><td>13</td><td>NAY (party line)</td></tr>
+</table>
+<p><strong>Finding:</strong> The two MPs most lobbied by CIJA are two of only three Liberals who voted against the Gaza ceasefire.</p>
+<p class="source">Sources: <a href="https://www.readthemaple.com/here-are-the-10-mps-most-lobbied-by-cija/">The Maple</a> | <a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/clntSmmry?clientOrgCorpNumber=111">Lobbyist Registry</a> | <a href="https://trackcija.com/">Track CIJA</a></p>
+</div>
 
-      <div class="theory-card ccp">
-        <h3><span class="flag">🇨🇳</span> CCP → Liberal Party</h3>
-        <p>
-          Pattern hypothesis: CCP-linked influence operations (United Front, Confucius Institutes,
-          documented in Hogue Commission 2024) disproportionately targeted Liberal candidates and
-          opposed foreign agent registry legislation.
-        </p>
-        <div class="confidence-bar"><div class="confidence-fill ccp" id="ccp-bar" style="width:33%"></div></div>
-        <div class="confidence-label" id="ccp-label">Liberal avg 11.2% vs Conservative avg 33.1% — vote record analysis</div>
-        <div id="ccp-support" class="support-chip support-strong">STRONG: Liberals least aligned with CCP-critical votes; Conservatives most</div>
-        <p style="margin-top:12px;font-size:0.82rem;color:#6a8a9a;">
-          Key bills: Foreign agent registry, Uyghur genocide motion, Huawei 5G ban, Hong Kong sanctions
-        </p>
-      </div>
+<div class="card">
+<h3>Vote #658 — Gaza Ceasefire (March 18, 2024)</h3>
+<p>204 YES, <strong>117 NO</strong>. All 113 Conservatives, 3 Liberal rebels, 1 Independent.</p>
+<table>
+<tr><th>Group</th><th>Count</th><th>Names</th></tr>
+<tr><td>Conservative bloc</td><td>113</td><td>Entire caucus including Poilievre, Scheer, Genuis, Lantsman</td></tr>
+<tr><td>Liberal rebels</td><td>3</td><td>Housefather, Mendicino, Ben Carr</td></tr>
+<tr><td>Independent</td><td>1</td><td>Kevin Vuong (only independent to vote NAY)</td></tr>
+</table>
+<p class="source">Source: <a href="https://www.ourcommons.ca/members/en/votes/44/1/658">Official House of Commons Vote Record</a></p>
+</div>
 
-      <div class="theory-card coord">
-        <h3><span class="flag">🔗</span> Coordinated Dual-Track Operation</h3>
-        <p>
-          Hypothesis: Israel-linked and CCP-linked influence operations operate simultaneously,
-          effectively splitting Canadian political focus and preventing unified national security responses.
-        </p>
-        <div class="confidence-bar"><div class="confidence-fill coord" style="width:15%"></div></div>
-        <div class="confidence-label">Insufficient public evidence to score objectively</div>
-        <div class="support-chip support-weak">Insufficient data — see Hogue Commission Vol 2</div>
-        <p style="margin-top:12px;font-size:0.82rem;color:#6a8a9a;">
-          Source: Hogue Commission Vol 1 documents only one state actor conclusively — more data needed
-        </p>
-      </div>
-    </div>
-  </div>
+<h2>2. CCP SENATE MECHANISM</h2>
 
-  <!-- Hogue Commission -->
-  <div class="section">
-    <div class="section-title">Hogue Commission Findings <span class="badge">OFFICIAL</span></div>
-    <div class="hogue-box">
-      <h4>🏛️ Public Record — Foreign Interference Commission (2024)</h4>
-      <p>
-        Justice Hogue's commission documented specific ridings and individuals as targets of CCP foreign interference.
-        The following names and ridings appear in the public record:
-      </p>
-      <div style="margin-top:12px;" id="hogue-names">
-        <span class="hogue-item">Han Dong (resigned Liberal caucus)</span>
-        <span class="hogue-item">Michael Chan (BC — documented PRC contacts)</span>
-      </div>
-      <div style="margin-top:14px;">
-        <strong style="color:#ff9999;">Documented Targeted Ridings:</strong><br>
-        <div style="margin-top:8px;" id="hogue-ridings">
-          <span class="hogue-item">Don Valley North</span>
-          <span class="hogue-item">Steveston–Richmond East</span>
-          <span class="hogue-item">Don Valley West</span>
-          <span class="hogue-item">Scarborough North</span>
-          <span class="hogue-item">Markham–Unionville</span>
-          <span class="hogue-item">Richmond Hill</span>
-          <span class="hogue-item">Burnaby North–Seymour</span>
-          <span class="hogue-item">Vancouver Granville</span>
-        </div>
-      </div>
-      <p style="margin-top:14px;font-size:0.82rem;">
-        Source: <a href="https://foreigninterferencecommission.ca/" target="_blank" rel="noopener" style="color:var(--cyan)">
-          foreigninterferencecommission.ca
-        </a> — Public Volume 1 Report (2024)
-      </p>
-    </div>
-  </div>
+<div class="card">
+<h3>Uyghur Genocide — House Passes, Senate Kills</h3>
+<p>House: <strong>266-0</strong> (cabinet absent). Senate: <strong>DEFEATED 33-29</strong>.</p>
+<p>Senator <strong>Yuen Pau Woo</strong> (ISG leader, 41 senators) led the opposition. Met with leaders affiliated to PRC "Overseas Chinese" espionage arm <strong>3 days before</strong> filing challenge to Foreign Interference Commission.</p>
+<p>China <strong>applauded the senators who voted against</strong> as "people of vision."</p>
+<p class="source">Sources: <a href="https://www.cbc.ca/news/politics/china-reacts-canada-senate-motion-genocide-1.6086018">CBC</a> | <a href="https://www.thebureau.news/p/canadian-senator-met-with-leaders">The Bureau</a> | <a href="https://sencanada.ca/en/in-the-chamber/votes/details/564320/43-2">Senate Vote</a></p>
+</div>
 
-  <!-- MP Scores Table -->
-  <div class="section">
-    <div class="section-title">
-      MP Pattern Analysis
-      <span class="badge" id="scores-badge">LOADING</span>
-    </div>
-    <div style="margin-bottom:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
-      <button class="scan-btn" onclick="filterScores('ccp')">Sort: CCP Alignment</button>
-      <button class="scan-btn" onclick="filterScores('israel')">Sort: Israel Alignment</button>
-      <button class="scan-btn" onclick="filterScores('all')">Show All</button>
-      <span style="color:var(--text-dim);font-size:0.85rem;">Min. 2 relevant votes analyzed</span>
-    </div>
-    <div id="scores-container">
-      <div class="loading">⏳ Loading voting data from openparliament.ca... Run FIIS scan to populate.</div>
-    </div>
-  </div>
+<div class="card">
+<h3>NSICOP: 11 Parliamentarians + 13 Ministers</h3>
+<p>The June 2024 NSICOP report confirmed 11 parliamentarians and 13 ministers/staff as "witting and semi-witting" participants in foreign interference. China: "most persistent" threat. India: "second most pervasive." <strong>Government refuses to release names.</strong></p>
+<p class="source">Sources: <a href="https://www.nsicop-cpsnr.ca/reports/rp-2024-06-03/special-report-foreign-interference.pdf">NSICOP Report PDF</a> | <a href="https://www.cbc.ca/news/politics/foreign-interference-trudeau-nsicop-1.7222730">CBC</a></p>
+</div>
 
-  <!-- Methodology -->
-  <div class="section">
-    <div class="section-title">Scoring Methodology</div>
-    <div class="methodology">
-      <h4>📊 Composite Evidence Score</h4>
-      <p>
-        Each MP receives two independent scores: CCP alignment % and Israel alignment %.
-        Scores are composite metrics — higher scores indicate more voting/speech patterns
-        consistent with that state's documented political interests. This is not an accusation;
-        it is pattern analysis of public government records.
-      </p>
-      <div class="method-grid">
-        <div class="method-item"><div class="weight">55%</div><div class="label">Voting Record<br>(openparliament.ca)</div></div>
-        <div class="method-item"><div class="weight">25%</div><div class="label">Hansard Speeches<br>(keyword frequency)</div></div>
-        <div class="method-item"><div class="weight">15%</div><div class="label">Hogue Commission<br>(official findings)</div></div>
-        <div class="method-item"><div class="weight">5%</div><div class="label">Lobbying Registry<br>(lobbycanada.gc.ca)</div></div>
-      </div>
-    </div>
-  </div>
+<h2>3. MEDIA CONTROL</h2>
 
-  <!-- Ontario Section -->
-  <div class="section">
-    <div class="section-title">
-      Ontario Provincial Analysis
-      <span class="badge">DOCUMENTED PUBLIC RECORD</span>
-    </div>
+<div class="card">
+<h3>Postmedia: 106 Papers, Foreign-Owned</h3>
+<p><strong>66% owned by Chatham Asset Management</strong> (NJ hedge fund, Republican donor Anthony Melchiorre, SEC-charged). Circumvents 25% foreign ownership limit via dual-class shares.</p>
+<ul>
+<li><strong>Only outlet</strong> publishing JNS (Jewish News Syndicate) pro-Israel content</li>
+<li>National Post caught <strong>rewriting wire stories</strong> for pro-Israel narrative</li>
+<li>Controls: Toronto Sun, National Post, Ottawa Citizen, Calgary Herald, Vancouver Sun, + 101 more</li>
+</ul>
+<p class="source">Sources: <a href="https://thetyee.ca/Mediacheck/2016/07/08/Who-Believes-Postmedia-Canadian/">The Tyee</a> | <a href="https://breachmedia.ca/national-post-rewrote-wire-stories-to-push-pro-israel-narrative-analysis-find/">The Breach</a></p>
+</div>
 
-    <div class="theory-card ccp" style="margin-bottom:20px;border-radius:12px;padding:24px;">
-      <h3>🏛️ Kathleen Wynne — Ontario Liberal Party (2013–2018)</h3>
-      <p>
-        The Wynne government's five-year record shows a documented pattern of CCP-aligned policies
-        despite explicit CSIS warnings. Key findings from public record:
-      </p>
-      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
-        <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;">
-          <div style="color:#ff9999;font-weight:700;font-size:0.9rem;margin-bottom:6px;">🏫 Confucius Institutes</div>
-          <div style="color:#8a9aaa;font-size:0.84rem;">
-            Ontario maintained <strong style="color:#ffcc88">14 Confucius Institutes</strong> in universities 2013–2019
-            despite CSIS briefings warning of United Front Work Department involvement.
-            <br><a href="https://globalnews.ca/news/4639953/confucius-institutes-canada-csis/" target="_blank" rel="noopener" style="color:#00aaff;font-size:0.8rem;">Source: Global News</a>
-          </div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;">
-          <div style="color:#ff9999;font-weight:700;font-size:0.9rem;margin-bottom:6px;">📜 China Trade MOUs</div>
-          <div style="color:#8a9aaa;font-size:0.84rem;">
-            Signed multiple Memoranda of Understanding with Chinese provincial governments and
-            state-owned entities during 2016–2017 trade missions.
-            <br><a href="https://news.ontario.ca/" target="_blank" rel="noopener" style="color:#00aaff;font-size:0.8rem;">Source: Ontario Newsroom</a>
-          </div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;">
-          <div style="color:#ff9999;font-weight:700;font-size:0.9rem;margin-bottom:6px;">⚡ Hydro One Privatization</div>
-          <div style="color:#8a9aaa;font-size:0.84rem;">
-            Partial sell-off of Hydro One included exposure to Chinese state-adjacent investment
-            funds. Infrastructure sold for $9B with limited foreign ownership scrutiny.
-            <br><a href="https://nationalpost.com/news/canada/hydro-one" target="_blank" rel="noopener" style="color:#00aaff;font-size:0.8rem;">Source: National Post</a>
-          </div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;">
-          <div style="color:#ff9999;font-weight:700;font-size:0.9rem;margin-bottom:6px;">💰 Donor Patterns</div>
-          <div style="color:#8a9aaa;font-size:0.84rem;">
-            OLP received donations from individuals documented in media investigations as connected
-            to PRC-linked organizations and community networks.
-            <br><a href="https://ero.elections.on.ca/" target="_blank" rel="noopener" style="color:#00aaff;font-size:0.8rem;">Source: Elections Ontario (searchable)</a>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:14px;padding:10px;background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.25);border-radius:6px;font-size:0.82rem;color:#cc9900;">
-        ⚖️ Pattern analysis only. No criminal conduct is alleged. Wynne was not charged with any offence.
-        These are documented policy decisions from the public record.
-      </div>
-    </div>
+<h2>4. CASE STUDY: KEVIN VUONG</h2>
 
-    <!-- Stephen Harper dual-track -->
-    <div class="theory-card" style="margin-bottom:20px;border-radius:12px;padding:24px;border-color:rgba(150,100,255,0.4);">
-      <h3>🔗 Stephen Harper — DUAL Track (2006–2015)</h3>
-      <p>
-        The Harper government presents a unique pattern: <strong>CCP-aligned on trade/investment</strong>
-        while simultaneously <strong>Israel-aligned on foreign policy</strong> — the only documented case
-        of a Canadian leader showing strong statistical alignment with both foreign interests.
-      </p>
-      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div style="background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:8px;padding:14px;">
-          <div style="color:#ff8888;font-weight:700;font-size:0.9rem;margin-bottom:6px;">🇨🇳 CCP-Aligned Policies</div>
-          <ul style="color:#8a9aaa;font-size:0.83rem;padding-left:16px;line-height:1.8;">
-            <li>FIPA 2014 — gave Chinese SOEs 31-year legal rights over Canadian energy policy</li>
-            <li>CNOOC-Nexen approval ($15.1B Chinese state acquisition)</li>
-            <li>Delayed CSIS foreign interference reporting reforms</li>
-          </ul>
-        </div>
-        <div style="background:rgba(0,100,255,0.08);border:1px solid rgba(0,100,255,0.2);border-radius:8px;padding:14px;">
-          <div style="color:#88aaff;font-weight:700;font-size:0.9rem;margin-bottom:6px;">🇮🇱 Israel-Aligned Policies</div>
-          <ul style="color:#8a9aaa;font-size:0.83rem;padding-left:16px;line-height:1.8;">
-            <li>CIJA's most-endorsed PM — "no matter what" ally statement</li>
-            <li>Anti-BDS resolutions supported in Parliament</li>
-            <li>IHRA definition championed; UN settlement votes opposed</li>
-          </ul>
-        </div>
-      </div>
-      <p style="margin-top:12px;color:#8a9aaa;font-size:0.82rem;">
-        This dual-track pattern is consistent with the "split attention" hypothesis —
-        foreign influence from two state actors simultaneously occupying different policy domains.
-      </p>
-    </div>
+<div class="card">
+<p><strong>Independent MP, Spadina-Fort York (2021-2025)</strong> | Naval Reservist</p>
+<ul>
+<li>237 CCP mentions across 318 speeches (anti-CCP positioning)</li>
+<li>Concealed sexual assault charge from party and military (<a href="https://www.cbc.ca/news/politics/military-vuong-fined-500-1.6526128">fined $500</a>)</li>
+<li><strong>Only independent to vote against ceasefire</strong> (Vote #658)</li>
+<li>Called veteran Daniel Perry "domestic terrorist" on Twitter for questioning Israeli influence</li>
+<li>Pattern: loud anti-CCP, quiet pro-Israel. Anti-CCP may serve as cover.</li>
+</ul>
+</div>
 
-    <!-- Ontario Party comparison table -->
-    <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:20px;">
-      <h4 style="color:var(--cyan);margin-bottom:14px;">🏛️ Ontario Provincial Parties — Foreign Influence Pattern Summary</h4>
-      <div style="overflow-x:auto;">
-        <table class="data-table" style="width:100%;font-size:0.83rem;">
-          <thead>
-            <tr>
-              <th>Leader / Party</th>
-              <th>Era</th>
-              <th>CCP Alignment</th>
-              <th>Israel Alignment</th>
-              <th>Key Documented Pattern</th>
-              <th>Evidence Level</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Kathleen Wynne</strong><br><span style="color:#8a9aaa;font-size:0.78rem;">Ontario Liberal Party</span></td>
-              <td>2013–2018</td>
-              <td><span style="color:#ff6666;font-weight:700;">35%</span></td>
-              <td><span style="color:#666;">—</span></td>
-              <td>Confucius Institutes, China MOUs, Hydro One, donor patterns (OLP/PRC-linked)</td>
-              <td><span style="background:rgba(255,100,100,0.2);color:#ff9999;padding:2px 7px;border-radius:3px;font-size:0.78rem;">PUBLIC RECORD</span></td>
-            </tr>
-            <tr>
-              <td><strong>Doug Ford</strong><br><span style="color:#8a9aaa;font-size:0.78rem;">Ontario PC Party</span></td>
-              <td>2018–present</td>
-              <td><span style="color:#ff9966;font-weight:700;">15%</span></td>
-              <td><span style="color:#666;">—</span></td>
-              <td>Confucius Institutes continued in universities; Ontario China trade offices; Greenbelt foreign links</td>
-              <td><span style="background:rgba(255,170,0,0.2);color:#ffcc66;padding:2px 7px;border-radius:3px;font-size:0.78rem;">PARTIAL RECORD</span></td>
-            </tr>
-            <tr>
-              <td><strong>Andrea Horwath</strong><br><span style="color:#8a9aaa;font-size:0.78rem;">Ontario NDP</span></td>
-              <td>2009–2022</td>
-              <td><span style="color:#66cc66;font-weight:700;">0%</span></td>
-              <td><span style="color:#666;">—</span></td>
-              <td><em style="color:#66cc66;">Called for Confucius Institute review — documented opposition to CCP influence</em></td>
-              <td><span style="background:rgba(100,200,100,0.2);color:#88dd88;padding:2px 7px;border-radius:3px;font-size:0.78rem;">OPPOSED</span></td>
-            </tr>
-            <tr>
-              <td><strong>Derek Sloan</strong><br><span style="color:#8a9aaa;font-size:0.78rem;">Ontario Party</span></td>
-              <td>2022–present</td>
-              <td><span style="color:#ff9966;font-weight:700;">5%</span></td>
-              <td><span style="color:#ffcc66;font-weight:700;">30%</span></td>
-              <td>Anti-China rhetoric publicly; CIJA/social conservative donor overlap; anti-BDS; small party limited data</td>
-              <td><span style="background:rgba(255,170,0,0.2);color:#ffcc66;padding:2px 7px;border-radius:3px;font-size:0.78rem;">LIMITED DATA</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="margin-top:10px;font-size:0.78rem;color:#666;">
-        ⚖️ Scores are pattern analysis from public record — not legal findings. No criminal conduct alleged.
-      </div>
-    </div>
+<h2>5. THREE-STATE COMPETITION</h2>
 
-    <!-- Ontario Lobby Registry note -->
-    <div style="background:rgba(0,170,255,0.05);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:16px;">
-      <h4 style="color:var(--cyan);margin-bottom:10px;">📋 Ontario Lobby Registry — Search Links</h4>
-      <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:12px;">
-        Ontario's lobbying registry is publicly searchable. Search these entities to verify
-        foreign-linked lobbying at Queen's Park:
-      </p>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        <a href="https://lobbyist.oico.on.ca/Pages/Public/PublicSearch/PublicSearch.aspx" target="_blank" rel="noopener" style="background:rgba(0,170,255,0.12);border:1px solid rgba(0,170,255,0.3);color:#00aaff;padding:5px 12px;border-radius:4px;font-size:0.82rem;text-decoration:none;">Ontario Lobby Registry ↗</a>
-        <a href="https://ero.elections.on.ca/en/political-financing" target="_blank" rel="noopener" style="background:rgba(0,170,255,0.12);border:1px solid rgba(0,170,255,0.3);color:#00aaff;padding:5px 12px;border-radius:4px;font-size:0.82rem;text-decoration:none;">Elections Ontario Donations ↗</a>
-        <a href="https://www.ola.org/en/legislative-business/hansard" target="_blank" rel="noopener" style="background:rgba(0,170,255,0.12);border:1px solid rgba(0,170,255,0.3);color:#00aaff;padding:5px 12px;border-radius:4px;font-size:0.82rem;text-decoration:none;">Ontario Hansard ↗</a>
-      </div>
-    </div>
-  </div>
+<div class="card">
+<table>
+<tr><th>State</th><th>Primary Mechanism</th><th>Key Evidence</th></tr>
+<tr><td><strong>Israel</strong></td><td>CIJA lobby + CPC bloc + Postmedia</td><td>579 lobby instances, $678K trips, Vote 658, JNS syndication</td></tr>
+<tr><td><strong>China</strong></td><td>Cabinet absence + Senate ISG bloc</td><td>Woo led genocide defeat, CCP praised senators, NSICOP findings</td></tr>
+<tr><td><strong>India</strong></td><td>MP-level intelligence sharing</td><td>NSICOP: MPs provided confidential info to Indian officials, Nijjar assassination</td></tr>
+</table>
+<p>Common pattern: identify sympathetic MPs, provide support/access, extract votes and intelligence, use identity politics to deflect criticism.</p>
+</div>
 
-  <!-- Sources -->
-  <div class="section">
-    <div class="section-title">Primary Sources</div>
-    <ul class="sources-list">
-      <li>🏛️ <a href="https://openparliament.ca/votes/" target="_blank" rel="noopener">openparliament.ca</a> — House of Commons votes and Hansard debates (public API)</li>
-      <li>🔍 <a href="https://foreigninterferencecommission.ca/" target="_blank" rel="noopener">foreigninterferencecommission.ca</a> — Hogue Commission public findings (2024)</li>
-      <li>📋 <a href="https://lobbycanada.gc.ca/" target="_blank" rel="noopener">lobbycanada.gc.ca</a> — Office of the Commissioner of Lobbying of Canada</li>
-      <li>🗳️ <a href="https://www.elections.ca/" target="_blank" rel="noopener">elections.ca</a> — Elections Canada financial returns and donor records</li>
-      <li>📜 <a href="https://www.ourcommons.ca/en/parliamentary-business/house-publications" target="_blank" rel="noopener">ourcommons.ca</a> — House of Commons Hansard official record</li>
-      <li>🔒 <a href="https://www.canada.ca/en/national-security-intelligence-committee-parliamentarians.html" target="_blank" rel="noopener">NSICOP reports</a> — National Security and Intelligence Committee of Parliamentarians</li>
-      <li>🏛️ <a href="https://www.ola.org/en/legislative-business/hansard" target="_blank" rel="noopener">Ontario Hansard (ola.org)</a> — Ontario Legislature debates</li>
-      <li>📋 <a href="https://lobbyist.oico.on.ca/" target="_blank" rel="noopener">Ontario Lobby Registry</a> — Ontario Integrity Commissioner lobbyist filings</li>
-      <li>🗳️ <a href="https://ero.elections.on.ca/" target="_blank" rel="noopener">Elections Ontario</a> — Ontario campaign finance and donor records</li>
-    </ul>
-  </div>
+<h2>6. METHODOLOGY</h2>
+<div class="card">
+<p>Data sources (all public):</p>
+<ul>
+<li><a href="https://api.openparliament.ca/">Open Parliament API</a> — 7,959 speeches</li>
+<li><a href="https://www.ourcommons.ca/members/en/votes">House of Commons Votes</a></li>
+<li><a href="https://sencanada.ca/en/in-the-chamber/votes/">Senate Votes</a></li>
+<li><a href="https://lobbycanada.gc.ca">Lobbyist Registry</a></li>
+<li><a href="https://www.nsicop-cpsnr.ca">NSICOP Reports</a></li>
+<li><a href="https://trackcija.com/">Track CIJA</a></li>
+</ul>
+<p>Keyword frequency does not prove influence. It identifies patterns for investigation. Sentiment analysis distinguishes criticism from support.</p>
+</div>
 
-  <!-- Run scan prompt -->
-  <div class="section">
-    <div class="methodology" style="text-align:center;padding:30px;">
-      <h4 style="margin-bottom:10px;">🔄 FIIS Live Data</h4>
-      <p>This page loads live data from the TENET5 FIIS engine when available.<br>
-      Data is sourced from government APIs and updated on demand.</p>
-      <p style="margin-top:10px;color:#6a8a9a;font-size:0.85rem;">
-        TENET5 FIIS v1.0 | SYSTEM_SEED=118400 | Data: openparliament.ca + Hogue Commission
-      </p>
-    </div>
-  </div>
-
-</div><!-- /container -->
-
-<script>
-const API = 'http://127.0.0.1:8520';
-let _scores = [];
-let _currentSort = 'all';
-
-async function loadFIISData() {
-  try {
-    const r = await fetch(`${API}/api/fiis/status`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
-
-    if (data.status === 'no_data') {
-      document.getElementById('scores-container').innerHTML =
-        `<div class="error-box">No FIIS scan data yet. Run the scan from the TENET5 Aurora dashboard, or use:<br>
-        <code style="font-family:monospace;color:#00aaff">python -m tools.fiis.run_fiis --quick</code></div>`;
-      return;
-    }
-
-    // Update hypothesis bars
-    const hyp = data.hypothesis || {};
-
-    const israelTheory = hyp.israel_conservative_theory || {};
-    const cpcIsrael = israelTheory.cpc_avg_israel_pct || 0;
-    const libIsrael = israelTheory.lib_avg_israel_pct || 0;
-    const israelDiff = cpcIsrael - libIsrael;
-    animateBar('israel-bar', Math.min(cpcIsrael, 100));
-    document.getElementById('israel-label').textContent =
-      `CPC avg ${cpcIsrael?.toFixed(1) ?? '?'}% vs Lib avg ${libIsrael?.toFixed(1) ?? '?'}%`;
-    setSupport('israel-support', israelTheory.support || '');
-
-    const ccpTheory = hyp.ccp_liberal_theory || {};
-    const libCCP = ccpTheory.lib_avg_ccp_pct || 0;
-    const cpcCCP = ccpTheory.cpc_avg_ccp_pct || 0;
-    animateBar('ccp-bar', Math.min(libCCP, 100));
-    document.getElementById('ccp-label').textContent =
-      `Lib avg ${libCCP?.toFixed(1) ?? '?'}% vs CPC avg ${cpcCCP?.toFixed(1) ?? '?'}%`;
-    setSupport('ccp-support', ccpTheory.support || '');
-
-    // Badge
-    const badge = document.getElementById('scores-badge');
-    const updated = data.generated ? new Date(data.generated).toLocaleDateString('en-CA') : 'unknown';
-    badge.textContent = `${data.total_mps || 0} MPs — ${updated}`;
-
-    // Combine top lists
-    const combined = {};
-    (data.top_ccp || []).forEach(mp => {
-      if (!combined[mp.name]) combined[mp.name] = {...mp, ccp_pct: 0, israel_pct: 0};
-      combined[mp.name].ccp_pct = mp.ccp_pct || 0;
-    });
-    (data.top_israel || []).forEach(mp => {
-      if (!combined[mp.name]) combined[mp.name] = {...mp, ccp_pct: 0, israel_pct: 0};
-      combined[mp.name].israel_pct = mp.israel_pct || 0;
-    });
-    _scores = Object.values(combined);
-    renderTable(_scores, _currentSort);
-
-  } catch(e) {
-    document.getElementById('scores-container').innerHTML =
-      `<div class="error-box">Could not connect to TENET5 Aurora API (${API}).<br>
-      This page shows live data when the Aurora dashboard is running locally.<br>
-      <span style="color:#6a8a9a;font-size:0.85rem">Error: ${e.message}</span></div>`;
-    // Still show static Hogue data which is already in the HTML
-  }
-}
-
-function animateBar(id, pct) {
-  setTimeout(() => {
-    const el = document.getElementById(id);
-    if (el) el.style.width = Math.min(Math.max(pct, 2), 100) + '%';
-  }, 300);
-}
-
-function setSupport(id, text) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (text.includes('STRONG')) {
-    el.className = 'support-chip support-strong';
-    el.textContent = '✅ ' + text;
-  } else if (text.includes('MODERATE')) {
-    el.className = 'support-chip support-moderate';
-    el.textContent = '⚠️ ' + text;
-  } else {
-    el.className = 'support-chip support-weak';
-    el.textContent = '❓ ' + text;
-  }
-}
-
-function filterScores(sort) {
-  _currentSort = sort;
-  renderTable(_scores, sort);
-}
-
-function partyClass(party) {
-  if (!party) return '';
-  if (party.includes('Conservative') || party === 'CPC') return 'party-CPC';
-  if (party.includes('Liberal') || party === 'Lib') return 'party-Lib';
-  if (party.includes('NDP')) return 'party-NDP';
-  if (party.includes('Bloc') || party === 'BQ') return 'party-BQ';
-  if (party.includes('Green')) return 'party-Green';
-  return '';
-}
-
-function pctClass(pct) {
-  if (pct >= 50) return 'pct-high';
-  if (pct >= 25) return 'pct-mid';
-  return 'pct-low';
-}
-
-function renderTable(scores, sort) {
-  const container = document.getElementById('scores-container');
-  if (!scores || scores.length === 0) {
-    container.innerHTML = '<div class="loading">No score data available yet.</div>';
-    return;
-  }
-
-  let sorted = [...scores];
-  if (sort === 'ccp') sorted.sort((a,b) => (b.ccp_pct||0) - (a.ccp_pct||0));
-  else if (sort === 'israel') sorted.sort((a,b) => (b.israel_pct||0) - (a.israel_pct||0));
-  else sorted.sort((a,b) => Math.max(b.ccp_pct||0, b.israel_pct||0) - Math.max(a.ccp_pct||0, a.israel_pct||0));
-
-  const rows = sorted.map(mp => {
-    const ccp = (mp.ccp_pct || 0).toFixed(1);
-    const isr = (mp.israel_pct || 0).toFixed(1);
-    const pc = partyClass(mp.party);
-    return `<tr>
-      <td>${mp.name || '—'}</td>
-      <td><span class="party-chip ${pc}">${mp.party || '?'}</span></td>
-      <td>${mp.riding || '—'}</td>
-      <td class="pct-cell ${pctClass(mp.ccp_pct||0)}">${ccp}%</td>
-      <td class="pct-cell ${pctClass(mp.israel_pct||0)}">${isr}%</td>
-      <td style="color:#6a8a9a;font-size:0.8rem">${mp.votes_analyzed || '?'}</td>
-    </tr>`;
-  }).join('');
-
-  container.innerHTML = `<table class="data-table">
-    <thead><tr>
-      <th>MP</th><th>Party</th><th>Riding</th>
-      <th>🇨🇳 CCP Alignment</th><th>🇮🇱 Israel Alignment</th><th>Votes</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
-  <p style="color:#6a8a9a;font-size:0.78rem;margin-top:10px;text-align:right">
-    Source: openparliament.ca | Methodology: composite voting + Hansard + Hogue Commission
-  </p>`;
-}
-
-async function loadOntarioData() {
-  try {
-    const r = await fetch(`${API}/api/fiis/ontario`);
-    if (!r.ok) return;
-    const data = await r.json();
-    if (data.status !== 'ok') return;
-
-    // Update Wynne confidence bar if present
-    const politicians = data.politicians || [];
-    const wynne = politicians.find(p => p.slug === 'kathleen-wynne');
-    if (wynne) {
-      const bar = document.getElementById('wynne-bar');
-      const label = document.getElementById('wynne-label');
-      if (bar) { setTimeout(() => bar.style.width = wynne.confidence_pct + '%', 400); }
-      if (label) label.textContent = `${wynne.confidence_pct}% — ${wynne.documented_concerns.length} documented concerns`;
-    }
-
-    // Inject politician cards dynamically if API has fresher data
-    const container = document.getElementById('ontario-politicians');
-    if (container && politicians.length) {
-      const high = politicians.filter(p => p.confidence_pct >= 15);
-      container.innerHTML = high.map(p => {
-        const interestColor = p.interest === 'CCP' ? '#ff6666' : p.interest === 'Israel' ? '#66aaff' : '#ffaa66';
-        const concerns = (p.documented_concerns || []).slice(0, 3).map(c =>
-          `<li style="color:#8a9aaa;font-size:0.83rem;">${c}</li>`).join('');
-        return `<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;border:1px solid rgba(255,255,255,0.06);">
-          <div style="font-weight:700;color:#fff;margin-bottom:4px;">${p.name}</div>
-          <div style="font-size:0.8rem;color:#6a8a9a;margin-bottom:8px;">${p.party} — ${p.role}</div>
-          <div style="color:${interestColor};font-weight:700;font-size:0.88rem;margin-bottom:6px;">${p.interest || '—'} alignment: ${p.confidence_pct}%</div>
-          <div class="confidence-bar"><div class="confidence-fill ${(p.interest||'').toLowerCase()}" style="width:${p.confidence_pct}%"></div></div>
-          <ul style="margin-top:8px;padding-left:16px;">${concerns}</ul>
-        </div>`;
-      }).join('');
-    }
-  } catch(e) {
-    // Silent — Ontario section has static fallback content
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadFIISData();
-  loadOntarioData();
-});
-</script>
+<p style="margin-top:30px;font-size:0.7rem;color:#334;text-align:center">
+Investigation by Daniel Perry | Data analysis by LIRIL/TENET5 | All sources public record<br>
+Last updated: April 3, 2026
+</p>
+</div>
 </body>
 </html>
