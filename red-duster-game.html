@@ -3,170 +3,466 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Red Duster — Anti-Communist Training Simulator | TENET5</title>
-  <meta name="description" content="Red Duster: Co-op tactical survival FPS. FarCry + DayZ + Squad realism in your browser. No install. Canadian veterans defend the wilderness against communist occupation.">
+  <meta name="description" content="Red Duster — Open World Survival in Communist-Occupied Canada. Hunt. Craft. Fight back.">
+  <title>Red Duster</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #050505; color: #fff;
-      font-family: 'Rajdhani', sans-serif;
-      min-height: 100vh; overflow-x: hidden;
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    canvas#gameCanvas { width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+    /* ── Main Menu ── */
+    #mainMenu {
+      position: fixed; inset: 0; z-index: 200;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0505 50%, #0a0a0a 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
     }
-    .bg {
-      position: fixed; inset: 0;
-      background: radial-gradient(circle at 60% 40%, rgba(60,0,0,0.7) 0%, #050505 75%);
-      z-index: 0;
+    .menu-container {
+      text-align: center; max-width: 600px; padding: 2rem;
     }
-    .scanlines {
-      position: fixed; inset: 0; z-index: 1; pointer-events: none;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+    .menu-title {
+      font-family: 'Black Ops One', system-ui; font-size: 5rem; color: #cc2200;
+      text-shadow: 0 0 40px rgba(200,30,0,0.4), 0 4px 8px rgba(0,0,0,0.8);
+      letter-spacing: 4px; line-height: 1;
     }
-    .content { position: relative; z-index: 10; max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
-
-    /* Header */
-    .header { border-bottom: 2px solid #330000; padding-bottom: 2rem; margin-bottom: 3rem; }
-    .studio { font-size: 0.8rem; letter-spacing: 0.4em; color: #cc4444; margin-bottom: 0.5rem; text-transform: uppercase; }
-    h1 {
-      font-family: 'Black Ops One', system-ui;
-      font-size: clamp(3rem, 8vw, 6rem);
-      color: #ff2222;
-      text-shadow: 0 0 30px rgba(255,0,0,0.4), 0 2px 0 #440000;
-      letter-spacing: 2px; line-height: 1;
+    .menu-subtitle {
+      font-size: 1.1rem; color: #886644; letter-spacing: 0.4em;
+      font-weight: 600; margin: 0.5rem 0 2rem; text-transform: uppercase;
     }
-    .tagline { font-size: 1.2rem; color: #cc8855; letter-spacing: 0.2em; margin-top: 0.5rem; font-weight: 600; }
-
-    /* Play section */
-    .play-section { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 3rem; }
-    .play-main { flex: 1; min-width: 280px; }
-    .play-btn {
-      display: inline-block;
-      background: #cc0000; color: #fff;
-      font-family: 'Black Ops One', system-ui;
-      font-size: 1.6rem; letter-spacing: 3px;
-      padding: 1.1rem 3rem; text-decoration: none;
-      border: none; cursor: pointer;
-      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-      transition: background 0.15s, box-shadow 0.15s;
-      box-shadow: 0 0 20px rgba(200,0,0,0.4);
-      text-transform: uppercase;
+    .menu-tagline {
+      font-size: 0.95rem; color: #998877; margin-bottom: 2.5rem;
+      line-height: 1.6; max-width: 480px; margin-left: auto; margin-right: auto;
     }
-    .play-btn:hover { background: #ff0000; box-shadow: 0 0 40px rgba(255,0,0,0.7); }
-
-    .play-sub { margin-top: 1rem; font-size: 0.9rem; color: #667; letter-spacing: 0.1em; }
-    .play-sub span { color: #44aa44; }
-
-    /* Feature grid */
-    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-    .feat {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,0,0,0.15);
-      padding: 1.4rem; border-left: 3px solid #cc0000;
+    .menu-btn {
+      display: block; width: 100%; max-width: 360px; margin: 0.8rem auto;
+      background: transparent; border: 1px solid #cc2200; color: #fff;
+      padding: 1rem 2rem; font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .feat-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
-    .feat h3 { font-size: 1rem; letter-spacing: 0.15em; color: #ff8888; margin-bottom: 0.4rem; text-transform: uppercase; }
-    .feat p { font-size: 0.85rem; color: #999; line-height: 1.5; }
-
-    /* Specs */
-    .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
-    .spec { text-align: center; padding: 1rem; background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.1); }
-    .spec-val { font-family: 'Black Ops One'; font-size: 2rem; color: #ff3333; }
-    .spec-label { font-size: 0.75rem; color: #666; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 0.3rem; }
-
-    /* Controls */
-    .controls-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 3rem; }
-    .controls-table th { text-align: left; padding: 0.6rem 1rem; background: rgba(255,0,0,0.1); color: #ff4444; letter-spacing: 0.15em; text-transform: uppercase; }
-    .controls-table td { padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #aaa; }
-    .controls-table td:first-child { color: #ffcc44; font-family: monospace; font-size: 1rem; }
-
-    /* Footer */
-    footer { border-top: 1px solid #1a0000; padding-top: 2rem; font-size: 0.8rem; color: #444; letter-spacing: 0.1em; }
-    footer a { color: #cc3333; text-decoration: none; }
+    .menu-btn:hover {
+      background: rgba(200,30,0,0.15); border-color: #ff4422;
+      box-shadow: 0 0 20px rgba(200,30,0,0.3);
+      transform: translateY(-1px);
+    }
+    .menu-version {
+      margin-top: 2rem; font-size: 0.75rem; color: #444;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* ── Loading Overlay ── */
+    #loadingOverlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: #0a0a0a; display: none;
+      align-items: center; justify-content: center; flex-direction: column;
+      font-family: 'Rajdhani', sans-serif; color: #cc8855;
+    }
+    #loadingOverlay .loading-text { font-size: 1.4rem; letter-spacing: 0.2em; }
+    #loadingOverlay .loading-bar-bg {
+      width: 300px; height: 4px; background: #222; margin-top: 1.5rem; border-radius: 2px;
+    }
+    #loadingOverlay .loading-bar {
+      height: 100%; width: 0%; background: #cc2200; border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    /* ── HUD ── */
+    #hud {
+      position: fixed; inset: 0; z-index: 100; pointer-events: none;
+      font-family: 'JetBrains Mono', monospace; display: none;
+    }
+    /* Crosshair */
+    .crosshair {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 2px; height: 2px; background: rgba(255,255,255,0.7);
+      box-shadow: 0 -8px 0 rgba(255,255,255,0.5), 0 8px 0 rgba(255,255,255,0.5),
+                  -8px 0 0 rgba(255,255,255,0.5), 8px 0 0 rgba(255,255,255,0.5);
+    }
+    /* Bottom-left survival bars */
+    .survival-panel {
+      position: absolute; bottom: 20px; left: 20px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .surv-row { display: flex; align-items: center; gap: 8px; }
+    .surv-label { font-size: 0.65rem; color: #888; width: 42px; text-align: right; }
+    .surv-bar-bg { width: 120px; height: 5px; background: #1a1a1a; border-radius: 2px; }
+    .surv-bar { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+    .surv-val { font-size: 0.6rem; color: #666; width: 36px; }
+    /* Bottom-right weapon info */
+    .weapon-panel {
+      position: absolute; bottom: 20px; right: 20px; text-align: right;
+    }
+    .wpn-name { font-size: 0.75rem; color: #666; letter-spacing: 0.2em; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+    .wpn-ammo { font-size: 2.4rem; color: #fff; font-weight: 700; font-family: 'Rajdhani', sans-serif; line-height: 1; text-shadow: 0 0 20px rgba(255,200,0,0.3); }
+    .wpn-ammo-reserve { font-size: 0.85rem; color: #555; font-family: 'Rajdhani', sans-serif; }
+    /* Top-right compass + time */
+    .info-panel {
+      position: absolute; top: 16px; right: 20px;
+      font-size: 0.7rem; color: #666; text-align: right;
+    }
+    /* Top-left zone/status */
+    .status-panel {
+      position: absolute; top: 16px; left: 20px;
+      font-size: 0.7rem; color: #887744; font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    }
+    .status-kills { font-size: 1.1rem; color: #cc3333; font-weight: 700; letter-spacing: 0.1em; }
+    /* Interaction prompt */
+    .interact-prompt {
+      position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
+      font-size: 0.85rem; color: #cc8855; letter-spacing: 0.1em; display: none;
+    }
+    /* Damage flash */
+    .damage-flash {
+      position: fixed; inset: 0; background: radial-gradient(ellipse, transparent 40%, rgba(180,0,0,0.4) 100%);
+      pointer-events: none; opacity: 0; transition: opacity 0.1s;
+    }
+    /* ── Death Screen ── */
+    #deathScreen {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0); backdrop-filter: blur(0px);
+      align-items: center; justify-content: center; flex-direction: column;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
+      transition: background 1.2s ease, backdrop-filter 1.2s ease;
+    }
+    #deathScreen.visible {
+      background: rgba(10,0,0,0.88); backdrop-filter: blur(6px);
+    }
+    .death-title {
+      font-family: 'Black Ops One', system-ui; font-size: 4rem; color: #cc2200;
+      text-shadow: 0 0 60px rgba(200,0,0,0.6); letter-spacing: 4px;
+      opacity: 0; transform: translateY(-20px);
+      transition: opacity 0.8s ease 0.4s, transform 0.8s ease 0.4s;
+    }
+    #deathScreen.visible .death-title { opacity: 1; transform: translateY(0); }
+    .death-stats {
+      margin: 1.5rem 0; font-size: 1.1rem; color: #888; text-align: center;
+      line-height: 2; letter-spacing: 0.1em;
+      opacity: 0; transition: opacity 0.6s ease 0.9s;
+    }
+    #deathScreen.visible .death-stats { opacity: 1; }
+    .death-stat-val { color: #fff; font-weight: 700; font-size: 1.3rem; }
+    .death-btn {
+      display: block; width: 280px; margin: 0.5rem auto;
+      background: transparent; border: 1px solid #cc2200; color: #fff;
+      padding: 0.85rem 2rem; font-family: 'Rajdhani', sans-serif;
+      font-size: 1.2rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s; opacity: 0; transition: opacity 0.6s ease 1.2s, background 0.2s, box-shadow 0.2s;
+    }
+    #deathScreen.visible .death-btn { opacity: 1; }
+    .death-btn:hover { background: rgba(200,30,0,0.2); box-shadow: 0 0 20px rgba(200,30,0,0.3); }
+    /* ── Settings / Pause overlay ── */
+    #settingsOverlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
+    }
+    #settingsOverlay.open { display: flex; }
+    .settings-box {
+      background: #0d0d0d; border: 1px solid #cc2200;
+      padding: 2.2rem 2.8rem; min-width: 380px; max-width: 460px;
+      box-shadow: 0 0 40px rgba(200,30,0,0.25);
+    }
+    .settings-title {
+      font-family: 'Black Ops One', system-ui; font-size: 1.6rem;
+      color: #cc2200; letter-spacing: 3px; margin-bottom: 1.6rem;
+      text-align: center;
+    }
+    .settings-row {
+      display: flex; align-items: center; margin-bottom: 1.1rem;
+      gap: 0.8rem;
+    }
+    .settings-label {
+      flex: 0 0 130px; font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: #aaa;
+    }
+    .settings-row input[type=range] {
+      flex: 1; accent-color: #cc2200; cursor: pointer;
+    }
+    .settings-row input[type=checkbox] {
+      width: 18px; height: 18px; accent-color: #cc2200; cursor: pointer;
+    }
+    .settings-val {
+      flex: 0 0 40px; text-align: right; font-size: 0.82rem; color: #cc8866;
+    }
+    .settings-divider {
+      border: none; border-top: 1px solid #2a2a2a; margin: 1.2rem 0;
+    }
+    .settings-close-btn {
+      display: block; width: 100%; margin-top: 1.4rem;
+      background: transparent; border: 1px solid #cc2200; color: #fff;
+      padding: 0.7rem 1rem; font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .settings-close-btn:hover { background: rgba(200,30,0,0.2); }
   </style>
+  <script type="module" crossorigin src="/reduster/assets/index-C1362462.js"></script>
+  <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-core-BQ3_Mr3s.js">
+  <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-loaders-D8XtkAnA.js">
 </head>
 <body>
-  <nav id="site-nav"></nav>
-  <div class="bg"></div>
-  <div class="scanlines"></div>
-  <div class="content">
+  <canvas id="gameCanvas"></canvas>
 
-    <div class="header">
-      <div class="studio">TENET5 · Canadian Forces Veteran Project</div>
-      <h1>RED DUSTER</h1>
-      <div class="tagline">ANTI-COMMUNIST TRAINING SIMULATOR</div>
-    </div>
-
-    <div class="play-section">
-      <div class="play-main">
-        <a class="play-btn" href="./reduster/index.html" target="_blank">▶ PLAY NOW — FREE</a>
-        <div class="play-sub">
-          Browser-native · No download · No install<br>
-          <span>✓ Works in Chrome / Edge / Firefox</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="features">
-      <div class="feat">
-        <div class="feat-icon">🍁</div>
-        <h3>Open World</h3>
-        <p>10 km² procedural Canadian wilderness. Boreal forest, frozen lakes, mountain passes, small towns under occupation.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🎯</div>
-        <h3>Squad Realism</h3>
-        <p>Canadian Forces weapons: C7A2, C8 Carbine, C6 GPMG, C14 Timberwolf. Realistic ballistics, suppression, injury system.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🤝</div>
-        <h3>Co-op Multiplayer</h3>
-        <p>Up to 8 players. P2P — no server needed. Squad roles: Rifleman, Medic, Engineer, Marksman, Anti-Armour.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🏕</div>
-        <h3>DayZ Survival</h3>
-        <p>Hunger, thirst, hypothermia, arterial bleeding. Death has weight. Loot scarcity. Base building and sleeping bags.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🏴</div>
-        <h3>Liberation System</h3>
-        <p>FarCry-style: capture outposts, raise the Red Ensign, push The Collective back. Every objective frees more of Canada.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🌩</div>
-        <h3>Dynamic World</h3>
-        <p>Day/night cycle. Weather: blizzard, fog, rain. Night vision. Avro Arrow airstrike. Communist drones and armoured vehicles.</p>
-      </div>
-    </div>
-
-    <div class="specs-grid">
-      <div class="spec"><div class="spec-val">8</div><div class="spec-label">Max Players</div></div>
-      <div class="spec"><div class="spec-val">10km²</div><div class="spec-label">Map Size</div></div>
-      <div class="spec"><div class="spec-val">7</div><div class="spec-label">Weapons</div></div>
-      <div class="spec"><div class="spec-val">FREE</div><div class="spec-label">No Install</div></div>
-    </div>
-
-    <table class="controls-table">
-      <thead><tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr><td>WASD</td><td>Move</td><td>SHIFT</td><td>Sprint</td></tr>
-        <tr><td>MOUSE</td><td>Aim</td><td>R</td><td>Reload</td></tr>
-        <tr><td>LMB</td><td>Fire</td><td>F</td><td>Interact / Loot</td></tr>
-        <tr><td>RMB</td><td>Aim Down Sights</td><td>1-7</td><td>Switch Weapons</td></tr>
-        <tr><td>B</td><td>Place Campfire</td><td>M</td><td>Full Map</td></tr>
-        <tr><td>TAB</td><td>Inventory</td><td>ESC</td><td>Pause</td></tr>
-      </tbody>
-    </table>
-
-    <footer>
-      <p>Red Duster is built by a Canadian Forces veteran. All weapon designations are Canadian Armed Forces nomenclature.
-      &nbsp;·&nbsp; <a href="https://github.com/TENET-5/reduster" target="_blank">Source on GitHub</a>
-      &nbsp;·&nbsp; <a href="/">← TENET5 Main Site</a>
+  <!-- Main Menu -->
+  <div id="mainMenu">
+    <div class="menu-container">
+      <h1 class="menu-title">RED DUSTER</h1>
+      <h2 class="menu-subtitle">Occupied Canada</h2>
+      <p class="menu-tagline">
+        The communists have seized power. Supply routes cut. Death squads patrol the highways.
+        You are alone in the Canadian wilderness. Hunt. Fish. Scavenge. Build weapons. Fight back.
       </p>
-    </footer>
-
+      <button id="btnSurvive" class="menu-btn">SURVIVE</button>
+      <button id="btnHost" class="menu-btn">HOST SERVER</button>
+      <button id="btnJoin" class="menu-btn">JOIN SERVER</button>
+      <div class="menu-version">RED DUSTER v2.0 // BABYLON.JS 9 // TENET-5</div>
+    </div>
   </div>
-<script src="nav.js?v=5"></script>
+
+  <!-- Loading -->
+  <div id="loadingOverlay">
+    <div class="loading-text">DEPLOYING...</div>
+    <div class="loading-bar-bg"><div class="loading-bar" id="loadBar"></div></div>
+    <div id="loadingTip" style="margin-top:15px;font-size:0.75rem;color:#556;font-style:italic;max-width:400px;text-align:center"></div>
+  </div>
+  <script>
+  (function(){
+    const tips = [
+      'Press H for controls reference',
+      'RMB to aim down sights — reduces recoil by 55%',
+      'Place a campfire (B) to warm up and recover fatigue',
+      'Loot cabins for food, water, and medical supplies (F)',
+      'Night vision goggles (N) — essential after dark',
+      'Vehicles (E) — drive between locations faster',
+      'Check objectives (J) for mission rewards',
+      'Grenades (G) are lethal within 8 metres — watch your distance',
+      'The minimap (M) shows nearby enemies as red dots',
+      'Sprint (SHIFT) drains stamina — manage it carefully',
+      'Crouch (C) reduces detection range from enemies',
+      'Hypothermia kills — stay near campfires at night',
+    ];
+    const el = document.getElementById('loadingTip');
+    if(el) { let i=0; el.textContent=tips[0]; setInterval(()=>{i=(i+1)%tips.length;el.textContent=tips[i];},3000); }
+  })();
+  </script>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="crosshair"></div>
+
+    <div class="survival-panel">
+      <div class="surv-row">
+        <span class="surv-label">HP</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barHP" style="width:100%;background:#cc2200;"></div></div>
+        <span class="surv-val" id="valHP">100</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">FOOD</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barFood" style="width:100%;background:#cc8800;"></div></div>
+        <span class="surv-val" id="valFood">100</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">H2O</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barWater" style="width:100%;background:#2288cc;"></div></div>
+        <span class="surv-val" id="valWater">100</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">TEMP</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barTemp" style="width:60%;background:#22aa44;"></div></div>
+        <span class="surv-val" id="valTemp">+5C</span>
+      </div>
+      <div class="surv-row">
+        <span class="surv-label">STAM</span>
+        <div class="surv-bar-bg"><div class="surv-bar" id="barStamina" style="width:100%;background:#dddddd;"></div></div>
+        <span class="surv-val" id="valStamina">100</span>
+      </div>
+    </div>
+
+    <div class="weapon-panel">
+      <div class="wpn-name" id="wpnName">C7A2</div>
+      <div class="wpn-ammo"><span id="wpnAmmo">30</span></div>
+      <div class="wpn-ammo-reserve"><span id="wpnReserve">120</span> reserve</div>
+      <div class="wpn-ammo-reserve" style="margin-top:4px;color:#ff6644"><span id="grenadeCount">3</span> frags [G]</div>
+    </div>
+    <div id="vehicleHUD" style="display:none;position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);border:1px solid #ff4422;border-radius:6px;padding:8px 20px;color:#fff;font-family:monospace;font-size:0.9rem;z-index:800"></div>
+
+    <div class="info-panel">
+      <div id="timeDisplay">12:00</div>
+      <div id="compassDisplay">N</div>
+    </div>
+
+    <div class="status-panel">
+      <div id="zoneDisplay">CANADIAN WILDERNESS</div>
+      <div class="status-kills">☠ <span id="killDisplay">0</span> KILLS</div>
+    </div>
+
+    <div class="interact-prompt" id="interactPrompt">[F] INTERACT</div>
+    <div id="killFeed" style="position:fixed;top:60px;left:12px;width:320px;pointer-events:none;font-family:'Rajdhani',sans-serif;font-size:12px;"></div>
+    <div id="hudMsg" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);color:#ffcc44;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.1em;text-align:center;pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,0.8);"></div>
+    <div class="damage-flash" id="damageFlash"></div>
+    <div id="reloadBar" style="position:fixed;bottom:52px;left:50%;transform:translateX(-50%);width:160px;height:4px;background:rgba(0,0,0,0.5);border:1px solid #555;display:none;border-radius:2px;">
+      <div id="reloadFill" style="height:100%;width:0%;background:#f0a500;border-radius:2px;transition:width 0.05s linear;"></div>
+    </div>
+    <!-- Hit marker (crosshair flash on hit) -->
+    <div id="hitMarker" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;color:#ff3333;display:none;pointer-events:none;text-shadow:0 0 6px rgba(0,0,0,0.9);"></div>
+    <!-- Weapon name toast -->
+    <div id="weaponName" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%);color:#ddbb88;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;display:none;pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,0.9);transition:opacity 0.3s;"></div>
+    <!-- Low-health vignette pulse -->
+    <div id="lowHealthPulse" style="position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 60%,rgba(180,0,0,0.55) 100%);opacity:0;transition:opacity 0.2s;"></div>
+    <!-- Bleed indicator -->
+    <div id="bleedIndicator" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;background:#cc0000;border-radius:50%;opacity:0;pointer-events:none;box-shadow:0 0 8px #ff0000;"></div>
+    <!-- Sleep veil -->
+    <div id="sleepVeil" style="position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:900;transition:opacity 0.8s;"></div>
+    <div style="position:fixed;bottom:12px;left:12px;font-size:10px;color:#555;font-family:'Rajdhani',sans-serif;letter-spacing:0.05em;">
+      WASD move &bull; SHIFT sprint &bull; C crouch &bull; F interact &bull; R reload &bull; Q melee &bull; 1-7 weapons &bull; ESC settings
+    </div>
+  </div>
+
+  <!-- Death Screen -->
+  <div id="deathScreen" style="display:none;">
+    <div class="death-title">YOU DIED</div>
+    <div class="death-stats">
+      KILLS &nbsp;<span class="death-stat-val" id="deathKills">0</span><br>
+      SURVIVED &nbsp;<span class="death-stat-val" id="deathTime">0:00</span><br>
+      CAUSE &nbsp;<span class="death-stat-val" id="deathCause">UNKNOWN</span>
+    </div>
+    <button class="death-btn" id="btnRespawn">RESPAWN</button>
+    <button class="death-btn" id="btnDeathMenu" style="border-color:#555;color:#888;">MAIN MENU</button>
+  </div>
+
+  <!-- Settings / Pause Overlay (Esc) -->
+  <div id="settingsOverlay">
+    <div class="settings-box">
+      <div class="settings-title">⚙ SETTINGS</div>
+
+      <div class="settings-row">
+        <span class="settings-label">Master Volume</span>
+        <input type="range" id="setVolume" min="0" max="100" value="80">
+        <span class="settings-val" id="setVolumeVal">80</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Mouse Sensitivity</span>
+        <input type="range" id="setSensitivity" min="500" max="4000" step="100" value="2000">
+        <span class="settings-val" id="setSensitivityVal">2000</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Field of View</span>
+        <input type="range" id="setFOV" min="60" max="120" step="5" value="80">
+        <span class="settings-val" id="setFOVVal">80°</span>
+      </div>
+
+      <hr class="settings-divider">
+
+      <div class="settings-row">
+        <span class="settings-label">Bloom</span>
+        <input type="checkbox" id="setBloom" checked>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">FXAA</span>
+        <input type="checkbox" id="setFXAA" checked>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Vignette</span>
+        <input type="checkbox" id="setVignette" checked>
+      </div>
+
+      <button class="settings-close-btn" id="btnSettingsClose">RESUME [ ESC ]</button>
+    </div>
+  </div>
+
+  <script>
+    // ── Settings overlay logic ──
+    (function() {
+      const overlay  = document.getElementById('settingsOverlay');
+      let _pp = null; // post-processing pipeline ref set by game
+      window._setPP = function(pp) { _pp = pp; };
+
+      function openSettings() {
+        if (document.pointerLockElement) document.exitPointerLock();
+        overlay.classList.add('open');
+      }
+      function closeSettings() {
+        overlay.classList.remove('open');
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas && document.getElementById('hud')?.style.display !== 'none') {
+          canvas.requestPointerLock();
+        }
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Escape') {
+          if (overlay.classList.contains('open')) closeSettings();
+          else if (document.getElementById('mainMenu')?.style.display === 'none' &&
+                   document.getElementById('deathScreen')?.style.display !== 'flex') {
+            openSettings();
+          }
+        }
+      });
+      document.getElementById('btnSettingsClose').addEventListener('click', closeSettings);
+
+      // Live slider feedback
+      function bindSlider(id, valId, suffix, onChange) {
+        const sl = document.getElementById(id);
+        const vl = document.getElementById(valId);
+        if (!sl) return;
+        sl.addEventListener('input', () => {
+          vl.textContent = sl.value + (suffix || '');
+          onChange && onChange(Number(sl.value));
+        });
+      }
+      bindSlider('setVolume', 'setVolumeVal', '', v => {
+        if (window._masterGain) window._masterGain.gain.value = v / 100;
+      });
+      bindSlider('setSensitivity', 'setSensitivityVal', '', v => {
+        if (window._camera) window._camera.angularSensibility = v;
+      });
+      bindSlider('setFOV', 'setFOVVal', '°', v => {
+        if (window._camera) window._camera.fov = (v * Math.PI) / 180;
+      });
+
+      // Toggle checkboxes
+      document.getElementById('setBloom').addEventListener('change', e => {
+        if (_pp) _pp.bloomEnabled = e.target.checked;
+      });
+      document.getElementById('setFXAA').addEventListener('change', e => {
+        if (_pp) _pp.fxaaEnabled = e.target.checked;
+      });
+      document.getElementById('setVignette').addEventListener('change', e => {
+        if (_pp) _pp.imageProcessingEnabled = e.target.checked;
+      });
+    })();
+  </script>
+<div id="controlsOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9500;font-family:monospace;color:#c8d6e5;padding:40px;overflow-y:auto">
+<div style="max-width:600px;margin:0 auto">
+<h2 style="color:#ff4422;letter-spacing:2px;margin-bottom:15px">CONTROLS</h2>
+<div style="font-size:0.7rem;color:#556;margin-bottom:15px">Press H to close</div>
+<table style="width:100%;font-size:0.8rem;border-collapse:collapse">
+<tr><th style="text-align:left;color:#ff4422;padding:4px 8px;border-bottom:1px solid #1e2a3a">Key</th><th style="text-align:left;color:#ff4422;padding:4px 8px;border-bottom:1px solid #1e2a3a">Action</th></tr>
+<tr><td style="padding:4px 8px;color:#fff">WASD</td><td style="padding:4px 8px">Move</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">Mouse</td><td style="padding:4px 8px">Look</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">LMB</td><td style="padding:4px 8px">Shoot</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">RMB (hold)</td><td style="padding:4px 8px">Aim Down Sights</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">R</td><td style="padding:4px 8px">Reload</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">G</td><td style="padding:4px 8px">Throw Grenade</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">Q</td><td style="padding:4px 8px">Melee Attack</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">E</td><td style="padding:4px 8px">Enter/Exit Vehicle</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">F</td><td style="padding:4px 8px">Interact (Loot/Search)</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">B</td><td style="padding:4px 8px">Place Campfire</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">K</td><td style="padding:4px 8px">Sleep (near sleeping bag)</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">N</td><td style="padding:4px 8px">Night Vision Goggles</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">M</td><td style="padding:4px 8px">Minimap / Full Map</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">J</td><td style="padding:4px 8px">Objectives</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">TAB</td><td style="padding:4px 8px">Inventory</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">C</td><td style="padding:4px 8px">Crouch</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">SHIFT</td><td style="padding:4px 8px">Sprint</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">1-7</td><td style="padding:4px 8px">Switch Weapon</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">H</td><td style="padding:4px 8px">This Help Screen</td></tr>
+<tr><td style="padding:4px 8px;color:#fff">ESC</td><td style="padding:4px 8px">Settings</td></tr>
+</table>
+<p style="margin-top:20px;font-size:0.7rem;color:#334">RED DUSTER v2.0 | Babylon.js 9 | TENET5</p>
+</div>
+</div>
 </body>
 </html>
-
-
