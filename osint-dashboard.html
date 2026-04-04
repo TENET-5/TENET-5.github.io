@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MooseRacks OSINT Intelligence</title>
+    <!-- Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-red: #ff3366;
+            --neon-green: #39ff14;
+            --neon-yellow: #faff00;
+            --dark-base: #050914;
+            --panel-glass: rgba(10, 20, 40, 0.6);
+            --panel-border: rgba(0, 240, 255, 0.2);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: var(--dark-base);
+            background-image: linear-gradient(rgba(5, 9, 20, 0.8), rgba(5, 9, 20, 0.8)), url('assets/osint_heatmap.png');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Outfit', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            grid-template-rows: 80px 1fr;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            background: var(--panel-glass);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1::before {
+            content: '';
+            display: block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--neon-red);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-red);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 51, 102, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
+        }
+
+        .sys-status {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            gap: 30px;
+        }
+        .sys-status span strong { color: var(--neon-green); }
+
+        .glass-panel {
+            background: var(--panel-glass);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            opacity: 0.5;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Timeline / Disinformation Feed */
+        .feed-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-right: 10px;
+        }
+        .feed-container::-webkit-scrollbar { width: 4px; }
+        .feed-container::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 4px; }
+
+        .alert-item {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid var(--neon-blue);
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            animation: slideIn 0.3s ease-out forwards;
+            transition: transform 0.2s;
+        }
+        .alert-item:hover { transform: translateX(5px); background: rgba(0, 240, 255, 0.05); }
+
+        .alert-item.critical { border-left-color: var(--neon-red); }
+        .alert-item.anomaly { border-left-color: var(--neon-yellow); }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .alert-body { line-height: 1.4; color: rgba(255,255,255,0.85); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Center Grid Graphing */
+        .nexus-grid-container {
+            position: relative;
+            flex: 1;
+            border-radius: 8px;
+            background: radial-gradient(circle at center, rgba(0, 240, 255, 0.1) 0%, transparent 60%);
+            border: 1px dashed rgba(0, 240, 255, 0.2);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .radar {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: 
+                linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .node {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--neon-blue);
+            transition: all 1s ease-in-out;
+        }
+        
+        .node.anomaly { background: var(--neon-red); box-shadow: 0 0 15px var(--neon-red); }
+
+        .center-reticle {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px; height: 150px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .center-reticle::after {
+            content: '+';
+            font-size: 24px;
+            color: rgba(0, 240, 255, 0.5);
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* SATOR Metrics Panel */
+        .metric-block {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .metric-title {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            font-weight: 600;
+        }
+
+        .metric-graph {
+            height: 40px;
+            margin-top: 10px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        
+        .bar {
+            flex: 1;
+            background: var(--neon-blue);
+            min-height: 2px;
+            transition: height 0.2s;
+            opacity: 0.7;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>MooseRacks OSINT</h1>
+        <div class="sys-status">
+            <span>SATOR Matrix: <strong>ACTIVE</strong></span>
+            <span>Chronos Gate: <strong>SECURED</strong></span>
+            <span>Kyre Engine: <strong>Phase 76</strong></span>
+            <span>NemoClaw Bridge: <strong style="color:var(--neon-yellow);">ARMED</strong></span>
+        </div>
+    </header>
+
+    <!-- LEFT PANEL: OSINT Feed -->
+    <div class="glass-panel">
+        <h2>Live Intelligence Feed <span style="font-size: 0.8rem; color: var(--neon-green)">● LIVE</span></h2>
+        <div class="feed-container" id="feed-container">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <!-- CENTER PANEL: Causal Graph / Topological Mapping -->
+    <div class="glass-panel" style="display: flex;">
+        <h2>SATOR Causal Neighborhood</h2>
+        <div class="nexus-grid-container" id="grid">
+            <div class="radar"></div>
+            <div class="center-reticle"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Telemetry & Phase 56 Disinformation Metrics -->
+    <div class="glass-panel">
+        <h2>System Telemetry</h2>
+        
+        <div class="metric-block">
+            <div class="metric-title">Phase 54 Tension (A-SGCN)</div>
+            <div class="metric-value" id="tension-val">0.9994</div>
+            <div class="metric-graph" id="tension-graph"></div>
+        </div>
+
+        <div class="metric-block">
+            <div class="metric-title">Disinformation Threat Level</div>
+            <div class="metric-value" id="threat-val" style="color: var(--neon-green)">NOMINAL</div>
+        </div>
+
+        <div class="metric-block">
+            <div class="metric-title">Red Duster Bridge Link</div>
+            <div class="metric-value" style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">
+                <div style="margin-bottom: 10px;">Listening on Port: 8091</div>
+                <div style="height: 6px; background: rgba(0,240,255,0.2); border-radius: 3px; overflow: hidden;">
+                    <div style="width: 100%; height: 100%; background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green);"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="flex: 1;"></div>
+        <a href="reduster/index.html" style="display: block; text-align: center; background: rgba(0,240,255,0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; border-radius: 6px; text-decoration: none; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">
+            Launch Simulator
+        </a>
+    </div>
+
+    <script>
+        // Simulate Telemetry Streaming
+        const feed = document.getElementById('feed-container');
+        const grid = document.getElementById('grid');
+        const tensionVal = document.getElementById('tension-val');
+        const threatVal = document.getElementById('threat-val');
+        const tGraph = document.getElementById('tension-graph');
+
+        for(let i=0; i<30; i++) {
+            let b = document.createElement('div');
+            b.className = 'bar';
+            b.style.height = (Math.random() * 30 + 5) + 'px';
+            tGraph.appendChild(b);
+        }
+
+        const events = [
+            { type: 'standard', msg: 'SATOR Token [9994.1] correctly routed.' },
+            { type: 'standard', msg: 'Stable Euclidean Causal Point confirmed.' },
+            { type: 'critical', msg: 'Paradox Fracture Detected! Chronos Mitigated.' },
+            { type: 'anomaly', msg: 'Disinformation Score spike detected on node XZ-9.' },
+            { type: 'standard', msg: 'Kyre Query execution completed (0.012s).' },
+            { type: 'standard', msg: 'Red Duster telemetry structural sync payload received.' }
+        ];
+
+        let nodeCount = 0;
+
+        function addAlert() {
+            const ev = events[Math.floor(Math.random() * events.length)];
+            const div = document.createElement('div');
+            div.className = `alert-item ${ev.type}`;
+            
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false, hour: "numeric", minute: "numeric", second: "numeric"});
+            
+            div.innerHTML = `
+                <div class="alert-header">
+                    <span>EVENT // ${ev.type.toUpperCase()}</span>
+                    <span>${time}</span>
+                </div>
+                <div class="alert-body">${ev.msg}</div>
+            `;
+            
+            feed.prepend(div);
+            if (feed.children.length > 20) feed.lastChild.remove();
+
+            // Update Map Graphics
+            if (nodeCount < 15) {
+                const node = document.createElement('div');
+                node.className = `node ${ev.type === 'critical' ? 'anomaly' : ''}`;
+                node.style.left = (Math.random() * 80 + 10) + '%';
+                node.style.top = (Math.random() * 80 + 10) + '%';
+                grid.appendChild(node);
+                nodeCount++;
+                
+                setTimeout(() => {
+                    node.style.opacity = '0.2';
+                }, 4000);
+            }
+
+            // Update Tension
+            const tension = (0.9500 + Math.random() * 0.0499).toFixed(4);
+            tensionVal.innerText = tension;
+            const bars = tGraph.children;
+            tGraph.appendChild(bars[0]); // rotate
+            bars[bars.length-1].style.height = (Math.random() * 30 + 5) + 'px';
+            if (ev.type === 'critical') bars[bars.length-1].style.background = 'var(--neon-red)';
+            else bars[bars.length-1].style.background = 'var(--neon-blue)';
+
+            // Update Threat
+            if (ev.type === 'critical') {
+                threatVal.innerText = 'ELEVATED';
+                threatVal.style.color = 'var(--neon-red)';
+            } else if (ev.type === 'anomaly') {
+                threatVal.innerText = 'ANOMALY';
+                threatVal.style.color = 'var(--neon-yellow)';
+            } else {
+                threatVal.innerText = 'NOMINAL';
+                threatVal.style.color = 'var(--neon-green)';
+            }
+
+            setTimeout(addAlert, Math.random() * 3000 + 1000);
+        }
+
+        setTimeout(addAlert, 1000);
+    </script>
+</body>
+</html>
