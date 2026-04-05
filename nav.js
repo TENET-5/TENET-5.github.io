@@ -12,64 +12,55 @@
   const NAV_STRUCTURE = {
     brand: { label: 'TENET5', href: 'index.html' },
     primary: [
-      { label: 'My Story', href: 'my-story.html' },
-      { label: 'Evidence', href: 'evidence.html', class: 'nav-hot' },
+      { label: '🕵 Investigation Board', href: 'conspiracy-board.html', class: 'nav-hot' },
       { label: '🔎 Search', href: 'search.html' }
     ],
     dropdowns: [
       {
-        label: '🔍 Investigation',
+        label: '🩸 The Harm',
         items: [
-          { label: '🏛 Hansard Records', href: 'hansard-evidence.html' },
-          { label: '📊 Hansard Dashboard', href: 'hansard-dashboard.html' },
-          { label: '⚠ The Pattern', href: 't4-comparison.html' },
-          { label: '⚔ 5GW Subversion', href: '5gw-subversion.html' },
-          { label: '☠ Harm Index', href: 'harm-index.html' },
+          { label: '📋 The 504 Charges', href: 'accountability.html' },
           { label: '☠ Genocide Evidence', href: 'genocide-evidence.html' },
-          { label: '🔍 Corruption Map', href: 'corruption-map.html' },
-          { label: '📊 Infographics', href: 'infographics.html' }
+          { label: '📉 Policy Harm Index', href: 'harm-index.html' },
+          { label: '⚠ The Pattern', href: 't4-comparison.html' },
+          { label: '🥾 The Boot', href: 'the-boot.html' }
         ]
       },
       {
-        label: '⚖ Accountability',
+        label: '🕸 The Treason',
         items: [
-          { label: '📋 The 504 Charges', href: 'accountability.html' },
           { label: '🏛 Treason Trajectory', href: 'treason-trajectory.html' },
-          { label: '🕵 Investigation Board', href: 'conspiracy-board.html' },
+          { label: '⚔ 5GW Subversion', href: '5gw-subversion.html' },
           { label: '🗺 Foreign Influence', href: 'foreign-influence.html' },
-          { label: '💰 Lobbying Tracker', href: 'lobbying-tracker.html' },
-          { label: '💵 Contributions Tracker', href: 'contributions-tracker.html' },
           { label: '🔗 Follow the Money', href: 'cross-reference.html' },
-          { label: '📅 Timeline', href: 'timeline.html' },
-          { label: '🎖 CFNIS Investigation', href: 'cfnis.html' }
+          { label: '💰 Procurement Analysis', href: 'procurement-analysis.html' },
+          { label: '🏛 Hansard Dashboard', href: 'hansard-dashboard.html' }
         ]
       },
       {
         label: '🎖 Military & Legal',
         items: [
-          { label: '⚖ Legal Proceedings', href: 'legal.html' },
-          { label: '🎖 Veterans', href: 'veterans.html' },
           { label: '📜 PPCLI Lawsuit', href: 'lawsuit-ppcli.html' },
-          { label: '💰 Procurement Registry', href: 'procurement-registry.html' },
-          { label: '📊 Procurement Analysis', href: 'procurement-analysis.html' },
-          { label: '🥾 The Boot', href: 'the-boot.html' }
+          { label: '🎖 CFNIS Investigation', href: 'cfnis.html' },
+          { label: '⚖ Legal Proceedings', href: 'legal.html' },
+          { label: '🎖 Veterans Support', href: 'veterans.html' },
+          { label: '🛡 Whistleblower Guide', href: 'whistleblower-guide.html' }
         ]
       },
       {
-        label: '📚 Resources',
+        label: '📚 About & Action',
         items: [
-          { label: '📢 Open Letter', href: 'open-letter.html' },
+          { label: '📖 My Story', href: 'my-story.html' },
+          { label: '📢 Open Letter to MPs', href: 'open-letter.html' },
           { label: '📋 MP Briefing', href: 'mp-brief.html' },
-          { label: '🛡 Whistleblower Guide', href: 'whistleblower-guide.html' },
-          { label: '🔗 Wardoll Investigation', href: 'acelephius-wardoll.html' },
-          { label: '📖 History', href: 'history.html' },
-          { label: '❓ FAQ', href: 'faq.html' },
-          { label: '📚 Resources', href: 'resources.html' }
+          { label: '📅 Master Timeline', href: 'timeline.html' },
+          { label: '❓ FAQ & History', href: 'history.html' },
+          { label: '📂 Entire Evidence Archive', href: 'evidence.html' }
         ]
       }
     ],
     tools: [
-      { label: '🩸 PLAY FPS', href: 'red-duster-game.html', class: 'nav-hot', style: 'text-shadow:0 0 5px #ff2a2a;' },
+      { label: '🚀 Red Duster FPS', href: 'red-duster-game.html', class: 'nav-hot', style: 'text-shadow:0 0 5px #ff2a2a;' },
       { label: '🦝 Bloggins', href: 'bloggins.html', class: 'nav-green' }
     ]
   };
