@@ -145,17 +145,6 @@
     <h1>Policy Harm Index</h1>
     <p class="subtitle">Every entry documents a Canadian legislative or policy change with a measurable, publicly reported increase in preventable death or mortality rate. Sources: Statistics Canada, Health Canada, CIHI, Auditor General, coroner reports, peer-reviewed epidemiology. These are not opinions — these are numbers the government published about itself.</p>
   </header>
-
-  
-  <!-- ── CAMPAIGN SHARE BAR ── -->
-  <div class="share-bar">
-    <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
-    <div class="share-bar-buttons">
-      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
-      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button><a href="https://www.instagram.com/" target="_blank" rel="noopener" class="share-btn share-btn-instagram">📸 Instagram</a>
-      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy</button>
-    </div>
-  </div>
   <div class="content" id="main">
 
     <!-- TOTALS -->
@@ -527,7 +516,17 @@
       </ol>
     </section>
 
-    <p class="back-link" style="padding-bottom:2rem;"><a href="corruption-map.html">&larr; Back to Corruption Map</a> &nbsp;|&nbsp; <a href="index.html">&larr; Back to Main Report</a></p>
+    <p class="back-link" style="padding-bottom:1rem;"><a href="corruption-map.html">&larr; Back to Corruption Map</a> &nbsp;|&nbsp; <a href="index.html">&larr; Back to Main Report</a></p>
+
+    <h2><span class="section-num">04 &mdash; CONNECTED</span>Related Evidence</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:1rem 0 3rem;">
+      <a href="genocide-evidence.html" style="display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;background:rgba(196,30,58,0.1);color:#ff6b6b;border:1px solid rgba(196,30,58,0.2);text-decoration:none;">💀 Genocide Evidence</a>
+      <a href="t4-comparison.html" style="display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;background:rgba(196,30,58,0.1);color:#ff6b6b;border:1px solid rgba(196,30,58,0.2);text-decoration:none;">📊 T4 Comparison</a>
+      <a href="accountability.html" style="display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;background:rgba(196,30,58,0.1);color:#ff6b6b;border:1px solid rgba(196,30,58,0.2);text-decoration:none;">📋 The 504 Database</a>
+      <a href="conspiracy-board.html" style="display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;background:rgba(196,30,58,0.1);color:#ff6b6b;border:1px solid rgba(196,30,58,0.2);text-decoration:none;">🕵 Investigation Board</a>
+      <a href="veterans.html" style="display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;background:rgba(196,30,58,0.1);color:#ff6b6b;border:1px solid rgba(196,30,58,0.2);text-decoration:none;">🎖 Veterans</a>
+      <a href="the-boot.html" style="display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;background:rgba(196,30,58,0.1);color:#ff6b6b;border:1px solid rgba(196,30,58,0.2);text-decoration:none;">🦶 The Boot</a>
+    </div>
   </div>
 
   <script>
@@ -542,6 +541,43 @@
         }
       });
     }
+
+    // Animated counters — count up from 0 when visible
+    function animateCounter(el, target, suffix) {
+      const duration = 2000;
+      const startTime = performance.now();
+      const isFloat = target % 1 !== 0;
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        const current = Math.floor(target * eased);
+        el.textContent = current.toLocaleString() + (suffix || '+');
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target.toLocaleString() + (suffix || '+');
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Observe total-bar items
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.dataset.animated) {
+          entry.target.dataset.animated = '1';
+          const numEl = entry.target.querySelector('.n');
+          if (!numEl) return;
+          const text = numEl.textContent.trim();
+          const match = text.match(/([\d,]+)/);
+          if (match) {
+            const num = parseInt(match[1].replace(/,/g, ''), 10);
+            if (!isNaN(num) && num > 100) {
+              animateCounter(numEl, num, text.includes('+') ? '+' : '');
+            }
+          }
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.total-item').forEach(el => counterObserver.observe(el));
   </script>
 
 <script src="nav.js?v=6"></script>

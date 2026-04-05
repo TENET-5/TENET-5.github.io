@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who's Lobbying Canadian Politicians | TENET5</title>
+  <meta name="description" content="Track 547,889 lobbying contacts with Canadian government officials. Data from the Office of the Commissioner of Lobbying of Canada.">
+  <meta property="og:title" content="Who's Lobbying Canadian Politicians">
+  <meta property="og:description" content="547,889 registered lobbying contacts with Canadian officials. See who meets with whom.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/lobbying-tracker.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    .dash-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      color: #e0e0e0;
+    }
+    .dash-header {
+      text-align: center;
+      padding: 40px 0 20px;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.4);
+      margin-bottom: 30px;
+    }
+    .dash-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      color: #ededed;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .dash-header .subtitle {
+      font-size: 0.85rem;
+      color: #a0a0a6;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover {
+      border-color: rgba(196, 30, 58, 0.3);
+    }
+    .stat-card .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #ededed;
+      display: block;
+    }
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      color: #6e6e76;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* Section */
+    .section-block {
+      background: #0c0c0e;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-block h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: #ededed;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(196, 30, 58, 0.2);
+    }
+
+    /* Data Table */
+    .data-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .data-table th {
+      background: #161618;
+      color: #a0a0a6;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.3);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .data-table th:hover {
+      color: #ededed;
+      background: #1a1a1c;
+    }
+    .data-table th .sort-arrow {
+      margin-left: 4px;
+      opacity: 0.4;
+    }
+    .data-table th.sorted .sort-arrow {
+      opacity: 1;
+      color: #c41e3a;
+    }
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: #c8c8cc;
+    }
+    .data-table tbody tr:hover {
+      background: rgba(196, 30, 58, 0.05);
+    }
+    .data-table .rank-col {
+      color: #6e6e76;
+      width: 40px;
+      text-align: center;
+    }
+    .data-table .num-col {
+      text-align: right;
+      font-weight: 600;
+      color: #ededed;
+    }
+
+    /* Bar Chart */
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .bar-label {
+      width: 280px;
+      min-width: 180px;
+      font-size: 0.78rem;
+      color: #c8c8cc;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .bar-track {
+      flex: 1;
+      height: 24px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c41e3a, #e53555);
+      border-radius: 4px;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      min-width: 2px;
+    }
+    .bar-value {
+      width: 70px;
+      font-size: 0.78rem;
+      color: #a0a0a6;
+      text-align: right;
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+
+    /* Horizontal bar for institutions */
+    .horiz-bar .bar-fill {
+      background: linear-gradient(90deg, #1a3a5c, #2d7dd2);
+    }
+
+    /* Foreign Influence */
+    .fi-flag {
+      background: rgba(196, 30, 58, 0.08);
+      border: 1px solid rgba(196, 30, 58, 0.2);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .fi-flag .fi-name {
+      font-weight: 700;
+      color: #ededed;
+    }
+    .fi-flag .fi-note {
+      color: #a0a0a6;
+      font-style: italic;
+      display: block;
+      margin-top: 4px;
+      font-size: 0.75rem;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-size: 0.75rem;
+      color: #6e6e76;
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+
+    /* Source Footer */
+    .source-footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      margin-top: 40px;
+    }
+    .source-footer p {
+      font-size: 0.75rem;
+      color: #6e6e76;
+      line-height: 1.8;
+    }
+    .source-footer a {
+      color: #a0a0a6;
+      text-decoration: underline;
+      text-decoration-color: rgba(160,160,166,0.3);
+    }
+    .source-footer a:hover {
+      color: #e53555;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #6e6e76;
+      font-size: 0.85rem;
+    }
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #333;
+      border-top-color: #c41e3a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 700px) {
+      .bar-label { width: 120px; min-width: 80px; font-size: 0.7rem; }
+      .bar-value { width: 50px; font-size: 0.7rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .dash-header h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+
+  <div id="main" class="dash-wrap">
+    <div class="dash-header">
+      <h1>Who's Lobbying Canadian Politicians</h1>
+      <p class="subtitle">Registered lobbying communications with Designated Public Office Holders (DPOHs)</p>
+    </div>
+
+    <div id="content-area" class="loading">Loading lobbying data from public records...</div>
+  </div>
+
+  <script src="nav.js?v=3"></script>
+  <script src="js/main.js?v=5"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    fetch('data/lobbying_analysis.json')
+      .then(function(r) { return r.json(); })
+      .then(function(data) { renderAll(data); })
+      .catch(function(err) {
+        document.getElementById('content-area').innerHTML =
+          '<p style="color:#e53555;">Failed to load data: ' + err.message + '</p>';
+      });
+
+    function fmt(n) {
+      return Number(n).toLocaleString('en-CA');
+    }
+
+    function renderAll(data) {
+      var el = document.getElementById('content-area');
+      el.className = '';
+      var html = '';
+
+      // ── Header Stats ──
+      html += '<div class="stats-row">';
+      html += '<div class="stat-card"><span class="stat-number">' + fmt(data.total_dpoh_contacts) + '</span><span class="stat-label">DPOH Contacts</span></div>';
+      html += '<div class="stat-card"><span class="stat-number">' + fmt(data.total_communications) + '</span><span class="stat-label">Communications</span></div>';
+      html += '<div class="stat-card"><span class="stat-number">' + fmt(data.top_lobbied_officials.length) + '</span><span class="stat-label">Top Officials Tracked</span></div>';
+      html += '<div class="stat-card"><span class="stat-number">' + fmt(data.top_organizations.length) + '</span><span class="stat-label">Organizations Tracked</span></div>';
+      html += '</div>';
+
+      // ── Top 20 Most Lobbied Officials ──
+      html += '<div class="section-block">';
+      html += '<h2>Top 20 Most Lobbied Officials</h2>';
+      html += '<div class="disclaimer">Meeting counts reflect registered communications only. High meeting counts do not imply wrongdoing. Lobbying is a legal and regulated activity in Canada.</div>';
+      html += renderOfficialsTable(data.top_lobbied_officials.slice(0, 20));
+      html += '</div>';
+
+      // ── Top 20 Lobbying Organizations ──
+      html += '<div class="section-block">';
+      html += '<h2>Top 20 Lobbying Organizations</h2>';
+      html += '<div class="disclaimer">Communications include meetings, phone calls, and written submissions. All are publicly registered with the Commissioner of Lobbying.</div>';
+      html += renderOrgChart(data.top_organizations.slice(0, 20));
+      html += '</div>';
+
+      // ── Institutions Breakdown ──
+      html += '<div class="section-block">';
+      html += '<h2>Institutions Breakdown</h2>';
+      html += '<p style="font-size:0.8rem;color:#a0a0a6;margin-bottom:14px;">Which government institutions receive the most lobbying contacts.</p>';
+      html += renderInstitutionChart(data.top_institutions);
+      html += '</div>';
+
+      // ── Foreign Influence Indicators ──
+      html += '<div class="section-block">';
+      html += '<h2>Foreign Influence Indicators</h2>';
+      html += '<div class="disclaimer" style="margin-bottom:14px;margin-top:0;">This section flags organizations that may have international connections based on their names or known affiliations. Appearing here does not imply wrongdoing. All lobbying in Canada is legal and regulated. These flags are algorithmic and require independent verification.</div>';
+      html += renderForeignFlags(data.top_organizations);
+      html += '</div>';
+
+      // ── Source Footer ──
+      html += '<div class="source-footer">';
+      html += '<p>Data from <a href="https://lobbycanada.gc.ca/en/open-data/" target="_blank" rel="noopener">Office of the Commissioner of Lobbying of Canada</a> (lobbycanada.gc.ca).</p>';
+      html += '<p>Lobbying is a legal activity in Canada. All communications shown are publicly registered.</p>';
+      html += '<p style="margin-top:8px;">Data sourced from public government records.</p>';
+      html += '</div>';
+
+      el.innerHTML = html;
+
+      // Animate bars after render
+      requestAnimationFrame(function() {
+        el.querySelectorAll('.bar-fill').forEach(function(bar) {
+          bar.style.width = bar.dataset.width + '%';
+        });
+      });
+
+      // Wire up table sorting
+      el.querySelectorAll('.data-table').forEach(function(table) {
+        setupTableSort(table);
+      });
+    }
+
+    function renderOfficialsTable(officials) {
+      var h = '<div class="data-table-wrap"><table class="data-table" data-sortable>';
+      h += '<thead><tr>';
+      h += '<th class="rank-col">#</th>';
+      h += '<th data-sort="string">Name <span class="sort-arrow">&#9650;</span></th>';
+      h += '<th data-sort="string">Title <span class="sort-arrow">&#9650;</span></th>';
+      h += '<th data-sort="string">Institution <span class="sort-arrow">&#9650;</span></th>';
+      h += '<th data-sort="number" class="sorted">Meetings <span class="sort-arrow">&#9660;</span></th>';
+      h += '</tr></thead><tbody>';
+      for (var i = 0; i < officials.length; i++) {
+        var o = officials[i];
+        h += '<tr>';
+        h += '<td class="rank-col">' + (i + 1) + '</td>';
+        h += '<td>' + escHtml(o.name) + '</td>';
+        h += '<td>' + escHtml(o.title) + '</td>';
+        h += '<td>' + escHtml(o.institution) + '</td>';
+        h += '<td class="num-col">' + fmt(o.meetings) + '</td>';
+        h += '</tr>';
+      }
+      h += '</tbody></table></div>';
+      return h;
+    }
+
+    function renderOrgChart(orgs) {
+      var max = orgs[0].communications;
+      var h = '<div class="bar-chart">';
+      for (var i = 0; i < orgs.length; i++) {
+        var pct = (orgs[i].communications / max * 100).toFixed(1);
+        h += '<div class="bar-row">';
+        h += '<span class="bar-label" title="' + escHtml(orgs[i].name) + '">' + escHtml(orgs[i].name) + '</span>';
+        h += '<div class="bar-track"><div class="bar-fill" data-width="' + pct + '" style="width:0%"></div></div>';
+        h += '<span class="bar-value">' + fmt(orgs[i].communications) + '</span>';
+        h += '</div>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    function renderInstitutionChart(institutions) {
+      var max = institutions[0].contacts;
+      var h = '<div class="bar-chart horiz-bar">';
+      for (var i = 0; i < institutions.length; i++) {
+        var pct = (institutions[i].contacts / max * 100).toFixed(1);
+        h += '<div class="bar-row">';
+        h += '<span class="bar-label" title="' + escHtml(institutions[i].name) + '">' + escHtml(institutions[i].name) + '</span>';
+        h += '<div class="bar-track"><div class="bar-fill" data-width="' + pct + '" style="width:0%"></div></div>';
+        h += '<span class="bar-value">' + fmt(institutions[i].contacts) + '</span>';
+        h += '</div>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    function renderForeignFlags(orgs) {
+      var foreignIndicators = [
+        { pattern: /Israel|Jewish Affairs/i, note: 'Organization focused on Israel-related policy advocacy. The Centre for Israel and Jewish Affairs is a registered Canadian organization.' },
+        { pattern: /Rio Tinto/i, note: 'Multinational mining corporation headquartered in London, UK and Melbourne, Australia.' },
+        { pattern: /General Motors/i, note: 'American multinational automotive corporation headquartered in Detroit, Michigan.' },
+        { pattern: /Ford Motor/i, note: 'American multinational automotive corporation headquartered in Dearborn, Michigan.' },
+        { pattern: /Bombardier/i, note: 'Canadian multinational with extensive international operations and foreign government contracts.' },
+        { pattern: /Suncor/i, note: 'Canadian energy company with significant international investment and operations.' },
+        { pattern: /TransCanada|TC Energy/i, note: 'Canadian pipeline company with major cross-border infrastructure projects (US, Mexico).' },
+        { pattern: /Enbridge/i, note: 'Canadian energy company operating major cross-border pipeline infrastructure.' },
+        { pattern: /francophone|acadien/i, note: 'Organization with ties to international Francophonie network.' }
+      ];
+
+      var flagged = [];
+      for (var i = 0; i < orgs.length; i++) {
+        for (var j = 0; j < foreignIndicators.length; j++) {
+          if (foreignIndicators[j].pattern.test(orgs[i].name)) {
+            flagged.push({ name: orgs[i].name, communications: orgs[i].communications, note: foreignIndicators[j].note });
+            break;
+          }
+        }
+      }
+
+      if (flagged.length === 0) {
+        return '<p style="color:#6e6e76;font-size:0.82rem;">No foreign influence indicators detected in the top organizations.</p>';
+      }
+
+      var h = '';
+      for (var k = 0; k < flagged.length; k++) {
+        h += '<div class="fi-flag">';
+        h += '<span class="fi-name">' + escHtml(flagged[k].name) + '</span>';
+        h += ' &mdash; ' + fmt(flagged[k].communications) + ' communications';
+        h += '<span class="fi-note">Requires further investigation &mdash; public data only. ' + escHtml(flagged[k].note) + '</span>';
+        h += '</div>';
+      }
+      return h;
+    }
+
+    function setupTableSort(table) {
+      var headers = table.querySelectorAll('th[data-sort]');
+      headers.forEach(function(th, colIndex) {
+        // Offset by 1 for the rank column
+        var actualCol = colIndex + 1;
+        th.addEventListener('click', function() {
+          var type = th.dataset.sort;
+          var tbody = table.querySelector('tbody');
+          var rows = Array.from(tbody.querySelectorAll('tr'));
+          var asc = th.classList.contains('sorted-asc');
+
+          headers.forEach(function(h) {
+            h.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+            h.querySelector('.sort-arrow').textContent = '\u25B2';
+          });
+
+          rows.sort(function(a, b) {
+            var aVal = a.children[actualCol].textContent.trim();
+            var bVal = b.children[actualCol].textContent.trim();
+            if (type === 'number') {
+              aVal = parseFloat(aVal.replace(/,/g, '')) || 0;
+              bVal = parseFloat(bVal.replace(/,/g, '')) || 0;
+            }
+            if (asc) {
+              return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+            } else {
+              return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+            }
+          });
+
+          rows.forEach(function(row, i) {
+            row.children[0].textContent = i + 1;
+            tbody.appendChild(row);
+          });
+
+          th.classList.add('sorted');
+          if (asc) {
+            th.classList.add('sorted-desc');
+            th.querySelector('.sort-arrow').textContent = '\u25BC';
+          } else {
+            th.classList.add('sorted-asc');
+            th.querySelector('.sort-arrow').textContent = '\u25B2';
+          }
+        });
+      });
+    }
+
+    function escHtml(s) {
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+  })();
+  </script>
+</body>
+</html>
