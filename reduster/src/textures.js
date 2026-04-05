@@ -9,7 +9,7 @@ import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
 import { Engine } from '@babylonjs/core/Engines/engine.js';
 
-const SIZE = 512;
+const SIZE = 2048; // Native 2K mapping (tiles infinitely) natively scaled for 4K terrain
 
 // ── Noise helpers ──
 function hash(x, y) {

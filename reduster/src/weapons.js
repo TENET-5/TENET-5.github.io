@@ -96,12 +96,14 @@ function getWpnMats(scene) {
 function box(scene, name, parent, w, h, d, pos, mat) {
   const m = MeshBuilder.CreateBox(name, { width: w, height: h, depth: d }, scene);
   m.parent = parent; m.position = pos; m.material = mat;
+  m.isVisible = false; // Hide primitive fallback visuals
   m.isPickable = false; return m;
 }
 function cyl(scene, name, parent, diam, h, tess, pos, mat, rotX) {
   const m = MeshBuilder.CreateCylinder(name, { diameter: diam, height: h, tessellation: tess ?? 8 }, scene);
   m.parent = parent; m.position = pos; m.material = mat;
   if (rotX !== undefined) m.rotation.x = rotX;
+  m.isVisible = false; // Hide primitive fallback visuals
   m.isPickable = false; return m;
 }
 
