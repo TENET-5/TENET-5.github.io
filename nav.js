@@ -13,7 +13,8 @@
     brand: { label: 'TENET5', href: 'index.html' },
     primary: [
       { label: 'My Story', href: 'my-story.html' },
-      { label: 'Evidence', href: 'evidence.html', class: 'nav-hot' }
+      { label: 'Evidence', href: 'evidence.html', class: 'nav-hot' },
+      { label: '🔎 Search', href: 'search.html' }
     ],
     dropdowns: [
       {

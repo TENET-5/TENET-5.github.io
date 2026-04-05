@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSINT Search - TENET5</title>
+  <meta name="description" content="Search across 151 bills, 340 MPs, lobbying records, and political donations from public Canadian government data.">
+  <link rel="canonical" href="https://tenet-5.github.io/search.html">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      line-height: 1.7;
+      font-size: 15px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2e; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ff4444; }
+
+    a { color: #e0e0e0; text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #ff4444; }
+
+    /* ── LAYOUT ── */
+    .search-page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ── HEADER ── */
+    .search-header {
+      text-align: center;
+      padding: 3rem 0 1.5rem;
+    }
+
+    .search-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      color: #ededed;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .search-header h1 span {
+      color: #ff4444;
+    }
+
+    .search-header p {
+      color: #6e6e76;
+      font-size: 0.9rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── SEARCH BAR ── */
+    .search-container {
+      position: sticky;
+      top: 60px;
+      z-index: 100;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 1.25rem 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .search-box {
+      position: relative;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6e6e76;
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 3.5rem 1rem 3.2rem;
+      background: #111113;
+      border: 2px solid rgba(255, 68, 68, 0.15);
+      border-radius: 12px;
+      color: #ededed;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-input::placeholder {
+      color: #4a4a52;
+    }
+
+    .search-input:focus {
+      border-color: #ff4444;
+      box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.1), 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .search-shortcut {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1a1a1e;
+      color: #6e6e76;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .search-input:focus ~ .search-shortcut {
+      opacity: 0;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 56px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #6e6e76;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      display: none;
+      transition: color 0.2s;
+    }
+
+    .search-clear:hover { color: #ff4444; }
+    .search-clear.visible { display: block; }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      text-align: center;
+      padding: 0.75rem 0;
+      color: #4a4a52;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.02em;
+    }
+
+    .stats-bar span {
+      color: #ff4444;
+      font-weight: 600;
+    }
+
+    /* ── RECENT SEARCHES ── */
+    .recent-searches {
+      max-width: 720px;
+      margin: 0.5rem auto 1.5rem;
+      display: none;
+    }
+
+    .recent-searches.visible {
+      display: block;
+    }
+
+    .recent-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .recent-header h3 {
+      color: #6e6e76;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .recent-clear-btn {
+      background: none;
+      border: none;
+      color: #4a4a52;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .recent-clear-btn:hover { color: #ff4444; }
+
+    .recent-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .recent-tag {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #a0a0a6;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .recent-tag:hover {
+      border-color: rgba(255, 68, 68, 0.3);
+      color: #ededed;
+      background: #161618;
+    }
+
+    /* ── RESULTS ── */
+    .results-container {
+      min-height: 300px;
+    }
+
+    .result-count {
+      color: #6e6e76;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .result-count strong {
+      color: #ff4444;
+      font-weight: 600;
+    }
+
+    .result-group {
+      margin-bottom: 2rem;
+    }
+
+    .result-group-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .result-group-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #a0a0a6;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .result-group-count {
+      background: rgba(255, 68, 68, 0.12);
+      color: #ff4444;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* ── RESULT CARDS ── */
+    .result-card {
+      display: block;
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .result-card:hover {
+      background: #161618;
+      border-color: rgba(255, 68, 68, 0.2);
+      transform: translateX(4px);
+      color: inherit;
+    }
+
+    .result-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .result-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .badge-bill { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-mp { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-official { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .badge-org { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .badge-donor { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+
+    .result-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ededed;
+      line-height: 1.4;
+    }
+
+    .result-name mark {
+      background: rgba(255, 68, 68, 0.2);
+      color: #ff8888;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    .result-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.25rem;
+      margin-top: 0.35rem;
+      padding-left: 0;
+    }
+
+    .result-detail {
+      color: #6e6e76;
+      font-size: 0.8rem;
+    }
+
+    .result-detail strong {
+      color: #a0a0a6;
+      font-weight: 500;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      color: #6e6e76;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: #4a4a52;
+      font-size: 0.9rem;
+    }
+
+    /* ── LOADING ── */
+    .loading-state {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255, 68, 68, 0.15);
+      border-top-color: #ff4444;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-state p {
+      color: #6e6e76;
+      font-size: 0.9rem;
+    }
+
+    /* ── INITIAL STATE ── */
+    .initial-state {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .initial-state h3 {
+      color: #4a4a52;
+      font-size: 1rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+    }
+
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .quick-link {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #a0a0a6;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-link:hover {
+      border-color: rgba(255, 68, 68, 0.3);
+      color: #ededed;
+      background: #161618;
+    }
+
+    /* ── FOOTER ── */
+    .search-footer {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      margin-top: 3rem;
+    }
+
+    .search-footer p {
+      color: #4a4a52;
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+
+    .search-footer a {
+      color: #6e6e76;
+    }
+
+    .search-footer a:hover {
+      color: #ff4444;
+    }
+
+    .footer-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-nav a {
+      color: #6e6e76;
+      font-size: 0.82rem;
+      transition: color 0.2s;
+    }
+
+    .footer-nav a:hover {
+      color: #ff4444;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .search-page {
+        padding: 0 1rem 3rem;
+      }
+
+      .search-header {
+        padding: 2rem 0 1rem;
+      }
+
+      .search-input {
+        font-size: 1rem;
+        padding: 0.85rem 3rem 0.85rem 2.8rem;
+      }
+
+      .search-icon {
+        left: 14px;
+        font-size: 1rem;
+      }
+
+      .search-shortcut {
+        display: none;
+      }
+
+      .search-clear {
+        right: 12px;
+      }
+
+      .result-card {
+        padding: 0.85rem 1rem;
+      }
+
+      .result-card-top {
+        gap: 0.5rem;
+      }
+
+      .result-badge {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+      }
+
+      .result-name {
+        font-size: 0.88rem;
+      }
+
+      .result-details {
+        gap: 0.25rem 0.75rem;
+      }
+
+      .stats-bar {
+        font-size: 0.72rem;
+      }
+
+      .quick-links {
+        gap: 0.5rem;
+      }
+
+      .quick-link {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="search-page">
+    <!-- Header -->
+    <div class="search-header">
+      <h1>OSINT <span>Search</span></h1>
+      <p>Search across parliamentary bills, MPs, lobbying records, and political donations from public government data.</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <div class="search-box">
+        <span class="search-icon">&#128269;</span>
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="Search bills, MPs, lobbyists, donors..."
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button id="search-clear" class="search-clear" aria-label="Clear search">&#10005;</button>
+        <span class="search-shortcut">/</span>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="stats-bar">Loading datasets...</div>
+
+    <!-- Recent Searches -->
+    <div class="recent-searches" id="recent-searches">
+      <div class="recent-header">
+        <h3>Recent Searches</h3>
+        <button class="recent-clear-btn" id="recent-clear-btn">Clear</button>
+      </div>
+      <div class="recent-tags" id="recent-tags"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-container" id="results-container">
+      <div class="loading-state" id="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading datasets...</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="search-footer">
+      <nav class="footer-nav">
+        <a href="index.html">Home</a>
+        <a href="evidence.html">Evidence</a>
+        <a href="hansard-dashboard.html">Hansard Dashboard</a>
+        <a href="lobbying-tracker.html">Lobbying Tracker</a>
+        <a href="contributions-tracker.html">Contributions Tracker</a>
+        <a href="cross-reference.html">Follow the Money</a>
+        <a href="accountability.html">The 504 Charges</a>
+        <a href="osint-dashboard.html">OSINT Dashboard</a>
+      </nav>
+      <p>Data from public government records &mdash; <a href="https://openparliament.ca" target="_blank" rel="noopener">OpenParliament.ca</a>, <a href="https://www.elections.ca" target="_blank" rel="noopener">Elections Canada</a>, <a href="https://lobbycanada.gc.ca" target="_blank" rel="noopener">Lobbying Commissioner</a></p>
+      <p style="margin-top:0.5rem;">TENET5 &mdash; Government Accountability Through Transparency</p>
+    </div>
+  </div>
+
+  <script src="nav.js?v=7"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    // ── State ──
+    let data = {
+      bills: [],
+      mps: [],
+      officials: [],
+      organizations: [],
+      donors: []
+    };
+    let loaded = false;
+    let debounceTimer = null;
+
+    // ── DOM refs ──
+    const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear');
+    const statsBar = document.getElementById('stats-bar');
+    const resultsContainer = document.getElementById('results-container');
+    const loadingState = document.getElementById('loading-state');
+    const recentSearches = document.getElementById('recent-searches');
+    const recentTags = document.getElementById('recent-tags');
+    const recentClearBtn = document.getElementById('recent-clear-btn');
+
+    // ── Data Loading ──
+    async function loadData() {
+      try {
+        const [analysisRes, mpsRes, lobbyingRes, contributionsRes] = await Promise.all([
+          fetch('data/analysis.json'),
+          fetch('data/all_mps.json'),
+          fetch('data/lobbying_analysis.json'),
+          fetch('data/contributions_analysis.json')
+        ]);
+
+        const [analysis, mpsData, lobbying, contributions] = await Promise.all([
+          analysisRes.json(),
+          mpsRes.json(),
+          lobbyingRes.json(),
+          contributionsRes.json()
+        ]);
+
+        // Bills
+        data.bills = (analysis.all_bills || []).map(function(b) {
+          return {
+            number: b.number || '',
+            title: b.title || '',
+            category: b.category || '',
+            introduced: b.introduced || '',
+            url: b.url || '',
+            session: b.session || ''
+          };
+        });
+
+        // MPs
+        data.mps = (mpsData.mps || []).map(function(m) {
+          return {
+            name: m.name || '',
+            party: (m.current_party && m.current_party.short_name && m.current_party.short_name.en) || '',
+            riding: (m.current_riding && m.current_riding.name && m.current_riding.name.en) || '',
+            province: (m.current_riding && m.current_riding.province) || '',
+            url: m.url || ''
+          };
+        });
+
+        // Lobbied Officials
+        data.officials = (lobbying.top_lobbied_officials || []).map(function(o) {
+          return {
+            name: o.name || '',
+            title: o.title || '',
+            institution: o.institution || '',
+            meetings: o.meetings || 0
+          };
+        });
+
+        // Organizations
+        data.organizations = (lobbying.top_organizations || []).map(function(o) {
+          return {
+            name: o.name || '',
+            communications: o.communications || 0
+          };
+        });
+
+        // Donors
+        data.donors = (contributions.top_donors || []).map(function(d) {
+          return {
+            name: d.name || '',
+            total_amount: d.total_amount || 0
+          };
+        });
+
+        loaded = true;
+
+        // Update stats
+        statsBar.innerHTML = 'Searching across <span>' + data.bills.length + '</span> bills, <span>' + data.mps.length + '</span> MPs, <span>' + data.officials.length + '</span> officials, <span>' + data.organizations.length + '</span> organizations, <span>' + data.donors.length + '</span> donors';
+
+        loadingState.style.display = 'none';
+        showInitialState();
+        renderRecentSearches();
+
+        // Check URL for query param
+        var params = new URLSearchParams(window.location.search);
+        var q = params.get('q');
+        if (q) {
+          searchInput.value = q;
+          performSearch(q);
+        }
+      } catch (err) {
+        loadingState.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9888;</div><h3>Failed to load datasets</h3><p>' + err.message + '</p></div>';
+      }
+    }
+
+    // ── Search Logic ──
+    function normalize(str) {
+      return (str || '').toLowerCase().trim();
+    }
+
+    function matches(text, query) {
+      var t = normalize(text);
+      var terms = normalize(query).split(/\s+/).filter(Boolean);
+      return terms.every(function(term) {
+        return t.indexOf(term) !== -1;
+      });
+    }
+
+    function highlightMatch(text, query) {
+      if (!query || !text) return escapeHtml(text);
+      var terms = normalize(query).split(/\s+/).filter(Boolean);
+      var result = escapeHtml(text);
+      terms.forEach(function(term) {
+        var escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        var regex = new RegExp('(' + escaped + ')', 'gi');
+        result = result.replace(regex, '<mark>$1</mark>');
+      });
+      return result;
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str || ''));
+      return div.innerHTML;
+    }
+
+    function formatMoney(amount) {
+      if (amount >= 1000000) return '$' + (amount / 1000000).toFixed(1) + 'M';
+      if (amount >= 1000) return '$' + (amount / 1000).toFixed(1) + 'K';
+      return '$' + amount.toFixed(0);
+    }
+
+    function performSearch(query) {
+      if (!loaded) return;
+
+      var q = query.trim();
+      if (!q) {
+        showInitialState();
+        renderRecentSearches();
+        return;
+      }
+
+      var results = {
+        bills: [],
+        mps: [],
+        officials: [],
+        organizations: [],
+        donors: []
+      };
+
+      // Search bills: title, number, category
+      data.bills.forEach(function(b) {
+        if (matches(b.title + ' ' + b.number + ' ' + b.category, q)) {
+          results.bills.push(b);
+        }
+      });
+
+      // Search MPs: name, party, riding, province
+      data.mps.forEach(function(m) {
+        if (matches(m.name + ' ' + m.party + ' ' + m.riding + ' ' + m.province, q)) {
+          results.mps.push(m);
+        }
+      });
+
+      // Search officials: name, title, institution
+      data.officials.forEach(function(o) {
+        if (matches(o.name + ' ' + o.title + ' ' + o.institution, q)) {
+          results.officials.push(o);
+        }
+      });
+
+      // Search organizations: name
+      data.organizations.forEach(function(o) {
+        if (matches(o.name, q)) {
+          results.organizations.push(o);
+        }
+      });
+
+      // Search donors: name
+      data.donors.forEach(function(d) {
+        if (matches(d.name, q)) {
+          results.donors.push(d);
+        }
+      });
+
+      renderResults(results, q);
+      saveRecentSearch(q);
+    }
+
+    // ── Render Results ──
+    function renderResults(results, query) {
+      var total = results.bills.length + results.mps.length + results.officials.length + results.organizations.length + results.donors.length;
+
+      if (total === 0) {
+        resultsContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128269;</div><h3>No matches found</h3><p>Try a different search term.</p></div>';
+        return;
+      }
+
+      var html = '<div class="result-count">Found <strong>' + total + '</strong> result' + (total !== 1 ? 's' : '') + '</div>';
+
+      // Bills
+      if (results.bills.length > 0) {
+        html += renderGroup('Bills', results.bills.length, results.bills.map(function(b) {
+          return '<a href="hansard-dashboard.html" class="result-card">' +
+            '<div class="result-card-top">' +
+              '<span class="result-badge badge-bill">BILL</span>' +
+              '<div class="result-name">' + highlightMatch(b.number + ' — ' + b.title, query) + '</div>' +
+            '</div>' +
+            '<div class="result-details">' +
+              '<span class="result-detail"><strong>Category:</strong> ' + escapeHtml(b.category) + '</span>' +
+              '<span class="result-detail"><strong>Introduced:</strong> ' + escapeHtml(b.introduced) + '</span>' +
+              '<span class="result-detail"><strong>Session:</strong> ' + escapeHtml(b.session) + '</span>' +
+            '</div>' +
+          '</a>';
+        }).join(''));
+      }
+
+      // MPs
+      if (results.mps.length > 0) {
+        html += renderGroup('Members of Parliament', results.mps.length, results.mps.map(function(m) {
+          return '<a href="hansard-dashboard.html" class="result-card">' +
+            '<div class="result-card-top">' +
+              '<span class="result-badge badge-mp">MP</span>' +
+              '<div class="result-name">' + highlightMatch(m.name, query) + '</div>' +
+            '</div>' +
+            '<div class="result-details">' +
+              '<span class="result-detail"><strong>Party:</strong> ' + escapeHtml(m.party) + '</span>' +
+              '<span class="result-detail"><strong>Riding:</strong> ' + escapeHtml(m.riding) + '</span>' +
+              '<span class="result-detail"><strong>Province:</strong> ' + escapeHtml(m.province) + '</span>' +
+            '</div>' +
+          '</a>';
+        }).join(''));
+      }
+
+      // Officials
+      if (results.officials.length > 0) {
+        html += renderGroup('Lobbied Officials', results.officials.length, results.officials.map(function(o) {
+          return '<a href="lobbying-tracker.html" class="result-card">' +
+            '<div class="result-card-top">' +
+              '<span class="result-badge badge-official">OFFICIAL</span>' +
+              '<div class="result-name">' + highlightMatch(o.name, query) + '</div>' +
+            '</div>' +
+            '<div class="result-details">' +
+              '<span class="result-detail"><strong>Title:</strong> ' + escapeHtml(o.title) + '</span>' +
+              '<span class="result-detail"><strong>Institution:</strong> ' + escapeHtml(o.institution) + '</span>' +
+              '<span class="result-detail"><strong>Meetings:</strong> ' + o.meetings.toLocaleString() + '</span>' +
+            '</div>' +
+          '</a>';
+        }).join(''));
+      }
+
+      // Organizations
+      if (results.organizations.length > 0) {
+        html += renderGroup('Lobbying Organizations', results.organizations.length, results.organizations.map(function(o) {
+          return '<a href="lobbying-tracker.html" class="result-card">' +
+            '<div class="result-card-top">' +
+              '<span class="result-badge badge-org">ORG</span>' +
+              '<div class="result-name">' + highlightMatch(o.name, query) + '</div>' +
+            '</div>' +
+            '<div class="result-details">' +
+              '<span class="result-detail"><strong>Communications:</strong> ' + o.communications.toLocaleString() + '</span>' +
+            '</div>' +
+          '</a>';
+        }).join(''));
+      }
+
+      // Donors
+      if (results.donors.length > 0) {
+        html += renderGroup('Political Donors', results.donors.length, results.donors.map(function(d) {
+          return '<a href="contributions-tracker.html" class="result-card">' +
+            '<div class="result-card-top">' +
+              '<span class="result-badge badge-donor">DONOR</span>' +
+              '<div class="result-name">' + highlightMatch(d.name, query) + '</div>' +
+            '</div>' +
+            '<div class="result-details">' +
+              '<span class="result-detail"><strong>Total Donated:</strong> ' + formatMoney(d.total_amount) + '</span>' +
+            '</div>' +
+          '</a>';
+        }).join(''));
+      }
+
+      resultsContainer.innerHTML = html;
+    }
+
+    function renderGroup(title, count, cardsHtml) {
+      return '<div class="result-group">' +
+        '<div class="result-group-header">' +
+          '<span class="result-group-title">' + escapeHtml(title) + '</span>' +
+          '<span class="result-group-count">' + count + '</span>' +
+        '</div>' +
+        cardsHtml +
+      '</div>';
+    }
+
+    function showInitialState() {
+      resultsContainer.innerHTML = '<div class="initial-state">' +
+        '<h3>Start typing to search across all datasets</h3>' +
+        '<div class="quick-links">' +
+          '<button class="quick-link" data-query="Conservative">Conservative</button>' +
+          '<button class="quick-link" data-query="Liberal">Liberal</button>' +
+          '<button class="quick-link" data-query="NDP">NDP</button>' +
+          '<button class="quick-link" data-query="defense">Defense</button>' +
+          '<button class="quick-link" data-query="immigration">Immigration</button>' +
+          '<button class="quick-link" data-query="justice">Justice</button>' +
+          '<button class="quick-link" data-query="Mining">Mining</button>' +
+          '<button class="quick-link" data-query="Parliament">Parliament</button>' +
+        '</div>' +
+      '</div>';
+
+      // Bind quick link clicks
+      resultsContainer.querySelectorAll('.quick-link').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var q = this.getAttribute('data-query');
+          searchInput.value = q;
+          searchInput.focus();
+          performSearch(q);
+          updateClearButton();
+        });
+      });
+    }
+
+    // ── Recent Searches (localStorage) ──
+    var STORAGE_KEY = 'tenet5_recent_searches';
+
+    function getRecentSearches() {
+      try {
+        var stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRecentSearch(query) {
+      var q = query.trim();
+      if (!q || q.length < 2) return;
+      var recent = getRecentSearches();
+      // Remove duplicate
+      recent = recent.filter(function(r) { return r.toLowerCase() !== q.toLowerCase(); });
+      // Add to front
+      recent.unshift(q);
+      // Keep last 10
+      recent = recent.slice(0, 10);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(recent));
+      } catch (e) { /* ignore */ }
+      renderRecentSearches();
+    }
+
+    function clearRecentSearches() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) { /* ignore */ }
+      renderRecentSearches();
+    }
+
+    function renderRecentSearches() {
+      var recent = getRecentSearches();
+      if (recent.length === 0 || searchInput.value.trim().length > 0) {
+        recentSearches.classList.remove('visible');
+        return;
+      }
+
+      recentSearches.classList.add('visible');
+      recentTags.innerHTML = recent.map(function(term) {
+        return '<button class="recent-tag" data-query="' + escapeHtml(term) + '">' + escapeHtml(term) + '</button>';
+      }).join('');
+
+      recentTags.querySelectorAll('.recent-tag').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var q = this.getAttribute('data-query');
+          searchInput.value = q;
+          searchInput.focus();
+          performSearch(q);
+          updateClearButton();
+        });
+      });
+    }
+
+    // ── UI Helpers ──
+    function updateClearButton() {
+      if (searchInput.value.length > 0) {
+        searchClear.classList.add('visible');
+      } else {
+        searchClear.classList.remove('visible');
+      }
+    }
+
+    // ── Event Bindings ──
+    searchInput.addEventListener('input', function() {
+      updateClearButton();
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() {
+        performSearch(searchInput.value);
+      }, 300);
+    });
+
+    searchClear.addEventListener('click', function() {
+      searchInput.value = '';
+      updateClearButton();
+      showInitialState();
+      renderRecentSearches();
+      searchInput.focus();
+    });
+
+    recentClearBtn.addEventListener('click', function() {
+      clearRecentSearches();
+    });
+
+    // Keyboard shortcut: / to focus search
+    document.addEventListener('keydown', function(e) {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+      if (e.key === 'Escape' && document.activeElement === searchInput) {
+        searchInput.blur();
+      }
+    });
+
+    // ── Init ──
+    loadData();
+  })();
+  </script>
+</body>
+</html>
