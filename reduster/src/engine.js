@@ -22,6 +22,7 @@ import { DefaultRenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPi
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents.js';
 import { KeyboardEventTypes } from '@babylonjs/core/Events/keyboardEvents.js';
 import { GlowLayer } from '@babylonjs/core/Layers/glowLayer.js';
+import { SkyMaterial } from '@babylonjs/materials/sky/skyMaterial.js';
 import { transmitSatorEvent } from './telemetry.js';
 
 import '@babylonjs/core/Meshes/instancedMesh.js';
@@ -111,76 +112,60 @@ export async function startGame(canvas, onProgress) {
 
   // Sun — primary directional
   const sun = new DirectionalLight('sun', new Vector3(-0.25, -0.6, 0.5).normalize(), scene);
-  sun.intensity = 3.2;
-  sun.diffuse = new Color3(1.0, 0.92, 0.78);   // Warm golden hour
-  sun.specular = new Color3(0.85, 0.8, 0.7);
-  sun.position = new Vector3(500, 250, 200);
+  sun.intensity = 5.0; // Boosted for photorealistic contrast
+  sun.diffuse = new Color3(1.0, 0.95, 0.85);   
+  sun.specular = new Color3(1.0, 0.95, 0.85);
+  sun.position = new Vector3(8000, 4500, 2500); // Distant photorealistic positioning
 
   // Back/rim light — UE5-style edge separation
   const rim = new DirectionalLight('rim', new Vector3(0.4, -0.2, -0.7).normalize(), scene);
-  rim.intensity = 0.35;
-  rim.diffuse = new Color3(0.6, 0.65, 0.8);
+  rim.intensity = 0.8;
+  rim.diffuse = new Color3(0.5, 0.7, 1.0);
   rim.specular = Color3.Black();
 
   // Fill from below (faking ground bounce for under-canopy areas)
   const bounce = new HemisphericLight('bounce', new Vector3(0, -1, 0), scene);
-  bounce.intensity = 0.12;
-  bounce.diffuse = new Color3(0.25, 0.3, 0.15);  // Green ground bounce
+  bounce.intensity = 0.2;
+  bounce.diffuse = new Color3(0.2, 0.35, 0.15);  
   bounce.groundColor = Color3.Black();
   bounce.specular = Color3.Black();
 
   // ── Shadows — Cascaded Shadow Maps (4 cascades, PCF, soft) ──
   let shadowGen = null;
   try {
-    shadowGen = new CascadedShadowGenerator(2048, sun);
+    shadowGen = new CascadedShadowGenerator(4096, sun); // 4k shadows
     shadowGen.numCascades = 4;
-    shadowGen.lambda = 0.7;               // Cascade split balance (0=uniform, 1=log)
-    shadowGen.shadowMaxZ = 600;           // Max shadow distance
-    shadowGen.stabilizeCascades = true;   // Prevents shimmer on camera move
-    shadowGen.filteringQuality = CascadedShadowGenerator.QUALITY_MEDIUM;
+    shadowGen.lambda = 0.8;               
+    shadowGen.shadowMaxZ = 1200;           
+    shadowGen.stabilizeCascades = true;   
+    shadowGen.filteringQuality = CascadedShadowGenerator.QUALITY_HIGH;
     shadowGen.usePercentageCloserFiltering = true;
-    shadowGen.cascadeBlendPercentage = 0.15;
-    shadowGen.darkness = 0.22;
-    shadowGen.bias = 0.002;
-    shadowGen.normalBias = 0.012;
-    shadowGen.frustumEdgeFalloff = 0.5;
+    shadowGen.cascadeBlendPercentage = 0.1;
+    shadowGen.darkness = 0.3;
+    shadowGen.bias = 0.005;
+    shadowGen.normalBias = 0.02;
+    shadowGen.frustumEdgeFalloff = 1.0;
     shadowGen.forceBackFacesOnly = true;
   } catch (e) { console.warn('[Shadows]', e.message); }
   onProgress(0.3);
 
   // ════════════════════════════════════════════════════════════════════════
-  // SKY — Atmospheric sphere with baked Rayleigh scattering + clouds
+  // SKY — Proper Atmospheric Scattering Sphere
   // ════════════════════════════════════════════════════════════════════════
-  const skyDome = MeshBuilder.CreateSphere('sky', {
-    diameter: 5000, segments: 32, sideOrientation: Mesh.BACKSIDE,
-  }, scene);
-  const skyMat = new StandardMaterial('skyMat', scene);
-  skyMat.disableLighting = true;
-  skyMat.emissiveTexture = createSkyGradient(scene);
-  skyMat.emissiveTexture.coordinatesMode = Texture.SPHERICAL_MODE;
-  skyDome.material = skyMat;
-  skyDome.infiniteDistance = true;
-  skyDome.isPickable = false;
-  skyDome.renderingGroupId = 0;
-
-  // Sun disc (bright emissive with glow)
-  const sunDisc = MeshBuilder.CreateSphere('sunDisc', { diameter: 30, segments: 16 }, scene);
-  const sunDiscMat = new StandardMaterial('sunDiscMat', scene);
-  sunDiscMat.emissiveColor = new Color3(1, 0.95, 0.85);
-  sunDiscMat.disableLighting = true;
-  sunDisc.material = sunDiscMat;
-  sunDisc.position = new Vector3(1500, 600, -500);
-  sunDisc.isPickable = false;
-  sunDisc.infiniteDistance = true;
-
-  // Moon disc
-  const moonDisc = MeshBuilder.CreateSphere('moonDisc', { diameter: 20, segments: 16 }, scene);
-  const moonDiscMat = new StandardMaterial('moonDiscMat', scene);
-  moonDiscMat.emissiveColor = new Color3(0.5, 0.6, 0.8);
-  moonDiscMat.disableLighting = true;
-  moonDisc.material = moonDiscMat;
-  moonDisc.isPickable = false;
-  moonDisc.infiniteDistance = true;
+  const skybox = MeshBuilder.CreateSphere('skyBox', { diameter: 45000, segments: 64 }, scene);
+  const skyMat = new SkyMaterial("skyMaterial", scene);
+  skyMat.backFaceCulling = false;
+  skyMat.azimuth = 0.25;
+  skyMat.inclination = 0.3; // High noon / afternoon
+  skyMat.luminance = 1.0;
+  skyMat.rayleigh = 2.0;    // Atmosphere thickness
+  skyMat.mieDirectionalG = 0.8; 
+  skyMat.mieCoefficient = 0.005;
+  skyMat.useSunPosition = true;
+  skyMat.sunPosition = sun.position.clone();
+  skybox.material = skyMat;
+  skybox.infiniteDistance = true;
+  skybox.renderingGroupId = 0;
 
   onProgress(0.32);
 
