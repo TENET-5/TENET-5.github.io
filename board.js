@@ -124,10 +124,22 @@
     { from: [4,5], to: [4,7], type: 'dashed' },
   ];
 
+  const IS_MOBILE = window.innerWidth <= 768;
+  const IS_TABLET = window.innerWidth <= 1024 && window.innerWidth > 768;
+  const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  // Inject viewport meta if missing (safety for any page)
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const meta = document.createElement('meta');
+    meta.name = 'viewport';
+    meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+    document.head.appendChild(meta);
+  }
+
   let boardOpen = false;
   let dragState = { active: false, startX: 0, startY: 0 };
   let boardOffset = { x: 0, y: 0 };
-  let boardScale = 0.55;
+  let boardScale = IS_MOBILE ? 0.38 : IS_TABLET ? 0.48 : 0.55;
   let focusedCluster = null;
   let docPanelOpen = false;
   let navHistory = [];
@@ -189,6 +201,7 @@
       <div class="board-world" id="board-world">
         <div class="board-surface" id="board-surface"></div>
       </div>
+      <div class="board-hint" id="board-hint">${IS_TOUCH ? 'Pinch to zoom • Tap cards to open • Swipe clusters' : 'Scroll to zoom • Click cards to open • 1-5 jump to clusters'}</div>
       <div class="board-doc-panel" id="board-doc-panel">
         <div class="doc-titlebar" id="doc-titlebar">
           <div class="doc-titlebar-left">
@@ -564,19 +577,29 @@
       surface.style.transform = `translate(calc(-50% + ${boardOffset.x}px), calc(-50% + ${boardOffset.y}px)) rotateX(8deg) scale(${boardScale})`;
     }
 
-    // ── Touch ──
+    // ── Touch (improved mobile handling) ──
     let touchStart = null;
     let initialPinchDist = null;
+    let initialPinchScale = boardScale;
+    let touchMoved = false;
+
     world.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.board-card')) return;
+      if (e.target.closest('.board-card') || e.target.closest('button')) return;
+      touchMoved = false;
       if (e.touches.length === 1) {
         touchStart = { x: e.touches[0].clientX - boardOffset.x, y: e.touches[0].clientY - boardOffset.y };
       }
       if (e.touches.length === 2) {
-        initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        initialPinchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialPinchScale = boardScale;
       }
-    });
+    }, { passive: true });
+
     world.addEventListener('touchmove', (e) => {
+      touchMoved = true;
       if (e.touches.length === 1 && touchStart) {
         e.preventDefault();
         boardOffset.x = e.touches[0].clientX - touchStart.x;
@@ -585,13 +608,82 @@
       }
       if (e.touches.length === 2 && initialPinchDist) {
         e.preventDefault();
-        const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-        boardScale = Math.max(0.2, Math.min(1.5, boardScale * (dist / initialPinchDist)));
-        initialPinchDist = dist;
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const ratio = dist / initialPinchDist;
+        boardScale = Math.max(0.2, Math.min(1.5, initialPinchScale * ratio));
         updateTransform();
       }
     }, { passive: false });
-    world.addEventListener('touchend', () => { touchStart = null; initialPinchDist = null; });
+
+    world.addEventListener('touchend', (e) => {
+      touchStart = null;
+      initialPinchDist = null;
+      // Double-tap to reset on mobile
+      if (e.changedTouches.length === 1 && !touchMoved) {
+        const now = Date.now();
+        if (world._lastTap && (now - world._lastTap) < 300) {
+          // Double tap — reset view
+          focusedCluster = null;
+          boardScale = IS_MOBILE ? 0.38 : 0.55;
+          boardOffset = { x: 0, y: 0 };
+          updateTransform();
+          surface.querySelectorAll('.board-card').forEach(card => {
+            card.style.opacity = '';
+            card.style.filter = '';
+            card.style.transform = '';
+          });
+          clusterNav.querySelectorAll('.board-cluster-pill').forEach(p => p.classList.remove('active'));
+        }
+        world._lastTap = now;
+      }
+    });
+
+    // ── Swipe-to-close on doc panel (mobile) ──
+    if (IS_TOUCH) {
+      let swipeStartX = 0;
+      let swipeStartY = 0;
+      docPanel.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          swipeStartX = e.touches[0].clientX;
+          swipeStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+      docPanel.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 1) {
+          const dx = e.changedTouches[0].clientX - swipeStartX;
+          const dy = Math.abs(e.changedTouches[0].clientY - swipeStartY);
+          // Swipe right to close (> 80px horizontal, < 60px vertical)
+          if (dx > 80 && dy < 60 && docPanelOpen) {
+            closeDocPanel();
+          }
+        }
+      }, { passive: true });
+    }
+
+    // ── Handle orientation changes ──
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const isMobile = window.innerWidth <= 768;
+        // Auto-adjust scale on orientation change
+        if (isMobile && boardScale > 0.5) {
+          boardScale = 0.38;
+          boardOffset = { x: 0, y: 0 };
+          updateTransform();
+        }
+      }, 200);
+    });
+
+    // ── Prevent iOS elastic overscroll on board ──
+    overlay.addEventListener('touchmove', (e) => {
+      if (!e.target.closest('.doc-frame') && !e.target.closest('.board-cluster-nav')) {
+        // Allow scroll inside iframe and cluster nav, block elsewhere
+      }
+    }, { passive: true });
   }
 
   // ── Footer ──
