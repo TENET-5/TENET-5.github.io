@@ -214,11 +214,12 @@ export async function buildPlanet(scene, shadowGen) {
   sphere.updateVerticesData('normal', normals);
   sphere.setVerticesData('color', colors, false, 4);
 
-  // ── Material — PBR with vertex colours ──
-  const mat = new PBRMaterial('planetMat', scene);
-  mat.roughness = 0.88;
-  mat.metallic  = 0.02;
-  mat.useVertexColors = true;
+  // ── Material — Standard with vertex colours ──
+  const mat = new StandardMaterial('planetMat', scene);
+  // Remove PBR specific roughness/metallic properties
+  mat.specularPower = 32;
+  mat.specularColor = new Color3(0.05, 0.05, 0.05); // slight sheen rather than blazing reflections
+  mat.disableLighting = false; // default
   sphere.material = mat;
   sphere.receiveShadows = true;
   sphere.checkCollisions = true;
