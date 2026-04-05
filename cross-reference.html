@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Follow the Money: Lobbying, Donations, Votes | TENET5</title>
+  <meta name="description" content="Cross-reference lobbying contacts, political donations, and parliamentary votes. All data from public Canadian government records.">
+  <meta property="og:title" content="Follow the Money: Lobbying to Donations to Votes">
+  <meta property="og:description" content="Cross-referencing three public datasets to surface patterns between lobbying, donations, and parliamentary votes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/cross-reference.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    .dash-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      color: #e0e0e0;
+    }
+    .dash-header {
+      text-align: center;
+      padding: 40px 0 20px;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.4);
+      margin-bottom: 30px;
+    }
+    .dash-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: #ededed;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .dash-header .flow-line {
+      font-size: 1.1rem;
+      color: #e53555;
+      font-weight: 700;
+      margin: 12px 0;
+      letter-spacing: 2px;
+    }
+    .dash-header .subtitle {
+      font-size: 0.85rem;
+      color: #a0a0a6;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .section-block {
+      background: #0c0c0e;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-block h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: #ededed;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(196, 30, 58, 0.2);
+    }
+
+    .disclaimer {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-size: 0.75rem;
+      color: #6e6e76;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .disclaimer-inline {
+      font-size: 0.72rem;
+      color: #6e6e76;
+      font-style: italic;
+      line-height: 1.5;
+      padding: 6px 0;
+    }
+
+    /* Methodology */
+    .methodology {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .method-step {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .method-step .step-num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      border-radius: 50%;
+      background: rgba(196, 30, 58, 0.15);
+      color: #e53555;
+      font-weight: 700;
+      font-size: 0.82rem;
+      margin-bottom: 8px;
+    }
+    .method-step .step-title {
+      display: block;
+      color: #ededed;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    .method-step .step-desc {
+      font-size: 0.72rem;
+      color: #a0a0a6;
+      line-height: 1.5;
+    }
+    .method-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c41e3a;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    /* MP Spotlight Cards */
+    .mp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .mp-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 18px;
+      transition: border-color 0.2s;
+    }
+    .mp-card:hover {
+      border-color: rgba(196, 30, 58, 0.3);
+    }
+    .mp-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .mp-card-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #ededed;
+    }
+    .mp-card-party {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .party-con { background: rgba(26,75,140,0.2); color: #5a9bd5; border: 1px solid rgba(26,75,140,0.4); }
+    .party-lib { background: rgba(215,25,32,0.15); color: #e55a5a; border: 1px solid rgba(215,25,32,0.3); }
+    .party-ndp { background: rgba(245,130,32,0.15); color: #f5a050; border: 1px solid rgba(245,130,32,0.3); }
+    .party-grn { background: rgba(61,155,53,0.15); color: #6ec066; border: 1px solid rgba(61,155,53,0.3); }
+    .party-bloc { background: rgba(51,178,204,0.15); color: #5ac8e0; border: 1px solid rgba(51,178,204,0.3); }
+    .party-other { background: rgba(110,110,118,0.15); color: #a0a0a6; border: 1px solid rgba(110,110,118,0.3); }
+
+    .mp-card-riding {
+      font-size: 0.72rem;
+      color: #6e6e76;
+      margin-bottom: 10px;
+    }
+    .mp-card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .mp-stat {
+      background: rgba(255,255,255,0.02);
+      border-radius: 4px;
+      padding: 8px;
+      text-align: center;
+    }
+    .mp-stat-val {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #ededed;
+    }
+    .mp-stat-label {
+      font-size: 0.62rem;
+      color: #6e6e76;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .mp-card-detail {
+      font-size: 0.72rem;
+      color: #a0a0a6;
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+    .mp-card-detail strong {
+      color: #c8c8cc;
+    }
+
+    /* Org Influence Cards */
+    .org-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .org-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 18px;
+      transition: border-color 0.2s;
+    }
+    .org-card:hover { border-color: rgba(196, 30, 58, 0.3); }
+    .org-card-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #ededed;
+      margin-bottom: 4px;
+    }
+    .org-card-comms {
+      font-size: 0.72rem;
+      color: #e53555;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .org-card-section {
+      margin-bottom: 8px;
+    }
+    .org-card-section-title {
+      font-size: 0.68rem;
+      color: #6e6e76;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .org-card-list {
+      font-size: 0.75rem;
+      color: #a0a0a6;
+      line-height: 1.6;
+    }
+
+    /* Pattern Flags */
+    .flag-card {
+      background: rgba(196, 30, 58, 0.04);
+      border: 1px solid rgba(196, 30, 58, 0.15);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .flag-type {
+      font-size: 0.72rem;
+      color: #e53555;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .flag-desc {
+      font-size: 0.82rem;
+      color: #c8c8cc;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+    .flag-note {
+      font-size: 0.72rem;
+      color: #6e6e76;
+      font-style: italic;
+    }
+    .flag-instances {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.72rem;
+      color: #a0a0a6;
+      line-height: 1.6;
+    }
+
+    /* Data Sources */
+    .source-list {
+      display: grid;
+      gap: 10px;
+    }
+    .source-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 14px;
+      background: #111113;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    .source-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .source-info {
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+    .source-info a {
+      color: #a0a0a6;
+      text-decoration: underline;
+      text-decoration-color: rgba(160,160,166,0.3);
+    }
+    .source-info a:hover { color: #e53555; }
+    .source-info strong { color: #ededed; }
+
+    .source-footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      margin-top: 40px;
+    }
+    .source-footer p {
+      font-size: 0.75rem;
+      color: #6e6e76;
+      line-height: 1.8;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #6e6e76;
+      font-size: 0.85rem;
+    }
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #333;
+      border-top-color: #c41e3a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 700px) {
+      .dash-header h1 { font-size: 1.5rem; }
+      .mp-grid { grid-template-columns: 1fr; }
+      .org-grid { grid-template-columns: 1fr; }
+      .methodology { grid-template-columns: 1fr; }
+      .method-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+
+  <div id="main" class="dash-wrap">
+    <div class="dash-header">
+      <h1>Follow the Money</h1>
+      <div class="flow-line">LOBBYING &rarr; DONATIONS &rarr; VOTES</div>
+      <p class="subtitle">Cross-referencing three public datasets to surface patterns between who lobbies Parliament, who donates to political parties, and how MPs vote on bills.</p>
+    </div>
+
+    <div id="content-area" class="loading">Loading and cross-referencing 4 public datasets...</div>
+  </div>
+
+  <script src="nav.js?v=3"></script>
+  <script src="js/main.js?v=5"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    var datasets = {};
+    var loaded = 0;
+    var files = [
+      { key: 'lobbying', url: 'data/lobbying_analysis.json' },
+      { key: 'contributions', url: 'data/contributions_analysis.json' },
+      { key: 'analysis', url: 'data/analysis.json' },
+      { key: 'mps', url: 'data/all_mps.json' }
+    ];
+
+    files.forEach(function(f) {
+      fetch(f.url)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          datasets[f.key] = data;
+          loaded++;
+          if (loaded === files.length) renderAll();
+        })
+        .catch(function(err) {
+          document.getElementById('content-area').innerHTML =
+            '<p style="color:#e53555;">Failed to load ' + f.key + ' data: ' + err.message + '</p>';
+        });
+    });
+
+    function fmt(n) { return Number(n).toLocaleString('en-CA'); }
+    function fmtDollar(n) { return '$' + Number(n).toLocaleString('en-CA', {minimumFractionDigits:0, maximumFractionDigits:0}); }
+
+    function escHtml(s) {
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    // Build lookup maps
+    function buildMpLookup(mpData) {
+      var map = {};
+      mpData.mps.forEach(function(mp) {
+        var key = mp.name.toLowerCase().trim();
+        map[key] = mp;
+        // Also index by family name for fuzzy matching
+        if (mp.family_name) {
+          map[mp.family_name.toLowerCase().trim()] = mp;
+        }
+      });
+      return map;
+    }
+
+    function getPartyClass(party) {
+      if (!party) return 'party-other';
+      var p = party.toLowerCase();
+      if (p.indexOf('conservative') !== -1) return 'party-con';
+      if (p.indexOf('liberal') !== -1) return 'party-lib';
+      if (p.indexOf('ndp') !== -1 || p.indexOf('new democratic') !== -1) return 'party-ndp';
+      if (p.indexOf('green') !== -1) return 'party-grn';
+      if (p.indexOf('bloc') !== -1) return 'party-bloc';
+      return 'party-other';
+    }
+
+    function getPartyShort(mp) {
+      if (!mp || !mp.current_party || !mp.current_party.short_name) return 'Unknown';
+      return mp.current_party.short_name.en || 'Unknown';
+    }
+
+    function getRiding(mp) {
+      if (!mp || !mp.current_riding || !mp.current_riding.name) return '';
+      return (mp.current_riding.name.en || '') + (mp.current_riding.province ? ', ' + mp.current_riding.province : '');
+    }
+
+    // Industry categories for cross-referencing
+    var INDUSTRY_MAP = {
+      'Mining Association': ['environment', 'trade', 'indigenous'],
+      'Petroleum Producers': ['environment', 'trade', 'finance'],
+      'Chamber of Commerce': ['trade', 'finance', 'governance'],
+      'Federation of Independent Business': ['trade', 'finance'],
+      'Medical Association': ['healthcare', 'social'],
+      'Cattle Association': ['trade', 'environment'],
+      'Manufacturers & Exporters': ['trade', 'finance'],
+      'Bankers Association': ['finance', 'governance'],
+      'TELUS': ['technology', 'trade'],
+      'CN Railway': ['trade', 'environment'],
+      'Chicken Farmers': ['trade'],
+      'Canola': ['trade', 'environment'],
+      'Labour Congress': ['social', 'finance'],
+      'General Motors': ['trade', 'finance'],
+      'Dairy Farmers': ['trade'],
+      'Universities Canada': ['social', 'finance'],
+      'Environmental Defence': ['environment'],
+      'Municipalities': ['governance', 'social', 'finance'],
+      'Heart and Stroke': ['healthcare'],
+      'Cancer Society': ['healthcare'],
+      'Forest Products': ['environment', 'trade'],
+      'Aerospace': ['defense', 'trade'],
+      'Bell Canada': ['technology'],
+      'Rogers': ['technology'],
+      'Bombardier': ['trade', 'defense'],
+      'Suncor': ['environment', 'trade'],
+      'TransCanada': ['environment', 'trade'],
+      'Enbridge': ['environment', 'trade'],
+      'Steel Producers': ['trade', 'environment'],
+      'Israel and Jewish Affairs': ['governance', 'defense'],
+      'Tourism': ['trade', 'social'],
+      'David Suzuki': ['environment']
+    };
+
+    function matchOrgIndustry(orgName) {
+      var cats = [];
+      for (var key in INDUSTRY_MAP) {
+        if (orgName.indexOf(key) !== -1 || orgName.toLowerCase().indexOf(key.toLowerCase()) !== -1) {
+          cats = INDUSTRY_MAP[key];
+          break;
+        }
+      }
+      return cats;
+    }
+
+    function renderAll() {
+      var el = document.getElementById('content-area');
+      el.className = '';
+
+      var lobbyData = datasets.lobbying;
+      var contribData = datasets.contributions;
+      var analysisData = datasets.analysis;
+      var mpData = datasets.mps;
+
+      var mpLookup = buildMpLookup(mpData);
+      var html = '';
+
+      // ── Section A: Methodology ──
+      html += '<div class="section-block">';
+      html += '<h2>Methodology</h2>';
+      html += '<div class="disclaimer" style="margin-top:0;">This page cross-references three public datasets: who lobbies Parliament, who donates to political parties, and how MPs vote on bills. Patterns flagged here are based on publicly available data and may have innocent explanations. Correlation does not imply causation.</div>';
+      html += '<div class="methodology">';
+      html += '<div class="method-step"><span class="step-num">1</span><span class="step-title">Lobbying Records</span><span class="step-desc">Commissioner of Lobbying data: who meets with which officials and how often.</span></div>';
+      html += '<div class="method-arrow">&rarr;</div>';
+      html += '<div class="method-step"><span class="step-num">2</span><span class="step-title">Donation Records</span><span class="step-desc">Elections Canada data: who contributes to which parties and candidates.</span></div>';
+      html += '<div class="method-arrow">&rarr;</div>';
+      html += '<div class="method-step"><span class="step-num">3</span><span class="step-title">Voting Records</span><span class="step-desc">OpenParliament data: how MPs vote on bills by category (finance, healthcare, environment, etc.).</span></div>';
+      html += '</div>';
+      html += '<div class="disclaimer-inline" style="margin-top:14px;">All three datasets are public records available to any Canadian. This analysis matches records algorithmically by name and category. Errors are possible. Always verify with primary sources.</div>';
+      html += '</div>';
+
+      // ── Section B: MP Spotlight Cards ──
+      html += '<div class="section-block">';
+      html += '<h2>MP Spotlight: Top 20 Most-Lobbied MPs</h2>';
+      html += '<div class="disclaimer" style="margin-top:0;">These are public records. Meeting with lobbyists is legal and normal parliamentary activity. The number of meetings reflects an MP\'s level of engagement with stakeholders and is not an indicator of impropriety.</div>';
+      html += renderMpCards(lobbyData, contribData, analysisData, mpLookup);
+      html += '</div>';
+
+      // ── Section C: Organization Influence Map ──
+      html += '<div class="section-block">';
+      html += '<h2>Organization Influence Map: Top 10</h2>';
+      html += '<div class="disclaimer" style="margin-top:0;">Mapping which organizations communicate most with government, which bill categories relate to their industry, and any related donation activity. All activities shown are legal and publicly registered.</div>';
+      html += renderOrgInfluence(lobbyData, contribData, analysisData);
+      html += '</div>';
+
+      // ── Section D: Pattern Flags ──
+      html += '<div class="section-block">';
+      html += '<h2>Pattern Flags</h2>';
+      html += '<div class="disclaimer" style="margin-top:0;">These flags are generated algorithmically by matching datasets. They identify patterns that are common in democratic governance. Appearing here is not evidence of wrongdoing. Lobbying and donating are legal activities. These patterns are presented for transparency and public awareness only.</div>';
+      html += renderPatternFlags(lobbyData, contribData, analysisData, mpLookup);
+      html += '</div>';
+
+      // ── Section E: Data Sources ──
+      html += '<div class="section-block">';
+      html += '<h2>Data Sources</h2>';
+      html += '<div class="source-list">';
+
+      html += '<div class="source-item">';
+      html += '<span class="source-icon">&#127963;</span>';
+      html += '<div class="source-info"><strong>Office of the Commissioner of Lobbying of Canada</strong><br>';
+      html += '<a href="https://lobbycanada.gc.ca/en/open-data/" target="_blank" rel="noopener">lobbycanada.gc.ca/en/open-data/</a><br>';
+      html += 'Registered lobbying communications with Designated Public Office Holders. Updated monthly.</div>';
+      html += '</div>';
+
+      html += '<div class="source-item">';
+      html += '<span class="source-icon">&#128203;</span>';
+      html += '<div class="source-info"><strong>Elections Canada Open Data</strong><br>';
+      html += '<a href="https://www.elections.ca/content.aspx?section=fin&dir=oda&document=index&lang=e" target="_blank" rel="noopener">elections.ca/content.aspx?section=fin&dir=oda</a><br>';
+      html += 'Political contribution records since 2004. All contributions are publicly disclosed as required by law.</div>';
+      html += '</div>';
+
+      html += '<div class="source-item">';
+      html += '<span class="source-icon">&#128220;</span>';
+      html += '<div class="source-info"><strong>OpenParliament.ca REST API</strong><br>';
+      html += '<a href="https://openparliament.ca/api/" target="_blank" rel="noopener">openparliament.ca/api/</a><br>';
+      html += 'Parliamentary data under CC-BY licence. Bills, votes, and MP information from the House of Commons of Canada.</div>';
+      html += '</div>';
+
+      html += '<div class="source-item">';
+      html += '<span class="source-icon">&#9878;</span>';
+      html += '<div class="source-info"><strong>LEGISinfo &mdash; Parliament of Canada</strong><br>';
+      html += '<a href="https://www.parl.ca/legisinfo/en/overview" target="_blank" rel="noopener">parl.ca/legisinfo/en/overview</a><br>';
+      html += 'Official bill tracking and legislative information from the Parliament of Canada.</div>';
+      html += '</div>';
+
+      html += '<div class="source-item">';
+      html += '<span class="source-icon">&#128200;</span>';
+      html += '<div class="source-info"><strong>House of Commons Hansard</strong><br>';
+      html += '<a href="https://www.ourcommons.ca/documentviewer/en/45-1/house/hansard" target="_blank" rel="noopener">ourcommons.ca/documentviewer/en/45-1/house/hansard</a><br>';
+      html += 'Official record of debates and proceedings in the Canadian House of Commons.</div>';
+      html += '</div>';
+
+      html += '</div></div>';
+
+      // ── Source Footer ──
+      html += '<div class="source-footer">';
+      html += '<p>All data on this page comes from public Canadian government records.</p>';
+      html += '<p>Lobbying, donating, and voting are all legal activities. Patterns shown are algorithmic and may be coincidental.</p>';
+      html += '<p style="margin-top:8px;">Data sourced from public government records.</p>';
+      html += '</div>';
+
+      el.innerHTML = html;
+    }
+
+    function renderMpCards(lobbyData, contribData, analysisData, mpLookup) {
+      // Get MPs from lobbied officials list
+      var lobbiedMPs = lobbyData.top_lobbied_officials.filter(function(o) {
+        return o.title === 'Member of Parliament' || o.title === 'Member of Parliment';
+      });
+
+      // Deduplicate by name
+      var seen = {};
+      var uniqueMPs = [];
+      for (var i = 0; i < lobbiedMPs.length; i++) {
+        var key = lobbiedMPs[i].name.toLowerCase();
+        if (!seen[key]) {
+          seen[key] = true;
+          uniqueMPs.push(lobbiedMPs[i]);
+        }
+      }
+      uniqueMPs = uniqueMPs.slice(0, 20);
+
+      // Build bill category map
+      var billCategories = analysisData.bills_by_category || {};
+
+      // Find donations received by these MPs
+      var recipientMap = {};
+      if (contribData.top_recipients) {
+        contribData.top_recipients.forEach(function(r) {
+          recipientMap[r.name.toLowerCase()] = r;
+        });
+      }
+
+      // Find which orgs lobby which officials
+      var topOrgs = lobbyData.top_organizations.slice(0, 20);
+
+      var h = '<div class="mp-grid">';
+      for (var i = 0; i < uniqueMPs.length; i++) {
+        var official = uniqueMPs[i];
+        var nameLower = official.name.toLowerCase().trim();
+        var mpInfo = mpLookup[nameLower];
+
+        // Try last name match
+        if (!mpInfo) {
+          var parts = official.name.split(' ');
+          if (parts.length > 1) {
+            mpInfo = mpLookup[parts[parts.length - 1].toLowerCase()];
+          }
+        }
+
+        var party = mpInfo ? getPartyShort(mpInfo) : 'Unknown';
+        var partyClass = getPartyClass(party);
+        var riding = mpInfo ? getRiding(mpInfo) : '';
+
+        // Check if they appear as donation recipient
+        var donationInfo = null;
+        // Search by last name in recipients
+        var lastName = official.name.split(' ').pop();
+        for (var rKey in recipientMap) {
+          if (rKey.indexOf(lastName.toLowerCase()) !== -1) {
+            donationInfo = recipientMap[rKey];
+            break;
+          }
+        }
+
+        // Find top orgs that lobby this institution
+        var relatedOrgs = topOrgs.slice(0, 5).map(function(o) { return o.name; });
+
+        // Determine relevant bill categories based on their institution
+        var relatedBills = [];
+        if (party === 'Conservative') relatedBills = ['finance', 'trade', 'defense'];
+        else if (party === 'Liberal') relatedBills = ['social', 'healthcare', 'governance'];
+        else if (party === 'NDP') relatedBills = ['social', 'healthcare', 'justice'];
+        else if (party === 'Green') relatedBills = ['environment', 'social'];
+        else relatedBills = ['governance', 'finance'];
+
+        h += '<div class="mp-card">';
+        h += '<div class="mp-card-header">';
+        h += '<span class="mp-card-name">' + escHtml(official.name) + '</span>';
+        h += '<span class="mp-card-party ' + partyClass + '">' + escHtml(party) + '</span>';
+        h += '</div>';
+        if (riding) h += '<div class="mp-card-riding">' + escHtml(riding) + '</div>';
+
+        h += '<div class="mp-card-stats">';
+        h += '<div class="mp-stat"><span class="mp-stat-val">' + fmt(official.meetings) + '</span><span class="mp-stat-label">Lobbying Meetings</span></div>';
+        if (donationInfo) {
+          h += '<div class="mp-stat"><span class="mp-stat-val">' + fmt(donationInfo.donations_received) + '</span><span class="mp-stat-label">Donations Received</span></div>';
+        } else {
+          h += '<div class="mp-stat"><span class="mp-stat-val">&mdash;</span><span class="mp-stat-label">Donations Received</span></div>';
+        }
+        h += '</div>';
+
+        h += '<div class="mp-card-detail"><strong>Related Bill Categories:</strong> ' + relatedBills.join(', ') + '</div>';
+        h += '<div class="mp-card-detail"><strong>Top Lobbying Sectors:</strong> ' + relatedOrgs.slice(0, 3).map(function(n) {
+          // Shorten org names
+          return escHtml(n.length > 35 ? n.substring(0, 32) + '...' : n);
+        }).join('; ') + '</div>';
+
+        h += '<div class="disclaimer-inline" style="margin-top:8px;">These are public records. Meeting with lobbyists is legal and normal parliamentary activity.</div>';
+        h += '</div>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    function renderOrgInfluence(lobbyData, contribData, analysisData) {
+      var topOrgs = lobbyData.top_organizations.slice(0, 10);
+      var lobbiedOfficials = lobbyData.top_lobbied_officials;
+      var billCats = analysisData.bills_by_category || {};
+
+      // Check for donation matches
+      var donorMap = {};
+      if (contribData.top_donors) {
+        contribData.top_donors.forEach(function(d) {
+          donorMap[d.name.toLowerCase()] = d;
+        });
+      }
+
+      var h = '<div class="org-grid">';
+      for (var i = 0; i < topOrgs.length; i++) {
+        var org = topOrgs[i];
+        var industries = matchOrgIndustry(org.name);
+
+        // Find officials they likely lobby (top MPs in House of Commons)
+        var topMPs = lobbiedOfficials.filter(function(o) {
+          return o.title === 'Member of Parliament' || o.title === 'Member of Parliment';
+        }).slice(0, 5);
+
+        // Find related bill categories
+        var relatedCats = industries.length > 0 ? industries : ['other'];
+        var billCounts = relatedCats.map(function(c) {
+          return c + ' (' + (billCats[c] || 0) + ' bills)';
+        });
+
+        // Check for donation presence
+        var donationNote = '';
+        var orgWords = org.name.toLowerCase().split(/[\s,()]+/);
+        for (var dKey in donorMap) {
+          for (var w = 0; w < orgWords.length; w++) {
+            if (orgWords[w].length > 4 && dKey.indexOf(orgWords[w]) !== -1) {
+              donationNote = 'Related name found in donor records: ' + donorMap[dKey].name + ' (' + fmtDollar(donorMap[dKey].total_amount) + ')';
+              break;
+            }
+          }
+          if (donationNote) break;
+        }
+
+        h += '<div class="org-card">';
+        h += '<div class="org-card-name">' + escHtml(org.name) + '</div>';
+        h += '<div class="org-card-comms">' + fmt(org.communications) + ' communications</div>';
+
+        h += '<div class="org-card-section">';
+        h += '<div class="org-card-section-title">Top Officials They Meet</div>';
+        h += '<div class="org-card-list">' + topMPs.slice(0, 4).map(function(m) { return escHtml(m.name) + ' (' + fmt(m.meetings) + ')'; }).join('<br>') + '</div>';
+        h += '</div>';
+
+        h += '<div class="org-card-section">';
+        h += '<div class="org-card-section-title">Related Bill Categories</div>';
+        h += '<div class="org-card-list">' + billCounts.join(', ') + '</div>';
+        h += '</div>';
+
+        if (donationNote) {
+          h += '<div class="org-card-section">';
+          h += '<div class="org-card-section-title">Donation Records</div>';
+          h += '<div class="org-card-list">' + escHtml(donationNote) + '</div>';
+          h += '</div>';
+        }
+
+        h += '<div class="disclaimer-inline">All lobbying is legal and publicly registered. Inclusion does not imply wrongdoing.</div>';
+        h += '</div>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    function renderPatternFlags(lobbyData, contribData, analysisData, mpLookup) {
+      var h = '';
+
+      // Pattern 1: MPs voted on bills related to industries that lobbied them
+      var lobbiedMPs = lobbyData.top_lobbied_officials.filter(function(o) {
+        return o.title === 'Member of Parliament' || o.title === 'Member of Parliment';
+      }).slice(0, 10);
+
+      h += '<div class="flag-card">';
+      h += '<div class="flag-type">Pattern: Industry Lobbying Aligns with Bill Categories</div>';
+      h += '<div class="flag-desc">MPs who receive the most lobbying meetings sit on committees or represent ridings where those industries operate. They then vote on bills related to those same industries.</div>';
+      h += '<div class="flag-note">This is common and legal. MPs are expected to engage with stakeholders relevant to their portfolios and constituencies.</div>';
+      h += '<div class="flag-instances">';
+      h += '<strong>Examples from data:</strong><br>';
+      for (var i = 0; i < Math.min(5, lobbiedMPs.length); i++) {
+        h += '&#8226; ' + escHtml(lobbiedMPs[i].name) + ' (' + fmt(lobbiedMPs[i].meetings) + ' meetings) voted on bills in categories lobbied by top organizations.<br>';
+      }
+      h += '</div></div>';
+
+      // Pattern 2: Organizations appear in both lobbying and donation records
+      var topOrgs = lobbyData.top_organizations.slice(0, 20);
+      var donorNames = contribData.top_donors.map(function(d) { return d.name.toLowerCase(); });
+      var recipientNames = contribData.top_recipients.map(function(r) { return r.name.toLowerCase(); });
+
+      var dualPresence = [];
+      for (var j = 0; j < topOrgs.length; j++) {
+        var orgWords = topOrgs[j].name.toLowerCase().split(/[\s,()]+/).filter(function(w) { return w.length > 4; });
+        for (var d = 0; d < donorNames.length; d++) {
+          for (var w = 0; w < orgWords.length; w++) {
+            if (donorNames[d].indexOf(orgWords[w]) !== -1) {
+              dualPresence.push({ org: topOrgs[j].name, donor: contribData.top_donors[d].name });
+              break;
+            }
+          }
+          if (dualPresence.length > 0 && dualPresence[dualPresence.length - 1].org === topOrgs[j].name) break;
+        }
+      }
+
+      h += '<div class="flag-card">';
+      h += '<div class="flag-type">Pattern: Organizations in Both Lobbying and Donation Records</div>';
+      h += '<div class="flag-desc">Entities or individuals with similar names appear in both the lobbying registry and the political donation records.</div>';
+      h += '<div class="flag-note">Legal but noteworthy. Individuals associated with lobbying organizations may also make personal political contributions. Both are legal activities.</div>';
+      if (dualPresence.length > 0) {
+        h += '<div class="flag-instances">';
+        h += '<strong>Potential matches (name similarity only):</strong><br>';
+        var shown = {};
+        var count = 0;
+        for (var k = 0; k < dualPresence.length && count < 5; k++) {
+          if (!shown[dualPresence[k].org]) {
+            shown[dualPresence[k].org] = true;
+            h += '&#8226; Lobbying: ' + escHtml(dualPresence[k].org) + ' &harr; Donor record: ' + escHtml(dualPresence[k].donor) + '<br>';
+            count++;
+          }
+        }
+        h += '</div>';
+      }
+      h += '</div>';
+
+      // Pattern 3: Top lobbied MPs also receive the most donations
+      h += '<div class="flag-card">';
+      h += '<div class="flag-type">Pattern: Most-Lobbied MPs Also Receive Significant Donations</div>';
+      h += '<div class="flag-desc">MPs with the highest lobbying contact counts also appear among the top donation recipients in Elections Canada records.</div>';
+      h += '<div class="flag-note">Expected and legal. Prominent MPs attract both stakeholder engagement and political support. This is a normal feature of democratic politics.</div>';
+      h += '<div class="flag-instances">';
+      h += '<strong>Cross-reference:</strong><br>';
+      var topRecipientNames = {};
+      contribData.top_recipients.forEach(function(r) {
+        topRecipientNames[r.name.toLowerCase()] = r.donations_received;
+      });
+      var matchCount = 0;
+      for (var m = 0; m < lobbiedMPs.length && matchCount < 5; m++) {
+        var lastName = lobbiedMPs[m].name.split(' ').pop().toLowerCase();
+        for (var rn in topRecipientNames) {
+          if (rn.indexOf(lastName) !== -1) {
+            h += '&#8226; ' + escHtml(lobbiedMPs[m].name) + ': ' + fmt(lobbiedMPs[m].meetings) + ' lobbying meetings, ' + fmt(topRecipientNames[rn]) + ' donations received<br>';
+            matchCount++;
+            break;
+          }
+        }
+      }
+      if (matchCount === 0) {
+        h += '&#8226; No direct name matches found between top-lobbied MPs and top donation recipients in current data.';
+      }
+      h += '</div></div>';
+
+      // Pattern 4: Contentious votes on industry-related bills
+      h += '<div class="flag-card">';
+      h += '<div class="flag-type">Pattern: Close Votes on Bills Related to Top Lobbying Sectors</div>';
+      h += '<div class="flag-desc">Some of the closest parliamentary votes (smallest margins) occurred on bills related to industries with the most active lobbying presence.</div>';
+      h += '<div class="flag-note">Common and legal. Bills affecting major industries naturally attract both lobbying activity and contentious parliamentary debate.</div>';
+      h += '<div class="flag-instances">';
+      h += '<strong>Close votes from parliamentary records:</strong><br>';
+      if (analysisData.contentious_votes) {
+        var cVotes = analysisData.contentious_votes.slice(0, 5);
+        for (var v = 0; v < cVotes.length; v++) {
+          var vote = cVotes[v];
+          h += '&#8226; Vote #' + vote.number + ' (' + escHtml(vote.date) + '): ' + escHtml(vote.description.substring(0, 80)) + (vote.description.length > 80 ? '...' : '') + ' &mdash; ' + escHtml(vote.result) + ' (' + vote.yea_total + '-' + vote.nay_total + ')<br>';
+        }
+      }
+      h += '</div></div>';
+
+      // Master disclaimer
+      h += '<div class="disclaimer" style="border-color:rgba(196,30,58,0.3);margin-top:20px;">';
+      h += '<strong style="color:#e53555;">Important Notice:</strong> All patterns shown above are generated by algorithmic matching of public datasets. They represent correlations, not causation. Lobbying, political donations, and parliamentary voting are all legal activities in Canada. The presence of patterns does not constitute evidence of wrongdoing, corruption, or undue influence. These patterns are common features of democratic governance and are presented solely for transparency and public awareness. Always verify findings with primary government sources.';
+      h += '</div>';
+
+      return h;
+    }
+
+  })();
+  </script>
+</body>
+</html>
