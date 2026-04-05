@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hansard Dashboard -- Canadian Parliament 45-1 | TENET5</title>
+  <meta name="description" content="Real-time dashboard tracking 151 bills, 94 votes, and 340 MPs in the Canadian 45th Parliament. All data from public government records.">
+  <meta property="og:title" content="Hansard Dashboard -- Parliament 45-1">
+  <meta property="og:description" content="Track all bills, votes, and MP activity in the 45th Canadian Parliament. Data from OpenParliament.ca and LEGISinfo.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/hansard-dashboard.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    /* ── Dashboard Layout ──────────────────────────────────────────── */
+    .dash-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      color: #e0e0e0;
+    }
+    .dash-header {
+      text-align: center;
+      padding: 40px 0 20px;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.4);
+      margin-bottom: 30px;
+    }
+    .dash-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      color: #ededed;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .dash-header .subtitle {
+      font-size: 0.85rem;
+      color: #a0a0a6;
+    }
+    .dash-header .session-badge {
+      display: inline-block;
+      background: rgba(196, 30, 58, 0.15);
+      border: 1px solid rgba(196, 30, 58, 0.4);
+      color: #e53555;
+      padding: 4px 14px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* ── Stats Row ─────────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover {
+      border-color: rgba(196, 30, 58, 0.3);
+    }
+    .stat-card .num {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #e53555;
+      display: block;
+      line-height: 1.1;
+    }
+    .stat-card .label {
+      font-size: 0.65rem;
+      color: #6e6e76;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ── Section Headings ──────────────────────────────────────────── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .section-head h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.15rem;
+      color: #ededed;
+      font-weight: 600;
+    }
+    .section-head .count {
+      font-size: 0.7rem;
+      color: #e53555;
+      background: rgba(196, 30, 58, 0.1);
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+
+    /* ── Search / Filter ───────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+    .filter-bar input,
+    .filter-bar select {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e0e0e0;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filter-bar input:focus,
+    .filter-bar select:focus {
+      border-color: rgba(196, 30, 58, 0.5);
+    }
+    .filter-bar input { flex: 1; min-width: 200px; }
+    .filter-bar select { min-width: 140px; }
+
+    /* ── Tables ─────────────────────────────────────────────────────── */
+    .dash-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 20px;
+    }
+    .dash-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .dash-table th {
+      background: #0c0c0e;
+      color: #a0a0a6;
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 2px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .dash-table th:hover {
+      color: #e53555;
+    }
+    .dash-table th .sort-arrow {
+      margin-left: 4px;
+      opacity: 0.3;
+    }
+    .dash-table th.sorted .sort-arrow {
+      opacity: 1;
+      color: #e53555;
+    }
+    .dash-table td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      vertical-align: top;
+    }
+    .dash-table tr:hover {
+      background: rgba(196, 30, 58, 0.03);
+    }
+    .dash-table a {
+      color: #e53555;
+      text-decoration: none;
+    }
+    .dash-table a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Category Tags ─────────────────────────────────────────────── */
+    .cat-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
+    .cat-defense     { background: #1a2a3a; color: #5dade2; }
+    .cat-finance     { background: #2a2a1a; color: #f1c40f; }
+    .cat-healthcare  { background: #1a2a1a; color: #2ecc71; }
+    .cat-environment { background: #0a2a1a; color: #1abc9c; }
+    .cat-justice     { background: #2a1a2a; color: #9b59b6; }
+    .cat-immigration { background: #2a1a1a; color: #e67e22; }
+    .cat-indigenous  { background: #1a1a0a; color: #d4a574; }
+    .cat-trade       { background: #1a1a2a; color: #3498db; }
+    .cat-technology  { background: #0a1a2a; color: #00b4d8; }
+    .cat-social      { background: #2a1a1a; color: #e74c3c; }
+    .cat-governance  { background: #1a1a1a; color: #95a5a6; }
+    .cat-other       { background: #151515; color: #6e6e76; }
+
+    /* ── Party Colors ──────────────────────────────────────────────── */
+    .party-con  { color: #1a6dc0; }
+    .party-lib  { color: #d32f2f; }
+    .party-bloc { color: #33b2cc; }
+    .party-ndp  { color: #f58220; }
+    .party-grn  { color: #3d9b35; }
+
+    /* ── Vote Bar Chart (pure CSS) ─────────────────────────────────── */
+    .vote-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .vote-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .vote-bar-label {
+      width: 100px;
+      text-align: right;
+      font-size: 0.78rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .vote-bar-track {
+      flex: 1;
+      display: flex;
+      height: 28px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #111113;
+    }
+    .vote-bar-yea {
+      background: #27ae60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #fff;
+      min-width: 30px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .vote-bar-nay {
+      background: #c0392b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #fff;
+      min-width: 30px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .vote-bar-pct {
+      width: 50px;
+      text-align: right;
+      font-size: 0.72rem;
+      color: #6e6e76;
+      flex-shrink: 0;
+    }
+
+    /* ── Category Breakdown Chart ──────────────────────────────────── */
+    .cat-chart {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .cat-chart-item {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .cat-chart-item:hover {
+      border-color: rgba(196, 30, 58, 0.3);
+    }
+    .cat-chart-item .cat-num {
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: block;
+    }
+    .cat-chart-item .cat-label {
+      font-size: 0.68rem;
+      text-transform: capitalize;
+      color: #6e6e76;
+      margin-top: 2px;
+    }
+
+    /* ── Foreign Affairs Highlight ──────────────────────────────────── */
+    .foreign-card {
+      background: rgba(196, 30, 58, 0.04);
+      border: 1px solid rgba(196, 30, 58, 0.15);
+      border-left: 3px solid #e53555;
+      border-radius: 6px;
+      padding: 14px;
+      margin: 8px 0;
+      font-size: 0.8rem;
+    }
+    .foreign-card .bill-num {
+      color: #e53555;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+    .foreign-card .bill-title {
+      color: #ededed;
+    }
+    .foreign-card .bill-meta {
+      font-size: 0.7rem;
+      color: #6e6e76;
+      margin-top: 4px;
+    }
+
+    /* ── MP Activity ───────────────────────────────────────────────── */
+    .mp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .mp-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 0.78rem;
+    }
+    .mp-card .mp-party-bar {
+      height: 3px;
+      border-radius: 2px;
+      margin-bottom: 8px;
+    }
+    .mp-card .mp-name {
+      font-weight: 600;
+      color: #ededed;
+    }
+    .mp-card .mp-riding {
+      font-size: 0.68rem;
+      color: #6e6e76;
+      margin-top: 2px;
+    }
+    .mp-card .mp-party-label {
+      font-size: 0.65rem;
+      margin-top: 4px;
+    }
+
+    /* ── Contentious Vote Flags ─────────────────────────────────────── */
+    .vote-flag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+    .vote-flag-tie       { background: #3a1a0a; color: #f39c12; }
+    .vote-flag-passed    { background: #0a2a1a; color: #2ecc71; }
+    .vote-flag-failed    { background: #2a0a0a; color: #e74c3c; }
+    .vote-flag-close     { background: #2a1a0a; color: #e67e22; }
+    .vote-flag-unanimous { background: #0a1a2a; color: #3498db; }
+
+    /* ── Data Sources Footer ───────────────────────────────────────── */
+    .sources-footer {
+      border-top: 1px solid rgba(255,255,255,0.05);
+      margin-top: 50px;
+      padding-top: 30px;
+      text-align: center;
+    }
+    .sources-footer h3 {
+      font-size: 0.85rem;
+      color: #a0a0a6;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .sources-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+    .sources-list li a {
+      display: inline-block;
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #a0a0a6;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .sources-list li a:hover {
+      border-color: rgba(196, 30, 58, 0.3);
+      color: #e53555;
+    }
+    .last-updated {
+      font-size: 0.7rem;
+      color: #4a4a52;
+      margin-top: 16px;
+    }
+
+    /* ── Loading State ─────────────────────────────────────────────── */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6e6e76;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(196, 30, 58, 0.2);
+      border-top-color: #e53555;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg {
+      text-align: center;
+      padding: 40px;
+      color: #e74c3c;
+      font-size: 0.85rem;
+    }
+
+    /* ── Pagination ────────────────────────────────────────────────── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    .pagination button {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #a0a0a6;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pagination button:hover {
+      border-color: rgba(196, 30, 58, 0.3);
+      color: #e53555;
+    }
+    .pagination button.active {
+      background: rgba(196, 30, 58, 0.15);
+      border-color: rgba(196, 30, 58, 0.4);
+      color: #e53555;
+    }
+    .pagination button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+    .pagination .page-info {
+      font-size: 0.7rem;
+      color: #6e6e76;
+    }
+
+    /* ── Tabs ──────────────────────────────────────────────────────── */
+    .tab-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #6e6e76;
+      padding: 10px 16px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #a0a0a6; }
+    .tab-btn.active {
+      color: #e53555;
+      border-bottom-color: #e53555;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Responsive ────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .dash-wrap { padding: 12px; }
+      .dash-header h1 { font-size: 1.6rem; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .vote-bar-label { width: 70px; font-size: 0.7rem; }
+      .dash-table { font-size: 0.7rem; }
+      .filter-bar { flex-direction: column; }
+      .filter-bar input, .filter-bar select { min-width: unset; width: 100%; }
+      .cat-chart { grid-template-columns: repeat(3, 1fr); }
+      .mp-grid { grid-template-columns: 1fr; }
+      .sources-list { flex-direction: column; align-items: center; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-card { padding: 10px; }
+      .stat-card .num { font-size: 1.5rem; }
+      .cat-chart { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="dash-wrap" id="app">
+    <header class="dash-header">
+      <h1>Hansard Dashboard</h1>
+      <p class="subtitle">45th Parliament of Canada, 1st Session -- Public Record Tracker</p>
+      <div class="session-badge">SESSION 45-1 // ALL DATA FROM PUBLIC GOVERNMENT RECORDS</div>
+    </header>
+
+    <!-- Loading state -->
+    <div class="loading" id="loading-state">
+      <div class="loading-spinner"></div>
+      <p style="margin-top:12px;">Loading parliamentary data...</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="error-msg" id="error-state" style="display:none;"></div>
+
+    <!-- Main content (hidden until data loads) -->
+    <div id="main-content" style="display:none;">
+
+      <!-- ── Stats Overview ──────────────────────────────────── -->
+      <div class="stats-row" id="stats-row"></div>
+
+      <!-- ── Tab Navigation ──────────────────────────────────── -->
+      <div class="tab-row" id="tab-row">
+        <button class="tab-btn active" data-tab="bills">Bills Tracker</button>
+        <button class="tab-btn" data-tab="votes">Vote Analysis</button>
+        <button class="tab-btn" data-tab="foreign">Foreign Affairs</button>
+        <button class="tab-btn" data-tab="mps">MP Activity</button>
+      </div>
+
+      <!-- ── Tab: Bills Tracker ──────────────────────────────── -->
+      <div class="tab-panel active" id="tab-bills">
+        <div class="section-head">
+          <h2>Bills Tracker</h2>
+          <span class="count" id="bills-count"></span>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="bill-search" placeholder="Search bills by number, title, or keyword...">
+          <select id="bill-cat-filter">
+            <option value="">All Categories</option>
+          </select>
+          <select id="bill-type-filter">
+            <option value="">All Types</option>
+            <option value="government">Government</option>
+            <option value="private">Private Member</option>
+            <option value="senate">Senate</option>
+          </select>
+        </div>
+
+        <div class="dash-table-wrap">
+          <table class="dash-table" id="bills-table">
+            <thead>
+              <tr>
+                <th data-sort="number">Number <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="title">Title <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="introduced">Introduced <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="category">Category <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="type">Type <span class="sort-arrow">&#9650;</span></th>
+              </tr>
+            </thead>
+            <tbody id="bills-tbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="bills-pagination"></div>
+      </div>
+
+      <!-- ── Tab: Vote Analysis ──────────────────────────────── -->
+      <div class="tab-panel" id="tab-votes">
+        <div class="section-head">
+          <h2>Party Voting Patterns</h2>
+          <span class="count">94 recorded votes</span>
+        </div>
+        <p style="font-size:0.78rem; color:#6e6e76; margin-bottom:16px;">
+          Yea/Nay breakdown per party across all recorded House votes in Session 45-1.
+        </p>
+        <div class="vote-chart" id="party-chart"></div>
+
+        <!-- Category Breakdown -->
+        <div class="section-head" style="margin-top:30px;">
+          <h2>Bills by Category</h2>
+        </div>
+        <div class="cat-chart" id="category-chart"></div>
+
+        <!-- Contentious Votes -->
+        <div class="section-head" style="margin-top:30px;">
+          <h2>Most Contentious Votes</h2>
+          <span class="count" id="contentious-count"></span>
+        </div>
+        <p style="font-size:0.78rem; color:#6e6e76; margin-bottom:10px;">
+          Votes with margins below 10% or significant internal party dissent.
+        </p>
+        <div class="dash-table-wrap">
+          <table class="dash-table" id="contentious-table">
+            <thead>
+              <tr>
+                <th>Vote #</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Result</th>
+                <th>Yea</th>
+                <th>Nay</th>
+                <th>Margin</th>
+              </tr>
+            </thead>
+            <tbody id="contentious-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Unanimous Votes -->
+        <div class="section-head" style="margin-top:30px;">
+          <h2>Unanimous Votes</h2>
+          <span class="count" id="unanimous-count"></span>
+        </div>
+        <div class="dash-table-wrap">
+          <table class="dash-table" id="unanimous-table">
+            <thead>
+              <tr>
+                <th>Vote #</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Yea</th>
+              </tr>
+            </thead>
+            <tbody id="unanimous-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Tab: Foreign Affairs ────────────────────────────── -->
+      <div class="tab-panel" id="tab-foreign">
+        <div class="section-head">
+          <h2>Foreign Affairs, Trade, Defense &amp; Immigration Bills</h2>
+          <span class="count" id="foreign-count"></span>
+        </div>
+        <p style="font-size:0.78rem; color:#6e6e76; margin-bottom:16px;">
+          Bills related to international trade, defense, border security, immigration, and foreign relations.
+          These are flagged for foreign influence analysis per the
+          <a href="foreign-influence.html" style="color:#e53555;">Foreign Influence Investigation</a>.
+        </p>
+        <div id="foreign-bills-list"></div>
+      </div>
+
+      <!-- ── Tab: MP Activity ────────────────────────────────── -->
+      <div class="tab-panel" id="tab-mps">
+        <div class="section-head">
+          <h2>MP Activity Overview</h2>
+          <span class="count" id="mp-count"></span>
+        </div>
+        <p style="font-size:0.78rem; color:#6e6e76; margin-bottom:16px;">
+          340 Members of Parliament in the 45th Parliament. Breakdown by party.
+        </p>
+        <div class="vote-chart" id="mp-party-chart"></div>
+        <div class="section-head" style="margin-top:20px;">
+          <h2>Members by Province</h2>
+        </div>
+        <div class="mp-grid" id="mp-grid"></div>
+      </div>
+
+      <!-- ── Data Sources Footer ─────────────────────────────── -->
+      <footer class="sources-footer">
+        <h3>Public Data Sources</h3>
+        <ul class="sources-list">
+          <li><a href="https://api.openparliament.ca/" target="_blank" rel="noopener">OpenParliament.ca API</a></li>
+          <li><a href="https://www.parl.ca/legisinfo/" target="_blank" rel="noopener">LEGISinfo (parl.ca)</a></li>
+          <li><a href="https://open.canada.ca/" target="_blank" rel="noopener">Canada Open Government Portal</a></li>
+          <li><a href="https://www.elections.ca/" target="_blank" rel="noopener">Elections Canada</a></li>
+          <li><a href="https://lobbycanada.gc.ca/" target="_blank" rel="noopener">Lobbying Commissioner</a></li>
+        </ul>
+        <p class="last-updated" id="last-updated"></p>
+        <p style="font-size:0.65rem; color:#4a4a52; margin-top:10px;">
+          All data is from public government records under open data licences.
+          <br>This page loads data via fetch() from data/analysis.json -- no external dependencies.
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="nav.js?v=3"></script>
+  <script src="js/main.js?v=5" defer></script>
+  <script>
+  (function() {
+    'use strict';
+
+    /* ──────────────────────────────────────────────────────────────
+       STATE
+    ────────────────────────────────────────────────────────────── */
+    var DATA = null;
+    var billsSort = { col: 'number', asc: true };
+    var billsPage = 1;
+    var BILLS_PER_PAGE = 30;
+
+    var PARTY_COLORS = {
+      'Conservative': '#1a6dc0',
+      'Liberal':      '#d32f2f',
+      'Bloc':         '#33b2cc',
+      'NDP':          '#f58220',
+      'Green':        '#3d9b35'
+    };
+
+    var CAT_COLORS = {
+      'defense': '#5dade2', 'finance': '#f1c40f', 'healthcare': '#2ecc71',
+      'environment': '#1abc9c', 'justice': '#9b59b6', 'immigration': '#e67e22',
+      'indigenous': '#d4a574', 'trade': '#3498db', 'technology': '#00b4d8',
+      'social': '#e74c3c', 'governance': '#95a5a6', 'other': '#6e6e76'
+    };
+
+    /* ──────────────────────────────────────────────────────────────
+       LOAD DATA
+    ────────────────────────────────────────────────────────────── */
+    fetch('data/analysis.json')
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        DATA = data;
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        renderAll();
+      })
+      .catch(function(err) {
+        document.getElementById('loading-state').style.display = 'none';
+        var el = document.getElementById('error-state');
+        el.style.display = 'block';
+        el.textContent = 'Failed to load data: ' + err.message +
+          '. Run: python data/scrapers/analyze_bills.py --analyze --export data/analysis.json';
+      });
+
+    /* ──────────────────────────────────────────────────────────────
+       TABS
+    ────────────────────────────────────────────────────────────── */
+    document.getElementById('tab-row').addEventListener('click', function(e) {
+      if (!e.target.classList.contains('tab-btn')) return;
+      var tabs = document.querySelectorAll('.tab-btn');
+      var panels = document.querySelectorAll('.tab-panel');
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      panels.forEach(function(p) { p.classList.remove('active'); });
+      e.target.classList.add('active');
+      document.getElementById('tab-' + e.target.dataset.tab).classList.add('active');
+    });
+
+    /* ──────────────────────────────────────────────────────────────
+       RENDER ALL
+    ─────��──────────────────────────────────────────────────────── */
+    function renderAll() {
+      renderStats();
+      renderBillsTable();
+      renderPartyChart();
+      renderCategoryChart();
+      renderContentiousVotes();
+      renderUnanimousVotes();
+      renderForeignBills();
+      renderMPSection();
+      renderLastUpdated();
+      setupBillFilters();
+      setupBillSort();
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       STATS ROW
+    ────────────────────────────────────────────────────────────── */
+    function renderStats() {
+      var m = DATA.metadata;
+      var stats = [
+        { num: m.total_bills, label: 'Bills' },
+        { num: m.total_votes, label: 'Votes' },
+        { num: m.total_mps, label: 'MPs' },
+        { num: DATA.foreign_affairs_bills.length, label: 'Foreign Affairs' },
+        { num: DATA.contentious_votes.length, label: 'Contentious' },
+        { num: DATA.unanimous_votes.length, label: 'Unanimous' },
+      ];
+      var html = '';
+      stats.forEach(function(s) {
+        html += '<div class="stat-card"><span class="num">' + s.num +
+                '</span><span class="label">' + s.label + '</span></div>';
+      });
+      document.getElementById('stats-row').innerHTML = html;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       BILLS TABLE
+    ────────────────────────────────────────────────────────────── */
+    function getBillType(num) {
+      if (num.startsWith('S-')) return 'senate';
+      var n = parseInt(num.replace('C-', ''), 10);
+      return (n <= 200) ? 'government' : 'private';
+    }
+
+    function getFilteredBills() {
+      var search = document.getElementById('bill-search').value.toLowerCase();
+      var cat = document.getElementById('bill-cat-filter').value;
+      var type = document.getElementById('bill-type-filter').value;
+
+      return DATA.all_bills.filter(function(b) {
+        if (search && b.title.toLowerCase().indexOf(search) === -1 &&
+            b.number.toLowerCase().indexOf(search) === -1) return false;
+        if (cat && b.category !== cat) return false;
+        if (type) {
+          var bt = getBillType(b.number);
+          if (bt !== type) return false;
+        }
+        return true;
+      });
+    }
+
+    function sortBills(bills) {
+      var col = billsSort.col;
+      var asc = billsSort.asc;
+      return bills.slice().sort(function(a, b) {
+        var va, vb;
+        if (col === 'number') {
+          // Numeric sort: C-1, C-2, ..., C-200, S-1, etc.
+          var pa = a.number.startsWith('S-') ? 1 : 0;
+          var pb = b.number.startsWith('S-') ? 1 : 0;
+          if (pa !== pb) return pa - pb;
+          va = parseInt(a.number.replace(/^[CS]-/, ''), 10) || 0;
+          vb = parseInt(b.number.replace(/^[CS]-/, ''), 10) || 0;
+        } else if (col === 'title') {
+          va = a.title.toLowerCase();
+          vb = b.title.toLowerCase();
+        } else if (col === 'introduced') {
+          va = a.introduced || '';
+          vb = b.introduced || '';
+        } else if (col === 'category') {
+          va = a.category;
+          vb = b.category;
+        } else if (col === 'type') {
+          va = getBillType(a.number);
+          vb = getBillType(b.number);
+        }
+        if (va < vb) return asc ? -1 : 1;
+        if (va > vb) return asc ? 1 : -1;
+        return 0;
+      });
+    }
+
+    function renderBillsTable() {
+      var bills = sortBills(getFilteredBills());
+      var total = bills.length;
+      var totalPages = Math.ceil(total / BILLS_PER_PAGE) || 1;
+      if (billsPage > totalPages) billsPage = totalPages;
+      var start = (billsPage - 1) * BILLS_PER_PAGE;
+      var page = bills.slice(start, start + BILLS_PER_PAGE);
+
+      document.getElementById('bills-count').textContent = total + ' bills';
+
+      var tbody = document.getElementById('bills-tbody');
+      var html = '';
+      page.forEach(function(b) {
+        var opUrl = 'https://openparliament.ca' + b.url;
+        var typeLabel = getBillType(b.number);
+        var foreignMark = b.foreign_flag ? ' *' : '';
+        html += '<tr>' +
+          '<td><a href="' + opUrl + '" target="_blank" rel="noopener">' + esc(b.number) + '</a>' + foreignMark + '</td>' +
+          '<td>' + esc(truncate(b.title, 80)) + '</td>' +
+          '<td>' + esc(b.introduced || '--') + '</td>' +
+          '<td><span class="cat-tag cat-' + b.category + '">' + b.category + '</span></td>' +
+          '<td style="text-transform:capitalize;font-size:0.72rem;">' + typeLabel + '</td>' +
+          '</tr>';
+      });
+      tbody.innerHTML = html;
+
+      // Pagination
+      renderPagination(document.getElementById('bills-pagination'), billsPage, totalPages, function(p) {
+        billsPage = p;
+        renderBillsTable();
+      });
+
+      // Update sort arrows
+      document.querySelectorAll('#bills-table th').forEach(function(th) {
+        th.classList.remove('sorted');
+        var arrow = th.querySelector('.sort-arrow');
+        if (arrow) arrow.innerHTML = '&#9650;';
+        if (th.dataset.sort === billsSort.col) {
+          th.classList.add('sorted');
+          if (arrow) arrow.innerHTML = billsSort.asc ? '&#9650;' : '&#9660;';
+        }
+      });
+    }
+
+    function setupBillFilters() {
+      // Populate category dropdown
+      var catFilter = document.getElementById('bill-cat-filter');
+      var cats = Object.keys(DATA.bills_by_category);
+      cats.forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c.charAt(0).toUpperCase() + c.slice(1) + ' (' + DATA.bills_by_category[c] + ')';
+        catFilter.appendChild(opt);
+      });
+
+      document.getElementById('bill-search').addEventListener('input', function() {
+        billsPage = 1;
+        renderBillsTable();
+      });
+      catFilter.addEventListener('change', function() {
+        billsPage = 1;
+        renderBillsTable();
+      });
+      document.getElementById('bill-type-filter').addEventListener('change', function() {
+        billsPage = 1;
+        renderBillsTable();
+      });
+    }
+
+    function setupBillSort() {
+      document.querySelectorAll('#bills-table th[data-sort]').forEach(function(th) {
+        th.addEventListener('click', function() {
+          var col = this.dataset.sort;
+          if (billsSort.col === col) {
+            billsSort.asc = !billsSort.asc;
+          } else {
+            billsSort.col = col;
+            billsSort.asc = true;
+          }
+          billsPage = 1;
+          renderBillsTable();
+        });
+      });
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       PARTY VOTING CHART (CSS bars)
+    ────────────────────────────────────────────────────────────── */
+    function renderPartyChart() {
+      var patterns = DATA.party_voting_patterns;
+      var order = ['Conservative', 'Liberal', 'Bloc', 'NDP', 'Green'];
+      var html = '';
+      order.forEach(function(party) {
+        var p = patterns[party];
+        if (!p) return;
+        var total = p.yea + p.nay;
+        var yeaPct = total > 0 ? (p.yea / total * 100) : 0;
+        var nayPct = total > 0 ? (p.nay / total * 100) : 0;
+        var color = PARTY_COLORS[party] || '#666';
+        html += '<div class="vote-bar-row">' +
+          '<div class="vote-bar-label" style="color:' + color + ';">' + party + '</div>' +
+          '<div class="vote-bar-track">' +
+            '<div class="vote-bar-yea" style="width:' + yeaPct.toFixed(1) + '%;">' + p.yea + 'Y</div>' +
+            '<div class="vote-bar-nay" style="width:' + nayPct.toFixed(1) + '%;">' + p.nay + 'N</div>' +
+          '</div>' +
+          '<div class="vote-bar-pct">' + yeaPct.toFixed(1) + '%</div>' +
+          '</div>';
+      });
+      document.getElementById('party-chart').innerHTML = html;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       CATEGORY CHART
+    ────────────────────────────────────────────────────────────── */
+    function renderCategoryChart() {
+      var cats = DATA.bills_by_category;
+      var html = '';
+      Object.keys(cats).forEach(function(c) {
+        var color = CAT_COLORS[c] || '#6e6e76';
+        html += '<div class="cat-chart-item">' +
+          '<span class="cat-num" style="color:' + color + ';">' + cats[c] + '</span>' +
+          '<span class="cat-label">' + c + '</span>' +
+          '</div>';
+      });
+      document.getElementById('category-chart').innerHTML = html;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       CONTENTIOUS VOTES TABLE
+    ────────────────────────────────────────────────────────────── */
+    function renderContentiousVotes() {
+      var votes = DATA.contentious_votes;
+      document.getElementById('contentious-count').textContent = votes.length + ' votes';
+      var html = '';
+      votes.forEach(function(v) {
+        var flag = voteFlag(v);
+        html += '<tr>' +
+          '<td><a href="https://openparliament.ca' + v.url + '" target="_blank" rel="noopener">#' + v.number + '</a></td>' +
+          '<td>' + esc(v.date) + '</td>' +
+          '<td>' + esc(truncate(v.description, 80)) + '</td>' +
+          '<td>' + flag + '</td>' +
+          '<td>' + v.yea_total + '</td>' +
+          '<td>' + v.nay_total + '</td>' +
+          '<td>' + v.margin_pct + '%</td>' +
+          '</tr>';
+      });
+      document.getElementById('contentious-tbody').innerHTML = html;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       UNANIMOUS VOTES TABLE
+    ────────────────────────────────────────────────────────────── */
+    function renderUnanimousVotes() {
+      var votes = DATA.unanimous_votes;
+      document.getElementById('unanimous-count').textContent = votes.length + ' votes';
+      var html = '';
+      votes.forEach(function(v) {
+        html += '<tr>' +
+          '<td><a href="https://openparliament.ca' + v.url + '" target="_blank" rel="noopener">#' + v.number + '</a></td>' +
+          '<td>' + esc(v.date) + '</td>' +
+          '<td>' + esc(truncate(v.description, 100)) + '</td>' +
+          '<td>' + v.yea_total + '</td>' +
+          '</tr>';
+      });
+      document.getElementById('unanimous-tbody').innerHTML = html;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       FOREIGN AFFAIRS BILLS
+    ────────────────────────────────────────────────────────────── */
+    function renderForeignBills() {
+      var bills = DATA.foreign_affairs_bills;
+      document.getElementById('foreign-count').textContent = bills.length + ' bills flagged';
+      var html = '';
+      bills.forEach(function(b) {
+        var opUrl = 'https://openparliament.ca' + b.url;
+        html += '<div class="foreign-card">' +
+          '<a href="' + opUrl + '" target="_blank" rel="noopener" class="bill-num">' + esc(b.number) + '</a>' +
+          '<span class="bill-title">' + esc(b.title) + '</span>' +
+          '<div class="bill-meta">' +
+            '<span class="cat-tag cat-' + b.category + '">' + b.category + '</span>' +
+            ' &middot; Introduced ' + esc(b.introduced || 'N/A') +
+          '</div>' +
+          '</div>';
+      });
+      document.getElementById('foreign-bills-list').innerHTML = html;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       MP SECTION
+    ────────────────────────────────────────────────────────────── */
+    function renderMPSection() {
+      var mp = DATA.mp_summary;
+      document.getElementById('mp-count').textContent = mp.total + ' members';
+
+      // Party breakdown chart
+      var parties = mp.by_party;
+      var total = mp.total;
+      var order = ['Conservative', 'Liberal', 'Bloc', 'NDP', 'Green'];
+      var html = '';
+      order.forEach(function(party) {
+        var count = parties[party] || 0;
+        var pct = total > 0 ? (count / total * 100) : 0;
+        var color = PARTY_COLORS[party] || '#666';
+        html += '<div class="vote-bar-row">' +
+          '<div class="vote-bar-label" style="color:' + color + ';">' + party + '</div>' +
+          '<div class="vote-bar-track">' +
+            '<div class="vote-bar-yea" style="width:' + pct.toFixed(1) + '%;background:' + color + ';">' + count + '</div>' +
+          '</div>' +
+          '<div class="vote-bar-pct">' + pct.toFixed(1) + '%</div>' +
+          '</div>';
+      });
+      // Handle remaining parties not in main order
+      Object.keys(parties).forEach(function(party) {
+        if (order.indexOf(party) === -1) {
+          var count = parties[party];
+          var pct = total > 0 ? (count / total * 100) : 0;
+          html += '<div class="vote-bar-row">' +
+            '<div class="vote-bar-label" style="color:#888;">' + esc(party) + '</div>' +
+            '<div class="vote-bar-track">' +
+              '<div class="vote-bar-yea" style="width:' + pct.toFixed(1) + '%;background:#888;">' + count + '</div>' +
+            '</div>' +
+            '<div class="vote-bar-pct">' + pct.toFixed(1) + '%</div>' +
+            '</div>';
+        }
+      });
+      document.getElementById('mp-party-chart').innerHTML = html;
+
+      // If all_mps.json was loaded, show province breakdown
+      // We build this from the mp_summary data
+      // For now, show per-party seat cards
+      var grid = document.getElementById('mp-grid');
+      var gridHtml = '';
+      order.forEach(function(party) {
+        var count = parties[party] || 0;
+        var color = PARTY_COLORS[party] || '#666';
+        var pct = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
+        gridHtml += '<div class="mp-card">' +
+          '<div class="mp-party-bar" style="background:' + color + ';"></div>' +
+          '<div class="mp-name" style="color:' + color + ';">' + esc(party) + '</div>' +
+          '<div class="mp-riding">' + count + ' seats (' + pct + '% of House)</div>' +
+          '<div class="mp-party-label" style="color:#6e6e76;">Session 45-1</div>' +
+          '</div>';
+      });
+      grid.innerHTML = gridHtml;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       FOOTER
+    ────────────────────────────────────────────────────────────── */
+    function renderLastUpdated() {
+      var ts = DATA.metadata.generated_at;
+      if (ts) {
+        var d = new Date(ts);
+        document.getElementById('last-updated').textContent =
+          'Last updated: ' + d.toLocaleDateString('en-CA', {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+          });
+      }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       HELPERS
+    ────────────────────────────────────────────────────────────── */
+    function esc(s) {
+      if (!s) return '';
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(s));
+      return div.innerHTML;
+    }
+
+    function truncate(s, n) {
+      if (!s) return '';
+      return s.length > n ? s.substring(0, n) + '...' : s;
+    }
+
+    function voteFlag(v) {
+      var r = (v.result || '').toLowerCase();
+      if (r === 'tie') return '<span class="vote-flag vote-flag-tie">TIE</span>';
+      if (r === 'passed') return '<span class="vote-flag vote-flag-passed">PASSED</span>';
+      if (r === 'failed') return '<span class="vote-flag vote-flag-failed">FAILED</span>';
+      return '<span class="vote-flag">' + esc(v.result) + '</span>';
+    }
+
+    function renderPagination(container, current, total, onPage) {
+      if (total <= 1) { container.innerHTML = ''; return; }
+      var html = '';
+      html += '<button ' + (current <= 1 ? 'disabled' : '') + ' data-p="' + (current - 1) + '">&laquo; Prev</button>';
+      var start = Math.max(1, current - 2);
+      var end = Math.min(total, current + 2);
+      if (start > 1) html += '<button data-p="1">1</button>';
+      if (start > 2) html += '<span class="page-info">...</span>';
+      for (var i = start; i <= end; i++) {
+        html += '<button data-p="' + i + '"' + (i === current ? ' class="active"' : '') + '>' + i + '</button>';
+      }
+      if (end < total - 1) html += '<span class="page-info">...</span>';
+      if (end < total) html += '<button data-p="' + total + '">' + total + '</button>';
+      html += '<button ' + (current >= total ? 'disabled' : '') + ' data-p="' + (current + 1) + '">Next &raquo;</button>';
+      container.innerHTML = html;
+      container.querySelectorAll('button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var p = parseInt(this.dataset.p, 10);
+          if (p >= 1 && p <= total) onPage(p);
+        });
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

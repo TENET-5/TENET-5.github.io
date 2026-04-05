@@ -20,6 +20,7 @@
         label: '🔍 Investigation',
         items: [
           { label: '🏛 Hansard Records', href: 'hansard-evidence.html' },
+          { label: '📊 Hansard Dashboard', href: 'hansard-dashboard.html' },
           { label: '⚠ The Pattern', href: 't4-comparison.html' },
           { label: '⚔ 5GW Subversion', href: '5gw-subversion.html' },
           { label: '☠ Harm Index', href: 'harm-index.html' },
