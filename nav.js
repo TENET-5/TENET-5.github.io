@@ -36,6 +36,9 @@
           { label: '🏛 Treason Trajectory', href: 'treason-trajectory.html' },
           { label: '🕵 Investigation Board', href: 'conspiracy-board.html' },
           { label: '🗺 Foreign Influence', href: 'foreign-influence.html' },
+          { label: '💰 Lobbying Tracker', href: 'lobbying-tracker.html' },
+          { label: '💵 Contributions Tracker', href: 'contributions-tracker.html' },
+          { label: '🔗 Follow the Money', href: 'cross-reference.html' },
           { label: '📅 Timeline', href: 'timeline.html' },
           { label: '🎖 CFNIS Investigation', href: 'cfnis.html' }
         ]
