@@ -2,160 +2,753 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <link rel="stylesheet" href="style.css?v=5">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Investigation Board — Foreign Influence in Canadian Politics</title>
 <meta name="description" content="Interactive investigation board mapping foreign state influence on Canadian politics. All data from public government records.">
+<link rel="stylesheet" href="style.css?v=5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#06080c;--surface:#0c1018;--card:#111820;--card-hover:#161e2a;--border:#1a2535;--border-active:#2a3a50;--text:#c8d6e5;--text-dim:#5a6a7a;--text-bright:#e8f0f8;--red:#e63946;--blue:#3a86ff;--green:#06d6a0;--yellow:#ffd60a;--purple:#8338ec;--pink:#ff006e;--orange:#fb5607;--cyan:#00b4d8;--radius:10px;--font:'Inter',-apple-system,sans-serif;--mono:'JetBrains Mono',monospace}
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;overflow-x:hidden}
-a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
-.nav{background:rgba(12,16,24,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:10px 20px;position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.nav-brand{font-weight:900;font-size:0.9rem;color:var(--red);letter-spacing:1px}
-.nav a{color:var(--text-dim);font-size:0.78rem;transition:color 0.2s}.nav a:hover,.nav a.active{color:var(--text-bright);text-decoration:none}
-.nav-spacer{flex:1}
-.hamburger{display:none;background:none;border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:1rem}
-.header{padding:24px 20px 16px;max-width:1200px;margin:0 auto}
-.header h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;color:var(--red);letter-spacing:2px;margin-bottom:4px}
-.header p{font-size:0.8rem;color:var(--text-dim);max-width:700px}
-.warning{background:rgba(255,214,10,0.06);border-left:3px solid var(--yellow);padding:8px 14px;margin:12px 0;font-size:0.75rem;color:var(--text-dim);border-radius:0 var(--radius) var(--radius) 0}
-.stats{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;text-align:center;min-width:80px}
-.stat .num{font-family:var(--mono);font-size:1.2rem;font-weight:700;color:var(--red);display:block}
-.stat .lbl{font-size:0.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px}
-.controls{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0;padding:0 20px;max-width:1200px;margin-left:auto;margin-right:auto}
-.filter-btn{background:var(--card);border:1px solid var(--border);color:var(--text-dim);padding:5px 12px;border-radius:20px;font-size:0.72rem;cursor:pointer;font-family:var(--font);transition:all 0.2s}
-.filter-btn:hover,.filter-btn.active{background:var(--card-hover);color:var(--text-bright);border-color:var(--border-active)}
-.filter-btn[data-f="israel"].active{border-color:var(--blue);color:var(--blue)}
-.filter-btn[data-f="ccp"].active{border-color:var(--red);color:var(--red)}
-.filter-btn[data-f="india"].active{border-color:var(--orange);color:var(--orange)}
-.filter-btn[data-f="cfnis"].active{border-color:var(--yellow);color:var(--yellow)}
-.filter-btn[data-f="media"].active{border-color:var(--purple);color:var(--purple)}
-.legend{display:flex;gap:12px;flex-wrap:wrap;padding:0 20px;margin:8px auto;max-width:1200px}
-.legend-item{display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--text-dim)}
-.legend-dot{width:10px;height:10px;border-radius:50%}
-.board-wrap{position:relative;width:100%;max-width:100%;margin:16px auto;height:80vh;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.board{position:absolute;inset:0;width:3000px;height:2400px;transform-origin:0 0;touch-action:none}
-.board-grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(26,37,53,0.3) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
-.board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.board svg line{stroke-linecap:round;transition:opacity 0.3s}
-.board svg text{font-family:var(--mono);font-size:8px;fill:var(--text-dim);pointer-events:none}
-.node{position:absolute;max-width:180px;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px;cursor:grab;z-index:10;transition:border-color 0.2s,box-shadow 0.2s,opacity 0.3s;user-select:none}
-.node:hover{border-color:var(--border-active);box-shadow:0 4px 20px rgba(0,0,0,0.4);z-index:20}
-.node:active{cursor:grabbing}
-.node.hidden{opacity:0.08;pointer-events:none}
-.node .type-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
-.node .title{font-size:0.82rem;font-weight:700;color:var(--text-bright);line-height:1.3}
-.node .subtitle{font-size:0.65rem;color:var(--text-dim);margin-top:1px}
-.node .detail{font-size:0.65rem;color:var(--text-dim);margin-top:6px;line-height:1.4;display:none}
-.node:hover .detail{display:block}
-.node .link-btn{display:inline-block;margin-top:6px;font-size:0.6rem;color:var(--blue)}
-.type-person .type-badge{background:rgba(255,0,110,0.15);color:var(--pink)}
-.type-org .type-badge{background:rgba(131,56,236,0.15);color:var(--purple)}
-.type-event .type-badge{background:rgba(255,214,10,0.15);color:var(--yellow)}
-.type-evidence .type-badge{background:rgba(6,214,160,0.15);color:var(--green)}
-.type-person{border-left:3px solid var(--pink)}
-.type-org{border-left:3px solid var(--purple)}
-.type-event{border-left:3px solid var(--yellow)}
-.type-evidence{border-left:3px solid var(--green)}
-@media(max-width:768px){
-.hamburger{display:block}
-.nav-links{display:none;width:100%}.nav.open .nav-links{display:flex;flex-direction:column;gap:8px;padding:8px 0}
-.board{min-height:auto;display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--bg);border:none}
-.board-grid,.board svg{display:none}
-.node{position:static!important;max-width:100%;min-width:0;width:100%;transform:none!important}
-.node .detail{display:block}
-.node.hidden{display:none}
-.stats{justify-content:center}.stat{flex:1;min-width:70px}
-.header h1{font-size:1.2rem}
+:root {
+  --bg: #06080c;
+  --surface: #0c1018;
+  --card: #111820;
+  --card-hover: #161e2a;
+  --border: #1a2535;
+  --border-active: #2a3a50;
+  --text: #c8d6e5;
+  --text-dim: #5a6a7a;
+  --text-bright: #e8f0f8;
+  --red: #e63946;
+  --blue: #3a86ff;
+  --green: #06d6a0;
+  --yellow: #ffd60a;
+  --purple: #8338ec;
+  --pink: #ff006e;
+  --orange: #fb5607;
+  --cyan: #00b4d8;
+  --radius: 10px;
+  --font: 'Inter', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
 }
-.footer{text-align:center;padding:20px;font-size:0.65rem;color:var(--text-dim)}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.5;
+}
+
+/* ── HEADER ── */
+.board-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px;
+  background: rgba(12,16,24,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.board-bar-brand {
+  font-weight: 900; font-size: 0.85rem; color: var(--red);
+  letter-spacing: 1px; flex-shrink: 0;
+}
+.board-bar a {
+  color: var(--text-dim); font-size: 0.72rem; text-decoration: none;
+  transition: color 0.2s; padding: 4px 6px; border-radius: 4px;
+}
+.board-bar a:hover, .board-bar a.active { color: var(--text-bright); background: rgba(255,255,255,0.04); }
+.board-bar-spacer { flex: 1; }
+.board-bar-search {
+  position: relative; flex-shrink: 1;
+}
+.board-bar-search input {
+  width: 180px; padding: 6px 12px 6px 28px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; color: var(--text); font-family: var(--mono);
+  font-size: 0.7rem; outline: none; transition: all 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+.board-bar-search::before {
+  content: '🔍'; position: absolute; left: 8px; top: 50%;
+  transform: translateY(-50%); font-size: 0.6rem; pointer-events: none;
+}
+.board-bar-search input:focus {
+  width: 240px; border-color: var(--blue);
+  background: rgba(255,255,255,0.06);
+}
+.board-bar-search input::placeholder { color: var(--text-dim); }
+
+/* ── STATS ── */
+.stats-bar {
+  display: flex; gap: 6px; padding: 0 16px; flex-wrap: wrap;
+}
+.stat-chip {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px; text-align: center;
+  font-family: var(--mono); font-size: 0.7rem;
+}
+.stat-chip .n { color: var(--red); font-weight: 700; font-size: 0.9rem; }
+.stat-chip .l { color: var(--text-dim); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── FILTERS ── */
+.filter-bar {
+  display: flex; gap: 4px; padding: 8px 16px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.fbtn {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  color: var(--text-dim); padding: 5px 12px; border-radius: 20px;
+  font-size: 0.68rem; cursor: pointer; font-family: var(--font);
+  transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.fbtn:hover, .fbtn.on { background: rgba(255,255,255,0.06); color: var(--text-bright); border-color: var(--border-active); }
+.fbtn[data-c="israel"].on { border-color: var(--blue); color: var(--blue); }
+.fbtn[data-c="ccp"].on { border-color: var(--red); color: var(--red); }
+.fbtn[data-c="india"].on { border-color: var(--orange); color: var(--orange); }
+.fbtn[data-c="cfnis"].on { border-color: var(--yellow); color: var(--yellow); }
+.fbtn[data-c="media"].on { border-color: var(--purple); color: var(--purple); }
+.fbtn[data-c="disinfo"].on { border-color: var(--cyan); color: var(--cyan); }
+
+/* ── CANVAS AREA ── */
+.canvas-wrap {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden; touch-action: none;
+}
+.canvas {
+  position: absolute; width: 4000px; height: 3200px;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.canvas-grid {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(26,37,53,0.2) 1px, transparent 1px);
+  background-size: 50px 50px; pointer-events: none;
+}
+.canvas svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+.canvas svg line { stroke-linecap: round; transition: opacity 0.3s; }
+
+/* ── NODE CARDS ── */
+.node {
+  position: absolute; width: 170px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+  cursor: pointer; z-index: 2; user-select: none;
+  transition: border-color 0.25s, box-shadow 0.25s, opacity 0.3s, transform 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+.node:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  z-index: 20; transform: scale(1.04);
+}
+.node.selected {
+  border-color: var(--blue) !important;
+  box-shadow: 0 0 20px rgba(58,134,255,0.3), 0 4px 24px rgba(0,0,0,0.5);
+  z-index: 30;
+}
+.node.dim { opacity: 0.12; pointer-events: none; }
+.node .badge {
+  display: inline-block; padding: 1px 6px; border-radius: 3px;
+  font-size: 0.55rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 3px;
+}
+.node .name { font-size: 0.78rem; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.node .sub { font-size: 0.62rem; color: var(--text-dim); margin-top: 1px; }
+.node .info {
+  font-size: 0.62rem; color: var(--text-dim); margin-top: 6px;
+  line-height: 1.4; max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.3s, opacity 0.3s, margin 0.3s;
+}
+.node.selected .info, .node:hover .info { max-height: 200px; opacity: 1; margin-top: 6px; }
+.node .ev-link {
+  display: inline-block; margin-top: 5px; font-size: 0.58rem; color: var(--blue);
+  opacity: 0; transition: opacity 0.2s;
+}
+.node.selected .ev-link, .node:hover .ev-link { opacity: 1; }
+.type-person { border-left: 3px solid var(--pink); }
+.type-org    { border-left: 3px solid var(--purple); }
+.type-event  { border-left: 3px solid var(--yellow); }
+.type-evidence { border-left: 3px solid var(--green); }
+.type-person .badge { background: rgba(255,0,110,0.15); color: var(--pink); }
+.type-org .badge    { background: rgba(131,56,236,0.15); color: var(--purple); }
+.type-event .badge  { background: rgba(255,214,10,0.15); color: var(--yellow); }
+.type-evidence .badge { background: rgba(6,214,160,0.15); color: var(--green); }
+
+/* ── DETAIL PANEL (right side) ── */
+.detail-panel {
+  position: fixed; top: 48px; right: 0; bottom: 0; width: 360px;
+  background: rgba(12,16,24,0.94); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid var(--border); z-index: 90;
+  padding: 20px; overflow-y: auto; transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-panel-close {
+  position: absolute; top: 12px; right: 12px; background: none;
+  border: 1px solid var(--border); color: var(--text-dim);
+  width: 32px; height: 32px; border-radius: 6px;
+  cursor: pointer; font-size: 1rem; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.detail-panel-close:hover { color: var(--text-bright); border-color: var(--red); }
+.detail-panel h2 { font-size: 1.1rem; color: var(--text-bright); margin-bottom: 4px; }
+.detail-panel .dp-sub { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 12px; }
+.detail-panel .dp-body { font-size: 0.8rem; color: var(--text); line-height: 1.6; }
+.detail-panel .dp-connections { margin-top: 16px; }
+.detail-panel .dp-conn-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: 6px; cursor: pointer;
+  font-size: 0.72rem; color: var(--text); transition: background 0.2s;
+}
+.detail-panel .dp-conn-item:hover { background: rgba(255,255,255,0.04); }
+.detail-panel .dp-conn-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.detail-panel .dp-link {
+  display: inline-block; margin-top: 12px; padding: 6px 14px;
+  background: rgba(58,134,255,0.1); border: 1px solid rgba(58,134,255,0.3);
+  border-radius: 6px; color: var(--blue); font-size: 0.72rem;
+  text-decoration: none; transition: background 0.2s;
+}
+.detail-panel .dp-link:hover { background: rgba(58,134,255,0.2); }
+
+/* ── CONTROLS OVERLAY ── */
+.ctrl-float {
+  position: fixed; right: 16px; bottom: 16px; z-index: 80;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.ctrl-btn {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(12,16,24,0.88); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08); color: var(--text-dim);
+  font-size: 1.1rem; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all 0.2s;
+  font-family: var(--mono);
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.ctrl-btn:hover { color: var(--text-bright); border-color: var(--blue); background: rgba(255,255,255,0.06); }
+.ctrl-btn:active { transform: scale(0.9); }
+
+/* ── LEGEND ── */
+.legend-float {
+  position: fixed; left: 16px; bottom: 16px; z-index: 80;
+  display: flex; gap: 10px; flex-wrap: wrap;
+  background: rgba(12,16,24,0.85); backdrop-filter: blur(12px);
+  padding: 6px 12px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.legend-item {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.62rem; color: var(--text-dim);
+}
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ── FOOTER ── */
+.board-foot {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 5;
+  text-align: center; padding: 6px; font-size: 0.58rem; color: var(--text-dim);
+  background: linear-gradient(transparent, rgba(6,8,12,0.9));
+  pointer-events: none;
+}
+
+/* ═══ MOBILE ═══ */
+@media (max-width: 768px) {
+  .board-bar { padding: 8px 10px; gap: 6px; }
+  .board-bar a { font-size: 0.62rem; padding: 3px 4px; }
+  .board-bar-brand { font-size: 0.75rem; }
+  .board-bar-search input { width: 120px; font-size: 0.62rem; }
+  .board-bar-search input:focus { width: 160px; }
+  .stats-bar { padding: 0 10px; }
+  .stat-chip { padding: 3px 7px; }
+  .stat-chip .n { font-size: 0.78rem; }
+  .filter-bar { padding: 6px 10px; }
+  .node { width: 140px; padding: 8px 10px; }
+  .node .name { font-size: 0.7rem; }
+  .node .sub { font-size: 0.55rem; }
+  .detail-panel { width: 100%; top: 44px; }
+  .ctrl-float { right: 10px; bottom: 10px; }
+  .ctrl-btn { width: 36px; height: 36px; font-size: 1rem; }
+  .legend-float { left: 10px; bottom: 10px; padding: 4px 8px; }
+  .legend-item { font-size: 0.55rem; }
+}
+@media (max-width: 480px) {
+  .board-bar a:not(.active) { display: none; }
+  .node { width: 120px; padding: 6px 8px; }
+  .node .name { font-size: 0.62rem; }
+  .node .badge { font-size: 0.48rem; }
+  .legend-float { display: none; }
+}
 </style>
 </head>
 <body>
   <nav id="site-nav"></nav>
-<nav class="nav" id="nav">
-<span class="nav-brand">INVESTIGATION BOARD</span>
-<button class="hamburger" onclick="this.closest('.nav').classList.toggle('open')">&#9776;</button>
-<div class="nav-links" style="display:flex;gap:12px;align-items:center">
-<a href="index.html">Home</a>
-<a href="foreign-influence.html">Detailed Analysis</a>
-<a href="accountability.html">504 Database</a>
-<a href="cfnis.html">CFNIS</a>
-<a href="evidence.html">Evidence</a>
-<a href="conspiracy-board.html" class="active" style="color:var(--red)">The Board</a>
+
+<!-- HEADER BAR -->
+<div class="board-bar" id="topbar">
+  <span class="board-bar-brand">THE BOARD</span>
+  <a href="index.html">Home</a>
+  <a href="foreign-influence.html">Analysis</a>
+  <a href="accountability.html">504 DB</a>
+  <a href="evidence.html">Evidence</a>
+  <a href="conspiracy-board.html" class="active" style="color:var(--red)">Board</a>
+  <span class="board-bar-spacer"></span>
+  <div class="stats-bar" id="stats"></div>
+  <div class="board-bar-search">
+    <input type="text" id="searchBox" placeholder="Search nodes..." autocomplete="off">
+  </div>
 </div>
-</nav>
-<div class="header">
-<h1>THE BOARD</h1>
-<p>Interactive investigation map of foreign state influence on Canadian politics. Every node sourced from official government records. Drag nodes to rearrange. Click for details.</p>
-<div class="warning">All data from publicly available sources: House of Commons votes, Senate records, Lobbyist Registry, NSICOP reports, court rulings, CBC News.</div>
-<div class="stats" id="stats"></div>
+
+<!-- FILTERS -->
+<div class="filter-bar" id="filters" style="position:fixed;top:48px;left:0;right:0;z-index:90;background:rgba(6,8,12,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.04);"></div>
+
+<!-- CANVAS -->
+<div class="canvas-wrap" id="wrap" style="top:84px;">
+  <div class="canvas" id="board">
+    <div class="canvas-grid"></div>
+    <svg id="lines"></svg>
+  </div>
 </div>
-<div class="legend">
-<div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div> Person</div>
-<div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> Organization</div>
-<div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Event</div>
-<div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Evidence</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <button class="detail-panel-close" id="detailClose">✕</button>
+  <div id="detailContent"></div>
 </div>
-<div class="controls" id="controls"></div>
-<div style="display:flex;gap:8px;padding:4px 20px;max-width:100%">
-<button onclick="zoomBoard(1.2)" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:1rem">+</button>
-<button onclick="zoomBoard(0.8)" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:1rem">−</button>
-<button onclick="zoomBoard('fit')" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:0.7rem">FIT</button>
-<button onclick="zoomBoard('reset')" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:0.7rem">100%</button>
-<span id="zoomLevel" style="color:var(--text-dim);font-size:0.7rem;align-self:center">100%</span>
+
+<!-- ZOOM CONTROLS -->
+<div class="ctrl-float">
+  <button class="ctrl-btn" id="zIn" title="Zoom in">+</button>
+  <button class="ctrl-btn" id="zReset" title="Reset">⊙</button>
+  <button class="ctrl-btn" id="zOut" title="Zoom out">−</button>
 </div>
-<div class="board-wrap" id="boardWrap">
-<div class="board" id="board">
-<div class="board-grid"></div>
-<svg id="threads"></svg>
+
+<!-- LEGEND -->
+<div class="legend-float">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div> Person</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> Organization</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Event</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Evidence</div>
 </div>
-</div>
-<div class="footer">Investigation by Daniel Perry | Data: LIRIL/TENET5 | All sources public record | SEED=118400</div>
+
+<div class="board-foot">Investigation by Daniel Perry | Data: LIRIL/TENET5 | All sources public record | SEED=118400</div>
+
 <script>
-let _zoom = 0.45;
-function zoomBoard(factor) {
+(async function() {
+  'use strict';
+
+  // ── Load data ──
+  let DATA;
+  try {
+    const r = await fetch('data/investigation_board.json');
+    DATA = await r.json();
+  } catch(e) {
+    document.getElementById('board').innerHTML = '<p style="padding:40px;color:var(--red)">Failed to load data.</p>';
+    return;
+  }
+
+  const nodes = DATA.nodes;
+  const threads = DATA.threads;
   const board = document.getElementById('board');
-  if (factor === 'fit') _zoom = 0.35;
-  else if (factor === 'reset') _zoom = 1;
-  else _zoom = Math.max(0.15, Math.min(2, _zoom * factor));
-  board.style.transform = `scale(${_zoom})`;
-  document.getElementById('zoomLevel').textContent = Math.round(_zoom * 100) + '%';
-  setTimeout(draw, 50);
-}
-(async function(){
-let DATA;
-try{const r=await fetch('data/investigation_board.json');DATA=await r.json()}catch(e){document.getElementById('board').innerHTML='<p style="padding:40px;color:var(--red)">Failed to load data.</p>';return}
-const board=document.getElementById('board'),svg=document.getElementById('threads'),wrap=document.getElementById('boardWrap'),nodes=DATA.nodes,threads=DATA.threads,nodeEls={};let activeFilter='all';
-// Initial zoom to fit
-board.style.transform = `scale(${_zoom})`;
-document.getElementById('zoomLevel').textContent = Math.round(_zoom * 100) + '%';
-// Pan support
-let isPanning=false, panX=0, panY=0, startX=0, startY=0;
-wrap.addEventListener('pointerdown',e=>{if(e.target===wrap||e.target.classList.contains('board-grid')){isPanning=true;startX=e.clientX-panX;startY=e.clientY-panY;wrap.style.cursor='grabbing'}});
-wrap.addEventListener('pointermove',e=>{if(!isPanning)return;panX=e.clientX-startX;panY=e.clientY-startY;board.style.transform=`scale(${_zoom}) translate(${panX/_zoom}px,${panY/_zoom}px)`});
-wrap.addEventListener('pointerup',()=>{isPanning=false;wrap.style.cursor=''});
-// Mouse wheel zoom
-wrap.addEventListener('wheel',e=>{e.preventDefault();zoomBoard(e.deltaY<0?1.15:0.87)},{passive:false});
-const sEl=document.getElementById('stats');
-sEl.innerHTML=`<div class="stat"><span class="num">${nodes.length}</span><span class="lbl">Nodes</span></div><div class="stat"><span class="num">${threads.length}</span><span class="lbl">Connections</span></div><div class="stat"><span class="num">${nodes.filter(n=>n.type==='person').length}</span><span class="lbl">People</span></div><div class="stat"><span class="num">${nodes.filter(n=>n.type==='org').length}</span><span class="lbl">Orgs</span></div>`;
-const cats=new Set();nodes.forEach(n=>(n.categories||[]).forEach(c=>cats.add(c)));
-document.getElementById('controls').innerHTML='<button class="filter-btn active" data-f="all" onclick="filt(\'all\',this)">All</button>'+[...cats].map(c=>`<button class="filter-btn" data-f="${c}" onclick="filt('${c}',this)">${c.toUpperCase()}</button>`).join('');
-const mob=window.innerWidth<768;
-nodes.forEach(n=>{const el=document.createElement('div');el.className=`node type-${n.type}`;el.dataset.id=n.id;el.dataset.cats=(n.categories||[]).join(',');if(!mob){el.style.left=n.x+'%';el.style.top=n.y+'%'}el.innerHTML=`<span class="type-badge">${n.type}</span><div class="title">${n.label}</div><div class="subtitle">${n.subtitle||''}</div><div class="detail">${n.detail||''}</div>${n.link?`<a class="link-btn" href="${n.link}">View evidence &rarr;</a>`:''}`;board.appendChild(el);nodeEls[n.id]=el});
-function draw(){if(mob)return;svg.innerHTML='';svg.setAttribute('width',3000);svg.setAttribute('height',2400);threads.forEach(t=>{const f=nodeEls[t.from],o=nodeEls[t.to];if(!f||!o||f.classList.contains('hidden')||o.classList.contains('hidden'))return;const x1=parseFloat(f.style.left)/100*3000+65,y1=parseFloat(f.style.top)/100*2400+20;const x2=parseFloat(o.style.left)/100*3000+65,y2=parseFloat(o.style.top)/100*2400+20;const s=t.strength||1;const c={3:'rgba(230,57,70,0.5)',2:'rgba(58,134,255,0.4)',1:'rgba(90,106,122,0.25)'};const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',c[s]||c[1]);l.setAttribute('stroke-width',s*1.5);svg.appendChild(l);if(t.label){const tx=document.createElementNS('http://www.w3.org/2000/svg','text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',(y1+y2)/2-5);tx.setAttribute('text-anchor','middle');tx.setAttribute('fill','rgba(200,214,229,0.5)');tx.setAttribute('font-size','10');tx.textContent=t.label;svg.appendChild(tx)}})}
-setTimeout(draw,100);
-window.filt=function(cat,btn){activeFilter=cat;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');nodes.forEach(n=>{const el=nodeEls[n.id];if(!el)return;if(cat==='all'||(n.categories||[]).includes(cat)){el.classList.remove('hidden');if(mob)el.style.display=''}else{el.classList.add('hidden');if(mob)el.style.display='none'}});draw()};
-if(!mob){let d=null,ox=0,oy=0;board.addEventListener('pointerdown',e=>{const n=e.target.closest('.node');if(!n)return;d=n;const r=n.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;n.style.zIndex=100;n.setPointerCapture(e.pointerId)});board.addEventListener('pointermove',e=>{if(!d)return;const bR=board.getBoundingClientRect();d.style.left=((e.clientX-bR.left-ox)/bR.width*100)+'%';d.style.top=((e.clientY-bR.top-oy)/bR.height*100)+'%';draw()});board.addEventListener('pointerup',()=>{if(d)d.style.zIndex=10;d=null})}
-window.addEventListener('resize',draw);
+  const svg = document.getElementById('lines');
+  const wrap = document.getElementById('wrap');
+  const detailPanel = document.getElementById('detailPanel');
+  const detailContent = document.getElementById('detailContent');
+  const searchBox = document.getElementById('searchBox');
+  const filterBar = document.getElementById('filters');
+
+  const BOARD_W = 4000;
+  const BOARD_H = 3200;
+  const nodeEls = {};
+  const nodeMap = {};
+  const isMobile = window.innerWidth <= 768;
+  let zoom = isMobile ? 0.22 : 0.35;
+  let panX = 0, panY = 0;
+  let selectedId = null;
+  let activeFilter = 'all';
+
+  // ── Stats ──
+  const statsEl = document.getElementById('stats');
+  statsEl.innerHTML = `
+    <div class="stat-chip"><span class="n">${nodes.length}</span><span class="l">Nodes</span></div>
+    <div class="stat-chip"><span class="n">${threads.length}</span><span class="l">Links</span></div>
+    <div class="stat-chip"><span class="n">${nodes.filter(n=>n.type==='person').length}</span><span class="l">People</span></div>
+    <div class="stat-chip"><span class="n">${nodes.filter(n=>n.type==='org').length}</span><span class="l">Orgs</span></div>
+  `;
+
+  // ── Filters ──
+  const cats = new Set();
+  nodes.forEach(n => (n.categories||[]).forEach(c => cats.add(c)));
+  filterBar.innerHTML = '<button class="fbtn on" data-c="all">All</button>' +
+    [...cats].map(c => `<button class="fbtn" data-c="${c}">${c.toUpperCase()}</button>`).join('');
+  filterBar.addEventListener('click', e => {
+    const btn = e.target.closest('.fbtn');
+    if (!btn) return;
+    activeFilter = btn.dataset.c;
+    filterBar.querySelectorAll('.fbtn').forEach(b => b.classList.toggle('on', b.dataset.c === activeFilter));
+    applyFilter();
+  });
+
+  function applyFilter() {
+    nodes.forEach(n => {
+      const el = nodeEls[n.id];
+      if (!el) return;
+      const show = activeFilter === 'all' || (n.categories||[]).includes(activeFilter);
+      el.classList.toggle('dim', !show);
+    });
+    drawLines();
+  }
+
+  // ── Apply force-directed spacing to prevent overlap ──
+  // We use percentage coords from JSON but spread them better
+  function computePositions() {
+    // Group nodes by primary category for clustering
+    const catGroups = {};
+    const catAnchors = {
+      'israel':  { cx: 0.15, cy: 0.22 },
+      'ccp':     { cx: 0.82, cy: 0.15 },
+      'cfnis':   { cx: 0.55, cy: 0.55 },
+      'media':   { cx: 0.20, cy: 0.80 },
+      'india':   { cx: 0.85, cy: 0.50 },
+      'person':  { cx: 0.45, cy: 0.38 },
+      'org':     { cx: 0.30, cy: 0.55 },
+      'event':   { cx: 0.65, cy: 0.82 },
+      'evidence':{ cx: 0.50, cy: 0.92 },
+      'disinfo': { cx: 0.78, cy: 0.72 },
+    };
+
+    nodes.forEach(n => {
+      nodeMap[n.id] = n;
+      const primaryCat = (n.categories||[])[0] || 'org';
+      const anchor = catAnchors[primaryCat] || { cx: 0.5, cy: 0.5 };
+
+      // Use existing JSON coords but bias toward category anchor
+      const rawX = (n.x || 50) / 100;
+      const rawY = (n.y || 50) / 100;
+
+      // Blend: 50% original position + 50% category anchor + jitter
+      const jitterX = (Math.random() - 0.5) * 0.12;
+      const jitterY = (Math.random() - 0.5) * 0.10;
+      n._px = Math.max(0.03, Math.min(0.96, rawX * 0.5 + anchor.cx * 0.5 + jitterX));
+      n._py = Math.max(0.04, Math.min(0.95, rawY * 0.5 + anchor.cy * 0.5 + jitterY));
+    });
+
+    // Force-directed repulsion to spread nodes out
+    for (let iter = 0; iter < 60; iter++) {
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          let dx = a._px - b._px;
+          let dy = a._py - b._py;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minDist = 0.065; // ~6.5% of board
+          if (dist < minDist && dist > 0.001) {
+            const force = (minDist - dist) / dist * 0.45;
+            a._px += dx * force;
+            a._py += dy * force;
+            b._px -= dx * force;
+            b._py -= dy * force;
+          }
+          // Clamp
+          a._px = Math.max(0.02, Math.min(0.97, a._px));
+          a._py = Math.max(0.03, Math.min(0.96, a._py));
+          b._px = Math.max(0.02, Math.min(0.97, b._px));
+          b._py = Math.max(0.03, Math.min(0.96, b._py));
+        }
+      }
+    }
+  }
+
+  computePositions();
+
+  // ── Create nodes ──
+  nodes.forEach(n => {
+    const el = document.createElement('div');
+    el.className = `node type-${n.type}`;
+    el.dataset.id = n.id;
+    el.style.left = (n._px * BOARD_W) + 'px';
+    el.style.top = (n._py * BOARD_H) + 'px';
+
+    el.innerHTML = `
+      <span class="badge">${n.type}</span>
+      <div class="name">${n.label}</div>
+      <div class="sub">${n.subtitle||''}</div>
+      <div class="info">${n.detail||''}</div>
+      ${n.link ? `<a class="ev-link" href="${n.link}">Evidence →</a>` : ''}
+    `;
+
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectNode(n.id);
+    });
+
+    board.appendChild(el);
+    nodeEls[n.id] = el;
+  });
+
+  // ── Draw lines (progressive: only for selected/hovered node) ──
+  function drawLines() {
+    svg.innerHTML = '';
+    svg.setAttribute('width', BOARD_W);
+    svg.setAttribute('height', BOARD_H);
+
+    threads.forEach(t => {
+      const fromEl = nodeEls[t.from];
+      const toEl = nodeEls[t.to];
+      if (!fromEl || !toEl) return;
+      if (fromEl.classList.contains('dim') || toEl.classList.contains('dim')) return;
+
+      // Progressive disclosure: full opacity for selected connections, dim for rest
+      const isHighlighted = selectedId && (t.from === selectedId || t.to === selectedId);
+      const str = t.strength || 1;
+
+      const x1 = parseFloat(fromEl.style.left) + 85;
+      const y1 = parseFloat(fromEl.style.top) + 20;
+      const x2 = parseFloat(toEl.style.left) + 85;
+      const y2 = parseFloat(toEl.style.top) + 20;
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+
+      if (isHighlighted) {
+        const colors = { 3: 'rgba(230,57,70,0.7)', 2: 'rgba(58,134,255,0.6)', 1: 'rgba(200,214,229,0.45)' };
+        line.setAttribute('stroke', colors[str] || colors[1]);
+        line.setAttribute('stroke-width', str * 2);
+      } else {
+        line.setAttribute('stroke', selectedId ? 'rgba(90,106,122,0.06)' : 'rgba(90,106,122,0.12)');
+        line.setAttribute('stroke-width', 1);
+      }
+
+      svg.appendChild(line);
+
+      // Labels only for highlighted connections
+      if (isHighlighted && t.label) {
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', (x1 + x2) / 2);
+        txt.setAttribute('y', (y1 + y2) / 2 - 6);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('fill', 'rgba(200,214,229,0.6)');
+        txt.setAttribute('font-size', '11');
+        txt.setAttribute('font-family', "'JetBrains Mono', monospace");
+        txt.textContent = t.label;
+        svg.appendChild(txt);
+      }
+    });
+  }
+
+  drawLines();
+
+  // ── Auto-center view on load ──
+  function centerView() {
+    // Find bounding box of all nodes
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    nodes.forEach(n => {
+      const x = n._px * BOARD_W;
+      const y = n._py * BOARD_H;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x + 170 > maxX) maxX = x + 170;
+      if (y + 60 > maxY) maxY = y + 60;
+    });
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    panX = (wrap.clientWidth / 2) - (cx * zoom);
+    panY = (wrap.clientHeight / 2) - (cy * zoom);
+    applyTransform();
+  }
+  setTimeout(centerView, 100);
+
+  // ── Select node ──
+  function selectNode(id) {
+    selectedId = (selectedId === id) ? null : id;
+    board.querySelectorAll('.node').forEach(el => {
+      el.classList.toggle('selected', el.dataset.id === selectedId);
+    });
+    drawLines();
+
+    if (selectedId) {
+      const n = nodeMap[selectedId];
+      const conns = threads.filter(t => t.from === id || t.to === id);
+      const typeColors = { person: 'var(--pink)', org: 'var(--purple)', event: 'var(--yellow)', evidence: 'var(--green)' };
+
+      detailContent.innerHTML = `
+        <span class="badge" style="background:${typeColors[n.type]||'var(--blue)'}22;color:${typeColors[n.type]||'var(--blue)'};padding:2px 8px;border-radius:4px;font-size:0.65rem;text-transform:uppercase;font-weight:700">${n.type}</span>
+        <h2 style="margin-top:8px">${n.label}</h2>
+        <div class="dp-sub">${n.subtitle||''}</div>
+        <div class="dp-body">${n.detail||''}</div>
+        ${n.link ? `<a class="dp-link" href="${n.link}">View Evidence →</a>` : ''}
+        <div class="dp-connections">
+          <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:8px;font-weight:600">${conns.length} CONNECTIONS</div>
+          ${conns.map(c => {
+            const otherId = c.from === id ? c.to : c.from;
+            const other = nodeMap[otherId];
+            if (!other) return '';
+            return `<div class="dp-conn-item" data-id="${otherId}">
+              <div class="dp-conn-dot" style="background:${typeColors[other.type]||'var(--blue)'}"></div>
+              <div><strong>${other.label}</strong>${c.label ? ` — ${c.label}` : ''}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+      detailPanel.classList.add('open');
+
+      // Click connections in detail panel
+      detailContent.querySelectorAll('.dp-conn-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const targetId = item.dataset.id;
+          selectNode(targetId);
+          // Pan to that node
+          const el = nodeEls[targetId];
+          if (el) {
+            const nx = parseFloat(el.style.left);
+            const ny = parseFloat(el.style.top);
+            panX = -(nx * zoom - wrap.clientWidth / 2);
+            panY = -(ny * zoom - wrap.clientHeight / 2);
+            applyTransform();
+          }
+        });
+      });
+    } else {
+      detailPanel.classList.remove('open');
+    }
+  }
+
+  document.getElementById('detailClose').addEventListener('click', () => selectNode(null));
+  wrap.addEventListener('click', (e) => {
+    if (!e.target.closest('.node') && !e.target.closest('.detail-panel')) {
+      selectNode(null);
+    }
+  });
+
+  // ── Transform ──
+  function applyTransform() {
+    board.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+  }
+  applyTransform();
+
+  // ── Zoom controls ──
+  document.getElementById('zIn').addEventListener('click', () => { zoom = Math.min(2, zoom + 0.1); applyTransform(); });
+  document.getElementById('zOut').addEventListener('click', () => { zoom = Math.max(0.15, zoom - 0.1); applyTransform(); });
+  document.getElementById('zReset').addEventListener('click', () => {
+    zoom = 0.4; panX = 0; panY = 0;
+    selectNode(null);
+    applyTransform();
+  });
+
+  // ── Mouse pan ──
+  let dragging = false, dragSX = 0, dragSY = 0;
+  wrap.addEventListener('mousedown', e => {
+    if (e.target.closest('.node') || e.target.closest('button') || e.target.closest('a')) return;
+    dragging = true; dragSX = e.clientX - panX; dragSY = e.clientY - panY;
+    wrap.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    panX = e.clientX - dragSX; panY = e.clientY - dragSY;
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; wrap.style.cursor = ''; });
+
+  // ── Mouse wheel zoom ──
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(0.15, Math.min(2, zoom - e.deltaY * 0.001));
+    applyTransform();
+  }, { passive: false });
+
+  // ── Touch ──
+  let touchStart = null, pinchDist = null, pinchBase = zoom;
+  wrap.addEventListener('touchstart', e => {
+    if (e.target.closest('.node')) return;
+    if (e.touches.length === 1) {
+      touchStart = { x: e.touches[0].clientX - panX, y: e.touches[0].clientY - panY };
+    }
+    if (e.touches.length === 2) {
+      pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      pinchBase = zoom;
+    }
+  }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    if (e.touches.length === 1 && touchStart) {
+      e.preventDefault();
+      panX = e.touches[0].clientX - touchStart.x;
+      panY = e.touches[0].clientY - touchStart.y;
+      applyTransform();
+    }
+    if (e.touches.length === 2 && pinchDist) {
+      e.preventDefault();
+      const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      zoom = Math.max(0.15, Math.min(2, pinchBase * (d / pinchDist)));
+      applyTransform();
+    }
+  }, { passive: false });
+  wrap.addEventListener('touchend', () => { touchStart = null; pinchDist = null; });
+
+  // ── Search ──
+  searchBox.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    nodes.forEach(n => {
+      const el = nodeEls[n.id];
+      if (!el) return;
+      const match = !q || n.label.toLowerCase().includes(q) ||
+        (n.subtitle||'').toLowerCase().includes(q) ||
+        (n.detail||'').toLowerCase().includes(q);
+      el.classList.toggle('dim', !match);
+    });
+    drawLines();
+  });
+
+  // ── Drag nodes ──
+  if (window.innerWidth > 768) {
+    let dragNode = null, dox = 0, doy = 0;
+    board.addEventListener('pointerdown', e => {
+      const n = e.target.closest('.node');
+      if (!n) return;
+      dragNode = n;
+      const r = n.getBoundingClientRect();
+      dox = e.clientX - r.left;
+      doy = e.clientY - r.top;
+      n.style.zIndex = 50;
+      n.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+    });
+    board.addEventListener('pointermove', e => {
+      if (!dragNode) return;
+      const bR = board.getBoundingClientRect();
+      dragNode.style.left = ((e.clientX - bR.left - dox) / zoom) + 'px';
+      dragNode.style.top = ((e.clientY - bR.top - doy) / zoom) + 'px';
+      drawLines();
+    });
+    board.addEventListener('pointerup', () => {
+      if (dragNode) dragNode.style.zIndex = 2;
+      dragNode = null;
+    });
+  }
+
+  // ── Keyboard ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') selectNode(null);
+    if (e.ctrlKey && e.key === 'f') { e.preventDefault(); searchBox.focus(); }
+  });
+
+  // ── Resize ──
+  window.addEventListener('resize', drawLines);
 })();
 </script>
+
 <footer id="site-footer"></footer>
 <script src="share.js?v=1"></script>
 <script src="nav.js?v=6"></script>
+<script src="board.js?v=1"></script>
 </body>
 </html>
