@@ -300,41 +300,48 @@
   <script src="footer.js?v=1"></script>
   <script>
     // TENET-5 SATOR WebSocket Bridge
-    const satorDashboard = document.getElementById('sator-dashboard');
-    function logSatorEvent(msg, isError = false) {
-      if(!satorDashboard) return;
-      const t = new Date().toISOString().split('T')[1].substring(0,8);
-      const span = document.createElement('span');
-      span.style.color = isError ? '#ef4444' : '#22c55e';
-      span.innerHTML = `[${t}] ${msg}<br>`;
-      satorDashboard.appendChild(span);
-      satorDashboard.scrollTop = satorDashboard.scrollHeight;
-    }
-    
-    try {
-      const ws = new WebSocket('ws://127.0.0.1:8092/sator');
-      ws.onopen = () => logSatorEvent('WebSocket connected. Receiving 136Hz stream.');
-      ws.onmessage = (e) => {
-        try {
-          const data = JSON.parse(e.data);
-          let summary = '';
-          if(data.event === 'COMBAT_ENEMY_KILLED') summary = `⚔️ NEUTRALIZED: ${data.payload}`;
-          else if(data.event === 'COMBAT_ENGAGE') summary = `⚠️ ENGAGEMENT: ${data.payload}`;
-          else if(data.event === 'TACTICAL_MISSION_COMPLETED') summary = `🎯 MISSION DONE: ${data.payload.name}`;
-          else if(data.event === 'STORY_MISSION_COMPLETED') summary = `📜 STORY ADVANCED: ${data.payload.name}`;
-          else if(data.event === 'SURVIVAL_CRAFT') {
-            const p = JSON.parse(data.payload);
-            summary = `🔨 STRUCTURE PLACED: ${p.recipe} @ [${p.x}, ${p.y}, ${p.z}]`;
-          }
-          if(summary) logSatorEvent(summary);
-        } catch(err) {} 
-      };
-      ws.onerror = () => {
-        logSatorEvent('[OFFLINE] Local SATOR bridge unreachable. Running outside MooseRacks.', true);
-        ws.close();
-      };
-    } catch(err) {
-      logSatorEvent('[ERROR] Matrix binding failed.', true);
+    const satorPanel = document.querySelector('.sator-telemetry-panel');
+    const satorHeader = satorPanel ? satorPanel.previousElementSibling : null;
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    if (!isLocal) {
+      if (satorPanel) satorPanel.style.display = 'none';
+      if (satorHeader && satorHeader.tagName === 'H2') satorHeader.style.display = 'none';
+    } else {
+      const satorDashboard = document.getElementById('sator-dashboard');
+      function logSatorEvent(msg, isError = false) {
+        if(!satorDashboard) return;
+        const t = new Date().toISOString().split('T')[1].substring(0,8);
+        const span = document.createElement('span');
+        span.style.color = isError ? '#ef4444' : '#22c55e';
+        span.innerHTML = `[${t}] ${msg}<br>`;
+        satorDashboard.appendChild(span);
+        satorDashboard.scrollTop = satorDashboard.scrollHeight;
+      }
+      
+      try {
+        const ws = new WebSocket('ws://' + window.location.hostname + ':8092/sator');
+        ws.onopen = () => logSatorEvent('WebSocket connected. Receiving 136Hz stream.');
+        ws.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            let summary = '';
+            if(data.event === 'COMBAT_ENEMY_KILLED') summary = `⚔️ NEUTRALIZED: ${data.payload}`;
+            else if(data.event === 'COMBAT_ENGAGE') summary = `⚠️ ENGAGEMENT: ${data.payload}`;
+            else if(data.event === 'TACTICAL_MISSION_COMPLETED') summary = `🎯 MISSION DONE: ${data.payload.name}`;
+            else if(data.event === 'STORY_MISSION_COMPLETED') summary = `📜 STORY ADVANCED: ${data.payload.name}`;
+            else if(data.event === 'SURVIVAL_CRAFT') {
+              const p = JSON.parse(data.payload);
+              summary = `🔨 STRUCTURE PLACED: ${p.recipe} @ [${p.x}, ${p.y}, ${p.z}]`;
+            }
+            if(summary) logSatorEvent(summary);
+          } catch(err) {} 
+        };
+        ws.onerror = () => {
+          logSatorEvent('[OFFLINE] Local SATOR bridge unreachable.', true);
+          ws.close();
+        };
+      } catch(err) {}
     }
   </script>
 </body>
