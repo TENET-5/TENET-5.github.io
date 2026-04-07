@@ -240,8 +240,61 @@ export function createWeaponModel(scene, camera, weaponId) {
   const nameEl = document.getElementById('wpnName');
   if (nameEl) nameEl.textContent = wpn.name;
 
+  // Phase 24: FPS Arms — CADPAT sleeves + blue nitrile gloves (matching FPSArms.gd)
+  _buildFPSArms(parent, scene, weaponId);
+
   _activeWeaponNode = parent;
   return parent;
+}
+
+function _buildFPSArms(parent, scene, weaponId) {
+  // CADPAT sleeve material (matches FPSArms.gd line 27: Color(0.31, 0.35, 0.22))
+  const sleeve = new PBRMaterial('armSleeve', scene);
+  sleeve.albedoColor = new Color3(0.31, 0.35, 0.22);
+  sleeve.roughness = 0.9; sleeve.metallic = 0.0;
+
+  // Blue nitrile glove material (matches FPSArms.gd line 32: Color(0.18, 0.36, 0.62))
+  const glove = new PBRMaterial('armGlove', scene);
+  glove.albedoColor = new Color3(0.18, 0.36, 0.62);
+  glove.roughness = 0.6; glove.metallic = 0.0;
+
+  const isPistol = weaponId === 'glock17';
+
+  // Right forearm (trigger arm)
+  const rArm = MeshBuilder.CreateCylinder('rForearm', {
+    diameterTop: 0.058, diameterBottom: 0.068, height: 0.26, tessellation: 8
+  }, scene);
+  rArm.parent = parent;
+  rArm.position = new Vector3(-0.04, -0.16, isPistol ? -0.12 : -0.20);
+  rArm.rotation.x = -1.13; rArm.rotation.z = -0.26;
+  rArm.material = sleeve; rArm.isPickable = false;
+
+  // Right hand (blue nitrile glove)
+  const rHand = MeshBuilder.CreateCylinder('rHand', {
+    diameterTop: 0.054, diameterBottom: 0.060, height: 0.10, tessellation: 8
+  }, scene);
+  rHand.parent = parent;
+  rHand.position = new Vector3(-0.05, -0.28, isPistol ? -0.20 : -0.30);
+  rHand.rotation.x = -1.40; rHand.rotation.z = -0.17;
+  rHand.material = glove; rHand.isPickable = false;
+
+  // Left forearm (support arm)
+  const lArm = MeshBuilder.CreateCylinder('lForearm', {
+    diameterTop: 0.054, diameterBottom: 0.064, height: 0.24, tessellation: 8
+  }, scene);
+  lArm.parent = parent;
+  lArm.position = new Vector3(-0.30, -0.18, isPistol ? -0.10 : -0.38);
+  lArm.rotation.x = -0.87; lArm.rotation.y = 0.21; lArm.rotation.z = 0.17;
+  lArm.material = sleeve; lArm.isPickable = false;
+
+  // Left hand (support grip — blue glove)
+  const lHand = MeshBuilder.CreateCylinder('lHand', {
+    diameterTop: 0.050, diameterBottom: 0.056, height: 0.09, tessellation: 8
+  }, scene);
+  lHand.parent = parent;
+  lHand.position = new Vector3(-0.27, -0.24, isPistol ? -0.18 : -0.48);
+  lHand.rotation.x = -1.05; lHand.rotation.y = 0.26; lHand.rotation.z = 0.09;
+  lHand.material = glove; lHand.isPickable = false;
 }
 
 // ── Equip weapon by ID — tears down old viewmodel, builds new ───────────────
