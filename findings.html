@@ -154,7 +154,12 @@
         fetch('data/cija_trips_nsicop_update.json').then(r => r.json()).catch(() => null),
         fetch('data/arms_exports_israel.json').then(r => r.json()).catch(() => null),
         fetch('data/foreign_interference_commission.json').then(r => r.json()).catch(() => null),
-        fetch('data/cansec_2025.json').then(r => r.json()).catch(() => null)
+        fetch('data/cansec_2025.json').then(r => r.json()).catch(() => null),
+        fetch('data/treason_roster_matrix.json').then(r => r.json()).catch(() => null),
+        fetch('data/postmedia_ownership.json').then(r => r.json()).catch(() => null),
+        fetch('data/defense_nexus.json').then(r => r.json()).catch(() => null),
+        fetch('data/osint_mp_index.json').then(r => r.json()).catch(() => null),
+        fetch('data/subject_updates_apr2026.json').then(r => r.json()).catch(() => null)
       ]).then(function(results) {
         var cija = results[0];
         var foreign = results[1];
@@ -166,6 +171,11 @@
         var armsData = results[7];
         var hogueData = results[8];
         var cansecData = results[9];
+        var treasonRoster = results[10];
+        var postmedia = results[11];
+        var defenseNexus = results[12];
+        var osintIndex = results[13];
+        var subjectUpdates = results[14];
         var extra = '';
 
         // CIJA Deep Analysis
@@ -357,6 +367,73 @@
             extra += '<li><span style="color:#ef4444;">' + cansecData.protest_crackdown.aftermath + '</span><span class="src">WSWS</span></li>';
           }
           extra += '</ul>';
+          extra += '</div>';
+        }
+
+        // Treason Roster Matrix — 877 entities across 80 years
+        if (treasonRoster) {
+          var categories = ['Gouzenko_Defection', 'Project_Sidewinder', 'Emergencies_Act'];
+          var counts = {};
+          categories.forEach(function(c) { counts[c] = Array.isArray(treasonRoster[c]) ? treasonRoster[c].length : 0; });
+          var total = Object.values(counts).reduce(function(s, v) { return s + v; }, 0);
+
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis F</div>';
+          extra += '<h2>Treason Roster Matrix — ' + total + ' Entities Across 80 Years <span class="severity sev-critical">CRITICAL</span></h2>';
+          extra += '<div class="summary">Three key inflection points in Canadian foreign interference history: the Gouzenko Cold War espionage defection (1945), CSIS Project Sidewinder CCP investigation (1997, buried), and the Emergencies Act invocation (2022). 4 parliamentarians span both Sidewinder and Emergencies Act eras.</div>';
+
+          extra += '<table class="entity-table"><thead><tr><th>Period</th><th>Event</th><th>Entities</th></tr></thead><tbody>';
+          extra += '<tr><td>1945</td><td>Gouzenko Defection — Soviet espionage network exposed</td><td class="hi">' + counts.Gouzenko_Defection + '</td></tr>';
+          extra += '<tr><td>1997</td><td>Project Sidewinder — CSIS CCP investigation (buried by government)</td><td class="hi">' + counts.Project_Sidewinder + '</td></tr>';
+          extra += '<tr><td>2022</td><td>Emergencies Act — invoked against civilian protests</td><td class="hi">' + counts.Emergencies_Act + '</td></tr>';
+          extra += '</tbody></table>';
+
+          extra += '<div class="pattern-box">The same institutional apparatus that failed to act on the Gouzenko espionage network (1945), buried the Sidewinder CCP investigation (1997), and invoked wartime powers against its own citizens (2022) is the one now claiming it cannot name the parliamentarians identified in the NSICOP report. Four MPs span both the Sidewinder and Emergencies Act periods — 25 years of continued service after being flagged in a foreign interference investigation.</div>';
+          extra += '</div>';
+        }
+
+        // Postmedia Ownership
+        if (postmedia) {
+          extra += '<div class="finding high">';
+          extra += '<div class="finding-num">Deep Analysis G</div>';
+          extra += '<h2>Postmedia — 130+ Papers, 66% Foreign-Owned, Zionist-Founded <span class="severity sev-high">HIGH</span></h2>';
+          extra += '<div class="summary">Canada\'s largest newspaper chain (130+ papers) was founded by Israel Asper, a "self-declared Zionist." Now 66% owned by Chatham Asset Management (NJ hedge fund). Centralized directive to shift all papers right with staunch pro-Israel editorial stance.</div>';
+          extra += '<ul class="evidence-list">';
+          extra += '<li><span>66% owned by Chatham Asset Management (NJ hedge fund)</span><span class="src">Wikipedia</span></li>';
+          extra += '<li><span>Founded by Israel Asper — "self-declared Zionist with unshakeable commitment to Israel"</span><span class="src">Public record</span></li>';
+          extra += '<li><span>Centralized directive: ALL papers shift right, pro-Israel editorial stance</span><span class="src">Medium / Read the Maple</span></li>';
+          extra += '<li><span>Parliamentary Petition e-6821 filed regarding foreign ownership</span><span class="src">Parliament.ca</span></li>';
+          extra += '<li><span>Investigation board connections: Goldstein (Sun) → CIJA, Levant (Rebel) → Poilievre</span><span class="src">Board data</span></li>';
+          extra += '</ul></div>';
+        }
+
+        // Defense Nexus
+        if (defenseNexus && defenseNexus.defense_lobbying_total) {
+          extra += '<div class="finding high">';
+          extra += '<div class="finding-num">Deep Analysis H</div>';
+          extra += '<h2>Defense Contractor Nexus — 2,763+ Combined Lobbying Communications <span class="severity sev-high">HIGH</span></h2>';
+          extra += '<div class="summary">9 major defense contractors with ' + defenseNexus.defense_lobbying_total.combined_total + '. Irving family donated to both Liberal and Conservative parties while their company lobbied for the $84B frigate contract.</div>';
+          extra += '<table class="entity-table"><thead><tr><th>Contractor</th><th>Comms</th><th>Key Contract</th></tr></thead><tbody>';
+          var dlt = defenseNexus.defense_lobbying_total;
+          [['Irving', dlt.irving], ['CAE', dlt.cae], ['General Dynamics', dlt.general_dynamics], ['Raytheon', dlt.raytheon], ['L3Harris', dlt.l3harris], ['Lockheed', dlt.lockheed], ['Northrop', dlt.northrop]].forEach(function(r) {
+            if (r[1]) extra += '<tr><td>' + r[0] + '</td><td class="hi">' + (r[1].comms || '—') + '</td><td>' + (r[1].contract || '').substring(0, 40) + '</td></tr>';
+          });
+          extra += '</tbody></table></div>';
+        }
+
+        // OSINT MP Index
+        if (osintIndex) {
+          extra += '<div class="finding medium">';
+          extra += '<div class="finding-num">Deep Analysis I</div>';
+          extra += '<h2>OSINT MP Intelligence Index — ' + (osintIndex.total_queries || 0) + ' Queries, ' + (osintIndex.total_results || 0) + ' Results <span class="severity sev-medium">MEDIUM</span></h2>';
+          extra += '<div class="summary">Compiled OSINT search results across ' + (osintIndex.total_queries || 0) + ' targeted queries covering MPs\' Israel advocacy, foreign interference positions, and CCP connections.</div>';
+          if (osintIndex.results) {
+            extra += '<table class="entity-table"><thead><tr><th>Query</th><th>Results</th></tr></thead><tbody>';
+            Object.keys(osintIndex.results).slice(0, 14).forEach(function(q) {
+              extra += '<tr><td>' + q.replace(/_/g, ' ') + '</td><td>' + osintIndex.results[q].length + '</td></tr>';
+            });
+            extra += '</tbody></table>';
+          }
           extra += '</div>';
         }
 
