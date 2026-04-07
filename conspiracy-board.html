@@ -91,6 +91,50 @@ body {
 .stat-chip .n { color: var(--red); font-weight: 700; font-size: 0.9rem; }
 .stat-chip .l { color: var(--text-dim); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
+/* ── SORT DROPDOWN ── */
+.sort-wrap {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.65rem; color: var(--text-dim);
+}
+.sort-wrap select {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px; color: var(--text); font-family: var(--mono);
+  font-size: 0.65rem; padding: 4px 8px; outline: none; cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.sort-wrap select:focus { border-color: var(--blue); }
+
+/* ── TYPE FILTER PILLS ── */
+.type-pills {
+  display: flex; gap: 3px; margin-left: 6px;
+}
+.type-pill {
+  font-family: var(--font); font-size: 0.58rem; padding: 3px 8px;
+  border-radius: 4px; border: 1px solid var(--border); cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  transition: all 0.2s; background: transparent; color: var(--text-dim);
+  -webkit-tap-highlight-color: transparent;
+}
+.type-pill:hover { border-color: var(--border-active); color: var(--text); }
+.type-pill.on { border-color: var(--indicator, var(--text)); color: var(--indicator, var(--text)); background: rgba(255,255,255,0.04); }
+.type-pill[data-t="person"] { --indicator: var(--pink); }
+.type-pill[data-t="org"]    { --indicator: var(--purple); }
+.type-pill[data-t="event"]  { --indicator: var(--yellow); }
+.type-pill[data-t="evidence"] { --indicator: var(--green); }
+
+/* ── NODE CONNECTION COUNT BADGE ── */
+.node .conn-count {
+  position: absolute; top: -6px; right: -6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--red); color: #fff;
+  font-size: 0.52rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
 /* ── FILTERS ── */
 .filter-bar {
   display: flex; gap: 4px; padding: 8px 16px; overflow-x: auto;
@@ -308,6 +352,22 @@ body {
   <div class="board-bar-search">
     <input type="text" id="searchBox" placeholder="Search nodes..." autocomplete="off">
   </div>
+  <div class="sort-wrap">
+    <span>Sort:</span>
+    <select id="sortSelect">
+      <option value="default">Default</option>
+      <option value="name">A → Z</option>
+      <option value="connections">Connections ↓</option>
+      <option value="type">Type</option>
+    </select>
+  </div>
+  <div class="type-pills" id="typePills">
+    <button class="type-pill on" data-t="all">All</button>
+    <button class="type-pill" data-t="person">Person</button>
+    <button class="type-pill" data-t="org">Org</button>
+    <button class="type-pill" data-t="event">Event</button>
+    <button class="type-pill" data-t="evidence">Evidence</button>
+  </div>
 </div>
 
 <!-- FILTERS -->
@@ -376,22 +436,39 @@ body {
   let zoom = isMobile ? 0.22 : 0.35;
   let panX = 0, panY = 0;
   let selectedId = null;
-  let activeFilter = 'all';
+  // ── Build connection count map ──
+  const connCounts = {};
+  threads.forEach(t => {
+    connCounts[t.from] = (connCounts[t.from] || 0) + 1;
+    connCounts[t.to] = (connCounts[t.to] || 0) + 1;
+  });
+  nodes.forEach(n => { n._connCount = connCounts[n.id] || 0; });
 
   // ── Stats ──
   const statsEl = document.getElementById('stats');
-  statsEl.innerHTML = `
-    <div class="stat-chip"><span class="n">${nodes.length}</span><span class="l">Nodes</span></div>
-    <div class="stat-chip"><span class="n">${threads.length}</span><span class="l">Links</span></div>
-    <div class="stat-chip"><span class="n">${nodes.filter(n=>n.type==='person').length}</span><span class="l">People</span></div>
-    <div class="stat-chip"><span class="n">${nodes.filter(n=>n.type==='org').length}</span><span class="l">Orgs</span></div>
-  `;
+  function updateStats() {
+    const visible = nodes.filter(n => {
+      const el = nodeEls[n.id];
+      return el && !el.classList.contains('dim');
+    });
+    statsEl.innerHTML = `
+      <div class="stat-chip"><span class="n">${visible.length}</span><span class="l">${visible.length < nodes.length ? 'of ' + nodes.length + ' Nodes' : 'Nodes'}</span></div>
+      <div class="stat-chip"><span class="n">${threads.length}</span><span class="l">Links</span></div>
+      <div class="stat-chip"><span class="n">${visible.filter(n=>n.type==='person').length}</span><span class="l">People</span></div>
+      <div class="stat-chip"><span class="n">${visible.filter(n=>n.type==='org').length}</span><span class="l">Orgs</span></div>
+    `;
+  }
 
-  // ── Filters ──
+  // ── CATEGORY FILTER + TYPE FILTER ──
+  let activeFilter = 'all';
+  let activeType = 'all';
+
+  // Build category buttons from data
   const cats = new Set();
   nodes.forEach(n => (n.categories||[]).forEach(c => cats.add(c)));
   filterBar.innerHTML = '<button class="fbtn on" data-c="all">All</button>' +
     [...cats].map(c => `<button class="fbtn" data-c="${c}">${c.toUpperCase()}</button>`).join('');
+
   filterBar.addEventListener('click', e => {
     const btn = e.target.closest('.fbtn');
     if (!btn) return;
@@ -400,14 +477,35 @@ body {
     applyFilter();
   });
 
+  // Type pills
+  const typePills = document.getElementById('typePills');
+  typePills.addEventListener('click', e => {
+    const btn = e.target.closest('.type-pill');
+    if (!btn) return;
+    activeType = btn.dataset.t;
+    typePills.querySelectorAll('.type-pill').forEach(b => b.classList.toggle('on', b.dataset.t === activeType));
+    applyFilter();
+  });
+
   function applyFilter() {
+    const q = searchBox.value.toLowerCase().trim();
     nodes.forEach(n => {
       const el = nodeEls[n.id];
       if (!el) return;
-      const show = activeFilter === 'all' || (n.categories||[]).includes(activeFilter);
+      let show = true;
+      // Category filter
+      if (activeFilter !== 'all' && !(n.categories||[]).includes(activeFilter)) show = false;
+      // Type filter
+      if (activeType !== 'all' && n.type !== activeType) show = false;
+      // Search filter
+      if (q) {
+        const hay = (n.label + ' ' + (n.subtitle||'') + ' ' + (n.detail||'')).toLowerCase();
+        if (!hay.includes(q)) show = false;
+      }
       el.classList.toggle('dim', !show);
     });
     drawLines();
+    updateStats();
   }
 
   // ── Apply force-directed spacing to prevent overlap ──
@@ -486,6 +584,7 @@ body {
       <div class="sub">${n.subtitle||''}</div>
       <div class="info">${n.detail||''}</div>
       ${n.link ? `<a class="ev-link" href="${n.link}">Evidence →</a>` : ''}
+      ${n._connCount > 0 ? `<div class="conn-count">${n._connCount}</div>` : ''}
     `;
 
     el.addEventListener('click', (e) => {
@@ -570,7 +669,45 @@ body {
     panY = (wrap.clientHeight / 2) - (cy * zoom);
     applyTransform();
   }
-  setTimeout(centerView, 100);
+  setTimeout(() => { centerView(); updateStats(); }, 100);
+
+  // ── Sort ──
+  const sortSelect = document.getElementById('sortSelect');
+  sortSelect.addEventListener('change', () => {
+    const sortMode = sortSelect.value;
+    const sorted = [...nodes];
+    if (sortMode === 'name') sorted.sort((a, b) => a.label.localeCompare(b.label));
+    else if (sortMode === 'connections') sorted.sort((a, b) => b._connCount - a._connCount);
+    else if (sortMode === 'type') sorted.sort((a, b) => a.type.localeCompare(b.type) || a.label.localeCompare(b.label));
+
+    if (sortMode === 'default') {
+      // Restore original positions
+      computePositions();
+      nodes.forEach(n => {
+        const el = nodeEls[n.id];
+        if (el) {
+          el.style.left = (n._px * BOARD_W) + 'px';
+          el.style.top = (n._py * BOARD_H) + 'px';
+        }
+      });
+    } else {
+      // Arrange in a neat grid layout
+      const cols = Math.ceil(Math.sqrt(sorted.length * 1.5));
+      const cellW = BOARD_W / (cols + 1);
+      const cellH = 90;
+      sorted.forEach((n, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const el = nodeEls[n.id];
+        if (el) {
+          el.style.left = (cellW * (col + 0.5)) + 'px';
+          el.style.top = (120 + cellH * row) + 'px';
+        }
+      });
+    }
+    drawLines();
+    centerView();
+  });
 
   // ── Select node ──
   function selectNode(id) {
@@ -701,18 +838,8 @@ body {
   }, { passive: false });
   wrap.addEventListener('touchend', () => { touchStart = null; pinchDist = null; });
 
-  // ── Search ──
   searchBox.addEventListener('input', e => {
-    const q = e.target.value.toLowerCase().trim();
-    nodes.forEach(n => {
-      const el = nodeEls[n.id];
-      if (!el) return;
-      const match = !q || n.label.toLowerCase().includes(q) ||
-        (n.subtitle||'').toLowerCase().includes(q) ||
-        (n.detail||'').toLowerCase().includes(q);
-      el.classList.toggle('dim', !match);
-    });
-    drawLines();
+    applyFilter();
   });
 
   // ── Drag nodes ──
