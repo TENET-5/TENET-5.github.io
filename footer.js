@@ -28,6 +28,7 @@
           { label: 'Cross-Reference Findings', href: 'findings.html' },
           { label: 'Arms Pipeline', href: 'arms-pipeline.html' },
           { label: 'Evidence Archive', href: 'evidence.html' },
+          { label: 'Evidence Index', href: 'evidence-index.html' },
         ]
       },
       {
