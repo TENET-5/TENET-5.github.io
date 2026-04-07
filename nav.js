@@ -1,385 +1,494 @@
 /**
- * TENET5 Shared Navigation Component v3.0
- * Single source of truth for site navigation across all 34 pages.
- * Include this script in every page: <script src="nav.js?v=3"></script>
- * Place a <nav id="site-nav"></nav> element where the nav should appear.
+ * TENET5 Shared Navigation Component v4.0
+ * Redesigned for easier navigation across 35+ pages.
  * 
+ * Features:
+ *  - Persistent sidebar mega-menu on desktop (triggered by hamburger)
+ *  - Categorized page sections with visual hierarchy
+ *  - Breadcrumb-style current page indicator
+ *  - Search shortcut
+ *  - "You Are Here" active page highlighting
+ *  - Smooth slide-in animation
+ *  - Full mobile-first responsive
+ *
+ * Include this script in every page: <script src="nav.js?v=7"></script>
+ * Place a <nav id="site-nav"></nav> element where the nav should appear.
+ *
  * LIRIL/SATOR: BUFFER gate — navigational routing for all content
  */
 (function () {
   'use strict';
 
-  const NAV_STRUCTURE = {
-    brand: { label: 'TENET5', href: 'index.html' },
-    primary: [
-      { label: '🕵 Investigation Board', href: 'conspiracy-board.html', class: 'nav-hot' },
-      { label: '🔎 Search', href: 'search.html' }
-    ],
-    dropdowns: [
-      {
-        label: '🩸 The Harm',
-        items: [
-          { label: '📋 The 504 Charges', href: 'accountability.html' },
-          { label: '☠ Genocide Evidence', href: 'genocide-evidence.html' },
-          { label: '📉 Policy Harm Index', href: 'harm-index.html' },
-          { label: '⚠ The Pattern', href: 't4-comparison.html' },
-          { label: '🥾 The Boot', href: 'the-boot.html' }
-        ]
-      },
-      {
-        label: '🕸 The Treason',
-        items: [
-          { label: '🏛 Treason Trajectory', href: 'treason-trajectory.html' },
-          { label: '⚔ 5GW Subversion', href: '5gw-subversion.html' },
-          { label: '🗺 Foreign Influence', href: 'foreign-influence.html' },
-          { label: '🔗 Follow the Money', href: 'cross-reference.html' },
-          { label: '💰 Procurement Analysis', href: 'procurement-analysis.html' },
-          { label: '🏛 Hansard Dashboard', href: 'hansard-dashboard.html' }
-        ]
-      },
-      {
-        label: '🎖 Military & Legal',
-        items: [
-          { label: '📜 PPCLI Lawsuit', href: 'lawsuit-ppcli.html' },
-          { label: '🎖 CFNIS Investigation', href: 'cfnis.html' },
-          { label: '⚖ Legal Proceedings', href: 'legal.html' },
-          { label: '🎖 Veterans Support', href: 'veterans.html' },
-          { label: '🛡 Whistleblower Guide', href: 'whistleblower-guide.html' }
-        ]
-      },
-      {
-        label: '📚 About & Action',
-        items: [
-          { label: '📖 My Story', href: 'my-story.html' },
-          { label: '📢 Open Letter to MPs', href: 'open-letter.html' },
-          { label: '📋 MP Briefing', href: 'mp-brief.html' },
-          { label: '📅 Master Timeline', href: 'timeline.html' },
-          { label: '❓ FAQ & History', href: 'history.html' },
-          { label: '📂 Entire Evidence Archive', href: 'evidence.html' }
-        ]
-      }
-    ],
-    tools: [
-      { label: '🚀 Red Duster FPS', href: 'red-duster-game.html', class: 'nav-hot', style: 'text-shadow:0 0 5px #ff2a2a;' },
-      { label: '🦝 Bloggins', href: 'bloggins.html', class: 'nav-green' }
-    ]
-  };
-
-  const NAV_CSS = `
-/* ── TENET5 NAV V3 INJECTED STYLES ── */
-.site-nav-v3 {
-  position: sticky;
-  top: 0;
-  z-index: 2147483647; /* Maximum possible z-index to stay above everything */
-  background: rgba(5, 5, 6, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 2px solid rgba(196, 30, 58, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  height: 60px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.82rem;
-  box-sizing: border-box;
-}
-
-.site-nav-v3 * {
-  box-sizing: border-box;
-}
-
-.site-nav-v3 .brand {
-  font-weight: 900;
-  color: #c41e3a !important;
-  text-decoration: none;
-  font-size: 1.1rem;
-  letter-spacing: 2px;
-  flex-shrink: 0;
-  text-transform: uppercase;
-}
-
-.site-nav-v3 .nav-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  justify-content: flex-end;
-  height: 100%;
-}
-
-.site-nav-v3 .nav-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 100%;
-}
-
-.site-nav-v3 .nav-primary {
-  margin-right: 1rem;
-  border-right: 1px solid rgba(255,255,255,0.1);
-  padding-right: 1rem;
-}
-
-.site-nav-v3 .nav-tools {
-  margin-left: 1rem;
-  border-left: 1px solid rgba(255,255,255,0.1);
-  padding-left: 1rem;
-}
-
-.site-nav-v3 a, .site-nav-v3 .nav-more-btn {
-  color: #a0a0a6;
-  text-decoration: none;
-  padding: 0.5rem 0.8rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  font-size: inherit;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 1;
-}
-
-.site-nav-v3 a:hover, .site-nav-v3 .nav-more-btn:hover, .site-nav-v3 .nav-dropdown-group:hover .nav-more-btn {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.site-nav-v3 a.active, .site-nav-v3 .active-section {
-  color: #fff;
-  background: rgba(196, 30, 58, 0.2);
-}
-
-.site-nav-v3 .nav-hot { color: #ff6b6b !important; }
-.site-nav-v3 .nav-green { color: #06d6a0 !important; }
-
-/* Dropdown Logic - Native Hover for Desktop */
-.site-nav-v3 .nav-dropdown-group {
-  position: relative;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.site-nav-v3 .nav-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 0;
-  background: #0a0c10;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 2px solid #c41e3a;
-  border-radius: 0 0 4px 4px;
-  display: none;
-  flex-direction: column;
-  min-width: 240px;
-  padding: 0.5rem 0;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.9);
-}
-
-/* Hover activates dropdown securely on desktop */
-@media (min-width: 1101px) {
-  .site-nav-v3 .nav-dropdown-group:hover .nav-dropdown {
-    display: flex;
-  }
-}
-
-.site-nav-v3 .nav-more-btn[aria-expanded="true"] + .nav-dropdown {
-  display: flex;
-}
-
-.site-nav-v3 .nav-dropdown a {
-  padding: 0.75rem 1.2rem;
-  border-radius: 0;
-  width: 100%;
-  justify-content: flex-start;
-}
-
-.site-nav-v3 .nav-dropdown a:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  padding-left: 1.5rem; /* Slide effect */
-}
-
-/* Mobile Hamburger */
-.site-nav-v3 .nav-hamburger {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 26px;
-  height: 20px;
-  padding: 0;
-}
-
-.site-nav-v3 .nav-hamburger span {
-  display: block;
-  width: 100%;
-  height: 2px;
-  background: #ededed;
-  border-radius: 2px;
-  transition: all 0.3s;
-}
-
-/* Mobile View */
-@media (max-width: 1100px) {
-  .site-nav-v3 .nav-hamburger {
-    display: flex;
-  }
-  .site-nav-v3 .nav-content {
-    display: none;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    right: 0;
-    background: #050506;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem 2rem;
-    max-height: calc(100vh - 60px);
-    overflow-y: auto;
-    height: auto;
-  }
-  .site-nav-v3 .nav-content.nav-open {
-    display: flex;
-  }
-  .site-nav-v3 .nav-group {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    margin: 0 !important;
-    border: none !important;
-    padding: 0.5rem 0 !important;
-    height: auto;
-  }
-  .site-nav-v3 .nav-dropdown {
-    position: static;
-    margin-top: 0;
-    width: 100%;
-    box-shadow: none;
-    border: none;
-    border-left: 2px solid rgba(255,255,255,0.1);
-    background: transparent;
-  }
-  .site-nav-v3 .nav-more-btn {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .site-nav-v3 a {
-    width: 100%;
-  }
-}
-  `;
+  // ── COMPLETE SITE MAP ──
+  const SITEMAP = [
+    {
+      section: 'Core Investigation',
+      icon: '🕵',
+      items: [
+        { label: 'Investigation Board', href: 'conspiracy-board.html', desc: 'Node graph of influence networks' },
+        { label: 'OSINT Dashboard', href: 'osint-dashboard.html', desc: 'Aggregated intelligence data' },
+        { label: 'Network Analysis', href: 'network-analysis.html', desc: 'Cross-referenced topology', hot: true },
+        { label: 'Dossier Viewer', href: 'dossier-viewer.html', desc: 'Generated intelligence dossiers', hot: true },
+        { label: 'Evidence Archive', href: 'evidence.html', desc: 'Complete evidence repository' },
+      ]
+    },
+    {
+      section: 'The Harm',
+      icon: '🩸',
+      items: [
+        { label: 'The 504 Charges', href: 'accountability.html', desc: 'Criminal accountability database' },
+        { label: 'Genocide Evidence', href: 'genocide-evidence.html', desc: 'Pattern documentation' },
+        { label: 'Policy Harm Index', href: 'harm-index.html', desc: 'Quantified policy damage' },
+        { label: 'The Pattern (T4)', href: 't4-comparison.html', desc: 'Historical comparison' },
+        { label: 'The Boot', href: 'the-boot.html', desc: 'Institutional mechanics' },
+      ]
+    },
+    {
+      section: 'Follow the Money',
+      icon: '💰',
+      items: [
+        { label: 'Cross-Reference Engine', href: 'cross-reference.html', desc: 'Lobbying vs. voting correlation' },
+        { label: 'Foreign Influence', href: 'foreign-influence.html', desc: 'CIJA, CCP, UFWD pipelines' },
+        { label: 'Procurement Analysis', href: 'procurement-analysis.html', desc: 'Contract anomalies' },
+        { label: 'Procurement Registry', href: 'procurement-registry.html', desc: 'Full contract database' },
+        { label: 'Contributions Tracker', href: 'contributions-tracker.html', desc: 'Political donations' },
+        { label: 'Lobbying Tracker', href: 'lobbying-tracker.html', desc: 'Registered lobbying data' },
+        { label: 'Corruption Map', href: 'corruption-map.html', desc: 'Documented failures' },
+        { label: 'Charity Pipeline', href: 'charity-pipeline.html', desc: 'Charity fund routing' },
+      ]
+    },
+    {
+      section: 'Parliament',
+      icon: '🏛',
+      items: [
+        { label: 'Treason Trajectory', href: 'treason-trajectory.html', desc: '81 years of pattern' },
+        { label: '5GW Subversion', href: '5gw-subversion.html', desc: 'Fifth-generation warfare' },
+        { label: 'Hansard Dashboard', href: 'hansard-dashboard.html', desc: 'Debate analysis' },
+        { label: 'Hansard Evidence', href: 'hansard-evidence.html', desc: 'Parliamentary records' },
+        { label: 'Voting Records', href: 'voting-records.html', desc: 'MP voting patterns' },
+        { label: 'Infographics', href: 'infographics.html', desc: 'Visual data presentations' },
+      ]
+    },
+    {
+      section: 'Military & Legal',
+      icon: '🎖',
+      items: [
+        { label: 'PPCLI Lawsuit', href: 'lawsuit-ppcli.html', desc: 'Active legal proceedings' },
+        { label: 'CFNIS Investigation', href: 'cfnis.html', desc: 'Military police misconduct' },
+        { label: 'Legal Proceedings', href: 'legal.html', desc: 'Full legal framework' },
+        { label: 'Veterans Support', href: 'veterans.html', desc: 'Veteran community resources' },
+        { label: 'Whistleblower Guide', href: 'whistleblower-guide.html', desc: 'Protected disclosure' },
+        { label: 'Acelephius Report', href: 'acelephius-report.html', desc: 'Intelligence assessment' },
+      ]
+    },
+    {
+      section: 'About & Action',
+      icon: '📖',
+      items: [
+        { label: 'My Story', href: 'my-story.html', desc: 'Daniel Perry\'s account' },
+        { label: 'Open Letter to MPs', href: 'open-letter.html', desc: 'Direct address to parliament' },
+        { label: 'MP Briefing', href: 'mp-brief.html', desc: 'Concise brief for MPs' },
+        { label: 'Master Timeline', href: 'timeline.html', desc: '81 years documented' },
+        { label: 'FAQ & History', href: 'history.html', desc: 'Common questions' },
+        { label: 'Resources', href: 'resources.html', desc: 'External reference links' },
+      ]
+    },
+    {
+      section: 'Apps',
+      icon: '🎮',
+      items: [
+        { label: 'Red Duster FPS', href: 'red-duster-game.html', desc: 'Tactical simulator', special: 'game' },
+        { label: 'Bloggins', href: 'bloggins.html', desc: 'Raccoon intelligence AI', special: 'green' },
+        { label: 'Search', href: 'search.html', desc: 'Full-site search' },
+      ]
+    },
+  ];
 
   function getCurrentPage() {
-    const path = window.location.pathname;
+    var path = window.location.pathname;
     return path.split('/').pop() || 'index.html';
   }
 
-  function injectCSS() {
-    if (document.getElementById('tenet5-nav-v3-css')) return;
-    const style = document.createElement('style');
-    style.id = 'tenet5-nav-v3-css';
-    style.textContent = NAV_CSS;
-    document.head.appendChild(style);
+  function getCurrentSection(page) {
+    for (var i = 0; i < SITEMAP.length; i++) {
+      for (var j = 0; j < SITEMAP[i].items.length; j++) {
+        if (SITEMAP[i].items[j].href === page) {
+          return SITEMAP[i].section;
+        }
+      }
+    }
+    return null;
   }
 
   function buildNav() {
-    injectCSS();
+    // Prevent double-init
+    if (document.getElementById('t5-nav-v4-css')) return;
 
-    const currentPage = getCurrentPage();
-    const nav = document.getElementById('site-nav') || document.querySelector('nav.site-nav') || document.querySelector('nav.site-nav-v3');
+    var currentPage = getCurrentPage();
+    var currentSection = getCurrentSection(currentPage);
+
+    // Inject CSS
+    var style = document.createElement('style');
+    style.id = 't5-nav-v4-css';
+    style.textContent = NAV_CSS;
+    document.head.appendChild(style);
+
+    var nav = document.getElementById('site-nav') || document.querySelector('nav');
     if (!nav) return;
 
-    nav.className = 'site-nav-v3';
+    nav.className = 't5-topbar';
     nav.setAttribute('role', 'navigation');
     nav.setAttribute('aria-label', 'Main navigation');
 
-    let html = '';
+    // ── TOP BAR ──
+    var html = '';
+    html += '<a href="index.html" class="t5-brand">TENET5</a>';
 
-    // Brand
-    html += `<a href="${NAV_STRUCTURE.brand.href}" class="brand">${NAV_STRUCTURE.brand.label}</a>`;
+    // Quick links (visible on desktop)
+    html += '<div class="t5-quick">';
+    html += '<a href="conspiracy-board.html"' + (currentPage === 'conspiracy-board.html' ? ' class="active"' : '') + '>Investigation</a>';
+    html += '<a href="osint-dashboard.html"' + (currentPage === 'osint-dashboard.html' ? ' class="active"' : '') + '>OSINT</a>';
+    html += '<a href="evidence.html"' + (currentPage === 'evidence.html' ? ' class="active"' : '') + '>Evidence</a>';
+    html += '<a href="foreign-influence.html"' + (currentPage === 'foreign-influence.html' ? ' class="active"' : '') + '>Influence</a>';
+    html += '<a href="my-story.html"' + (currentPage === 'my-story.html' ? ' class="active"' : '') + '>My Story</a>';
+    html += '</div>';
 
-    // Mobile hamburger
-    html += '<button class="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">';
+    // Right side: search + menu button
+    html += '<div class="t5-right">';
+    html += '<a href="search.html" class="t5-search-btn" title="Search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>';
+    html += '<button class="t5-menu-btn" aria-label="Open site menu" aria-expanded="false">';
     html += '<span></span><span></span><span></span>';
     html += '</button>';
-
-    // Nav content wrapper
-    html += '<div class="nav-content">';
-
-    // Primary Links
-    html += '<div class="nav-group nav-primary">';
-    NAV_STRUCTURE.primary.forEach(item => {
-      const active = currentPage === item.href ? ' active' : '';
-      const cls = item.class ? ` ${item.class}` : '';
-      html += `<a href="${item.href}" class="${cls}${active}">${item.label}</a>`;
-    });
     html += '</div>';
 
-    // Dropdowns
-    NAV_STRUCTURE.dropdowns.forEach(dropdown => {
-      const hasActivePage = dropdown.items.some(i => i.href === currentPage);
-      html += '<div class="nav-group nav-dropdown-group">';
-      html += `<button class="nav-more-btn${hasActivePage ? ' active-section' : ''}" aria-expanded="false" aria-haspopup="true">`;
-      html += `${dropdown.label} <span class="chevron">▾</span></button>`;
-      html += '<div class="nav-dropdown">';
-      dropdown.items.forEach(item => {
-        const active = currentPage === item.href ? ' class="active"' : '';
-        html += `<a href="${item.href}"${active}>${item.label}</a>`;
-      });
+    // ── SLIDE-OUT MEGA MENU ──
+    html += '<div class="t5-mega" aria-hidden="true">';
+    html += '<div class="t5-mega-scroll">';
+
+    // Current page indicator
+    if (currentSection) {
+      html += '<div class="t5-youarehere">';
+      html += '<span class="t5-yah-label">You are here</span>';
+      html += '<span class="t5-yah-crumb">' + currentSection + ' → <strong>' + getPageLabel(currentPage) + '</strong></span>';
+      html += '</div>';
+    }
+
+    // Sections
+    for (var s = 0; s < SITEMAP.length; s++) {
+      var sec = SITEMAP[s];
+      html += '<div class="t5-mega-section">';
+      html += '<h3 class="t5-mega-heading">' + sec.icon + ' ' + sec.section + '</h3>';
+      html += '<div class="t5-mega-items">';
+      for (var i = 0; i < sec.items.length; i++) {
+        var item = sec.items[i];
+        var cls = 't5-mega-link';
+        if (item.href === currentPage) cls += ' active';
+        if (item.hot) cls += ' hot';
+        if (item.special === 'game') cls += ' game';
+        if (item.special === 'green') cls += ' green';
+        html += '<a href="' + item.href + '" class="' + cls + '">';
+        html += '<span class="t5-ml-name">' + item.label + '</span>';
+        html += '<span class="t5-ml-desc">' + item.desc + '</span>';
+        html += '</a>';
+      }
       html += '</div></div>';
-    });
+    }
 
-    // Tools
-    html += '<div class="nav-group nav-tools">';
-    NAV_STRUCTURE.tools.forEach(item => {
-      const active = currentPage === item.href ? ' active' : '';
-      const cls = item.class ? ` ${item.class}` : '';
-      const style = item.style ? ` style="${item.style}"` : '';
-      html += `<a href="${item.href}" class="${cls}${active}"${style}>${item.label}</a>`;
-    });
-    html += '</div>';
-    html += '</div>'; // close .nav-content
+    html += '</div></div>'; // close mega-scroll + mega
+    html += '<div class="t5-overlay"></div>';
 
     nav.innerHTML = html;
 
-    // Mobile & Click Handlers
-    nav.querySelectorAll('.nav-more-btn').forEach(btn => {
-      btn.addEventListener('click', function (e) {
-        if (window.innerWidth > 1100) return; // Desktop uses CSS hover
-        e.stopPropagation();
-        const expanded = this.getAttribute('aria-expanded') === 'true';
-        nav.querySelectorAll('.nav-more-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
-        this.setAttribute('aria-expanded', !expanded);
-      });
-    });
+    // ── EVENT HANDLERS ──
+    var menuBtn = nav.querySelector('.t5-menu-btn');
+    var mega = nav.querySelector('.t5-mega');
+    var overlay = nav.querySelector('.t5-overlay');
+    var isOpen = false;
 
-    const hamburger = nav.querySelector('.nav-hamburger');
-    const navContent = nav.querySelector('.nav-content');
-    if (hamburger && navContent) {
-      hamburger.addEventListener('click', function (e) {
-        e.stopPropagation();
-        const expanded = this.getAttribute('aria-expanded') === 'true';
-        this.setAttribute('aria-expanded', !expanded);
-        navContent.classList.toggle('nav-open', !expanded);
-        this.classList.toggle('open', !expanded);
-      });
+    function toggleMenu(forceClose) {
+      isOpen = forceClose ? false : !isOpen;
+      mega.classList.toggle('open', isOpen);
+      overlay.classList.toggle('open', isOpen);
+      menuBtn.classList.toggle('open', isOpen);
+      menuBtn.setAttribute('aria-expanded', isOpen);
+      mega.setAttribute('aria-hidden', !isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
     }
 
-    document.addEventListener('click', () => {
-      nav.querySelectorAll('.nav-more-btn').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+    menuBtn.addEventListener('click', function(e) { e.stopPropagation(); toggleMenu(); });
+    overlay.addEventListener('click', function() { toggleMenu(true); });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isOpen) toggleMenu(true);
+    });
+
+    // Close on link click
+    mega.querySelectorAll('.t5-mega-link').forEach(function(link) {
+      link.addEventListener('click', function() { toggleMenu(true); });
     });
   }
 
-  // Load Nav
+  function getPageLabel(page) {
+    for (var s = 0; s < SITEMAP.length; s++) {
+      for (var i = 0; i < SITEMAP[s].items.length; i++) {
+        if (SITEMAP[s].items[i].href === page) return SITEMAP[s].items[i].label;
+      }
+    }
+    return page.replace('.html', '').replace(/-/g, ' ');
+  }
+
+  // ── STYLES ──
+  var NAV_CSS = '\
+/* ══════════════════════════════════════════════ */\
+/*  TENET5 NAV V4 — TOPBAR + MEGA MENU          */\
+/* ══════════════════════════════════════════════ */\
+\
+.t5-topbar {\
+  position: sticky;\
+  top: 0;\
+  z-index: 2147483647;\
+  background: rgba(5,5,6,0.92);\
+  backdrop-filter: blur(20px);\
+  -webkit-backdrop-filter: blur(20px);\
+  border-bottom: 1px solid rgba(255,255,255,0.06);\
+  display: flex;\
+  align-items: center;\
+  justify-content: space-between;\
+  padding: 0 clamp(16px, 3vw, 40px);\
+  height: 56px;\
+  font-family: "JetBrains Mono", "SF Mono", monospace;\
+  font-size: 0.78rem;\
+  box-sizing: border-box;\
+}\
+.t5-topbar *, .t5-topbar *::before, .t5-topbar *::after { box-sizing: border-box; }\
+\
+/* Brand */\
+.t5-brand {\
+  font-weight: 800;\
+  color: #c41e3a !important;\
+  text-decoration: none !important;\
+  font-size: 1rem;\
+  letter-spacing: 3px;\
+  text-transform: uppercase;\
+  flex-shrink: 0;\
+  transition: color 0.2s;\
+}\
+.t5-brand:hover { color: #e53555 !important; }\
+\
+/* Quick links – desktop only */\
+.t5-quick {\
+  display: flex;\
+  align-items: center;\
+  gap: 2px;\
+  margin-left: clamp(16px, 3vw, 40px);\
+}\
+.t5-quick a {\
+  color: #6e6e76 !important;\
+  text-decoration: none !important;\
+  padding: 6px 12px;\
+  border-radius: 6px;\
+  font-size: 0.76rem;\
+  font-weight: 500;\
+  transition: all 0.2s;\
+  white-space: nowrap;\
+}\
+.t5-quick a:hover { color: #ededed !important; background: rgba(255,255,255,0.06); }\
+.t5-quick a.active { color: #ededed !important; background: rgba(196,30,58,0.12); }\
+\
+/* Right side */\
+.t5-right {\
+  display: flex;\
+  align-items: center;\
+  gap: 8px;\
+  margin-left: auto;\
+}\
+\
+/* Search button */\
+.t5-search-btn {\
+  color: #6e6e76 !important;\
+  text-decoration: none !important;\
+  padding: 8px;\
+  border-radius: 6px;\
+  transition: all 0.2s;\
+  display: flex;\
+  align-items: center;\
+}\
+.t5-search-btn:hover { color: #ededed !important; background: rgba(255,255,255,0.06); }\
+.t5-search-btn svg { display: block; }\
+\
+/* Menu Button */\
+.t5-menu-btn {\
+  display: flex;\
+  flex-direction: column;\
+  gap: 4px;\
+  background: none;\
+  border: 1px solid rgba(255,255,255,0.08);\
+  border-radius: 6px;\
+  padding: 10px 9px;\
+  cursor: pointer;\
+  transition: all 0.25s;\
+}\
+.t5-menu-btn:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); }\
+.t5-menu-btn span {\
+  display: block;\
+  width: 18px;\
+  height: 2px;\
+  background: #a0a0a6;\
+  border-radius: 2px;\
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);\
+}\
+.t5-menu-btn.open span:nth-child(1) { transform: rotate(45deg) translate(3.5px, 3.5px); }\
+.t5-menu-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }\
+.t5-menu-btn.open span:nth-child(3) { transform: rotate(-45deg) translate(3.5px, -3.5px); }\
+.t5-menu-btn.open { border-color: rgba(196,30,58,0.3); }\
+\
+/* Overlay */\
+.t5-overlay {\
+  position: fixed;\
+  inset: 0;\
+  background: rgba(0,0,0,0.6);\
+  z-index: 2147483645;\
+  opacity: 0;\
+  pointer-events: none;\
+  transition: opacity 0.35s;\
+}\
+.t5-overlay.open { opacity: 1; pointer-events: auto; }\
+\
+/* ── MEGA MENU ── */\
+.t5-mega {\
+  position: fixed;\
+  top: 0;\
+  right: -420px;\
+  width: 400px;\
+  max-width: calc(100vw - 20px);\
+  height: 100vh;\
+  height: 100dvh;\
+  background: #0a0a0c;\
+  border-left: 1px solid rgba(255,255,255,0.06);\
+  z-index: 2147483646;\
+  transition: right 0.35s cubic-bezier(0.16,1,0.3,1);\
+  display: flex;\
+  flex-direction: column;\
+}\
+.t5-mega.open { right: 0; }\
+\
+.t5-mega-scroll {\
+  flex: 1;\
+  overflow-y: auto;\
+  padding: 24px 24px 40px;\
+  scrollbar-width: thin;\
+  scrollbar-color: #2a2a2e transparent;\
+}\
+.t5-mega-scroll::-webkit-scrollbar { width: 4px; }\
+.t5-mega-scroll::-webkit-scrollbar-thumb { background: #2a2a2e; border-radius: 2px; }\
+\
+/* You Are Here */\
+.t5-youarehere {\
+  background: rgba(196,30,58,0.08);\
+  border: 1px solid rgba(196,30,58,0.15);\
+  border-radius: 8px;\
+  padding: 12px 16px;\
+  margin-bottom: 24px;\
+}\
+.t5-yah-label {\
+  display: block;\
+  font-size: 0.6rem;\
+  text-transform: uppercase;\
+  letter-spacing: 1.5px;\
+  color: #c41e3a;\
+  margin-bottom: 4px;\
+  font-weight: 600;\
+}\
+.t5-yah-crumb {\
+  font-size: 0.78rem;\
+  color: #a0a0a6;\
+}\
+.t5-yah-crumb strong { color: #ededed; }\
+\
+/* Section headings */\
+.t5-mega-section {\
+  margin-bottom: 20px;\
+}\
+.t5-mega-heading {\
+  font-size: 0.65rem;\
+  text-transform: uppercase;\
+  letter-spacing: 1.5px;\
+  color: #6e6e76;\
+  font-weight: 600;\
+  padding: 0 4px 8px;\
+  border-bottom: 1px solid rgba(255,255,255,0.04);\
+  margin-bottom: 6px;\
+}\
+\
+/* Page links */\
+.t5-mega-items {\
+  display: flex;\
+  flex-direction: column;\
+  gap: 2px;\
+}\
+.t5-mega-link {\
+  display: flex;\
+  flex-direction: column;\
+  gap: 1px;\
+  padding: 10px 12px;\
+  border-radius: 8px;\
+  text-decoration: none !important;\
+  transition: all 0.2s;\
+  border-left: 2px solid transparent;\
+}\
+.t5-mega-link:hover {\
+  background: rgba(255,255,255,0.04);\
+  border-left-color: rgba(255,255,255,0.15);\
+}\
+.t5-mega-link.active {\
+  background: rgba(196,30,58,0.1);\
+  border-left-color: #c41e3a;\
+}\
+.t5-mega-link.hot .t5-ml-name::after {\
+  content: "NEW";\
+  font-size: 0.5rem;\
+  background: #c41e3a;\
+  color: #fff;\
+  padding: 1px 5px;\
+  border-radius: 3px;\
+  margin-left: 8px;\
+  font-weight: 700;\
+  vertical-align: middle;\
+  letter-spacing: 0.5px;\
+}\
+.t5-mega-link.game .t5-ml-name { color: #ff6b6b !important; }\
+.t5-mega-link.green .t5-ml-name { color: #06d6a0 !important; }\
+\
+.t5-ml-name {\
+  font-size: 0.82rem;\
+  font-weight: 500;\
+  color: #c8c8cc !important;\
+  transition: color 0.2s;\
+}\
+.t5-mega-link:hover .t5-ml-name { color: #fff !important; }\
+.t5-mega-link.active .t5-ml-name { color: #ededed !important; font-weight: 600; }\
+\
+.t5-ml-desc {\
+  font-size: 0.68rem;\
+  color: #4a4a52 !important;\
+  line-height: 1.3;\
+}\
+.t5-mega-link:hover .t5-ml-desc { color: #6e6e76 !important; }\
+\
+/* ── MOBILE ── */\
+@media (max-width: 768px) {\
+  .t5-quick { display: none; }\
+  .t5-mega { width: 100%; max-width: 100vw; right: -100%; }\
+  .t5-topbar { height: 50px; }\
+}\
+\
+@media (min-width: 769px) and (max-width: 1100px) {\
+  .t5-quick a:nth-child(n+4) { display: none; }\
+}\
+';
+
+  // ── INIT ──
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', buildNav);
   } else {

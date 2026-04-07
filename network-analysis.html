@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Analysis | TENET5</title>
+  <meta name="description" content="TENET5 cross-referenced influence network analysis. Visualize entity connections across lobbying, treason roster, OSINT vault, and parliamentary records.">
+  <meta name="theme-color" content="#050506">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
+    .net-wrap { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: 'JetBrains Mono', monospace; color: #e0e0e0; }
+    .net-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid rgba(196,30,58,0.4); margin-bottom: 24px; }
+    .net-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #ededed; letter-spacing: -1px; margin-bottom: 8px; }
+    .net-header .sub { font-size: 0.85rem; color: #a0a0a6; }
+
+    /* System Banner */
+    .sys-banner {
+      background: linear-gradient(135deg, rgba(10,10,15,0.98), rgba(15,10,20,0.95));
+      border: 1px solid rgba(57,255,20,0.2);
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .sys-banner .item { display: flex; flex-direction: column; gap: 2px; }
+    .sys-banner .lbl { color: #6e6e76; }
+    .sys-banner .val { color: #39ff14; font-weight: 700; }
+    .sys-banner .val.red { color: #e53555; }
+    .sys-banner .val.blue { color: #60a5fa; }
+
+    /* Score Overview Cards */
+    .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .score-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+    .score-card:hover { border-color: rgba(196,30,58,0.3); }
+    .score-card .big { font-size: 1.8rem; font-weight: 700; display: block; line-height: 1.1; }
+    .score-card .big.red { color: #e53555; }
+    .score-card .big.green { color: #39ff14; }
+    .score-card .big.blue { color: #60a5fa; }
+    .score-card .big.yellow { color: #facc15; }
+    .score-card .lbl { font-size: 0.6rem; color: #6e6e76; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+
+    /* Network Canvas */
+    .canvas-container {
+      background: #0a0a0c;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      position: relative;
+      width: 100%;
+      height: 600px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    #network-canvas {
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+    .canvas-legend {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(10,10,14,0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 0.65rem;
+    }
+    .canvas-legend .leg-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .canvas-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* Entity Table */
+    .entity-section { margin-bottom: 30px; }
+    .entity-section h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #a0a0a6; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .entity-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .entity-table th { text-align: left; color: #6e6e76; font-weight: 600; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.65rem; }
+    .entity-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #c0c0c6; }
+    .entity-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .entity-table .score-col { text-align: right; font-weight: 700; }
+    .entity-table .score-col.high { color: #e53555; }
+    .entity-table .score-col.mid { color: #facc15; }
+    .entity-table .score-col.low { color: #39ff14; }
+    .entity-table .cats { font-size: 0.65rem; color: #6e6e76; }
+    .entity-table .badge { display: inline-block; font-size: 0.55rem; padding: 2px 6px; border-radius: 3px; margin-right: 4px; font-weight: 600; text-transform: uppercase; }
+    .badge-israel { background: rgba(96,165,250,0.15); color: #60a5fa; }
+    .badge-ccp { background: rgba(229,53,85,0.15); color: #e53555; }
+    .badge-cfnis { background: rgba(250,204,21,0.15); color: #facc15; }
+    .badge-osint { background: rgba(57,255,20,0.15); color: #39ff14; }
+    .badge-lobby { background: rgba(168,85,247,0.15); color: #c084fc; }
+    .badge-donor { background: rgba(249,115,22,0.15); color: #f97316; }
+    .badge-media { background: rgba(236,72,153,0.15); color: #f472b6; }
+
+    /* Overlap Section */
+    .overlap-card {
+      background: #0c0c0e;
+      border: 1px solid rgba(229,53,85,0.15);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+    }
+    .overlap-card:hover { border-color: rgba(229,53,85,0.4); }
+    .overlap-card .name { font-size: 0.95rem; font-weight: 600; color: #ededed; }
+    .overlap-card .meta { font-size: 0.72rem; color: #6e6e76; margin-top: 4px; }
+    .overlap-card .sources { font-size: 0.7rem; color: #a0a0a6; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+
+    @media (max-width: 700px) {
+      .canvas-container { height: 400px; }
+      .score-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="net-wrap">
+    <div class="net-header">
+      <h1>&#128300; Network Analysis</h1>
+      <p class="sub">Cross-referenced influence topology across all investigative data vectors</p>
+    </div>
+
+    <!-- System Status -->
+    <div class="sys-banner">
+      <div class="item"><span class="lbl">Millennial Falcon Tracker</span><span class="val">TOPOLOGY MODE</span></div>
+      <div class="item"><span class="lbl">Empirical Magic Handoff</span><span class="val">SECURED</span></div>
+      <div class="item"><span class="lbl">Data Vectors</span><span class="val blue" id="vec-count">5</span></div>
+      <div class="item"><span class="lbl">Entity Graph</span><span class="val red" id="entity-count">LOADING...</span></div>
+    </div>
+
+    <!-- Score Overview -->
+    <div class="score-grid" id="score-grid">
+      <div class="score-card"><span class="big red" id="total-entities">--</span><div class="lbl">Unique Entities</div></div>
+      <div class="score-card"><span class="big blue" id="multi-source">--</span><div class="lbl">Multi-Source</div></div>
+      <div class="score-card"><span class="big green" id="graph-nodes">--</span><div class="lbl">Graph Nodes</div></div>
+      <div class="score-card"><span class="big yellow" id="graph-edges">--</span><div class="lbl">Connections</div></div>
+      <div class="score-card"><span class="big red" id="high-influence">--</span><div class="lbl">High Influence</div></div>
+    </div>
+
+    <!-- Network Canvas -->
+    <div class="canvas-container">
+      <canvas id="network-canvas"></canvas>
+      <div class="canvas-legend">
+        <div class="leg-item"><div class="dot" style="background:#e53555;"></div> Person</div>
+        <div class="leg-item"><div class="dot" style="background:#60a5fa;"></div> Organization</div>
+        <div class="leg-item"><div class="dot" style="background:#facc15;"></div> Event</div>
+        <div class="leg-item"><div class="dot" style="background:#39ff14;"></div> Official</div>
+        <div class="leg-item"><div class="dot" style="background:#c084fc;"></div> Donor</div>
+      </div>
+    </div>
+
+    <!-- Top Influence Entities -->
+    <div class="entity-section">
+      <h2>Top Influence Entities</h2>
+      <table class="entity-table" id="entity-table">
+        <thead>
+          <tr><th>#</th><th>Entity</th><th>Categories</th><th>Sources</th><th class="score-col">Score</th></tr>
+        </thead>
+        <tbody id="entity-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Multi-Vector Entities -->
+    <div class="entity-section">
+      <h2>Multi-Vector Entities (&#9888; appear in 3+ investigation sources)</h2>
+      <div id="overlap-list"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Investigation</h4>
+        <a href="accountability.html">The 504 Database</a>
+        <a href="conspiracy-board.html">Investigation Board</a>
+        <a href="evidence.html">Evidence Archive</a>
+        <a href="dossier-viewer.html">Dossier Viewer</a>
+      </div>
+      <div class="footer-col">
+        <h4>Analysis</h4>
+        <a href="osint-dashboard.html">OSINT Dashboard</a>
+        <a href="cross-reference.html">Cross-Reference Engine</a>
+        <a href="corruption-map.html">Corruption Map</a>
+        <a href="procurement-analysis.html">Procurement Analysis</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="legal.html">Legal Framework</a>
+        <a href="lawsuit-ppcli.html">PPCLI Lawsuit</a>
+        <a href="cfnis.html">CFNIS Investigation</a>
+        <a href="whistleblower-guide.html">Whistleblower Guide</a>
+      </div>
+      <div class="footer-col">
+        <h4>About</h4>
+        <a href="my-story.html">My Story</a>
+        <a href="open-letter.html">Open Letter to MPs</a>
+        <a href="timeline.html">Master Timeline</a>
+        <a href="history.html">FAQ &amp; History</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Daniel Perry. Canadian Forces combat veteran, Afghanistan. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="nav.js?v=7"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    // Load the investigation board data for rendering
+    var graphData = null;
+    var boardData = null;
+
+    function loadData() {
+      Promise.all([
+        fetch('data/investigation_board.json').then(r => r.json()).catch(() => null),
+        fetch('data/network_analysis/influence_network.json').then(r => r.json()).catch(() => null),
+      ]).then(function(results) {
+        boardData = results[0];
+        graphData = results[1];
+
+        if (graphData) {
+          renderFromGraph(graphData);
+        } else if (boardData) {
+          renderFromBoard(boardData);
+        } else {
+          renderFallback();
+        }
+      });
+    }
+
+    function renderFromGraph(data) {
+      document.getElementById('total-entities').textContent = data.total_nodes || '--';
+      document.getElementById('multi-source').textContent = (data.entity_overlaps || []).length;
+      document.getElementById('graph-nodes').textContent = data.total_nodes || '--';
+      document.getElementById('graph-edges').textContent = data.total_edges || '--';
+      document.getElementById('entity-count').textContent = data.total_nodes + ' LOADED';
+
+      var highInfluence = (data.nodes || []).filter(n => n.influence_score >= 20).length;
+      document.getElementById('high-influence').textContent = highInfluence;
+
+      drawCanvas(data.nodes, data.edges);
+      renderTable(data.nodes);
+      renderOverlaps(data.entity_overlaps || []);
+    }
+
+    function renderFromBoard(data) {
+      var nodes = data.nodes || [];
+      var edges = (data.threads || data.edges || []).map(function(e) {
+        return { source: e.from || e.source, target: e.to || e.target, label: e.label, strength: e.strength };
+      });
+      document.getElementById('total-entities').textContent = nodes.length;
+      document.getElementById('multi-source').textContent = '--';
+      document.getElementById('graph-nodes').textContent = nodes.length;
+      document.getElementById('graph-edges').textContent = edges.length;
+      document.getElementById('entity-count').textContent = nodes.length + ' LOADED (Board)';
+      document.getElementById('high-influence').textContent = '--';
+
+      drawCanvasBoard(nodes, edges);
+      renderTableBoard(nodes);
+    }
+
+    function renderFallback() {
+      document.getElementById('entity-count').textContent = 'OFFLINE';
+      document.getElementById('total-entities').textContent = '0';
+    }
+
+    // ── Canvas Rendering (from graph) ──
+    function drawCanvas(nodes, edges) {
+      var canvas = document.getElementById('network-canvas');
+      var ctx = canvas.getContext('2d');
+      var rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      var w = rect.width, h = rect.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Position nodes using force-layout approximation
+      var positioned = nodes.map(function(n, i) {
+        var angle = (i / nodes.length) * Math.PI * 2;
+        var radius = 100 + Math.random() * (Math.min(w, h) / 2 - 120);
+        return {
+          x: w / 2 + Math.cos(angle) * radius,
+          y: h / 2 + Math.sin(angle) * radius,
+          node: n,
+          r: 3 + Math.min(n.influence_score || 1, 50) * 0.3,
+        };
+      });
+
+      var nodeMap = {};
+      positioned.forEach(function(p) { nodeMap[p.node.id] = p; });
+
+      // Draw edges
+      ctx.globalAlpha = 0.15;
+      ctx.strokeStyle = '#6e6e76';
+      ctx.lineWidth = 0.5;
+      (edges || []).forEach(function(e) {
+        var s = nodeMap[e.source];
+        var t = nodeMap[e.target];
+        if (s && t) {
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(t.x, t.y);
+          ctx.stroke();
+        }
+      });
+
+      // Draw nodes
+      ctx.globalAlpha = 1;
+      positioned.forEach(function(p) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = getNodeColor(p.node);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      });
+
+      // Labels for top entities
+      var top = positioned.sort(function(a, b) { return (b.node.influence_score || 0) - (a.node.influence_score || 0); }).slice(0, 20);
+      ctx.font = '10px JetBrains Mono';
+      ctx.textAlign = 'center';
+      top.forEach(function(p) {
+        ctx.fillStyle = 'rgba(224,224,224,0.8)';
+        ctx.fillText(p.node.label, p.x, p.y - p.r - 4);
+      });
+    }
+
+    // ── Canvas Rendering (from board data) ──
+    function drawCanvasBoard(nodes, edges) {
+      var canvas = document.getElementById('network-canvas');
+      var ctx = canvas.getContext('2d');
+      var rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      var w = rect.width, h = rect.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Use x/y positions from board data
+      var nodeMap = {};
+      var positioned = nodes.map(function(n) {
+        var px = (n.x || 50) / 100 * w;
+        var py = (n.y || 50) / 100 * h;
+        var r = n.type === 'org' ? 6 : n.type === 'event' ? 5 : 4;
+        nodeMap[n.id] = { x: px, y: py, r: r, node: n };
+        return nodeMap[n.id];
+      });
+
+      // Draw edges
+      ctx.globalAlpha = 0.2;
+      ctx.strokeStyle = '#6e6e76';
+      ctx.lineWidth = 0.5;
+      (edges || []).forEach(function(e) {
+        var s = nodeMap[e.source];
+        var t = nodeMap[e.target];
+        if (s && t) {
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(t.x, t.y);
+          ctx.stroke();
+        }
+      });
+
+      // Nodes
+      ctx.globalAlpha = 1;
+      positioned.forEach(function(p) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = getBoardColor(p.node);
+        ctx.fill();
+      });
+
+      // Labels
+      ctx.font = '9px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(224,224,224,0.7)';
+      positioned.forEach(function(p) {
+        ctx.fillText(p.node.label, p.x, p.y - p.r - 3);
+      });
+    }
+
+    function getNodeColor(node) {
+      var cats = (node.categories || []).join(' ');
+      if (cats.indexOf('israel') !== -1) return '#60a5fa';
+      if (cats.indexOf('ccp') !== -1) return '#e53555';
+      if (cats.indexOf('cfnis') !== -1) return '#facc15';
+      if (node.type === 'org') return '#c084fc';
+      if (node.type === 'donor') return '#f97316';
+      if (node.type === 'official') return '#39ff14';
+      return '#e53555';
+    }
+
+    function getBoardColor(node) {
+      var cats = (node.categories || []).join(' ');
+      if (cats.indexOf('israel') !== -1) return '#60a5fa';
+      if (cats.indexOf('ccp') !== -1) return '#e53555';
+      if (cats.indexOf('cfnis') !== -1) return '#facc15';
+      if (cats.indexOf('media') !== -1) return '#f472b6';
+      if (node.type === 'org') return '#c084fc';
+      if (node.type === 'event') return '#f97316';
+      return '#39ff14';
+    }
+
+    function getCatBadge(cat) {
+      var map = {
+        israel: 'badge-israel', ccp: 'badge-ccp', cfnis: 'badge-cfnis',
+        osint_target: 'badge-osint', lobbied_official: 'badge-lobby',
+        political_donor: 'badge-donor', media: 'badge-media',
+      };
+      return map[cat] || '';
+    }
+
+    function renderTable(nodes) {
+      var tbody = document.getElementById('entity-tbody');
+      var sorted = nodes.slice().sort(function(a, b) { return (b.influence_score || 0) - (a.influence_score || 0); });
+      var html = '';
+      sorted.slice(0, 50).forEach(function(n, i) {
+        var score = n.influence_score || 0;
+        var sc = score >= 20 ? 'high' : score >= 10 ? 'mid' : 'low';
+        var cats = (n.categories || []).filter(function(c) { return c !== 'treason_roster' && c !== 'person' && c !== 'org'; });
+        var badges = cats.map(function(c) { return '<span class="badge ' + getCatBadge(c) + '">' + c + '</span>'; }).join('');
+        html += '<tr><td>' + (i + 1) + '</td><td><strong>' + n.label + '</strong></td><td>' + badges + '</td><td>' + (n.source_count || 1) + '</td><td class="score-col ' + sc + '">' + score.toFixed(1) + '</td></tr>';
+      });
+      tbody.innerHTML = html;
+    }
+
+    function renderTableBoard(nodes) {
+      var tbody = document.getElementById('entity-tbody');
+      var html = '';
+      nodes.forEach(function(n, i) {
+        var cats = (n.categories || []).filter(function(c) { return c !== 'person' && c !== 'org'; });
+        var badges = cats.map(function(c) { return '<span class="badge ' + getCatBadge(c) + '">' + c + '</span>'; }).join('');
+        html += '<tr><td>' + (i + 1) + '</td><td><strong>' + n.label + '</strong><br><span class="cats">' + (n.subtitle || '') + '</span></td><td>' + badges + '</td><td>1</td><td class="score-col mid">--</td></tr>';
+      });
+      tbody.innerHTML = html;
+    }
+
+    function renderOverlaps(overlaps) {
+      var container = document.getElementById('overlap-list');
+      if (!overlaps.length) {
+        container.innerHTML = '<p style="color:#6e6e76; font-size:0.8rem;">Run the network topology analyzer to detect multi-vector entities.</p>';
+        return;
+      }
+      var html = '';
+      overlaps.slice(0, 25).forEach(function(o) {
+        var sources = (o.sources || []).map(function(s) { return '<span class="badge badge-osint">' + s + '</span>'; }).join('');
+        html += '<div class="overlap-card"><div class="name">' + o.name + ' <span style="color:#e53555; font-size:0.75rem;">(Score: ' + o.influence_score.toFixed(1) + ')</span></div><div class="meta">Appearances: ' + o.appearance_count + ' &bull; Sources: ' + o.source_count + '</div><div class="sources">' + sources + '</div></div>';
+      });
+      container.innerHTML = html;
+    }
+
+    loadData();
+  })();
+  </script>
+</body>
+</html>

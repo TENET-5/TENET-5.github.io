@@ -152,6 +152,11 @@
     .score-mixed    { color: #f97316; }
     .hidden { display: none; }
   </style>
+  <meta name="theme-color" content="#050506">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to content</a>
@@ -161,9 +166,10 @@
   <div id="share-bar" class="share-bar">
     <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
     <div class="share-bar-buttons">
+      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
       <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
       <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="share-btn share-btn-instagram">&#128248; Instagram</a>
+      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
       <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
     </div>
   </div>
@@ -179,8 +185,9 @@
   <div class="share-bar">
     <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
     <div class="share-bar-buttons">
+      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
       <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
-      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button><a href="https://www.instagram.com/" target="_blank" rel="noopener" class="share-btn share-btn-instagram">📸 Instagram</a>
+      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
       <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy</button>
     </div>
   </div>
@@ -221,6 +228,15 @@ ACCOUNTABILITY LAYER
     <!-- ══════ FILTERS ══════ -->
     <section id="timeline">
       <h2><span class="section-num">02 &mdash; THE RECORD</span>Documented Corruption by Actor, Mechanism &amp; Evidence</h2>
+
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;flex-wrap:wrap;align-items:center;">
+        <input type="text" id="corr-search" placeholder="Search entries... (e.g. 'Phoenix', 'SNC', 'Trudeau')" style="flex:1;min-width:200px;background:#111113;border:1px solid rgba(255,255,255,0.08);color:#ededed;padding:0.55rem 1rem;border-radius:6px;font-size:0.88rem;font-family:inherit;">
+        <select id="corr-sort" style="background:#111113;border:1px solid rgba(255,255,255,0.08);color:#a0a0a6;padding:0.5rem 0.8rem;border-radius:6px;font-size:0.82rem;cursor:pointer;">
+          <option value="document">Document Order</option>
+          <option value="severity">Sort: Severity</option>
+        </select>
+        <span id="corr-count" style="font-size:0.75rem;color:#6e6e76;font-family:'JetBrains Mono',monospace;white-space:nowrap;"></span>
+      </div>
 
       <div class="filter-bar">
         <button class="filter-btn active" onclick="filterEntries('all')">All</button>
@@ -1314,21 +1330,59 @@ ACCOUNTABILITY LAYER
   </div>
 
   <script>
-    function filterEntries(tag) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
-      document.querySelectorAll('.corruption-entry').forEach(el => {
-        if (tag === 'all') {
-          el.classList.remove('hidden');
-        } else {
-          const tags = el.dataset.tags || '';
-          el.classList.toggle('hidden', !tags.includes(tag));
-        }
-      });
+  (function() {
+    'use strict';
+    var entries = Array.from(document.querySelectorAll('.corruption-entry'));
+    var total = entries.length;
+    var activeTag = 'all';
+
+    function updateCount() {
+      var visible = entries.filter(function(e) { return !e.classList.contains('hidden'); }).length;
+      document.getElementById('corr-count').textContent = visible + ' of ' + total + ' entries';
     }
+
+    function applyFilters() {
+      var q = (document.getElementById('corr-search').value || '').toLowerCase();
+      entries.forEach(function(el) {
+        var matchesTag = activeTag === 'all' || (el.dataset.tags || '').indexOf(activeTag) !== -1;
+        var matchesSearch = !q || el.textContent.toLowerCase().indexOf(q) !== -1;
+        el.classList.toggle('hidden', !(matchesTag && matchesSearch));
+      });
+      updateCount();
+    }
+
+    function sortEntries() {
+      var sort = document.getElementById('corr-sort').value;
+      var parent = entries[0] ? entries[0].parentNode : null;
+      if (!parent) return;
+      var sevOrder = { critical: 1, high: 2, systemic: 3 };
+      var sorted = entries.slice().sort(function(a, b) {
+        if (sort === 'severity') {
+          return (sevOrder[a.dataset.severity] || 99) - (sevOrder[b.dataset.severity] || 99);
+        }
+        return 0;
+      });
+      sorted.forEach(function(el) { parent.appendChild(el); });
+    }
+
+    window.filterEntries = function(tag) {
+      activeTag = tag;
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (event && event.target) event.target.classList.add('active');
+      applyFilters();
+    };
+
+    document.getElementById('corr-search').addEventListener('input', applyFilters);
+    document.getElementById('corr-sort').addEventListener('change', function() {
+      sortEntries();
+      applyFilters();
+    });
+
+    updateCount();
+  })();
   </script>
 
-<script src="nav.js?v=6"></script>
+<script src="nav.js?v=7"></script>
 
   <footer id="site-footer"></footer>
   <script src="share.js?v=1"></script>
