@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP Report Generator | TENET5</title>
+  <meta name="description" content="Generate individualized investigation reports for Canadian MPs. Clean MPs get full evidence. Flagged MPs get everyone else's dirt.">
+  <link rel="stylesheet" href="style.css?v=5">
+  <meta name="theme-color" content="#1a1f36">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    .rg-wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .rg-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+    .rg-header h1 { font-family: var(--font-headline); font-size: var(--text-4xl); color: var(--text-primary); margin-bottom: 8px; }
+    .mp-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-md); margin-bottom: var(--s-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--s-sm); }
+    .mp-card .mp-info { flex: 1; min-width: 200px; }
+    .mp-card .mp-name { font-weight: 700; color: var(--text-primary); }
+    .mp-card .mp-meta { font-size: var(--text-xs); color: var(--text-tertiary); }
+    .mp-card .mp-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .mp-card .mp-btn { padding: 6px 12px; border-radius: var(--r-sm); font-size: var(--text-xs); font-weight: 600; text-decoration: none; border: 1px solid var(--border); color: var(--text-secondary); transition: all 0.2s; }
+    .mp-card .mp-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .mp-card .mp-btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .mp-card .mp-btn-primary:hover { background: var(--accent-bright); }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--s-md); }
+    .controls input, .controls select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 12px; border-radius: var(--r-md); font-size: var(--text-sm); }
+    .controls input { flex: 1; min-width: 200px; }
+    #rg-count { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary); }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="rg-wrap">
+    <div class="rg-header">
+      <h1>MP Report Generator</h1>
+      <p style="font-size:var(--text-sm);color:var(--text-tertiary);">Generate personalized investigation links for each MP. Clean MPs see the full picture. Flagged MPs see everyone else's dirt.</p>
+    </div>
+
+    <div class="evidence-box" style="margin-bottom:var(--s-md);">
+      <div class="evidence-title">How It Works</div>
+      <p style="margin:0;line-height:1.7;">Each MP gets a personalized link to the MP Scorecard showing their individual record. <strong>Clean MPs (score 0)</strong> get sent the full findings page — they become allies. <strong>Flagged MPs</strong> get sent the scorecard filtered to show their peers' flags — they think they have ammo but the data catches everyone.</p>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="rg-search" placeholder="Search MPs...">
+      <select id="rg-filter">
+        <option value="">All MPs</option>
+        <option value="clean">Clean Only (Tier 4)</option>
+        <option value="flagged">Flagged Only</option>
+        <option value="highest">Highest Flags (Tier 1)</option>
+      </select>
+      <span id="rg-count"></span>
+    </div>
+
+    <div id="rg-list"></div>
+  </div>
+
+  <script src="nav.js?v=7"></script>
+  <footer id="site-footer"></footer>
+  <script src="footer.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    var ALL = [];
+    var BASE = 'https://tenet-5.github.io/';
+
+    function render() {
+      var q = (document.getElementById('rg-search').value || '').toLowerCase();
+      var filter = document.getElementById('rg-filter').value;
+
+      var filtered = ALL.filter(function(m) {
+        if (q && (m.name + ' ' + m.riding + ' ' + m.province + ' ' + m.party).toLowerCase().indexOf(q) === -1) return false;
+        if (filter === 'clean' && m.score !== 0) return false;
+        if (filter === 'flagged' && m.score === 0) return false;
+        if (filter === 'highest' && m.score < 7) return false;
+        return true;
+      });
+
+      filtered.sort(function(a, b) { return b.score - a.score; });
+      document.getElementById('rg-count').textContent = filtered.length + ' MPs';
+
+      var list = document.getElementById('rg-list');
+      if (!filtered.length) {
+        list.innerHTML = '<p style="text-align:center;color:var(--text-quaternary);padding:40px;">No matching MPs</p>';
+        return;
+      }
+
+      list.innerHTML = filtered.slice(0, 100).map(function(m) {
+        var scoreClass = m.score === 0 ? 'color:var(--color-green)' : m.score <= 2 ? 'color:var(--color-blue)' : m.score <= 6 ? 'color:var(--color-warning)' : 'color:var(--color-critical)';
+        var scorecardUrl = BASE + 'mp-scorecard.html?mp=' + encodeURIComponent(m.name);
+        var findingsUrl = BASE + 'findings.html';
+        var partyUrl = BASE + 'mp-scorecard.html?party=' + encodeURIComponent(m.party);
+
+        // Strategy: clean MPs get findings (full picture), flagged get their party's scorecard
+        var primaryUrl = m.score === 0 ? findingsUrl : partyUrl;
+        var primaryLabel = m.score === 0 ? 'Send Full Findings' : 'Send Party Scorecard';
+
+        return '<div class="mp-card">' +
+          '<div class="mp-info">' +
+            '<div class="mp-name"><span style="' + scoreClass + ';font-family:var(--font-mono);margin-right:6px;">' + m.score + '</span>' + m.name + '</div>' +
+            '<div class="mp-meta">' + m.party + ' — ' + m.riding + ', ' + m.province +
+              (m.flags.length ? ' — ' + m.flags.join(', ') : '') +
+              (m.details && m.details.cija_meetings ? ' (CIJA: ' + m.details.cija_meetings + 'x)' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="mp-actions">' +
+            '<a href="' + scorecardUrl + '" target="_blank" class="mp-btn">View Score</a>' +
+            '<a href="' + primaryUrl + '" target="_blank" class="mp-btn mp-btn-primary">' + primaryLabel + '</a>' +
+            '<button class="mp-btn" onclick="navigator.clipboard.writeText(\'' + primaryUrl + '\').then(function(){this.textContent=\'Copied!\'}.bind(this))">Copy Link</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    fetch('data/mp_full_analysis.json').then(function(r) { return r.json(); }).then(function(d) {
+      ALL = [].concat(d.tier1_highest || [], d.tier2_moderate || [], d.tier3_low || [], d.tier4_clean || []);
+      render();
+    });
+
+    document.getElementById('rg-search').addEventListener('input', render);
+    document.getElementById('rg-filter').addEventListener('change', render);
+  })();
+  </script>
+</body>
+</html>
