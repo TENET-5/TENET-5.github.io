@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parliamentary Voting Records — 45th Parliament | TENET5</title>
+  <meta name="description" content="Searchable voting records for all 94 recorded divisions in Canada's 45th Parliament. See how every party voted on every bill. Data from OpenParliament.ca.">
+  <link rel="stylesheet" href="style.css?v=5">
+  <meta name="theme-color" content="#050506">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    .vr-wrap { max-width: 1100px; margin: 0 auto; padding: 20px; font-family: 'JetBrains Mono', 'Courier New', monospace; color: #e0e0e0; }
+    .vr-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid rgba(196, 30, 58, 0.4); margin-bottom: 24px; }
+    .vr-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #ededed; letter-spacing: -1px; margin-bottom: 8px; }
+    .vr-header .subtitle { font-size: 0.85rem; color: #a0a0a6; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 24px; }
+    .stat-card { background: #111113; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 14px; text-align: center; }
+    .stat-card .num { font-size: 1.5rem; font-weight: 700; display: block; line-height: 1.1; }
+    .stat-card .num.red { color: #e53555; }
+    .stat-card .num.blue { color: #60a5fa; }
+    .stat-card .num.green { color: #4ade80; }
+    .stat-card .num.yellow { color: #facc15; }
+    .stat-card .label { font-size: 0.6rem; color: #6e6e76; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .controls input, .controls select { background: #111113; border: 1px solid rgba(255,255,255,0.08); color: #ededed; padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 0.82rem; }
+    .controls input { flex: 1; min-width: 200px; }
+    .controls select { min-width: 120px; }
+    .controls input:focus, .controls select:focus { outline: none; border-color: rgba(196,30,58,0.5); }
+    #vr-count { font-size: 0.72rem; color: #6e6e76; white-space: nowrap; }
+
+    .vote-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .vote-table th { background: #0c0c0e; color: #6e6e76; font-size: 0.65rem; letter-spacing: 0.5px; text-transform: uppercase; padding: 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; user-select: none; }
+    .vote-table th:hover { color: #ededed; }
+    .vote-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: top; }
+    .vote-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .vote-desc { color: #c0c0c6; max-width: 360px; }
+    .vote-bill { color: #60a5fa; font-weight: 600; }
+    .vote-date { color: #6e6e76; white-space: nowrap; }
+
+    .result-passed { color: #4ade80; font-weight: 600; }
+    .result-failed { color: #ef4444; font-weight: 600; }
+    .result-tie { color: #facc15; font-weight: 600; }
+
+    .party-bar { display: flex; gap: 3px; flex-wrap: wrap; }
+    .pb { font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
+    .pb-yea { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .pb-nay { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+    .tally { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+    .tally-yea { color: #4ade80; }
+    .tally-nay { color: #ef4444; }
+
+    .source-note { font-size: 0.7rem; color: #4a4a52; margin-top: 20px; padding: 16px; background: #0a0a0c; border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; line-height: 1.7; }
+    .source-note a { color: #6e6e76; }
+
+    @media (max-width: 700px) {
+      .vote-table { font-size: 0.7rem; }
+      .party-bar { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="vr-wrap">
+    <div class="vr-header">
+      <h1>Parliamentary Voting Records</h1>
+      <p class="subtitle">All 94 recorded divisions in Canada's 45th Parliament (Session 45-1). Data from OpenParliament.ca.</p>
+    </div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card"><span class="num red" id="s-total">--</span><div class="label">Total Votes</div></div>
+      <div class="stat-card"><span class="num green" id="s-passed">--</span><div class="label">Passed</div></div>
+      <div class="stat-card"><span class="num" style="color:#ef4444" id="s-failed">--</span><div class="label">Failed</div></div>
+      <div class="stat-card"><span class="num yellow" id="s-tie">--</span><div class="label">Tied</div></div>
+      <div class="stat-card"><span class="num blue" id="s-dissent">--</span><div class="label">Had Dissent</div></div>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="vr-search" placeholder="Search bills, descriptions...">
+      <select id="vr-result">
+        <option value="">All Results</option>
+        <option value="Passed">Passed</option>
+        <option value="Failed">Failed</option>
+        <option value="Tie">Tied</option>
+      </select>
+      <select id="vr-party">
+        <option value="">All Parties</option>
+        <option value="Conservative">CPC voted Yes</option>
+        <option value="Liberal">LPC voted Yes</option>
+        <option value="Bloc">Bloc voted Yes</option>
+        <option value="NDP">NDP voted Yes</option>
+      </select>
+      <span id="vr-count"></span>
+    </div>
+
+    <table class="vote-table">
+      <thead>
+        <tr>
+          <th data-sort="number">#</th>
+          <th data-sort="date">Date</th>
+          <th data-sort="desc">Description</th>
+          <th data-sort="result">Result</th>
+          <th>Tally</th>
+          <th>Party Breakdown</th>
+        </tr>
+      </thead>
+      <tbody id="vr-tbody"><tr><td colspan="6" style="text-align:center;color:#4a4a52;padding:40px;">Loading votes...</td></tr></tbody>
+    </table>
+
+    <div class="source-note">
+      <strong>Source:</strong> <a href="https://openparliament.ca/votes/" target="_blank" rel="noopener">OpenParliament.ca</a> (CC-BY licence). Original data from the House of Commons of Canada. Collected 2026-04-05.<br>
+      <strong>Note:</strong> Party breakdown shows majority position. Disagreement score indicates % of party members who voted against their party's majority. Only recorded divisions are shown — voice votes are not included.
+    </div>
+  </div>
+
+  <script src="nav.js?v=7"></script>
+  <script src="share.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    var VOTES = [];
+    var sortCol = 'number';
+    var sortDir = -1;
+
+    function getPartyVote(v, partyShort) {
+      var found = (v.party_breakdown || []).find(function(p) {
+        return p.party && p.party.short_name && p.party.short_name.en === partyShort;
+      });
+      return found ? found.vote : null;
+    }
+
+    function hasDissent(v) {
+      return (v.party_breakdown || []).some(function(p) { return p.disagreement > 0.01; });
+    }
+
+    function render() {
+      var q = (document.getElementById('vr-search').value || '').toLowerCase();
+      var resultF = document.getElementById('vr-result').value;
+      var partyF = document.getElementById('vr-party').value;
+
+      var filtered = VOTES.filter(function(v) {
+        var desc = ((v.description && v.description.en) || '').toLowerCase();
+        var bill = (v.bill_url || '').toLowerCase();
+        if (q && desc.indexOf(q) === -1 && bill.indexOf(q) === -1) return false;
+        if (resultF && v.result !== resultF) return false;
+        if (partyF && getPartyVote(v, partyF) !== 'Yes') return false;
+        return true;
+      });
+
+      filtered.sort(function(a, b) {
+        var va, vb;
+        if (sortCol === 'number') { va = a.number; vb = b.number; }
+        else if (sortCol === 'date') { va = a.date; vb = b.date; }
+        else if (sortCol === 'result') { va = a.result; vb = b.result; }
+        else { va = (a.description && a.description.en) || ''; vb = (b.description && b.description.en) || ''; }
+        if (va < vb) return -1 * sortDir;
+        if (va > vb) return 1 * sortDir;
+        return 0;
+      });
+
+      document.getElementById('vr-count').textContent = filtered.length + ' of ' + VOTES.length + ' votes';
+
+      var tbody = document.getElementById('vr-tbody');
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#4a4a52;padding:20px;">No matching votes</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(function(v) {
+        var desc = (v.description && v.description.en) || '';
+        var billMatch = (v.bill_url || '').match(/\/(C-\d+|S-\d+)\//);
+        var billLabel = billMatch ? billMatch[1] : '';
+        var resultClass = v.result === 'Passed' ? 'result-passed' : v.result === 'Failed' ? 'result-failed' : 'result-tie';
+        var parties = ['Conservative', 'Liberal', 'Bloc', 'NDP', 'Green'];
+        var partyLabels = { Conservative: 'CPC', Liberal: 'LPC', Bloc: 'BQ', NDP: 'NDP', Green: 'GPC' };
+
+        var partyHTML = parties.map(function(p) {
+          var vote = getPartyVote(v, p);
+          if (!vote) return '';
+          var cls = vote === 'Yes' ? 'pb-yea' : 'pb-nay';
+          return '<span class="pb ' + cls + '">' + partyLabels[p] + '</span>';
+        }).join('');
+
+        return '<tr>' +
+          '<td>' + v.number + '</td>' +
+          '<td class="vote-date">' + v.date + '</td>' +
+          '<td class="vote-desc">' + (billLabel ? '<span class="vote-bill">' + billLabel + '</span> ' : '') + desc.substring(0, 120) + (desc.length > 120 ? '...' : '') + '</td>' +
+          '<td class="' + resultClass + '">' + v.result + '</td>' +
+          '<td class="tally"><span class="tally-yea">' + v.yea_total + '</span>–<span class="tally-nay">' + v.nay_total + '</span></td>' +
+          '<td><div class="party-bar">' + partyHTML + '</div></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    fetch('data/votes_45-1.json').then(function(r) { return r.json(); }).then(function(data) {
+      VOTES = data;
+      document.getElementById('s-total').textContent = data.length;
+      document.getElementById('s-passed').textContent = data.filter(function(v) { return v.result === 'Passed'; }).length;
+      document.getElementById('s-failed').textContent = data.filter(function(v) { return v.result === 'Failed'; }).length;
+      document.getElementById('s-tie').textContent = data.filter(function(v) { return v.result === 'Tie'; }).length;
+      document.getElementById('s-dissent').textContent = data.filter(hasDissent).length;
+      render();
+    });
+
+    document.getElementById('vr-search').addEventListener('input', render);
+    document.getElementById('vr-result').addEventListener('change', render);
+    document.getElementById('vr-party').addEventListener('change', render);
+
+    document.querySelectorAll('th[data-sort]').forEach(function(th) {
+      th.addEventListener('click', function() {
+        var col = this.dataset.sort;
+        if (sortCol === col) sortDir *= -1;
+        else { sortCol = col; sortDir = -1; }
+        render();
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

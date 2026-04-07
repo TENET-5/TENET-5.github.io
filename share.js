@@ -6,16 +6,22 @@
   const URL = window.location.href;
   const TITLE = document.title;
 
+  window.shareX = function() {
+    window.open('https://x.com/intent/tweet?url=' + encodeURIComponent(URL) + '&text=' + encodeURIComponent(TITLE), '_blank', 'width=600,height=400');
+  };
   window.shareFacebook = function() {
     window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(URL), '_blank', 'width=600,height=400');
   };
   window.shareReddit = function() {
     window.open('https://reddit.com/submit?url=' + encodeURIComponent(URL) + '&title=' + encodeURIComponent(TITLE), '_blank', 'width=600,height=400');
   };
+  window.shareLinkedIn = function() {
+    window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(URL), '_blank', 'width=600,height=400');
+  };
   window.copyLink = function() {
     navigator.clipboard.writeText(URL).then(function() {
       var btn = document.getElementById('copy-btn');
-      if (btn) { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.innerHTML = '&#128203; Copy Link'; }, 2000); }
+      if (btn) { btn.textContent = '\u2713 Copied!'; setTimeout(function() { btn.innerHTML = '&#128203; Copy Link'; }, 2000); }
     });
   };
 

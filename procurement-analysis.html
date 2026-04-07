@@ -36,6 +36,11 @@
   .methodology h3 { color: var(--accent-bright); margin-bottom: 1rem; }
   .methodology code { background: var(--bg-elevated); padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; color: var(--text-primary); }
 </style>
+  <meta name="theme-color" content="#050506">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
   <nav id="site-nav"></nav>
@@ -49,9 +54,10 @@
   <div id="share-bar" class="share-bar">
     <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
     <div class="share-bar-buttons">
+      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
       <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
       <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="share-btn share-btn-instagram">&#128248; Instagram</a>
+      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
       <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
     </div>
   </div>
@@ -150,6 +156,48 @@
     </section>
 
     <section>
+      <h2><span class="section-num">03b &mdash; SEARCH</span>Full Anomaly Database (18 Cases)</h2>
+      <p>Search and filter all documented procurement failures. Click any vendor name to search the government's own contract registry.</p>
+
+      <div class="search-box">
+        <input type="text" id="proc-search" placeholder="Search contracts, vendors, departments...">
+        <select id="proc-flag-filter">
+          <option value="">All Flags</option>
+          <option value="SOLE-SOURCE">Sole-Source</option>
+          <option value="AMENDMENT">Amendment/Overrun</option>
+          <option value="REVOLVING DOOR">Revolving Door</option>
+          <option value="CONCENTRATION">Concentration</option>
+        </select>
+        <select id="proc-outcome-filter">
+          <option value="">All Outcomes</option>
+          <option value="AG Finding">AG Finding</option>
+          <option value="Conviction">Conviction</option>
+          <option value="Charges/RCMP">Charges/RCMP</option>
+          <option value="PBO">PBO</option>
+          <option value="Parliamentary">Parliamentary</option>
+          <option value="Ongoing">Ongoing</option>
+        </select>
+        <select id="proc-sort">
+          <option value="overrun">Sort: Overrun %</option>
+          <option value="final">Sort: Final Cost</option>
+          <option value="year">Sort: Year</option>
+          <option value="name">Sort: Name</option>
+        </select>
+      </div>
+
+      <div id="proc-stats" style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:1rem;font-family:'JetBrains Mono',monospace;"></div>
+
+      <table class="results-table" id="proc-results">
+        <thead>
+          <tr><th>Contract</th><th>Vendor</th><th>Original</th><th>Final</th><th>Overrun</th><th>Flags</th><th>Outcome</th></tr>
+        </thead>
+        <tbody id="proc-tbody">
+          <tr><td colspan="7" style="text-align:center;color:var(--text-quaternary);">Loading data...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
       <h2><span class="section-num">04 &mdash; METHODOLOGY</span>How the Detector Works</h2>
 
       <div class="methodology">
@@ -192,11 +240,85 @@
     </section>
 
   </div>
-<script src="nav.js?v=6"></script>
-
-  <footer id="site-footer"></footer>
+<script src="nav.js?v=7"></script>
   <script src="share.js?v=1"></script>
   <script src="board.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    var DATA = [];
+    var SEARCH_BASE = 'https://search.open.canada.ca/contracts/?search_text=';
+
+    function money(n) {
+      if (!n) return '—';
+      if (n >= 1e9) return '$' + (n / 1e9).toFixed(1) + 'B';
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(0) + 'M';
+      return '$' + n.toLocaleString();
+    }
+
+    function flagHTML(flags) {
+      var map = { 'SOLE-SOURCE': 'flag-sole', 'AMENDMENT': 'flag-amend', 'REVOLVING DOOR': 'flag-revolve', 'CONCENTRATION': 'flag-concen' };
+      return flags.map(function(f) { return '<span class="flag ' + (map[f] || 'flag-sole') + '">' + f + '</span>'; }).join('');
+    }
+
+    function render() {
+      var q = (document.getElementById('proc-search').value || '').toLowerCase();
+      var flagF = document.getElementById('proc-flag-filter').value;
+      var outcomeF = document.getElementById('proc-outcome-filter').value;
+      var sort = document.getElementById('proc-sort').value;
+
+      var filtered = DATA.filter(function(d) {
+        if (q && d._search.indexOf(q) === -1) return false;
+        if (flagF && d.flags.indexOf(flagF) === -1) return false;
+        if (outcomeF && d.outcome !== outcomeF) return false;
+        return true;
+      });
+
+      filtered.sort(function(a, b) {
+        if (sort === 'overrun') return (b.overrun_pct || 0) - (a.overrun_pct || 0);
+        if (sort === 'final') return (b.final || 0) - (a.final || 0);
+        if (sort === 'year') return (b.year || 0) - (a.year || 0);
+        return a.name.localeCompare(b.name);
+      });
+
+      var totalWaste = filtered.reduce(function(s, d) { return s + (d.final || 0); }, 0);
+      document.getElementById('proc-stats').textContent = 'Showing ' + filtered.length + ' of ' + DATA.length + ' cases | Combined value: ' + money(totalWaste);
+
+      var tbody = document.getElementById('proc-tbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-quaternary);">No matches</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(function(d) {
+        var vendorLink = '<a href="' + SEARCH_BASE + encodeURIComponent(d.search_vendor || d.vendor) + '" target="_blank" rel="noopener" style="color:var(--accent-bright);text-decoration:none;" title="Search open.canada.ca">' + d.vendor.substring(0, 30) + '</a>';
+        return '<tr title="' + (d.detail || '').replace(/"/g, '&quot;') + '">' +
+          '<td style="color:var(--text-primary);font-weight:500;">' + d.name + '</td>' +
+          '<td>' + vendorLink + '</td>' +
+          '<td class="td-value">' + money(d.original) + '</td>' +
+          '<td class="td-value">' + money(d.final) + '</td>' +
+          '<td class="td-value"' + (d.overrun_pct > 100 ? ' style="color:#ef4444;"' : '') + '>' + (d.overrun_pct ? d.overrun_pct.toLocaleString() + '%' : '—') + '</td>' +
+          '<td class="td-flag">' + flagHTML(d.flags) + '</td>' +
+          '<td>' + (d.outcome || '—') + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    fetch('data/procurement_anomalies.json').then(function(r) { return r.json(); }).then(function(d) {
+      DATA = (d.anomalies || []).map(function(a) {
+        a._search = (a.name + ' ' + a.vendor + ' ' + a.department + ' ' + (a.detail || '') + ' ' + a.flags.join(' ')).toLowerCase();
+        return a;
+      });
+      SEARCH_BASE = d.metadata.search_base || SEARCH_BASE;
+      render();
+    });
+
+    document.getElementById('proc-search').addEventListener('input', render);
+    document.getElementById('proc-flag-filter').addEventListener('change', render);
+    document.getElementById('proc-outcome-filter').addEventListener('change', render);
+    document.getElementById('proc-sort').addEventListener('change', render);
+  })();
+  </script>
 </body>
 </html>
 
