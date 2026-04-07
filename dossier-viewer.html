@@ -120,6 +120,60 @@
       .dossier-viewer { padding: 18px; }
       .tools-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── ENTITY DISAMBIGUATION ── */
+    .dossier-search {
+      display: flex; gap: 8px; margin-bottom: 16px; align-items: center;
+    }
+    .dossier-search input {
+      flex: 1; padding: 10px 16px 10px 36px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; color: #e0e0e0; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem; outline: none; transition: border-color 0.3s;
+    }
+    .dossier-search input:focus { border-color: rgba(57,255,20,0.4); }
+    .dossier-search input::placeholder { color: #4a4a52; }
+    .dossier-search-wrap { position: relative; flex: 1; }
+    .dossier-search-wrap::before {
+      content: '🔍'; position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); font-size: 0.7rem; pointer-events: none;
+    }
+    .search-count {
+      font-size: 0.7rem; color: #6e6e76; white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .related-panel {
+      background: rgba(57,255,20,0.03);
+      border: 1px solid rgba(57,255,20,0.12);
+      border-radius: 8px; padding: 16px 20px;
+      margin-top: 20px;
+    }
+    .related-panel h3 {
+      font-size: 0.78rem; color: #39ff14; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 10px;
+    }
+    .related-link {
+      display: block; padding: 6px 10px; margin-bottom: 4px;
+      border-radius: 6px; font-size: 0.75rem; color: #c8c8ce;
+      cursor: pointer; transition: background 0.2s;
+      text-decoration: none;
+    }
+    .related-link:hover { background: rgba(57,255,20,0.06); color: #ededed; }
+    .related-link .match-count {
+      font-size: 0.6rem; color: #39ff14; margin-left: 6px;
+      background: rgba(57,255,20,0.1); padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .entity-pill {
+      display: inline-block; margin: 2px 3px 2px 0; padding: 2px 8px;
+      border-radius: 4px; font-size: 0.62rem; cursor: pointer;
+      transition: all 0.2s; text-decoration: none;
+    }
+    .entity-pill:hover { filter: brightness(1.3); }
+    .entity-pill.ep-person { background: rgba(255,0,110,0.12); color: #ff006e; }
+    .entity-pill.ep-org { background: rgba(131,56,236,0.12); color: #8338ec; }
+    .entity-pill.ep-category { background: rgba(57,255,20,0.1); color: #39ff14; }
   </style>
 </head>
 <body>
@@ -136,6 +190,14 @@
       <span><span class="label">ABCXYZ N vs NP Millennial Falcon:</span> <span class="online" id="falcon-status">ONLINE</span></span>
       <span><span class="label">Empirical Magic Handoff:</span> <span class="online" id="handoff-status">SECURED</span></span>
       <span><span class="label">Dossiers Loaded:</span> <span class="online" id="dossier-count">--</span></span>
+    </div>
+
+    <!-- Dossier Search/Filter -->
+    <div class="dossier-search">
+      <div class="dossier-search-wrap">
+        <input type="text" id="dossier-search" placeholder="Search dossiers by name, entity, or topic..." autocomplete="off">
+      </div>
+      <span class="search-count" id="search-count">12 dossiers</span>
     </div>
 
     <!-- Dossier Index -->
@@ -174,45 +236,18 @@
         </a>
       </div>
     </div>
+
+    <!-- Related Dossiers Panel (populated dynamically) -->
+    <div class="related-panel" id="related-panel" style="display:none;">
+      <h3>🔗 Related Dossiers (shared entities)</h3>
+      <div id="related-list"></div>
+    </div>
   </div>
 
-  <footer>
-    <div class="footer-grid">
-      <div class="footer-col">
-        <h4>Investigation</h4>
-        <a href="accountability.html">The 504 Database</a>
-        <a href="conspiracy-board.html">Investigation Board</a>
-        <a href="evidence.html">Evidence Archive</a>
-        <a href="corruption-map.html">Corruption Map</a>
-      </div>
-      <div class="footer-col">
-        <h4>Legal</h4>
-        <a href="legal.html">Legal Framework</a>
-        <a href="lawsuit-ppcli.html">PPCLI Lawsuit</a>
-        <a href="cfnis.html">CFNIS Investigation</a>
-        <a href="whistleblower-guide.html">Whistleblower Guide</a>
-      </div>
-      <div class="footer-col">
-        <h4>Analysis</h4>
-        <a href="harm-index.html">Policy Harm Index</a>
-        <a href="hansard-dashboard.html">Hansard Dashboard</a>
-        <a href="procurement-analysis.html">Procurement Analysis</a>
-        <a href="treason-trajectory.html">Treason Trajectory</a>
-      </div>
-      <div class="footer-col">
-        <h4>About</h4>
-        <a href="my-story.html">My Story</a>
-        <a href="open-letter.html">Open Letter to MPs</a>
-        <a href="timeline.html">Master Timeline</a>
-        <a href="history.html">FAQ &amp; History</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Daniel Perry. Canadian Forces combat veteran, Afghanistan. All rights reserved.</p>
-    </div>
-  </footer>
+  <footer id="site-footer"></footer>
 
   <script src="nav.js?v=7"></script>
+  <script src="js/main.js?v=5"></script>
   <script>
   (function() {
     'use strict';
@@ -233,6 +268,64 @@
       { file: 'data/dossier_charity_pipeline.json', title: 'Charity Pipeline — $276M to Israel', status: 'active', format: 'json' },
     ];
 
+    // ── ENTITY INDEX ── Maps entities to dossier indices for disambiguation
+    const ENTITY_INDEX = {
+      // Person entities (appearing across multiple dossiers)
+      'anthony housefather': [1, 3],   // Housefather dossier + Mendicino dossier (CIJA pipeline)
+      'melissa lantsman': [0],
+      'kevin vuong': [2],
+      'marco mendicino': [3, 1],       // Mendicino dossier + Housefather (CIJA)
+      'han dong': [7, 2],              // Han Dong profile + Vuong (foreign interference)
+      'irwin cotler': [8, 0, 1],       // Cotler profile + Lantsman + Housefather (Israel advocacy)
+      'michael chong': [9, 7],         // Chong profile + Han Dong (China targeting)
+      'pierre poilievre': [10, 0],     // Poilievre profile + Lantsman (Israel embassy)
+      'yuen pau woo': [11, 7],         // Senator Woo + Han Dong (CCP connections)
+      'vivienne poy': [11],
+      'katie telford': [7],
+      'justin trudeau': [7, 8, 9],
+      // Organization entities
+      'cija': [1, 3, 0, 8],           // Housefather, Mendicino, Lantsman, Cotler
+      'cfnis': [4, 5],                 // CFNIS dossier + 504 judicial interference
+      'jnf': [6, 0],                   // Charity pipeline + Lantsman
+      'ufwd': [11, 7],                 // Senator Woo + Han Dong
+      'united front': [11, 7],
+      'ccp': [7, 9, 11, 2],           // Han Dong, Chong, Woo, Vuong
+      'mossad': [0, 8],
+      'idf': [6, 0, 1],               // Charity pipeline, Lantsman, Housefather
+      'ppcli': [4, 5],
+      // Thematic / category entities
+      'foreign interference': [2, 7, 9, 11],
+      'genocide': [0, 7, 3, 8],
+      'lobbying': [1, 3, 0],
+      'charity pipeline': [6],
+    };
+
+    // Normalize names for matching
+    function normalizeEntity(name) {
+      return (name || '').toLowerCase()
+        .replace(/^(mp|hon|senator|dr|mr|ms|minister)\s+/i, '')
+        .replace(/[,.'"\-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Find related dossiers for a given dossier index
+    function findRelated(dossierIdx) {
+      var related = {}; // { idx: [entity names] }
+      for (var entity in ENTITY_INDEX) {
+        var indices = ENTITY_INDEX[entity];
+        if (indices.indexOf(dossierIdx) !== -1) {
+          indices.forEach(function(i) {
+            if (i !== dossierIdx) {
+              if (!related[i]) related[i] = [];
+              related[i].push(entity);
+            }
+          });
+        }
+      }
+      return related;
+    }
+
     const listEl = document.getElementById('dossier-list');
     const viewerEl = document.getElementById('dossier-viewer');
     const countEl = document.getElementById('dossier-count');
@@ -244,24 +337,36 @@
       const card = document.createElement('div');
       card.className = 'dossier-card';
       card.dataset.index = i;
+
+      // Find entity pills for this dossier
+      var pills = [];
+      for (var entity in ENTITY_INDEX) {
+        if (ENTITY_INDEX[entity].indexOf(i) !== -1) {
+          var cls = entity.length > 15 ? 'ep-org' : 'ep-person';
+          if (['foreign interference','genocide','lobbying','charity pipeline'].indexOf(entity) !== -1) cls = 'ep-category';
+          pills.push('<span class="entity-pill ' + cls + '">' + entity + '</span>');
+        }
+      }
+
       card.innerHTML =
         '<div class="dossier-card-top">' +
           '<span class="dossier-card-title">' + d.title + '</span>' +
           '<span class="dossier-card-badge ' + (d.status === 'active' ? 'badge-active' : 'badge-archived') + '">' + d.status.toUpperCase() + '</span>' +
         '</div>' +
-        '<div class="dossier-card-meta">' + d.file + '</div>';
+        '<div class="dossier-card-meta">' + d.file + '</div>' +
+        (pills.length ? '<div style="margin-top:6px;">' + pills.slice(0, 5).join('') + (pills.length > 5 ? '<span class="entity-pill ep-category">+' + (pills.length - 5) + ' more</span>' : '') + '</div>' : '');
 
       card.addEventListener('click', function() {
         // Highlight active
         document.querySelectorAll('.dossier-card').forEach(function(c) { c.classList.remove('active'); });
         card.classList.add('active');
-        loadDossier(d);
+        loadDossier(d, i);
       });
 
       listEl.appendChild(card);
     });
 
-    function loadDossier(dossier) {
+    function loadDossier(dossier, dossierIdx) {
       viewerEl.innerHTML = '<div class="placeholder"><div class="placeholder-icon">&#9203;</div><p>Loading dossier...</p></div>';
 
       fetch(dossier.file)
@@ -271,10 +376,53 @@
         })
         .then(function(data) {
           viewerEl.innerHTML = dossier.format === 'json' ? renderJSON(data) : renderMarkdown(data);
+          showRelated(dossierIdx);
+          viewerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         })
         .catch(function(err) {
           viewerEl.innerHTML = '<div class="placeholder"><div class="placeholder-icon">&#9888;</div><h3>Failed to load dossier</h3><p>' + err.message + '</p></div>';
         });
+    }
+
+    // Show related dossiers panel
+    function showRelated(dossierIdx) {
+      var relatedPanel = document.getElementById('related-panel');
+      var relatedList = document.getElementById('related-list');
+      if (dossierIdx === undefined) { relatedPanel.style.display = 'none'; return; }
+      
+      var related = findRelated(dossierIdx);
+      var keys = Object.keys(related);
+      if (keys.length === 0) { relatedPanel.style.display = 'none'; return; }
+
+      relatedPanel.style.display = 'block';
+      var html = '';
+      // Sort by number of shared entities (most connected first)
+      keys.sort(function(a, b) { return related[b].length - related[a].length; });
+      keys.forEach(function(idx) {
+        var d = DOSSIERS[parseInt(idx)];
+        if (!d) return;
+        var entities = related[idx];
+        html += '<a class="related-link" data-idx="' + idx + '">' +
+          d.title +
+          '<span class="match-count">' + entities.length + ' shared</span>' +
+          '<br><span style="font-size:0.6rem;color:#6e6e76;">' + entities.join(', ') + '</span>' +
+        '</a>';
+      });
+      relatedList.innerHTML = html;
+
+      // Click related dossier links
+      relatedList.querySelectorAll('.related-link').forEach(function(link) {
+        link.addEventListener('click', function() {
+          var idx = parseInt(link.dataset.idx);
+          var card = document.querySelectorAll('.dossier-card')[idx];
+          if (card) {
+            document.querySelectorAll('.dossier-card').forEach(function(c) { c.classList.remove('active'); });
+            card.classList.add('active');
+            loadDossier(DOSSIERS[idx], idx);
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      });
     }
 
     // JSON dossier renderer — handles person profiles, charity pipelines, and senator files
@@ -432,13 +580,37 @@
     if (fileParam) {
       var match = DOSSIERS.find(function(d) { return d.file === fileParam; });
       if (match) {
-        loadDossier(match);
         var idx = DOSSIERS.indexOf(match);
+        loadDossier(match, idx);
         if (idx >= 0) {
           document.querySelectorAll('.dossier-card')[idx].classList.add('active');
         }
       }
     }
+
+    // ── Dossier Search/Filter ──
+    var searchInput = document.getElementById('dossier-search');
+    var searchCount = document.getElementById('search-count');
+    searchInput.addEventListener('input', function() {
+      var q = normalizeEntity(searchInput.value);
+      var visible = 0;
+      document.querySelectorAll('.dossier-card').forEach(function(card, i) {
+        var d = DOSSIERS[i];
+        var text = normalizeEntity(d.title + ' ' + d.file);
+        // Also search entity index
+        var entityMatch = false;
+        for (var entity in ENTITY_INDEX) {
+          if (entity.indexOf(q) !== -1 && ENTITY_INDEX[entity].indexOf(i) !== -1) {
+            entityMatch = true;
+            break;
+          }
+        }
+        var show = !q || text.indexOf(q) !== -1 || entityMatch;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      searchCount.textContent = visible + ' of ' + DOSSIERS.length + ' dossiers';
+    });
 
   })();
   </script>
