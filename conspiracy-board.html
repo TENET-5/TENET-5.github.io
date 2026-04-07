@@ -219,10 +219,38 @@ body {
 .type-org    { border-left: 3px solid var(--purple); }
 .type-event  { border-left: 3px solid var(--yellow); }
 .type-evidence { border-left: 3px solid var(--green); }
+.type-navigate { border-left: 3px solid var(--cyan); }
 .type-person .badge { background: rgba(255,0,110,0.15); color: var(--pink); }
 .type-org .badge    { background: rgba(131,56,236,0.15); color: var(--purple); }
 .type-event .badge  { background: rgba(255,214,10,0.15); color: var(--yellow); }
 .type-evidence .badge { background: rgba(6,214,160,0.15); color: var(--green); }
+.type-navigate .badge { background: rgba(0,180,216,0.2); color: var(--cyan); }
+
+/* ── NAVIGATE hub nodes ── */
+.type-navigate {
+  background: linear-gradient(135deg, rgba(0,180,216,0.06) 0%, var(--card) 100%) !important;
+  min-width: 160px;
+}
+.type-navigate:hover {
+  border-color: rgba(0,180,216,0.7) !important;
+  box-shadow: 0 0 20px rgba(0,180,216,0.15), inset 0 0 12px rgba(0,180,216,0.05) !important;
+}
+.type-navigate .name { color: var(--cyan) !important; }
+
+/* ── NAV BUTTON on nodes ── */
+.node .nav-btn {
+  display: inline-block; margin-top: 6px; padding: 3px 10px;
+  background: rgba(0,180,216,0.1); border: 1px solid rgba(0,180,216,0.25);
+  border-radius: 4px; color: var(--cyan); font-size: 0.6rem;
+  font-weight: 700; text-decoration: none; cursor: pointer;
+  transition: all 0.2s; opacity: 0;
+}
+.node:hover .nav-btn, .node.selected .nav-btn { opacity: 1; }
+.node .nav-btn:hover {
+  background: rgba(0,180,216,0.25); border-color: var(--cyan);
+  box-shadow: 0 0 8px rgba(0,180,216,0.2);
+}
+.type-navigate .nav-btn { opacity: 1 !important; }
 
 /* ── DETAIL PANEL (right side) ── */
 .detail-panel {
@@ -367,6 +395,7 @@ body {
     <button class="type-pill" data-t="org">Org</button>
     <button class="type-pill" data-t="event">Event</button>
     <button class="type-pill" data-t="evidence">Evidence</button>
+    <button class="type-pill" data-t="navigate">🧭 Navigate</button>
   </div>
 </div>
 
@@ -400,6 +429,7 @@ body {
   <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> Organization</div>
   <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Event</div>
   <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Evidence</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div> 🧭 Navigate</div>
 </div>
 
 <div class="board-foot">Investigation by Daniel Perry | Data: LIRIL/TENET5 | All sources public record | SEED=118400</div>
@@ -570,6 +600,70 @@ body {
 
   computePositions();
 
+  // ── Page deep-link map (entity → page) ──
+  const PAGE_LINKS = {
+    'cija': 'foreign-influence.html#cija',
+    'housefather': 'dossier-viewer.html',
+    'mendicino': 'dossier-viewer.html',
+    'lantsman': 'dossier-viewer.html',
+    'vuong': 'dossier-viewer.html',
+    'woo': 'dossier-viewer.html',
+    'han_dong': 'dossier-viewer.html',
+    'cotler': 'dossier-viewer.html',
+    'chong': 'dossier-viewer.html',
+    'poilievre': 'dossier-viewer.html',
+    'cfnis': 'cfnis.html',
+    'trudeau_bgen': 'cfnis.html',
+    'leblanc_cfnis': 'cfnis.html',
+    'robar': 'cfnis.html',
+    'wardoll': 'genocide-evidence.html',
+    'postmedia': 'foreign-influence.html#media',
+    'rebel_news': 'foreign-influence.html#media',
+    'cahnreit': 'contributions-tracker.html',
+    'jnf': 'charity-pipeline.html',
+    'friends_sim_unit': 'charity-pipeline.html',
+    'vote_658': 'foreign-influence.html#cija',
+    'genocide_vote': 'foreign-influence.html#ccp',
+    'njjar': 'foreign-influence.html#india',
+  };
+
+  // ── OSINT Hub nodes (injected at runtime) ──
+  const HUB_NODES = [
+    { id: 'hub_osint', type: 'navigate', label: '📊 OSINT Dashboard', subtitle: 'Aggregated intelligence hub', detail: 'Real-time scraper health, data feeds, and investigation overview', link: 'osint-dashboard.html', categories: ['navigate'], x: 3, y: 93 },
+    { id: 'hub_network', type: 'navigate', label: '🕸 Network Analysis', subtitle: 'Force-directed influence graph', detail: 'Interactive graph of all entities, searchable, filterable by category', link: 'network-analysis.html', categories: ['navigate'], x: 20, y: 93 },
+    { id: 'hub_crossref', type: 'navigate', label: '🔗 Cross-Reference', subtitle: 'Lobbying × Donations × Votes × Corps', detail: 'Follow the money: match lobbying contacts against donations, votes, and corporate registries', link: 'cross-reference.html', categories: ['navigate'], x: 40, y: 93 },
+    { id: 'hub_dossier', type: 'navigate', label: '🔍 Dossier Viewer', subtitle: '12 intelligence dossiers', detail: 'Entity-disambiguated dossier profiles with cross-linking and search', link: 'dossier-viewer.html', categories: ['navigate'], x: 60, y: 93 },
+    { id: 'hub_foreign', type: 'navigate', label: '🌐 Foreign Influence', subtitle: '3-state analysis: Israel, China, India', detail: 'Complete analysis of foreign state mechanisms in Canadian politics', link: 'foreign-influence.html', categories: ['navigate'], x: 80, y: 93 },
+    { id: 'hub_evidence', type: 'navigate', label: '📋 Evidence Index', subtitle: '37 dossier files, public records', detail: 'All evidence documents indexed with sources and verification status', link: 'evidence.html', categories: ['navigate'], x: 97, y: 93 },
+  ];
+
+  // Add hub connections to relevant nodes
+  const HUB_THREADS = [
+    { from: 'hub_network', to: 'cija', label: 'mapped in graph', strength: 1 },
+    { from: 'hub_network', to: 'woo', label: 'mapped in graph', strength: 1 },
+    { from: 'hub_dossier', to: 'housefather', label: 'has dossier', strength: 1 },
+    { from: 'hub_dossier', to: 'lantsman', label: 'has dossier', strength: 1 },
+    { from: 'hub_dossier', to: 'vuong', label: 'has dossier', strength: 1 },
+    { from: 'hub_crossref', to: 'vote_658', label: 'in cross-ref', strength: 1 },
+    { from: 'hub_foreign', to: 'njjar', label: 'India analysis', strength: 1 },
+    { from: 'hub_evidence', to: 'cfnis', label: 'evidence indexed', strength: 1 },
+  ];
+
+  // Inject hub nodes
+  HUB_NODES.forEach(h => {
+    h._connCount = 0;
+    nodes.push(h);
+  });
+  HUB_THREADS.forEach(t => {
+    threads.push(t);
+    connCounts[t.from] = (connCounts[t.from] || 0) + 1;
+    connCounts[t.to] = (connCounts[t.to] || 0) + 1;
+  });
+  nodes.forEach(n => { n._connCount = connCounts[n.id] || 0; });
+
+  // Re-run positions with hub nodes included
+  computePositions();
+
   // ── Create nodes ──
   nodes.forEach(n => {
     const el = document.createElement('div');
@@ -578,12 +672,15 @@ body {
     el.style.left = (n._px * BOARD_W) + 'px';
     el.style.top = (n._py * BOARD_H) + 'px';
 
+    // Determine target page
+    const pageLink = n.link || PAGE_LINKS[n.id] || '';
+
     el.innerHTML = `
-      <span class="badge">${n.type}</span>
+      <span class="badge">${n.type === 'navigate' ? '🧭 tool' : n.type}</span>
       <div class="name">${n.label}</div>
       <div class="sub">${n.subtitle||''}</div>
       <div class="info">${n.detail||''}</div>
-      ${n.link ? `<a class="ev-link" href="${n.link}">Evidence →</a>` : ''}
+      ${pageLink ? `<a class="nav-btn" href="${pageLink}" onclick="event.stopPropagation()">${n.type === 'navigate' ? 'Open →' : 'Go →'}</a>` : ''}
       ${n._connCount > 0 ? `<div class="conn-count">${n._connCount}</div>` : ''}
     `;
 
@@ -725,12 +822,46 @@ body {
       const conns = threads.filter(t => t.from === id || t.to === id);
       const typeColors = { person: 'var(--pink)', org: 'var(--purple)', event: 'var(--yellow)', evidence: 'var(--green)' };
 
+      // Build explore links
+      const pageLink = n.link || PAGE_LINKS[n.id] || '';
+      const exploreLinks = [];
+      if (pageLink) exploreLinks.push({ label: n.type === 'navigate' ? 'Open Page' : 'View Evidence', href: pageLink, icon: '📄' });
+
+      // Auto-detect related pages based on categories
+      const cats = n.categories || [];
+      if (cats.includes('israel') || cats.includes('cija')) {
+        exploreLinks.push({ label: 'Foreign Influence Analysis', href: 'foreign-influence.html', icon: '🌐' });
+        exploreLinks.push({ label: 'Cross-Reference Engine', href: 'cross-reference.html', icon: '🔗' });
+      }
+      if (cats.includes('ccp')) {
+        exploreLinks.push({ label: 'Foreign Influence — China', href: 'foreign-influence.html#ccp', icon: '🌐' });
+      }
+      if (cats.includes('cfnis')) {
+        exploreLinks.push({ label: 'CFNIS Investigation', href: 'cfnis.html', icon: '📋' });
+        exploreLinks.push({ label: 'Lawsuit Filing', href: 'lawsuit-ppcli.html', icon: '⚖️' });
+      }
+      if (n.type === 'person') {
+        exploreLinks.push({ label: 'Dossier Viewer', href: 'dossier-viewer.html', icon: '🔍' });
+        exploreLinks.push({ label: 'Network Graph', href: 'network-analysis.html', icon: '🕸' });
+      }
+      if (cats.includes('media') || cats.includes('disinfo')) {
+        exploreLinks.push({ label: 'Foreign Influence — Media', href: 'foreign-influence.html#media', icon: '📡' });
+      }
+      // De-dup
+      const seenHrefs = new Set();
+      const uniqueLinks = exploreLinks.filter(l => { if (seenHrefs.has(l.href)) return false; seenHrefs.add(l.href); return true; });
+
       detailContent.innerHTML = `
-        <span class="badge" style="background:${typeColors[n.type]||'var(--blue)'}22;color:${typeColors[n.type]||'var(--blue)'};padding:2px 8px;border-radius:4px;font-size:0.65rem;text-transform:uppercase;font-weight:700">${n.type}</span>
+        <span class="badge" style="background:${typeColors[n.type]||'var(--blue)'}22;color:${typeColors[n.type]||'var(--blue)'};padding:2px 8px;border-radius:4px;font-size:0.65rem;text-transform:uppercase;font-weight:700">${n.type === 'navigate' ? '🧭 tool' : n.type}</span>
         <h2 style="margin-top:8px">${n.label}</h2>
         <div class="dp-sub">${n.subtitle||''}</div>
         <div class="dp-body">${n.detail||''}</div>
-        ${n.link ? `<a class="dp-link" href="${n.link}">View Evidence →</a>` : ''}
+        ${uniqueLinks.length ? `
+          <div style="margin:12px 0 8px;font-size:0.65rem;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:0.5px">🧭 EXPLORE</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+            ${uniqueLinks.map(l => `<a href="${l.href}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:5px;font-size:0.65rem;font-weight:600;background:rgba(0,180,216,0.08);border:1px solid rgba(0,180,216,0.2);color:var(--cyan);text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(0,180,216,0.2)'" onmouseout="this.style.background='rgba(0,180,216,0.08)'">${l.icon} ${l.label}</a>`).join('')}
+          </div>
+        ` : ''}
         <div class="dp-connections">
           <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:8px;font-weight:600">${conns.length} CONNECTIONS</div>
           ${conns.map(c => {
