@@ -181,7 +181,9 @@
         fetch('data/subject_updates_apr2026.json').then(r => r.json()).catch(() => null),
         fetch('data/sector_lobbying_analysis.json').then(r => r.json()).catch(() => null),
         fetch('data/most_lobbied_officials.json').then(r => r.json()).catch(() => null),
-        fetch('data/carney_conflicts_dossier.json').then(r => r.json()).catch(() => null)
+        fetch('data/carney_conflicts_dossier.json').then(r => r.json()).catch(() => null),
+        fetch('data/senate_lobbying_analysis.json').then(r => r.json()).catch(() => null),
+        fetch('data/pmo_lobbying_analysis.json').then(r => r.json()).catch(() => null)
       ]).then(function(results) {
         var cija = results[0];
         var foreign = results[1];
@@ -201,6 +203,8 @@
         var sectorData = results[15];
         var lobbiedOfficials = results[16];
         var carneyData = results[17];
+        var senateData = results[18];
+        var pmoData = results[19];
         var extra = '';
 
         // CIJA Deep Analysis
@@ -506,6 +510,38 @@
           extra += '<li><span>Allegedly lobbied British Cabinet for heat pump programs while at Brookfield</span><span class="src">Ricochet</span></li>';
           extra += '</ul>';
           extra += '<div class="pattern-box">When your board chair advises the PM directly, you don\'t need many registered lobbyists. The registered lobbying (35 total) is the tip. The real influence was Carney sitting in the PM\'s ear while his company pitched for $50 billion in public money.</div>';
+          extra += '</div>';
+        }
+
+        // Senate Lobbying
+        if (senateData) {
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis M</div>';
+          extra += '<h2>Senate — 18,378 Lobbying Contacts to Unelected Chamber <span class="severity sev-critical">CRITICAL</span></h2>';
+          extra += '<div class="summary">' + (senateData.total_senate_contacts || 18378).toLocaleString() + ' lobbying contacts to the unelected Senate. Senator Linda Frum lobbied by CIJA 45 times — nearly half of all CIJA Senate lobbying went to one person. The Senate killed the Uyghur genocide motion 33-29 after the House passed it 266-0.</div>';
+          extra += '<ul class="evidence-list">';
+          extra += '<li><span>Linda Frum: 45 CIJA contacts (nearly half of all CIJA Senate lobbying)</span><span class="src">Raw CSV</span></li>';
+          extra += '<li><span>Senator Woo: 145 total contacts + UFWD-linked + led genocide vote opposition</span><span class="src">Raw CSV + OSINT</span></li>';
+          extra += '<li><span>Uyghur genocide: House 266-0 YES → Senate 33-29 NO (Woo led opposition)</span><span class="src">Parliament records</span></li>';
+          extra += '</ul>';
+          extra += '<div class="pattern-box">Lobbying concentrates where accountability is lowest. The Senate is unelected. 18,378 contacts. They killed a genocide motion the House passed unanimously.</div>';
+          extra += '</div>';
+        }
+
+        // PMO Lobbying
+        if (pmoData) {
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis N</div>';
+          extra += '<h2>PMO — 20,383 Lobbying Contacts to Unelected Staff <span class="severity sev-critical">CRITICAL</span></h2>';
+          extra += '<div class="summary">The PM\'s Office received ' + (pmoData.total_pmo_contacts || 20383).toLocaleString() + ' lobbying contacts — more than the entire Senate. A single adviser (Ben Chin) received 965 contacts. PM Trudeau personally: ' + (pmoData.pm_personally || 440) + '. CIJA: 133 PMO contacts (#4 organization).</div>';
+          if (pmoData.top_pmo_staff) {
+            extra += '<table class="entity-table"><thead><tr><th>PMO Staff</th><th>Title</th><th>Contacts</th></tr></thead><tbody>';
+            pmoData.top_pmo_staff.slice(0, 6).forEach(function(s) {
+              extra += '<tr><td>' + s.name + '</td><td>' + s.title + '</td><td class="hi">' + s.contacts.toLocaleString() + '</td></tr>';
+            });
+            extra += '</tbody></table>';
+          }
+          extra += '<div class="pattern-box">20,383 contacts to unelected PMO staff who make policy decisions. Ben Chin alone: 965. These are people voters never chose and cannot remove, being lobbied by every major industry including CIJA at 133 contacts.</div>';
           extra += '</div>';
         }
 
