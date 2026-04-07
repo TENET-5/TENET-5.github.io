@@ -93,6 +93,46 @@
         { href: 'about.html', label: 'About & Methodology', desc: 'How it all works' },
       ]
     },
+    'cfnis.html': {
+      current: 'CFNIS Investigation',
+      next: [
+        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+        { href: 'my-story.html', label: 'My Story', desc: 'Six years of institutional retaliation' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
+      ]
+    },
+    'voting-records.html': {
+      current: 'Voting Records',
+      next: [
+        { href: 'hansard-dashboard.html', label: 'Hansard Dashboard', desc: '151 bills tracked in Parliament' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'What the voting patterns reveal' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'How lobbying connects to votes' },
+      ]
+    },
+    'dossier-viewer.html': {
+      current: 'Intelligence Dossiers',
+      next: [
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'The full influence investigation' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data' },
+      ]
+    },
+    'corruption-map.html': {
+      current: 'Corruption Map',
+      next: [
+        { href: 'procurement-analysis.html', label: 'Procurement Analysis', desc: '$191B in documented waste' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of who did what' },
+        { href: 'findings.html', label: 'All 21 Findings', desc: 'Cross-reference analysis' },
+      ]
+    },
+    'procurement-analysis.html': {
+      current: 'Procurement Analysis',
+      next: [
+        { href: 'corruption-map.html', label: 'Corruption Map', desc: '37 documented scandals' },
+        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$210M+ to Israel despite pause' },
+        { href: 'findings.html', label: 'All 21 Findings', desc: 'What the data reveals' },
+      ]
+    },
   };
 
   function getCurrentPage() {
