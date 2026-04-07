@@ -133,6 +133,14 @@
         { href: 'findings.html', label: 'All 21 Findings', desc: 'What the data reveals' },
       ]
     },
+    'mp-scorecard.html': {
+      current: 'MP Scorecard',
+      next: [
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 patterns from 7M records' },
+        { href: 'voting-records.html', label: 'Voting Records', desc: 'How every party voted' },
+        { href: 'legal.html', label: 'Legal Framework + Magnitsky', desc: 'Freeze their assets' },
+      ]
+    },
   };
 
   function getCurrentPage() {

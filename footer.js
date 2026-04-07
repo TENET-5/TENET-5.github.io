@@ -36,6 +36,7 @@
           { label: 'OSINT Dashboard', href: 'osint-dashboard.html' },
           { label: 'Network Analysis', href: 'network-analysis.html' },
           { label: 'Dossier Viewer', href: 'dossier-viewer.html' },
+          { label: 'MP Scorecard', href: 'mp-scorecard.html' },
           { label: 'Voting Records', href: 'voting-records.html' },
           { label: 'Charity Pipeline', href: 'charity-pipeline.html' },
         ]
