@@ -152,7 +152,9 @@
         fetch('data/cija_subject_breakdown.json').then(r => r.json()).catch(() => null),
         fetch('data/cija_timing_analysis.json').then(r => r.json()).catch(() => null),
         fetch('data/cija_trips_nsicop_update.json').then(r => r.json()).catch(() => null),
-        fetch('data/arms_exports_israel.json').then(r => r.json()).catch(() => null)
+        fetch('data/arms_exports_israel.json').then(r => r.json()).catch(() => null),
+        fetch('data/foreign_interference_commission.json').then(r => r.json()).catch(() => null),
+        fetch('data/cansec_2025.json').then(r => r.json()).catch(() => null)
       ]).then(function(results) {
         var cija = results[0];
         var foreign = results[1];
@@ -162,6 +164,8 @@
         var cijaTiming = results[5];
         var cijaTrips = results[6];
         var armsData = results[7];
+        var hogueData = results[8];
+        var cansecData = results[9];
         var extra = '';
 
         // CIJA Deep Analysis
@@ -318,6 +322,41 @@
           if (door.pratt_profile) {
             extra += '<div class="pattern-box">' + door.pratt_profile.pattern + '</div>';
           }
+          extra += '</div>';
+        }
+
+        // Hogue Commission
+        if (hogueData && hogueData.hogue_final_report) {
+          var h = hogueData.hogue_final_report;
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis D</div>';
+          extra += '<h2>Hogue Commission — Poilievre Refuses Security Clearance <span class="severity sev-critical">CRITICAL</span></h2>';
+          extra += '<div class="summary">Final report (Jan 28, 2025): ' + h.recommendations_total + ' recommendations. Found parliamentarians showed "troubling conduct" but not treason. Called on ALL party leaders to get top-secret clearance.</div>';
+          extra += '<ul class="evidence-list">';
+          (h.key_findings || []).forEach(function(f) { extra += '<li><span>' + f + '</span><span class="src">Hogue Report</span></li>'; });
+          if (h.poilievre_clearance) {
+            extra += '<li><span style="color:#ef4444;font-weight:600;">' + h.poilievre_clearance.finding + '</span><span class="src">CBC</span></li>';
+            extra += '<li><span>' + h.poilievre_clearance.context + '</span><span class="src">Investigation Board</span></li>';
+          }
+          extra += '</ul>';
+          extra += '<div class="pattern-box">The only federal party leader who refused the security clearance recommended by the Commission has 12 documented connections in the Israel influence network, led his party\'s bloc NAY vote on the Gaza ceasefire, and has a deputy leader (Lantsman) who was lobbied by CIJA 18 times.</div>';
+          extra += '</div>';
+        }
+
+        // CANSEC
+        if (cansecData) {
+          extra += '<div class="finding high">';
+          extra += '<div class="finding-num">Deep Analysis E</div>';
+          extra += '<h2>CANSEC 2025 — Arms Fair Displays Exact Israel Contract Weapon <span class="severity sev-high">HIGH</span></h2>';
+          extra += '<div class="summary">280+ exhibitors. ' + (cansecData.protest_crackdown ? cansecData.protest_crackdown.arrested : 13) + ' protesters arrested including a medic and photojournalist. 6 activists had homes raided afterwards.</div>';
+          extra += '<ul class="evidence-list">';
+          if (cansecData.general_dynamics_display) extra += '<li><span>' + cansecData.general_dynamics_display.finding + '</span><span class="src">PBI Canada</span></li>';
+          if (cansecData.elbit_display) extra += '<li><span>' + cansecData.elbit_display.finding + '</span><span class="src">PBI Canada</span></li>';
+          if (cansecData.protest_crackdown) {
+            extra += '<li><span>Police response: ' + cansecData.protest_crackdown.police_response + '</span><span class="src">PBI Canada</span></li>';
+            extra += '<li><span style="color:#ef4444;">' + cansecData.protest_crackdown.aftermath + '</span><span class="src">WSWS</span></li>';
+          }
+          extra += '</ul>';
           extra += '</div>';
         }
 
