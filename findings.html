@@ -148,12 +148,16 @@
         fetch('data/cija_deep_analysis.json').then(r => r.json()).catch(() => null),
         fetch('data/foreign_lobbying_deep_scan.json').then(r => r.json()).catch(() => null),
         fetch('data/revolving_door_analysis.json').then(r => r.json()).catch(() => null),
-        fetch('data/cija_lobbying_detail.json').then(r => r.json()).catch(() => null)
+        fetch('data/cija_lobbying_detail.json').then(r => r.json()).catch(() => null),
+        fetch('data/cija_subject_breakdown.json').then(r => r.json()).catch(() => null),
+        fetch('data/cija_timing_analysis.json').then(r => r.json()).catch(() => null)
       ]).then(function(results) {
         var cija = results[0];
         var foreign = results[1];
         var door = results[2];
         var cijaDetail = results[3];
+        var cijaSubjects = results[4];
+        var cijaTiming = results[5];
         var extra = '';
 
         // CIJA Deep Analysis
@@ -173,6 +177,49 @@
               extra += '<tr><td>' + c.name + '</td><td>' + c.title + '</td><td>' + c.institution.substring(0, 30) + '</td><td class="hi">' + c.meetings + '</td></tr>';
             });
             extra += '</tbody></table>';
+          }
+          extra += '</div>';
+        }
+
+        // CIJA Subject Matter Breakdown
+        if (cijaSubjects && cijaSubjects.decoded_subjects) {
+          extra += '<div class="finding high">';
+          extra += '<div class="finding-num">Deep Analysis A2</div>';
+          extra += '<h2>CIJA Lobbying by Subject — 3,180 Decoded Tags <span class="severity sev-high">HIGH</span></h2>';
+          extra += '<div class="summary">Every lobbying communication is tagged with subject matter codes. Decoded from Codes_SubjectMatterTypesExport.csv. International Relations (Israel\'s foreign affairs agenda) dominates at 38.4%.</div>';
+          var subjects = cijaSubjects.decoded_subjects;
+          var totalTags = cijaSubjects.total_tags || 1;
+          var entries = Object.entries(subjects).sort(function(a, b) { return b[1] - a[1]; });
+          entries.slice(0, 15).forEach(function(s) {
+            var pct = (s[1] / totalTags * 100).toFixed(1);
+            var barWidth = Math.min(s[1] / entries[0][1] * 100, 100);
+            extra += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:0.75rem;">';
+            extra += '<span style="width:180px;color:#a0a0a6;flex-shrink:0;text-align:right;">' + s[0] + '</span>';
+            extra += '<div style="flex:1;height:16px;background:#111113;border-radius:3px;overflow:hidden;">';
+            extra += '<div style="width:' + barWidth + '%;height:100%;background:' + (pct > 10 ? '#e53555' : pct > 3 ? '#fbbf24' : '#60a5fa') + ';border-radius:3px;"></div>';
+            extra += '</div>';
+            extra += '<span style="width:70px;color:#6e6e76;font-size:0.68rem;">' + s[1] + ' (' + pct + '%)</span>';
+            extra += '</div>';
+          });
+          extra += '</div>';
+        }
+
+        // CIJA Timing Analysis
+        if (cijaTiming) {
+          extra += '<div class="finding high">';
+          extra += '<div class="finding-num">Deep Analysis A3</div>';
+          extra += '<h2>CIJA Lobbying Timing vs Vote Dates <span class="severity sev-high">HIGH</span></h2>';
+          extra += '<div class="summary">Lobbying intensity measured in 30/60/90 day windows before each key vote, compared against same-period baseline from prior year.</div>';
+          if (cijaTiming.vote_correlation) {
+            extra += '<table class="entity-table"><thead><tr><th>Vote</th><th>Result</th><th>CIJA 30d</th><th>CIJA 90d</th><th>Baseline</th><th>Surge</th></tr></thead><tbody>';
+            cijaTiming.vote_correlation.forEach(function(v) {
+              extra += '<tr><td>' + v.bill + ' — ' + v.desc + '</td><td>' + v.result + '</td><td>' + v.cija_30d + '</td><td>' + v.cija_90d + '</td><td>' + v.baseline_30d + '</td><td class="hi">+' + v.surge_pct + '%</td></tr>';
+            });
+            extra += '</tbody></table>';
+          }
+          if (cijaTiming.oct7_timeline) {
+            var t = cijaTiming.oct7_timeline;
+            extra += '<div class="pattern-box">' + t.pattern + '<br><br>Sep 2023: ' + t.sep_2023 + ' → Oct: ' + t.oct_2023 + ' (+' + t.oct_surge + ') → Nov: ' + t.nov_2023 + ' (+' + t.nov_surge + ')</div>';
           }
           extra += '</div>';
         }
