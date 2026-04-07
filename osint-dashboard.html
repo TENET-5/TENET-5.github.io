@@ -434,6 +434,30 @@
     loadJSON('data/contributions_analysis.json', 'contributions');
     loadJSON('data/analysis.json', 'analysis');
     loadJSON('data/all_mps.json', 'mps');
+
+    // ── Scraper Automation Status ──
+    fetch('data/scraper_status.json').then(function(r){return r.json();}).then(function(status){
+      var panel = document.getElementById('scraper-status');
+      panel.style.display = 'block';
+      var dt = new Date(status.last_run);
+      var ago = Math.floor((Date.now() - dt.getTime()) / 3600000);
+      var agoStr = ago < 1 ? 'Just now' : ago + 'h ago';
+      document.getElementById('scraper-last-run').textContent = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ' (' + agoStr + ')';
+      document.getElementById('scraper-ok').textContent = status.ok_count;
+      document.getElementById('scraper-total').textContent = status.scraper_count;
+      document.getElementById('scraper-duration').textContent = status.total_duration_s + 's';
+      // Health bars
+      var bars = document.getElementById('scraper-bars');
+      (status.results || []).forEach(function(r){
+        var color = r.status === 'OK' ? '#39ff14' : r.status === 'TIMEOUT' ? '#facc15' : '#e53555';
+        var bar = document.createElement('div');
+        bar.style.cssText = 'flex:1; height:4px; border-radius:2px; background:' + color + '; opacity:0.8;';
+        bar.title = r.name + ': ' + r.status + ' (' + r.duration_s + 's)';
+        bars.appendChild(bar);
+      });
+    }).catch(function(){
+      // No status file yet — leave panel hidden
+    });
   })();
   </script>
 </body>

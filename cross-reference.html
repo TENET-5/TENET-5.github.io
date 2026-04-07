@@ -380,8 +380,8 @@
   <div id="main" class="dash-wrap">
     <div class="dash-header">
       <h1>Follow the Money</h1>
-      <div class="flow-line">LOBBYING &rarr; DONATIONS &rarr; VOTES</div>
-      <p class="subtitle">Cross-referencing three public datasets to surface patterns between who lobbies Parliament, who donates to political parties, and how MPs vote on bills.</p>
+      <div class="flow-line">LOBBYING &rarr; DONATIONS &rarr; VOTES &rarr; CORPORATIONS</div>
+      <p class="subtitle">Cross-referencing five public datasets to surface patterns between who lobbies Parliament, who donates to political parties, how MPs vote on bills, and corporate board connections.</p>
     </div>
 
     <div id="content-area" class="loading">Loading and cross-referencing 4 public datasets...</div>
@@ -399,7 +399,8 @@
       { key: 'lobbying', url: 'data/lobbying_analysis.json' },
       { key: 'contributions', url: 'data/contributions_analysis.json' },
       { key: 'analysis', url: 'data/analysis.json' },
-      { key: 'mps', url: 'data/all_mps.json' }
+      { key: 'mps', url: 'data/all_mps.json' },
+      { key: 'corporate', url: 'data/corporate_registry_analysis.json' }
     ];
 
     files.forEach(function(f) {
@@ -522,15 +523,17 @@
       // ── Section A: Methodology ──
       html += '<div class="section-block">';
       html += '<h2>Methodology</h2>';
-      html += '<div class="disclaimer" style="margin-top:0;">This page cross-references three public datasets: who lobbies Parliament, who donates to political parties, and how MPs vote on bills. Patterns flagged here are based on publicly available data and may have innocent explanations. Correlation does not imply causation.</div>';
+      html += '<div class="disclaimer" style="margin-top:0;">This page cross-references five public datasets: who lobbies Parliament, who donates to political parties, how MPs vote on bills, corporate registry records, and procurement contracts. Patterns flagged here are based on publicly available data and may have innocent explanations. Correlation does not imply causation.</div>';
       html += '<div class="methodology">';
       html += '<div class="method-step"><span class="step-num">1</span><span class="step-title">Lobbying Records</span><span class="step-desc">Commissioner of Lobbying data: who meets with which officials and how often.</span></div>';
       html += '<div class="method-arrow">&rarr;</div>';
       html += '<div class="method-step"><span class="step-num">2</span><span class="step-title">Donation Records</span><span class="step-desc">Elections Canada data: who contributes to which parties and candidates.</span></div>';
       html += '<div class="method-arrow">&rarr;</div>';
       html += '<div class="method-step"><span class="step-num">3</span><span class="step-title">Voting Records</span><span class="step-desc">OpenParliament data: how MPs vote on bills by category (finance, healthcare, environment, etc.).</span></div>';
+      html += '<div class="method-arrow">&rarr;</div>';
+      html += '<div class="method-step"><span class="step-num">4</span><span class="step-title">Corporate Registry</span><span class="step-desc">ISED Corporations Canada: board positions, directors, and corporate officer records.</span></div>';
       html += '</div>';
-      html += '<div class="disclaimer-inline" style="margin-top:14px;">All three datasets are public records available to any Canadian. This analysis matches records algorithmically by name and category. Errors are possible. Always verify with primary sources.</div>';
+      html += '<div class="disclaimer-inline" style="margin-top:14px;">All five datasets are public records available to any Canadian. This analysis matches records algorithmically by name and category. Errors are possible. Always verify with primary sources.</div>';
       html += '</div>';
 
       // ── Section B: MP Spotlight Cards ──
@@ -545,6 +548,13 @@
       html += '<h2>Organization Influence Map: Top 10</h2>';
       html += '<div class="disclaimer" style="margin-top:0;">Mapping which organizations communicate most with government, which bill categories relate to their industry, and any related donation activity. All activities shown are legal and publicly registered.</div>';
       html += renderOrgInfluence(lobbyData, contribData, analysisData);
+      html += '</div>';
+
+      // ── Section C2: Corporate-Political Connections ──
+      html += '<div class="section-block">';
+      html += '<h2>Corporate-Political Connections</h2>';
+      html += '<div class="disclaimer" style="margin-top:0;">Corporate board positions and officer roles held by current or former politicians, as found in ISED Corporations Canada records and public disclosures. Being a corporate director or officer is legal and common for former public officials.</div>';
+      html += renderCorporateConnections(datasets.corporate);
       html += '</div>';
 
       // ── Section D: Pattern Flags ──
@@ -592,6 +602,13 @@
       html += '<div class="source-info"><strong>House of Commons Hansard</strong><br>';
       html += '<a href="https://www.ourcommons.ca/documentviewer/en/45-1/house/hansard" target="_blank" rel="noopener">ourcommons.ca/documentviewer/en/45-1/house/hansard</a><br>';
       html += 'Official record of debates and proceedings in the Canadian House of Commons.</div>';
+      html += '</div>';
+
+      html += '<div class="source-item">';
+      html += '<span class="source-icon">&#127970;</span>';
+      html += '<div class="source-info"><strong>ISED Corporations Canada</strong><br>';
+      html += '<a href="https://open.canada.ca/data/en/dataset/8945fceb-d392-4c20-a478-b4a4a82c4fe4" target="_blank" rel="noopener">open.canada.ca/data (Corporations)</a><br>';
+      html += 'Federal corporate registry data including directors, officers, and corporate status from Innovation, Science and Economic Development Canada.</div>';
       html += '</div>';
 
       html += '</div></div>';
@@ -882,6 +899,64 @@
       h += '<div class="disclaimer" style="border-color:rgba(196,30,58,0.3);margin-top:20px;">';
       h += '<strong style="color:#e53555;">Important Notice:</strong> All patterns shown above are generated by algorithmic matching of public datasets. They represent correlations, not causation. Lobbying, political donations, and parliamentary voting are all legal activities in Canada. The presence of patterns does not constitute evidence of wrongdoing, corruption, or undue influence. These patterns are common features of democratic governance and are presented solely for transparency and public awareness. Always verify findings with primary government sources.';
       h += '</div>';
+
+      return h;
+    }
+
+    // ── Corporate Connections Section ──
+    function renderCorporateConnections(corpData) {
+      if (!corpData || !corpData.corporate_connections) return '<p style="color:#6e6e76;">Corporate registry data not loaded.</p>';
+      var h = '';
+
+      // Board positions grid
+      h += '<div class="org-grid">';
+      corpData.corporate_connections.forEach(function(c) {
+        h += '<div class="org-card" style="border-color:rgba(96,165,250,0.12);">';
+        h += '<div class="org-card-name">' + escHtml(c.person) + '</div>';
+        h += '<div class="org-card-comms" style="color:#60a5fa;">' + escHtml(c.role) + '</div>';
+        h += '<div class="org-card-section">';
+        h += '<div class="org-card-section-title">Corporation</div>';
+        h += '<div class="org-card-list">' + escHtml(c.corporation) + '</div>';
+        h += '</div>';
+        h += '<div class="org-card-section">';
+        h += '<div class="org-card-section-title">Status</div>';
+        h += '<div class="org-card-list">' + escHtml(c.status) + '</div>';
+        h += '</div>';
+        h += '<div class="org-card-section">';
+        h += '<div class="org-card-section-title">Source</div>';
+        h += '<div class="org-card-list">' + escHtml(c.source) + '</div>';
+        h += '</div>';
+        h += '<div class="disclaimer-inline">Public record. Corporate board service is legal and common.</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+
+      // Triple-vector flags
+      if (corpData.cross_reference_flags && corpData.cross_reference_flags.length > 0) {
+        h += '<h3 style="font-size:0.85rem; color:#e53555; margin-top:24px; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">&#9888; Triple-Vector Entities (Corporate + Lobby + Donation)</h3>';
+        h += '<div class="disclaimer" style="margin-top:0;">These entities appear in three separate public datasets: the federal corporate registry, the lobbying registry, and political donation records. This is a common feature of large organizations in Canada and is entirely legal.</div>';
+        corpData.cross_reference_flags.forEach(function(f) {
+          h += '<div class="flag-card">';
+          h += '<div class="flag-type">' + escHtml(f.flag_type) + ': ' + escHtml(f.entity) + '</div>';
+          h += '<div class="flag-desc">' + escHtml(f.description) + '</div>';
+          h += '<div class="flag-note">' + escHtml(f.risk_note) + '</div>';
+          h += '<div class="flag-instances">';
+          h += '<strong>Data vectors:</strong> ' + f.vectors.map(function(v){return escHtml(v);}).join(' &bull; ');
+          h += '<br><em>' + escHtml(f.legal_status) + '</em>';
+          h += '</div></div>';
+        });
+      }
+
+      // Statistics
+      if (corpData.statistics) {
+        var s = corpData.statistics;
+        h += '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:20px;">';
+        h += '<div class="mp-stat" style="background:rgba(96,165,250,0.06);"><span class="mp-stat-val" style="color:#60a5fa;">' + s.politicians_with_corp_ties + '</span><span class="mp-stat-label">Politicians w/ Corp Ties</span></div>';
+        h += '<div class="mp-stat" style="background:rgba(229,53,85,0.06);"><span class="mp-stat-val" style="color:#e53555;">' + s.triple_vector_entities + '</span><span class="mp-stat-label">Triple-Vector Entities</span></div>';
+        h += '<div class="mp-stat" style="background:rgba(57,255,20,0.06);"><span class="mp-stat-val" style="color:#39ff14;">' + s.total_org_matches + '</span><span class="mp-stat-label">Org Registry Matches</span></div>';
+        h += '<div class="mp-stat" style="background:rgba(250,204,21,0.06);"><span class="mp-stat-val" style="color:#facc15;">' + s.total_flags + '</span><span class="mp-stat-label">Cross-Ref Flags</span></div>';
+        h += '</div>';
+      }
 
       return h;
     }
