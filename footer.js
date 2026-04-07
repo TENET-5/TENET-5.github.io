@@ -57,6 +57,7 @@
           { label: 'Legal Framework', href: 'legal.html' },
           { label: 'Whistleblower Guide', href: 'whistleblower-guide.html' },
           { label: 'Open Letter to MPs', href: 'open-letter.html' },
+          { label: 'About This Project', href: 'about.html' },
           { label: 'FAQ & History', href: 'history.html' },
         ]
       }
