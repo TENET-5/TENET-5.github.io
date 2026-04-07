@@ -197,21 +197,42 @@
       transition: all 0.2s;
     }
     .settings-close-btn:hover { background: rgba(200,30,0,0.2); }
+    /* ── Character Selection ── */
+    #characterSelection {
+      display: none; position: fixed; inset: 0; z-index: 250;
+      background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #050505 100%);
+      align-items: center; justify-content: center; flex-direction: column;
+      font-family: 'Rajdhani', sans-serif; color: #fff;
+    }
+    .char-title {
+      font-family: 'Black Ops One', system-ui; font-size: 3rem; color: #cc2200;
+      letter-spacing: 3px; margin-bottom: 2rem;
+    }
+    .char-grid {
+      display: flex; gap: 2rem; max-width: 1000px;
+    }
+    .char-card {
+      background: rgba(20, 20, 20, 0.9); border: 1px solid #444;
+      padding: 1.5rem; width: 280px; text-align: center; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .char-card:hover { border-color: #cc8855; transform: translateY(-5px); }
+    .char-card.selected { border-color: #cc2200; box-shadow: 0 0 20px rgba(200,30,0,0.4); background: rgba(40, 10, 10, 0.9); }
+    .char-name { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.1em; color: #eee; margin-bottom: 0.5rem; }
+    .char-desc { font-size: 0.9rem; color: #aaa; margin-bottom: 1.5rem; line-height: 1.4; }
+    .char-stats { font-size: 0.8rem; color: #888; text-align: left; }
+    .char-stat-row { display: flex; justify-content: space-between; margin-bottom: 0.2rem; }
+    .btn-deploy-final {
+      margin-top: 3rem; background: #cc2200; border: none; color: #fff;
+      padding: 1rem 3rem; font-family: 'Rajdhani', sans-serif; font-size: 1.5rem;
+      font-weight: 700; letter-spacing: 0.2em; cursor: pointer; transition: 0.2s;
+    }
+    .btn-deploy-final:hover { background: #ff3300; box-shadow: 0 0 25px rgba(255,50,0,0.5); }
+    .btn-deploy-final:disabled { background: #444; color: #777; cursor: not-allowed; box-shadow: none; }
   </style>
-  <script type="module" crossorigin src="./assets/index-DKi53YY_.js"></script>
-    <script>
-      window.TENET5_OS = {
-        validateTelemetry: () => {
-          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-          if (!isLocal) return; // Silent abort on public internet
-          console.log('[LIRIL] Validating Telemetry endpoints to localhost MooseRacks geofence...');
-          fetch('http://' + window.location.hostname + ':8091/health')
-            .then(r => console.log('[LIRIL] Payload Hub Online.'))
-            .catch(e => console.warn('[LIRIL] Local SATOR hub unreachable'));
-        }
-      };
-      window.addEventListener('load', () => window.TENET5_OS.validateTelemetry());
-    </script>
+  <script type="module" crossorigin src="/reduster/assets/index-xnbvepDv.js"></script>
+  <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-core-B8ytfeYv.js">
+  <link rel="modulepreload" crossorigin href="/reduster/assets/babylon-loaders-CFQCs2P7.js">
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
@@ -230,6 +251,41 @@
       <button id="btnJoin" class="menu-btn">JOIN SERVER</button>
       <div class="menu-version">RED DUSTER v2.0 // BABYLON.JS 9 // TENET-5</div>
     </div>
+  </div>
+
+  <!-- Character Selection -->
+  <div id="characterSelection">
+    <h1 class="char-title">SELECT OPERATIVE</h1>
+    <div class="char-grid">
+      <div class="char-card selected" data-class="VANGUARD">
+        <div class="char-name">VANGUARD</div>
+        <div class="char-desc">Heavy assault operative. Specialized in direct combat, rifles, and maximum durability.</div>
+        <div class="char-stats">
+          <div class="char-stat-row"><span>ENDURANCE</span><span style="color:#2c2">HIGH</span></div>
+          <div class="char-stat-row"><span>MOBILITY</span><span style="color:#c22">LOW</span></div>
+          <div class="char-stat-row"><span>STARTING</span><span>C7A2 RIFLE</span></div>
+        </div>
+      </div>
+      <div class="char-card" data-class="SCOUT">
+        <div class="char-name">SCOUT</div>
+        <div class="char-desc">Wilderness recon specialist. High mobility and stealth for flanking and evasion.</div>
+        <div class="char-stats">
+          <div class="char-stat-row"><span>ENDURANCE</span><span style="color:#c22">LOW</span></div>
+          <div class="char-stat-row"><span>MOBILITY</span><span style="color:#2c2">HIGH</span></div>
+          <div class="char-stat-row"><span>STARTING</span><span>SUPPRESSED 9MM</span></div>
+        </div>
+      </div>
+      <div class="char-card" data-class="ARTISAN">
+        <div class="char-name">ARTISAN</div>
+        <div class="char-desc">Field engineer and medic. Bonus crafting speeds and tool proficiency.</div>
+        <div class="char-stats">
+          <div class="char-stat-row"><span>ENDURANCE</span><span style="color:#cc2">MED</span></div>
+          <div class="char-stat-row"><span>CRAFTING</span><span style="color:#2c2">EXPERT</span></div>
+          <div class="char-stat-row"><span>STARTING</span><span>HATCHET, MEDS</span></div>
+        </div>
+      </div>
+    </div>
+    <button id="btnDeployFinal" class="btn-deploy-final">DEPLOY</button>
   </div>
 
   <!-- Loading -->
@@ -307,7 +363,6 @@
     <div class="status-panel">
       <div id="zoneDisplay">CANADIAN WILDERNESS</div>
       <div class="status-kills">☠ <span id="killDisplay">0</span> KILLS</div>
-      <div id="lirilSyncState" style="margin-top:4px; font-size:0.65rem; color:#22c55e; letter-spacing:0.1em; text-shadow:0 0 5px rgba(34,197,94,0.5);">LIRIL SATOR METRICS: [ SYNCED ]</div>
     </div>
 
     <div class="interact-prompt" id="interactPrompt">[F] INTERACT</div>
