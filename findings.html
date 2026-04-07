@@ -142,6 +142,85 @@
       });
 
       container.innerHTML = html;
+
+      // Load supplementary data files
+      Promise.all([
+        fetch('data/cija_deep_analysis.json').then(r => r.json()).catch(() => null),
+        fetch('data/foreign_lobbying_deep_scan.json').then(r => r.json()).catch(() => null),
+        fetch('data/revolving_door_analysis.json').then(r => r.json()).catch(() => null),
+        fetch('data/cija_lobbying_detail.json').then(r => r.json()).catch(() => null)
+      ]).then(function(results) {
+        var cija = results[0];
+        var foreign = results[1];
+        var door = results[2];
+        var cijaDetail = results[3];
+        var extra = '';
+
+        // CIJA Deep Analysis
+        if (cija) {
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis A</div>';
+          extra += '<h2>CIJA Raw CSV Analysis — 57MB Dataset <span class="severity sev-critical">CRITICAL</span></h2>';
+          extra += '<div class="summary">' + cija.total_communications + ' registered communications to ' + cija.unique_contacts + ' unique government officials since 2008. Post-Oct 7 2023: ' + cija.post_oct7_total + ' communications (' + cija.oct7_surge_pct + '% surge).</div>';
+          if (cija.key_policy_objectives) {
+            extra += '<ul class="evidence-list">';
+            cija.key_policy_objectives.forEach(function(o) { extra += '<li><span>' + o + '</span><span class="src">Raw CSV</span></li>'; });
+            extra += '</ul>';
+          }
+          if (cijaDetail && cijaDetail.top_contacts) {
+            extra += '<table class="entity-table"><thead><tr><th>Official</th><th>Title</th><th>Institution</th><th>Meetings</th></tr></thead><tbody>';
+            cijaDetail.top_contacts.slice(0, 15).forEach(function(c) {
+              extra += '<tr><td>' + c.name + '</td><td>' + c.title + '</td><td>' + c.institution.substring(0, 30) + '</td><td class="hi">' + c.meetings + '</td></tr>';
+            });
+            extra += '</tbody></table>';
+          }
+          extra += '</div>';
+        }
+
+        // Foreign Lobbying Scan
+        if (foreign) {
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis B</div>';
+          extra += '<h2>Foreign-State Lobbying Ratio <span class="severity sev-critical">CRITICAL</span></h2>';
+          if (foreign.israel_vs_all) {
+            var iv = foreign.israel_vs_all;
+            extra += '<div class="summary">Israel-linked lobbying: ' + iv.israel + ' communications (' + iv.israel_pct_of_foreign + '% of all foreign). China: ' + iv.china + '. Ratio: ' + iv.ratio_israel_to_china + '. Russia: ' + iv.russia + '. Saudi: ' + iv.saudi + '.</div>';
+            extra += '<table class="entity-table"><thead><tr><th>State Link</th><th>Communications</th></tr></thead><tbody>';
+            [['Israel', iv.israel], ['US Defense', iv.us_defense], ['UAE', iv.uae], ['China', iv.china], ['Russia', iv.russia], ['Saudi', iv.saudi]].forEach(function(r) {
+              extra += '<tr><td>' + r[0] + '</td><td' + (r[0] === 'Israel' ? ' class="hi"' : '') + '>' + r[1] + '</td></tr>';
+            });
+            extra += '</tbody></table>';
+          }
+          if (foreign.fogel_ranking) {
+            extra += '<div class="pattern-box">' + foreign.fogel_ranking.finding + ' (' + foreign.fogel_ranking.communications + ' comms). Only outranked by ' + foreign.fogel_ranking.only_outranked_by + '.</div>';
+          }
+          extra += '</div>';
+        }
+
+        // Revolving Door
+        if (door) {
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis C</div>';
+          extra += '<h2>Revolving Door — Defence Procurement Gatekeepers <span class="severity sev-critical">CRITICAL</span></h2>';
+          if (door.pratt_profile) {
+            var p = door.pratt_profile;
+            extra += '<div class="summary">' + p.name + ' (' + p.former_role + ') made ' + p.total_communications + ' lobbying communications. ' + p.targets_at_dnd + ' targeted his former department (DND). ' + p.targets_at_pmo + ' targeted the PMO. Clients: ' + p.current_clients.join(', ') + '.</div>';
+          }
+          if (door.shared_gatekeepers && door.shared_gatekeepers.gatekeepers) {
+            extra += '<table class="entity-table"><thead><tr><th>Gatekeeper</th><th>Role</th><th>Pratt (Raytheon/IAI)</th><th>Irving ($84B)</th><th>Total</th></tr></thead><tbody>';
+            door.shared_gatekeepers.gatekeepers.forEach(function(g) {
+              extra += '<tr><td>' + g.name + '</td><td>' + g.title + '</td><td>' + (g.lobbied_by_pratt_raytheon_iai || '—') + '</td><td>' + (g.lobbied_by_irving || '—') + '</td><td class="hi">' + (g.total || g.lobbied_by_pratt_raytheon_iai || '—') + '</td></tr>';
+            });
+            extra += '</tbody></table>';
+          }
+          if (door.pratt_profile) {
+            extra += '<div class="pattern-box">' + door.pratt_profile.pattern + '</div>';
+          }
+          extra += '</div>';
+        }
+
+        if (extra) container.innerHTML += extra;
+      });
     });
   })();
   </script>
