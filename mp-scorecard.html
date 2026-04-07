@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP Scorecard — All 340 Members of Parliament | TENET5</title>
+  <meta name="description" content="Every sitting Canadian MP scored against lobbying data, CIJA contacts, investigation board, and treason roster. Search by name, party, or province.">
+  <meta property="og:title" content="MP Scorecard — All 340 Members of Parliament">
+  <meta property="og:description" content="Every MP scored against lobbying, CIJA, and investigation data. 113 clean. 8 highest-flagged.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css?v=5">
+  <meta name="theme-color" content="#1a1f36">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    .sc-wrap { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .sc-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+    .sc-header h1 { font-family: var(--font-headline); font-size: var(--text-4xl); color: var(--text-primary); margin-bottom: 8px; }
+    .sc-header .subtitle { font-size: var(--text-sm); color: var(--text-tertiary); }
+
+    .sc-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .sc-controls input, .sc-controls select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 14px; border-radius: var(--r-md); font-family: inherit; font-size: var(--text-sm); }
+    .sc-controls input { flex: 1; min-width: 200px; }
+    .sc-controls input:focus, .sc-controls select:focus { outline: none; border-color: var(--accent); }
+    #sc-count { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary); }
+
+    .sc-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .sc-table th { text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 10px; border-bottom: 2px solid var(--border); cursor: pointer; user-select: none; }
+    .sc-table th:hover { color: var(--text-primary); }
+    .sc-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .sc-table tr:hover td { background: var(--bg-surface); }
+
+    .score-badge { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono); }
+    .score-0 { background: rgba(5,150,105,0.08); color: var(--color-green); }
+    .score-low { background: rgba(37,99,235,0.08); color: var(--color-blue); }
+    .score-mid { background: rgba(217,119,6,0.08); color: var(--color-warning); }
+    .score-high { background: rgba(220,38,38,0.08); color: var(--color-critical); }
+
+    .flag-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.65rem; font-weight: 600; margin: 1px; }
+    .flag-CIJA_LOBBIED { background: rgba(220,38,38,0.08); color: var(--color-critical); }
+    .flag-TOP_LOBBIED { background: rgba(217,119,6,0.08); color: var(--color-warning); }
+    .flag-ON_BOARD { background: rgba(124,58,237,0.08); color: #7c3aed; }
+    .flag-EMERGENCIES_ERA { background: rgba(37,99,235,0.05); color: var(--color-blue); }
+
+    .tier-header { font-family: var(--font-headline); font-size: var(--text-xl); color: var(--text-primary); margin: var(--s-lg) 0 var(--s-sm); padding-bottom: var(--s-xs); border-bottom: 1px solid var(--border); }
+
+    @media (max-width: 640px) {
+      .sc-table { font-size: var(--text-xs); }
+      .sc-table th, .sc-table td { padding: 6px; }
+      .flag-tag { font-size: 0.55rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="sc-wrap">
+    <div class="sc-header">
+      <h1>MP Scorecard</h1>
+      <p class="subtitle">All 340 Members of Parliament scored against lobbying data, CIJA contacts, investigation board, and treason roster. <a href="about.html">Methodology.</a></p>
+    </div>
+
+    <!-- LIRIL callout -->
+    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s-sm) var(--s-md);margin-bottom:var(--s-md);display:flex;gap:var(--s-xs);align-items:center;">
+      <span style="font-size:1.2rem;">🤖</span>
+      <p style="font-size:var(--text-xs);color:var(--text-tertiary);margin:0;"><a href="liril.html">LIRIL</a> cross-referenced every MP against 4 databases: Commissioner of Lobbying (547K contacts), CIJA raw CSV (2,156 comms to 993 officials), investigation board (94 nodes), and treason roster matrix (877 entities).</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-row" style="margin-bottom:var(--s-md);">
+      <div class="stat-card"><span class="stat-number" id="s-total">--</span><div class="stat-label">Total MPs</div></div>
+      <div class="stat-card"><span class="stat-number green" id="s-clean">--</span><div class="stat-label">Clean</div></div>
+      <div class="stat-card"><span class="stat-number gold" id="s-flagged">--</span><div class="stat-label">Flagged</div></div>
+      <div class="stat-card"><span class="stat-number" id="s-highest">--</span><div class="stat-label">Highest Score</div></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="sc-controls">
+      <input type="text" id="sc-search" placeholder="Search by name, riding, or province...">
+      <select id="sc-party">
+        <option value="">All Parties</option>
+        <option value="Conservative">Conservative</option>
+        <option value="Liberal">Liberal</option>
+        <option value="NDP">NDP</option>
+        <option value="Bloc">Bloc</option>
+        <option value="Green">Green</option>
+      </select>
+      <select id="sc-tier">
+        <option value="">All Tiers</option>
+        <option value="1">Tier 1 — Highest Flags</option>
+        <option value="2">Tier 2 — Moderate</option>
+        <option value="3">Tier 3 — Low</option>
+        <option value="0">Tier 4 — Clean</option>
+      </select>
+      <span id="sc-count"></span>
+    </div>
+
+    <table class="sc-table">
+      <thead>
+        <tr>
+          <th data-sort="score">Score</th>
+          <th data-sort="name">Name</th>
+          <th data-sort="party">Party</th>
+          <th data-sort="riding">Riding</th>
+          <th data-sort="province">Prov</th>
+          <th>Flags</th>
+        </tr>
+      </thead>
+      <tbody id="sc-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);padding:40px;">Loading MP data...</td></tr></tbody>
+    </table>
+
+    <div style="font-size:var(--text-xs);color:var(--text-quaternary);margin-top:var(--s-md);padding:var(--s-sm);background:var(--bg-surface);border-radius:var(--r-md);line-height:1.7;">
+      <strong>Scoring:</strong> CIJA_LOBBIED (+4) = directly lobbied by CIJA per raw CSV. TOP_LOBBIED (+3) = in Commissioner of Lobbying top list. ON_BOARD (+5) = on investigation board. EMERGENCIES_ERA (+2) = served during Emergencies Act period. Score 0 = not in any negative database. <strong>Being flagged does not imply wrongdoing.</strong> Lobbying is legal. <a href="about.html">Full methodology.</a>
+    </div>
+  </div>
+
+  <script src="nav.js?v=7"></script>
+  <div id="read-next"></div>
+  <footer id="site-footer"></footer>
+  <script src="readnext.js?v=1"></script>
+  <script src="footer.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    var ALL = [];
+    var sortCol = 'score';
+    var sortDir = -1;
+
+    function scoreBadge(score) {
+      var cls = score === 0 ? 'score-0' : score <= 2 ? 'score-low' : score <= 6 ? 'score-mid' : 'score-high';
+      return '<span class="score-badge ' + cls + '">' + score + '</span>';
+    }
+
+    function flagTags(flags) {
+      return flags.map(function(f) { return '<span class="flag-tag flag-' + f + '">' + f.replace(/_/g, ' ') + '</span>'; }).join('');
+    }
+
+    function render() {
+      var q = (document.getElementById('sc-search').value || '').toLowerCase();
+      var party = document.getElementById('sc-party').value;
+      var tier = document.getElementById('sc-tier').value;
+
+      var filtered = ALL.filter(function(m) {
+        if (q && (m.name + ' ' + m.riding + ' ' + m.province).toLowerCase().indexOf(q) === -1) return false;
+        if (party && m.party !== party) return false;
+        if (tier === '1' && m.score < 7) return false;
+        if (tier === '2' && (m.score < 3 || m.score >= 7)) return false;
+        if (tier === '3' && (m.score < 1 || m.score >= 3)) return false;
+        if (tier === '0' && m.score !== 0) return false;
+        return true;
+      });
+
+      filtered.sort(function(a, b) {
+        var va, vb;
+        if (sortCol === 'score') { va = a.score; vb = b.score; }
+        else if (sortCol === 'name') { va = a.name; vb = b.name; }
+        else if (sortCol === 'party') { va = a.party; vb = b.party; }
+        else if (sortCol === 'province') { va = a.province; vb = b.province; }
+        else { va = a.riding; vb = b.riding; }
+        if (va < vb) return -1 * sortDir;
+        if (va > vb) return 1 * sortDir;
+        return 0;
+      });
+
+      document.getElementById('sc-count').textContent = filtered.length + ' of ' + ALL.length;
+
+      var tbody = document.getElementById('sc-tbody');
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);padding:20px;">No matching MPs</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(function(m) {
+        var extra = '';
+        if (m.details && m.details.cija_meetings) extra = ' (CIJA: ' + m.details.cija_meetings + 'x)';
+        if (m.details && m.details.lobby_meetings) extra += ' (Lobby: ' + m.details.lobby_meetings + 'x)';
+        return '<tr>' +
+          '<td>' + scoreBadge(m.score) + '</td>' +
+          '<td style="font-weight:600;color:var(--text-primary);">' + m.name + extra + '</td>' +
+          '<td>' + m.party + '</td>' +
+          '<td style="color:var(--text-secondary);font-size:var(--text-xs);">' + m.riding + '</td>' +
+          '<td>' + m.province + '</td>' +
+          '<td>' + flagTags(m.flags) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    fetch('data/mp_full_analysis.json').then(function(r) { return r.json(); }).then(function(d) {
+      ALL = [].concat(d.tier1_highest || [], d.tier2_moderate || [], d.tier3_low || [], d.tier4_clean || []);
+      document.getElementById('s-total').textContent = d.total_mps || ALL.length;
+      document.getElementById('s-clean').textContent = (d.tier4_clean || []).length;
+      document.getElementById('s-flagged').textContent = ALL.length - (d.tier4_clean || []).length;
+      document.getElementById('s-highest').textContent = ALL.length > 0 ? ALL.reduce(function(max, m) { return m.score > max ? m.score : max; }, 0) : '--';
+      render();
+    });
+
+    document.getElementById('sc-search').addEventListener('input', render);
+    document.getElementById('sc-party').addEventListener('change', render);
+    document.getElementById('sc-tier').addEventListener('change', render);
+
+    document.querySelectorAll('th[data-sort]').forEach(function(th) {
+      th.addEventListener('click', function() {
+        var col = this.dataset.sort;
+        if (sortCol === col) sortDir *= -1;
+        else { sortCol = col; sortDir = -1; }
+        render();
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
