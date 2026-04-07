@@ -157,15 +157,25 @@ export function getSphereRotation(position, yawRadians = 0) {
 export async function buildPlanet(scene, shadowGen) {
   const segments = 200; // vertex resolution — higher = smoother peaks
 
-  // ── Base sphere ──
-  const sphere = MeshBuilder.CreateSphere('planet', {
-    diameter: PLANET_RADIUS * 2,
-    segments,
-    updatable: true,
-  }, scene);
+  // Phase 22: Unify planetary voxel load grids (Trellis)
+  let sphere = getModelInstance(scene, 'planet_map');
 
-  // ── Displace vertices by terrain height ──
-  const positions = sphere.getVerticesData('position');
+  if (sphere) {
+    console.log("[Planet] Static Trellis AI voxel grid found. Bypassing procedural mesh mapping.");
+    // Scale the unit GLB grid block up to our system bounds
+    sphere.scaling = new Vector3(PLANET_RADIUS, PLANET_RADIUS, PLANET_RADIUS);
+    sphere.receiveShadows = true;
+    sphere.checkCollisions = true;
+  } else {
+    // ── Base procedural sphere fallback ──
+    sphere = MeshBuilder.CreateSphere('planet', {
+      diameter: PLANET_RADIUS * 2,
+      segments,
+      updatable: true,
+    }, scene);
+
+    // ── Displace vertices by terrain height ──
+    const positions = sphere.getVerticesData('position');
   const normals   = sphere.getVerticesData('normal');
   const colors    = new Float32Array(positions.length / 3 * 4);
 
@@ -215,15 +225,16 @@ export async function buildPlanet(scene, shadowGen) {
   sphere.updateVerticesData('normal', normals);
   sphere.setVerticesData('color', colors, false, 4);
 
-  // ── Material — Standard with vertex colours ──
-  const mat = new StandardMaterial('planetMat', scene);
-  // Remove PBR specific roughness/metallic properties
-  mat.specularPower = 32;
-  mat.specularColor = new Color3(0.05, 0.05, 0.05); // slight sheen rather than blazing reflections
-  mat.disableLighting = false; // default
-  sphere.material = mat;
-  sphere.receiveShadows = true;
-  sphere.checkCollisions = true;
+    // ── Material — Standard with vertex colours ──
+    const mat = new StandardMaterial('planetMat', scene);
+    // Remove PBR specific roughness/metallic properties
+    mat.specularPower = 32;
+    mat.specularColor = new Color3(0.05, 0.05, 0.05); // slight sheen rather than blazing reflections
+    mat.disableLighting = false; // default
+    sphere.material = mat;
+    sphere.receiveShadows = true;
+    sphere.checkCollisions = true;
+  }
 
   // ── Atmosphere — thin additive sphere slightly larger ──
   const atmo = MeshBuilder.CreateSphere('atmosphere', {
