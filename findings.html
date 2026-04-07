@@ -150,7 +150,8 @@
         fetch('data/revolving_door_analysis.json').then(r => r.json()).catch(() => null),
         fetch('data/cija_lobbying_detail.json').then(r => r.json()).catch(() => null),
         fetch('data/cija_subject_breakdown.json').then(r => r.json()).catch(() => null),
-        fetch('data/cija_timing_analysis.json').then(r => r.json()).catch(() => null)
+        fetch('data/cija_timing_analysis.json').then(r => r.json()).catch(() => null),
+        fetch('data/cija_trips_nsicop_update.json').then(r => r.json()).catch(() => null)
       ]).then(function(results) {
         var cija = results[0];
         var foreign = results[1];
@@ -158,6 +159,7 @@
         var cijaDetail = results[3];
         var cijaSubjects = results[4];
         var cijaTiming = results[5];
+        var cijaTrips = results[6];
         var extra = '';
 
         // CIJA Deep Analysis
@@ -221,6 +223,38 @@
             var t = cijaTiming.oct7_timeline;
             extra += '<div class="pattern-box">' + t.pattern + '<br><br>Sep 2023: ' + t.sep_2023 + ' → Oct: ' + t.oct_2023 + ' (+' + t.oct_surge + ') → Nov: ' + t.nov_2023 + ' (+' + t.nov_surge + ')</div>';
           }
+          extra += '</div>';
+        }
+
+        // CIJA Trip Sponsorship & Post-Election Lobbying
+        if (cijaTrips) {
+          extra += '<div class="finding critical">';
+          extra += '<div class="finding-num">Deep Analysis A4</div>';
+          extra += '<h2>CIJA Trip Sponsorships & Post-Election Lobbying Blitz <span class="severity sev-critical">CRITICAL</span></h2>';
+          var ct = cijaTrips.cija_trips || {};
+          var pe = cijaTrips.cija_post_election_2025 || {};
+          extra += '<div class="summary">CIJA has taken ' + (ct.total_mps_taken || 73) + ' sitting MPs on paid trips to Israel ($' + ((ct.total_spent || 894000) / 1000).toFixed(0) + 'K total, avg $' + (ct.avg_per_trip || 12257).toLocaleString() + '/trip). Since the 2025 election, ' + (pe.mps_lobbied || 63) + ' MPs (20% of Parliament) lobbied in just 8 months.</div>';
+
+          extra += '<ul class="evidence-list">';
+          extra += '<li><span>73 MPs taken on paid Israel trips — CPC: 35, LPC: 32, BQ: 3, NDP: 2</span><span class="src">Ethics Commissioner</span></li>';
+          extra += '<li><span>58% of MPs running in 2025 were lobbied or trip-sponsored by CIJA</span><span class="src">readthemaple.com</span></li>';
+          if (pe.mass_lobbying_event) {
+            extra += '<li><span>Oct 21, 2025: CIJA met with ' + pe.mass_lobbying_event.mps_present + ' MPs, 1 senator, and PMO Deputy Chief of Staff in a single session</span><span class="src">Lobbying Registry</span></li>';
+          }
+          extra += '<li><span>74% of post-election meetings focused on "national security" — 67% on "justice/law enforcement"</span><span class="src">Lobbying Registry</span></li>';
+          extra += '<li><span>New lobbying rules (July 2025) restrict lobbyists from lobbying MPs who accepted free trips</span><span class="src">Globe and Mail</span></li>';
+          extra += '<li><span>50 years of free Israel trips for Canadian MPs may now end under new code</span><span class="src">Globe and Mail</span></li>';
+          extra += '</ul>';
+
+          if (pe.party_breakdown) {
+            extra += '<table class="entity-table"><thead><tr><th>Party</th><th>MPs Lobbied (post-2025)</th><th>% of Caucus</th><th>MPs Taken on Trips (all-time)</th></tr></thead><tbody>';
+            extra += '<tr><td>Conservative</td><td class="hi">' + pe.party_breakdown.conservative.mps + '</td><td>' + pe.party_breakdown.conservative.pct_of_caucus + '%</td><td>' + (ct.party_breakdown ? ct.party_breakdown.conservative : 35) + '</td></tr>';
+            extra += '<tr><td>Liberal</td><td>' + pe.party_breakdown.liberal.mps + '</td><td>' + pe.party_breakdown.liberal.pct_of_caucus + '%</td><td>' + (ct.party_breakdown ? ct.party_breakdown.liberal : 32) + '</td></tr>';
+            extra += '<tr><td>Bloc</td><td>' + pe.party_breakdown.bloc.mps + '</td><td>' + pe.party_breakdown.bloc.pct_of_caucus + '%</td><td>' + (ct.party_breakdown ? ct.party_breakdown.bloc : 3) + '</td></tr>';
+            extra += '</tbody></table>';
+          }
+
+          extra += '<div class="pattern-box">CIJA operates a systematic influence infrastructure: paid trips to Israel for 22% of sitting MPs, registered lobbying of 58% of candidates, and post-election blitz targeting 20% of the new Parliament within 8 months. A single October 2025 session gathered 37 MPs plus PMO staff. New lobbying rules may restrict this — but the historical access has already shaped the voting record.</div>';
           extra += '</div>';
         }
 
