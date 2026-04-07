@@ -450,6 +450,31 @@ body {
 
   const nodes = DATA.nodes;
   const threads = DATA.threads;
+
+  // ── OSINT Hub nodes (injected at runtime) ──
+  const HUB_NODES = [
+    { id: 'hub_osint', type: 'navigate', label: '📊 OSINT Dashboard', subtitle: 'Aggregated intelligence hub', detail: 'Real-time scraper health, data feeds, and investigation overview', link: 'osint-dashboard.html', categories: ['navigate'], x: 3, y: 93 },
+    { id: 'hub_network', type: 'navigate', label: '🕸 Network Analysis', subtitle: 'Force-directed influence graph', detail: 'Interactive graph of all entities, searchable, filterable by category', link: 'network-analysis.html', categories: ['navigate'], x: 20, y: 93 },
+    { id: 'hub_crossref', type: 'navigate', label: '🔗 Cross-Reference', subtitle: 'Lobbying × Donations × Votes × Corps', detail: 'Follow the money: match lobbying contacts against donations, votes, and corporate registries', link: 'cross-reference.html', categories: ['navigate'], x: 40, y: 93 },
+    { id: 'hub_dossier', type: 'navigate', label: '🔍 Dossier Viewer', subtitle: '12 intelligence dossiers', detail: 'Entity-disambiguated dossier profiles with cross-linking and search', link: 'dossier-viewer.html', categories: ['navigate'], x: 60, y: 93 },
+    { id: 'hub_foreign', type: 'navigate', label: '🌐 Foreign Influence', subtitle: '3-state analysis: Israel, China, India', detail: 'Complete analysis of foreign state mechanisms in Canadian politics', link: 'foreign-influence.html', categories: ['navigate'], x: 80, y: 93 },
+    { id: 'hub_evidence', type: 'navigate', label: '📋 Evidence Index', subtitle: '37 dossier files, public records', detail: 'All evidence documents indexed with sources and verification status', link: 'evidence.html', categories: ['navigate'], x: 97, y: 93 },
+  ];
+
+  const HUB_THREADS = [
+    { from: 'hub_network', to: 'cija', label: 'mapped in graph', strength: 1 },
+    { from: 'hub_network', to: 'woo', label: 'mapped in graph', strength: 1 },
+    { from: 'hub_dossier', to: 'housefather', label: 'has dossier', strength: 1 },
+    { from: 'hub_dossier', to: 'lantsman', label: 'has dossier', strength: 1 },
+    { from: 'hub_dossier', to: 'vuong', label: 'has dossier', strength: 1 },
+    { from: 'hub_crossref', to: 'vote_658', label: 'in cross-ref', strength: 1 },
+    { from: 'hub_foreign', to: 'njjar', label: 'India analysis', strength: 1 },
+    { from: 'hub_evidence', to: 'cfnis', label: 'evidence indexed', strength: 1 },
+  ];
+
+  nodes.push(...HUB_NODES);
+  threads.push(...HUB_THREADS);
+
   const board = document.getElementById('board');
   const svg = document.getElementById('lines');
   const wrap = document.getElementById('wrap');
@@ -627,42 +652,7 @@ body {
     'njjar': 'foreign-influence.html#india',
   };
 
-  // ── OSINT Hub nodes (injected at runtime) ──
-  const HUB_NODES = [
-    { id: 'hub_osint', type: 'navigate', label: '📊 OSINT Dashboard', subtitle: 'Aggregated intelligence hub', detail: 'Real-time scraper health, data feeds, and investigation overview', link: 'osint-dashboard.html', categories: ['navigate'], x: 3, y: 93 },
-    { id: 'hub_network', type: 'navigate', label: '🕸 Network Analysis', subtitle: 'Force-directed influence graph', detail: 'Interactive graph of all entities, searchable, filterable by category', link: 'network-analysis.html', categories: ['navigate'], x: 20, y: 93 },
-    { id: 'hub_crossref', type: 'navigate', label: '🔗 Cross-Reference', subtitle: 'Lobbying × Donations × Votes × Corps', detail: 'Follow the money: match lobbying contacts against donations, votes, and corporate registries', link: 'cross-reference.html', categories: ['navigate'], x: 40, y: 93 },
-    { id: 'hub_dossier', type: 'navigate', label: '🔍 Dossier Viewer', subtitle: '12 intelligence dossiers', detail: 'Entity-disambiguated dossier profiles with cross-linking and search', link: 'dossier-viewer.html', categories: ['navigate'], x: 60, y: 93 },
-    { id: 'hub_foreign', type: 'navigate', label: '🌐 Foreign Influence', subtitle: '3-state analysis: Israel, China, India', detail: 'Complete analysis of foreign state mechanisms in Canadian politics', link: 'foreign-influence.html', categories: ['navigate'], x: 80, y: 93 },
-    { id: 'hub_evidence', type: 'navigate', label: '📋 Evidence Index', subtitle: '37 dossier files, public records', detail: 'All evidence documents indexed with sources and verification status', link: 'evidence.html', categories: ['navigate'], x: 97, y: 93 },
-  ];
 
-  // Add hub connections to relevant nodes
-  const HUB_THREADS = [
-    { from: 'hub_network', to: 'cija', label: 'mapped in graph', strength: 1 },
-    { from: 'hub_network', to: 'woo', label: 'mapped in graph', strength: 1 },
-    { from: 'hub_dossier', to: 'housefather', label: 'has dossier', strength: 1 },
-    { from: 'hub_dossier', to: 'lantsman', label: 'has dossier', strength: 1 },
-    { from: 'hub_dossier', to: 'vuong', label: 'has dossier', strength: 1 },
-    { from: 'hub_crossref', to: 'vote_658', label: 'in cross-ref', strength: 1 },
-    { from: 'hub_foreign', to: 'njjar', label: 'India analysis', strength: 1 },
-    { from: 'hub_evidence', to: 'cfnis', label: 'evidence indexed', strength: 1 },
-  ];
-
-  // Inject hub nodes
-  HUB_NODES.forEach(h => {
-    h._connCount = 0;
-    nodes.push(h);
-  });
-  HUB_THREADS.forEach(t => {
-    threads.push(t);
-    connCounts[t.from] = (connCounts[t.from] || 0) + 1;
-    connCounts[t.to] = (connCounts[t.to] || 0) + 1;
-  });
-  nodes.forEach(n => { n._connCount = connCounts[n.id] || 0; });
-
-  // Re-run positions with hub nodes included
-  computePositions();
 
   // ── Create nodes ──
   nodes.forEach(n => {
