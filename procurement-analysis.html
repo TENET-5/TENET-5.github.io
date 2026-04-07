@@ -197,8 +197,24 @@
       </table>
     </section>
 
+    <section id="live-scan">
+      <h2><span class="section-num">04 &mdash; LIVE SCAN</span>Latest Automated Scan Results</h2>
+      <p>Live anomaly scan from <a href="https://open.canada.ca/data/en/dataset?q=contracts" target="_blank" rel="noopener">open.canada.ca</a> proactive disclosure data. Last run: <span id="scan-ts" style="color:var(--accent-bright);">loading...</span></p>
+
+      <div class="stat-grid" style="margin:1rem 0;">
+        <div class="stat-card"><div class="number" id="scan-contracts">--</div><div class="label">Contracts Scanned</div></div>
+        <div class="stat-card"><div class="number" id="scan-anomalies">--</div><div class="label">Anomalies Found</div></div>
+        <div class="stat-card"><div class="number" style="color:#ef4444;" id="scan-high">--</div><div class="label">High Severity</div></div>
+      </div>
+
+      <table class="results-table" id="scan-table">
+        <thead><tr><th>Vendor</th><th>Department</th><th>Spend</th><th>Dept Total</th><th>Concentration</th><th>Severity</th></tr></thead>
+        <tbody id="scan-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);">Loading live scan...</td></tr></tbody>
+      </table>
+    </section>
+
     <section>
-      <h2><span class="section-num">04 &mdash; METHODOLOGY</span>How the Detector Works</h2>
+      <h2><span class="section-num">05 &mdash; METHODOLOGY</span>How the Detector Works</h2>
 
       <div class="methodology">
         <h3>Detection Algorithm</h3>
@@ -317,6 +333,32 @@
     document.getElementById('proc-flag-filter').addEventListener('change', render);
     document.getElementById('proc-outcome-filter').addEventListener('change', render);
     document.getElementById('proc-sort').addEventListener('change', render);
+
+    // Live scan results
+    fetch('data/live_anomaly_scan.json').then(function(r) { return r.json(); }).then(function(scan) {
+      document.getElementById('scan-ts').textContent = scan.scan_timestamp ? scan.scan_timestamp.replace('T', ' ').replace(/\.\d+Z/, ' UTC') : 'unknown';
+      document.getElementById('scan-contracts').textContent = (scan.total_contracts_scanned || 0).toLocaleString();
+      document.getElementById('scan-anomalies').textContent = scan.total_anomalies || 0;
+      document.getElementById('scan-high').textContent = scan.high_severity_count || 0;
+
+      var tbody = document.getElementById('scan-tbody');
+      var anomalies = (scan.anomalies || []).sort(function(a, b) { return (b.concentration_pct || 0) - (a.concentration_pct || 0); });
+      if (!anomalies.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);">No anomalies detected</td></tr>';
+        return;
+      }
+      tbody.innerHTML = anomalies.map(function(a) {
+        var sevColor = a.severity === 'HIGH' ? '#ef4444' : '#fbbf24';
+        return '<tr>' +
+          '<td style="color:var(--text-primary);font-weight:500;">' + (a.vendor || '?') + '</td>' +
+          '<td>' + (a.department || '?') + '</td>' +
+          '<td class="td-value">$' + ((a.vendor_spend || 0) / 1000).toFixed(0) + 'K</td>' +
+          '<td class="td-value">$' + ((a.department_total || 0) / 1000).toFixed(0) + 'K</td>' +
+          '<td class="td-value" style="color:' + sevColor + ';">' + (a.concentration_pct || 0).toFixed(1) + '%</td>' +
+          '<td><span class="flag" style="background:rgba(' + (a.severity === 'HIGH' ? '239,68,68' : '251,191,36') + ',0.15);color:' + sevColor + ';">' + (a.severity || '?') + '</span></td>' +
+          '</tr>';
+      }).join('');
+    }).catch(function() {});
   })();
   </script>
 </body>

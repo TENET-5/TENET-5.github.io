@@ -277,8 +277,20 @@
     </section>
 
     <!-- ══════ SECTION 07: RELATED PAGES ══════ -->
+    <section id="osint-feed">
+      <h2><span class="section-num">07 &mdash; OSINT EVIDENCE</span>Open Source Intelligence Feed</h2>
+      <p>165 results from 33 OSINT queries across CFNIS misconduct, whistleblower retaliation, and military justice failures. Sourced from public news reports, MPCC filings, and government disclosures.</p>
+
+      <div style="display:flex;gap:0.5rem;margin:1rem 0;flex-wrap:wrap;">
+        <input type="text" id="cfnis-search" placeholder="Search OSINT results..." style="flex:1;min-width:200px;background:#111113;border:1px solid rgba(255,255,255,0.08);color:#ededed;padding:0.55rem 1rem;border-radius:6px;font-size:0.85rem;font-family:inherit;">
+        <span id="cfnis-count" style="font-size:0.72rem;color:#6e6e76;font-family:'JetBrains Mono',monospace;white-space:nowrap;padding-top:0.6rem;"></span>
+      </div>
+
+      <div id="cfnis-osint-feed" style="max-height:600px;overflow-y:auto;"></div>
+    </section>
+
     <section id="more">
-      <h2><span class="section-num">07 &mdash; RELATED</span>The Full Record</h2>
+      <h2><span class="section-num">08 &mdash; RELATED</span>The Full Record</h2>
       <div class="cta-grid">
         <div class="cta-card">
           <h3>📋 The 504 Database</h3>
@@ -312,6 +324,66 @@
 
   <script src="share.js?v=1"></script>
   <script src="board.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    var ALL_RESULTS = [];
+    var files = ['data/osint_vault/osint_cfnis_results.json', 'data/osint_vault/osint_cfnis_round2.json', 'data/osint_vault/osint_cfnis_round3.json'];
+    var loaded = 0;
+
+    function cleanUrl(u) {
+      if (!u) return '';
+      var m = u.match(/uddg=([^&]+)/);
+      return m ? decodeURIComponent(m[1]) : u.replace(/^\/\/duckduckgo\.com\/l\/\?/, '');
+    }
+
+    function onAllLoaded() {
+      render();
+      document.getElementById('cfnis-search').addEventListener('input', render);
+    }
+
+    function render() {
+      var q = (document.getElementById('cfnis-search').value || '').toLowerCase();
+      var filtered = ALL_RESULTS.filter(function(r) {
+        if (!q) return true;
+        return (r.title + ' ' + r.snippet + ' ' + r.query).toLowerCase().indexOf(q) !== -1;
+      });
+      document.getElementById('cfnis-count').textContent = filtered.length + ' of ' + ALL_RESULTS.length + ' results';
+
+      var feed = document.getElementById('cfnis-osint-feed');
+      if (!filtered.length) {
+        feed.innerHTML = '<p style="color:#4a4a52;text-align:center;padding:20px;">No matching results</p>';
+        return;
+      }
+      feed.innerHTML = filtered.slice(0, 50).map(function(r) {
+        var url = cleanUrl(r.url);
+        var domain = '';
+        try { domain = new URL(url).hostname; } catch(e) {}
+        return '<div style="background:#111113;border-left:3px solid ' + (r.query.indexOf('abuse') !== -1 || r.query.indexOf('sexual') !== -1 ? '#ef4444' : r.query.indexOf('whistleblower') !== -1 ? '#fbbf24' : '#60a5fa') + ';border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:8px;font-size:0.82rem;">' +
+          '<div style="color:#ededed;font-weight:600;margin-bottom:4px;">' + (r.title || 'Untitled') + '</div>' +
+          (r.snippet ? '<div style="color:#a0a0a6;line-height:1.5;font-size:0.78rem;">' + r.snippet + '</div>' : '') +
+          '<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.68rem;">' +
+            '<span style="color:#4a4a52;">Query: ' + r.query.substring(0, 50) + '</span>' +
+            (url ? '<a href="' + url + '" target="_blank" rel="noopener" style="color:#6e6e76;text-decoration:none;">' + domain + '</a>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    files.forEach(function(f) {
+      fetch(f).then(function(r) { return r.json(); }).then(function(d) {
+        Object.keys(d).forEach(function(query) {
+          if (!Array.isArray(d[query])) return;
+          d[query].forEach(function(r) {
+            ALL_RESULTS.push({ title: r.title || '', snippet: r.snippet || '', url: r.url || '', query: query });
+          });
+        });
+        loaded++;
+        if (loaded === files.length) onAllLoaded();
+      }).catch(function() { loaded++; if (loaded === files.length) onAllLoaded(); });
+    });
+  })();
+  </script>
 </body>
 </html>
 
