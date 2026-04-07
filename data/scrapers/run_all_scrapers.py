@@ -89,6 +89,22 @@ SCRAPERS = [
         'outputs': ['corporate_registry/'],
     },
     {
+        'name': 'financial_transaction_scanner',
+        'file': 'financial_transaction_scanner.py',
+        'description': 'Analyzes political and foundation financial flows',
+        'priority': 8,
+        'timeout': 180,
+        'outputs': [],
+    },
+    {
+        'name': 'social_media_scanner',
+        'file': 'social_media_scanner.py',
+        'description': 'Monitors entity social pipelines with Nitter / SATOR',
+        'priority': 9,
+        'timeout': 300,
+        'outputs': [],
+    },
+    {
         'name': 'network_topology_analyzer',
         'file': 'network_topology_analyzer.py',
         'description': 'Cross-references all sources into influence network',

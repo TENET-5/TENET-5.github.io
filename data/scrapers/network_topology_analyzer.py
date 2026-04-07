@@ -42,6 +42,8 @@ MP_PROFILES_DIR = os.path.join(DATA_DIR, "profiles")
 LOBBYING_ANALYSIS_PATH = os.path.join(DATA_DIR, "lobbying_analysis.json")
 CONTRIBUTIONS_PATH = os.path.join(DATA_DIR, "contributions_analysis.json")
 ALL_MPS_PATH = os.path.join(DATA_DIR, "all_mps.json")
+FINANCIAL_ANALYSIS_PATH = os.path.join(DATA_DIR, "financial_transaction_analysis.json")
+SOCIAL_MEDIA_ANALYSIS_PATH = os.path.join(DATA_DIR, "social_media_analysis.json")
 
 # Output
 OUTPUT_DIR = os.path.join(DATA_DIR, "network_analysis")
@@ -86,7 +88,7 @@ def load_all_sources():
     log.info("Investigation board: %d nodes, %d edges",
              len(sources["board_nodes"]), len(sources["board_edges"]))
 
-    # OSINT Vault
+    # OSINT vault
     sources["osint_vault"] = {}
     if os.path.isdir(OSINT_VAULT_DIR):
         for fname in os.listdir(OSINT_VAULT_DIR):
@@ -96,11 +98,11 @@ def load_all_sources():
                     sources["osint_vault"][fname] = data
     log.info("OSINT vault: %d files loaded", len(sources["osint_vault"]))
 
-    # Lobbying analysis
+    # Extra pipelines
     sources["lobbying"] = load_json_safe(LOBBYING_ANALYSIS_PATH) or {}
-
-    # Contributions
     sources["contributions"] = load_json_safe(CONTRIBUTIONS_PATH) or {}
+    sources["financial_analysis"] = load_json_safe(FINANCIAL_ANALYSIS_PATH) or {}
+    sources["social_media"] = load_json_safe(SOCIAL_MEDIA_ANALYSIS_PATH) or {}
 
     # All MPs
     mps_data = load_json_safe(ALL_MPS_PATH) or {}
@@ -211,6 +213,34 @@ def extract_all_entities(sources):
         entities[key]["categories"].add("political_donor")
         entities[key]["sources"].add("contributions_analysis")
 
+    # 6. From Financial Transactions
+    financial_data = sources.get("financial_analysis", {}).get("transactions", {})
+    for tid, t in financial_data.items():
+        name = t.get("entity", "")
+        if name:
+            key = normalize_name(name)
+            entities[key]["name"] = name
+            entities[key]["appearances"].append({
+                "source": "financial_analysis",
+                "risk_factor": t.get("risk_factor", 0),
+                "flow": t.get("flow", "")
+            })
+            entities[key]["categories"].add("financial_vector")
+            entities[key]["sources"].add("financial_analysis")
+
+    # 7. From Social Media
+    social_data = sources.get("social_media", {}).get("targets", {})
+    for target, s in social_data.items():
+        if target:
+            key = normalize_name(target)
+            entities[key]["name"] = target
+            entities[key]["appearances"].append({
+                "source": "social_media_analysis",
+                "primary_vector": s.get("primary_vector", "")
+            })
+            entities[key]["categories"].add("social_media")
+            entities[key]["sources"].add("social_media_analysis")
+
     log.info("Extracted %d unique entities", len(entities))
     return entities
 
@@ -249,6 +279,11 @@ def compute_influence_scores(entities):
             elif src == "contributions_analysis":
                 amount = appearance.get("total_amount", 0)
                 score += 5 + (amount / 10000) * 3
+            elif src == "financial_analysis":
+                risk = appearance.get("risk_factor", 0)
+                score += 10 + (risk * 2)
+            elif src == "social_media_analysis":
+                score += 7
 
         # Cross-source overlap bonus
         unique_sources = len(entity["sources"])
