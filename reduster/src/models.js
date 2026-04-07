@@ -63,6 +63,8 @@ export async function preloadModels(scene, onProgress) {
     // Props
     'supply_crate', 'campfire', 'sleeping_bag',
     'rock_boulder', 'rock_small',
+    // Phase 22: Trellis AI Matrix unified planetary grid
+    'planet_map',
   ];
 
   let loaded = 0;

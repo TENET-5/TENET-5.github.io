@@ -84,7 +84,31 @@ export const STATE = {
   corpses: [],
   bloodDecals: [],
   damageNumbers: [],
+
+  // Character Sync Phase 21
+  operatorId: 'char_vanguard',
+  callsign: 'ECHO-1'
 };
+
+// Bootstrap Godot Character Payload
+try {
+  const payloadStr = localStorage.getItem('red_duster_character');
+  if (payloadStr) {
+    const p = JSON.parse(payloadStr);
+    STATE.operatorId = p.model_id || 'char_vanguard';
+    STATE.callsign = p.callsign || 'ECHO-1';
+    
+    if (p.stats) {
+      STATE.maxHealth = 50 + (p.stats.Endurance * 10) || 100;
+      STATE.health = STATE.maxHealth;
+      STATE.stamina = 50 + (p.stats.Agility * 10) || 100;
+      STATE.maxAmmo = (p.stats.Strength > 7) ? 40 : 30; // Better handling allows drum mags
+      STATE.reserveAmmo = (p.stats.Strength * 15);
+    }
+  }
+} catch (e) {
+  console.warn("Failed to load generic character payload from SATOR bridge", e);
+}
 
 // ── Survival Drain Rates (per second) ───────────────────────────────────────
 const HUNGER_DRAIN   = 0.07;   // Empty in ~24 min

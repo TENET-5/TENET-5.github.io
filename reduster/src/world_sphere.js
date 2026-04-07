@@ -24,6 +24,7 @@ import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
 import { ParticleSystem } from '@babylonjs/core/Particles/particleSystem.js';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader.js';
 import '@babylonjs/loaders/glTF/2.0/index.js';
+import { getModelInstance } from './models.js';
 
 // ── Planet parameters ──
 export const PLANET_RADIUS   = 600;   // metres — visible sphere radius
