@@ -271,7 +271,16 @@
         <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">This page is satire by a combat veteran about his own experience. The Canadian Armed Forces retroactively diagnosed a qualified Signals Operator as cognitively impaired. The absurdity is the point. If you're taking this seriously, you might need to be tested for basic human communication yourself.</p>
       </div>
 
-      <h2><span class="section-num">06</span> Connected Evidence</h2>
+      <h2><span class="section-num">06</span> Live 118.4 Hz Telemetry Link (SATOR)</h2>
+      <div class="kit-banner sator-telemetry-panel" style="border-color: #22c55e;">
+        <h2>📡 ACTIVE TENET-5 / SATOR TELEMETRY</h2>
+        <div id="sator-dashboard" style="text-align:left; background:#000; padding:15px; font-family:'JetBrains Mono', monospace; color:#22c55e; border:1px solid #1f1f1f; height:200px; overflow-y:auto; font-size:0.85rem; border-radius: 6px;">
+          [SYS] Synchronizing N-vs-NP Matrices...<br>
+          [SYS] Awaiting RED_DUSTER simulation telemetry via Loopback...<br>
+        </div>
+      </div>
+
+      <h2><span class="section-num">07</span> Connected Evidence</h2>
       <div>
         <a href="cfnis.html" class="evidence-tag">📋 CFNIS Investigation</a>
         <a href="evidence.html" class="evidence-tag">🔍 Evidence Archive</a>
@@ -289,5 +298,44 @@
   <script src="board.js?v=1"></script>
   <footer id="site-footer"></footer>
   <script src="footer.js?v=1"></script>
+  <script>
+    // TENET-5 SATOR WebSocket Bridge
+    const satorDashboard = document.getElementById('sator-dashboard');
+    function logSatorEvent(msg, isError = false) {
+      if(!satorDashboard) return;
+      const t = new Date().toISOString().split('T')[1].substring(0,8);
+      const span = document.createElement('span');
+      span.style.color = isError ? '#ef4444' : '#22c55e';
+      span.innerHTML = `[${t}] ${msg}<br>`;
+      satorDashboard.appendChild(span);
+      satorDashboard.scrollTop = satorDashboard.scrollHeight;
+    }
+    
+    try {
+      const ws = new WebSocket('ws://127.0.0.1:8092/sator');
+      ws.onopen = () => logSatorEvent('WebSocket connected. Receiving 136Hz stream.');
+      ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          let summary = '';
+          if(data.event === 'COMBAT_ENEMY_KILLED') summary = `⚔️ NEUTRALIZED: ${data.payload}`;
+          else if(data.event === 'COMBAT_ENGAGE') summary = `⚠️ ENGAGEMENT: ${data.payload}`;
+          else if(data.event === 'TACTICAL_MISSION_COMPLETED') summary = `🎯 MISSION DONE: ${data.payload.name}`;
+          else if(data.event === 'STORY_MISSION_COMPLETED') summary = `📜 STORY ADVANCED: ${data.payload.name}`;
+          else if(data.event === 'SURVIVAL_CRAFT') {
+            const p = JSON.parse(data.payload);
+            summary = `🔨 STRUCTURE PLACED: ${p.recipe} @ [${p.x}, ${p.y}, ${p.z}]`;
+          }
+          if(summary) logSatorEvent(summary);
+        } catch(err) {} 
+      };
+      ws.onerror = () => {
+        logSatorEvent('[OFFLINE] Local SATOR bridge unreachable. Running outside MooseRacks.', true);
+        ws.close();
+      };
+    } catch(err) {
+      logSatorEvent('[ERROR] Matrix binding failed.', true);
+    }
+  </script>
 </body>
 </html>
