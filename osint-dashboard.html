@@ -149,6 +149,24 @@
           <tbody id="org-body"><tr><td colspan="2" class="loading">Loading...</td></tr></tbody>
         </table>
       </div>
+
+      <!-- Financial Transaction Tracker -->
+      <div class="panel">
+        <h2>Financial Trajectory <a href="cross-reference.html">ABCXYZ Engine &rarr;</a></h2>
+        <table class="mini-table" id="finance-table">
+          <thead><tr><th>Entity</th><th>Vector</th><th class="num-col">Risk</th></tr></thead>
+          <tbody id="finance-body"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Social Media Monitor -->
+      <div class="panel">
+        <h2>Social Intelligence <a href="dossier-viewer.html">Dossiers &rarr;</a></h2>
+        <table class="mini-table" id="social-table">
+          <thead><tr><th>Target</th><th>Primary Vector</th></tr></thead>
+          <tbody id="social-body"><tr><td colspan="2" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
     </div>
 
     <div style="background: rgba(10, 10, 15, 0.95); border: 1px solid rgba(57, 255, 20, 0.25); border-radius: 8px; padding: 12px 20px; margin-bottom: 14px; font-size: 0.7rem; color: #39ff14; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'JetBrains Mono', monospace;">
@@ -282,7 +300,7 @@
   (function() {
     'use strict';
 
-    var DATA = { lobbying: null, contributions: null, analysis: null, mps: null };
+    var DATA = { lobbying: null, contributions: null, analysis: null, mps: null, financial: null, social: null };
     var loaded = 0;
 
     function fmt(n) {
@@ -343,6 +361,30 @@
       (DATA.lobbying.top_organizations || []).slice(0, 10).forEach(function(o) {
         ob.innerHTML += '<tr><td>' + o.name.substring(0, 40) + '</td><td class="num-col">' + o.communications.toLocaleString() + '</td></tr>';
       });
+
+      // Finance table
+      var fb = document.getElementById('finance-body');
+      if (fb) {
+        fb.innerHTML = '';
+        if (DATA.financial && DATA.financial.transactions) {
+          var f_list = Object.values(DATA.financial.transactions).sort(function(a,b){ return b.risk_factor - a.risk_factor; }).slice(0, 8);
+          f_list.forEach(function(f) {
+            fb.innerHTML += '<tr><td style="text-transform:capitalize">' + f.entity.replace('_', ' ') + '</td><td>' + f.flow + '</td><td class="num-col" style="color:var(--red)">' + f.risk_factor.toFixed(2) + '</td></tr>';
+          });
+        }
+      }
+
+      // Social table
+      var sb = document.getElementById('social-body');
+      if (sb) {
+        sb.innerHTML = '';
+        if (DATA.social && DATA.social.targets) {
+          var s_list = Object.entries(DATA.social.targets).slice(0, 8);
+          s_list.forEach(function(s) {
+            sb.innerHTML += '<tr><td>@' + s[0] + '</td><td style="text-transform:capitalize">' + (s[1].primary_vector || 'unknown').replace('_', ' ') + '</td></tr>';
+          });
+        }
+      }
 
       // Search
       setupSearch();
@@ -421,12 +463,12 @@
       fetch(url).then(function(r) { return r.json(); }).then(function(d) {
         DATA[key] = d;
         loaded++;
-        if (loaded === 4) onDataReady();
+        if (loaded === 6) onDataReady();
       }).catch(function(e) {
         console.warn('Failed to load ' + url, e);
         DATA[key] = {};
         loaded++;
-        if (loaded === 4) onDataReady();
+        if (loaded === 6) onDataReady();
       });
     }
 
@@ -434,6 +476,8 @@
     loadJSON('data/contributions_analysis.json', 'contributions');
     loadJSON('data/analysis.json', 'analysis');
     loadJSON('data/all_mps.json', 'mps');
+    loadJSON('data/financial_transaction_analysis.json', 'financial');
+    loadJSON('data/social_media_analysis.json', 'social');
 
     // ── Scraper Automation Status ──
     fetch('data/scraper_status.json').then(function(r){return r.json();}).then(function(status){
