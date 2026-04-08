@@ -71,7 +71,7 @@
       { label: 'Commissioner of Lobbying', href: 'https://lobbycanada.gc.ca/en/open-data/' },
       { label: 'Elections Canada', href: 'https://www.elections.ca/content.aspx?section=fin&dir=oda&document=index&lang=e' },
       { label: 'OpenParliament.ca', href: 'https://openparliament.ca/api/' },
-      { label: 'open.canada.ca', href: 'https://open.canada.ca/data/en/dataset?q=contracts' },
+      { label: 'open.canada.ca', href: 'https://open.canada.ca/data/en/dataset/d8f85d91-7dec-4fd1-8055-483b77225d8b' },
       { label: 'Auditor General', href: 'https://www.oag-bvg.gc.ca' },
     ]
   };
