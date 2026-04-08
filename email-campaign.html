@@ -86,6 +86,13 @@
     var ALL = [];
     var BASE = 'https://tenet-5.github.io/';
 
+    // Get MP's email address from directory
+    function getMPEmail(mp) {
+      if (!EMAIL_DIR || !EMAIL_DIR.directory) return '';
+      var match = EMAIL_DIR.directory.find(function(d) { return d.name === mp.name; });
+      return match ? match.email : '';
+    }
+
     // Get MP's specific board connections
     function getMPConnections(mp) {
       if (!BOARD) return [];
@@ -321,7 +328,8 @@
       document.getElementById('email-container').style.display = 'block';
 
       var mailto = document.getElementById('mailto-link');
-      mailto.href = 'mailto:?subject=' + encodeURIComponent(email.subject) + '&body=' + encodeURIComponent(email.body);
+      var mpEmail = getMPEmail(mp);
+      mailto.href = 'mailto:' + (mpEmail || '') + '?subject=' + encodeURIComponent(email.subject) + '&body=' + encodeURIComponent(email.body);
       mailto.style.display = 'inline-block';
 
       window._currentEmail = email;
@@ -351,19 +359,22 @@
 
     var DIRT = null;
     var RIVALRIES = null;
+    var EMAIL_DIR = null;
 
     Promise.all([
       fetch('data/mp_full_analysis.json').then(function(r) { return r.json(); }),
       fetch('data/investigation_board.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
       fetch('data/cija_lobbying_detail.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
       fetch('data/mp_criminal_ethics_dossier.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
-      fetch('data/parliamentary_rivalries.json').then(function(r) { return r.json(); }).catch(function() { return null; })
+      fetch('data/parliamentary_rivalries.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
+      fetch('data/mp_email_directory.json').then(function(r) { return r.json(); }).catch(function() { return null; })
     ]).then(function(results) {
       var d = results[0];
       BOARD = results[1];
       CIJA_DETAIL = results[2];
       DIRT = results[3];
       RIVALRIES = results[4];
+      EMAIL_DIR = results[5];
       ALL = [].concat(d.tier1_highest || [], d.tier2_moderate || [], d.tier3_low || [], d.tier4_clean || []);
       ALL.sort(function(a, b) { return a.name.localeCompare(b.name); });
 
@@ -530,7 +541,9 @@
         var mp = ALL.find(function(m) { return m.name.includes(name); });
         if (mp) {
           var email = generateEmail(mp);
+          var pEmail = getMPEmail(mp);
           output += '┌─ PRIORITY: ' + mp.name + ' (' + mp.party + ', ' + mp.riding + ', Score ' + mp.score + ') ─┐\n';
+          if (pEmail) output += 'TO: ' + pEmail + '\n';
           output += 'Subject: ' + email.subject + '\n\n' + email.body + '\n';
           output += '└──────────────────────────────────────────────────────────┘\n\n\n';
         }
@@ -546,7 +559,8 @@
         stats.clean++;
         stats.total++;
         var email = generateEmail(mp);
-        output += '── ' + mp.name + ' (' + mp.party + ', ' + mp.province + ') ──\n';
+        var cEmail = getMPEmail(mp);
+        output += '── ' + mp.name + ' (' + mp.party + ', ' + mp.province + ')' + (cEmail ? ' | ' + cEmail : '') + ' ──\n';
         output += 'Subject: ' + email.subject + '\n\n' + email.body + '\n\n\n';
       });
 
@@ -560,7 +574,8 @@
         stats.tier1++;
         stats.total++;
         var email = generateEmail(mp);
-        output += '── ' + mp.name + ' (' + mp.party + ', Score ' + mp.score + ') ──\n';
+        var t1Email = getMPEmail(mp);
+        output += '── ' + mp.name + ' (' + mp.party + ', Score ' + mp.score + ')' + (t1Email ? ' | ' + t1Email : '') + ' ──\n';
         output += 'Subject: ' + email.subject + '\n\n' + email.body + '\n\n\n';
       });
 
@@ -574,7 +589,8 @@
         stats.moderate++;
         stats.total++;
         var email = generateEmail(mp);
-        output += '── ' + mp.name + ' (' + mp.party + ', Score ' + mp.score + ') ──\n';
+        var mEmail = getMPEmail(mp);
+        output += '── ' + mp.name + ' (' + mp.party + ', Score ' + mp.score + ')' + (mEmail ? ' | ' + mEmail : '') + ' ──\n';
         output += 'Subject: ' + email.subject + '\n\n' + email.body + '\n\n\n';
       });
 
