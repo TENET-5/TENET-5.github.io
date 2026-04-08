@@ -47,6 +47,7 @@
         links: [
           { label: 'Lobbying Tracker', href: 'lobbying-tracker.html' },
           { label: 'Contributions Tracker', href: 'contributions-tracker.html' },
+          { label: 'Carney Conflicts', href: 'carney-conflicts.html' },
           { label: 'Corruption Map', href: 'corruption-map.html' },
           { label: 'Procurement Analysis', href: 'procurement-analysis.html' },
           { label: 'Foreign Influence', href: 'foreign-influence.html' },
