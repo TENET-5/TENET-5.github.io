@@ -15,15 +15,23 @@ import { getHeight } from './world.js';
 import { getPlanetHeight, getSpherePos, PLANET_RADIUS, flatToSphereDir } from './world_sphere.js';
 import { triggerDeath } from './state.js';
 import { addTracer } from './effects.js';
-import { playSound } from './audio.js';
+import { playSound, playSpatialSound } from './audio.js';
 import { Ray } from '@babylonjs/core/Culling/ray.js';
 import { throwEnemyGrenade } from './grenades.js';
 import { getModelInstance } from './models.js';
+import { transmitSatorEvent } from './telemetry.js';
 
 const enemies = [];
 export function getEnemies() { return enemies; }
+
+export function registerEnemyDeath(mesh) {
+  const e = enemies.find(en => en.mesh === mesh);
+  if (!e) return;
+  // Push the unique execution coordinate to block re-population locally via Math.abs bounds
+  STATE.deadEnemies.push({ x: e.root.position.x, z: e.root.position.z });
+}
 const DETECT_RANGE  = 60;   // metres — initial spot range
-const ENGAGE_RANGE  = 40;   // metres — open fire
+const ENGAGE_RANGE  = 45;   // metres — open fire (match Godot)
 const FIRE_INTERVAL = 1.2;  // seconds between shots
 const SEARCH_TIME   = 8.0;  // seconds to search before giving up
 const RESPAWN_INTERVAL = 45; // seconds between respawn waves
@@ -44,6 +52,9 @@ export function notifyEnemyHit(mesh) {
   const hpFrac = Math.max(0, e.mesh.metadata.hp) / 100;
   e.morale = Math.max(0, e.morale - (30 + (1 - hpFrac) * 40));
   if (e.morale <= MORALE_ROUT && e.mesh.metadata.hp > 0) {
+    if (e.state !== 'retreat') {
+      transmitSatorEvent('COMBAT_ENEMY_ROUTED', JSON.stringify({ threshold: MORALE_ROUT, hp: e.mesh.metadata.hp }));
+    }
     e.state = 'retreat';
     // Pick a retreat point behind the enemy (away from player)
     const dx = e.root.position.x - (window._px ?? 2000);
@@ -71,17 +82,25 @@ const CAMP_DEFS = [
 // ── Spawn Enemies ───────────────────────────────────────────────────────────
 export function spawnEnemies(scene, shadowGen) {
   for (const camp of CAMP_DEFS) {
-    const guardCount = 3 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < guardCount; i++) {
-      const angle = (i / guardCount) * Math.PI * 2;
-      const r = 8 + Math.random() * 15;
-      spawnEnemy(scene, shadowGen, {
-        x: camp.x + Math.cos(angle) * r,
-        z: camp.z + Math.sin(angle) * r,
-        type: 'guard',
-        patrolRadius: 15,
-        patrolCenter: { x: camp.x, z: camp.z },
-      });
+    const baseGuardCount = 3 + Math.floor(Math.random() * 3);
+    
+    // Count how many dead guards have been persistently registered within this camp's domain (~50m radius)
+    const deadInCamp = STATE.deadEnemies.filter(d => 
+      Math.sqrt((d.x - camp.x)**2 + (d.z - camp.z)**2) < 50
+    ).length;
+    
+    const activeGuardCount = Math.max(0, baseGuardCount - deadInCamp);
+
+    for (let i = 0; i < activeGuardCount; i++) {
+        const angle = (i / activeGuardCount) * Math.PI * 2;
+        const r = 8 + Math.random() * 15;
+        spawnEnemy(scene, shadowGen, {
+          x: camp.x + Math.cos(angle) * r,
+          z: camp.z + Math.sin(angle) * r,
+          type: 'guard',
+          patrolRadius: 40,
+          patrolCenter: { x: camp.x, z: camp.z },
+        });
     }
   }
 
@@ -89,6 +108,11 @@ export function spawnEnemies(scene, shadowGen) {
   for (let i = 0; i < 8; i++) {
     const x = 100 + Math.random() * 1800;
     const z = 950 + (Math.random() - 0.5) * 100;
+    
+    // Ensure this squad wasn't wiped in a previous save instance
+    const isWiped = STATE.deadEnemies.some(d => Math.sqrt((d.x - x)**2 + (d.z - z)**2) < 25);
+    if (isWiped) continue;
+    
     spawnEnemy(scene, shadowGen, {
       x, z, type: 'deathSquad',
       patrolRadius: 80,
@@ -376,7 +400,7 @@ function spawnEnemy(scene, shadowGen, opts) {
     patrolAngle: Math.random() * Math.PI * 2,
     fireTimer: 0,
     alertTimer: 0,
-    speed: opts.type === 'deathSquad' ? 3.5 : 2.0,
+    speed: opts.type === 'deathSquad' ? 9.0 : 5.0, // Match sprint/move Godot parity
     morale: 100,        // 0-100; retreat below MORALE_ROUT
     suppressTimer: 0,   // seconds of suppression fire remaining
     retreatTarget: null,// {x,z} run-to point when routing
@@ -429,6 +453,34 @@ export function updateEnemies(dt, scene, camera) {
     // Cache player position globally for notifyEnemyHit
     window._px = px; window._pz = pz;
 
+    // ── Squad Coordination (calculate roles every ~1.5s for engaging units) ──
+    if (e.state === 'engage') {
+      e.squadUpdateTimer = (e.squadUpdateTimer || 0) - dt;
+      if (e.squadUpdateTimer <= 0) {
+        e.squadUpdateTimer = 1.5;
+        // Find squad mates (nearby engaging enemies)
+        const mates = enemies.filter(m => m.state === 'engage' && m.mesh.metadata.alive && 
+          Math.sqrt((m.root.position.x - ex)**2 + (m.root.position.z - ez)**2) < 35);
+        
+        if (mates.length > 1) {
+          // Sort by distance to player
+          mates.sort((a,b) => {
+             const da = Math.sqrt((a.root.position.x - px)**2 + (a.root.position.z - pz)**2);
+             const db = Math.sqrt((b.root.position.x - px)**2 + (b.root.position.z - pz)**2);
+             return da - db;
+          });
+          // Closest 1 or 2 flank/push, others suppress
+          if (mates.indexOf(e) < Math.max(1, Math.floor(mates.length / 3))) {
+             e.squadRole = 'flank';
+          } else {
+             e.squadRole = 'suppress';
+          }
+        } else {
+          e.squadRole = 'solo';
+        }
+      }
+    }
+
     // ── Behavior ──
     switch (e.state) {
       case 'patrol': {
@@ -448,35 +500,57 @@ export function updateEnemies(dt, scene, camera) {
         facePlayer(e, px, pz);
         let targetX = px;
         let targetZ = pz;
+        let moveSpeed = e.speed;
         
-        // Death squads flank to the left or right of the player
-        if (e.type === 'deathSquad') {
-            const angleToPlayer = Math.atan2(pz - ez, px - ex);
-            const flankAngle = angleToPlayer + (Math.PI / 4) * e.flankDir;
-            targetX = px - Math.cos(flankAngle) * 12;
-            targetZ = pz - Math.sin(flankAngle) * 12;
+        // Squad behavioral overrides
+        if (e.squadRole === 'flank') {
+          // Push aggressive flank
+          const angleToPlayer = Math.atan2(pz - ez, px - ex);
+          const flankAngle = angleToPlayer + (Math.PI / 3) * e.flankDir;
+          targetX = px - Math.cos(flankAngle) * 8;
+          targetZ = pz - Math.sin(flankAngle) * 8;
+          moveSpeed *= 1.3; // flankers run faster
+        } else if (e.squadRole === 'suppress') {
+          // Stay further back and strafe
+          const angleToPlayer = Math.atan2(pz - ez, px - ex);
+          const strafeAngle = angleToPlayer + (Math.PI / 2) * e.flankDir;
+          targetX = ex + Math.cos(strafeAngle) * 20;
+          targetZ = ez + Math.sin(strafeAngle) * 20;
+          moveSpeed *= 0.6; // suppressing units move slower
+        } else if (e.type === 'deathSquad') {
+          const angleToPlayer = Math.atan2(pz - ez, px - ex);
+          const flankAngle = angleToPlayer + (Math.PI / 4) * e.flankDir;
+          targetX = px - Math.cos(flankAngle) * 12;
+          targetZ = pz - Math.sin(flankAngle) * 12;
         }
 
-        if (dist > 12) {
-          moveToward(e, targetX, targetZ, e.speed, dt);
+        if (dist > (e.squadRole === 'suppress' ? 25 : 12)) {
+          moveToward(e, targetX, targetZ, moveSpeed, dt);
         } else {
           const strafeAngle = Math.atan2(pz - ez, px - ex) + Math.PI / 2;
-          const sx = ex + Math.cos(strafeAngle) * e.speed * dt;
-          const sz = ez + Math.sin(strafeAngle) * e.speed * dt;
+          const sx = ex + Math.cos(strafeAngle) * moveSpeed * 0.5 * dt;
+          const sz = ez + Math.sin(strafeAngle) * moveSpeed * 0.5 * dt;
           if (window._planetMode) {
             const sDir = new Vector3(sx, e.root.position.y, sz).normalize();
             const sh = getPlanetHeight(sDir);
             e.root.position = sDir.scale(PLANET_RADIUS + Math.max(0, sh) + 0.85);
           } else {
-          e.root.position.x = sx;
-          e.root.position.z = sz;
-          e.root.position.y = getHeight(sx, sz) + 0.85;
+            e.root.position.x = sx;
+            e.root.position.z = sz;
+            e.root.position.y = getHeight(sx, sz) + 0.85;
           }
         }
+        
         e.fireTimer -= dt;
         if (e.fireTimer <= 0 && dist < ENGAGE_RANGE) {
-          fireAtPlayer(e, dist, scene);
-          e.fireTimer = FIRE_INTERVAL + Math.random() * 0.5;
+          // Suppressors fire 2x faster but less accurately
+          if (e.squadRole === 'suppress') {
+             fireAtPlayer(e, dist * 1.5, scene);
+             e.fireTimer = FIRE_INTERVAL * 0.5 + Math.random() * 0.3;
+          } else {
+             fireAtPlayer(e, dist, scene);
+             e.fireTimer = FIRE_INTERVAL + Math.random() * 0.5;
+          }
         }
         
         // AI Grenade Logic
@@ -651,14 +725,16 @@ function fireAtPlayer(e, dist, scene) {
     if (STATE.alive) {
       // Direct hit
       addTracer(scene, new Vector3(ex, ey, ez), new Vector3(px, py - 0.5, pz), true);
-      playSound('shoot', { weaponType: 'rifle', volume: 0.35 });
+      playSpatialSound('enemy_shoot', ex, ey, ez, 1.0);
 
-      const dmg = 8 + Math.random() * 12;
+      const dmg = 12.0 + (Math.random() * 6.0 - 3.0); // Godot parity
       STATE.health -= dmg;
       
       // Hit induces bleeding
       STATE.isBleeding = true;
       STATE.bleedRate = Math.min(2.0, STATE.bleedRate + 0.3);
+      
+      transmitSatorEvent('COMBAT_PLAYER_INJURED', JSON.stringify({ health_rem: STATE.health, bleed_rate: STATE.bleedRate }));
       
       const el = document.getElementById('damageFlash');
       if (el) {
@@ -676,7 +752,7 @@ function fireAtPlayer(e, dist, scene) {
     const my = py + Math.random() * 2;
     const mz = pz + (Math.random() - 0.5) * 4;
     addTracer(scene, new Vector3(ex, ey, ez), new Vector3(mx, my, mz), true);
-    playSound('shoot', { weaponType: 'rifle', volume: 0.25 });
+    playSpatialSound('enemy_shoot', ex, ey, ez, 1.0);
   }
 }
 
