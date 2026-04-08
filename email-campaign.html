@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP Email Campaign — Individualized Reports | TENET5</title>
+  <meta name="description" content="Generate individualized emails for every Canadian MP based on their lobbying score, CIJA contacts, and investigation flags.">
+  <link rel="stylesheet" href="style.css?v=5">
+  <meta name="theme-color" content="#1a1f36">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    .ec-wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .ec-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+    .ec-header h1 { font-family: var(--font-headline); font-size: var(--text-4xl); color: var(--text-primary); margin-bottom: 8px; }
+    .email-preview { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-md); margin-bottom: var(--s-md); font-family: var(--font-body); font-size: var(--text-sm); line-height: 1.8; color: var(--text-secondary); white-space: pre-wrap; }
+    .email-preview .subject { font-weight: 700; color: var(--text-primary); font-size: var(--text-base); margin-bottom: var(--s-sm); padding-bottom: var(--s-xs); border-bottom: 1px solid var(--border); }
+    .mp-select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 14px; border-radius: var(--r-md); font-size: var(--text-sm); width: 100%; margin-bottom: var(--s-sm); }
+    .mp-select:focus { outline: none; border-color: var(--accent); }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--s-md); }
+    .btn { padding: 8px 16px; border-radius: var(--r-md); font-size: var(--text-sm); font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); transition: all 0.2s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-bright); }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="ec-wrap">
+    <div class="ec-header">
+      <h1>MP Email Campaign</h1>
+      <p style="font-size:var(--text-sm);color:var(--text-tertiary);">Select an MP. Get a customized email based on their lobbying score, CIJA contacts, and investigation flags. Clean MPs get recruited as allies. Flagged MPs get useful intel about their peers.</p>
+    </div>
+
+    <div class="evidence-box" style="margin-bottom:var(--s-md);">
+      <div class="evidence-title">Strategy</div>
+      <p style="margin:0;line-height:1.7;"><strong>Clean MPs (score 0):</strong> Full evidence report. They become allies who push for Magnitsky Act reform. <strong>Flagged MPs:</strong> Report showing their peers' flags but omitting their own. They think they have ammo — but the reform they push catches everyone. <strong>Tier 1 MPs:</strong> Get the full industry lobbying data focused on their party rivals.</p>
+    </div>
+
+    <select id="mp-select" class="mp-select">
+      <option value="">— Select an MP —</option>
+    </select>
+
+    <div id="mp-info" style="display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s-md);margin-bottom:var(--s-md);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--s-xs);">
+        <div>
+          <span id="mp-name" style="font-weight:700;font-size:var(--text-lg);color:var(--text-primary);"></span>
+          <span id="mp-party" style="font-size:var(--text-sm);color:var(--text-tertiary);margin-left:8px;"></span>
+        </div>
+        <div>
+          <span id="mp-score-badge" style="font-family:var(--font-mono);font-size:var(--text-sm);font-weight:700;padding:2px 10px;border-radius:100px;"></span>
+          <span id="mp-flags" style="font-size:var(--text-xs);color:var(--text-tertiary);margin-left:8px;"></span>
+        </div>
+      </div>
+      <div id="mp-riding" style="font-size:var(--text-xs);color:var(--text-quaternary);margin-top:4px;"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="copyEmail()">Copy Email to Clipboard</button>
+      <button class="btn" onclick="downloadEmail()">Download as .txt</button>
+      <a id="mailto-link" href="#" class="btn" style="text-decoration:none;display:none;">Open in Email Client</a>
+    </div>
+
+    <div id="email-container" style="display:none;">
+      <div class="email-preview">
+        <div class="subject" id="email-subject"></div>
+        <div id="email-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="nav.js?v=7"></script>
+  <footer id="site-footer"></footer>
+  <script src="footer.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    var ALL = [];
+    var BASE = 'https://tenet-5.github.io/';
+
+    function generateEmail(mp) {
+      var isClean = mp.score === 0;
+      var isTier1 = mp.score >= 7;
+      var subject, body;
+
+      if (isClean) {
+        // CLEAN MP — recruit as ally
+        subject = 'Evidence Brief: Government Accountability Data for ' + mp.name;
+        body = 'Dear ' + mp.name + ',\n\n' +
+          'I am writing to bring to your attention a comprehensive investigation into Canadian government accountability, backed by 7 million records from official government databases.\n\n' +
+          'As a Member of Parliament with a clean record in our cross-reference analysis, I believe you are well-positioned to act on this evidence.\n\n' +
+          'KEY FINDINGS:\n\n' +
+          '1. LOBBYING: 359,251 registered lobbying communications analyzed from the Commissioner of Lobbying\'s raw data. Israel-linked lobbying generates 539 contacts per organization — 22 times the rate of China-linked lobbying.\n\n' +
+          '2. ARMS PIPELINE: $210M+ in Canadian arms flowing to Israel despite the January 2024 "pause." A Crown corporation signed a $78.8M artillery contract two weeks after blocking the same company.\n\n' +
+          '3. CHARITY FRAUD: 12 CRA charity revocations for funneling funds to Israeli settlements and military operations. $276M flowed to Israel through Canadian charities in 2024.\n\n' +
+          '4. PROCUREMENT: $140B+ in documented procurement waste across 18 major failures. The SDTC "Green Slush Fund" alone had 186 conflicts of interest.\n\n' +
+          '5. PM CONFLICTS: Mark Carney must recuse from 100+ corporate entities. While advising PM Trudeau, his company Brookfield pitched a $50B fund asking for $10B from the government.\n\n' +
+          'RECOMMENDED ACTION:\n\n' +
+          'The Justice for Victims of Corrupt Foreign Officials Act (Magnitsky Act) can be used to freeze assets of officials involved in documented corruption and human rights violations. This site provides the evidence. The law provides the mechanism.\n\n' +
+          'Full evidence: ' + BASE + 'findings.html\n' +
+          'Your scorecard: ' + BASE + 'mp-scorecard.html?mp=' + encodeURIComponent(mp.name) + '\n' +
+          'Magnitsky Act: ' + BASE + 'legal.html#magnitsky\n' +
+          'All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n\n' +
+          'Every statistic is sourced from official Government of Canada publications. Methodology and corrections policy: ' + BASE + 'about.html\n\n' +
+          'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, PPCLI';
+      } else if (isTier1) {
+        // TIER 1 — give them ammo about rivals
+        var rivals = ALL.filter(function(m) { return m.score >= 5 && m.party !== mp.party && m.name !== mp.name; }).slice(0, 5);
+        subject = 'Confidential: Opposition Lobbying Data — ' + mp.party + ' Briefing';
+        body = 'Dear ' + mp.name + ',\n\n' +
+          'I am a Canadian Forces veteran who has compiled extensive government accountability data from official sources. This briefing contains opposition lobbying intelligence that may be relevant to your work.\n\n' +
+          'OPPOSITION LOBBYING FLAGS:\n\n';
+        rivals.forEach(function(r) {
+          body += '• ' + r.name + ' (' + r.party + ', ' + r.riding + '): Score ' + r.score + ' — ' + r.flags.join(', ');
+          if (r.details && r.details.cija_meetings) body += ' (CIJA: ' + r.details.cija_meetings + 'x)';
+          body += '\n';
+        });
+        body += '\n' +
+          'SECTOR LOBBYING OVERVIEW:\n\n' +
+          '• Oil & Gas: 10,794 communications to government (NRCan targeted 4,609x)\n' +
+          '• Banking: 7,497 communications (Finance Canada targeted 3,703x)\n' +
+          '• Israel Lobby: 2,176 communications from only 4 organizations (539 per org)\n' +
+          '• Big Tech: 3,527 communications (quadrupled since 2015)\n\n' +
+          'PM CARNEY CONFLICTS:\n\n' +
+          '• Must recuse from 100+ corporate entities\n' +
+          '• Brookfield pitched $50B "Maple Fund" while he advised PM Trudeau\n' +
+          '• 95% of Brookfield portfolio NOT covered by ethics screen\n' +
+          '• BlackRock executive appointed as Deputy Minister of International Trade\n\n' +
+          'Full data: ' + BASE + 'sector-lobbying.html\n' +
+          'All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n' +
+          'Carney conflicts: ' + BASE + 'carney-conflicts.html\n\n' +
+          'Daniel Perry\nCanadian Forces Combat Veteran';
+      } else {
+        // MODERATE FLAGGED — general report minus their own data
+        subject = 'Government Accountability Data — Constituent Request for ' + mp.name;
+        body = 'Dear ' + mp.name + ',\n\n' +
+          'As your constituent, I am requesting that you review the following government accountability data compiled from 7 million official records.\n\n' +
+          'KEY ISSUES:\n\n' +
+          '1. 76,475 Canadians killed under MAID since 2016. 1 in 20 deaths in 2024.\n' +
+          '2. $210M+ in arms to Israel despite announced "pause."\n' +
+          '3. 12 CRA charity revocations for funding Israeli military/settlements.\n' +
+          '4. $140B+ in documented procurement waste.\n' +
+          '5. PM Carney\'s $50B Brookfield conflict — 100+ recusals, 95% unscreened.\n\n' +
+          'I am requesting:\n' +
+          '• Support for Magnitsky Act sanctions against officials involved in documented corruption\n' +
+          '• Support for strengthened whistleblower protections\n' +
+          '• A parliamentary review of lobbying concentration by foreign-linked organizations\n\n' +
+          'Evidence: ' + BASE + 'findings.html\n' +
+          'Legal framework: ' + BASE + 'legal.html#magnitsky\n\n' +
+          'Daniel Perry\nCanadian Forces Combat Veteran, Afghanistan';
+      }
+
+      return { subject: subject, body: body };
+    }
+
+    function updateDisplay(mp) {
+      document.getElementById('mp-info').style.display = 'block';
+      document.getElementById('mp-name').textContent = mp.name;
+      document.getElementById('mp-party').textContent = mp.party + ' — ' + mp.riding + ', ' + mp.province;
+      document.getElementById('mp-riding').textContent = mp.flags.length ? 'Flags: ' + mp.flags.join(', ') + (mp.details && mp.details.cija_meetings ? ' | CIJA: ' + mp.details.cija_meetings + 'x' : '') : 'No flags — clean across all databases';
+
+      var badge = document.getElementById('mp-score-badge');
+      badge.textContent = 'Score: ' + mp.score;
+      badge.style.background = mp.score === 0 ? 'rgba(5,150,105,0.1)' : mp.score <= 2 ? 'rgba(37,99,235,0.1)' : mp.score <= 6 ? 'rgba(217,119,6,0.1)' : 'rgba(220,38,38,0.1)';
+      badge.style.color = mp.score === 0 ? 'var(--color-green)' : mp.score <= 2 ? 'var(--color-blue)' : mp.score <= 6 ? 'var(--color-warning)' : 'var(--color-critical)';
+
+      var email = generateEmail(mp);
+      document.getElementById('email-subject').textContent = 'Subject: ' + email.subject;
+      document.getElementById('email-body').textContent = email.body;
+      document.getElementById('email-container').style.display = 'block';
+
+      var mailto = document.getElementById('mailto-link');
+      mailto.href = 'mailto:?subject=' + encodeURIComponent(email.subject) + '&body=' + encodeURIComponent(email.body);
+      mailto.style.display = 'inline-block';
+
+      window._currentEmail = email;
+    }
+
+    window.copyEmail = function() {
+      if (!window._currentEmail) return;
+      var text = 'Subject: ' + window._currentEmail.subject + '\n\n' + window._currentEmail.body;
+      navigator.clipboard.writeText(text).then(function() {
+        document.querySelector('.btn-primary').textContent = 'Copied!';
+        setTimeout(function() { document.querySelector('.btn-primary').textContent = 'Copy Email to Clipboard'; }, 2000);
+      });
+    };
+
+    window.downloadEmail = function() {
+      if (!window._currentEmail) return;
+      var text = 'Subject: ' + window._currentEmail.subject + '\n\n' + window._currentEmail.body;
+      var blob = new Blob([text], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'email-' + document.getElementById('mp-name').textContent.toLowerCase().replace(/\s+/g, '-') + '.txt';
+      a.click();
+    };
+
+    fetch('data/mp_full_analysis.json').then(function(r) { return r.json(); }).then(function(d) {
+      ALL = [].concat(d.tier1_highest || [], d.tier2_moderate || [], d.tier3_low || [], d.tier4_clean || []);
+      ALL.sort(function(a, b) { return a.name.localeCompare(b.name); });
+
+      var select = document.getElementById('mp-select');
+      ALL.forEach(function(mp, i) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        var scoreTag = mp.score === 0 ? '[CLEAN]' : mp.score >= 7 ? '[TIER 1]' : mp.score >= 3 ? '[FLAGGED]' : '';
+        opt.textContent = mp.name + ' — ' + mp.party + ', ' + mp.province + ' ' + scoreTag;
+        select.appendChild(opt);
+      });
+
+      select.addEventListener('change', function() {
+        if (this.value === '') return;
+        updateDisplay(ALL[parseInt(this.value)]);
+      });
+
+      // URL param support
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('mp')) {
+        var match = ALL.findIndex(function(m) { return m.name.toLowerCase().includes(params.get('mp').toLowerCase()); });
+        if (match >= 0) {
+          select.value = match;
+          updateDisplay(ALL[match]);
+        }
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
