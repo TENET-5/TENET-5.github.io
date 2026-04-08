@@ -36,7 +36,12 @@
 
     <div class="evidence-box" style="margin-bottom:var(--s-md);">
       <div class="evidence-title">Strategy</div>
-      <p style="margin:0;line-height:1.7;"><strong>Clean MPs (score 0):</strong> Full evidence report. They become allies who push for Magnitsky Act reform. <strong>Flagged MPs:</strong> Report showing their peers' flags but omitting their own. They think they have ammo — but the reform they push catches everyone. <strong>Tier 1 MPs:</strong> Get the full industry lobbying data focused on their party rivals.</p>
+      <p style="margin:0;line-height:1.7;"><strong>Clean MPs (score 0):</strong> Full evidence report + correct legal tools (s.122 breach of trust, s.504 private prosecution, Lobbying Act, C-70). They become allies who push for structural reform. <strong>Flagged MPs:</strong> Report showing their peers' criminal/ethics records but omitting their own. They think they have ammo — but the reform catches everyone. <strong>Tier 1 MPs:</strong> Get the opposition's criminal convictions, ethics violations, and specific scandals. Data now includes 28 criminal/ethics entries from the dirt dossier + 8 active feuds from the rivalries database.</p>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:var(--s-sm);">
+      <button class="btn" onclick="generateETHI()">Generate All ETHI Briefs</button>
+      <button class="btn" onclick="generateNDDN()">Generate All NDDN Briefs</button>
     </div>
 
     <select id="mp-select" class="mp-select">
@@ -120,14 +125,20 @@
           '3. CHARITY FRAUD: 12 CRA charity revocations for funneling funds to Israeli settlements and military operations. $276M flowed to Israel through Canadian charities in 2024.\n\n' +
           '4. PROCUREMENT: $140B+ in documented procurement waste across 18 major failures. The SDTC "Green Slush Fund" alone had 186 conflicts of interest.\n\n' +
           '5. PM CONFLICTS: Mark Carney must recuse from 100+ corporate entities. While advising PM Trudeau, his company Brookfield pitched a $50B fund asking for $10B from the government.\n\n' +
+          '6. ETHICS SYSTEM FAILURE: The Conflict of Interest Act has NO enforcement mechanism. PM Trudeau was found guilty TWICE with no consequence. Morneau, LeBlanc, Ng, Fergus, Verschuren — all violated the act. None punished.\n\n' +
           'RECOMMENDED ACTION:\n\n' +
-          'The Justice for Victims of Corrupt Foreign Officials Act (Magnitsky Act) can be used to freeze assets of officials involved in documented corruption and human rights violations. This site provides the evidence. The law provides the mechanism.\n\n' +
+          'Existing Canadian law provides tools that are not being used:\n\n' +
+          '1. Criminal Code s.122 (Breach of Trust by Public Officer) — up to 5 years. Applies to SDTC board, contradictory arms approvals.\n' +
+          '2. Criminal Code s.504 (Private Prosecution) — any citizen can lay an information before a justice.\n' +
+          '3. Conflict of Interest Act reform — 10-year cooling period, full PM divestiture, criminal penalties.\n' +
+          '4. Lobbying Act enforcement — January 2026 reforms created new 8-hour threshold. File complaints.\n' +
+          '5. Bill C-70 foreign agent registry — enforce against ALL foreign influence organizations.\n\n' +
           'Full evidence: ' + BASE + 'findings.html\n' +
-          'Your scorecard: ' + BASE + 'mp-scorecard.html?mp=' + encodeURIComponent(mp.name) + '\n' +
-          'Magnitsky Act: ' + BASE + 'legal.html#magnitsky\n' +
-          'All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n\n' +
-          'Every statistic is sourced from official Government of Canada publications. Methodology and corrections policy: ' + BASE + 'about.html\n\n' +
-          'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, PPCLI';
+          'Legal framework: ' + BASE + 'legal.html\n' +
+          'All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n' +
+          'Evidence index: ' + BASE + 'evidence-index.html\n\n' +
+          'Every statistic is sourced from official Government of Canada publications. Methodology: ' + BASE + 'about.html\n\n' +
+          'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, Princess Patricia\'s Canadian Light Infantry';
       } else if (isTier1) {
         // TIER 1 — give them ammo about rivals
         var rivals = ALL.filter(function(m) { return m.score >= 5 && m.party !== mp.party && m.name !== mp.name; }).slice(0, 5);
@@ -141,48 +152,69 @@
           'This briefing highlights accountability concerns involving ' + (isCPC ? 'the current Liberal government' : isLPC ? 'the Official Opposition' : 'other parties') + ' that may be relevant to your parliamentary duties.\n\n';
 
         if (isCPC) {
-          // CPC gets LIBERAL dirt
-          body += 'LIBERAL GOVERNMENT ACCOUNTABILITY ISSUES:\n\n' +
-            '1. PM CARNEY CONFLICTS:\n' +
-            '   • Must recuse from 100+ corporate entities (Ethics Commissioner)\n' +
-            '   • Brookfield pitched $50B "Maple Fund" while Carney advised PM Trudeau\n' +
-            '   • 95% of Brookfield portfolio NOT covered by ethics screen (The Walrus)\n' +
-            '   • BlackRock executive appointed as Deputy Minister of Trade\n' +
-            '   • Brookfield subsidiary lobbied PM Carney DIRECTLY (April 2026)\n' +
-            '   • Democracy Watch: "as many conflicts as Trump"\n\n' +
-            '2. SDTC GREEN SLUSH FUND:\n' +
-            '   • Auditor General found 186 separate conflicts of interest\n' +
-            '   • $400M in taxpayer money to board-connected companies\n' +
-            '   • RCMP investigation ongoing — no charges after 2+ years\n\n' +
-            '3. ARRIVECAN:\n' +
-            '   • Two-person company received $100M in 106 contracts\n' +
-            '   • Kristian Firth found in contempt of Parliament\n' +
-            '   • IT executive testified he inflated contractor credentials\n' +
-            '   • RCMP searched home and office — still no charges\n\n' +
-            '4. ARMS PIPELINE:\n' +
-            '   • Minister Joly announced "pause" on Israel arms exports\n' +
-            '   • $18.9M shipped anyway, $37.2M new permits quietly approved\n' +
+          // CPC gets LIBERAL criminal/ethics dirt
+          body += 'LIBERAL GOVERNMENT — CRIMINAL & ETHICS RECORD:\n\n' +
+            '1. PM TRUDEAU — TWICE GUILTY:\n' +
+            '   • 2017: Violated 4 sections of Conflict of Interest Act (Aga Khan, $215K govt expenditures)\n' +
+            '   • 2019: Violated s.9 — pressured AG on SNC-Lavalin prosecution\n' +
+            '   • Ethics Commissioner: "PM\'s office used to circumvent and discredit the DPP"\n' +
+            '   • Penalty: ZERO. The system has no enforcement.\n\n' +
+            '2. PM CARNEY — $50B CONFLICT:\n' +
+            '   • 100+ recusals. Brookfield pitched $50B fund while Carney advised PM\n' +
+            '   • 95% of portfolio NOT covered by ethics screen\n' +
+            '   • CAUGHT meeting Brookfield executives despite his own ethics screen (Juno News)\n' +
+            '   • Brookfield exec questioned at Ethics Committee (CBC, 2026)\n' +
+            '   • The Walrus: his wealth "tests Canada\'s ethics laws"\n' +
+            '   • BlackRock exec appointed as Deputy Minister of Trade\n\n' +
+            '3. SDTC — 186 CONFLICTS, $400M:\n' +
+            '   • Board chair Verschuren voted on grants to her OWN company NRStor\n' +
+            '   • Ethics Commissioner found Verschuren violated s.6(1) and s.21\n' +
+            '   • Government in CONTEMPT OF PARLIAMENT for hiding documents\n\n' +
+            '4. MINISTER ETHICS VIOLATIONS (Commissioner findings):\n' +
+            '   • Morneau: 3 violations — daughter at WE Charity during $900M contract\n' +
+            '   • LeBlanc: Clam licence to wife\'s cousin. Sister-in-law was Ethics Commissioner.\n' +
+            '   • Ng: Contracts to personal friend\'s PR firm (20-year friendship)\n' +
+            '   • Fergus: Violated act as Speaker\n' +
+            '   • Boissonnault: Fake Indigenous identity on government contract bids. Police investigating.\n' +
+            '   • Champagne: Partner works at Alto ($90B rail project) that received $100M+ from his own budget. Recused only AFTER media caught it. Ethics filing didn\'t mention it.\n\n' +
+            '5. LIBERAL CAUCUS CRIMINAL PATTERN:\n' +
+            '   • Tabbara: Convicted of assault — Liberals knew about harassment, let him run anyway\n' +
+            '   • Ratansi: Employed sister with fake name on business cards. Active concealment.\n' +
+            '   • Han Dong: CSIS "witting affiliate" of Chinese interference networks\n' +
+            '   • Wilson-Raybould: Expelled for TELLING THE TRUTH about SNC-Lavalin\n\n' +
+            '6. ARMS PIPELINE FRAUD:\n' +
+            '   • Joly announced "pause" — $18.9M shipped anyway, $37.2M new permits\n' +
             '   • Crown corp signed $78.8M contract 2 WEEKS after blocking same company\n\n';
         } else if (isLPC) {
-          // LPC gets CONSERVATIVE dirt
-          body += 'OFFICIAL OPPOSITION ACCOUNTABILITY CONCERNS:\n\n' +
-            '1. POILIEVRE FOREIGN CONNECTIONS:\n' +
-            '   • 12 connections on the investigation board — most of any person\n' +
-            '   • ONLY party leader who refused security clearance (Hogue Commission)\n' +
-            '   • CIJA lobbied him 12 times directly\n' +
+          // LPC gets CONSERVATIVE criminal/ethics dirt
+          body += 'OFFICIAL OPPOSITION — CRIMINAL & ETHICS RECORD:\n\n' +
+            '1. ONLY MP CONVICTED OF ELECTION FRAUD:\n' +
+            '   • Dean Del Mastro (CPC): 3 Canada Elections Act convictions\n' +
+            '   • Overspending, hiding $21K contribution, filing false report\n' +
+            '   • 1 month prison + 4 months house arrest. Supreme Court refused appeal.\n\n' +
+            '2. POILIEVRE — WHAT IS HE HIDING?\n' +
+            '   • ONLY party leader who refused NSICOP security clearance\n' +
+            '   • Every other leader (Singh, May, Blanchet) got clearance\n' +
+            '   • PM Trudeau told inquiry he saw CPC names on foreign interference list\n' +
+            '   • 2/3 of Canadians INCLUDING CPC voters said all leaders should read report\n' +
+            '   • Called RCMP leadership "despicable" — attacks rule of law institutions\n' +
+            '   • CPC leadership races infiltrated by foreign interference (NSICOP)\n\n' +
+            '3. CPC CAUCUS CULTURE:\n' +
+            '   • Chris d\'Entremont left caucus citing "negative approach to politics"\n' +
+            '   • Two senior CPC MPs barged into d\'Entremont\'s office, called him "a snake"\n' +
+            '   • Multiple defections — runs caucus through intimidation\n' +
+            '   • Derek Sloan expelled for white nationalist donor (Paul Fromm)\n\n' +
+            '4. HARPER SENATE APPOINTMENTS:\n' +
+            '   • Brazeau: Guilty of assault + cocaine. Charged with domestic violence.\n' +
+            '   • Duffy: $90K from PM\'s chief of staff Wright to cover expense fraud\n' +
+            '   • CPC appointees created the entire Senate expenses scandal\n\n' +
+            '5. POILIEVRE LOBBYING + REVOLVING DOOR:\n' +
+            '   • CIJA lobbied 12 times directly. Lantsman 18 times (highest CPC).\n' +
             '   • Jerusalem embassy pledge to Canada-Israel IPG\n' +
-            '   • CAAD bot network provides pro-Poilievre amplification\n' +
-            '   • Handshake with Jeremy MacKenzie (Diagolon movement leader)\n\n' +
-            '2. LANTSMAN (Deputy Leader):\n' +
-            '   • CIJA lobbied 18 times\n' +
-            '   • Called human rights commissioner "antisemite" — sued (Dattani case)\n' +
-            '   • Reports directly to Poilievre\n\n' +
-            '3. SCHEER LEGACY:\n' +
-            '   • Set CPC Israel precedent (Jerusalem embassy pledge)\n' +
-            '   • CIJA connections documented in investigation board\n\n' +
-            '4. CPC LOBBYING CONCENTRATION:\n' +
-            '   • 48 clean CPC MPs vs 35+ flagged in lobbying data\n' +
-            '   • Several CPC MPs received 400-900 lobbying meetings each\n\n';
+            '   • CAAD bot network amplification documented\n' +
+            '   • 6+ former Poilievre staffers became registered lobbyists (The Narwhal)\n' +
+            '   • Governing council stacked with corporate lobbyists (The Breach)\n' +
+            '   • CPC positions itself as "anti-establishment" while running revolving door\n\n';
         } else {
           // NDP/BLOC/OTHER gets BOTH parties' dirt
           body += 'CROSS-PARTY ACCOUNTABILITY DATA:\n\n';
@@ -214,37 +246,57 @@
         }
 
         body += 'RECOMMENDED PARLIAMENTARY ACTION:\n\n' +
-          '1. Support Magnitsky Act sanctions against officials involved in documented corruption\n' +
-          '2. Support strengthened lobbying transparency — currently 359,251 communications with minimal public oversight\n' +
-          '3. Support independent investigation of the arms export "pause" contradiction\n' +
-          '4. Support whistleblower protection reform\n\n' +
-          'EVIDENCE (all from government sources):\n\n' +
-          '• 26 cross-reference findings: ' + BASE + 'findings.html\n' +
-          '• Sector lobbying breakdown: ' + BASE + 'sector-lobbying.html\n' +
+          '1. Criminal Code s.122 (Breach of Trust) — prosecute officials who abuse their position\n' +
+          '2. Conflict of Interest Act reform — 10-year revolving door ban, full PM divestiture, criminal penalties\n' +
+          '3. Lobbying Act enforcement — formal complaints using January 2026 reformed thresholds\n' +
+          '4. Bill C-70 enforcement — foreign agent registry for ALL foreign influence organizations\n' +
+          '5. Military oversight independence — remove CFNIS from chain of command\n\n' +
+          'EVIDENCE (all from official government sources):\n\n' +
+          '• Investigation findings: ' + BASE + 'findings.html\n' +
+          '• Sector lobbying: ' + BASE + 'sector-lobbying.html\n' +
           '• Carney conflicts: ' + BASE + 'carney-conflicts.html\n' +
           '• Arms pipeline: ' + BASE + 'arms-pipeline.html\n' +
-          '• Legal framework + Magnitsky: ' + BASE + 'legal.html#magnitsky\n' +
-          '• Evidence index: ' + BASE + 'evidence-index.html\n\n' +
-          'Every number is sourced from official Government of Canada publications. Methodology: ' + BASE + 'about.html\n\n' +
+          '• Legal framework: ' + BASE + 'legal.html\n' +
+          '• Evidence index (32 files, verification status): ' + BASE + 'evidence-index.html\n\n' +
+          'Every number sourced from official Government of Canada publications. Methodology: ' + BASE + 'about.html\n\n' +
           'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, Princess Patricia\'s Canadian Light Infantry';
       } else {
-        // MODERATE FLAGGED — general report minus their own data
+        // MODERATE FLAGGED (score 1-6) — opposition dirt + correct legal tools
+        var isCPC2 = mp.party === 'Conservative';
+        var isLPC2 = mp.party === 'Liberal';
+
         subject = 'Government Accountability Data — Constituent Request for ' + mp.name;
         body = 'Dear ' + mp.name + ',\n\n' +
           'As your constituent, I am requesting that you review the following government accountability data compiled from 7 million official records.\n\n' +
           'KEY ISSUES:\n\n' +
-          '1. 76,475 Canadians killed under MAID since 2016. 1 in 20 deaths in 2024.\n' +
-          '2. $210M+ in arms to Israel despite announced "pause."\n' +
-          '3. 12 CRA charity revocations for funding Israeli military/settlements.\n' +
-          '4. $140B+ in documented procurement waste.\n' +
-          '5. PM Carney\'s $50B Brookfield conflict — 100+ recusals, 95% unscreened.\n\n' +
-          'I am requesting:\n' +
-          '• Support for Magnitsky Act sanctions against officials involved in documented corruption\n' +
-          '• Support for strengthened whistleblower protections\n' +
-          '• A parliamentary review of lobbying concentration by foreign-linked organizations\n\n' +
+          '1. ETHICS SYSTEM FAILURE: PM Trudeau guilty twice, Morneau, LeBlanc, Ng, Fergus — zero penalties.\n' +
+          '2. SDTC: 186 conflicts, $400M questioned, government in contempt of Parliament.\n' +
+          '3. ARMS: $210M+ to Israel despite "pause." $78.8M contract 2 weeks after block.\n' +
+          '4. LOBBYING: 359,251 contacts. Israel orgs: 539/org (22x China rate).\n' +
+          '5. PM CONFLICTS: Carney $50B Brookfield — 100+ recusals, 95% unscreened.\n\n';
+
+        if (isCPC2) {
+          body += 'LIBERAL GOVERNMENT CONCERNS:\n' +
+            '   • Trudeau twice guilty of ethics violations — zero penalty\n' +
+            '   • SDTC board chair voted on grants to her OWN company\n' +
+            '   • Han Dong: CSIS "witting affiliate" of Chinese interference\n' +
+            '   • Boissonnault: fake Indigenous identity on contract bids\n\n';
+        } else if (isLPC2) {
+          body += 'OFFICIAL OPPOSITION CONCERNS:\n' +
+            '   • Del Mastro: only MP convicted of election fraud — prison\n' +
+            '   • Poilievre: only leader who refused security clearance\n' +
+            '   • Sloan expelled for white nationalist donor\n' +
+            '   • CPC leadership races infiltrated by foreign interference (NSICOP)\n\n';
+        }
+
+        body += 'I am requesting:\n' +
+          '1. Support for Criminal Code s.122 (Breach of Trust) prosecution of officials who abuse their position\n' +
+          '2. Support for Conflict of Interest Act reform — 10-year revolving door, PM divestiture, criminal penalties\n' +
+          '3. Support for Lobbying Act enforcement using January 2026 reformed thresholds\n' +
+          '4. Support for Bill C-70 foreign agent registry enforcement\n\n' +
           'Evidence: ' + BASE + 'findings.html\n' +
-          'Legal framework: ' + BASE + 'legal.html#magnitsky\n\n' +
-          'Daniel Perry\nCanadian Forces Combat Veteran, Afghanistan';
+          'Legal framework: ' + BASE + 'legal.html\n\n' +
+          'Daniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, Princess Patricia\'s Canadian Light Infantry';
       }
 
       return { subject: subject, body: body };
@@ -295,14 +347,21 @@
     var BOARD = null;
     var CIJA_DETAIL = null;
 
+    var DIRT = null;
+    var RIVALRIES = null;
+
     Promise.all([
       fetch('data/mp_full_analysis.json').then(function(r) { return r.json(); }),
       fetch('data/investigation_board.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
-      fetch('data/cija_lobbying_detail.json').then(function(r) { return r.json(); }).catch(function() { return null; })
+      fetch('data/cija_lobbying_detail.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
+      fetch('data/mp_criminal_ethics_dossier.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
+      fetch('data/parliamentary_rivalries.json').then(function(r) { return r.json(); }).catch(function() { return null; })
     ]).then(function(results) {
       var d = results[0];
       BOARD = results[1];
       CIJA_DETAIL = results[2];
+      DIRT = results[3];
+      RIVALRIES = results[4];
       ALL = [].concat(d.tier1_highest || [], d.tier2_moderate || [], d.tier3_low || [], d.tier4_clean || []);
       ALL.sort(function(a, b) { return a.name.localeCompare(b.name); });
 
@@ -330,6 +389,121 @@
         }
       }
     });
+
+    // === COMMITTEE BRIEF GENERATORS ===
+    var COMMITTEE_DATA = null;
+    fetch('data/committee_targets.json').then(function(r) { return r.json(); }).catch(function() { return null; }).then(function(d) { COMMITTEE_DATA = d; });
+
+    function generateCommitteeBrief(memberName, memberParty, committee, role) {
+      var isCPC = memberParty === 'CPC' || memberParty === 'Conservative';
+      var isBloc = memberParty === 'Bloc' || memberParty.includes('Bloc');
+      var isLiberal = memberParty === 'Liberal';
+
+      var subject, body;
+      if (committee === 'ETHI') {
+        subject = 'Evidence Brief: Lobbying Concentration Patterns — For ' + memberName + ' (ETHI)';
+        body = 'Dear ' + memberName + ',\n\n' +
+          'As a member of the Standing Committee on Access to Information, Privacy and Ethics, I am writing to provide you with evidence that may warrant a committee study.\n\n' +
+          'I am a Canadian Forces combat veteran (PPCLI, Afghanistan) who has compiled 7 million government records from the Commissioner of Lobbying\'s raw CSV data, Elections Canada, and open.canada.ca.\n\n' +
+          'LOBBYING CONCENTRATION — KEY FINDINGS:\n\n' +
+          '1. 359,251 registered lobbying communications analyzed from raw CSV data\n' +
+          '2. Israel-linked organizations: 539 contacts PER ORGANIZATION — 22x the rate of China-linked orgs\n' +
+          '3. CIJA alone: 2,156 communications to 993 officials, including PM 15 times personally\n' +
+          '4. Top lobbied official: Rob Halucha (2,070 contacts). Ben Chin: 965. Freeland: 934.\n' +
+          '5. PMO received 20,383 total lobbying contacts\n' +
+          '6. Oil sector: 10,794 contacts. Banking: 7,497. Pharma: 4,776.\n\n' +
+          'ETHICS ENFORCEMENT FAILURE:\n\n' +
+          '9 sitting/former ministers found guilty of Conflict of Interest Act violations since 2017.\n' +
+          'Combined penalty: $9,391 (one repayment). Zero fines, zero criminal referrals.\n' +
+          'PM Trudeau: guilty TWICE. Morneau, LeBlanc, Ng, Fergus, Verschuren, Boissonnault — all violated. None punished.\n';
+
+        if (isCPC) {
+          body += '\nLATEST: Finance Minister Champagne\'s partner works at Alto ($90B rail subsidiary) that received $100M+ from his own budget. Recused only AFTER media caught it. Ethics filing didn\'t mention it.\n';
+        }
+
+        body += '\nRECOMMENDED COMMITTEE ACTION:\n\n' +
+          '1. ETHI study on lobbying concentration patterns using Commissioner of Lobbying raw data\n' +
+          '2. Review of Conflict of Interest Act enforcement mechanisms (or lack thereof)\n' +
+          '3. Assessment of January 2026 Lobbying Act reforms (8-hour threshold) implementation\n' +
+          '4. Review of Bill C-70 foreign agent registry enforcement\n\n' +
+          'EVIDENCE:\n' +
+          '• Sector lobbying: ' + BASE + 'sector-lobbying.html\n' +
+          '• Evidence index (32 verified data files): ' + BASE + 'evidence-index.html\n' +
+          '• Legal framework: ' + BASE + 'legal.html\n' +
+          '• All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n\n' +
+          'Every number sourced from official Government of Canada publications.\n\n' +
+          'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, Princess Patricia\'s Canadian Light Infantry';
+      } else {
+        // NDDN brief
+        subject = 'Evidence Brief: Military Oversight Independence — For ' + memberName + ' (NDDN)';
+        body = 'Dear ' + memberName + ',\n\n' +
+          'As a member of the Standing Committee on National Defence, I am writing to provide you with evidence that may warrant a committee study on CFNIS oversight independence.\n\n' +
+          'I am a Canadian Forces combat veteran (PPCLI, Afghanistan). I served as a Signals Operator and was deployed with Top Secret clearance. After reporting misconduct through proper military channels, I faced six years of institutional retaliation.\n\n' +
+          'CFNIS OVERSIGHT FAILURES:\n\n' +
+          '1. MPCC repeatedly found CFNIS complaint investigations exceeded 12-month standard — some ran 3-5 years\n' +
+          '2. Provost Marshal Trudeau accused of obstruction by MPCC — blocking investigations, redacting evidence\n' +
+          '3. LCol LeBlanc cleared Gen Vance despite sexual misconduct allegations\n' +
+          '4. CFNIS reports to the same chain of command it investigates — structural conflict of interest\n' +
+          '5. Federal Court already ruled MPCC can bind military police — but enforcement is non-existent\n\n' +
+          'THE REVOLVING DOOR:\n\n' +
+          'Former Defence Minister David Pratt now lobbies DND for Raytheon and Israel Aerospace Industries.\n' +
+          '408 DND lobbying communications from Pratt\'s clients alone.\n' +
+          'The person who set defence policy now profits from selling weapons to the department he used to run.\n\n' +
+          'RECOMMENDED COMMITTEE ACTION:\n\n' +
+          '1. NDDN study on CFNIS independence from military chain of command\n' +
+          '2. Review of MPCC binding authority and Federal Court enforcement\n' +
+          '3. Assessment of revolving door between Defence Ministers and defence lobbyists\n' +
+          '4. Hearing from MPCC chair on obstruction patterns\n\n' +
+          'EVIDENCE:\n' +
+          '• CFNIS investigation: ' + BASE + 'cfnis.html\n' +
+          '• Arms pipeline: ' + BASE + 'arms-pipeline.html\n' +
+          '• Legal framework: ' + BASE + 'legal.html\n' +
+          '• Evidence index: ' + BASE + 'evidence-index.html\n\n' +
+          'Every number sourced from official Government of Canada publications and MPCC annual reports.\n\n' +
+          'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, Princess Patricia\'s Canadian Light Infantry';
+      }
+
+      return { subject: subject, body: body, name: memberName };
+    }
+
+    window.generateETHI = function() {
+      if (!COMMITTEE_DATA || !COMMITTEE_DATA.ETHI) { alert('Committee data not loaded'); return; }
+      var c = COMMITTEE_DATA.ETHI;
+      var all = [c.chair].concat(c.vice_chairs || [], c.members || []);
+      var output = '';
+      all.forEach(function(m) {
+        var brief = generateCommitteeBrief(m.name, m.party, 'ETHI', m.note || '');
+        output += '═══════════════════════════════════\n';
+        output += 'TO: ' + m.name + ' (' + m.party + ', ' + m.riding + ')\n';
+        output += '═══════════════════════════════════\n';
+        output += 'Subject: ' + brief.subject + '\n\n' + brief.body + '\n\n\n';
+      });
+      var blob = new Blob([output], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ETHI-committee-briefs.txt';
+      a.click();
+    };
+
+    window.generateNDDN = function() {
+      if (!COMMITTEE_DATA || !COMMITTEE_DATA.NDDN) { alert('Committee data not loaded'); return; }
+      var c = COMMITTEE_DATA.NDDN;
+      var all = [c.chair].concat(c.vice_chairs || [], c.members || []);
+      var output = '';
+      all.forEach(function(m) {
+        var brief = generateCommitteeBrief(m.name, m.party, 'NDDN', m.note || '');
+        output += '═══════════════════════════════════\n';
+        output += 'TO: ' + m.name + ' (' + m.party + ', ' + m.riding + ')\n';
+        output += '═══════════════════════════════════\n';
+        output += 'Subject: ' + brief.subject + '\n\n' + brief.body + '\n\n\n';
+      });
+      var blob = new Blob([output], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'NDDN-committee-briefs.txt';
+      a.click();
+    };
+
   })();
   </script>
 </body>

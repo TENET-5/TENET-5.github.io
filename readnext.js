@@ -16,7 +16,7 @@
     'index.html': {
       current: 'The Numbers',
       next: [
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 patterns from 7M government records' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
         { href: 'arms-pipeline.html', label: 'The Arms Pipeline', desc: '$210M+ flowing to Israel despite the "pause"' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 confirmed records of government misconduct' },
       ]
@@ -32,9 +32,9 @@
     'arms-pipeline.html': {
       current: 'Arms Pipeline',
       next: [
-        { href: 'charity-pipeline.html', label: 'Charity Pipeline', desc: '7 CRA revocations, $276M annual flow' },
+        { href: 'charity-pipeline.html', label: 'Charity Pipeline', desc: '12 CRA revocations, $276M annual flow' },
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
-        { href: 'findings.html', label: 'All 21 Findings', desc: 'The complete cross-reference analysis' },
+        { href: 'findings.html', label: 'All 26+ Findings', desc: 'The complete cross-reference analysis' },
       ]
     },
     'charity-pipeline.html': {
@@ -66,7 +66,7 @@
       next: [
         { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
         { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
-        { href: 'findings.html', label: 'All 21 Findings', desc: 'What LIRIL found in the data' },
+        { href: 'findings.html', label: 'All 26+ Findings', desc: 'What LIRIL found in the data' },
       ]
     },
     'my-story.html': {
@@ -88,7 +88,7 @@
     'liril.html': {
       current: 'Meet LIRIL',
       next: [
-        { href: 'findings.html', label: 'What She Found', desc: '21 panels from 7M records' },
+        { href: 'findings.html', label: 'What She Found', desc: '26+ panels from 7M records' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the data yourself' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How it all works' },
       ]
@@ -122,7 +122,7 @@
       next: [
         { href: 'procurement-analysis.html', label: 'Procurement Analysis', desc: '$191B in documented waste' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of who did what' },
-        { href: 'findings.html', label: 'All 21 Findings', desc: 'Cross-reference analysis' },
+        { href: 'findings.html', label: 'All 26+ Findings', desc: 'Cross-reference analysis' },
       ]
     },
     'procurement-analysis.html': {
@@ -130,7 +130,7 @@
       next: [
         { href: 'corruption-map.html', label: 'Corruption Map', desc: '37 documented scandals' },
         { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$210M+ to Israel despite pause' },
-        { href: 'findings.html', label: 'All 21 Findings', desc: 'What the data reveals' },
+        { href: 'findings.html', label: 'All 26+ Findings', desc: 'What the data reveals' },
       ]
     },
     'mp-scorecard.html': {
@@ -138,15 +138,55 @@
       next: [
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 patterns from 7M records' },
         { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals' },
-        { href: 'legal.html', label: 'Legal Framework + Magnitsky', desc: 'Freeze their assets' },
+        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
       ]
     },
     'carney-conflicts.html': {
       current: 'Carney Conflicts',
       next: [
+        { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts by industry' },
         { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$210M+ to Israel despite pause' },
-        { href: 'findings.html', label: 'All 26 Findings', desc: 'Cross-reference analysis' },
         { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'Search all 340 MPs' },
+      ]
+    },
+    'sector-lobbying.html': {
+      current: 'Sector Lobbying',
+      next: [
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'Israel 2,176 vs China 93 (23:1 ratio)' },
+        { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'Which MPs are most lobbied' },
+      ]
+    },
+    'lobbying-tracker.html': {
+      current: 'Lobbying Tracker',
+      next: [
+        { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts broken down by industry' },
+        { href: 'contributions-tracker.html', label: 'Contributions', desc: '6.2M donation records since 2004' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'What the lobbying data reveals' },
+      ]
+    },
+    'contributions-tracker.html': {
+      current: 'Contributions Tracker',
+      next: [
+        { href: 'lobbying-tracker.html', label: 'Lobbying Tracker', desc: 'Who meets with whom' },
+        { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'All 340 MPs scored' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'Follow the money patterns' },
+      ]
+    },
+    'evidence-index.html': {
+      current: 'Evidence Index',
+      next: [
+        { href: 'about.html', label: 'About & Methodology', desc: 'How to verify every claim' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'What the data reveals' },
+        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
+      ]
+    },
+    'legal.html': {
+      current: 'Legal Framework',
+      next: [
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'The evidence that supports action' },
+        { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'Which MPs should champion reform' },
+        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
   };
