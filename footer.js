@@ -45,6 +45,7 @@
       {
         heading: 'Follow the Money',
         links: [
+          { label: 'Sector Lobbying', href: 'sector-lobbying.html' },
           { label: 'Lobbying Tracker', href: 'lobbying-tracker.html' },
           { label: 'Contributions Tracker', href: 'contributions-tracker.html' },
           { label: 'Carney Conflicts', href: 'carney-conflicts.html' },
