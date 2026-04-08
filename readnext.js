@@ -17,7 +17,7 @@
       current: 'The Numbers',
       next: [
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
-        { href: 'arms-pipeline.html', label: 'The Arms Pipeline', desc: '$210M+ flowing to Israel despite the "pause"' },
+        { href: 'arms-pipeline.html', label: 'The Arms Pipeline', desc: '$229M+ flowing to Israel despite the "pause"' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 confirmed records of government misconduct' },
       ]
     },
@@ -129,7 +129,7 @@
       current: 'Procurement Analysis',
       next: [
         { href: 'corruption-map.html', label: 'Corruption Map', desc: '37 documented scandals' },
-        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$210M+ to Israel despite pause' },
+        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$229M+ to Israel despite pause' },
         { href: 'findings.html', label: 'All 26+ Findings', desc: 'What the data reveals' },
       ]
     },
@@ -145,7 +145,7 @@
       current: 'Carney Conflicts',
       next: [
         { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts by industry' },
-        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$210M+ to Israel despite pause' },
+        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$229M+ to Israel despite pause' },
         { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'Search all 340 MPs' },
       ]
     },
