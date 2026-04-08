@@ -80,9 +80,32 @@
     var ALL = [];
     var BASE = 'https://tenet-5.github.io/';
 
+    // Get MP's specific board connections
+    function getMPConnections(mp) {
+      if (!BOARD) return [];
+      var lastName = mp.name.split(' ').pop().toLowerCase();
+      var node = BOARD.nodes.find(function(n) { return n.label.toLowerCase().includes(lastName) && n.type === 'person'; });
+      if (!node) return [];
+      return BOARD.threads.filter(function(t) { return t.from === node.id || t.to === node.id; }).map(function(t) {
+        var otherId = t.from === node.id ? t.to : t.from;
+        var other = BOARD.nodes.find(function(n) { return n.id === otherId; });
+        return { entity: other ? other.label : otherId, relationship: t.label, strength: t.strength };
+      });
+    }
+
+    // Get CIJA meeting count for this specific MP
+    function getCIJAMeetings(mp) {
+      if (!CIJA_DETAIL || !CIJA_DETAIL.top_contacts) return 0;
+      var lastName = mp.name.split(' ').pop().toLowerCase();
+      var match = CIJA_DETAIL.top_contacts.find(function(c) { return c.name.toLowerCase().includes(lastName); });
+      return match ? match.meetings : (mp.details && mp.details.cija_meetings ? mp.details.cija_meetings : 0);
+    }
+
     function generateEmail(mp) {
       var isClean = mp.score === 0;
       var isTier1 = mp.score >= 7;
+      var connections = getMPConnections(mp);
+      var cijaCount = getCIJAMeetings(mp);
       var subject, body;
 
       if (isClean) {
@@ -171,6 +194,25 @@
           body += '\n';
         }
 
+        // Add specific rival intel for flagged MPs
+        if (!isClean && !isTier1) {
+          // MODERATE — find their rivals' SPECIFIC connections
+          var specificRivals = ALL.filter(function(r) { return r.score >= 7 && r.party !== mp.party; });
+          if (specificRivals.length) {
+            body += 'SPECIFIC INTELLIGENCE ON KEY OPPOSITION MEMBERS:\n\n';
+            specificRivals.forEach(function(r) {
+              var rConns = getMPConnections(r);
+              var rCija = getCIJAMeetings(r);
+              body += '• ' + r.name + ' (' + r.party + '):\n';
+              if (rCija > 0) body += '  — CIJA lobbied ' + rCija + ' times (raw CSV from Commissioner of Lobbying)\n';
+              rConns.slice(0, 3).forEach(function(c) {
+                body += '  — ' + c.entity + ': ' + c.relationship + '\n';
+              });
+              body += '\n';
+            });
+          }
+        }
+
         body += 'RECOMMENDED PARLIAMENTARY ACTION:\n\n' +
           '1. Support Magnitsky Act sanctions against officials involved in documented corruption\n' +
           '2. Support strengthened lobbying transparency — currently 359,251 communications with minimal public oversight\n' +
@@ -178,12 +220,11 @@
           '4. Support whistleblower protection reform\n\n' +
           'EVIDENCE (all from government sources):\n\n' +
           '• 26 cross-reference findings: ' + BASE + 'findings.html\n' +
-          '• All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n' +
           '• Sector lobbying breakdown: ' + BASE + 'sector-lobbying.html\n' +
           '• Carney conflicts: ' + BASE + 'carney-conflicts.html\n' +
           '• Arms pipeline: ' + BASE + 'arms-pipeline.html\n' +
           '• Legal framework + Magnitsky: ' + BASE + 'legal.html#magnitsky\n' +
-          '• Evidence index (zero hallucinations): ' + BASE + 'evidence-index.html\n\n' +
+          '• Evidence index: ' + BASE + 'evidence-index.html\n\n' +
           'Every number is sourced from official Government of Canada publications. Methodology: ' + BASE + 'about.html\n\n' +
           'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, Princess Patricia\'s Canadian Light Infantry';
       } else {
@@ -251,7 +292,17 @@
       a.click();
     };
 
-    fetch('data/mp_full_analysis.json').then(function(r) { return r.json(); }).then(function(d) {
+    var BOARD = null;
+    var CIJA_DETAIL = null;
+
+    Promise.all([
+      fetch('data/mp_full_analysis.json').then(function(r) { return r.json(); }),
+      fetch('data/investigation_board.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
+      fetch('data/cija_lobbying_detail.json').then(function(r) { return r.json(); }).catch(function() { return null; })
+    ]).then(function(results) {
+      var d = results[0];
+      BOARD = results[1];
+      CIJA_DETAIL = results[2];
       ALL = [].concat(d.tier1_highest || [], d.tier2_moderate || [], d.tier3_low || [], d.tier4_clean || []);
       ALL.sort(function(a, b) { return a.name.localeCompare(b.name); });
 
