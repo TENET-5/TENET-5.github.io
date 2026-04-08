@@ -137,8 +137,16 @@
       current: 'MP Scorecard',
       next: [
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 patterns from 7M records' },
-        { href: 'voting-records.html', label: 'Voting Records', desc: 'How every party voted' },
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals' },
         { href: 'legal.html', label: 'Legal Framework + Magnitsky', desc: 'Freeze their assets' },
+      ]
+    },
+    'carney-conflicts.html': {
+      current: 'Carney Conflicts',
+      next: [
+        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$210M+ to Israel despite pause' },
+        { href: 'findings.html', label: 'All 26 Findings', desc: 'Cross-reference analysis' },
+        { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'Search all 340 MPs' },
       ]
     },
   };
