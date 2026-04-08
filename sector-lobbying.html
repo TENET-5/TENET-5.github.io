@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who Lobbies Canada — 359,251 Contacts by Industry | TENET5</title>
+  <meta name="description" content="Complete breakdown of 359,251 registered lobbying communications by industry. Every sector's top organizations and government targets. The regulated lobby the regulator.">
+  <meta property="og:title" content="Who Lobbies Canada — 359,251 Contacts by Industry">
+  <meta property="og:description" content="Oil 10,794. Banking 7,497. Pharma 4,776. Israel 2,176 (539 per org — 22x China). The regulated lobby the regulator.">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css?v=5">
+  <meta name="theme-color" content="#1a1f36">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div style="max-width:960px;margin:0 auto;padding:var(--s-lg) var(--s-md);">
+
+    <header class="page-header" style="text-align:left;border-bottom:none;padding-left:0;">
+      <h1 style="font-size:var(--text-4xl);">Who Lobbies Canada</h1>
+      <p class="page-subtitle" style="text-align:left;margin:0;">359,251 registered lobbying communications broken down by industry. Every sector's top organizations and their government targets.</p>
+      <p class="page-meta" style="text-align:left;">Source: Commissioner of Lobbying raw CSV (57MB) | Mined by <a href="liril.html">LIRIL</a></p>
+    </header>
+
+    <div class="stat-row" style="margin-bottom:var(--s-lg);">
+      <div class="stat-card"><span class="stat-number">359K</span><div class="stat-label">Total Contacts</div></div>
+      <div class="stat-card"><span class="stat-number blue">20K</span><div class="stat-label">PMO Contacts</div></div>
+      <div class="stat-card"><span class="stat-number gold">18K</span><div class="stat-label">Senate Contacts</div></div>
+      <div class="stat-card"><span class="stat-number">539</span><div class="stat-label">Israel per Org</div></div>
+    </div>
+
+    <div class="pull-quote" style="margin-bottom:var(--s-xl);">Every sector's #1 lobbying target is the government body that regulates it.</div>
+
+    <div id="sector-list"></div>
+
+    <div style="font-size:var(--text-xs);color:var(--text-quaternary);padding:var(--s-md);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);margin-top:var(--s-lg);line-height:1.7;">
+      <strong>Source:</strong> <a href="https://lobbycanada.gc.ca/en/open-data/" style="color:var(--text-tertiary);">Commissioner of Lobbying of Canada</a> — Communication_PrimaryExport.csv + Communication_DpohExport.csv (57MB combined). All data from public government records. Lobbying is legal and registered in Canada. Being lobbied does not imply wrongdoing. <a href="about.html" style="color:var(--text-tertiary);">Methodology.</a>
+    </div>
+  </div>
+
+  <script src="nav.js?v=7"></script>
+  <div id="read-next"></div>
+  <footer id="site-footer"></footer>
+  <script src="readnext.js?v=1"></script>
+  <script src="footer.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    fetch('data/sector_lobbying_analysis.json').then(function(r) { return r.json(); }).then(function(d) {
+      var list = document.getElementById('sector-list');
+      var html = '';
+
+      // Sector cards with deep data
+      var sectors = [
+        { key: 'oil_gas_deep', name: 'Oil & Gas', icon: '🛢', color: 'var(--color-warning)' },
+        { key: 'banking_deep', name: 'Banking & Finance', icon: '🏦', color: 'var(--color-blue)' },
+        { key: 'pharma_deep', name: 'Pharmaceutical', icon: '💊', color: 'var(--color-green)' },
+        { key: 'big_tech_deep', name: 'Big Tech', icon: '💻', color: '#7c3aed' },
+      ];
+
+      sectors.forEach(function(s) {
+        var data = d[s.key];
+        if (!data) return;
+
+        html += '<div style="background:var(--bg-card);border:1px solid var(--border);border-left:4px solid ' + s.color + ';border-radius:0 var(--r-md) var(--r-md) 0;padding:var(--s-md);margin-bottom:var(--s-md);">';
+        html += '<h2 style="font-family:var(--font-headline);font-size:var(--text-2xl);margin-bottom:var(--s-xs);">' + s.icon + ' ' + s.name + '</h2>';
+        html += '<p style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--accent);margin-bottom:var(--s-sm);"><strong>' + data.total_comms.toLocaleString() + '</strong> communications from <strong>' + data.organizations + '</strong> organizations</p>';
+
+        // Top orgs
+        if (data.top) {
+          html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--s-xs);margin-bottom:var(--s-sm);">';
+          data.top.slice(0, 6).forEach(function(org) {
+            html += '<div style="font-size:var(--text-xs);padding:6px 10px;background:var(--bg-surface);border-radius:var(--r-sm);"><strong style="color:var(--text-primary);">' + org.comms.toLocaleString() + '</strong> <span style="color:var(--text-tertiary);">' + org.name + '</span></div>';
+          });
+          html += '</div>';
+        }
+
+        // Targets
+        if (data.targets) {
+          html += '<div style="font-size:var(--text-xs);color:var(--text-tertiary);line-height:1.8;">';
+          html += '<strong style="color:var(--text-secondary);">Top targets:</strong> ';
+          var targetList = [];
+          if (typeof data.targets === 'object') {
+            Object.entries(data.targets).slice(0, 4).forEach(function(t) {
+              targetList.push(t[0] + ' (' + t[1].toLocaleString() + ')');
+            });
+          }
+          html += targetList.join(' | ');
+          html += '</div>';
+        }
+
+        // Pattern
+        if (data.pattern) {
+          html += '<p style="font-size:var(--text-xs);color:var(--text-tertiary);margin-top:var(--s-xs);font-style:italic;">' + data.pattern + '</p>';
+        }
+
+        html += '</div>';
+      });
+
+      // Israel Lobby — special treatment
+      html += '<div style="background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:0 var(--r-md) var(--r-md) 0;padding:var(--s-md);margin-bottom:var(--s-md);">';
+      html += '<h2 style="font-family:var(--font-headline);font-size:var(--text-2xl);margin-bottom:var(--s-xs);">🇮🇱 Israel Lobby</h2>';
+      html += '<p style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--accent);margin-bottom:var(--s-sm);"><strong>2,176</strong> communications from <strong>4</strong> organizations — <strong>539 per org</strong> (22x China)</p>';
+      html += '<div style="font-size:var(--text-xs);color:var(--text-tertiary);line-height:1.8;">';
+      html += '<strong style="color:var(--text-secondary);">Top targets:</strong> House of Commons (1,664) | PMO (186) | Global Affairs (158) | Senate (100)';
+      html += '</div>';
+      html += '<p style="font-size:var(--text-xs);color:var(--text-tertiary);margin-top:var(--s-xs);font-style:italic;">4 orgs generate 539 comms each — the most concentrated lobbying of any sector. Shimon Fogel (CIJA CEO) is the #2 individual lobbyist in all of Canada.</p>';
+      html += '</div>';
+
+      // Comparison table
+      html += '<h2 style="font-family:var(--font-headline);font-size:var(--text-2xl);margin:var(--s-xl) 0 var(--s-md);">Sector Comparison</h2>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:var(--text-sm);">';
+      html += '<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);text-transform:uppercase;">Sector</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">Comms</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">Orgs</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">Per Org</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">#1 Target</th></tr></thead><tbody>';
+
+      var rows = [
+        ['Agriculture', 16222, 83, 195, 'Ag Canada'],
+        ['Oil & Gas', 10794, 64, 169, 'NRCan (4,609)'],
+        ['Banking', 7497, 61, 123, 'Finance (3,703)'],
+        ['Telecom', 5338, 36, 148, 'ISED'],
+        ['Mining', 5253, 64, 82, 'NRCan'],
+        ['Pharma', 4776, 115, 42, 'Health Canada (1,611)'],
+        ['Big Tech', 3527, 40, 88, 'Heritage (530)'],
+        ['Defense', 2534, 34, 75, 'DND'],
+        ['Israel Lobby', 2176, 4, 539, 'House + PMO'],
+        ['Insurance', 1483, 10, 148, 'Finance'],
+        ['China', 74, 3, 25, 'Various']
+      ];
+
+      rows.forEach(function(r) {
+        var isIsrael = r[0] === 'Israel Lobby';
+        var style = isIsrael ? ' style="color:var(--accent);font-weight:700;"' : '';
+        html += '<tr><td style="padding:6px 8px;border-bottom:1px solid var(--border);"' + style + '>' + r[0] + '</td>';
+        html += '<td style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border);"' + style + '>' + r[1].toLocaleString() + '</td>';
+        html += '<td style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border);"' + style + '>' + r[2] + '</td>';
+        html += '<td style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border);font-weight:700;"' + style + '>' + r[3] + '</td>';
+        html += '<td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text-tertiary);">' + r[4] + '</td></tr>';
+      });
+
+      html += '</tbody></table>';
+
+      list.innerHTML = html;
+    });
+  })();
+  </script>
+</body>
+</html>
