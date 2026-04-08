@@ -108,30 +108,84 @@
       } else if (isTier1) {
         // TIER 1 — give them ammo about rivals
         var rivals = ALL.filter(function(m) { return m.score >= 5 && m.party !== mp.party && m.name !== mp.name; }).slice(0, 5);
-        subject = 'Confidential: Opposition Lobbying Data — ' + mp.party + ' Briefing';
+        var isCPC = mp.party === 'Conservative';
+        var isLPC = mp.party === 'Liberal';
+
+        subject = 'Confidential: ' + (isCPC ? 'Liberal' : isLPC ? 'Conservative' : 'Opposition') + ' Accountability Data — For ' + mp.name;
+
         body = 'Dear ' + mp.name + ',\n\n' +
-          'I am a Canadian Forces veteran who has compiled extensive government accountability data from official sources. This briefing contains opposition lobbying intelligence that may be relevant to your work.\n\n' +
-          'OPPOSITION LOBBYING FLAGS:\n\n';
-        rivals.forEach(function(r) {
-          body += '• ' + r.name + ' (' + r.party + ', ' + r.riding + '): Score ' + r.score + ' — ' + r.flags.join(', ');
-          if (r.details && r.details.cija_meetings) body += ' (CIJA: ' + r.details.cija_meetings + 'x)';
+          'I am a Canadian Forces combat veteran (PPCLI, Afghanistan) who has compiled an extensive government accountability database from official sources — 7 million records from the Commissioner of Lobbying, Elections Canada, OpenParliament, and open.canada.ca.\n\n' +
+          'This briefing highlights accountability concerns involving ' + (isCPC ? 'the current Liberal government' : isLPC ? 'the Official Opposition' : 'other parties') + ' that may be relevant to your parliamentary duties.\n\n';
+
+        if (isCPC) {
+          // CPC gets LIBERAL dirt
+          body += 'LIBERAL GOVERNMENT ACCOUNTABILITY ISSUES:\n\n' +
+            '1. PM CARNEY CONFLICTS:\n' +
+            '   • Must recuse from 100+ corporate entities (Ethics Commissioner)\n' +
+            '   • Brookfield pitched $50B "Maple Fund" while Carney advised PM Trudeau\n' +
+            '   • 95% of Brookfield portfolio NOT covered by ethics screen (The Walrus)\n' +
+            '   • BlackRock executive appointed as Deputy Minister of Trade\n' +
+            '   • Brookfield subsidiary lobbied PM Carney DIRECTLY (April 2026)\n' +
+            '   • Democracy Watch: "as many conflicts as Trump"\n\n' +
+            '2. SDTC GREEN SLUSH FUND:\n' +
+            '   • Auditor General found 186 separate conflicts of interest\n' +
+            '   • $400M in taxpayer money to board-connected companies\n' +
+            '   • RCMP investigation ongoing — no charges after 2+ years\n\n' +
+            '3. ARRIVECAN:\n' +
+            '   • Two-person company received $100M in 106 contracts\n' +
+            '   • Kristian Firth found in contempt of Parliament\n' +
+            '   • IT executive testified he inflated contractor credentials\n' +
+            '   • RCMP searched home and office — still no charges\n\n' +
+            '4. ARMS PIPELINE:\n' +
+            '   • Minister Joly announced "pause" on Israel arms exports\n' +
+            '   • $18.9M shipped anyway, $37.2M new permits quietly approved\n' +
+            '   • Crown corp signed $78.8M contract 2 WEEKS after blocking same company\n\n';
+        } else if (isLPC) {
+          // LPC gets CONSERVATIVE dirt
+          body += 'OFFICIAL OPPOSITION ACCOUNTABILITY CONCERNS:\n\n' +
+            '1. POILIEVRE FOREIGN CONNECTIONS:\n' +
+            '   • 12 connections on the investigation board — most of any person\n' +
+            '   • ONLY party leader who refused security clearance (Hogue Commission)\n' +
+            '   • CIJA lobbied him 12 times directly\n' +
+            '   • Jerusalem embassy pledge to Canada-Israel IPG\n' +
+            '   • CAAD bot network provides pro-Poilievre amplification\n' +
+            '   • Handshake with Jeremy MacKenzie (Diagolon movement leader)\n\n' +
+            '2. LANTSMAN (Deputy Leader):\n' +
+            '   • CIJA lobbied 18 times\n' +
+            '   • Called human rights commissioner "antisemite" — sued (Dattani case)\n' +
+            '   • Reports directly to Poilievre\n\n' +
+            '3. SCHEER LEGACY:\n' +
+            '   • Set CPC Israel precedent (Jerusalem embassy pledge)\n' +
+            '   • CIJA connections documented in investigation board\n\n' +
+            '4. CPC LOBBYING CONCENTRATION:\n' +
+            '   • 48 clean CPC MPs vs 35+ flagged in lobbying data\n' +
+            '   • Several CPC MPs received 400-900 lobbying meetings each\n\n';
+        } else {
+          // NDP/BLOC/OTHER gets BOTH parties' dirt
+          body += 'CROSS-PARTY ACCOUNTABILITY DATA:\n\n';
+          rivals.forEach(function(r) {
+            body += '• ' + r.name + ' (' + r.party + '): Score ' + r.score + ' — ' + r.flags.join(', ');
+            if (r.details && r.details.cija_meetings) body += ' (CIJA: ' + r.details.cija_meetings + 'x)';
+            body += '\n';
+          });
           body += '\n';
-        });
-        body += '\n' +
-          'SECTOR LOBBYING OVERVIEW:\n\n' +
-          '• Oil & Gas: 10,794 communications to government (NRCan targeted 4,609x)\n' +
-          '• Banking: 7,497 communications (Finance Canada targeted 3,703x)\n' +
-          '• Israel Lobby: 2,176 communications from only 4 organizations (539 per org)\n' +
-          '• Big Tech: 3,527 communications (quadrupled since 2015)\n\n' +
-          'PM CARNEY CONFLICTS:\n\n' +
-          '• Must recuse from 100+ corporate entities\n' +
-          '• Brookfield pitched $50B "Maple Fund" while he advised PM Trudeau\n' +
-          '• 95% of Brookfield portfolio NOT covered by ethics screen\n' +
-          '• BlackRock executive appointed as Deputy Minister of International Trade\n\n' +
-          'Full data: ' + BASE + 'sector-lobbying.html\n' +
-          'All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n' +
-          'Carney conflicts: ' + BASE + 'carney-conflicts.html\n\n' +
-          'Daniel Perry\nCanadian Forces Combat Veteran';
+        }
+
+        body += 'RECOMMENDED PARLIAMENTARY ACTION:\n\n' +
+          '1. Support Magnitsky Act sanctions against officials involved in documented corruption\n' +
+          '2. Support strengthened lobbying transparency — currently 359,251 communications with minimal public oversight\n' +
+          '3. Support independent investigation of the arms export "pause" contradiction\n' +
+          '4. Support whistleblower protection reform\n\n' +
+          'EVIDENCE (all from government sources):\n\n' +
+          '• 26 cross-reference findings: ' + BASE + 'findings.html\n' +
+          '• All 340 MPs scored: ' + BASE + 'mp-scorecard.html\n' +
+          '• Sector lobbying breakdown: ' + BASE + 'sector-lobbying.html\n' +
+          '• Carney conflicts: ' + BASE + 'carney-conflicts.html\n' +
+          '• Arms pipeline: ' + BASE + 'arms-pipeline.html\n' +
+          '• Legal framework + Magnitsky: ' + BASE + 'legal.html#magnitsky\n' +
+          '• Evidence index (zero hallucinations): ' + BASE + 'evidence-index.html\n\n' +
+          'Every number is sourced from official Government of Canada publications. Methodology: ' + BASE + 'about.html\n\n' +
+          'Respectfully,\nDaniel Perry\nCanadian Forces Combat Veteran, Afghanistan\nFormer Signals Operator, Princess Patricia\'s Canadian Light Infantry';
       } else {
         // MODERATE FLAGGED — general report minus their own data
         subject = 'Government Accountability Data — Constituent Request for ' + mp.name;
