@@ -1,6 +1,6 @@
 /**
  * TENET5 Shared Navigation Component v4.0
- * Redesigned for easier navigation across 35+ pages.
+ * Redesigned for easier navigation across 75+ pages.
  * 
  * Features:
  *  - Persistent sidebar mega-menu on desktop (triggered by hamburger)
@@ -31,6 +31,8 @@
         { label: 'N-vs-NP Matrix', href: 'corruption-map.html#n-vs-np', desc: 'LIRIL Pipeline Convergence', hot: true },
         { label: 'Dossier Viewer', href: 'dossier-viewer.html', desc: 'Generated intelligence dossiers', hot: true },
         { label: 'Evidence Archive', href: 'evidence.html', desc: 'Complete evidence repository' },
+        { label: 'Evidence Index', href: 'evidence-index.html', desc: 'Categorized evidence finder' },
+        { label: 'Cross-Reference Findings', href: 'findings.html', desc: 'Key investigation findings' },
       ]
     },
     {
@@ -59,6 +61,8 @@
         { label: 'Lobbying Tracker', href: 'lobbying-tracker.html', desc: 'Registered lobbying data' },
         { label: 'Corruption Map', href: 'corruption-map.html', desc: 'Documented failures' },
         { label: 'Charity Pipeline', href: 'charity-pipeline.html', desc: 'Charity fund routing' },
+        { label: 'Arms Pipeline', href: 'arms-pipeline.html', desc: 'Canadian arms export tracking' },
+        { label: 'Carney Conflicts', href: 'carney-conflicts.html', desc: 'PM conflict-of-interest analysis' },
       ]
     },
     {
@@ -70,6 +74,7 @@
         { label: 'Hansard Dashboard', href: 'hansard-dashboard.html', desc: 'Debate analysis' },
         { label: 'Hansard Evidence', href: 'hansard-evidence.html', desc: 'Parliamentary records' },
         { label: 'Voting Records', href: 'voting-records.html', desc: '151 bills, 94 votes analyzed', hot: true },
+        { label: 'MP Scorecard', href: 'mp-scorecard.html', desc: 'Rate your MP\'s record', hot: true },
         { label: 'Sector Lobbying', href: 'sector-lobbying.html', desc: '359K comms, 12 sectors', hot: true },
         { label: 'Provincial Analysis', href: 'provincial-analysis.html', desc: 'All 10 provinces', hot: true },
         { label: 'Infographics', href: 'infographics.html', desc: 'Visual data presentations' },
@@ -85,6 +90,7 @@
         { label: 'Veterans Support', href: 'veterans.html', desc: 'Veteran community resources' },
         { label: 'Whistleblower Guide', href: 'whistleblower-guide.html', desc: 'Protected disclosure' },
         { label: 'Acelephius Report', href: 'acelephius-report.html', desc: 'Intelligence assessment' },
+        { label: 'Acelephius Wardoll', href: 'acelephius-wardoll.html', desc: 'Wardoll analysis document' },
       ]
     },
     {
@@ -96,7 +102,12 @@
         { label: 'Open Letter to MPs', href: 'open-letter.html', desc: 'Direct address to parliament' },
         { label: 'MP Briefing', href: 'mp-brief.html', desc: 'Concise brief for MPs' },
         { label: 'Master Timeline', href: 'timeline.html', desc: '81 years documented' },
+        { label: 'About', href: 'about.html', desc: 'About the investigation' },
         { label: 'FAQ & History', href: 'history.html', desc: 'Common questions' },
+        { label: 'FAQ', href: 'faq.html', desc: 'Frequently asked questions' },
+        { label: 'Email Campaign', href: 'email-campaign.html', desc: 'Write your MP campaign' },
+        { label: 'Campaign Generator', href: 'campaign-generator.html', desc: 'Generate campaign materials' },
+        { label: 'Campaign Tracker', href: 'campaign-tracker.html', desc: 'Track outreach campaigns' },
         { label: 'Resources', href: 'resources.html', desc: 'External reference links' },
       ]
     },
@@ -108,6 +119,9 @@
         { label: 'Bloggins', href: 'bloggins.html', desc: 'Raccoon intelligence AI', special: 'green' },
         { label: 'LIRIL (AI)', href: 'liril.html', desc: "Daniel Perry's private AI system", hot: true },
         { label: 'Search', href: 'search.html', desc: 'Full-site search' },
+        { label: 'Report Generator', href: 'report-generator.html', desc: 'Generate investigation reports' },
+        { label: 'AI Research', href: 'ai-research.html', desc: 'AI-powered research tools' },
+        { label: 'Architecture', href: 'architecture.html', desc: 'TENET5 system architecture' },
       ]
     },
     {
@@ -117,6 +131,7 @@
         { label: 'Live Chat', href: 'chat.html', desc: 'Real-time discussion', hot: true },
         { label: 'AI Research', href: 'chat.html#ai', desc: 'Gemini-powered analysis', hot: true },
         { label: 'News Intelligence', href: 'news.html', desc: 'Canadian news aggregation', hot: true },
+        { label: 'Community Hub', href: 'community.html', desc: 'Join the community' },
       ]
     },
     {
@@ -130,6 +145,8 @@
         { label: 'Calgary', href: 'calgary.html', desc: 'Green Line, arena deal', hot: true },
         { label: 'Belleville', href: 'belleville.html', desc: 'City of Belleville' },
         { label: 'Quinte West', href: 'quinte-west.html', desc: 'City of Quinte West' },
+        { label: 'Canada Map', href: 'canada-map.html', desc: 'Interactive national corruption map', hot: true },
+        { label: 'Municipal Intel', href: 'municipal-intelligence.html', desc: 'Municipal intelligence briefs', hot: true },
         { label: 'Kingston', href: 'municipal-accountability.html?city=kingston', desc: 'Third Crossing, housing crisis' },
         { label: 'Peterborough', href: 'municipal-accountability.html?city=peterborough', desc: 'Del Mastro conviction, opioid crisis' },
       ]
