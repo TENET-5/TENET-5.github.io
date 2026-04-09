@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criminal Charges Sheet — 38 Officials, 42 Charges | TENET5</title>
+  <meta name="description" content="Per-individual Criminal Code charges mapped from public records. 38 government officials, 42 potential charges across 8 Criminal Code sections. Every charge includes s.504 private prosecution pathway.">
+  <meta property="og:title" content="Criminal Charges Sheet — 38 Officials, 42 Charges from Public Records">
+  <meta property="og:description" content="Per-individual Criminal Code analysis. 38 officials, 42 charges, s.504 private prosecution pathways. All from government records.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TENET5 — Canadian Government Accountability">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    .cs-wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .cs-header{text-align:center;padding:40px 0 20px;border-bottom:2px solid rgba(196,30,58,.3);margin-bottom:24px}
+    .cs-header h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--text-primary);margin-bottom:8px}
+    .cs-header .sub{font-size:.85rem;color:var(--text-tertiary);max-width:700px;margin:0 auto}
+    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+    .stat-tile{background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+    .stat-tile .val{font-size:1.5rem;font-weight:800;line-height:1.2}
+    .stat-tile .val.red{color:#ef4444}.stat-tile .val.orange{color:#f59e0b}.stat-tile .val.yellow{color:#eab308}.stat-tile .val.blue{color:#60a5fa}
+    .stat-tile .label{font-size:.62rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+    .filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+    .filter-bar input{flex:1;min-width:200px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text-primary);font-family:inherit;font-size:.82rem;outline:none}
+    .filter-bar input:focus{border-color:rgba(196,30,58,.5)}
+    .filter-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.72rem;color:var(--text-tertiary);cursor:pointer;font-family:inherit;transition:all .2s}
+    .filter-pill:hover{border-color:rgba(196,30,58,.4);color:var(--text-primary)}
+    .filter-pill.active{background:rgba(196,30,58,.12);border-color:rgba(196,30,58,.5);color:var(--accent);font-weight:600}
+    .disclaimer{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:12px 16px;font-size:.72rem;color:var(--text-tertiary);line-height:1.7;margin-bottom:16px}
+    .person-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}
+    .person-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer;transition:background .2s}
+    .person-header:hover{background:rgba(196,30,58,.03)}
+    .person-name{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:var(--text-primary)}
+    .person-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .badge{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase}
+    .badge-critical{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+    .badge-high{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+    .badge-medium{background:rgba(234,179,8,.15);color:#eab308;border:1px solid rgba(234,179,8,.3)}
+    .badge-type{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.3)}
+    .charge-count{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);font-weight:700}
+    .person-body{display:none;padding:0 20px 16px;border-top:1px solid var(--border)}
+    .person-body.open{display:block}
+    .charge-card{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:14px;margin:10px 0;border-left:3px solid}
+    .charge-card.sev-critical{border-left-color:#ef4444}
+    .charge-card.sev-high{border-left-color:#f59e0b}
+    .charge-card.sev-medium{border-left-color:#eab308}
+    .charge-section{font-weight:700;font-size:.88rem;color:var(--text-primary)}
+    .charge-title{font-size:.75rem;color:var(--text-tertiary)}
+    .charge-desc{font-size:.78rem;color:var(--text-secondary,#c8c8cc);line-height:1.6;margin-top:6px}
+    .charge-penalty{font-size:.72rem;color:#ef4444;font-weight:600;margin-top:4px}
+    .charge-action{font-size:.72rem;color:var(--accent);font-weight:600;margin-top:4px}
+    .charge-evidence{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04);font-size:.72rem;color:var(--text-tertiary);line-height:1.6}
+    .loading{text-align:center;padding:60px;color:var(--text-tertiary)}
+    .chevron{transition:transform .2s;font-size:.8rem;color:var(--text-tertiary)}
+    .chevron.open{transform:rotate(90deg)}
+  </style>
+  <meta name="theme-color" content="#1a1f36">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+  <div id="share-bar" class="share-bar">
+    <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
+    <div class="share-bar-buttons">
+      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
+      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
+      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
+      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
+      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
+    </div>
+  </div>
+  <div id="main" class="cs-wrap">
+    <div class="cs-header">
+      <h1>Criminal Charges Sheet</h1>
+      <p class="sub">Per-individual Criminal Code charges mapped from public records. Every charge includes the s.504 private prosecution pathway — any Canadian citizen can initiate proceedings.</p>
+    </div>
+    <div class="disclaimer"><strong>Legal Notice:</strong> This document identifies patterns in public data that may warrant investigation under specified Criminal Code sections. These are NOT formal charges. All persons are presumed innocent until proven guilty in a court of law. This analysis does not constitute legal advice. Consult a qualified lawyer before taking any legal action. The s.504 mechanism allows any citizen to lay an information before a justice of the peace.</div>
+    <div id="content" class="loading">Loading charges database...</div>
+  </div>
+  <script src="nav.js?v=7"></script>
+  <script src="js/main.js?v=5"></script>
+  <script src="share.js?v=1"></script>
+  <script>
+  (function(){
+    'use strict';
+    fetch('data/charges_sheet.json')
+      .then(function(r){return r.json()})
+      .then(render)
+      .catch(function(e){document.getElementById('content').innerHTML='<p style="color:var(--accent)">Failed to load: '+e.message+'</p>'});
+
+    function fmt(n){return Number(n||0).toLocaleString('en-CA')}
+    function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+    var currentFilter='all';
+    var currentSearch='';
+
+    function render(data){
+      var el=document.getElementById('content');el.className='';
+      var individuals=data.individuals||[];
+      var h='';
+
+      // Stats
+      h+='<div class="stats-bar">';
+      h+='<div class="stat-tile"><div class="val red">'+fmt(data.total_individuals)+'</div><div class="label">Individuals Charged</div></div>';
+      h+='<div class="stat-tile"><div class="val orange">'+fmt(data.total_charges)+'</div><div class="label">Total Charges</div></div>';
+      h+='<div class="stat-tile"><div class="val red">'+fmt(data.severity_distribution.critical_individuals)+'</div><div class="label">Critical Severity</div></div>';
+      h+='<div class="stat-tile"><div class="val orange">'+fmt(data.severity_distribution.high_individuals)+'</div><div class="label">High Severity</div></div>';
+      h+='<div class="stat-tile"><div class="val yellow">'+fmt(data.severity_distribution.medium_individuals)+'</div><div class="label">Medium Severity</div></div>';
+      h+='</div>';
+
+      // Filters
+      h+='<div class="filter-bar">';
+      h+='<input type="text" id="cs-search" placeholder="Search by name..." oninput="window._csFilter()">';
+      h+='<button class="filter-pill active" data-sev="all" onclick="window._csSev(this)">All ('+individuals.length+')</button>';
+      h+='<button class="filter-pill" data-sev="critical" onclick="window._csSev(this)">Critical ('+data.severity_distribution.critical_individuals+')</button>';
+      h+='<button class="filter-pill" data-sev="high" onclick="window._csSev(this)">High ('+data.severity_distribution.high_individuals+')</button>';
+      h+='<button class="filter-pill" data-sev="medium" onclick="window._csSev(this)">Medium ('+data.severity_distribution.medium_individuals+')</button>';
+      h+='</div>';
+
+      // Person cards
+      individuals.forEach(function(p,i){
+        var maxSev=p.charges.reduce(function(max,c){var o={critical:3,high:2,medium:1};return Math.max(max,o[c.severity]||0)},0);
+        var sevLabel=maxSev>=3?'critical':maxSev>=2?'high':'medium';
+
+        h+='<div class="person-card" data-name="'+esc(p.name).toLowerCase()+'" data-sev="'+sevLabel+'">';
+        h+='<div class="person-header" onclick="window._csToggle('+i+')">';
+        h+='<div><div class="person-name">'+esc(p.name)+'</div></div>';
+        h+='<div class="person-meta">';
+        h+='<span class="badge badge-type">'+esc(p.type)+'</span>';
+        h+='<span class="badge badge-'+sevLabel+'">'+sevLabel.toUpperCase()+'</span>';
+        h+='<span class="charge-count">'+p.charge_count+' charge'+(p.charge_count>1?'s':'')+'</span>';
+        if(p.max_combined_penalty)h+='<span style="font-size:.65rem;color:var(--text-tertiary);">Max: '+esc(p.max_combined_penalty)+'</span>';
+        h+='<span class="chevron" id="chev-'+i+'">&#9654;</span>';
+        h+='</div></div>';
+
+        h+='<div class="person-body" id="body-'+i+'">';
+        p.charges.forEach(function(c){
+          h+='<div class="charge-card sev-'+c.severity+'">';
+          h+='<div class="charge-section">Criminal Code '+esc(c.section)+'</div>';
+          h+='<div class="charge-title">'+esc(c.section_title)+'</div>';
+          h+='<div class="charge-desc">'+esc(c.description)+'</div>';
+          h+='<div class="charge-penalty">Maximum penalty: '+esc(c.max_penalty)+'</div>';
+          if(c.action)h+='<div class="charge-action">'+esc(c.action)+'</div>';
+          if(c.evidence&&c.evidence.length>0){
+            h+='<div class="charge-evidence"><strong>Evidence:</strong><br>';
+            c.evidence.forEach(function(e){
+              h+=esc(e.fact||'');
+              if(e.source)h+=' <span style="color:var(--text-tertiary);">('+esc(e.source)+')</span>';
+              h+='<br>';
+            });
+            h+='</div>';
+          }
+          h+='</div>';
+        });
+        h+='</div></div>';
+      });
+
+      // S.504 guide
+      h+='<div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-top:24px;">';
+      h+='<h2 style="font-family:Playfair Display,serif;font-size:1.2rem;color:var(--text-primary);margin-bottom:12px;">How to Use This: Criminal Code s.504</h2>';
+      h+='<div style="font-size:.82rem;color:var(--text-tertiary);line-height:1.8;">';
+      h+='<p><strong>Section 504 of the Criminal Code</strong> states: "Any one who, on reasonable grounds, believes that a person has committed an indictable offence may lay an information in writing and under oath before a justice."</p>';
+      h+='<p style="margin-top:8px;"><strong>Steps:</strong></p>';
+      h+='<ol style="margin:8px 0 8px 20px;">';
+      h+='<li>Gather evidence (this page provides the starting point)</li>';
+      h+='<li>Consult a lawyer to review the evidence and applicable sections</li>';
+      h+='<li>Draft an information (sworn written statement of facts)</li>';
+      h+='<li>Attend before a Justice of the Peace at your local courthouse</li>';
+      h+='<li>Swear the information under oath</li>';
+      h+='<li>The Justice decides whether to issue process (summons or warrant)</li>';
+      h+='</ol>';
+      h+='<p>See <a href="criminal-code-analysis.html" style="color:var(--accent);">full Criminal Code analysis</a> for all 81 findings.</p>';
+      h+='</div></div>';
+
+      // Footer
+      h+='<div style="text-align:center;padding:30px 0;border-top:1px solid var(--border);margin-top:24px;">';
+      h+='<p style="font-size:.72rem;color:var(--text-tertiary);">All data sourced from Canadian government public records.</p>';
+      h+='<p style="font-size:.68rem;color:var(--text-tertiary);margin-top:4px;">Generated: '+esc(data.generated||'')+'</p>';
+      h+='</div>';
+
+      el.innerHTML=h;
+    }
+
+    window._csToggle=function(i){
+      var body=document.getElementById('body-'+i);
+      var chev=document.getElementById('chev-'+i);
+      if(body){body.classList.toggle('open');if(chev)chev.classList.toggle('open')}
+    };
+
+    window._csSev=function(btn){
+      currentFilter=btn.getAttribute('data-sev');
+      document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.remove('active')});
+      btn.classList.add('active');
+      applyFilters();
+    };
+
+    window._csFilter=function(){
+      currentSearch=(document.getElementById('cs-search')||{}).value||'';
+      applyFilters();
+    };
+
+    function applyFilters(){
+      var q=currentSearch.toLowerCase().trim();
+      document.querySelectorAll('.person-card').forEach(function(card){
+        var name=card.getAttribute('data-name')||'';
+        var sev=card.getAttribute('data-sev')||'';
+        var matchSearch=!q||name.indexOf(q)!==-1;
+        var matchSev=currentFilter==='all'||sev===currentFilter;
+        card.style.display=(matchSearch&&matchSev)?'':'none';
+      });
+    }
+  })();
+  </script>
+  <script src="js/ai-panel.js"></script>
+  <footer id="site-footer"></footer>
+  <script src="footer.js?v=1"></script>
+</body>
+</html>
