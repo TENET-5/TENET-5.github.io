@@ -402,7 +402,7 @@
           y: h / 2 + Math.sin(angle) * radius * (0.7 + Math.random() * 0.3),
           vx: 0, vy: 0,
           node: n,
-          r: 3 + Math.min(n.influence_score || 2, 50) * 0.35,
+          r: 2.5 + Math.log1p(n.influence_score || 1) * 0.9,
         };
       });
 
@@ -411,14 +411,16 @@
       positioned.forEach(function(p) { nodeMap[p.node.id] = p; });
 
       // Simple force simulation (50 iterations)
-      for (var iter = 0; iter < 60; iter++) {
+      for (var iter = 0; iter < 220; iter++) {
         // Repulsion between all nodes
         for (var i = 0; i < positioned.length; i++) {
           for (var j = i + 1; j < positioned.length; j++) {
             var dx = positioned[j].x - positioned[i].x;
             var dy = positioned[j].y - positioned[i].y;
             var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            var force = 800 / (dist * dist);
+            var minDist = (positioned[i].r + positioned[j].r) * 1.8;
+            var d = Math.max(dist, minDist);
+            var force = 2200 / (d * d);
             positioned[i].vx -= dx / dist * force;
             positioned[i].vy -= dy / dist * force;
             positioned[j].vx += dx / dist * force;
@@ -433,7 +435,7 @@
             var dx = t.x - s.x;
             var dy = t.y - s.y;
             var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            var force = (dist - 120) * 0.005;
+            var force = (dist - 80) * 0.003;
             s.vx += dx / dist * force;
             s.vy += dy / dist * force;
             t.vx -= dx / dist * force;
@@ -442,8 +444,8 @@
         });
         // Center gravity
         positioned.forEach(function(p) {
-          p.vx += (w / 2 - p.x) * 0.001;
-          p.vy += (h / 2 - p.y) * 0.001;
+          p.vx += (w / 2 - p.x) * 0.002;
+          p.vy += (h / 2 - p.y) * 0.002;
           p.x += p.vx * 0.4;
           p.y += p.vy * 0.4;
           p.vx *= 0.85;
@@ -544,8 +546,12 @@
       ctx.font = '10px JetBrains Mono';
       ctx.textAlign = 'center';
       top.forEach(function(p) {
-        ctx.fillStyle = hoveredNode === p ? '#fff' : 'rgba(224,224,224,0.75)';
-        ctx.fillText(p.node.label, p.x, p.y - p.r - 5);
+        var lbl = p.node.label.length > 22 ? p.node.label.substring(0, 20) + '…' : p.node.label;
+        ctx.fillStyle = hoveredNode === p ? '#fff' : 'rgba(255,255,255,0.88)';
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(lbl, p.x, p.y - p.r - 4);
+        ctx.shadowBlur = 0;
       });
 
       updateFilterInfo();
@@ -572,7 +578,11 @@
     // ── TABLE RENDERING ──
     function renderTable() {
       var tbody = document.getElementById('entity-tbody');
-      var visible = allNodes.filter(isNodeVisible);
+      var visible = allNodes.filter(isNodeVisible).filter(function(n) {
+        // Filter out generic billing threshold entries (not actual named entities)
+        var lbl = n.label || '';
+        return !(lbl.match(/^contributions? of \True\d/i) || lbl.match(/contributions de \d/i) || lbl.match(/^Estate of /i) || lbl.match(/^\$\d+ or less/i));
+      });
 
       visible.sort(function(a, b) {
         var va, vb;
@@ -695,3 +705,4 @@
   <!-- No footer on canvas pages — full-screen tools -->
 </body>
 </html>
+
