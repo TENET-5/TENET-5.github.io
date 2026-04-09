@@ -344,6 +344,8 @@
   </footer>
 
   <script src="nav.js?v=8"></script>
+  <script src="data/investigation_board.js"></script>
+  <script src="data/network_analysis/influence_network.js"></script>
   <script>
   (function() {
     'use strict';
@@ -358,14 +360,11 @@
     var sortAsc = false;
     var hoveredNode = null;
 
-    // ── DATA LOADING ──
+    // ── DATA LOADING (OFFLINE PARITY) ──
     function loadData() {
-      Promise.all([
-        fetch('data/investigation_board.json', {cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
-        fetch('data/network_analysis/influence_network.json', {cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
-      ]).then(function(results) {
-        var boardData = results[0];
-        var graphData = results[1];
+      // Resolve statically mapped window variables
+      var boardData = window.BOARD_DATA || null;
+      var graphData = window.INFLUENCE_DATA || null;
         if (graphData) {
           allNodes = graphData.nodes || [];
           allEdges = graphData.edges || [];
@@ -395,7 +394,6 @@
         initPhysics();
         requestAnimationFrame(tick);
         renderTable();
-      });
     }
 
     // ── GLOW RADIUS MAP ──
