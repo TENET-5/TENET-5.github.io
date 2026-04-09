@@ -44,7 +44,7 @@
         '<button class="ai-panel-close" onclick="window._t5toggleAI()" aria-label="Close">&times;</button>' +
       '</div>' +
       '<div class="ai-panel-info">' +
-        '<p>Powered by Google Gemini via your Google account. Ask questions about the data on this page.</p>' +
+        '<p>Powered by <strong style="color:var(--accent);">TENET5 OpenNatwork</strong> (Offline Inference). Ask questions about the data on this page securely.</p>' +
       '</div>' +
       '<div class="ai-panel-quick">' +
         QUICK_PROMPTS.map(function(qp) {
@@ -141,23 +141,34 @@
     });
   }
 
-  // ── Call Gemini API ──
+  // ── Call OpenNatwork (Local TENET5 AI) ──
   async function callGemini(prompt) {
-    // Try using the Google AI SDK if available
-    if (window.google && window.google.generativeAI) {
-      var model = window.google.generativeAI.getGenerativeModel({ model: 'gemini-pro' });
-      var result = await model.generateContent(prompt);
-      return result.response.text();
-    }
-
-    // Fallback: try the @google/genai import
     try {
-      var module = await import('https://esm.run/@google/genai');
-      // User needs to have their own API key or Google AI access
-      // This will be configured when Firebase Auth is live
-      throw new Error('Configure your Google AI access in account settings');
+      const response = await fetch('http://127.0.0.1:9222/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer tenet5-native'
+        },
+        body: JSON.stringify({
+          model: 'opennatwork-local',
+          messages: [
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.1
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Local inference is currently OFFLINE on port 9222.');
+      }
+      
+      const data = await response.json();
+      return data.choices && data.choices[0] && data.choices[0].message.content 
+        ? data.choices[0].message.content 
+        : 'Received empty response from the local inference node.';
     } catch (e) {
-      throw new Error('Google Gemini AI requires a Google account with AI access enabled. Sign in with Google to use this feature.');
+      throw new Error('TENET5 Local AI mesh could not be reached. Ensure OpenNatwork is running on the host. (' + e.message + ')');
     }
   }
 
