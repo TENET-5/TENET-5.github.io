@@ -119,7 +119,7 @@
       border-radius: 10px;
       position: relative;
       width: 100%;
-      height: 650px;
+      height: 800px;
       margin-bottom: 28px;
       overflow: hidden;
     }
@@ -205,7 +205,7 @@
     .overlap-card .sources { font-size: 0.7rem; color: var(--text-tertiary); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
 
     @media (max-width: 700px) {
-      .canvas-container { height: 400px; }
+      .canvas-container { height: 550px; }
       .score-grid { grid-template-columns: repeat(2, 1fr); }
       .filter-bar { flex-direction: column; }
     }
@@ -266,14 +266,14 @@
         <div class="tt-detail"></div>
       </div>
       <div class="canvas-legend">
-        <div class="leg-item"><div class="dot" style="background:#ff4444; color:#ff4444;"></div> MAID Chain</div>
-        <div class="leg-item"><div class="dot" style="background:#60a5fa; color:#60a5fa;"></div> Israel-linked</div>
-        <div class="leg-item"><div class="dot" style="background:#e53555; color:#e53555;"></div> CCP-linked</div>
-        <div class="leg-item"><div class="dot" style="background:#facc15; color:#facc15;"></div> CFNIS</div>
-        <div class="leg-item"><div class="dot" style="background:#f472b6; color:#f472b6;"></div> Media</div>
-        <div class="leg-item"><div class="dot" style="background:#f97316; color:#f97316;"></div> Donor</div>
-        <div class="leg-item"><div class="dot" style="background:#39ff14; color:#39ff14;"></div> Official</div>
-        <div class="leg-item"><div class="dot" style="background:#c084fc; color:#c084fc;"></div> Organization</div>
+        <div class="leg-item"><div class="dot" style="background:#ff3333; color:#ff3333;"></div> MAID Chain</div>
+        <div class="leg-item"><div class="dot" style="background:#4d9fff; color:#4d9fff;"></div> Israel-linked</div>
+        <div class="leg-item"><div class="dot" style="background:#ff2d50; color:#ff2d50;"></div> CCP-linked</div>
+        <div class="leg-item"><div class="dot" style="background:#f5c518; color:#f5c518;"></div> CFNIS</div>
+        <div class="leg-item"><div class="dot" style="background:#ff5da0; color:#ff5da0;"></div> Media</div>
+        <div class="leg-item"><div class="dot" style="background:#ff8c1a; color:#ff8c1a;"></div> Donor</div>
+        <div class="leg-item"><div class="dot" style="background:#2dff6e; color:#2dff6e;"></div> Official</div>
+        <div class="leg-item"><div class="dot" style="background:#a66dff; color:#a66dff;"></div> Organization</div>
       </div>
     </div>
 
@@ -631,14 +631,36 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
         
-        ctx.fillStyle = baseColor;
-        ctx.shadowColor = baseColor;
-        ctx.shadowBlur = isHovered ? 18 : 6;
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        // Outer glow for depth — larger, dimmer halo behind the node
+        var score = p.node.influence_score || 0;
+        if (score > 10 || isHovered) {
+          ctx.shadowColor = baseColor;
+          ctx.shadowBlur = isHovered ? 25 : Math.min(score * 0.4, 12);
+          ctx.fillStyle = baseColor;
+          ctx.globalAlpha = 0.15;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = isHovered ? 1 : 0.85;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
+        }
 
-        ctx.lineWidth = isHovered ? 2 : 0.5;
-        ctx.strokeStyle = isHovered ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)';
+        // Inner radial gradient — bright center, saturated edge
+        var bigint = parseInt(baseColor.replace('#', ''), 16);
+        var rV = (bigint >> 16) & 255, gV = (bigint >> 8) & 255, bV = bigint & 255;
+        var grad = ctx.createRadialGradient(
+          p.x - currentRadius * 0.25, p.y - currentRadius * 0.25, currentRadius * 0.1,
+          p.x, p.y, currentRadius
+        );
+        grad.addColorStop(0, 'rgba(' + Math.min(rV+80,255) + ',' + Math.min(gV+80,255) + ',' + Math.min(bV+80,255) + ',1)');
+        grad.addColorStop(0.6, baseColor);
+        grad.addColorStop(1, 'rgba(' + Math.floor(rV*0.6) + ',' + Math.floor(gV*0.6) + ',' + Math.floor(bV*0.6) + ',1)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Crisp edge ring
+        ctx.lineWidth = isHovered ? 2 : (score > 30 ? 1.5 : 0.5);
+        ctx.strokeStyle = isHovered ? '#fff' : 'rgba(255,255,255,' + Math.min(0.15 + score * 0.005, 0.5) + ')';
         ctx.stroke();
       });
 
@@ -687,16 +709,16 @@
 
     function getNodeColor(node) {
       var cats = (node.categories || []).join(' ');
-      if (cats.indexOf('maid_legislation') !== -1) return '#ff4444';
-      if (cats.indexOf('israel') !== -1) return '#60a5fa';
-      if (cats.indexOf('ccp') !== -1) return '#e53555';
-      if (cats.indexOf('cfnis') !== -1) return '#facc15';
-      if (cats.indexOf('media') !== -1) return '#f472b6';
-      if (node.type === 'org') return '#c084fc';
-      if (node.type === 'donor' || cats.indexOf('donor') !== -1) return '#f97316';
-      if (node.type === 'official') return '#39ff14';
-      if (node.type === 'event') return '#facc15';
-      return '#e53555';
+      if (cats.indexOf('maid_legislation') !== -1) return '#ff3333';
+      if (cats.indexOf('israel') !== -1) return '#4d9fff';
+      if (cats.indexOf('ccp') !== -1) return '#ff2d50';
+      if (cats.indexOf('cfnis') !== -1) return '#f5c518';
+      if (cats.indexOf('media') !== -1) return '#ff5da0';
+      if (node.type === 'org') return '#a66dff';
+      if (node.type === 'donor' || cats.indexOf('donor') !== -1) return '#ff8c1a';
+      if (node.type === 'official') return '#2dff6e';
+      if (node.type === 'event') return '#f5c518';
+      return '#ff2d50';
     }
 
     function getCatBadge(cat) {
