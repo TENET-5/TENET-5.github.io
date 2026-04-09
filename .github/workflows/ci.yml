@@ -1,0 +1,58 @@
+name: TENET-5 OSINT Automation Pipeline
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  validate-osint:
+    name: "SATOR Pipeline: Crawler Validation"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Configure Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Execute Link Parity Crawler
+        run: |
+          python scripts/cicd_validate.py
+
+  deploy-pages:
+    name: "SATOR Pipeline: Github Pages Deployment"
+    needs: validate-osint
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Configure Pages Ecosystem
+        uses: actions/configure-pages@v5
+
+      - name: Compile Site Artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy Live Ecosystem
+        id: deployment
+        uses: actions/deploy-pages@v4

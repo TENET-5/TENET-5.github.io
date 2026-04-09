@@ -1,6 +1,6 @@
 /**
- * TENET5 Shared Navigation Component v4.0
- * Redesigned for easier navigation across 75+ pages.
+ * TENET5 Shared Navigation Component v5.0
+ * Redesigned for easier navigation across 82+ pages.
  * 
  * Features:
  *  - Persistent sidebar mega-menu on desktop (triggered by hamburger)
@@ -10,8 +10,13 @@
  *  - "You Are Here" active page highlighting
  *  - Smooth slide-in animation
  *  - Full mobile-first responsive
+ *  - Inline mega menu search with fuzzy matching
+ *  - Recently visited pages (localStorage)
+ *  - Reading progress bar
+ *  - Keyboard shortcuts (/, ?, Escape, h, j, k)
+ *  - LIRIL domain classification badges
  *
- * Include this script in every page: <script src="nav.js?v=7"></script>
+ * Include this script in every page: <script src="nav.js?v=9"></script>
  * Place a <nav id="site-nav"></nav> element where the nav should appear.
  *
  * LIRIL/SATOR: BUFFER gate — navigational routing for all content
@@ -24,6 +29,7 @@
     {
       section: 'Core Investigation',
       icon: '🕵',
+      domain: 'TECHNOLOGY',
       items: [
         { label: 'Investigation Board', href: 'conspiracy-board.html', desc: 'Node graph of influence networks' },
         { label: 'OSINT Dashboard', href: 'osint-dashboard.html', desc: 'Aggregated intelligence data' },
@@ -39,6 +45,7 @@
     {
       section: 'The Harm',
       icon: '🩸',
+      domain: 'ETHICS',
       items: [
         { label: 'The 504 Charges', href: 'accountability.html', desc: 'Criminal accountability database' },
         { label: 'Criminal Code Analysis', href: 'criminal-code-analysis.html', desc: '81 findings mapped to CC sections', hot: true },
@@ -54,6 +61,7 @@
     {
       section: 'Follow the Money',
       icon: '💰',
+      domain: 'MATHEMATICS',
       items: [
         { label: 'Cross-Reference Engine', href: 'cross-reference.html', desc: 'Lobbying vs. voting correlation' },
         { label: 'Foreign Influence', href: 'foreign-influence.html', desc: 'CIJA, CCP, UFWD pipelines' },
@@ -74,6 +82,7 @@
     {
       section: 'Parliament',
       icon: '🏛',
+      domain: 'ETHICS',
       items: [
         { label: 'Treason Trajectory', href: 'treason-trajectory.html', desc: '81 years of pattern' },
         { label: '5GW Subversion', href: '5gw-subversion.html', desc: 'Fifth-generation warfare' },
@@ -90,6 +99,7 @@
     {
       section: 'Military & Legal',
       icon: '🎖',
+      domain: 'ETHICS',
       items: [
         { label: 'PPCLI Lawsuit', href: 'lawsuit-ppcli.html', desc: 'Active legal proceedings' },
         { label: 'CFNIS Investigation', href: 'cfnis.html', desc: 'Military police misconduct' },
@@ -103,6 +113,7 @@
     {
       section: 'About & Action',
       icon: '📖',
+      domain: 'ART',
       items: [
         { label: 'Take Action', href: 'take-action.html', desc: 's.504 prosecution, complaints, contact MPs', hot: true },
         { label: 'My Story', href: 'my-story.html', desc: 'Daniel Perry\'s account' },
@@ -121,6 +132,7 @@
     {
       section: 'Apps',
       icon: '🎮',
+      domain: 'TECHNOLOGY',
       items: [
         { label: 'Red Duster FPS', href: 'red-duster-game.html', desc: 'Tactical simulator', special: 'game' },
         { label: 'Bloggins', href: 'bloggins.html', desc: 'Raccoon intelligence AI', special: 'green' },
@@ -134,6 +146,7 @@
     {
       section: 'Community',
       icon: '💬',
+      domain: 'ART',
       items: [
         { label: 'Live Chat', href: 'chat.html', desc: 'Real-time discussion', hot: true },
         { label: 'AI Research', href: 'chat.html#ai', desc: 'Gemini-powered analysis', hot: true },
@@ -144,6 +157,7 @@
     {
       section: 'Municipal',
       icon: '🏛️',
+      domain: 'SCIENCE',
       items: [
         { label: 'Municipal Hub', href: 'municipal-accountability.html', desc: 'All municipalities', hot: true },
         { label: 'Ottawa', href: 'ottawa.html', desc: 'LRT scandal, Lansdowne 2.0', hot: true },
@@ -178,14 +192,14 @@
 
   function buildNav() {
     // Prevent double-init
-    if (document.getElementById('t5-nav-v4-css')) return;
+    if (document.getElementById('t5-nav-v5-css')) return;
 
     var currentPage = getCurrentPage();
     var currentSection = getCurrentSection(currentPage);
 
     // Inject CSS
     var style = document.createElement('style');
-    style.id = 't5-nav-v4-css';
+    style.id = 't5-nav-v5-css';
     style.textContent = NAV_CSS;
     document.head.appendChild(style);
 
@@ -198,7 +212,14 @@
 
     // ── TOP BAR ──
     var html = '';
-    html += '<a href="index.html" class="t5-brand">TENET5</a>';
+
+    // Page count
+    var totalPages = 0;
+    for (var c = 0; c < SITEMAP.length; c++) totalPages += SITEMAP[c].items.length;
+
+    // Progress bar
+    html += '<div class="t5-progress"></div>';
+    html += '<a href="index.html" class="t5-brand">TENET5<span class="t5-page-count">' + totalPages + '</span></a>';
 
     // Quick links (visible on desktop)
     html += '<div class="t5-quick">';
@@ -224,6 +245,18 @@
     html += '<div class="t5-mega" aria-hidden="true">';
     html += '<div class="t5-mega-scroll">';
 
+    // Search box
+    html += '<div class="t5-search-box">';
+    html += '<input type="text" class="t5-search-input" placeholder="Search ' + totalPages + ' pages... (press /)" autocomplete="off" />';
+    html += '<button class="t5-search-clear" aria-label="Clear search">&times;</button>';
+    html += '</div>';
+
+    // Recently visited
+    html += '<div class="t5-recent" id="t5-recent-section">';
+    html += '<div class="t5-recent-heading">⏱ Recently Visited</div>';
+    html += '<div class="t5-recent-links"></div>';
+    html += '</div>';
+
     // Current page indicator
     if (currentSection) {
       html += '<div class="t5-youarehere">';
@@ -236,7 +269,9 @@
     for (var s = 0; s < SITEMAP.length; s++) {
       var sec = SITEMAP[s];
       html += '<div class="t5-mega-section">';
-      html += '<h3 class="t5-mega-heading">' + sec.icon + ' ' + sec.section + '</h3>';
+      html += '<h3 class="t5-mega-heading">' + sec.icon + ' ' + sec.section;
+      if (sec.domain) html += '<span class="t5-domain-badge t5-domain-' + sec.domain + '">' + sec.domain + '</span>';
+      html += '</h3>';
       html += '<div class="t5-mega-items">';
       for (var i = 0; i < sec.items.length; i++) {
         var item = sec.items[i];
@@ -253,6 +288,9 @@
       html += '</div></div>';
     }
 
+    // No results message
+    html += '<div class="t5-no-results" style="display:none;">No results found</div>';
+
     html += '</div></div>'; // close mega-scroll + mega
     html += '<div class="t5-overlay"></div>';
 
@@ -263,6 +301,10 @@
     var mega = nav.querySelector('.t5-mega');
     var overlay = nav.querySelector('.t5-overlay');
     var isOpen = false;
+    var searchInput = nav.querySelector('.t5-search-input');
+    var searchClear = nav.querySelector('.t5-search-clear');
+    var noResults = nav.querySelector('.t5-no-results');
+    var progressBar = nav.querySelector('.t5-progress');
 
     function toggleMenu(forceClose) {
       isOpen = forceClose ? false : !isOpen;
@@ -277,14 +319,199 @@
     menuBtn.addEventListener('click', function(e) { e.stopPropagation(); toggleMenu(); });
     overlay.addEventListener('click', function() { toggleMenu(true); });
 
-    // Close on Escape
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen) toggleMenu(true);
-    });
-
     // Close on link click
     mega.querySelectorAll('.t5-mega-link').forEach(function(link) {
       link.addEventListener('click', function() { toggleMenu(true); });
+    });
+
+    // ── INLINE SEARCH ──
+    function doSearch(query) {
+      var term = query.toLowerCase().trim();
+      var sections = mega.querySelectorAll('.t5-mega-section');
+      var recentEl = document.getElementById('t5-recent-section');
+      var anyVisible = false;
+
+      if (!term) {
+        mega.querySelectorAll('.t5-mega-link').forEach(function(l) { l.style.display = ''; });
+        sections.forEach(function(s) { s.style.display = ''; });
+        if (recentEl) recentEl.style.display = '';
+        noResults.style.display = 'none';
+        return;
+      }
+
+      if (recentEl) recentEl.style.display = 'none';
+
+      sections.forEach(function(sec) {
+        var links = sec.querySelectorAll('.t5-mega-link');
+        var visibleCount = 0;
+        links.forEach(function(link) {
+          var text = link.textContent.toLowerCase();
+          var href = (link.getAttribute('href') || '').toLowerCase();
+          if (text.indexOf(term) !== -1 || href.indexOf(term) !== -1) {
+            link.style.display = '';
+            visibleCount++;
+          } else {
+            link.style.display = 'none';
+          }
+        });
+        sec.style.display = visibleCount > 0 ? '' : 'none';
+        if (visibleCount > 0) anyVisible = true;
+      });
+
+      noResults.style.display = anyVisible ? 'none' : '';
+    }
+
+    searchInput.addEventListener('keyup', function() { doSearch(this.value); });
+    searchInput.addEventListener('input', function() { doSearch(this.value); });
+    searchClear.addEventListener('click', function() {
+      searchInput.value = '';
+      doSearch('');
+      searchInput.focus();
+    });
+
+    // ── RECENTLY VISITED (localStorage) ──
+    (function initRecent() {
+      var key = 't5-recent';
+      var max = 5;
+      var stored = [];
+      try { stored = JSON.parse(localStorage.getItem(key)) || []; } catch(e) { stored = []; }
+
+      if (currentPage && currentPage !== 'index.html') {
+        stored = stored.filter(function(r) { return r.href !== currentPage; });
+        stored.unshift({ href: currentPage, label: getPageLabel(currentPage) });
+        if (stored.length > max) stored = stored.slice(0, max);
+        try { localStorage.setItem(key, JSON.stringify(stored)); } catch(e) {}
+      }
+
+      var container = nav.querySelector('.t5-recent-links');
+      var section = document.getElementById('t5-recent-section');
+      if (!stored.length) {
+        if (section) section.style.display = 'none';
+        return;
+      }
+      var rHtml = '';
+      for (var r = 0; r < stored.length; r++) {
+        rHtml += '<a href="' + stored[r].href + '" class="t5-recent-link">' + stored[r].label + '</a>';
+      }
+      container.innerHTML = rHtml;
+    })();
+
+    // ── READING PROGRESS BAR ──
+    (function initProgress() {
+      var ticking = false;
+      function updateProgress() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight;
+        var winHeight = document.documentElement.clientHeight;
+
+        if (docHeight < winHeight * 2) {
+          progressBar.style.display = 'none';
+          ticking = false;
+          return;
+        }
+        progressBar.style.display = '';
+        var scrollable = docHeight - winHeight;
+        var pct = scrollable > 0 ? (scrollTop / scrollable) * 100 : 0;
+        progressBar.style.width = Math.min(pct, 100) + '%';
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          requestAnimationFrame(updateProgress);
+          ticking = true;
+        }
+      }, { passive: true });
+
+      updateProgress();
+    })();
+
+    // ── KEYBOARD SHORTCUTS ──
+    var shortcutsOverlay = null;
+
+    function createShortcutsOverlay() {
+      if (shortcutsOverlay) return shortcutsOverlay;
+      var el = document.createElement('div');
+      el.className = 't5-shortcuts-overlay';
+      el.innerHTML = '<div class="t5-shortcuts-modal">' +
+        '<h3>\u2328\ufe0f Keyboard Shortcuts</h3>' +
+        '<div class="t5-shortcuts-grid">' +
+        '<div class="t5-sc"><kbd>/</kbd><span>Search pages</span></div>' +
+        '<div class="t5-sc"><kbd>?</kbd><span>Show shortcuts</span></div>' +
+        '<div class="t5-sc"><kbd>Esc</kbd><span>Close menu / overlay</span></div>' +
+        '<div class="t5-sc"><kbd>h</kbd><span>Go home</span></div>' +
+        '<div class="t5-sc"><kbd>j</kbd><span>Next link in menu</span></div>' +
+        '<div class="t5-sc"><kbd>k</kbd><span>Previous link in menu</span></div>' +
+        '</div>' +
+        '<p class="t5-sc-hint">Press <kbd>?</kbd> or <kbd>Esc</kbd> to close</p>' +
+        '</div>';
+      el.addEventListener('click', function(ev) {
+        if (ev.target === el) toggleShortcuts(false);
+      });
+      document.body.appendChild(el);
+      shortcutsOverlay = el;
+      return el;
+    }
+
+    function toggleShortcuts(show) {
+      var ol = createShortcutsOverlay();
+      if (typeof show === 'undefined') show = !ol.classList.contains('open');
+      ol.classList.toggle('open', show);
+    }
+
+    document.addEventListener('keydown', function(e) {
+      var tag = (e.target.tagName || '').toLowerCase();
+      var isInput = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+
+      if (e.key === 'Escape') {
+        if (shortcutsOverlay && shortcutsOverlay.classList.contains('open')) {
+          toggleShortcuts(false);
+          e.preventDefault();
+          return;
+        }
+        if (isOpen) {
+          toggleMenu(true);
+          e.preventDefault();
+          return;
+        }
+      }
+
+      if (isInput) return;
+
+      if (e.key === '/') {
+        e.preventDefault();
+        if (!isOpen) toggleMenu();
+        setTimeout(function() { searchInput.focus(); }, 100);
+        return;
+      }
+
+      if (e.key === '?') {
+        e.preventDefault();
+        toggleShortcuts();
+        return;
+      }
+
+      if (e.key === 'h') {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      if ((e.key === 'j' || e.key === 'k') && isOpen) {
+        var visibleLinks = [];
+        mega.querySelectorAll('.t5-mega-link').forEach(function(l) {
+          if (l.offsetParent !== null && l.style.display !== 'none') visibleLinks.push(l);
+        });
+        if (!visibleLinks.length) return;
+        var focused = document.activeElement;
+        var idx = visibleLinks.indexOf(focused);
+        if (e.key === 'j') {
+          idx = idx < visibleLinks.length - 1 ? idx + 1 : 0;
+        } else {
+          idx = idx > 0 ? idx - 1 : visibleLinks.length - 1;
+        }
+        visibleLinks[idx].focus();
+        e.preventDefault();
+      }
     });
   }
 
@@ -300,7 +527,7 @@
   // ── STYLES ──
   var NAV_CSS = '\
 /* ══════════════════════════════════════════════ */\
-/*  TENET5 NAV V4 — TOPBAR + MEGA MENU          */\
+/*  TENET5 NAV V5 — TOPBAR + MEGA MENU          */\
 /* ══════════════════════════════════════════════ */\
 \
 .t5-topbar {\
@@ -564,6 +791,200 @@
 \
 @media (min-width: 769px) and (max-width: 1100px) {\
   .t5-quick a:nth-child(n+4) { display: none; }\
+}\
+\
+/* ── PROGRESS BAR ── */\
+.t5-progress {\
+  position: absolute;\
+  top: 0;\
+  left: 0;\
+  height: 3px;\
+  background: #c41e3a;\
+  width: 0%;\
+  transition: width 0.1s;\
+  z-index: 1;\
+  pointer-events: none;\
+}\
+\
+/* Page count badge */\
+.t5-page-count {\
+  font-size: 0.55rem;\
+  color: #4a4a52;\
+  margin-left: 6px;\
+  font-weight: 400;\
+}\
+\
+/* ── INLINE SEARCH ── */\
+.t5-search-box {\
+  position: relative;\
+  margin-bottom: 16px;\
+}\
+.t5-search-input {\
+  width: 100%;\
+  background: #111114;\
+  border: 1px solid rgba(255,255,255,0.08);\
+  border-radius: 8px;\
+  padding: 10px 36px 10px 12px;\
+  color: #ededed;\
+  font-family: inherit;\
+  font-size: 0.78rem;\
+  outline: none;\
+  transition: border-color 0.2s;\
+  box-sizing: border-box;\
+}\
+.t5-search-input::placeholder { color: #4a4a52; }\
+.t5-search-input:focus { border-color: #c41e3a; }\
+.t5-search-clear {\
+  position: absolute;\
+  right: 8px;\
+  top: 50%;\
+  transform: translateY(-50%);\
+  background: none;\
+  border: none;\
+  color: #6e6e76;\
+  font-size: 1.1rem;\
+  cursor: pointer;\
+  padding: 4px 6px;\
+  line-height: 1;\
+}\
+.t5-search-clear:hover { color: #ededed; }\
+\
+/* No results */\
+.t5-no-results {\
+  text-align: center;\
+  color: #4a4a52;\
+  font-size: 0.78rem;\
+  padding: 40px 0;\
+}\
+\
+/* ── RECENTLY VISITED ── */\
+.t5-recent {\
+  margin-bottom: 16px;\
+  padding: 10px 12px;\
+  background: rgba(255,255,255,0.02);\
+  border-radius: 8px;\
+  border: 1px solid rgba(255,255,255,0.04);\
+}\
+.t5-recent-heading {\
+  font-size: 0.6rem;\
+  text-transform: uppercase;\
+  letter-spacing: 1.5px;\
+  color: #6e6e76;\
+  font-weight: 600;\
+  margin-bottom: 6px;\
+}\
+.t5-recent-links {\
+  display: flex;\
+  flex-wrap: wrap;\
+  gap: 4px;\
+}\
+.t5-recent-link {\
+  font-size: 0.7rem;\
+  color: #a0a0a6 !important;\
+  text-decoration: none !important;\
+  padding: 4px 10px;\
+  background: rgba(255,255,255,0.04);\
+  border-radius: 6px;\
+  transition: all 0.2s;\
+}\
+.t5-recent-link:hover {\
+  color: #ededed !important;\
+  background: rgba(255,255,255,0.08);\
+}\
+\
+/* ── DOMAIN BADGES ── */\
+.t5-domain-badge {\
+  font-size: 0.5rem;\
+  padding: 1px 6px;\
+  border-radius: 3px;\
+  margin-left: 8px;\
+  font-weight: 600;\
+  letter-spacing: 0.5px;\
+  text-transform: uppercase;\
+  vertical-align: middle;\
+  display: inline-block;\
+}\
+.t5-domain-ETHICS { background: rgba(196,30,58,0.13); color: #c41e3a; border: 1px solid rgba(196,30,58,0.25); }\
+.t5-domain-TECHNOLOGY { background: rgba(59,130,246,0.13); color: #3b82f6; border: 1px solid rgba(59,130,246,0.25); }\
+.t5-domain-MATHEMATICS { background: rgba(245,158,11,0.13); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }\
+.t5-domain-ART { background: rgba(139,92,246,0.13); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.25); }\
+.t5-domain-SCIENCE { background: rgba(6,214,160,0.13); color: #06d6a0; border: 1px solid rgba(6,214,160,0.25); }\
+\
+/* ── SHORTCUTS OVERLAY ── */\
+.t5-shortcuts-overlay {\
+  position: fixed;\
+  inset: 0;\
+  background: rgba(0,0,0,0.7);\
+  z-index: 2147483647;\
+  display: flex;\
+  align-items: center;\
+  justify-content: center;\
+  opacity: 0;\
+  pointer-events: none;\
+  transition: opacity 0.25s;\
+}\
+.t5-shortcuts-overlay.open {\
+  opacity: 1;\
+  pointer-events: auto;\
+}\
+.t5-shortcuts-modal {\
+  background: #111114;\
+  border: 1px solid rgba(255,255,255,0.08);\
+  border-radius: 12px;\
+  padding: 28px 32px;\
+  max-width: 380px;\
+  width: 90%;\
+}\
+.t5-shortcuts-modal h3 {\
+  color: #ededed;\
+  font-size: 0.9rem;\
+  margin: 0 0 16px;\
+  font-weight: 600;\
+}\
+.t5-shortcuts-grid {\
+  display: grid;\
+  grid-template-columns: 1fr 1fr;\
+  gap: 10px;\
+}\
+.t5-sc {\
+  display: flex;\
+  align-items: center;\
+  gap: 10px;\
+}\
+.t5-sc kbd {\
+  display: inline-flex;\
+  align-items: center;\
+  justify-content: center;\
+  min-width: 28px;\
+  height: 24px;\
+  background: #1a1a1e;\
+  border: 1px solid rgba(255,255,255,0.1);\
+  border-radius: 4px;\
+  color: #c41e3a;\
+  font-size: 0.7rem;\
+  font-family: inherit;\
+  padding: 0 6px;\
+  font-weight: 600;\
+}\
+.t5-sc span {\
+  font-size: 0.72rem;\
+  color: #a0a0a6;\
+}\
+.t5-sc-hint {\
+  margin-top: 16px;\
+  text-align: center;\
+  font-size: 0.65rem;\
+  color: #4a4a52;\
+}\
+.t5-sc-hint kbd {\
+  display: inline;\
+  background: #1a1a1e;\
+  border: 1px solid rgba(255,255,255,0.1);\
+  border-radius: 3px;\
+  color: #6e6e76;\
+  font-size: 0.6rem;\
+  padding: 1px 4px;\
+  font-family: inherit;\
 }\
 ';
 

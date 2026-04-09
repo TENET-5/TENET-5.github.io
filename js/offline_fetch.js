@@ -14,7 +14,7 @@
                     ok: true,
                     status: 200,
                     json: () => Promise.resolve(window.TENET_OFFLINE_DB[relativeUrl]),
-                    text: () => Promise.resolve(JSON.stringify(window.TENET_OFFLINE_DB[relativeUrl]))
+                    text: () => Promise.resolve(typeof window.TENET_OFFLINE_DB[relativeUrl] === 'string' ? window.TENET_OFFLINE_DB[relativeUrl] : JSON.stringify(window.TENET_OFFLINE_DB[relativeUrl]))
                 });
             }
         }
