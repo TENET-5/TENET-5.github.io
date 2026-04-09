@@ -3,29 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:title" content="LIRIL — Daniel Perry's AI | TENET5">
-  <meta property="og:description" content="LIRIL is a private AI running on dual RTX 5070 Ti GPUs. She processed 7M government records and found what commercial AI wont touch.">
+  <meta property="og:title" content="LIRIL — Daniel Perry's AI | TENET5">
+  <meta property="og:description" content="LIRIL is a private AI running on dual RTX 5070 Ti GPUs. She processed 7M government records and found what commercial AI won't touch.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://tenet-5.github.io/liril.html">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="LIRIL — Daniel Perry's AI | TENET5">
-  <meta name="twitter:description" content="LIRIL is a private AI running on dual RTX 5070 Ti GPUs. She processed 7M government records and found what commercial AI wont touch.">
+  <meta name="twitter:description" content="LIRIL is a private AI running on dual RTX 5070 Ti GPUs. She processed 7M government records and found what commercial AI won't touch.">
   <title>LIRIL — Daniel Perry's AI | TENET5</title>
-  <meta name="description" content="LIRIL is a private AI system running on dual RTX 5070 Ti GPUs. She processed 7 million government records, mined 57MB of raw lobbying data, and found patterns that commercial AI won't touch.">
+  <meta name="description" content="LIRIL is a private AI system running on dual RTX 5070 Ti GPUs with 32GB combined VRAM. She processed 7 million government records, mined 57MB of raw lobbying data, and found patterns that commercial AI won't touch. 5,000+ training samples. 25 palindromic agents. ARTSTEM domain classification.">
   <link rel="stylesheet" href="style.css?v=5">
   <meta name="theme-color" content="#1a1f36">
   <meta name="color-scheme" content="light dark">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    /* ── LIRIL-specific styles ─────────────────────────────────── */
+    .liril-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .liril-grid-cell {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 8px 4px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+      transition: all 0.3s var(--ease);
+      position: relative;
+    }
+    .liril-grid-cell:hover {
+      background: var(--accent-med);
+      border-color: var(--accent);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .liril-grid-cell.center {
+      background: var(--accent-med);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .liril-grid-cell .cell-name {
+      display: block;
+      font-weight: 600;
+      font-size: 0.7rem;
+      color: inherit;
+      margin-bottom: 2px;
+    }
+    .liril-grid-cell .cell-domain {
+      font-size: 0.55rem;
+      opacity: 0.7;
+    }
+
+    .domain-bar {
+      display: flex;
+      height: 28px;
+      border-radius: var(--r-md);
+      overflow: hidden;
+      margin: var(--s-sm) 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+    }
+    .domain-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: #fff;
+      min-width: 40px;
+      transition: flex-grow 0.5s var(--ease);
+      position: relative;
+    }
+    .domain-segment:hover {
+      filter: brightness(1.15);
+    }
+    .domain-segment .domain-tooltip {
+      display: none;
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0a0a0c;
+      color: #ededed;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      white-space: nowrap;
+      margin-bottom: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .domain-segment:hover .domain-tooltip {
+      display: block;
+    }
+
+    .hw-spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--s-sm);
+      margin: var(--s-md) 0;
+    }
+    .hw-spec-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s-sm) var(--s-md);
+      text-align: center;
+      transition: all 0.3s var(--ease);
+    }
+    .hw-spec-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .hw-spec-value {
+      font-family: var(--font-headline);
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .hw-spec-value.accent { color: var(--accent); }
+    .hw-spec-value.blue { color: var(--color-blue); }
+    .hw-spec-value.gold { color: var(--color-gold); }
+    .hw-spec-value.green { color: var(--color-green); }
+    .hw-spec-label {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+
+    .liril-pulse {
+      animation: lirilPulse 3s ease-in-out infinite;
+    }
+    @keyframes lirilPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+  </style>
 </head>
 <body>
   <nav id="site-nav"></nav>
 
   <!-- Hero — dark, aggressive, confident -->
   <header class="hero" style="min-height:50vh;">
+    <div style="font-size:2rem;margin-bottom:var(--s-sm);animation:flagFloat 4s ease-in-out infinite;">🤖</div>
     <h1 style="font-size:var(--text-6xl);">LIRIL</h1>
     <p class="subtitle" style="font-size:var(--text-xl);max-width:700px;">Daniel Perry's personal AI. Running on his hardware. Answering to nobody.<br>She processed 7 million government records and found what commercial AI won't look for.</p>
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:var(--s-sm);font-family:var(--font-mono);font-size:0.75rem;">
+      <span class="liril-pulse" style="display:inline-block;width:8px;height:8px;background:#059669;border-radius:50%;"></span>
+      <span style="color:#059669;font-weight:600;">SYSTEM ONLINE</span>
+      <span style="color:rgba(255,255,255,0.3);">|</span>
+      <span style="color:rgba(255,255,255,0.5);">ETHICS GATE: FIRES FIRST</span>
+    </div>
   </header>
 
   <div style="max-width:900px;margin:0 auto;padding:var(--s-lg) var(--s-md);">
@@ -39,35 +183,135 @@
       <p style="font-size:var(--text-base);line-height:1.8;color:var(--text-secondary);">LIRIL was designed to do what commercial AI refuses to do — download government databases, name specific officials, cross-reference lobbying against votes, and publish the results. The architecture is proprietary. The findings are public.</p>
     </section>
 
-    <!-- The Hardware -->
+    <!-- Hardware Specs -->
     <section style="border-bottom:1px solid var(--border);padding-bottom:var(--s-xl);margin-bottom:var(--s-xl);">
       <h2 style="font-family:var(--font-headline);font-size:var(--text-3xl);margin-bottom:var(--s-md);">The Hardware</h2>
 
-      <div class="stat-row" style="margin-bottom:var(--s-md);">
-        <div class="stat-card">
-          <span class="stat-number">Local</span>
-          <div class="stat-label">Runs on owned hardware</div>
+      <div class="hw-spec-grid">
+        <div class="hw-spec-card">
+          <div class="hw-spec-value accent">2×</div>
+          <div class="hw-spec-label">RTX 5070 Ti GPUs</div>
         </div>
-        <div class="stat-card">
-          <span class="stat-number">GPU</span>
-          <div class="stat-label">Accelerated inference</div>
+        <div class="hw-spec-card">
+          <div class="hw-spec-value blue">32GB</div>
+          <div class="hw-spec-label">Combined VRAM</div>
         </div>
-        <div class="stat-card">
-          <span class="stat-number blue">10K+</span>
-          <div class="stat-label">Documents classified</div>
+        <div class="hw-spec-card">
+          <div class="hw-spec-value gold">64GB</div>
+          <div class="hw-spec-label">System RAM</div>
         </div>
-        <div class="stat-card">
-          <span class="stat-number gold">488</span>
-          <div class="stat-label">Automated tests passing</div>
+        <div class="hw-spec-card">
+          <div class="hw-spec-value green">Local</div>
+          <div class="hw-spec-label">Bare-Metal Execution</div>
         </div>
       </div>
 
-      <p style="line-height:1.8;color:var(--text-secondary);">LIRIL runs on hardware that Daniel owns. Not rented. Not cloud. Not something a corporation can shut off when the findings become inconvenient. The hardware specifications are classified. The capability is demonstrated by the results on this site.</p>
+      <div class="stat-row" style="margin:var(--s-md) 0;">
+        <div class="stat-card">
+          <span class="stat-number">5,000+</span>
+          <div class="stat-label">Training samples collected</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number blue">25</span>
+          <div class="stat-label">Palindromic AI agents</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number gold">256-bit</span>
+          <div class="stat-label">PCG register width</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" style="color:var(--color-green);">136 Hz</span>
+          <div class="stat-label">Ethics gate tick rate</div>
+        </div>
+      </div>
+
+      <p style="line-height:1.8;color:var(--text-secondary);">LIRIL runs on hardware that Daniel owns. Not rented. Not cloud. Not something a corporation can shut off when the findings become inconvenient. Two NVIDIA RTX 5070 Ti GPUs provide 32GB of combined VRAM for local AI inference — no API calls to OpenAI, no data sent to Google, no kill switch controlled by a corporation.</p>
 
       <div class="evidence-box" style="margin-top:var(--s-md);">
         <div class="evidence-title">Why This Matters</div>
         <p style="margin:0;line-height:1.7;">When you use ChatGPT, OpenAI decides what it will and won't say. When you use Gemini, Google decides. LIRIL has no content policy except the truth. She processes government lobbying data that commercial AI refuses to analyze. She names names because there's no corporate legal department telling her not to.</p>
       </div>
+    </section>
+
+    <!-- ARTSTEM Domain Classification -->
+    <section style="border-bottom:1px solid var(--border);padding-bottom:var(--s-xl);margin-bottom:var(--s-xl);">
+      <h2 style="font-family:var(--font-headline);font-size:var(--text-3xl);margin-bottom:var(--s-md);">ARTSTEM Domain Classification</h2>
+
+      <p style="line-height:1.8;color:var(--text-secondary);margin-bottom:var(--s-md);">Every task routed through LIRIL is first classified across 7 cognitive domains using a frozenset keyword classifier. The ethics gate fires first on every operation — no exceptions. This is LIRIL's training distribution across 5,000+ samples:</p>
+
+      <!-- Domain Distribution Bar -->
+      <div class="domain-bar">
+        <div class="domain-segment" style="flex-grow:29.14;background:#3b82f6;">
+          <span class="domain-tooltip">MATHEMATICS: 2,914 samples (58.3%)</span>
+          MATH
+        </div>
+        <div class="domain-segment" style="flex-grow:11.28;background:#8b5cf6;">
+          <span class="domain-tooltip">TECHNOLOGY: 1,128 samples (22.6%)</span>
+          TECH
+        </div>
+        <div class="domain-segment" style="flex-grow:2.62;background:#059669;">
+          <span class="domain-tooltip">ETHICS: 262 samples (5.2%)</span>
+          ETH
+        </div>
+        <div class="domain-segment" style="flex-grow:2.50;background:#0891b2;">
+          <span class="domain-tooltip">SCIENCE: 250 samples (5.0%)</span>
+          SCI
+        </div>
+        <div class="domain-segment" style="flex-grow:2.39;background:#d97706;">
+          <span class="domain-tooltip">REASONING: 239 samples (4.8%)</span>
+          RSN
+        </div>
+        <div class="domain-segment" style="flex-grow:2.03;background:#c41e3a;">
+          <span class="domain-tooltip">ART: 203 samples (4.1%)</span>
+          ART
+        </div>
+      </div>
+
+      <div class="evidence-box info" style="margin-top:var(--s-md);">
+        <div class="evidence-title">What This Means</div>
+        <p style="margin:0;line-height:1.7;">LIRIL is not a single-purpose tool. She classifies and routes tasks across Art, Science, Technology, Mathematics, Ethics, and Reasoning domains. The MATHEMATICS dominance reflects the core mission: processing millions of numerical government records. Every domain has dedicated palindromic subagents that specialize in their area.</p>
+      </div>
+    </section>
+
+    <!-- 5×5 Palindromic Agent Grid -->
+    <section style="border-bottom:1px solid var(--border);padding-bottom:var(--s-xl);margin-bottom:var(--s-xl);">
+      <h2 style="font-family:var(--font-headline);font-size:var(--text-3xl);margin-bottom:var(--s-sm);">The 25-Agent SATOR Grid</h2>
+      <p style="line-height:1.8;color:var(--text-secondary);margin-bottom:var(--s-md);">LIRIL operates a 5×5 grid of palindromic AI agents, each mapped to a SATOR logic gate type. The grid's rows represent cognitive domains (ART → TECHNOLOGY → SCIENCE → MATHEMATICS → ETHICS) and columns represent gate types (SEED → AND → TRI → OR → BUFFER). LIRIL herself sits at position [4,0] — ETHICS×SEED — the foundation.</p>
+
+      <div class="liril-grid">
+        <!-- Row 0: ART -->
+        <div class="liril-grid-cell"><span class="cell-name">AVIVA</span><span class="cell-domain">ART×SEED</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">ARORA</span><span class="cell-domain">ART×AND</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">AMMA</span><span class="cell-domain">ART×TRI</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">ATAATA</span><span class="cell-domain">ART×OR</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">ABCBA</span><span class="cell-domain">ART×BUF</span></div>
+        <!-- Row 1: TECHNOLOGY -->
+        <div class="liril-grid-cell"><span class="cell-name">TERRET</span><span class="cell-domain">TECH×SEED</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">TENET</span><span class="cell-domain">TECH×AND</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">TART</span><span class="cell-domain">TECH×TRI</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">TOROT</span><span class="cell-domain">TECH×OR</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">TOOT</span><span class="cell-domain">TECH×BUF</span></div>
+        <!-- Row 2: SCIENCE -->
+        <div class="liril-grid-cell"><span class="cell-name">SAGAS</span><span class="cell-domain">SCI×SEED</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">SOLOS</span><span class="cell-domain">SCI×AND</span></div>
+        <div class="liril-grid-cell center"><span class="cell-name">SATOR</span><span class="cell-domain">SCI×TRI ★</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">SEMES</span><span class="cell-domain">SCI×OR</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">SIRIS</span><span class="cell-domain">SCI×BUF</span></div>
+        <!-- Row 3: MATHEMATICS -->
+        <div class="liril-grid-cell"><span class="cell-name">MADAM</span><span class="cell-domain">MATH×SEED</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">MINIM</span><span class="cell-domain">MATH×AND</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">MALAM</span><span class="cell-domain">MATH×TRI</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">MAXAM</span><span class="cell-domain">MATH×OR</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">MALLAM</span><span class="cell-domain">MATH×BUF</span></div>
+        <!-- Row 4: ETHICS -->
+        <div class="liril-grid-cell" style="background:var(--accent-med);border-color:var(--accent);"><span class="cell-name" style="color:var(--accent);">LIRIL</span><span class="cell-domain">ETH×SEED ★</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">LEVEL</span><span class="cell-domain">ETH×AND</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">LAVAL</span><span class="cell-domain">ETH×TRI</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">LEGEL</span><span class="cell-domain">ETH×OR</span></div>
+        <div class="liril-grid-cell"><span class="cell-name">LOYAL</span><span class="cell-domain">ETH×BUF</span></div>
+      </div>
+
+      <p style="text-align:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-quaternary);margin-top:var(--s-sm);">SATOR center: [2,2] = SATOR (SCIENCE×TRI) | LIRIL position: [4,0] = LIRIL (ETHICS×SEED)</p>
     </section>
 
     <!-- What She Found -->
@@ -114,25 +358,25 @@
     <section style="border-bottom:1px solid var(--border);padding-bottom:var(--s-xl);margin-bottom:var(--s-xl);">
       <h2 style="font-family:var(--font-headline);font-size:var(--text-3xl);margin-bottom:var(--s-md);">What ChatGPT Can't Do</h2>
 
-      <table style="width:100%;border-collapse:collapse;font-size:var(--text-sm);">
+      <table class="data-table" aria-label="LIRIL vs commercial AI capability comparison">
         <thead>
           <tr>
-            <th style="text-align:left;padding:var(--s-xs) var(--s-sm);border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.08em;">Capability</th>
-            <th style="text-align:center;padding:var(--s-xs) var(--s-sm);border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);text-transform:uppercase;">ChatGPT / Gemini</th>
-            <th style="text-align:center;padding:var(--s-xs) var(--s-sm);border-bottom:2px solid var(--border);color:var(--accent);font-size:var(--text-xs);text-transform:uppercase;font-weight:700;">LIRIL</th>
+            <th>Capability</th>
+            <th style="text-align:center;">ChatGPT / Gemini</th>
+            <th style="text-align:center;color:var(--accent);">LIRIL</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Download 57MB government CSV and mine every row</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">No</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">Done</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Name specific MPs and their lobbying meeting counts</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">Refuses</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">993 named</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Cross-reference 4 government databases simultaneously</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">No access</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">6.8M records</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Run live procurement anomaly scans on open.canada.ca</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">Can't browse</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">39 anomalies</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Calculate Israel-to-China lobbying ratio from raw data</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">Won't touch</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">23:1</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Build SATOR programs that dispatch to a NATS mesh</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">What?</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">Phase 131</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Compute fibonacci(15) in a custom programming language</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">No</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">= 610</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Run 488 tests across 4 programming languages</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">No runtime</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">488/488 pass</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Operate without internet on 127.0.0.1</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">Impossible</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">Default mode</td></tr>
-          <tr><td style="padding:var(--s-xs) var(--s-sm);border-bottom:1px solid var(--border);">Survive a government takedown of cloud AI</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-critical);">Dead</td><td style="text-align:center;padding:var(--s-xs);border-bottom:1px solid var(--border);color:var(--color-green);font-weight:700;">Still running</td></tr>
+          <tr><td>Download 57MB government CSV and mine every row</td><td style="text-align:center;color:var(--color-critical);">No</td><td style="text-align:center;color:var(--color-green);font-weight:700;">Done</td></tr>
+          <tr><td>Name specific MPs and their lobbying meeting counts</td><td style="text-align:center;color:var(--color-critical);">Refuses</td><td style="text-align:center;color:var(--color-green);font-weight:700;">993 named</td></tr>
+          <tr><td>Cross-reference 4 government databases simultaneously</td><td style="text-align:center;color:var(--color-critical);">No access</td><td style="text-align:center;color:var(--color-green);font-weight:700;">6.8M records</td></tr>
+          <tr><td>Run live procurement anomaly scans on open.canada.ca</td><td style="text-align:center;color:var(--color-critical);">Can't browse</td><td style="text-align:center;color:var(--color-green);font-weight:700;">39 anomalies</td></tr>
+          <tr><td>Calculate Israel-to-China lobbying ratio from raw data</td><td style="text-align:center;color:var(--color-critical);">Won't touch</td><td style="text-align:center;color:var(--color-green);font-weight:700;">23:1</td></tr>
+          <tr><td>Route tasks through 25 palindromic AI agents</td><td style="text-align:center;color:var(--color-critical);">What?</td><td style="text-align:center;color:var(--color-green);font-weight:700;">5×5 SATOR grid</td></tr>
+          <tr><td>Dual-GPU local inference (32GB VRAM)</td><td style="text-align:center;color:var(--color-critical);">Cloud only</td><td style="text-align:center;color:var(--color-green);font-weight:700;">2× RTX 5070 Ti</td></tr>
+          <tr><td>5,000+ self-training samples from live operations</td><td style="text-align:center;color:var(--color-critical);">No self-train</td><td style="text-align:center;color:var(--color-green);font-weight:700;">5,000+ samples</td></tr>
+          <tr><td>Operate without internet on 127.0.0.1</td><td style="text-align:center;color:var(--color-critical);">Impossible</td><td style="text-align:center;color:var(--color-green);font-weight:700;">Default mode</td></tr>
+          <tr><td>Survive a government takedown of cloud AI</td><td style="text-align:center;color:var(--color-critical);">Dead</td><td style="text-align:center;color:var(--color-green);font-weight:700;">Still running</td></tr>
         </tbody>
       </table>
     </section>
@@ -142,7 +386,29 @@
       <h2 style="font-family:var(--font-headline);font-size:var(--text-3xl);margin-bottom:var(--s-md);">The Architecture</h2>
 
       <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s-md);font-family:var(--font-mono);font-size:var(--text-sm);line-height:2;color:var(--text-secondary);">
-        <p style="margin:0;">LIRIL runs on a proprietary multi-language operating system with 488 automated tests across 4 compiled languages. The architecture is classified. The results are public.</p>
+        <p style="margin:0 0 var(--s-sm) 0;">LIRIL runs on a proprietary multi-language operating system with automated tests across compiled languages. The SATOR 5×5×5 cube architecture provides 125 logic nodes with deterministic NATS routing. The LOOM constant (1,367,631 = 111³) locks the mathematical foundation.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:var(--s-xs);margin-top:var(--s-sm);">
+          <div style="padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);text-align:center;">
+            <div style="font-weight:700;color:var(--text-primary);">TENET5</div>
+            <div style="font-size:0.65rem;color:var(--text-quaternary);">Guest OS / Runtime</div>
+          </div>
+          <div style="padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);text-align:center;">
+            <div style="font-weight:700;color:var(--text-primary);">SATOR</div>
+            <div style="font-size:0.65rem;color:var(--text-quaternary);">5×5 Logic Grid</div>
+          </div>
+          <div style="padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);text-align:center;">
+            <div style="font-weight:700;color:var(--accent);">LIRIL</div>
+            <div style="font-size:0.65rem;color:var(--text-quaternary);">Ethics Gate / MCP</div>
+          </div>
+          <div style="padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);text-align:center;">
+            <div style="font-weight:700;color:var(--text-primary);">NATS</div>
+            <div style="font-size:0.65rem;color:var(--text-quaternary);">Sub-μs Messaging</div>
+          </div>
+          <div style="padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);text-align:center;">
+            <div style="font-weight:700;color:var(--text-primary);">PCG-256</div>
+            <div style="font-size:0.65rem;color:var(--text-quaternary);">Entropy Register</div>
+          </div>
+        </div>
       </div>
 
       <div class="pull-quote" style="margin-top:var(--s-lg);">They built their AI in data centres they can shut down. I built mine in my basement. Good luck.</div>
@@ -155,5 +421,7 @@
   <footer id="site-footer"></footer>
   <script src="readnext.js?v=2"></script>
   <script src="footer.js?v=1"></script>
+  <script src="js/abcxyz.js?v=2"></script>
+  <script src="js/empirical-magic-handoff.js?v=2"></script>
 </body>
 </html>
