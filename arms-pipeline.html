@@ -86,6 +86,13 @@
       <div class="stat-card"><span class="num">2,156</span><div class="label">CIJA Lobby Comms</div></div>
     </div>
 
+    <div class="section-head" style="margin-top:25px; border-bottom:1px solid rgba(196,30,58,0.4); padding-bottom:8px; margin-bottom:15px;">
+      <h3 style="margin-top:0; color:#fff; font-size:1.1rem; line-height:1.4;">N-vs-NP Empirical Matrix: Federal Export Subversion Map</h3>
+    </div>
+    <div class="matrix-wrapper" style="width:100%; height:450px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; margin-bottom:35px;">
+      <canvas id="armsMatrix"></canvas>
+    </div>
+
     <div class="section">
       <h2><span class="num">01</span> The Timeline</h2>
       <p class="desc">What the government said vs. what happened.</p>
@@ -227,5 +234,166 @@
   <footer id="site-footer"></footer>
   <script src="readnext.js?v=2"></script>
   <script src="footer.js?v=1"></script>
+  
+  <script>
+    // ═══════════════════════════════════════
+    // ARMS FLOW MATRIX RENDERING (N-vs-NP)
+    // ═══════════════════════════════════════
+    function renderArmsMatrix() {
+      var cvs = document.getElementById('armsMatrix');
+      if (!cvs) return;
+      var ctx = cvs.getContext('2d');
+      var wrap = cvs.parentElement;
+      cvs.width = wrap.clientWidth;
+      cvs.height = wrap.clientHeight;
+
+      // The Structure Nodes
+      var nodes = [
+        // Capital Origin Nodes
+        { id: 'gd', lbl: 'GD-OTS ($78.8M)', cx: 0.1, cy: 0.2, col: '#fbbf24' },
+        { id: 'elbit', lbl: 'Elbit Systems ($44.8M)', cx: 0.1, cy: 0.5, col: '#fca5a5' },
+        { id: 'historic', lbl: 'Pre-existing Permits ($18.9M)', cx: 0.1, cy: 0.8, col: '#34d399' },
+        
+        // Illusory Federal Buffer
+        { id: 'pause', lbl: 'Federal Arms "Pause"', cx: 0.5, cy: 0.5, col: '#4b5563' },
+        
+        // Final Output
+        { id: 'idf', lbl: 'Israel (IDF/Gaza Output)', cx: 0.85, cy: 0.5, col: '#e53555' }
+      ];
+
+      var edges = [
+        // Bypass vectors arching securely AROUND the central buffer node
+        { from: 0, to: 4, w: 5, curveOffset: -0.3 }, 
+        { from: 1, to: 4, w: 4, curveOffset: -0.4 },
+        { from: 2, to: 4, w: 3, curveOffset: 0.3 }
+      ];
+
+      var particles = [];
+      for(var i=0; i<60; i++) {
+        var e = edges[Math.floor(Math.random()*edges.length)];
+        particles.push({ edge: e, progress: Math.random(), speed: 0.002 + Math.random()*0.003 });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        // Radar Grid overlay
+        ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+        ctx.lineWidth = 1;
+        for (var i=1; i<20; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * (cvs.width/20), 0);
+          ctx.lineTo(i * (cvs.width/20), cvs.height);
+          ctx.stroke();
+        }
+
+        // Illusory central boundary field (The pause illusion)
+        ctx.beginPath();
+        ctx.arc(cvs.width * 0.5, cvs.height * 0.5, 40, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(75, 85, 99, 0.4)'; // Gray dashed
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset
+
+        // Draw structural bypass vectors (Capital circumventing the state)
+        edges.forEach(function(e) {
+          var n1 = nodes[e.from], n2 = nodes[e.to];
+          ctx.beginPath();
+          ctx.moveTo(n1.cx * cvs.width, n1.cy * cvs.height);
+          
+          var midX = cvs.width * 0.5;
+          // Curve pushes up or down based on the offset, avoiding the center
+          var midY = (cvs.height * 0.5) + (e.curveOffset * cvs.height);
+          
+          ctx.quadraticCurveTo(midX, midY, n2.cx * cvs.width, n2.cy * cvs.height);
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.1)';
+          ctx.lineWidth = Math.max(1, e.w);
+          ctx.stroke();
+        });
+
+        // Flow Particles (Unchecked Munitions capital mapping to death)
+        particles.forEach(function(p) {
+          p.progress += p.speed;
+          if (p.progress >= 1) {
+            p.progress = 0;
+            p.edge = edges[Math.floor(Math.random()*edges.length)];
+          }
+          
+          var n1 = nodes[p.edge.from], n2 = nodes[p.edge.to];
+          var startX = n1.cx * cvs.width, startY = n1.cy * cvs.height;
+          var endX = n2.cx * cvs.width, endY = n2.cy * cvs.height;
+          
+          var midX = cvs.width * 0.5;
+          var midY = (cvs.height * 0.5) + (p.edge.curveOffset * cvs.height);
+
+          var t = p.progress;
+          var mt = 1 - t;
+          var px = (mt * mt * startX) + (2 * mt * t * midX) + (t * t * endX);
+          var py = (mt * mt * startY) + (2 * mt * t * midY) + (t * t * endY);
+
+          ctx.shadowColor = '#e53555';
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = '#e53555';
+          ctx.beginPath();
+          ctx.arc(px, py, 3, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+
+        // Matrix Interface Nodes
+        nodes.forEach(function(n) {
+          var px = n.cx * cvs.width, py = n.cy * cvs.height;
+          
+          // Pulse the IDF output mode
+          if(n.id === 'idf') {
+            var pulse = Math.sin(Date.now() / 250) * 5;
+            ctx.shadowColor = '#e53555';
+            ctx.shadowBlur = 15 + pulse;
+            ctx.beginPath();
+            ctx.arc(px, py, 12, 0, Math.PI*2);
+            ctx.fillStyle = '#e53555';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px JetBrains Mono';
+            ctx.textAlign = 'right';
+            ctx.fillText(n.lbl, px - 25, py + 4);
+          } else {
+            ctx.shadowColor = n.col;
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI*2);
+            ctx.fillStyle = n.col;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = n.id === 'pause' ? '#9ca3af' : '#fff';
+            ctx.font = '11px JetBrains Mono';
+            var textX = n.cx < 0.5 ? px + 15 : px - 15;
+            ctx.textAlign = n.cx < 0.5 ? 'left' : 'right';
+            if (n.id === 'pause') {
+                ctx.textAlign = 'center';
+                ctx.fillText(n.lbl, px, py - 48); // Labels buffer circle
+            } else {
+                ctx.fillText(n.lbl, textX, py + 4);
+            }
+          }
+        });
+
+        requestAnimationFrame(draw);
+      }
+      
+      window.addEventListener('resize', function() {
+        cvs.width = wrap.clientWidth;
+        cvs.height = wrap.clientHeight;
+      });
+
+      requestAnimationFrame(draw);
+    }
+    
+    renderArmsMatrix();
+  </script>
 </body>
 </html>
