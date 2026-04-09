@@ -1,9 +1,11 @@
 /**
- * TENET5 — "Read Next" Navigation v1.0
+ * TENET5 — "Read Next" Navigation v2.0
  *
  * Adds a guided "What to read next" section at the bottom of investigation pages.
  * The investigation has a logical flow: understand the problem → see the evidence →
  * follow the money → take action. This component guides visitors through that flow.
+ *
+ * v2.0 — Full 82-page FLOW map coverage (up from 25 in v1.0).
  *
  * Place <div id="read-next"></div> in pages that should show navigation.
  * If no element exists, the script does nothing.
@@ -195,6 +197,454 @@
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'The evidence that supports action' },
         { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'Which MPs should champion reform' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
+      ]
+    },
+    '5gw-subversion.html': {
+      current: '5GW Subversion',
+      next: [
+        { href: 'treason-trajectory.html', label: 'Treason Trajectory', desc: 'Pattern of policy decisions against national interest' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
+        { href: 'history.html', label: 'History', desc: 'Historical context behind the subversion' },
+      ]
+    },
+    'acelephius-report.html': {
+      current: 'Acelephius Report',
+      next: [
+        { href: 'acelephius-wardoll.html', label: 'Acelephius Wardoll', desc: 'Follow-up analysis on the Acelephius case' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data yourself' },
+      ]
+    },
+    'acelephius-wardoll.html': {
+      current: 'Acelephius Wardoll',
+      next: [
+        { href: 'acelephius-report.html', label: 'Acelephius Report', desc: 'The initial Acelephius investigation' },
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
+        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+      ]
+    },
+    'ag-findings.html': {
+      current: 'AG Findings',
+      next: [
+        { href: 'phoenix-pay.html', label: 'Phoenix Pay', desc: 'The Phoenix pay system debacle' },
+        { href: 'procurement-deep-dive.html', label: 'Procurement Deep Dive', desc: 'Detailed procurement failure analysis' },
+        { href: 'elections-finance.html', label: 'Elections Finance', desc: 'Political financing and election data' },
+      ]
+    },
+    'ai-research.html': {
+      current: 'AI Research',
+      next: [
+        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the analysis' },
+        { href: 'search.html', label: 'Search', desc: 'Search across the full dataset' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
+      ]
+    },
+    'belleville.html': {
+      current: 'Belleville',
+      next: [
+        { href: 'quinte-west.html', label: 'Quinte West', desc: 'Neighbouring municipality accountability' },
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+        { href: 'ottawa.html', label: 'Ottawa', desc: 'Capital city municipal analysis' },
+      ]
+    },
+    'bloggins.html': {
+      current: 'Bloggins',
+      next: [
+        { href: 'red-duster-game.html', label: 'Red Duster Game', desc: 'The interactive investigation game' },
+        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the project' },
+        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
+      ]
+    },
+    'calgary.html': {
+      current: 'Calgary',
+      next: [
+        { href: 'vancouver.html', label: 'Vancouver', desc: 'West coast municipal analysis' },
+        { href: 'toronto.html', label: 'Toronto', desc: 'GTA municipal analysis' },
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+      ]
+    },
+    'campaign-generator.html': {
+      current: 'Campaign Generator',
+      next: [
+        { href: 'campaign-tracker.html', label: 'Campaign Tracker', desc: 'Track your campaign progress' },
+        { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
+        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
+      ]
+    },
+    'campaign-tracker.html': {
+      current: 'Campaign Tracker',
+      next: [
+        { href: 'campaign-generator.html', label: 'Campaign Generator', desc: 'Create new campaign materials' },
+        { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
+        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
+      ]
+    },
+    'canada-map.html': {
+      current: 'Canada Map',
+      next: [
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+        { href: 'provincial-analysis.html', label: 'Provincial Analysis', desc: 'Province-by-province breakdown' },
+        { href: 'corruption-map.html', label: 'Corruption Map', desc: '37 documented procurement scandals' },
+      ]
+    },
+    'charges-sheet.html': {
+      current: 'Charges Sheet',
+      next: [
+        { href: 'criminal-code-analysis.html', label: 'Criminal Code Analysis', desc: 'Applicable Criminal Code sections' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
+        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Documented evidence of complicity' },
+      ]
+    },
+    'chat.html': {
+      current: 'Chat',
+      next: [
+        { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
+        { href: 'news.html', label: 'News', desc: 'Latest investigation updates' },
+        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the analysis' },
+      ]
+    },
+    'community.html': {
+      current: 'Community',
+      next: [
+        { href: 'chat.html', label: 'Chat', desc: 'Live discussion channel' },
+        { href: 'news.html', label: 'News', desc: 'Latest investigation updates' },
+        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
+      ]
+    },
+    'conspiracy-board.html': {
+      current: 'Conspiracy Board',
+      next: [
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data yourself' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
+      ]
+    },
+    'criminal-code-analysis.html': {
+      current: 'Criminal Code Analysis',
+      next: [
+        { href: 'charges-sheet.html', label: 'Charges Sheet', desc: 'Specific charges and evidence mapping' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
+        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
+      ]
+    },
+    'cross-reference.html': {
+      current: 'Cross-Reference',
+      next: [
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
+        { href: 'lobbying-tracker.html', label: 'Lobbying Tracker', desc: 'Who meets with whom' },
+        { href: 'contributions-tracker.html', label: 'Contributions Tracker', desc: '6.2M donation records since 2004' },
+      ]
+    },
+    'elections-finance.html': {
+      current: 'Elections Finance',
+      next: [
+        { href: 'contributions-tracker.html', label: 'Contributions Tracker', desc: '6.2M donation records since 2004' },
+        { href: 'lobbying-tracker.html', label: 'Lobbying Tracker', desc: 'Who meets with whom' },
+        { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How 25 key MPs voted on key bills' },
+      ]
+    },
+    'email-campaign.html': {
+      current: 'Email Campaign',
+      next: [
+        { href: 'campaign-generator.html', label: 'Campaign Generator', desc: 'Create new campaign materials' },
+        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
+        { href: 'mp-brief.html', label: 'MP Brief', desc: 'Brief your MP with the evidence' },
+      ]
+    },
+    'entity-viewer.html': {
+      current: 'Entity Viewer',
+      next: [
+        { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
+      ]
+    },
+    'evidence.html': {
+      current: 'Evidence',
+      next: [
+        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Full index of sourced evidence' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
+      ]
+    },
+    'faq.html': {
+      current: 'FAQ',
+      next: [
+        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
+        { href: 'history.html', label: 'History', desc: 'Historical context and background' },
+        { href: 'resources.html', label: 'Resources', desc: 'Tools and reference materials' },
+      ]
+    },
+    'genocide-evidence.html': {
+      current: 'Genocide Evidence',
+      next: [
+        { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
+        { href: 'harm-index.html', label: 'Harm Index', desc: 'Quantified harm across populations' },
+        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Documented law enforcement failures' },
+      ]
+    },
+    'hansard-dashboard.html': {
+      current: 'Hansard Dashboard',
+      next: [
+        { href: 'hansard-evidence.html', label: 'Hansard Evidence', desc: 'Parliamentary record evidence base' },
+        { href: 'voting-records.html', label: 'Voting Records', desc: '151 bills, 94 divisions tracked' },
+        { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How 25 key MPs voted on key bills' },
+      ]
+    },
+    'hansard-evidence.html': {
+      current: 'Hansard Evidence',
+      next: [
+        { href: 'hansard-dashboard.html', label: 'Hansard Dashboard', desc: '151 bills tracked in Parliament' },
+        { href: 'voting-records.html', label: 'Voting Records', desc: 'How every party voted on every bill' },
+        { href: 'rcmp-maid-accountability.html', label: 'RCMP MAID Accountability', desc: 'MAID enforcement oversight' },
+      ]
+    },
+    'harm-index.html': {
+      current: 'Harm Index',
+      next: [
+        { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
+        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Documented evidence of complicity' },
+        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Documented law enforcement failures' },
+      ]
+    },
+    'history.html': {
+      current: 'History',
+      next: [
+        { href: 'timeline.html', label: 'Timeline', desc: 'Visual chronology of key events' },
+        { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
+        { href: '5gw-subversion.html', label: '5GW Subversion', desc: 'Fifth-generation warfare analysis' },
+      ]
+    },
+    'infographics.html': {
+      current: 'Infographics',
+      next: [
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
+        { href: 'harm-index.html', label: 'Harm Index', desc: 'Quantified harm across populations' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+      ]
+    },
+    'lawsuit-ppcli.html': {
+      current: 'PPCLI Lawsuit',
+      next: [
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
+        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
+        { href: 'veterans.html', label: 'Veterans', desc: 'Veterans advocacy and support' },
+      ]
+    },
+    'mp-brief.html': {
+      current: 'MP Brief',
+      next: [
+        { href: 'open-letter.html', label: 'Open Letter', desc: 'Public letter to elected officials' },
+        { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
+        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
+      ]
+    },
+    'municipal-accountability.html': {
+      current: 'Municipal Accountability',
+      next: [
+        { href: 'canada-map.html', label: 'Canada Map', desc: 'Geographic data visualization' },
+        { href: 'municipal-intelligence.html', label: 'Municipal Intelligence', desc: 'Deep-dive municipal data analysis' },
+        { href: 'ottawa.html', label: 'Ottawa', desc: 'Capital city municipal analysis' },
+      ]
+    },
+    'municipal-intelligence.html': {
+      current: 'Municipal Intelligence',
+      next: [
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+        { href: 'canada-map.html', label: 'Canada Map', desc: 'Geographic data visualization' },
+        { href: 'provincial-analysis.html', label: 'Provincial Analysis', desc: 'Province-by-province breakdown' },
+      ]
+    },
+    'network-analysis.html': {
+      current: 'Network Analysis',
+      next: [
+        { href: 'conspiracy-board.html', label: 'Conspiracy Board', desc: 'Visual connection mapping' },
+        { href: 'entity-viewer.html', label: 'Entity Viewer', desc: 'Detailed entity profiles and links' },
+        { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
+      ]
+    },
+    'news.html': {
+      current: 'News',
+      next: [
+        { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
+        { href: 'chat.html', label: 'Chat', desc: 'Live discussion channel' },
+        { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
+      ]
+    },
+    'open-letter.html': {
+      current: 'Open Letter',
+      next: [
+        { href: 'mp-brief.html', label: 'MP Brief', desc: 'Brief your MP with the evidence' },
+        { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
+        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
+      ]
+    },
+    'ottawa.html': {
+      current: 'Ottawa',
+      next: [
+        { href: 'toronto.html', label: 'Toronto', desc: 'GTA municipal analysis' },
+        { href: 'belleville.html', label: 'Belleville', desc: 'Regional municipal analysis' },
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+      ]
+    },
+    'phoenix-pay.html': {
+      current: 'Phoenix Pay',
+      next: [
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+        { href: 'procurement-deep-dive.html', label: 'Procurement Deep Dive', desc: 'Detailed procurement failure analysis' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
+      ]
+    },
+    'procurement-deep-dive.html': {
+      current: 'Procurement Deep Dive',
+      next: [
+        { href: 'procurement-registry.html', label: 'Procurement Registry', desc: 'Full registry of procurement records' },
+        { href: 'procurement-analysis.html', label: 'Procurement Analysis', desc: '$191B in documented waste' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+      ]
+    },
+    'procurement-registry.html': {
+      current: 'Procurement Registry',
+      next: [
+        { href: 'procurement-deep-dive.html', label: 'Procurement Deep Dive', desc: 'Detailed procurement failure analysis' },
+        { href: 'procurement-analysis.html', label: 'Procurement Analysis', desc: '$191B in documented waste' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
+      ]
+    },
+    'provincial-analysis.html': {
+      current: 'Provincial Analysis',
+      next: [
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+        { href: 'canada-map.html', label: 'Canada Map', desc: 'Geographic data visualization' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
+      ]
+    },
+    'quinte-west.html': {
+      current: 'Quinte West',
+      next: [
+        { href: 'belleville.html', label: 'Belleville', desc: 'Neighbouring municipality analysis' },
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+        { href: 'ottawa.html', label: 'Ottawa', desc: 'Capital city municipal analysis' },
+      ]
+    },
+    'rcmp-complicity.html': {
+      current: 'RCMP Complicity',
+      next: [
+        { href: 'rcmp-maid-accountability.html', label: 'RCMP MAID Accountability', desc: 'MAID enforcement oversight' },
+        { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
+        { href: 'charges-sheet.html', label: 'Charges Sheet', desc: 'Specific charges and evidence mapping' },
+      ]
+    },
+    'rcmp-maid-accountability.html': {
+      current: 'RCMP MAID Accountability',
+      next: [
+        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Documented law enforcement failures' },
+        { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
+        { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How 25 key MPs voted on MAID bills' },
+      ]
+    },
+    'red-duster-game.html': {
+      current: 'Red Duster Game',
+      next: [
+        { href: 'bloggins.html', label: 'Bloggins', desc: 'The story behind the game' },
+        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the project' },
+        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
+      ]
+    },
+    'report-generator.html': {
+      current: 'Report Generator',
+      next: [
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
+        { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
+        { href: 'search.html', label: 'Search', desc: 'Search across the full dataset' },
+      ]
+    },
+    'resources.html': {
+      current: 'Resources',
+      next: [
+        { href: 'faq.html', label: 'FAQ', desc: 'Frequently asked questions' },
+        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
+        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
+      ]
+    },
+    'search.html': {
+      current: 'Search',
+      next: [
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
+        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Full index of sourced evidence' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
+      ]
+    },
+    't4-comparison.html': {
+      current: 'T4 Comparison',
+      next: [
+        { href: 'rcmp-maid-accountability.html', label: 'RCMP MAID Accountability', desc: 'MAID enforcement oversight' },
+        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Documented evidence of complicity' },
+        { href: 'harm-index.html', label: 'Harm Index', desc: 'Quantified harm across populations' },
+      ]
+    },
+    'take-action.html': {
+      current: 'Take Action',
+      next: [
+        { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
+        { href: 'mp-brief.html', label: 'MP Brief', desc: 'Brief your MP with the evidence' },
+        { href: 'open-letter.html', label: 'Open Letter', desc: 'Public letter to elected officials' },
+      ]
+    },
+    'the-boot.html': {
+      current: 'The Boot',
+      next: [
+        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Documented law enforcement failures' },
+        { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
+      ]
+    },
+    'timeline.html': {
+      current: 'Timeline',
+      next: [
+        { href: 'history.html', label: 'History', desc: 'Historical context and background' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
+        { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
+      ]
+    },
+    'toronto.html': {
+      current: 'Toronto',
+      next: [
+        { href: 'ottawa.html', label: 'Ottawa', desc: 'Capital city municipal analysis' },
+        { href: 'vancouver.html', label: 'Vancouver', desc: 'West coast municipal analysis' },
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+      ]
+    },
+    'treason-trajectory.html': {
+      current: 'Treason Trajectory',
+      next: [
+        { href: '5gw-subversion.html', label: '5GW Subversion', desc: 'Fifth-generation warfare analysis' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
+        { href: 'history.html', label: 'History', desc: 'Historical context and background' },
+      ]
+    },
+    'vancouver.html': {
+      current: 'Vancouver',
+      next: [
+        { href: 'toronto.html', label: 'Toronto', desc: 'GTA municipal analysis' },
+        { href: 'calgary.html', label: 'Calgary', desc: 'Alberta municipal analysis' },
+        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
+      ]
+    },
+    'veterans.html': {
+      current: 'Veterans',
+      next: [
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
+        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+        { href: 'whistleblower-guide.html', label: 'Whistleblower Guide', desc: 'How to safely report wrongdoing' },
+      ]
+    },
+    'whistleblower-guide.html': {
+      current: 'Whistleblower Guide',
+      next: [
+        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
+        { href: 'veterans.html', label: 'Veterans', desc: 'Veterans advocacy and support' },
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
       ]
     },
   };
