@@ -80,6 +80,7 @@
         { label: 'Hansard Dashboard', href: 'hansard-dashboard.html', desc: 'Debate analysis' },
         { label: 'Hansard Evidence', href: 'hansard-evidence.html', desc: 'Parliamentary records' },
         { label: 'Voting Records', href: 'voting-records.html', desc: '151 bills, 94 votes analyzed', hot: true },
+        { label: 'MP Voting Records', href: 'mp-voting-records.html', desc: 'How key MPs voted on MAID, firearms, censorship', hot: true },
         { label: 'MP Scorecard', href: 'mp-scorecard.html', desc: 'Rate your MP\'s record', hot: true },
         { label: 'Sector Lobbying', href: 'sector-lobbying.html', desc: '359K comms, 12 sectors', hot: true },
         { label: 'Provincial Analysis', href: 'provincial-analysis.html', desc: 'All 10 provinces', hot: true },

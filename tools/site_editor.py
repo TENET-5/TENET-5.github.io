@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 TENET5 Site Editor & Validator — Automated CI/CD Pipeline
 Canadian Accountability Project (TENET-5.github.io)
@@ -31,12 +32,19 @@ import re
 import sys
 import json
 import time
+import io
 import socket
 import argparse
 import subprocess
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, timezone
+
+# Force UTF-8 output on Windows
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if sys.stderr.encoding != 'utf-8':
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # ── Config ──────────────────────────────────────────────────────
 SITE_DIR = Path(__file__).parent.parent
@@ -249,12 +257,20 @@ class SiteEditor:
 
     # ── Phase 8: Source Attribution ──
     def phase_source_attribution(self):
+        # Utility/tool pages exempt from source attribution
+        exempt_pages = {
+            "404.html", "ai-research.html", "campaign-tracker.html",
+            "report-generator.html", "canada-map.html", "corruption-map.html",
+            "community.html", "bloggins.html"
+        }
         investigative_keywords = [
             "accountability", "scandal", "maid", "rcmp", "commissioner",
             "auditor", "inquiry", "investigation", "evidence", "findings",
             "genocide", "indigenous", "procurement", "corruption"
         ]
         for f in self.html_files:
+            if f.name in exempt_pages:
+                continue
             content = f.read_text(encoding="utf-8", errors="replace").lower()
             # Is this an investigative page?
             kw_count = sum(1 for kw in investigative_keywords if kw in content)
