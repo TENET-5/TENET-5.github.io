@@ -28,6 +28,7 @@
         { label: 'Investigation Board', href: 'conspiracy-board.html', desc: 'Node graph of influence networks' },
         { label: 'OSINT Dashboard', href: 'osint-dashboard.html', desc: 'Aggregated intelligence data' },
         { label: 'Network Analysis', href: 'network-analysis.html', desc: 'Cross-referenced topology', hot: true },
+        { label: 'N-vs-NP Matrix', href: 'corruption-map.html#n-vs-np', desc: 'LIRIL Pipeline Convergence', hot: true },
         { label: 'Dossier Viewer', href: 'dossier-viewer.html', desc: 'Generated intelligence dossiers', hot: true },
         { label: 'Evidence Archive', href: 'evidence.html', desc: 'Complete evidence repository' },
       ]
@@ -123,8 +124,8 @@
         { label: 'Toronto', href: 'toronto.html', desc: 'Eglinton LRT, Gardiner', hot: true },
         { label: 'Vancouver', href: 'vancouver.html', desc: 'Housing, money laundering', hot: true },
         { label: 'Calgary', href: 'calgary.html', desc: 'Green Line, arena deal', hot: true },
-        { label: 'Belleville', href: 'municipal-accountability.html?city=belleville', desc: 'City of Belleville' },
-        { label: 'Quinte West', href: 'municipal-accountability.html?city=quinte-west', desc: 'City of Quinte West' },
+        { label: 'Belleville', href: 'belleville.html', desc: 'City of Belleville' },
+        { label: 'Quinte West', href: 'quinte-west.html', desc: 'City of Quinte West' },
       ]
     },
   ];
