@@ -119,8 +119,12 @@
       icon: '🏛️',
       items: [
         { label: 'Municipal Hub', href: 'municipal-accountability.html', desc: 'All municipalities', hot: true },
-        { label: 'Belleville', href: 'municipal-accountability.html?city=belleville', desc: 'City of Belleville', hot: true },
-        { label: 'Quinte West', href: 'municipal-accountability.html?city=quinte-west', desc: 'City of Quinte West', hot: true },
+        { label: 'Ottawa', href: 'ottawa.html', desc: 'LRT scandal, Lansdowne 2.0', hot: true },
+        { label: 'Toronto', href: 'toronto.html', desc: 'Eglinton LRT, Gardiner', hot: true },
+        { label: 'Vancouver', href: 'vancouver.html', desc: 'Housing, money laundering', hot: true },
+        { label: 'Calgary', href: 'calgary.html', desc: 'Green Line, arena deal', hot: true },
+        { label: 'Belleville', href: 'municipal-accountability.html?city=belleville', desc: 'City of Belleville' },
+        { label: 'Quinte West', href: 'municipal-accountability.html?city=quinte-west', desc: 'City of Quinte West' },
       ]
     },
   ];
