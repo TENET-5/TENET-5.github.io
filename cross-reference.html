@@ -5,13 +5,227 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Follow the Money: Lobbying, Donations, Votes | TENET5</title>
   <meta name="description" content="Cross-reference lobbying contacts, political donations, and parliamentary votes. All data from public Canadian government records.">
-  <meta property="og:title" content="Follow the Money: Lobbying to Donations to Votes">
-  <meta property="og:description" content="Cross-referencing three public datasets to surface patterns between lobbying, donations, and parliamentary votes.">
+  <meta property="og:title" content="Follow the Money — 6.2M Donations, 350K Lobby Contacts, $1.2B Tracked">
+  <meta property="og:description" content="Cross-referencing 6 public datasets: who lobbies Parliament, who donates, how MPs vote, corporate boards, and procurement contracts. Every record from government sources.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://tenet-5.github.io/cross-reference.html">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:site_name" content="TENET5 — Canadian Government Accountability">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-follow-money.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Follow the Money — $1.2B in Political Money Tracked">
+  <meta name="twitter:description" content="6.2M donation records. 350K lobbying contacts. 3,133 contracts scanned. Cross-referencing 6 government datasets. All public records.">
+  <meta name="twitter:image" content="https://tenet-5.github.io/img/og-follow-money.png">
   <link rel="stylesheet" href="style.css?v=5">
   <style>
+    /* ── Summary Dashboard ── */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .summary-tile {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 14px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .summary-tile:hover {
+      border-color: rgba(196, 30, 58, 0.35);
+      transform: translateY(-2px);
+    }
+    .summary-val {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .summary-val.accent { color: var(--accent); }
+    .summary-val.blue { color: #60a5fa; }
+    .summary-val.green { color: #34d399; }
+    .summary-val.gold { color: #facc15; }
+    .summary-val.purple { color: #c084fc; }
+    .summary-label {
+      font-size: 0.62rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+
+    /* ── Filter Controls ── */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .filter-bar input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filter-bar input[type="text"]:focus { border-color: rgba(196, 30, 58, 0.5); }
+    .filter-bar input[type="text"]::placeholder { color: var(--text-tertiary); }
+    .filter-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .filter-pill:hover { border-color: rgba(196, 30, 58, 0.4); color: var(--text-primary); }
+    .filter-pill.active {
+      background: rgba(196, 30, 58, 0.12);
+      border-color: rgba(196, 30, 58, 0.5);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ── Donation Flow ── */
+    .donation-flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .flow-bar-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .flow-bar-label {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .flow-bar-track {
+      height: 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .flow-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+    .flow-bar-amount {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 6px;
+    }
+
+    /* ── Procurement Cards ── */
+    .procurement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .procurement-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      border-left: 3px solid;
+    }
+    .procurement-card.risk-high { border-left-color: #ef4444; }
+    .procurement-card.risk-medium { border-left-color: #f59e0b; }
+    .procurement-card.risk-low { border-left-color: #22c55e; }
+    .procurement-vendor {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .procurement-dept {
+      font-size: 0.68rem;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+    .procurement-amount {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .procurement-flag {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* ── Timeline ── */
+    .timeline-track {
+      position: relative;
+      padding: 16px 0 16px 24px;
+      border-left: 2px solid rgba(196, 30, 58, 0.2);
+    }
+    .timeline-event {
+      position: relative;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.82rem;
+    }
+    .timeline-event::before {
+      content: '';
+      position: absolute;
+      left: -30px;
+      top: 16px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg-surface);
+    }
+    .timeline-date {
+      font-size: 0.68rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .timeline-title {
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .timeline-desc {
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
     .dash-wrap {
       max-width: 1100px;
       margin: 0 auto;
@@ -400,7 +614,8 @@
       { key: 'contributions', url: 'data/contributions_analysis.json' },
       { key: 'analysis', url: 'data/analysis.json' },
       { key: 'mps', url: 'data/all_mps.json' },
-      { key: 'corporate', url: 'data/corporate_registry_analysis.json' }
+      { key: 'corporate', url: 'data/corporate_registry_analysis.json' },
+      { key: 'procurement', url: 'data/contracts/anomaly_scan_20260407_221148.json' }
     ];
 
     files.forEach(function(f) {
@@ -508,6 +723,11 @@
       return cats;
     }
 
+    // ── Global state for filters ──
+    var currentPartyFilter = 'all';
+    var currentSearch = '';
+    var cachedMpData = null;
+
     function renderAll() {
       var el = document.getElementById('content-area');
       el.className = '';
@@ -516,14 +736,35 @@
       var contribData = datasets.contributions;
       var analysisData = datasets.analysis;
       var mpData = datasets.mps;
+      var procData = datasets.procurement;
 
       var mpLookup = buildMpLookup(mpData);
       var html = '';
 
+      // ── Summary Statistics Dashboard ──
+      var totalDonations = 0;
+      if (contribData.party_donations) {
+        contribData.party_donations.forEach(function(p) { totalDonations += p.total_amount || 0; });
+      }
+      var totalBills = 0;
+      var billCats = analysisData.bills_by_category || {};
+      for (var bc in billCats) { totalBills += billCats[bc]; }
+
+      html += '<div class="summary-bar">';
+      html += '<div class="summary-tile"><span class="summary-val accent">' + fmt(lobbyData.total_communications) + '</span><span class="summary-label">Lobbying Communications</span></div>';
+      html += '<div class="summary-tile"><span class="summary-val blue">' + fmt(contribData.total_records) + '</span><span class="summary-label">Donation Records</span></div>';
+      html += '<div class="summary-tile"><span class="summary-val green">' + fmtDollar(totalDonations) + '</span><span class="summary-label">Total Donated (All Parties)</span></div>';
+      html += '<div class="summary-tile"><span class="summary-val gold">' + fmt(totalBills) + '</span><span class="summary-label">Bills Tracked</span></div>';
+      html += '<div class="summary-tile"><span class="summary-val purple">' + fmt(lobbyData.top_organizations.length) + '</span><span class="summary-label">Lobbying Orgs Tracked</span></div>';
+      if (procData) {
+        html += '<div class="summary-tile"><span class="summary-val accent">' + fmt(procData.total_contracts_scanned) + '</span><span class="summary-label">Contracts Scanned</span></div>';
+      }
+      html += '</div>';
+
       // ── Section A: Methodology ──
       html += '<div class="section-block">';
       html += '<h2>Methodology</h2>';
-      html += '<div class="disclaimer" style="margin-top:0;">This page cross-references five public datasets: who lobbies Parliament, who donates to political parties, how MPs vote on bills, corporate registry records, and procurement contracts. Patterns flagged here are based on publicly available data and may have innocent explanations. Correlation does not imply causation.</div>';
+      html += '<div class="disclaimer" style="margin-top:0;">This page cross-references six public datasets: who lobbies Parliament, who donates to political parties, how MPs vote on bills, corporate registry records, and government procurement contracts. Patterns flagged here are based on publicly available data and may have innocent explanations. Correlation does not imply causation.</div>';
       html += '<div class="methodology">';
       html += '<div class="method-step"><span class="step-num">1</span><span class="step-title">Lobbying Records</span><span class="step-desc">Commissioner of Lobbying data: who meets with which officials and how often.</span></div>';
       html += '<div class="method-arrow">&rarr;</div>';
@@ -532,15 +773,35 @@
       html += '<div class="method-step"><span class="step-num">3</span><span class="step-title">Voting Records</span><span class="step-desc">OpenParliament data: how MPs vote on bills by category (finance, healthcare, environment, etc.).</span></div>';
       html += '<div class="method-arrow">&rarr;</div>';
       html += '<div class="method-step"><span class="step-num">4</span><span class="step-title">Corporate Registry</span><span class="step-desc">ISED Corporations Canada: board positions, directors, and corporate officer records.</span></div>';
+      html += '<div class="method-arrow">&rarr;</div>';
+      html += '<div class="method-step"><span class="step-num">5</span><span class="step-title">Procurement</span><span class="step-desc">Government proactive disclosure: federal contracts, vendor concentration, and anomalies.</span></div>';
       html += '</div>';
-      html += '<div class="disclaimer-inline" style="margin-top:14px;">All five datasets are public records available to any Canadian. This analysis matches records algorithmically by name and category. Errors are possible. Always verify with primary sources.</div>';
+      html += '<div class="disclaimer-inline" style="margin-top:14px;">All datasets are public records available to any Canadian. This analysis matches records algorithmically by name and category. Errors are possible. Always verify with primary sources.</div>';
       html += '</div>';
 
-      // ── Section B: MP Spotlight Cards ──
+      // ── Donation Flow by Party ──
+      html += '<div class="section-block">';
+      html += '<h2>Donation Flow by Party</h2>';
+      html += '<div class="disclaimer" style="margin-top:0;">Total political contributions by party from Elections Canada open data. All political donations in Canada are legal, publicly disclosed, and subject to contribution limits. These figures span all available years in the dataset.</div>';
+      html += renderDonationFlow(contribData);
+      html += '</div>';
+
+      // ── Section B: MP Spotlight Cards with filters ──
       html += '<div class="section-block">';
       html += '<h2>MP Spotlight: Top 20 Most-Lobbied MPs</h2>';
       html += '<div class="disclaimer" style="margin-top:0;">These are public records. Meeting with lobbyists is legal and normal parliamentary activity. The number of meetings reflects an MP\'s level of engagement with stakeholders and is not an indicator of impropriety.</div>';
+      html += '<div class="filter-bar">';
+      html += '<input type="text" id="mp-search" placeholder="Search by MP name..." onkeyup="window._filterMPs()">';
+      html += '<button class="filter-pill active" data-party="all" onclick="window._setParty(this)">All</button>';
+      html += '<button class="filter-pill" data-party="conservative" onclick="window._setParty(this)">Conservative</button>';
+      html += '<button class="filter-pill" data-party="liberal" onclick="window._setParty(this)">Liberal</button>';
+      html += '<button class="filter-pill" data-party="ndp" onclick="window._setParty(this)">NDP</button>';
+      html += '<button class="filter-pill" data-party="green" onclick="window._setParty(this)">Green</button>';
+      html += '<button class="filter-pill" data-party="bloc" onclick="window._setParty(this)">Bloc</button>';
+      html += '</div>';
+      html += '<div id="mp-grid-container">';
       html += renderMpCards(lobbyData, contribData, analysisData, mpLookup);
+      html += '</div>';
       html += '</div>';
 
       // ── Section C: Organization Influence Map ──
@@ -550,12 +811,30 @@
       html += renderOrgInfluence(lobbyData, contribData, analysisData);
       html += '</div>';
 
-      // ── Section C2: Corporate-Political Connections ──
+      // ── Procurement Anomalies ──
+      if (procData && procData.anomalies && procData.anomalies.length > 0) {
+        html += '<div class="section-block">';
+        html += '<h2>Procurement Anomalies: Vendor Concentration</h2>';
+        html += '<div class="disclaimer" style="margin-top:0;">Federal procurement contracts where a single vendor captures a disproportionate share of a department\'s spending. Vendor concentration is common and often reflects specialized expertise or sole-source requirements. Inclusion here does not imply misconduct. Data from Government of Canada proactive disclosure.</div>';
+        html += renderProcurement(procData);
+        html += '</div>';
+      }
+
+      // ── Corporate-Political Connections ──
       html += '<div class="section-block">';
       html += '<h2>Corporate-Political Connections</h2>';
       html += '<div class="disclaimer" style="margin-top:0;">Corporate board positions and officer roles held by current or former politicians, as found in ISED Corporations Canada records and public disclosures. Being a corporate director or officer is legal and common for former public officials.</div>';
       html += renderCorporateConnections(datasets.corporate);
       html += '</div>';
+
+      // ── Contentious Votes Timeline ──
+      if (analysisData.contentious_votes && analysisData.contentious_votes.length > 0) {
+        html += '<div class="section-block">';
+        html += '<h2>Contentious Votes Timeline</h2>';
+        html += '<div class="disclaimer" style="margin-top:0;">Parliamentary votes with the narrowest margins. Close votes are a normal feature of democratic governance and often reflect genuine policy disagreement. The connection to lobbying activity is correlational, not causal.</div>';
+        html += renderTimeline(analysisData);
+        html += '</div>';
+      }
 
       // ── Section D: Pattern Flags ──
       html += '<div class="section-block">';
@@ -960,6 +1239,139 @@
 
       return h;
     }
+
+    // ── Donation Flow by Party ──
+    function renderDonationFlow(contribData) {
+      if (!contribData.party_donations) return '';
+      var parties = contribData.party_donations;
+      var maxAmount = 0;
+      parties.forEach(function(p) { if (p.total_amount > maxAmount) maxAmount = p.total_amount; });
+
+      var PARTY_COLORS = {
+        'Conservative Party of Canada': '#1a4b8c',
+        'Liberal Party of Canada': '#d71920',
+        'New Democratic Party': '#f58220',
+        'Green Party of Canada': '#3d9b35',
+        'Bloc Québécois': '#33b2cc',
+        'Bloc QuÃ©bÃ©cois': '#33b2cc'
+      };
+
+      var h = '<div class="donation-flow">';
+      parties.forEach(function(p) {
+        var pct = maxAmount > 0 ? (p.total_amount / maxAmount * 100) : 0;
+        var color = PARTY_COLORS[p.party] || '#6e6e76';
+        h += '<div class="flow-bar-wrap">';
+        h += '<div class="flow-bar-label"><span>' + escHtml(p.party.replace('Party of Canada','').replace('Bloc QuÃ©bÃ©cois','Bloc').trim()) + '</span><span>' + fmt(p.count) + ' donations</span></div>';
+        h += '<div class="flow-bar-track"><div class="flow-bar-fill" style="width:' + pct.toFixed(1) + '%;background:' + color + ';"></div></div>';
+        h += '<div class="flow-bar-amount">' + fmtDollar(p.total_amount) + '</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+
+      // Contributor type breakdown
+      if (contribData.contributor_types) {
+        h += '<div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;">';
+        contribData.contributor_types.forEach(function(ct) {
+          h += '<div class="mp-stat"><span class="mp-stat-val" style="font-size:0.95rem;">' + fmt(ct.count) + '</span><span class="mp-stat-label">' + escHtml(ct.type) + '</span></div>';
+        });
+        h += '</div>';
+      }
+      return h;
+    }
+
+    // ── Procurement Anomalies ──
+    function renderProcurement(procData) {
+      var anomalies = procData.anomalies || [];
+      // Sort by spend descending
+      anomalies.sort(function(a, b) { return (b.vendor_spend || 0) - (a.vendor_spend || 0); });
+
+      var h = '';
+      // Stats row
+      h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;">';
+      h += '<div class="mp-stat" style="background:rgba(239,68,68,0.06);"><span class="mp-stat-val" style="color:#ef4444;">' + fmt(procData.high_severity_count) + '</span><span class="mp-stat-label">High Severity</span></div>';
+      h += '<div class="mp-stat" style="background:rgba(245,158,11,0.06);"><span class="mp-stat-val" style="color:#f59e0b;">' + fmt(procData.total_anomalies) + '</span><span class="mp-stat-label">Total Anomalies</span></div>';
+      h += '<div class="mp-stat" style="background:rgba(96,165,250,0.06);"><span class="mp-stat-val" style="color:#60a5fa;">' + fmt(procData.total_contracts_scanned) + '</span><span class="mp-stat-label">Contracts Scanned</span></div>';
+      h += '</div>';
+
+      h += '<div class="procurement-grid">';
+      var shown = Math.min(anomalies.length, 12);
+      for (var i = 0; i < shown; i++) {
+        var a = anomalies[i];
+        var risk = a.severity === 'HIGH' ? 'high' : a.severity === 'MEDIUM' ? 'medium' : 'low';
+        h += '<div class="procurement-card risk-' + risk + '">';
+        h += '<div class="procurement-vendor">' + escHtml(a.vendor) + '</div>';
+        h += '<div class="procurement-dept">' + escHtml(a.department.toUpperCase()) + '</div>';
+        h += '<div class="procurement-amount">' + fmtDollar(a.vendor_spend) + '</div>';
+        h += '<div style="font-size:0.72rem;color:var(--text-tertiary);">';
+        h += '<span style="color:' + (a.concentration_pct > 80 ? '#ef4444' : a.concentration_pct > 50 ? '#f59e0b' : '#22c55e') + ';font-weight:700;">' + a.concentration_pct.toFixed(0) + '%</span> of department spend';
+        h += '</div>';
+        h += '<div class="procurement-flag">Vendor concentration in ' + escHtml(a.department) + '. Single-vendor dominance may reflect specialized expertise or sole-source justification.</div>';
+        h += '</div>';
+      }
+      h += '</div>';
+      if (anomalies.length > shown) {
+        h += '<div class="disclaimer-inline" style="text-align:center;margin-top:14px;">' + (anomalies.length - shown) + ' additional anomalies not shown.</div>';
+      }
+      return h;
+    }
+
+    // ── Contentious Votes Timeline ──
+    function renderTimeline(analysisData) {
+      var votes = (analysisData.contentious_votes || []).slice(0, 12);
+      if (votes.length === 0) return '<p style="color:var(--text-tertiary);">No contentious vote data available.</p>';
+
+      var h = '<div class="timeline-track">';
+      votes.forEach(function(v) {
+        var margin = Math.abs((v.yea_total || 0) - (v.nay_total || 0));
+        var total = (v.yea_total || 0) + (v.nay_total || 0);
+        var yeaPct = total > 0 ? ((v.yea_total / total) * 100).toFixed(1) : '?';
+
+        h += '<div class="timeline-event">';
+        h += '<div class="timeline-date">' + escHtml(v.date || 'Unknown') + ' &mdash; Vote #' + (v.number || '?') + '</div>';
+        h += '<div class="timeline-title">' + escHtml((v.description || '').substring(0, 120)) + (v.description && v.description.length > 120 ? '...' : '') + '</div>';
+        h += '<div class="timeline-desc">';
+        h += '<strong>' + escHtml(v.result || '') + '</strong> &mdash; ';
+        h += '<span style="color:#34d399;">' + (v.yea_total || 0) + ' Yea</span> / ';
+        h += '<span style="color:#ef4444;">' + (v.nay_total || 0) + ' Nay</span>';
+        h += ' (margin: ' + margin + ', ' + yeaPct + '% Yea)';
+        h += '</div>';
+
+        // Visual vote bar
+        h += '<div style="margin-top:6px;display:flex;height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,0.04);">';
+        h += '<div style="width:' + yeaPct + '%;background:#34d399;"></div>';
+        h += '<div style="flex:1;background:#ef4444;"></div>';
+        h += '</div>';
+
+        h += '</div>';
+      });
+      h += '</div>';
+      return h;
+    }
+
+    // ── MP Filter Logic ──
+    window._setParty = function(btn) {
+      currentPartyFilter = btn.getAttribute('data-party');
+      var pills = document.querySelectorAll('.filter-pill');
+      pills.forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      window._filterMPs();
+    };
+
+    window._filterMPs = function() {
+      var search = (document.getElementById('mp-search') || {}).value || '';
+      search = search.toLowerCase().trim();
+      var cards = document.querySelectorAll('#mp-grid-container .mp-card');
+      cards.forEach(function(card) {
+        var name = (card.querySelector('.mp-card-name') || {}).textContent || '';
+        var partyEl = card.querySelector('.mp-card-party');
+        var party = partyEl ? partyEl.textContent.toLowerCase() : '';
+
+        var matchSearch = !search || name.toLowerCase().indexOf(search) !== -1;
+        var matchParty = currentPartyFilter === 'all' || party.indexOf(currentPartyFilter) !== -1 || (currentPartyFilter === 'bloc' && party.indexOf('bloc') !== -1);
+
+        card.style.display = (matchSearch && matchParty) ? '' : 'none';
+      });
+    };
 
   })();
   </script>
