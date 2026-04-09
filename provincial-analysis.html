@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provincial Government Accountability — All 10 Provinces | TENET5</title>
+  <meta name="description" content="Provincial-level government accountability data for all 10 Canadian provinces. Scandal tracker, criminal code applicability, and federal cross-references from public records.">
+  <meta property="og:title" content="Provincial Government Accountability — All 10 Provinces">
+  <meta property="og:description" content="Provincial-level government accountability data for all 10 Canadian provinces. Scandal tracker, criminal code applicability, and federal cross-references.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/provincial-analysis.html">
+  <meta property="og:site_name" content="TENET5 — Canadian Government Accountability">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-findings.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_CA">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Provincial Government Accountability — All 10 Provinces">
+  <meta name="twitter:description" content="Provincial scandal tracker, criminal code analysis, and federal cross-references for all 10 Canadian provinces. Built from public records.">
+  <meta name="twitter:image" content="https://tenet-5.github.io/img/og-findings.png">
+  <link rel="stylesheet" href="style.css?v=5">
+  <meta name="theme-color" content="#1a1f36">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    /* ── LAYOUT ── */
+    .prov-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      color: var(--text-primary);
+    }
+
+    /* ── HERO ── */
+    .prov-hero {
+      text-align: center;
+      padding: 48px 0 32px;
+      border-bottom: 2px solid rgba(196,30,58,0.4);
+      margin-bottom: 40px;
+    }
+    .prov-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      color: var(--text-primary);
+      margin: 0 0 10px;
+      line-height: 1.2;
+    }
+    .prov-hero .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      max-width: 750px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .prov-hero .gen-date {
+      font-size: 0.7rem;
+      color: var(--text-quaternary, #555);
+      margin-top: 8px;
+    }
+
+    /* ── SECTION HEADINGS ── */
+    .section-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 48px 0 6px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-heading .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent, #c41e3a);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .section-desc {
+      font-size: 0.82rem;
+      color: var(--text-tertiary);
+      line-height: 1.7;
+      margin-bottom: 24px;
+      max-width: 900px;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+    .stat-tile {
+      background: var(--bg-card, #1a1f36);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 14px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .stat-tile:hover {
+      border-color: var(--accent, #c41e3a);
+    }
+    .stat-tile .val {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-primary);
+      display: block;
+    }
+    .stat-tile .label {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ── PROVINCE GRID ── */
+    .prov-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .prov-card {
+      background: var(--bg-card, #1a1f36);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .prov-card:hover {
+      border-color: var(--accent, #c41e3a);
+      transform: translateY(-2px);
+    }
+    .prov-card-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .prov-card-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.3;
+    }
+    .prov-card-header .party-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+    /* Party colors */
+    .party-pc { background: rgba(0,82,165,0.2); color: #4a9eff; border: 1px solid rgba(0,82,165,0.3); }
+    .party-liberal { background: rgba(215,25,32,0.15); color: #ff6b6b; border: 1px solid rgba(215,25,32,0.25); }
+    .party-ndp { background: rgba(243,112,33,0.15); color: #f59e42; border: 1px solid rgba(243,112,33,0.25); }
+    .party-caq { background: rgba(0,114,187,0.15); color: #38b6ff; border: 1px solid rgba(0,114,187,0.25); }
+    .party-ucp { background: rgba(0,82,165,0.2); color: #4a9eff; border: 1px solid rgba(0,82,165,0.3); }
+    .party-sp { background: rgba(0,82,165,0.2); color: #4a9eff; border: 1px solid rgba(0,82,165,0.3); }
+
+    .prov-card-body {
+      padding: 16px 20px;
+    }
+    .prov-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 16px;
+      margin-bottom: 14px;
+      font-size: 0.78rem;
+    }
+    .prov-meta .meta-label {
+      color: var(--text-tertiary);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .prov-meta .meta-val {
+      color: var(--text-secondary, #ccc);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .prov-issues {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .prov-issues li {
+      font-size: 0.78rem;
+      color: var(--text-secondary, #bbb);
+      line-height: 1.6;
+      padding: 4px 0 4px 16px;
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .prov-issues li:last-child {
+      border-bottom: none;
+    }
+    .prov-issues li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent, #c41e3a);
+      opacity: 0.7;
+    }
+
+    /* ── SCANDAL TIMELINE ── */
+    .scandal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .scandal-card {
+      background: var(--bg-card, #1a1f36);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent, #c41e3a);
+      border-radius: 8px;
+      padding: 20px 24px;
+      transition: border-color 0.2s;
+    }
+    .scandal-card:hover {
+      border-color: var(--accent, #c41e3a);
+    }
+    .scandal-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: var(--text-primary);
+      margin: 0 0 8px;
+    }
+    .scandal-card .scandal-province {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent, #c41e3a);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .scandal-card .scandal-body {
+      font-size: 0.82rem;
+      color: var(--text-secondary, #bbb);
+      line-height: 1.7;
+    }
+    .scandal-card .scandal-cost {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #ef4444;
+      background: rgba(239,68,68,0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+    .scandal-card .scandal-status {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      letter-spacing: 0.5px;
+    }
+    .status-reversed { background: rgba(34,197,94,0.12); color: #22c55e; }
+    .status-ongoing { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .status-completed { background: rgba(59,130,246,0.12); color: #3b82f6; }
+    .status-closed { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+    /* ── CROSS-REFERENCE TABLE ── */
+    .xref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin: 16px 0;
+    }
+    .xref-table th {
+      background: var(--bg-elevated, #111318);
+      color: var(--text-tertiary);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 2px solid rgba(196,30,58,0.3);
+    }
+    .xref-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary, #bbb);
+    }
+    .xref-table tr:hover {
+      background: var(--bg-card-h, rgba(255,255,255,0.02));
+    }
+    .xref-link {
+      color: var(--accent, #c41e3a);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .xref-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ── CRIMINAL CODE CARDS ── */
+    .cc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .cc-card {
+      background: var(--bg-card, #1a1f36);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .cc-card:hover {
+      border-color: var(--accent, #c41e3a);
+    }
+    .cc-card .cc-section {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent, #c41e3a);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .cc-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin: 0 0 10px;
+    }
+    .cc-card .cc-body {
+      font-size: 0.8rem;
+      color: var(--text-secondary, #bbb);
+      line-height: 1.7;
+    }
+    .cc-card .cc-examples {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .cc-card .cc-examples span {
+      display: inline-block;
+      font-size: 0.7rem;
+      background: rgba(196,30,58,0.1);
+      color: var(--text-secondary, #bbb);
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin: 2px 4px 2px 0;
+    }
+
+    /* ── METHODOLOGY ── */
+    .methodology-block {
+      background: var(--bg-card, #1a1f36);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-top: 40px;
+    }
+    .methodology-block h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      margin: 0 0 12px;
+    }
+    .methodology-block p,
+    .methodology-block li {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      line-height: 1.7;
+    }
+    .methodology-block ul {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      .prov-grid { grid-template-columns: 1fr; }
+      .cc-grid { grid-template-columns: 1fr; }
+      .prov-hero h1 { font-size: 1.8rem; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+
+<!-- CAMPAIGN SHARE BAR -->
+<div id="share-bar" class="share-bar">
+  <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
+  <div class="share-bar-buttons">
+    <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
+    <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
+    <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
+    <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
+    <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
+  </div>
+</div>
+
+  <div id="main" class="prov-wrap">
+
+    <!-- ── HERO ── -->
+    <div class="prov-hero">
+      <h1>Provincial Government Accountability</h1>
+      <p class="subtitle">Accountability data for all 10 Canadian provinces. Premiers, governing parties, key scandals, criminal code applicability, and federal cross-references. All from public records.</p>
+      <p class="gen-date">Data current as of April 2026 | Built from public provincial records, Auditor General reports, and integrity commissioner findings</p>
+    </div>
+
+    <!-- ── NATIONAL STATS ── -->
+    <div class="stats-row">
+      <div class="stat-tile">
+        <span class="val">10</span>
+        <span class="label">Provinces Tracked</span>
+      </div>
+      <div class="stat-tile">
+        <span class="val">6</span>
+        <span class="label">Major Scandals</span>
+      </div>
+      <div class="stat-tile">
+        <span class="val">$35B+</span>
+        <span class="label">Scandal Costs</span>
+      </div>
+      <div class="stat-tile">
+        <span class="val">5</span>
+        <span class="label">Governing Parties</span>
+      </div>
+      <div class="stat-tile">
+        <span class="val">38.8M</span>
+        <span class="label">Canadians Affected</span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- SECTION 1: PROVINCIAL OVERVIEW DASHBOARD        -->
+    <!-- ════════════════════════════════════════════════ -->
+    <h2 class="section-heading">
+      <span class="num">Section 01</span>
+      Provincial Overview Dashboard
+    </h2>
+    <p class="section-desc">Intelligence briefing cards for all 10 Canadian provinces. Color-coded by governing party. Key accountability issues drawn from Auditor General reports, integrity commissioner findings, and public legislative records.</p>
+
+    <div class="prov-grid">
+
+      <!-- ONTARIO -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Ontario</h3>
+          <span class="party-tag party-pc">PC</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Doug Ford</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">15.8M</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Toronto</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">Progressive Conservative</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Greenbelt scandal &mdash; $8.3B developer giveaway reversed after Auditor General and Integrity Commissioner investigations</li>
+            <li>Highway 413 &mdash; contested GTA highway through protected farmland and wetlands</li>
+            <li>Ontario Place redevelopment &mdash; $2.1B+ public cost for private spa, no competitive bid</li>
+            <li>Healthcare privatization &mdash; expanded private surgical clinics, OHIP billing concerns</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- QUEBEC -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Quebec</h3>
+          <span class="party-tag party-caq">CAQ</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Fran&ccedil;ois Legault</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">8.8M</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Quebec City</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">Coalition Avenir Qu&eacute;bec</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Bill 21 &mdash; religious symbols ban for public workers, Charter challenge ongoing</li>
+            <li>Bill 96 &mdash; strengthened language law restricting English services, business compliance burden</li>
+            <li>Immigration cap &mdash; unilateral temporary immigration reduction demands to Ottawa</li>
+            <li>Quebec City tramway cancellation &mdash; $4B+ project cancelled then partially revived</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- BRITISH COLUMBIA -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>British Columbia</h3>
+          <span class="party-tag party-ndp">NDP</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">David Eby</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">5.5M</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Victoria</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">New Democratic Party</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Housing affordability crisis &mdash; median home price remains among highest in North America</li>
+            <li>Cullen Commission &mdash; $100B+ laundered through BC casinos, real estate, and horse racing</li>
+            <li>Site C dam &mdash; $16B+ (originally $6.6B), massive cost overrun, geotechnical issues</li>
+            <li>Drug decriminalization reversal &mdash; Health Canada pilot recriminalized after public backlash</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ALBERTA -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Alberta</h3>
+          <span class="party-tag party-ucp">UCP</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Danielle Smith</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">4.8M</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Edmonton</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">United Conservative Party</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Alberta Sovereignty Act &mdash; legislation to refuse federal laws, constitutional questions</li>
+            <li>CPP withdrawal proposal &mdash; plan to pull Alberta out of Canada Pension Plan</li>
+            <li>Coal mining in Rockies &mdash; rescinded 1976 coal policy protecting eastern slopes, then reversed</li>
+            <li>Healthcare restructuring &mdash; AHS dissolution into 4 new agencies, transition chaos</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- MANITOBA -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Manitoba</h3>
+          <span class="party-tag party-ndp">NDP</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Wab Kinew</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">1.4M</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Winnipeg</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">New Democratic Party</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>First Indigenous premier in Canadian history &mdash; reconciliation mandate</li>
+            <li>Healthcare system rebuilding &mdash; reversing previous government ER closures and consolidations</li>
+            <li>Manitoba Hydro rate increases &mdash; Bipole III cost overruns passed to ratepayers</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SASKATCHEWAN -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Saskatchewan</h3>
+          <span class="party-tag party-sp">SASK PARTY</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Scott Moe</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">1.2M</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Regina</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">Saskatchewan Party</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Carbon tax fight &mdash; provincial refusal to implement federal backstop, SCC reference</li>
+            <li>Potash royalties &mdash; below-market royalty rates costing province billions in revenue</li>
+            <li>Indigenous water crisis &mdash; multiple First Nations reserves lack clean drinking water</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- NOVA SCOTIA -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Nova Scotia</h3>
+          <span class="party-tag party-pc">PC</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Tim Houston</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">1.07M</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Halifax</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">Progressive Conservative</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Healthcare emergency &mdash; 140,000+ Nova Scotians without a family doctor</li>
+            <li>Housing crisis &mdash; rapid population growth outpacing housing construction</li>
+            <li>Immigration surge &mdash; fastest growing province per capita, infrastructure strain</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- NEW BRUNSWICK -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>New Brunswick</h3>
+          <span class="party-tag party-liberal">LIBERAL</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Susan Holt</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">820K</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Fredericton</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">Liberal</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Property tax reform &mdash; non-resident ownership surcharges and assessment controversies</li>
+            <li>Healthcare access &mdash; rural hospital staffing shortages, ER closures</li>
+            <li>Bilingualism &mdash; Official Languages Act enforcement and Francophone service delivery</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- NEWFOUNDLAND AND LABRADOR -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Newfoundland &amp; Labrador</h3>
+          <span class="party-tag party-liberal">LIBERAL</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Andrew Furey</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">540K</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">St. John's</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">Liberal</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Muskrat Falls &mdash; $6.2B to $13.1B (100%+ cost overrun), ratepayer burden, public inquiry completed</li>
+            <li>Oil dependency &mdash; provincial revenues tied to offshore oil production amid energy transition</li>
+            <li>Population decline &mdash; aging demographics and outmigration threatening services</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PEI -->
+      <div class="prov-card">
+        <div class="prov-card-header">
+          <h3>Prince Edward Island</h3>
+          <span class="party-tag party-pc">PC</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-meta">
+            <div><span class="meta-label">Premier</span><br><span class="meta-val">Dennis King</span></div>
+            <div><span class="meta-label">Population</span><br><span class="meta-val">175K</span></div>
+            <div><span class="meta-label">Capital</span><br><span class="meta-val">Charlottetown</span></div>
+            <div><span class="meta-label">Party</span><br><span class="meta-val">Progressive Conservative</span></div>
+          </div>
+          <ul class="prov-issues">
+            <li>Housing affordability &mdash; island housing prices surging beyond local wage growth</li>
+            <li>Land ownership rules &mdash; Lands Protection Act caps non-resident holdings, enforcement gaps</li>
+            <li>Confederation Bridge (Fixed Link) &mdash; sole mainland connection, toll and maintenance costs</li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /prov-grid -->
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- SECTION 2: PROVINCIAL SCANDAL TRACKER           -->
+    <!-- ════════════════════════════════════════════════ -->
+    <h2 class="section-heading">
+      <span class="num">Section 02</span>
+      Provincial Scandal Tracker
+    </h2>
+    <p class="section-desc">Major provincial scandals tracked from Auditor General reports, public inquiry findings, and integrity commissioner investigations. Costs reflect public record figures.</p>
+
+    <div class="scandal-list">
+
+      <div class="scandal-card">
+        <span class="scandal-province">Ontario</span>
+        <h4>Greenbelt Land Swap</h4>
+        <p class="scandal-body">Provincial government removed 7,400 acres of protected Greenbelt land, enriching connected developers by an estimated $8.3 billion. The Auditor General found the process bypassed normal planning review. The Integrity Commissioner found the Housing Minister contravened the Members' Integrity Act. All lands were subsequently returned to the Greenbelt.</p>
+        <span class="scandal-cost">$8.3B developer benefit</span>
+        <span class="scandal-status status-reversed">REVERSED</span>
+      </div>
+
+      <div class="scandal-card">
+        <span class="scandal-province">British Columbia</span>
+        <h4>Money Laundering &mdash; Cullen Commission</h4>
+        <p class="scandal-body">The Commission of Inquiry into Money Laundering in BC (Cullen Commission) found over $100 billion was laundered through the province's casinos, real estate, luxury cars, and horse racing between 2008 and 2018. Regulatory failures, inadequate AML enforcement, and provincial gaming corporation negligence were documented across 1,800+ pages of findings.</p>
+        <span class="scandal-cost">$100B+ laundered</span>
+        <span class="scandal-status status-completed">INQUIRY COMPLETE</span>
+      </div>
+
+      <div class="scandal-card">
+        <span class="scandal-province">Newfoundland &amp; Labrador</span>
+        <h4>Muskrat Falls Hydroelectric Project</h4>
+        <p class="scandal-body">Estimated at $6.2 billion at sanction, the Muskrat Falls project ballooned to $13.1 billion &mdash; a 100%+ cost overrun. The Leblanc Inquiry found systemic project management failures, political interference, and inadequate risk assessment. Ratepayers now bear the cost through electricity rate mitigation measures requiring ongoing federal support.</p>
+        <span class="scandal-cost">$13.1B final cost ($6.9B overrun)</span>
+        <span class="scandal-status status-ongoing">RATEPAYER BURDEN ONGOING</span>
+      </div>
+
+      <div class="scandal-card">
+        <span class="scandal-province">Ontario</span>
+        <h4>eHealth Ontario</h4>
+        <p class="scandal-body">Over $1 billion spent on electronic health records with minimal functional delivery. The Auditor General documented untendered contracts, consultant spending irregularities, and poor oversight across multiple governments. Regarded as one of Ontario's most expensive IT failures.</p>
+        <span class="scandal-cost">$1B+ wasted</span>
+        <span class="scandal-status status-closed">AG REPORT COMPLETE</span>
+      </div>
+
+      <div class="scandal-card">
+        <span class="scandal-province">Quebec</span>
+        <h4>Charbonneau Commission &mdash; Construction Corruption</h4>
+        <p class="scandal-body">The Charbonneau Commission (2011-2015) investigated corruption in the construction industry and its links to organized crime and political party financing. Findings included systematic bid rigging, kickback schemes on public contracts, and connections between construction firms, municipal officials, and organized crime. Led to sweeping procurement reforms.</p>
+        <span class="scandal-cost">Billions in inflated contracts</span>
+        <span class="scandal-status status-completed">INQUIRY COMPLETE</span>
+      </div>
+
+      <div class="scandal-card">
+        <span class="scandal-province">Alberta</span>
+        <h4>Coal Policy Reversal &amp; WCB Scandals</h4>
+        <p class="scandal-body">The 2020 rescission of the 1976 Coal Development Policy (protecting the eastern slopes of the Rockies from open-pit mining) was reversed after public outcry. Separately, the Workers' Compensation Board has faced ongoing criticism over claim denial rates, unfunded liability management, and governance concerns documented by the Ombudsman.</p>
+        <span class="scandal-cost">Environmental + worker costs</span>
+        <span class="scandal-status status-reversed">COAL POLICY RESTORED</span>
+      </div>
+
+    </div><!-- /scandal-list -->
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- SECTION 3: PROVINCIAL-FEDERAL CROSS-REFERENCE   -->
+    <!-- ════════════════════════════════════════════════ -->
+    <h2 class="section-heading">
+      <span class="num">Section 03</span>
+      Provincial-Federal Cross-Reference
+    </h2>
+    <p class="section-desc">Provincial accountability issues frequently intersect with federal jurisdiction. Entities involved in provincial scandals may also appear in the federal lobbying registry, campaign finance records, and transfer payment agreements.</p>
+
+    <div style="overflow-x:auto;">
+      <table class="xref-table">
+        <thead>
+          <tr>
+            <th>Provincial Issue</th>
+            <th>Province</th>
+            <th>Federal Connection</th>
+            <th>Cross-Reference Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Greenbelt developer lobbying</td>
+            <td>Ontario</td>
+            <td>Multiple developers involved in Greenbelt removals also registered as federal lobbyists on housing and infrastructure policy</td>
+            <td><a href="lobbying-tracker.html" class="xref-link">Federal Lobbying Registry</a></td>
+          </tr>
+          <tr>
+            <td>Money laundering enforcement</td>
+            <td>British Columbia</td>
+            <td>FINTRAC oversight gaps at the federal level enabled provincial casino laundering. Federal AML legislation reforms followed Cullen Commission findings</td>
+            <td><a href="criminal-code-analysis.html" class="xref-link">Criminal Code Analysis</a></td>
+          </tr>
+          <tr>
+            <td>Muskrat Falls federal guarantee</td>
+            <td>Newfoundland &amp; Labrador</td>
+            <td>Federal loan guarantee of $7.9B tied to the project. Rate mitigation agreement requires ongoing federal funding commitments</td>
+            <td><a href="procurement-analysis.html" class="xref-link">Procurement Analysis</a></td>
+          </tr>
+          <tr>
+            <td>CPP withdrawal proposal</td>
+            <td>Alberta</td>
+            <td>Withdrawal would affect the federal pension system for all Canadians. Federal actuarial analysis disputed Alberta's claimed share</td>
+            <td><a href="cross-reference.html" class="xref-link">Cross-Reference Database</a></td>
+          </tr>
+          <tr>
+            <td>Transfer payment accountability</td>
+            <td>All Provinces</td>
+            <td>$90B+ in annual federal transfers (CHT, CST, Equalization) lack provincial outcome reporting requirements. Federal AG has flagged accountability gaps</td>
+            <td><a href="accountability.html" class="xref-link">Accountability Tracker</a></td>
+          </tr>
+          <tr>
+            <td>Construction industry corruption</td>
+            <td>Quebec</td>
+            <td>Firms named in Charbonneau Commission also held federal infrastructure contracts. Some appeared in federal lobbying registry during same period</td>
+            <td><a href="lobbying-tracker.html" class="xref-link">Federal Lobbying Registry</a></td>
+          </tr>
+          <tr>
+            <td>Drug policy jurisdiction</td>
+            <td>British Columbia</td>
+            <td>Federal Health Canada exemption enabled BC decriminalization pilot. Federal reversal of exemption followed provincial request</td>
+            <td><a href="cross-reference.html" class="xref-link">Cross-Reference Database</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- SECTION 4: CRIMINAL CODE APPLICABILITY          -->
+    <!-- ════════════════════════════════════════════════ -->
+    <h2 class="section-heading">
+      <span class="num">Section 04</span>
+      Criminal Code Applicability
+    </h2>
+    <p class="section-desc">Provincial ministers, deputy ministers, and senior officials are public officers under the Criminal Code of Canada. The following sections may apply to provincial-level conduct documented in the scandal tracker above.</p>
+
+    <div class="cc-grid">
+
+      <div class="cc-card">
+        <span class="cc-section">Section 122 &mdash; Breach of Trust</span>
+        <h4>Breach of Trust by Public Officer</h4>
+        <p class="cc-body">Every official who, in connection with the duties of their office, commits fraud or a breach of trust is guilty of an indictable offence punishable by up to 5 years imprisonment. Provincial cabinet ministers, deputy ministers, and senior public servants are public officers under this section.</p>
+        <div class="cc-examples">
+          <span>Greenbelt decisions</span>
+          <span>Sole-source contracts</span>
+          <span>Muskrat Falls oversight</span>
+        </div>
+      </div>
+
+      <div class="cc-card">
+        <span class="cc-section">Section 123 &mdash; Municipal Corruption</span>
+        <h4>Corruption of Municipal Officials</h4>
+        <p class="cc-body">Prohibits giving or accepting rewards, advantages, or benefits as consideration for cooperation, assistance, or exercise of influence in municipal matters. Despite the name, this section has been applied to provincial-level officials involved in land use, planning, and zoning decisions that overlap with municipal jurisdiction.</p>
+        <div class="cc-examples">
+          <span>Land rezoning</span>
+          <span>Developer influence</span>
+          <span>Planning bypasses</span>
+        </div>
+      </div>
+
+      <div class="cc-card">
+        <span class="cc-section">Section 121 &mdash; Frauds on the Government</span>
+        <h4>Frauds on Government</h4>
+        <p class="cc-body">Applies to anyone who gives, offers, or agrees to give a benefit to a government official, or any official who demands or accepts such benefits. Covers both provincial and federal officials. Relevant to procurement irregularities and sole-source contract awards documented in provincial auditor reports.</p>
+        <div class="cc-examples">
+          <span>Procurement fraud</span>
+          <span>Contract kickbacks</span>
+          <span>Charbonneau findings</span>
+        </div>
+      </div>
+
+      <div class="cc-card">
+        <span class="cc-section">Section 380 &mdash; Fraud</span>
+        <h4>General Fraud Provisions</h4>
+        <p class="cc-body">Fraud over $5,000 is an indictable offence with a maximum 14-year sentence. Where the total value exceeds $1 million, a minimum 2-year sentence applies. Applicable to cost overruns concealed from oversight bodies and misrepresentation of project costs to legislatures.</p>
+        <div class="cc-examples">
+          <span>Cost overrun concealment</span>
+          <span>eHealth spending</span>
+          <span>Project misrepresentation</span>
+        </div>
+      </div>
+
+      <div class="cc-card">
+        <span class="cc-section">Section 126 &mdash; Disobeying a Statute</span>
+        <h4>Disobeying a Statute</h4>
+        <p class="cc-body">Everyone who, without lawful excuse, contravenes an Act of Parliament by willfully doing anything that it forbids, or by willfully failing to do anything it requires, is guilty of an indictable offence (up to 2 years). Applicable where provincial officials have been found by integrity commissioners to have contravened governing legislation.</p>
+        <div class="cc-examples">
+          <span>Integrity Act violations</span>
+          <span>FOI non-compliance</span>
+          <span>Statutory duty failures</span>
+        </div>
+      </div>
+
+      <div class="cc-card">
+        <span class="cc-section">Provincial Integrity Commissioners</span>
+        <h4>Provincial Oversight Findings</h4>
+        <p class="cc-body">Each province has an integrity commissioner or ethics commissioner empowered to investigate conflicts of interest and contraventions of members' integrity legislation. Findings can be referred to police for Criminal Code investigation. Notable findings include Ontario's Integrity Commissioner report on the Greenbelt affair and Quebec's ethics commissioner investigations following Charbonneau.</p>
+        <div class="cc-examples">
+          <span>Ontario IC &mdash; Greenbelt</span>
+          <span>Quebec Ethics Commissioner</span>
+          <span>BC Conflict of Interest</span>
+        </div>
+      </div>
+
+    </div><!-- /cc-grid -->
+
+    <!-- ── METHODOLOGY ── -->
+    <div class="methodology-block">
+      <h3>Methodology &amp; Sources</h3>
+      <p>All data on this page is compiled from publicly available government records:</p>
+      <ul>
+        <li>Provincial Auditor General / Auditor General reports (all 10 provinces)</li>
+        <li>Integrity Commissioner / Ethics Commissioner annual reports and investigation findings</li>
+        <li>Public inquiry reports: Cullen Commission (BC), Charbonneau Commission (QC), Leblanc Inquiry (NL)</li>
+        <li>Office of the Commissioner of Lobbying of Canada &mdash; federal lobbying registry</li>
+        <li>Statistics Canada population estimates (quarterly, 2025-Q4)</li>
+        <li>Elections Canada and provincial election records for current governing party data</li>
+        <li>Criminal Code of Canada (R.S.C., 1985, c. C-46) for all section references</li>
+      </ul>
+      <p>This page does not allege criminal conduct. It documents public record findings and identifies applicable Criminal Code sections for informational purposes. Where integrity commissioners or auditors general have made findings, those findings are cited. All scandal cost figures are drawn from official reports.</p>
+    </div>
+
+  </div><!-- /prov-wrap -->
+
+  <script src="nav.js?v=7"></script>
+  <script src="share.js?v=1"></script>
+  <div id="read-next"></div>
+  <footer id="site-footer"></footer>
+  <script src="readnext.js?v=2"></script>
+  <script src="footer.js?v=1"></script>
+  <script src="js/ai-panel.js"></script>
+</body>
+</html>
