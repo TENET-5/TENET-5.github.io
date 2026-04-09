@@ -51,6 +51,7 @@
         { label: 'Cross-Reference Engine', href: 'cross-reference.html', desc: 'Lobbying vs. voting correlation' },
         { label: 'Foreign Influence', href: 'foreign-influence.html', desc: 'CIJA, CCP, UFWD pipelines' },
         { label: 'Procurement Analysis', href: 'procurement-analysis.html', desc: 'Contract anomalies' },
+        { label: 'Procurement Deep Dive', href: 'procurement-deep-dive.html', desc: '1.26M contracts, 70K anomalies', hot: true },
         { label: 'Procurement Registry', href: 'procurement-registry.html', desc: 'Full contract database' },
         { label: 'Contributions Tracker', href: 'contributions-tracker.html', desc: 'Political donations' },
         { label: 'Lobbying Tracker', href: 'lobbying-tracker.html', desc: 'Registered lobbying data' },

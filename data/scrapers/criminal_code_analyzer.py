@@ -174,7 +174,7 @@ class CriminalCodeAnalyzer:
             "crossref": "cross_reference_findings.json",
             "carney": "carney_conflicts_dossier.json",
             "cfnis": "cfnis_command_dossier.json",
-            "procurement": "contracts/anomaly_scan_20260407_221148.json",
+            "procurement": "contracts/anomaly_scan_20260409_035111.json",
             "corporate": "corporate_registry_analysis.json",
             "revolving": "revolving_door_analysis.json",
             "arms": "arms_exports_israel.json",
@@ -317,15 +317,54 @@ class CriminalCodeAnalyzer:
     def analyze_procurement(self):
         """Analyze procurement anomalies for s.121/s.380/s.418."""
         proc = self.data.get("procurement", {})
-        if proc:
-            for anomaly in proc.get("anomalies", []):
-                concentration = anomaly.get("concentration_pct", 0)
-                spend = anomaly.get("vendor_spend", 0)
-                if concentration >= 90 and spend >= 100000:
-                    self.add_finding("s121", "medium", anomaly.get("vendor", "Unknown"), "organization",
-                        f"Procurement vendor concentration: {anomaly['vendor']} holds {concentration}% of {anomaly.get('department', 'unknown')} department spend (${spend:,.0f}). May warrant s.121 or s.418 review.",
-                        [{"fact": f"{concentration}% concentration, ${spend:,.0f}", "source": "Proactive disclosure"}],
-                        "contracts/anomaly_scan.json")
+        if not proc:
+            return
+
+        anomalies = proc.get("anomalies", [])
+
+        # Vendor concentration — flag high-spend concentration
+        vendor_conc = [a for a in anomalies if a.get("type") == "VENDOR_CONCENTRATION"]
+        vendor_conc.sort(key=lambda a: -a.get("vendor_spend", 0))
+        for anomaly in vendor_conc[:20]:  # Top 20 by spend
+            spend = anomaly.get("vendor_spend", 0)
+            concentration = anomaly.get("concentration_pct", 0)
+            severity = "critical" if spend > 10_000_000_000 else "high" if spend > 1_000_000_000 else "medium"
+            self.add_finding("s121", severity, anomaly.get("vendor", "Unknown"), "organization",
+                f"Procurement vendor concentration: {anomaly['vendor']} holds {concentration:.0f}% of {anomaly.get('department', 'unknown').upper()} department spend (${spend:,.0f}). {proc.get('total_contracts_scanned', 0):,} total contracts scanned.",
+                [{"fact": f"{concentration:.0f}% concentration, ${spend:,.0f}", "source": "Proactive disclosure open.canada.ca"}],
+                "contracts/anomaly_scan_20260409.json")
+
+        # Amendment chains — flag extreme amendment counts (70+ amendments)
+        amend_chains = [a for a in anomalies if a.get("type") == "AMENDMENT_CHAIN"]
+        # Get department-level stats
+        dept_counts = {}
+        for a in amend_chains:
+            dept = a.get("department", "unknown")
+            dept_counts[dept] = dept_counts.get(dept, 0) + 1
+        # Flag departments with extreme amendment patterns
+        for dept, count in sorted(dept_counts.items(), key=lambda x: -x[1])[:10]:
+            if count > 100:
+                self.add_finding("s418", "high", dept.upper(), "institution",
+                    f"Systematic amendment chain pattern: {count:,} contracts in {dept.upper()} have been amended 50+ times each. Pattern suggests systematic avoidance of competitive procurement thresholds.",
+                    [{"fact": f"{count:,} amendment chain anomalies in {dept}", "source": "Proactive disclosure"}],
+                    "contracts/anomaly_scan_20260409.json")
+
+        # Name variant detection — same vendor under multiple names
+        seen_vendors = {}
+        for a in vendor_conc:
+            base = a.get("vendor", "").upper().split(" ")[0:2]
+            key = " ".join(base)
+            if key not in seen_vendors:
+                seen_vendors[key] = []
+            seen_vendors[key].append(a)
+        for key, variants in seen_vendors.items():
+            if len(variants) > 1:
+                names = [v["vendor"] for v in variants]
+                total_spend = sum(v.get("vendor_spend", 0) for v in variants)
+                self.add_finding("s380", "high", " / ".join(names[:3]), "organization",
+                    f"Vendor name variant pattern: {len(variants)} entries under similar names ({', '.join(names[:3])}). Combined spend: ${total_spend:,.0f}. May indicate entity fragmentation to avoid disclosure thresholds.",
+                    [{"fact": f"{len(variants)} name variants, ${total_spend:,.0f} combined", "source": "Proactive disclosure"}],
+                    "contracts/anomaly_scan_20260409.json")
 
     def analyze_revolving_door(self):
         """Analyze revolving door patterns for s.121 influence peddling."""
