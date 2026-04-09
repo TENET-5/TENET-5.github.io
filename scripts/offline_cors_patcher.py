@@ -74,26 +74,19 @@ with open(polyfill_path, "w", encoding="utf-8") as f:
     f.write(polyfill_code)
 print(f"Created {polyfill_path}")
 
-# 3. Inject scripts into HTML files
-target_files = [
-    "charges-sheet.html",
-    "charity-pipeline.html",
-    "campaign-generator.html",
-    "procurement-deep-dive.html",
-    "criminal-code-analysis.html",
-    "municipal-accountability.html",
-    "sector-lobbying.html",
-    "voting-records.html",
-    "corruption-map.html",
-    "osint-dashboard.html",
-    "dossier-viewer.html"
-]
+# 3. Auto-discover and inject scripts into ALL HTML files that use fetch()
+target_files = []
+for f in os.listdir(base_dir):
+    if f.endswith(".html"):
+        fpath = os.path.join(base_dir, f)
+        with open(fpath, "r", encoding="utf-8") as fh:
+            if "fetch(" in fh.read():
+                target_files.append(f)
+print(f"Auto-discovered {len(target_files)} HTML files with fetch() calls.")
 
 injection = '<script src="js/offline_db.js"></script>\\n<script src="js/offline_fetch.js"></script>\\n'
 
-for html_file in os.listdir(base_dir):
-    if html_file not in target_files:
-        continue
+for html_file in target_files:
     
     filepath = os.path.join(base_dir, html_file)
     with open(filepath, "r", encoding="utf-8") as f:
