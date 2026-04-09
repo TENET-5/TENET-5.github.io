@@ -41,6 +41,13 @@
 
       <p>The question history must ask is: <strong>Why didn't the Royal Canadian Mounted Police arrest the politicians executing what behaves exactly as a modern rebirth of Aktion T4?</strong></p>
 
+      <div class="section-head" style="margin-top:25px; border-bottom:1px solid #737373; padding-bottom:8px; margin-bottom:15px;">
+        <h3 style="margin-top:0; color:#fff; font-size:1.1rem; line-height:1.4;">N-vs-NP Empirical Matrix: Command Failure Vectors</h3>
+      </div>
+      <div class="matrix-wrapper" style="width:100%; height:450px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; margin-bottom:35px;">
+        <canvas id="complicityMatrix"></canvas>
+      </div>
+
       <h3 class="proof-heading">I. The Command Structure Report</h3>
       <p>Accountability in federal law enforcement flows upward. To understand why no arrests were made, we must identify who held the ultimate authority to issue those orders at the exact moments the legislation was granted Royal Assent.</p>
 
@@ -102,6 +109,156 @@
   <script src="nav.js?v=8"></script>
   <script src="share.js?v=1"></script>
   <script src="board.js?v=1"></script>
+
+  <script>
+    // ═══════════════════════════════════════
+    // COMPLICITY MATRIX RENDERING (N-vs-NP)
+    // ═══════════════════════════════════════
+    function renderComplicityMatrix() {
+      var cvs = document.getElementById('complicityMatrix');
+      if (!cvs) return;
+      var ctx = cvs.getContext('2d');
+      var wrap = cvs.parentElement;
+      cvs.width = wrap.clientWidth;
+      cvs.height = wrap.clientHeight;
+
+      // The Structure Nodes
+      var nodes = [
+        { id: 'legislature', lbl: 'Parliament (Legislative Mechanism)', cx: 0.15, cy: 0.5, col: '#fbbf24' },
+        
+        // Command Inaction Layer (Central Shield)
+        { id: 'paulson', lbl: 'Cmdr. Paulson (2016 C-14)', cx: 0.5, cy: 0.35, col: '#60a5fa' },
+        { id: 'lucki', lbl: 'Cmdr. Lucki (2021 C-7)', cx: 0.5, cy: 0.65, col: '#60a5fa' },
+        
+        // Final Output
+        { id: 'aktion', lbl: 'MAID Output (Aktion T4 Parallel)', cx: 0.85, cy: 0.5, col: '#ff2244' }
+      ];
+
+      var edges = [
+        // Legislative bills flowing past the Command layer un-arrested
+        { from: 0, to: 1, w: 3 }, 
+        { from: 0, to: 2, w: 3 },
+        // Command layer failing to intercept, mapping straight to systemic death
+        { from: 1, to: 3, w: 5 },
+        { from: 2, to: 3, w: 5 }
+      ];
+
+      var particles = [];
+      for(var i=0; i<60; i++) {
+        var e = edges[Math.floor(Math.random()*edges.length)];
+        particles.push({ edge: e, progress: Math.random(), speed: 0.002 + Math.random()*0.003 });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        // Tactical Grid overlay
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        for (var i=1; i<20; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * (cvs.width/20), 0);
+          ctx.lineTo(i * (cvs.width/20), cvs.height);
+          ctx.stroke();
+        }
+
+        // Draw path vectors (simulating unchecked flow)
+        edges.forEach(function(e) {
+          var n1 = nodes[e.from], n2 = nodes[e.to];
+          ctx.beginPath();
+          ctx.moveTo(n1.cx * cvs.width, n1.cy * cvs.height);
+          
+          var midX;
+          var midY;
+          
+          if(e.from === 0) {
+            // Path entering defense line
+            midX = cvs.width * 0.3;
+            midY = n1.cy * cvs.height; 
+          } else {
+             // Path exiting defense line unchecked
+            midX = cvs.width * 0.7;
+            midY = n2.cy * cvs.height; 
+          }
+          
+          ctx.quadraticCurveTo(midX, midY, n2.cx * cvs.width, n2.cy * cvs.height);
+          ctx.strokeStyle = 'rgba(255,22,68,0.1)';
+          ctx.lineWidth = Math.max(1, e.w);
+          ctx.stroke();
+        });
+
+        // Flow Particles (Unchecked Legislation/Crimes mapping to death)
+        particles.forEach(function(p) {
+          p.progress += p.speed;
+          if (p.progress >= 1) {
+            p.progress = 0;
+            // Particles randomly flow from node 0 through intercept nodes to node 3
+            if (p.edge.from === 0) {
+              p.edge = edges[p.edge.to === 1 ? 2 : 3]; // Pass through 1->3 or 2->3
+            } else {
+              p.edge = edges[Math.random() < 0.5 ? 0 : 1]; // Reset back to start
+            }
+          }
+          
+          var n1 = nodes[p.edge.from], n2 = nodes[p.edge.to];
+          var startX = n1.cx * cvs.width, startY = n1.cy * cvs.height;
+          var endX = n2.cx * cvs.width, endY = n2.cy * cvs.height;
+          
+          var midX, midY;
+          if(p.edge.from === 0) {
+            midX = cvs.width * 0.3; midY = n1.cy * cvs.height; 
+          } else {
+            midX = cvs.width * 0.7; midY = n2.cy * cvs.height; 
+          }
+
+          var t = p.progress;
+          var mt = 1 - t;
+          var px = (mt * mt * startX) + (2 * mt * t * midX) + (t * t * endX);
+          var py = (mt * mt * startY) + (2 * mt * t * midY) + (t * t * endY);
+
+          ctx.shadowColor = '#ff2244';
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = '#ff2244';
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+
+        // Interface Nodes
+        nodes.forEach(function(n) {
+          var px = n.cx * cvs.width, py = n.cy * cvs.height;
+          
+          ctx.shadowColor = n.col;
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(px, py, n.id === 'aktion' ? 10 : 8, 0, Math.PI*2);
+          ctx.fillStyle = n.col;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 11px JetBrains Mono';
+          var textX = n.cx < 0.5 ? px + 18 : px - 18;
+          ctx.textAlign = n.cx < 0.5 ? 'left' : 'right';
+          if (n.id === 'legislature') ctx.fillText(n.lbl, px, py - 18);
+          else if (n.id === 'aktion') ctx.fillText(n.lbl, px, py - 20);
+          else ctx.fillText(n.lbl, textX, py + 4);
+        });
+
+        requestAnimationFrame(draw);
+      }
+      
+      window.addEventListener('resize', function() {
+        cvs.width = wrap.clientWidth;
+        cvs.height = wrap.clientHeight;
+      });
+
+      requestAnimationFrame(draw);
+    }
+    
+    renderComplicityMatrix();
+  </script>
   <footer id="site-footer"></footer>
   <script src="footer.js?v=1"></script>
 </body>
