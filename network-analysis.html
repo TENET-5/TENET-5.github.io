@@ -639,12 +639,13 @@
       ctx.translate(viewPanX, viewPanY);
       ctx.scale(viewZoom, viewZoom);
 
-      // Build hover connection set for highlighting
+      // Build connection set — uses focused node if set, otherwise hovered
+      var activeNode = focusedNode || hoveredNode;
       var hoveredConnections = {};
-      if (hoveredNode) {
+      if (activeNode) {
         allEdges.forEach(function(e) {
-          if (e.source === hoveredNode.node.id) hoveredConnections[e.target] = true;
-          if (e.target === hoveredNode.node.id) hoveredConnections[e.source] = true;
+          if (e.source === activeNode.node.id) hoveredConnections[e.target] = true;
+          if (e.target === activeNode.node.id) hoveredConnections[e.source] = true;
         });
       }
 
@@ -656,13 +657,13 @@
         if (!s || !t) return;
         if (!isNodeVisible(s.node) || !isNodeVisible(t.node)) return;
 
-        var isHighlighted = hoveredNode && (e.source === hoveredNode.node.id || e.target === hoveredNode.node.id);
+        var isHighlighted = activeNode && (e.source === activeNode.node.id || e.target === activeNode.node.id);
 
-        // When hovering: only show connected edges
-        if (hoveredNode && !isHighlighted) return;
+        // When focused/hovering: only show connected edges
+        if (activeNode && !isHighlighted) return;
 
-        // When not hovering: thin out low-score edges
-        if (!hoveredNode) {
+        // When not focused: thin out low-score edges
+        if (!activeNode) {
           var maxScore = Math.max(s.node.influence_score || 0, t.node.influence_score || 0);
           if (maxScore < 5 && Math.random() > 0.15) return;
         }
@@ -682,9 +683,9 @@
         var vis = isNodeVisible(p.node);
         if (!vis) return;
 
-        var isHovered = hoveredNode === p;
-        var isConnected = hoveredNode && (hoveredConnections[p.node.id] || isHovered);
-        var isDimmed = hoveredNode && !isConnected;
+        var isHovered = hoveredNode === p || focusedNode === p;
+        var isConnected = activeNode && (hoveredConnections[p.node.id] || isHovered);
+        var isDimmed = activeNode && !isConnected;
         var baseColor = getNodeColor(p.node);
         var currentRadius = isHovered ? p.r * 1.5 : p.r;
 
@@ -955,6 +956,53 @@
       isPanning = false;
     });
     canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // Left-click: zoom into clicked node and show its connection subgraph
+    var focusedNode = null;
+    canvas.addEventListener('click', function(e) {
+      if (isPanning) return;
+      var rect = canvas.getBoundingClientRect();
+      var sx = e.clientX - rect.left;
+      var sy = e.clientY - rect.top;
+      var g = screenToGraph(sx, sy);
+
+      // Find clicked node
+      var clicked = null;
+      for (var i = 0; i < positioned.length; i++) {
+        var p = positioned[i];
+        if (!isNodeVisible(p.node)) continue;
+        var dx = g.x - p.x, dy = g.y - p.y;
+        var hitR = (p.r + 6) / viewZoom;
+        if (dx * dx + dy * dy < hitR * hitR) { clicked = p; break; }
+      }
+
+      if (clicked && clicked !== focusedNode) {
+        // Zoom to clicked node
+        focusedNode = clicked;
+        var targetZoom = 2.5;
+        var cw = rect.width, ch = rect.height;
+        viewZoom = targetZoom;
+        viewPanX = cw / 2 - clicked.x * targetZoom;
+        viewPanY = ch / 2 - clicked.y * targetZoom;
+
+        // Scroll table to show this entity
+        var rows = document.querySelectorAll('#entity-tbody tr');
+        for (var j = 0; j < rows.length; j++) {
+          if (rows[j].textContent.indexOf(clicked.node.label) !== -1) {
+            rows[j].style.background = 'rgba(255,68,68,0.15)';
+            rows[j].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(function(r) { r.style.background = ''; }.bind(null, rows[j]), 3000);
+            break;
+          }
+        }
+      } else {
+        // Click empty space or same node: reset zoom
+        focusedNode = null;
+        viewZoom = 1;
+        viewPanX = 0;
+        viewPanY = 0;
+      }
+    });
 
     canvas.addEventListener('mouseleave', function() {
       hoveredNode = null;
