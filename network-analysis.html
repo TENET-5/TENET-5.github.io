@@ -114,8 +114,8 @@
 
     /* Network Canvas */
     .canvas-container {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
+      background: #08080d;
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 10px;
       position: relative;
       width: 100%;
@@ -130,17 +130,19 @@
     }
     .canvas-legend {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(10,10,14,0.92);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 14px;
-      font-size: 0.65rem;
+      top: 14px; right: 14px;
+      background: rgba(8, 8, 13, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 0.75rem;
+      color: #e0e0e8;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
     }
-    .canvas-legend .leg-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer; transition: opacity 0.2s; }
-    .canvas-legend .leg-item.dimmed { opacity: 0.3; }
-    .canvas-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .canvas-legend .leg-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: default; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; font-size: 0.72rem; }
+    .canvas-legend .dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 8px currentColor; border: 1px solid rgba(255,255,255,0.4); }
 
     /* Tooltip */
     .canvas-tooltip {
@@ -249,6 +251,7 @@
         <button class="cat-btn" data-cat="lobby" style="--c:#c084fc; --bg:rgba(168,85,247,0.1);">Lobby</button>
         <button class="cat-btn" data-cat="donor" style="--c:#f97316; --bg:rgba(249,115,22,0.1);">Donors</button>
         <button class="cat-btn" data-cat="media" style="--c:#f472b6; --bg:rgba(236,72,153,0.1);">Media</button>
+        <button class="cat-btn" data-cat="maid_legislation" style="--c:#ff4444; --bg:rgba(255,68,68,0.15);">MAID</button>
       </div>
       <span class="filter-info" id="filter-info">Showing all</span>
     </div>
@@ -263,11 +266,14 @@
         <div class="tt-detail"></div>
       </div>
       <div class="canvas-legend">
-        <div class="leg-item" data-type="person"><div class="dot" style="background:#e53555;"></div> Person</div>
-        <div class="leg-item" data-type="org"><div class="dot" style="background:#60a5fa;"></div> Organization</div>
-        <div class="leg-item" data-type="event"><div class="dot" style="background:#facc15;"></div> Event</div>
-        <div class="leg-item" data-type="official"><div class="dot" style="background:#39ff14;"></div> Official</div>
-        <div class="leg-item" data-type="donor"><div class="dot" style="background:#c084fc;"></div> Donor</div>
+        <div class="leg-item"><div class="dot" style="background:#ff4444; color:#ff4444;"></div> MAID Chain</div>
+        <div class="leg-item"><div class="dot" style="background:#60a5fa; color:#60a5fa;"></div> Israel-linked</div>
+        <div class="leg-item"><div class="dot" style="background:#e53555; color:#e53555;"></div> CCP-linked</div>
+        <div class="leg-item"><div class="dot" style="background:#facc15; color:#facc15;"></div> CFNIS</div>
+        <div class="leg-item"><div class="dot" style="background:#f472b6; color:#f472b6;"></div> Media</div>
+        <div class="leg-item"><div class="dot" style="background:#f97316; color:#f97316;"></div> Donor</div>
+        <div class="leg-item"><div class="dot" style="background:#39ff14; color:#39ff14;"></div> Official</div>
+        <div class="leg-item"><div class="dot" style="background:#c084fc; color:#c084fc;"></div> Organization</div>
       </div>
     </div>
 
@@ -350,8 +356,8 @@
     // ── DATA LOADING ──
     function loadData() {
       Promise.all([
-        fetch('data/investigation_board.json').then(function(r){return r.json();}).catch(function(){return null;}),
-        fetch('data/network_analysis/influence_network.json').then(function(r){return r.json();}).catch(function(){return null;}),
+        fetch('data/investigation_board.json', {cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
+        fetch('data/network_analysis/influence_network.json', {cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
       ]).then(function(results) {
         var boardData = results[0];
         var graphData = results[1];
@@ -381,79 +387,169 @@
           document.getElementById('total-entities').textContent = '0';
           return;
         }
-        layoutNodes();
-        draw();
+        initPhysics();
+        requestAnimationFrame(tick);
         renderTable();
       });
     }
 
-    // ── FORCE-DIRECTED LAYOUT ──
-    function layoutNodes() {
+    // ── GLOW RADIUS MAP ──
+    var colorCache = {};
+    function getGlowGradient(ctx, x, y, r, baseHex) {
+      if (r <= 0) r = 1;
+      var key = x.toFixed(1) + '_' + y.toFixed(1) + '_' + r.toFixed(1) + '_' + baseHex;
+      if (colorCache[key]) return colorCache[key];
+      var grad = ctx.createRadialGradient(x, y, r * 0.1, x, y, Math.max(r * 1.5, 1));
+      
+      var bigint = parseInt(baseHex.replace('#', ''), 16);
+      var rVal = (bigint >> 16) & 255;
+      var gVal = (bigint >> 8) & 255;
+      var bVal = bigint & 255;
+      
+      grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+      grad.addColorStop(0.3, 'rgba(' + rVal + ',' + gVal + ',' + bVal + ',0.8)');
+      grad.addColorStop(1, 'rgba(' + rVal + ',' + gVal + ',' + bVal + ',0)');
+      
+      colorCache[key] = grad;
+      if (Object.keys(colorCache).length > 2000) colorCache = {};
+      return grad;
+    }
+
+    // ── FLUID PHYSICS ENGINE ──
+    var tickCount = 0;
+    var nodeMap = {};
+    function initPhysics() {
       var canvas = document.getElementById('network-canvas');
       var rect = canvas.parentElement.getBoundingClientRect();
       var w = rect.width, h = rect.height;
 
-      // Initial placement in a spiral
+      // Category-based initial positioning — seeds clusters so the sim
+      // separates categories instead of collapsing into two blobs
+      var catCenters = {
+        'maid':    { x: w * 0.5,  y: h * 0.12 },
+        'israel':  { x: w * 0.2,  y: h * 0.35 },
+        'ccp':     { x: w * 0.8,  y: h * 0.35 },
+        'cfnis':   { x: w * 0.5,  y: h * 0.3 },
+        'media':   { x: w * 0.15, y: h * 0.7 },
+        'donor':   { x: w * 0.5,  y: h * 0.75 },
+        'official':{ x: w * 0.85, y: h * 0.7 },
+        'default': { x: w * 0.5,  y: h * 0.5 },
+      };
+
+      function getNodeCluster(n) {
+        var cats = (n.categories || []).join(' ').toLowerCase();
+        if (cats.indexOf('maid') !== -1) return 'maid';
+        if (cats.indexOf('israel') !== -1) return 'israel';
+        if (cats.indexOf('ccp') !== -1) return 'ccp';
+        if (cats.indexOf('cfnis') !== -1) return 'cfnis';
+        if (cats.indexOf('media') !== -1) return 'media';
+        if (cats.indexOf('donor') !== -1 || n.type === 'donor') return 'donor';
+        if (n.type === 'official') return 'official';
+        return 'default';
+      }
+
       positioned = allNodes.map(function(n, i) {
-        var angle = (i / allNodes.length) * Math.PI * 6;
-        var radius = 50 + (i / allNodes.length) * (Math.min(w, h) / 2 - 80);
+        var cluster = getNodeCluster(n);
+        var center = catCenters[cluster] || catCenters['default'];
+        var spread = 80 + Math.random() * 120;
+        var angle = Math.random() * Math.PI * 2;
         return {
-          x: w / 2 + Math.cos(angle) * radius * (0.7 + Math.random() * 0.3),
-          y: h / 2 + Math.sin(angle) * radius * (0.7 + Math.random() * 0.3),
+          x: center.x + Math.cos(angle) * spread,
+          y: center.y + Math.sin(angle) * spread,
           vx: 0, vy: 0,
           node: n,
-          r: 2.5 + Math.log1p(n.influence_score || 1) * 0.9,
+          r: 4 + Math.sqrt(Math.max(n.influence_score || 1, 1)) * 2.5,
+          phase: Math.random() * Math.PI * 2
         };
       });
-
-      // Build edge lookup
-      var nodeMap = {};
+      nodeMap = {};
       positioned.forEach(function(p) { nodeMap[p.node.id] = p; });
+    }
 
-      // Simple force simulation (50 iterations)
-      for (var iter = 0; iter < 220; iter++) {
-        // Repulsion between all nodes
-        for (var i = 0; i < positioned.length; i++) {
-          for (var j = i + 1; j < positioned.length; j++) {
-            var dx = positioned[j].x - positioned[i].x;
-            var dy = positioned[j].y - positioned[i].y;
-            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            var minDist = (positioned[i].r + positioned[j].r) * 1.8;
-            var d = Math.max(dist, minDist);
-            var force = 2200 / (d * d);
-            positioned[i].vx -= dx / dist * force;
-            positioned[i].vy -= dy / dist * force;
-            positioned[j].vx += dx / dist * force;
-            positioned[j].vy += dy / dist * force;
-          }
+    function tick() {
+      var canvas = document.getElementById('network-canvas');
+      var rect = canvas.parentElement.getBoundingClientRect();
+      var w = rect.width, h = rect.height;
+      if (w === 0 || h === 0) return requestAnimationFrame(tick); 
+
+      tickCount++;
+      // Aggressive cooling: fast convergence, then subtle drift
+      var cooling = Math.max(0.01, 1.0 - (tickCount * 0.003));
+      var drift = tickCount > 300 ? 0.008 : 0;
+
+      // Repulsion — NO distance cutoff. Every node repels every other.
+      // Strength 2500 (was 600) to overcome 6392 edges pulling inward.
+      for (var i = 0; i < positioned.length; i++) {
+        var a = positioned[i];
+        if (!isNodeVisible(a.node)) continue;
+
+        if (drift > 0) {
+          a.vx += Math.cos(tickCount * 0.008 + a.phase) * drift;
+          a.vy += Math.sin(tickCount * 0.008 + a.phase) * drift;
         }
-        // Attraction along edges
-        allEdges.forEach(function(e) {
-          var s = nodeMap[e.source];
-          var t = nodeMap[e.target];
-          if (s && t) {
-            var dx = t.x - s.x;
-            var dy = t.y - s.y;
-            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            var force = (dist - 80) * 0.003;
-            s.vx += dx / dist * force;
-            s.vy += dy / dist * force;
-            t.vx -= dx / dist * force;
-            t.vy -= dy / dist * force;
-          }
-        });
-        // Center gravity
-        positioned.forEach(function(p) {
-          p.vx += (w / 2 - p.x) * 0.002;
-          p.vy += (h / 2 - p.y) * 0.002;
-          p.x += p.vx * 0.4;
-          p.y += p.vy * 0.4;
-          p.vx *= 0.85;
-          p.vy *= 0.85;
-          p.x = Math.max(20, Math.min(w - 20, p.x));
-          p.y = Math.max(20, Math.min(h - 20, p.y));
-        });
+
+        for (var j = i + 1; j < positioned.length; j++) {
+          var b = positioned[j];
+          if (!isNodeVisible(b.node)) continue;
+
+          var dx = b.x - a.x;
+          var dy = b.y - a.y;
+          var distSq = dx * dx + dy * dy;
+          if (distSq < 1) distSq = 1;
+          var dist = Math.sqrt(distSq);
+
+          // Strong repulsion with soft minimum distance
+          var minDist = a.r + b.r + 12;
+          var force = 4000 / distSq;
+          if (dist < minDist) force *= 5; // extra push when overlapping
+          var fx = (dx / dist) * force * cooling;
+          var fy = (dy / dist) * force * cooling;
+          a.vx -= fx;
+          a.vy -= fy;
+          b.vx += fx;
+          b.vy += fy;
+        }
       }
+
+      // Edge attraction — subsample edges to prevent blob collapse.
+      // 6392 edges × 64 avg degree = massive inward pull that overwhelms repulsion.
+      // Only apply springs on ~15% of edges per tick (stochastic thinning).
+      allEdges.forEach(function(e) {
+        if (Math.random() > 0.15) return; // skip 85% of edges per tick
+        var s = nodeMap[e.source];
+        var t = nodeMap[e.target];
+        if (s && t && isNodeVisible(s.node) && isNodeVisible(t.node)) {
+          var dx = t.x - s.x;
+          var dy = t.y - s.y;
+          var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          var force = (dist - 200) * 0.0008 * cooling;
+          s.vx += dx / dist * force;
+          s.vy += dy / dist * force;
+          t.vx -= dx / dist * force;
+          t.vy -= dy / dist * force;
+        }
+      });
+
+      // Mild center gravity to prevent drift to edges
+      positioned.forEach(function(p) {
+        if (!isNodeVisible(p.node)) return;
+        p.vx += (w / 2 - p.x) * 0.0003;
+        p.vy += (h / 2 - p.y) * 0.0003;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.85;
+        p.vy *= 0.85;
+
+        // Soft boundary with bounce
+        var pad = p.r + 10;
+        if (p.x < pad) { p.x = pad; p.vx *= -0.3; }
+        if (p.x > w - pad) { p.x = w - pad; p.vx *= -0.3; }
+        if (p.y < pad) { p.y = pad; p.vy *= -0.3; }
+        if (p.y > h - pad) { p.y = h - pad; p.vy *= -0.3; }
+      });
+
+      drawFrame(w, h); 
+      requestAnimationFrame(tick);
     }
 
     // ── FILTERING ──
@@ -470,9 +566,7 @@
       return true;
     }
 
-    function getVisibleCount() {
-      return allNodes.filter(isNodeVisible).length;
-    }
+    function getVisibleCount() { return allNodes.filter(isNodeVisible).length; }
 
     function updateFilterInfo() {
       var vis = getVisibleCount();
@@ -480,78 +574,112 @@
       document.getElementById('filter-info').textContent = txt;
     }
 
-    // ── DRAWING ──
-    function draw() {
+    // ── PREMIUM DRAWING PIPELINE ──
+    function drawFrame(w, h) {
       var canvas = document.getElementById('network-canvas');
+      if (!canvas) return;
       var ctx = canvas.getContext('2d');
-      var rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      var w = rect.width, h = rect.height;
-      ctx.clearRect(0, 0, w, h);
+      // Set dimension correctly for high-DPI scaling if needed.
+      var pR = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.floor(w * pR)) {
+          canvas.width = Math.floor(w * pR);
+          canvas.height = Math.floor(h * pR);
+          ctx.scale(pR, pR);
+      } else {
+          ctx.clearRect(0, 0, w, h);
+      }
 
-      var nodeMap = {};
-      positioned.forEach(function(p) { nodeMap[p.node.id] = p; });
+      // Dark background fill
+      ctx.fillStyle = '#08080d';
+      ctx.fillRect(0, 0, w, h);
 
-      // Draw edges
+      // Edges — draw with color from source node, thin, low opacity.
+      // Only draw edges where both endpoints have score > 2 to reduce noise.
+      ctx.globalCompositeOperation = "source-over";
       allEdges.forEach(function(e) {
         var s = nodeMap[e.source];
         var t = nodeMap[e.target];
         if (!s || !t) return;
-        var sVis = isNodeVisible(s.node);
-        var tVis = isNodeVisible(t.node);
-        if (!sVis && !tVis) return;
-        ctx.globalAlpha = (sVis && tVis) ? 0.2 : 0.05;
-        ctx.strokeStyle = '#6e6e76';
-        ctx.lineWidth = 0.5;
+        if (!isNodeVisible(s.node) || !isNodeVisible(t.node)) return;
+        // Skip low-importance edges to reduce visual noise (6392 is too many)
+        var maxScore = Math.max(s.node.influence_score || 0, t.node.influence_score || 0);
+        if (maxScore < 3 && Math.random() > 0.3) return; // thin out low-score edges
+
+        var dist = Math.sqrt(Math.pow(s.x - t.x, 2) + Math.pow(s.y - t.y, 2));
+        ctx.globalAlpha = Math.min(0.25, Math.max(0.04, 50 / dist));
+        // Color edge by source node — muted so it doesn't overwhelm
+        var eColor = getNodeColor(s.node);
+        ctx.strokeStyle = eColor;
+        ctx.lineWidth = maxScore > 20 ? 0.8 : 0.4;
+
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
-        ctx.lineTo(t.x, t.y);
+        ctx.lineTo(t.x, t.y); // straight lines are cleaner than curves with this density
+        ctx.stroke();
+      });
+      ctx.globalCompositeOperation = "source-over";
+
+      positioned.forEach(function(p) {
+        var vis = isNodeVisible(p.node);
+        if (!vis) return;
+
+        var isHovered = hoveredNode === p;
+        var baseColor = getNodeColor(p.node);
+        var currentRadius = isHovered ? p.r * 1.5 : p.r;
+
+        ctx.globalAlpha = isHovered ? 1 : 0.85;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
+        
+        ctx.fillStyle = baseColor;
+        ctx.shadowColor = baseColor;
+        ctx.shadowBlur = isHovered ? 18 : 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.lineWidth = isHovered ? 2 : 0.5;
+        ctx.strokeStyle = isHovered ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)';
         ctx.stroke();
       });
 
-      // Draw nodes
-      positioned.forEach(function(p) {
-        var vis = isNodeVisible(p.node);
-        if (!vis) {
-          ctx.globalAlpha = 0.06;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2);
-          ctx.fillStyle = '#333';
-          ctx.fill();
-          return;
-        }
-        var isHovered = hoveredNode === p;
-        ctx.globalAlpha = isHovered ? 1 : 0.85;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, isHovered ? p.r * 1.6 : p.r, 0, Math.PI * 2);
-        ctx.fillStyle = getNodeColor(p.node);
-        ctx.fill();
-        if (isHovered) {
-          ctx.strokeStyle = '#fff';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        } else {
-          ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
-      });
-
-      // Labels for top entities
-      ctx.globalAlpha = 1;
+      // Labels with collision avoidance
       var visible = positioned.filter(function(p){return isNodeVisible(p.node);});
-      var top = visible.slice().sort(function(a,b){return (b.node.influence_score||0)-(a.node.influence_score||0);}).slice(0, Math.min(25, Math.max(10, Math.floor(visible.length*0.3))));
-      ctx.font = '10px JetBrains Mono';
-      ctx.textAlign = 'center';
+      var top = visible.slice().sort(function(a,b){return (b.node.influence_score||0)-(a.node.influence_score||0);}).slice(0, 20);
+      if (hoveredNode && top.indexOf(hoveredNode) === -1) top.push(hoveredNode);
+
+      // Simple label collision avoidance — track placed label rects
+      var placedLabels = [];
+      ctx.font = 'bold 11px Inter, "JetBrains Mono", monospace';
       top.forEach(function(p) {
-        var lbl = p.node.label.length > 22 ? p.node.label.substring(0, 20) + '…' : p.node.label;
-        ctx.fillStyle = hoveredNode === p ? '#fff' : 'rgba(255,255,255,0.88)';
-        ctx.shadowColor = 'rgba(0,0,0,0.8)';
-        ctx.shadowBlur = 4;
-        ctx.fillText(lbl, p.x, p.y - p.r - 4);
-        ctx.shadowBlur = 0;
+        var label = p.node.label;
+        // Truncate long labels
+        if (label.length > 28) label = label.substring(0, 25) + '...';
+        var tw = ctx.measureText(label).width;
+        var lx = p.x;
+        var ly = p.y - p.r - 10;
+
+        // Check overlap with already placed labels — nudge if needed
+        for (var k = 0; k < placedLabels.length; k++) {
+          var pl = placedLabels[k];
+          if (Math.abs(lx - pl.x) < (tw + pl.w) * 0.5 + 4 && Math.abs(ly - pl.y) < 14) {
+            ly = pl.y - 14; // push upward
+          }
+        }
+        // Clamp to canvas bounds
+        ly = Math.max(12, ly);
+        lx = Math.max(tw / 2 + 4, Math.min(w - tw / 2 - 4, lx));
+
+        placedLabels.push({ x: lx, y: ly, w: tw });
+        ctx.textAlign = 'center';
+
+        // Dark background pill for readability
+        ctx.fillStyle = 'rgba(8,8,13,0.7)';
+        ctx.beginPath();
+        ctx.roundRect(lx - tw / 2 - 4, ly - 10, tw + 8, 14, 3);
+        ctx.fill();
+
+        ctx.fillStyle = hoveredNode === p ? '#fff' : 'rgba(224,224,230,0.9)';
+        ctx.fillText(label, lx, ly);
       });
 
       updateFilterInfo();
@@ -559,6 +687,7 @@
 
     function getNodeColor(node) {
       var cats = (node.categories || []).join(' ');
+      if (cats.indexOf('maid_legislation') !== -1) return '#ff4444';
       if (cats.indexOf('israel') !== -1) return '#60a5fa';
       if (cats.indexOf('ccp') !== -1) return '#e53555';
       if (cats.indexOf('cfnis') !== -1) return '#facc15';
@@ -578,11 +707,7 @@
     // ── TABLE RENDERING ──
     function renderTable() {
       var tbody = document.getElementById('entity-tbody');
-      var visible = allNodes.filter(isNodeVisible).filter(function(n) {
-        // Filter out generic billing threshold entries (not actual named entities)
-        var lbl = n.label || '';
-        return !(lbl.match(/^contributions? of \True\d/i) || lbl.match(/contributions de \d/i) || lbl.match(/^Estate of /i) || lbl.match(/^\$\d+ or less/i));
-      });
+      var visible = allNodes.filter(isNodeVisible);
 
       visible.sort(function(a, b) {
         var va, vb;
@@ -705,4 +830,3 @@
   <!-- No footer on canvas pages — full-screen tools -->
 </body>
 </html>
-
