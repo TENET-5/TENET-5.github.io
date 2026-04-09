@@ -110,6 +110,13 @@ ul { font-size:0.8rem; margin:8px 0 8px 20px; }
   <a href="osint-dashboard.html" style="display:inline-block;padding:6px 12px;border-radius:4px;font-size:0.72rem;background:rgba(255,68,34,0.1);color:var(--accent);border:1px solid rgba(255,68,34,0.2);text-decoration:none;">📊 OSINT Dashboard</a>
 </div>
 
+<div class="section-head" style="margin-top:25px;">
+  <h2 style="margin-top:0; border-bottom:none;">N-vs-NP Empirical Matrix: Threat State Convergence</h2>
+</div>
+<div class="matrix-wrapper" style="width:100%; height:450px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; margin-bottom:25px;">
+  <canvas id="influenceMatrix"></canvas>
+</div>
+
 <h2>1. CIJA LOBBY-TO-VOTE PIPELINE</h2>
 
 <div class="card">
@@ -373,6 +380,130 @@ ul { font-size:0.8rem; margin:8px 0 8px 20px; }
         document.getElementById('ai-expansion-content').innerHTML = html;
       })
       .catch(function(e) { /* AI expansion feed dormant — silent fallback */ });
+
+    // ═══════════════════════════════════════
+    // INFLUENCE MATRIX RENDERING
+    // ═══════════════════════════════════════
+    function renderInfluenceMatrix() {
+      var cvs = document.getElementById('influenceMatrix');
+      if (!cvs) return;
+      var ctx = cvs.getContext('2d');
+      var wrap = cvs.parentElement;
+      cvs.width = wrap.clientWidth;
+      cvs.height = wrap.clientHeight;
+
+      // Foreign States
+      var nodes = [
+        { id: 'israel', lbl: 'Israel (Institutional)', cx: 0.1, cy: 0.2, col: '#60a5fa' },
+        { id: 'china', lbl: 'China (Espionage)', cx: 0.1, cy: 0.5, col: '#ef4444' },
+        { id: 'india', lbl: 'India (Assassination)', cx: 0.1, cy: 0.8, col: '#f59e0b' },
+        
+        // Canadian Targets
+        { id: 'cija_lobby', lbl: 'CIJA / Parliament Lobby', cx: 0.75, cy: 0.2, col: '#d8b4fe' },
+        { id: 'media', lbl: 'Postmedia Network', cx: 0.85, cy: 0.35, col: '#fca5a5' },
+        { id: 'senate', lbl: 'Senate ISG Bloc', cx: 0.75, cy: 0.5, col: '#34d399' },
+        { id: 'nsicop', lbl: 'Compromised MPs', cx: 0.85, cy: 0.65, col: '#fbbf24' },
+        { id: 'hitz', lbl: 'Extrajudicial Targets', cx: 0.75, cy: 0.8, col: '#c2410c' }
+      ];
+
+      var edges = [
+        { from: 0, to: 3, w: 5 }, { from: 0, to: 4, w: 4 }, // Israel->Lobby/Media
+        { from: 1, to: 5, w: 4 }, { from: 1, to: 6, w: 5 }, // China->Senate/MPs
+        { from: 2, to: 6, w: 3 }, { from: 2, to: 7, w: 6 }  // India->MPs/Assassination
+      ];
+
+      var particles = [];
+      for(var i=0; i<50; i++) {
+        var e = edges[Math.floor(Math.random()*edges.length)];
+        particles.push({ edge: e, progress: Math.random(), speed: 0.002 + Math.random()*0.003 });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        // Grid background
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        for (var i=1; i<20; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * (cvs.width/20), 0);
+          ctx.lineTo(i * (cvs.width/20), cvs.height);
+          ctx.stroke();
+        }
+
+        // Quadratic arcs
+        edges.forEach(function(e) {
+          var n1 = nodes[e.from], n2 = nodes[e.to];
+          ctx.beginPath();
+          ctx.moveTo(n1.cx * cvs.width, n1.cy * cvs.height);
+          var midX = cvs.width * 0.45;
+          var midY = Math.min(n1.cy, n2.cy) * cvs.height;
+          ctx.quadraticCurveTo(midX, midY, n2.cx * cvs.width, n2.cy * cvs.height);
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+
+        // Telemetry Flow
+        particles.forEach(function(p) {
+          p.progress += p.speed;
+          if (p.progress >= 1) {
+            p.progress = 0;
+            p.edge = edges[Math.floor(Math.random()*edges.length)]; // Swap vectors
+          }
+          
+          var n1 = nodes[p.edge.from], n2 = nodes[p.edge.to];
+          var startX = n1.cx * cvs.width, startY = n1.cy * cvs.height;
+          var endX = n2.cx * cvs.width, endY = n2.cy * cvs.height;
+          var midX = cvs.width * 0.45;
+          var midY = Math.min(n1.cy, n2.cy) * cvs.height;
+
+          var t = p.progress;
+          var mt = 1 - t;
+          var px = (mt * mt * startX) + (2 * mt * t * midX) + (t * t * endX);
+          var py = (mt * mt * startY) + (2 * mt * t * midY) + (t * t * endY);
+
+          ctx.shadowColor = nodes[p.edge.from].col;
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = nodes[p.edge.from].col;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+
+        // Overlay Nodes
+        nodes.forEach(function(n) {
+          var px = n.cx * cvs.width, py = n.cy * cvs.height;
+          ctx.shadowColor = n.col;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(px, py, 6, 0, Math.PI*2);
+          ctx.fillStyle = n.col;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Text
+          ctx.fillStyle = '#fff';
+          ctx.font = '11px JetBrains Mono';
+          var textX = n.cx < 0.5 ? px + 15 : px + 15;
+          ctx.textAlign = 'left';
+          ctx.fillText(n.lbl, textX, py + 4);
+        });
+
+        requestAnimationFrame(draw);
+      }
+      
+      window.addEventListener('resize', function() {
+        cvs.width = wrap.clientWidth;
+        cvs.height = wrap.clientHeight;
+      });
+
+      requestAnimationFrame(draw);
+    }
+    
+    // Auto-init
+    renderInfluenceMatrix();
   </script>
 </body>
 </html>

@@ -179,6 +179,13 @@
           <div class="l">Long-term care COVID deaths<br>attributable to policy failures<br><small>AG reports, CIHI</small></div>
         </div>
       </div>
+      
+      <div class="section-head" style="margin-top:25px; border-bottom:1px solid #c41e3a; padding-bottom:8px; margin-bottom:15px;">
+        <h3 style="margin-top:0; color:#fff; font-size:1.1rem; line-height:1.4;">N-vs-NP Empirical Matrix: Continuous Mortality Vectors</h3>
+      </div>
+      <div class="matrix-wrapper" style="width:100%; height:450px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; margin-bottom:35px;">
+        <canvas id="mortalityMatrix"></canvas>
+      </div>
     </section>
 
     <!-- FILTERS -->
@@ -591,6 +598,150 @@
       });
     }, { threshold: 0.3 });
     document.querySelectorAll('.total-item').forEach(el => counterObserver.observe(el));
+
+    // ═══════════════════════════════════════
+    // MORTALITY VECTOR MATRIX RENDERING
+    // ═══════════════════════════════════════
+    function renderMortalityMatrix() {
+      var cvs = document.getElementById('mortalityMatrix');
+      if (!cvs) return;
+      var ctx = cvs.getContext('2d');
+      var wrap = cvs.parentElement;
+      cvs.width = wrap.clientWidth;
+      cvs.height = wrap.clientHeight;
+
+      // Policy Origin Nodes
+      var nodes = [
+        { id: 'maid', lbl: 'C-14 / MAID Expansion', cx: 0.1, cy: 0.15, col: '#fca5a5' },
+        { id: 'opioid', lbl: 'Opioid / Safe Supply', cx: 0.1, cy: 0.32, col: '#ef4444' },
+        { id: 'housing', lbl: 'Federal Housing Exit', cx: 0.1, cy: 0.5, col: '#fbbf24' },
+        { id: 'vac', lbl: 'VAC NVC Funding', cx: 0.1, cy: 0.68, col: '#f59e0b' },
+        { id: 'ltc', lbl: 'LTC Deregulation', cx: 0.1, cy: 0.85, col: '#c41e3a' },
+        
+        // Central Gravity Node
+        { id: 'mortality', lbl: 'CUMULATIVE PREVENTABLE DEATHS (>145,000)', cx: 0.75, cy: 0.5, col: '#ffffff' }
+      ];
+
+      var edges = [
+        { from: 0, to: 5, w: 6 }, // MAID (Highest volume)
+        { from: 1, to: 5, w: 4 }, // Opioids 
+        { from: 2, to: 5, w: 2 }, // Housing
+        { from: 3, to: 5, w: 1 }, // Vets
+        { from: 4, to: 5, w: 3 }  // LTC
+      ];
+
+      var particles = [];
+      for(var i=0; i<60; i++) {
+        var e = edges[Math.floor(Math.random()*edges.length)];
+        particles.push({ edge: e, progress: Math.random(), speed: 0.0015 + Math.random()*0.0025 });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        // Abstract Grid overlay
+        ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+        ctx.lineWidth = 1;
+        for (var i=1; i<20; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * (cvs.width/20), 0);
+          ctx.lineTo(i * (cvs.width/20), cvs.height);
+          ctx.stroke();
+        }
+
+        // Draw structural paths
+        edges.forEach(function(e) {
+          var n1 = nodes[e.from], n2 = nodes[e.to];
+          ctx.beginPath();
+          ctx.moveTo(n1.cx * cvs.width, n1.cy * cvs.height);
+          var midX = cvs.width * 0.45;
+          var midY = n1.cy * cvs.height; // Direct horizontal shoot outward
+          ctx.quadraticCurveTo(midX, midY, n2.cx * cvs.width, n2.cy * cvs.height);
+          ctx.strokeStyle = 'rgba(220,38,38,0.12)';
+          ctx.lineWidth = Math.max(1, e.w / 2);
+          ctx.stroke();
+        });
+
+        // Telemetry Flow Particles (Death Tally Simulation)
+        particles.forEach(function(p) {
+          p.progress += p.speed;
+          if (p.progress >= 1) {
+            p.progress = 0;
+            // Weighted randomization based on volume of death
+            var rand = Math.random();
+            if (rand < 0.4) p.edge = edges[0]; // MAID bias
+            else if (rand < 0.7) p.edge = edges[1]; // Opioid bias 
+            else p.edge = edges[Math.floor(Math.random()*edges.length)];
+          }
+          
+          var n1 = nodes[p.edge.from], n2 = nodes[p.edge.to];
+          var startX = n1.cx * cvs.width, startY = n1.cy * cvs.height;
+          var endX = n2.cx * cvs.width, endY = n2.cy * cvs.height;
+          var midX = cvs.width * 0.45;
+          var midY = n1.cy * cvs.height;
+
+          var t = p.progress;
+          var mt = 1 - t;
+          var px = (mt * mt * startX) + (2 * mt * t * midX) + (t * t * endX);
+          var py = (mt * mt * startY) + (2 * mt * t * midY) + (t * t * endY);
+
+          ctx.shadowColor = nodes[p.edge.from].col;
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = nodes[p.edge.from].col;
+          ctx.beginPath();
+          ctx.arc(px, py, p.edge.w > 3 ? 3 : 2, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+
+        // Render Nodes
+        nodes.forEach(function(n, index) {
+          var px = n.cx * cvs.width, py = n.cy * cvs.height;
+          
+          if (index === 5) {
+            // Pulse logic for central node
+            var pulse = Math.sin(Date.now() / 300) * 4;
+            ctx.shadowColor = '#ff2244';
+            ctx.shadowBlur = 20 + pulse;
+            ctx.beginPath();
+            ctx.arc(px, py, 12, 0, Math.PI*2);
+            ctx.fillStyle = '#ff2244';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px JetBrains Mono';
+            ctx.textAlign = 'left';
+            ctx.fillText(n.lbl, px + 25, py + 4);
+          } else {
+            ctx.shadowColor = n.col;
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI*2);
+            ctx.fillStyle = n.col;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '11px JetBrains Mono';
+            ctx.textAlign = 'left';
+            ctx.fillText(n.lbl, px + 15, py + 4);
+          }
+        });
+
+        requestAnimationFrame(draw);
+      }
+      
+      window.addEventListener('resize', function() {
+        cvs.width = wrap.clientWidth;
+        cvs.height = wrap.clientHeight;
+      });
+
+      requestAnimationFrame(draw);
+    }
+    
+    // Auto-init
+    renderMortalityMatrix();
   </script>
 
 <script src="nav.js?v=8"></script>
