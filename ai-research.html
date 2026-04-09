@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Research Workspace — TENET5</title>
+  <meta name="description" content="AI-powered OSINT research workspace. Use Google Gemini to analyze government data, lobbying records, procurement contracts, and parliamentary records.">
+  <link rel="stylesheet" href="style.css?v=6">
+  <meta name="theme-color" content="#1a1f36">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <style>
+    .research-container { max-width:800px; margin:0 auto; padding:var(--s-lg) var(--s-md); }
+    .research-hero { text-align:center; padding:var(--s-xl) 0 var(--s-lg); }
+    .research-hero h1 {
+      background: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; font-size: var(--text-4xl);
+    }
+    .research-key-box { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:var(--s-lg); margin-bottom:var(--s-xl); }
+    .research-chat { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); min-height:400px; display:flex; flex-direction:column; }
+    .research-messages { flex:1; padding:var(--s-md); overflow-y:auto; display:flex; flex-direction:column; gap:12px; }
+    .research-input-area { padding:var(--s-md); border-top:1px solid var(--border); display:flex; gap:8px; }
+    .research-input { flex:1; padding:12px; background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:0.9rem; resize:none; font-family:var(--font-body); }
+    .research-input:focus { border-color:#4285f4; outline:none; }
+    .research-send { background:linear-gradient(135deg,#4285f4,#9b72cb); color:#fff; border:none; border-radius:8px; padding:0 20px; font-weight:600; cursor:pointer; }
+    .research-send:hover { transform:translateY(-1px); }
+    .prompt-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:var(--s-sm); margin-top:var(--s-md); }
+    .prompt-card { background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:12px; cursor:pointer; transition:all 0.2s; text-align:left; }
+    .prompt-card:hover { border-color:#4285f4; background:rgba(66,133,244,0.05); }
+    .prompt-card-label { font-size:0.85rem; font-weight:600; color:var(--text-primary); }
+    .prompt-card-desc { font-size:0.75rem; color:var(--text-tertiary); margin-top:2px; }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="research-container">
+    <div class="research-hero">
+      <h1>✨ AI Research Workspace</h1>
+      <p style="color:var(--text-tertiary);max-width:600px;margin:0 auto;line-height:1.6;">
+        Use Google's Gemini AI to analyze evidence, cross-reference government data, explore lobbying records, and generate research reports — all from your browser.
+      </p>
+    </div>
+
+    <!-- API Key Setup -->
+    <div class="research-key-box" id="key-setup">
+      <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:var(--s-sm);">
+        <span style="font-size:1.2rem;">🔑</span> Connect Your Google AI
+      </h3>
+      <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.6;margin-bottom:var(--s-md);">
+        Enter your free Gemini API key to enable AI-powered research. Your key is stored <strong>only in your browser</strong> — never sent to TENET5 servers.
+      </p>
+      <div style="display:flex;gap:8px;">
+        <input type="password" id="api-key-input" class="research-input" placeholder="AIzaSy..." style="font-family:var(--font-mono);" />
+        <button class="research-send" id="api-key-save">Connect</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text-quaternary);margin-top:8px;">
+        Get a free key → <a href="https://aistudio.google.com/" target="_blank" rel="noopener" style="color:#4285f4;">aistudio.google.com</a>
+      </p>
+    </div>
+
+    <!-- Quick Prompts -->
+    <div id="prompt-section">
+      <h3 style="font-size:0.85rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.08em;">Research Prompts</h3>
+      <div class="prompt-grid" id="prompt-grid"></div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="research-chat" style="margin-top:var(--s-lg);">
+      <div class="research-messages" id="r-messages">
+        <div style="text-align:center;color:var(--text-quaternary);padding:var(--s-xl);">
+          <div style="font-size:2rem;margin-bottom:var(--s-sm);">✨</div>
+          <p>Ask anything about the investigation data. Gemini will analyze evidence, explain findings, and help you research.</p>
+        </div>
+      </div>
+      <div class="research-input-area">
+        <textarea class="research-input" id="r-input" placeholder="Ask about lobbying data, MAID statistics, procurement anomalies..." rows="2"></textarea>
+        <button class="research-send" id="r-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <footer id="site-footer"></footer>
+
+  <script src="nav.js?v=8"></script>
+  <script src="footer.js?v=1"></script>
+  <script src="js/gemini-assistant.js?v=1"></script>
+  <script src="js/abcxyz.js?v=2"></script>
+  <script src="js/empirical-magic-handoff.js?v=2"></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const messagesEl = document.getElementById('r-messages');
+      const inputEl = document.getElementById('r-input');
+      const sendBtn = document.getElementById('r-send');
+      const keyInput = document.getElementById('api-key-input');
+      const keySave = document.getElementById('api-key-save');
+      const keySetup = document.getElementById('key-setup');
+      const promptGrid = document.getElementById('prompt-grid');
+
+      // Check if key already set
+      function checkKey() {
+        if (window.tenet5Gemini && window.tenet5Gemini.hasKey()) {
+          keySetup.style.display = 'none';
+        }
+      }
+
+      // Save key
+      keySave.addEventListener('click', function () {
+        const val = keyInput.value.trim();
+        if (val && window.tenet5Gemini) {
+          window.tenet5Gemini.setKey(val);
+          keySetup.style.display = 'none';
+        }
+      });
+
+      // Build prompt grid
+      function buildPrompts() {
+        if (!window.tenet5Gemini) { setTimeout(buildPrompts, 300); return; }
+        const prompts = window.tenet5Gemini.RESEARCH_PROMPTS;
+        promptGrid.innerHTML = prompts.map(function (p, i) {
+          return '<button class="prompt-card" data-idx="' + i + '">' +
+            '<div class="prompt-card-label">' + p.label + '</div>' +
+            '<div class="prompt-card-desc">' + p.prompt.slice(0, 60) + '...</div>' +
+          '</button>';
+        }).join('');
+
+        promptGrid.querySelectorAll('.prompt-card').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const idx = parseInt(btn.dataset.idx);
+            handleSend(prompts[idx].prompt);
+          });
+        });
+
+        checkKey();
+      }
+
+      // Send
+      async function handleSend(text) {
+        if (!text || !window.tenet5Gemini) return;
+        if (!window.tenet5Gemini.hasKey()) {
+          keySetup.style.display = 'block';
+          return;
+        }
+
+        // Clear welcome
+        const welcome = messagesEl.querySelector('[style*="text-align:center"]');
+        if (welcome) welcome.remove();
+
+        // User message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'gemini-msg gemini-msg-user';
+        userMsg.textContent = text;
+        messagesEl.appendChild(userMsg);
+
+        // Loading
+        const loadMsg = document.createElement('div');
+        loadMsg.className = 'gemini-msg gemini-msg-ai gemini-loading';
+        loadMsg.innerHTML = '<span class="gemini-dots"><span>.</span><span>.</span><span>.</span></span> Analyzing...';
+        messagesEl.appendChild(loadMsg);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        try {
+          const response = await window.tenet5Gemini.generateContent(text, 'TENET5 AI Research Workspace — full site analysis context');
+          loadMsg.remove();
+          const aiMsg = document.createElement('div');
+          aiMsg.className = 'gemini-msg gemini-msg-ai';
+          aiMsg.innerHTML = simpleMarkdown(response);
+          messagesEl.appendChild(aiMsg);
+        } catch (err) {
+          loadMsg.remove();
+          const errMsg = document.createElement('div');
+          errMsg.className = 'gemini-msg gemini-msg-error';
+          errMsg.textContent = '⚠️ ' + err.message;
+          messagesEl.appendChild(errMsg);
+        }
+
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        inputEl.value = '';
+      }
+
+      function simpleMarkdown(text) {
+        return text
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+          .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+          .replace(/^- (.+)$/gm, '<li>$1</li>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>');
+      }
+
+      sendBtn.addEventListener('click', function () {
+        if (inputEl.value.trim()) handleSend(inputEl.value.trim());
+      });
+
+      inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendBtn.click();
+        }
+      });
+
+      buildPrompts();
+    })();
+  </script>
+</body>
+</html>

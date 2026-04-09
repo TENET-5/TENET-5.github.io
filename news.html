@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intelligence Brief — Canadian News | TENET5</title>
+  <meta name="description" content="Real-time Canadian news intelligence dashboard. Aggregated from CBC, Global News, CTV. Auto-classified by topic. TENET5 accountability monitoring.">
+  <meta property="og:title" content="Intelligence Brief — Canadian News | TENET5">
+  <meta property="og:description" content="Real-time Canadian news intelligence. Aggregated from CBC, Global, CTV. Auto-classified. Updated every 30 minutes.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_CA">
+  <meta property="og:site_name" content="TENET5 — Canadian Government Accountability">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#1a1f36">
+  <link rel="canonical" href="https://tenet-5.github.io/news.html">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="stylesheet" href="style.css?v=5">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       NEWS INTELLIGENCE DASHBOARD — Inline Styles
+       Dark theme overlay for intelligence aesthetic
+       ═══════════════════════════════════════════════════════════ */
+
+    .news-page { background: var(--bg); min-height: 100vh; }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    .news-header {
+      background: var(--color-navy);
+      color: #fff;
+      padding: var(--s-lg) var(--s-md);
+      text-align: center;
+      border-bottom: 3px solid var(--accent);
+    }
+    .news-header-classification {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: var(--s-2xs);
+    }
+    .news-header h1 {
+      font-family: var(--font-headline);
+      font-size: var(--text-4xl);
+      font-weight: 800;
+      margin: var(--s-xs) 0;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .news-header-subtitle {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      color: #9ca3af;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Intelligence Summary Bar ───────────────────────────── */
+    .intel-summary {
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      padding: var(--s-sm) var(--s-md);
+    }
+    .intel-summary-inner {
+      max-width: var(--max-wide);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--s-sm);
+    }
+    .intel-stats-row {
+      display: flex;
+      gap: var(--s-sm);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .intel-stat-tile {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 8px 14px;
+      text-align: center;
+      min-width: 80px;
+    }
+    .intel-stat-tile .stat-num {
+      font-family: var(--font-headline);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.1;
+    }
+    .intel-stat-tile .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-quaternary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .intel-stat-tile.politics .stat-num { color: var(--accent); }
+    .intel-stat-tile.defence .stat-num { color: var(--color-navy); }
+    .intel-stat-tile.justice .stat-num { color: var(--color-gold); }
+    .intel-stat-tile.foreign .stat-num { color: var(--color-blue); }
+    .intel-stat-tile.indigenous .stat-num { color: var(--color-green); }
+    .intel-stat-tile.health .stat-num { color: var(--color-critical); }
+    .intel-stat-tile.economy .stat-num { color: #8b5cf6; }
+    .intel-stat-tile.other .stat-num { color: var(--text-tertiary); }
+    .intel-updated {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-quaternary);
+    }
+
+    /* ── Controls: Filters + Search ─────────────────────────── */
+    .news-controls {
+      max-width: var(--max-wide);
+      margin: 0 auto;
+      padding: var(--s-sm) var(--s-md);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s-xs);
+      align-items: center;
+    }
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 1;
+    }
+    .filter-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease);
+      white-space: nowrap;
+    }
+    .filter-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .filter-pill.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .news-search {
+      position: relative;
+      min-width: 200px;
+    }
+    .news-search input {
+      width: 100%;
+      padding: 7px 12px 7px 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color var(--dur-fast) var(--ease);
+    }
+    .news-search input::placeholder { color: var(--text-quaternary); }
+    .news-search input:focus { border-color: var(--accent); }
+    .news-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: var(--text-quaternary);
+      pointer-events: none;
+    }
+
+    /* ── Generate Brief Button ──────────────────────────────── */
+    .brief-btn-wrap {
+      max-width: var(--max-wide);
+      margin: 0 auto;
+      padding: 0 var(--s-md) var(--s-xs);
+    }
+    .brief-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--color-navy);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--r-md);
+      padding: 8px 18px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease);
+      letter-spacing: 0.02em;
+    }
+    .brief-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .brief-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ── Article Grid ───────────────────────────────────────── */
+    .news-grid-container {
+      max-width: var(--max-wide);
+      margin: 0 auto;
+      padding: 0 var(--s-md) var(--s-lg);
+    }
+    .news-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--s-sm);
+    }
+    @media (max-width: 768px) {
+      .news-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Article Card ───────────────────────────────────────── */
+    .news-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s-sm);
+      transition: border-color var(--dur-fast) var(--ease),
+                  box-shadow var(--dur-fast) var(--ease);
+      display: flex;
+      flex-direction: column;
+    }
+    .news-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+    }
+    .news-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .source-badge.cbc {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+    }
+    .source-badge.global {
+      background: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+    }
+    .source-badge.ctv {
+      background: rgba(5, 150, 105, 0.1);
+      color: #059669;
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      background: var(--accent-med);
+      color: var(--accent);
+    }
+    .category-badge.defence { background: rgba(26,31,54,0.08); color: var(--color-navy); }
+    .category-badge.justice { background: rgba(217,119,6,0.1); color: var(--color-gold); }
+    .category-badge.foreign { background: rgba(37,99,235,0.08); color: var(--color-blue); }
+    .category-badge.indigenous { background: rgba(5,150,105,0.08); color: var(--color-green); }
+    .category-badge.health { background: rgba(220,38,38,0.08); color: var(--color-critical); }
+    .category-badge.economy { background: rgba(139,92,246,0.08); color: #8b5cf6; }
+    .category-badge.other { background: var(--bg-surface); color: var(--text-tertiary); }
+    .news-card-title {
+      font-family: var(--font-headline);
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .news-card-title:hover { color: var(--accent); }
+    .news-card-date {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-quaternary);
+      margin-bottom: 6px;
+    }
+    .news-card-desc {
+      font-size: 0.84rem;
+      color: var(--text-tertiary);
+      line-height: 1.55;
+      flex: 1;
+    }
+
+    /* ── Loading / Empty States ─────────────────────────────── */
+    .news-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: var(--s-xl) var(--s-md);
+    }
+    .news-loading-spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: var(--s-xs);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .news-loading-text {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+    .news-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: var(--s-xl) var(--s-md);
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    /* ── Article count bar ──────────────────────────────────── */
+    .news-count-bar {
+      max-width: var(--max-wide);
+      margin: 0 auto;
+      padding: 0 var(--s-md) var(--s-xs);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-quaternary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="news-page">
+
+    <!-- ── Header ─────────────────────────────────────────── -->
+    <div class="news-header">
+      <div class="news-header-classification">TENET5 — OPEN SOURCE INTELLIGENCE</div>
+      <h1>Intelligence Brief &mdash; Canadian News</h1>
+      <p class="news-header-subtitle">
+        Real-time aggregation from CBC, Global News, and CTV.
+        Auto-classified by topic. Updated every 30 minutes.
+      </p>
+    </div>
+
+    <!-- ── Intelligence Summary ───────────────────────────── -->
+    <div class="intel-summary">
+      <div class="intel-summary-inner">
+        <div class="intel-stats-row" id="intel-stats">
+          <div class="intel-stat-tile">
+            <div class="stat-num" id="stat-total">&mdash;</div>
+            <div class="stat-label">Total</div>
+          </div>
+        </div>
+        <div class="intel-updated" id="intel-updated">Loading feeds...</div>
+      </div>
+    </div>
+
+    <!-- ── Filters + Search ───────────────────────────────── -->
+    <div class="news-controls">
+      <div class="filter-pills" id="filter-pills">
+        <button class="filter-pill active" data-category="All">All</button>
+        <button class="filter-pill" data-category="Politics">Politics</button>
+        <button class="filter-pill" data-category="Defence">Defence</button>
+        <button class="filter-pill" data-category="Justice">Justice</button>
+        <button class="filter-pill" data-category="Foreign Affairs">Foreign Affairs</button>
+        <button class="filter-pill" data-category="Indigenous">Indigenous</button>
+        <button class="filter-pill" data-category="Health/MAID">Health</button>
+        <button class="filter-pill" data-category="Economy">Economy</button>
+      </div>
+      <div class="news-search">
+        <span class="news-search-icon">&#x1F50D;</span>
+        <input type="text" id="search-input" placeholder="Filter by keyword..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- ── Generate Brief Button ──────────────────────────── -->
+    <div class="brief-btn-wrap" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <button class="brief-btn" id="generate-brief-btn" disabled>
+        <span>🤖</span> Generate AI Intelligence Brief
+      </button>
+      <span id="brief-key-hint" style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-quaternary);">
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--accent)">Get free Gemini key</a> · stored locally only
+      </span>
+    </div>
+
+    <!-- ── AI Brief Output Panel ─────────────────────────── -->
+    <div id="intel-brief-panel" style="display:none;margin-top:16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;">
+      <div style="background:var(--color-navy,#0d1b35);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+        <span>🇨🇦</span>
+        <span style="font-weight:600;flex:1;">AI Intelligence Brief — Canadian News</span>
+        <span id="brief-date" style="font-size:.75rem;color:rgba(255,255,255,.45);"></span>
+        <button id="brief-close" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:16px;">✕</button>
+      </div>
+      <div style="padding:16px;">
+        <div id="brief-loading" style="display:flex;align-items:center;gap:10px;color:var(--text-tertiary);font-size:.875rem;">
+          <div style="width:18px;height:18px;border:2px solid #e5e7eb;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div>
+          Generating intelligence analysis with live Canadian news data…
+        </div>
+        <div id="brief-content" style="font-size:.9rem;line-height:1.75;color:var(--text-primary);display:none;"></div>
+      </div>
+      <div style="padding:8px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.72rem;color:var(--text-quaternary,#9ca3af);">Powered by Gemini 2.0 Flash + Google Search grounding</span>
+        <button id="brief-copy" style="padding:4px 10px;background:none;border:1px solid var(--border);border-radius:5px;font-size:.78rem;cursor:pointer;color:var(--text-secondary);">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- ── Article Count ──────────────────────────────────── -->
+    <div class="news-count-bar">
+      <span id="article-count">Loading...</span>
+      <button id="refresh-btn" style="background:none;border:none;font-family:var(--font-mono);font-size:0.7rem;color:var(--accent);cursor:pointer;">&#x21BB; Refresh</button>
+    </div>
+
+    <!-- ── News Grid ──────────────────────────────────────── -->
+    <div class="news-grid-container">
+      <div class="news-grid" id="news-grid">
+        <div class="news-loading">
+          <div class="news-loading-spinner"></div>
+          <div class="news-loading-text">Scanning Canadian news sources...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer id="site-footer"></footer>
+
+  <script src="nav.js?v=7"></script>
+  <script src="footer.js?v=1"></script>
+  <script src="share.js?v=1"></script>
+
+  <script type="module">
+    import { fetchAllNews, getCachedNews, categorizeArticle } from './js/news-engine.js';
+
+    // ── State ──────────────────────────────────────────────
+    let allArticles = [];
+    let activeCategory = 'All';
+    let searchQuery = '';
+
+    // ── Category CSS class map ─────────────────────────────
+    const categoryClass = {
+      'Politics': 'politics',
+      'Defence': 'defence',
+      'Justice': 'justice',
+      'Foreign Affairs': 'foreign',
+      'Indigenous': 'indigenous',
+      'Health/MAID': 'health',
+      'Economy': 'economy',
+      'Other': 'other'
+    };
+
+    // ── Source badge class map ──────────────────────────────
+    function sourceBadgeClass(source) {
+      const s = (source || '').toLowerCase();
+      if (s.includes('cbc')) return 'cbc';
+      if (s.includes('global')) return 'global';
+      if (s.includes('ctv')) return 'ctv';
+      return '';
+    }
+
+    // ── Format date for display ────────────────────────────
+    function formatDate(dateStr) {
+      try {
+        const d = new Date(dateStr);
+        const now = new Date();
+        const diff = now - d;
+
+        if (diff < 60000) return 'Just now';
+        if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+        if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+        if (diff < 172800000) return 'Yesterday';
+
+        return d.toLocaleDateString('en-CA', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    // ── Escape HTML ────────────────────────────────────────
+    function esc(text) {
+      const el = document.createElement('span');
+      el.textContent = text || '';
+      return el.innerHTML;
+    }
+
+    // ── Render a single article card ───────────────────────
+    function renderCard(article) {
+      const catClass = categoryClass[article.category] || 'other';
+      const srcClass = sourceBadgeClass(article.source);
+      const desc = (article.description || '').slice(0, 150);
+
+      return '<div class="news-card">' +
+        '<div class="news-card-header">' +
+          '<span class="source-badge ' + srcClass + '">' + esc(article.source) + '</span>' +
+          '<span class="category-badge ' + catClass + '">' + esc(article.category) + '</span>' +
+        '</div>' +
+        '<a href="' + esc(article.link) + '" target="_blank" rel="noopener noreferrer" class="news-card-title">' +
+          esc(article.title) +
+        '</a>' +
+        '<div class="news-card-date">' + formatDate(article.pubDate) + '</div>' +
+        (desc ? '<div class="news-card-desc">' + esc(desc) + '</div>' : '') +
+      '</div>';
+    }
+
+    // ── Filter articles by active category + search ────────
+    function getFilteredArticles() {
+      return allArticles.filter(function (a) {
+        // Category filter
+        if (activeCategory !== 'All' && a.category !== activeCategory) {
+          return false;
+        }
+        // Search filter
+        if (searchQuery) {
+          const text = (a.title + ' ' + a.description + ' ' + a.source).toLowerCase();
+          return text.includes(searchQuery.toLowerCase());
+        }
+        return true;
+      });
+    }
+
+    // ── Render the full grid ───────────────────────────────
+    function renderGrid() {
+      const filtered = getFilteredArticles();
+      const grid = document.getElementById('news-grid');
+      const countBar = document.getElementById('article-count');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="news-empty">No articles match your filters.</div>';
+        countBar.textContent = '0 articles';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(renderCard).join('');
+
+      const label = filtered.length === allArticles.length
+        ? filtered.length + ' articles'
+        : filtered.length + ' of ' + allArticles.length + ' articles';
+      countBar.textContent = label;
+    }
+
+    // ── Update the intelligence summary stats ──────────────
+    function updateSummary() {
+      const counts = {};
+      for (const a of allArticles) {
+        counts[a.category] = (counts[a.category] || 0) + 1;
+      }
+
+      const statsRow = document.getElementById('intel-stats');
+      let html = '<div class="intel-stat-tile">' +
+        '<div class="stat-num">' + allArticles.length + '</div>' +
+        '<div class="stat-label">Total</div></div>';
+
+      const order = ['Politics', 'Defence', 'Justice', 'Foreign Affairs', 'Indigenous', 'Health/MAID', 'Economy', 'Other'];
+      for (const cat of order) {
+        const count = counts[cat] || 0;
+        if (count > 0) {
+          const cls = categoryClass[cat] || 'other';
+          html += '<div class="intel-stat-tile ' + cls + '">' +
+            '<div class="stat-num">' + count + '</div>' +
+            '<div class="stat-label">' + esc(cat) + '</div></div>';
+        }
+      }
+      statsRow.innerHTML = html;
+
+      const now = new Date();
+      document.getElementById('intel-updated').textContent =
+        'Last updated: ' + now.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' }) +
+        ' \u2014 ' + now.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // ── Bind filter pill clicks ────────────────────────────
+    document.querySelectorAll('.filter-pill').forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        activeCategory = pill.dataset.category;
+        document.querySelectorAll('.filter-pill').forEach(function (p) {
+          p.classList.remove('active');
+        });
+        pill.classList.add('active');
+        renderGrid();
+      });
+    });
+
+    // ── Bind search input ──────────────────────────────────
+    let searchTimeout = null;
+    document.getElementById('search-input').addEventListener('input', function (e) {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function () {
+        searchQuery = e.target.value.trim();
+        renderGrid();
+      }, 250);
+    });
+
+    // ── Bind refresh button ────────────────────────────────
+    document.getElementById('refresh-btn').addEventListener('click', function () {
+      try { localStorage.removeItem('tenet5_news_v2'); } catch (e) {}
+      loadNews();
+    });
+
+    // ── Gemini Intelligence Brief ──────────────────────────
+    document.getElementById('generate-brief-btn').addEventListener('click', async function () {
+      const panel = document.getElementById('intel-brief-panel');
+      const loading = document.getElementById('brief-loading');
+      const content = document.getElementById('brief-content');
+      const btn = this;
+
+      // Get or prompt for API key
+      let apiKey = localStorage.getItem('tenet5_gemini_key') || '';
+      if (!apiKey) {
+        apiKey = prompt('Enter your Google AI Studio API key (free at aistudio.google.com/apikey).\nIt will be stored locally in your browser only.');
+        if (!apiKey) return;
+        localStorage.setItem('tenet5_gemini_key', apiKey.trim());
+      }
+      apiKey = apiKey.trim();
+
+      panel.style.display = 'block';
+      loading.style.display = 'flex';
+      content.style.display = 'none';
+      content.innerHTML = '';
+      document.getElementById('brief-date').textContent = new Date().toLocaleString('en-CA', {month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      btn.disabled = true;
+
+      // Build context from loaded articles
+      const headlines = (allArticles || []).slice(0, 30).map(a =>
+        `- [${a.category||'News'}] ${a.title} (${a.source}, ${new Date(a.pubDate).toLocaleDateString('en-CA')})`
+      ).join('\n');
+
+      const prompt = `You are an intelligence analyst. Analyze the following Canadian news headlines from the past 48 hours and generate a structured intelligence brief.
+
+HEADLINES:
+${headlines || 'No headlines loaded - use Google Search to find current Canadian news'}
+
+Generate a comprehensive intelligence brief with these exact sections:
+## EXECUTIVE SUMMARY
+2-3 sentences summarizing the most significant developments.
+
+## KEY DEVELOPMENTS
+Top 5-7 most significant stories with analysis of their implications for Canadian governance and accountability.
+
+## ACCOUNTABILITY FLAGS
+Stories that raise concerns about government transparency, conflicts of interest, procurement anomalies, or policy failures.
+
+## PATTERN ANALYSIS
+Identify any patterns, trends, or connections between stories that suggest systemic issues.
+
+## RECOMMENDED INVESTIGATIONS
+2-3 specific follow-up investigations that citizens or journalists should pursue based on today's news.
+
+Use bullet points, be factual, cite sources where possible.`;
+
+      try {
+        // Use Gemini 2.0 Flash with Google Search grounding
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            tools: [{ googleSearch: {} }],
+            generationConfig: { temperature: 0.4, maxOutputTokens: 2048 }
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error?.message || `API error ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No content generated.';
+
+        // Simple markdown render
+        const html = text
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/^## (.+)$/gm, '<h3 style="font-family:var(--font-heading,serif);color:var(--accent);margin:1.25rem 0 .4rem;font-size:1rem;border-bottom:1px solid var(--border);padding-bottom:.25rem;">$1</h3>')
+          .replace(/^### (.+)$/gm, '<h4 style="font-weight:600;margin:.75rem 0 .25rem;">$1</h4>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/^\* (.+)$/gm, '<li style="margin:.2rem 0">$1</li>')
+          .replace(/^- (.+)$/gm, '<li style="margin:.2rem 0">$1</li>')
+          .replace(/\n\n/g, '</p><p style="margin:.5rem 0">');
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        content.innerHTML = `<p style="margin:.5rem 0">${html}</p>`;
+
+        // Save to cache
+        try {
+          const cache = JSON.parse(localStorage.getItem('t5_news_reports') || '[]');
+          cache.unshift({ title: 'Canadian Intelligence Brief', content: text, ts: Date.now() });
+          localStorage.setItem('t5_news_reports', JSON.stringify(cache.slice(0, 8)));
+        } catch(e) {}
+
+      } catch(e) {
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        content.innerHTML = `<div style="color:#dc2626;padding:12px;background:#fef2f2;border-radius:8px;">❌ ${e.message}<br><small>Check your API key or try again. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></small></div>`;
+      } finally {
+        btn.disabled = (allArticles || []).length === 0;
+      }
+    });
+
+    document.getElementById('brief-close').addEventListener('click', function() {
+      document.getElementById('intel-brief-panel').style.display = 'none';
+    });
+
+    document.getElementById('brief-copy').addEventListener('click', function() {
+      const text = document.getElementById('brief-content').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        this.textContent = '✅ Copied';
+        setTimeout(() => { this.textContent = '📋 Copy'; }, 2000);
+      });
+    });
+
+    // ── Main load function ─────────────────────────────────
+    async function loadNews() {
+      const grid = document.getElementById('news-grid');
+      grid.innerHTML =
+        '<div class="news-loading">' +
+          '<div class="news-loading-spinner"></div>' +
+          '<div class="news-loading-text">Scanning Canadian news sources...</div>' +
+        '</div>';
+
+      try {
+        allArticles = await fetchAllNews();
+
+        if (allArticles.length > 0) {
+          document.getElementById('generate-brief-btn').disabled = false;
+        }
+
+        updateSummary();
+        renderGrid();
+
+      } catch (err) {
+        console.error('[News Dashboard]', err);
+        grid.innerHTML = '<div class="news-empty">Failed to load news feeds. Click Refresh to try again.</div>';
+      }
+    }
+
+    // ── Auto-refresh every 30 minutes ──────────────────────
+    setInterval(function () {
+      try { localStorage.removeItem('tenet5_news_v2'); } catch (e) {}
+      loadNews();
+    }, 30 * 60 * 1000);
+
+    // ── Initial load ───────────────────────────────────────
+    loadNews();
+  </script>
+</body>
+</html>
