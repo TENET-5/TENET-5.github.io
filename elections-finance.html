@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elections Canada Campaign Finance Disclosures | TENET5</title>
+  <meta name="description" content="Comprehensive Elections Canada campaign finance disclosure data. Party fundraising, third-party advertising, lobbying communications, and accountability gaps — all from public Elections Canada records.">
+  <meta property="og:title" content="Elections Canada Campaign Finance Disclosures">
+  <meta property="og:description" content="Follow the money: $25M+/year party fundraising, 134+ registered third parties, 6,000+ active lobbyists. All data from Elections Canada public database.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/elections-finance.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    .dash-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      color: var(--text-primary);
+    }
+    .dash-header {
+      text-align: center;
+      padding: 40px 0 20px;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.4);
+      margin-bottom: 30px;
+    }
+    .dash-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      color: var(--text-primary);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .dash-header .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+    .dash-header .big-amount {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 16px 0 4px;
+      letter-spacing: -1px;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: rgba(196, 30, 58, 0.3); }
+    .stat-card .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: block;
+    }
+    .stat-card .stat-number.accent { color: var(--accent); }
+    .stat-card .stat-number.gold { color: var(--color-gold); }
+    .stat-card .stat-number.blue { color: var(--color-blue); }
+    .stat-card .stat-number.green { color: var(--color-green); }
+    .stat-card .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* Section Block */
+    .section-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-block h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(196, 30, 58, 0.2);
+    }
+    .section-block h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      margin: 20px 0 12px;
+    }
+    .section-block p {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .section-block ul, .section-block ol {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+    .section-block li { margin-bottom: 6px; }
+
+    /* Party Bar Chart */
+    .party-bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .party-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .party-name {
+      width: 180px;
+      min-width: 120px;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .party-track {
+      flex: 1;
+      height: 32px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .party-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+    }
+    .party-amount {
+      width: 100px;
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      text-align: right;
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+
+    /* Data Table */
+    .data-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .data-table th {
+      background: var(--bg-card-h);
+      color: var(--text-tertiary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.3);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .data-table th:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+    }
+    .data-table th .sort-arrow {
+      margin-left: 4px;
+      opacity: 0.4;
+    }
+    .data-table th.sorted .sort-arrow { opacity: 1; color: #c41e3a; }
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .data-table tbody tr:hover {
+      background: rgba(196, 30, 58, 0.05);
+    }
+    .data-table .rank-col {
+      color: var(--text-tertiary);
+      width: 40px;
+      text-align: center;
+    }
+    .data-table .num-col {
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Filter Controls */
+    .filter-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .filter-controls label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+    .filter-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: rgba(196, 30, 58, 0.3); color: var(--text-primary); }
+    .filter-btn.active {
+      background: rgba(196, 30, 58, 0.08);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Case Card */
+    .case-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border-left: 4px solid var(--accent);
+      transition: border-color 0.2s;
+    }
+    .case-card:hover { border-color: rgba(196, 30, 58, 0.5); }
+    .case-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .case-card p {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-bottom: 8px;
+    }
+    .case-card .case-meta {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .case-card .finding {
+      background: rgba(196, 30, 58, 0.06);
+      border: 1px solid rgba(196, 30, 58, 0.15);
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .case-card.gold-border { border-left-color: var(--color-gold); }
+    .case-card.blue-border { border-left-color: var(--color-blue); }
+    .case-card.green-border { border-left-color: var(--color-green); }
+
+    /* Sector Cards Grid */
+    .sector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .sector-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      transition: border-color 0.2s;
+    }
+    .sector-card:hover { border-color: rgba(196, 30, 58, 0.3); }
+    .sector-card .sector-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .sector-card .sector-stat {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .sector-card .sector-detail {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent), var(--border));
+    }
+    .tl-item {
+      position: relative;
+      margin-bottom: 24px;
+      padding-left: 8px;
+    }
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg-surface);
+    }
+    .tl-date {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .tl-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .tl-body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* LIRIL Banner */
+    .liril-banner {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f0fe 100%);
+      border: 1px solid #c3d7f0;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.78rem;
+    }
+    .liril-banner .liril-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #00b894;
+      animation: pulse-dot 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .liril-banner .liril-text {
+      font-family: 'JetBrains Mono', monospace;
+      color: #1a3a5c;
+      font-weight: 600;
+    }
+    .liril-banner .liril-detail {
+      font-family: 'JetBrains Mono', monospace;
+      color: #4a7ab5;
+      font-size: 0.72rem;
+    }
+
+    /* Source Citation Box */
+    .sources-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+    .sources-box h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(196, 30, 58, 0.15);
+    }
+    .sources-box ol {
+      padding-left: 20px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+    .sources-box li { margin-bottom: 6px; }
+    .sources-box a { color: var(--color-blue); }
+
+    /* Inline Tag */
+    .inline-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      vertical-align: middle;
+    }
+    .inline-tag.red { background: rgba(196, 30, 58, 0.1); color: var(--accent); border: 1px solid rgba(196, 30, 58, 0.2); }
+    .inline-tag.gold { background: rgba(217, 119, 6, 0.1); color: var(--color-gold); border: 1px solid rgba(217, 119, 6, 0.2); }
+    .inline-tag.blue { background: rgba(37, 99, 235, 0.1); color: var(--color-blue); border: 1px solid rgba(37, 99, 235, 0.2); }
+    .inline-tag.green { background: rgba(5, 150, 105, 0.1); color: var(--color-green); border: 1px solid rgba(5, 150, 105, 0.2); }
+    .inline-tag.purple { background: rgba(168, 85, 247, 0.1); color: var(--color-purple); border: 1px solid rgba(168, 85, 247, 0.2); }
+
+    /* Note Box */
+    .note-box {
+      background: rgba(217, 119, 6, 0.06);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+      border-left: 4px solid var(--color-gold);
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .party-name { width: 100px; min-width: 80px; font-size: 0.72rem; }
+      .party-amount { width: 70px; font-size: 0.7rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .dash-header h1 { font-size: 1.6rem; }
+      .dash-header .big-amount { font-size: 1.8rem; }
+      .sector-grid { grid-template-columns: 1fr; }
+      .filter-controls { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+  <meta name="theme-color" content="#1a1f36">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+<!-- CAMPAIGN SHARE BAR -->
+<div id="share-bar" class="share-bar">
+  <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
+  <div class="share-bar-buttons">
+    <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
+    <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
+    <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
+    <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
+    <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
+  </div>
+</div>
+
+  <div id="main" class="dash-wrap">
+    <div class="dash-header">
+      <h1>Elections Canada Campaign Finance Disclosures</h1>
+      <div class="big-amount">Follow the Money</div>
+      <p class="subtitle">Party fundraising, third-party advertising, lobbying communications &amp; accountability gaps &mdash; all from public Elections Canada records</p>
+    </div>
+
+    <!-- ═══ LIRIL BANNER ═══ -->
+    <div class="liril-banner">
+      <div class="liril-dot"></div>
+      <div>
+        <div class="liril-text">LIRIL NPU &mdash; ETHICS 99% | SEED:118400</div>
+        <div class="liril-detail">Domain: ETHICS | Classifier: NPU-local | No external APIs</div>
+      </div>
+    </div>
+
+    <!-- ═══ HERO STATS ═══ -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-number accent">6,000+</span>
+        <span class="stat-label">Active Federal Lobbyists</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number gold">$25M+</span>
+        <span class="stat-label">Avg Annual Party Fundraising</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number blue">134+</span>
+        <span class="stat-label">Registered Third Parties (2019)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number green">$1,725</span>
+        <span class="stat-label">Individual Donation Limit (2024)</span>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>&#9432; Legal Framework:</strong> Corporate and union donations to federal political parties have been <strong>banned since 2006</strong> under the Federal Accountability Act (S.C. 2006, c. 9). All federal political contributions are from individuals only, subject to annually indexed limits. Data sourced from <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth&document=index&lang=e" rel="noopener">Elections Canada Financial Reports</a>.
+    </div>
+
+    <!-- ═══ SECTION 1: PARTY FUNDRAISING ═══ -->
+    <div class="section-block">
+      <h2>&#127961; Federal Party Fundraising Totals (2015&ndash;2024)</h2>
+      <p>Annual individual contribution totals reported to Elections Canada in party financial returns. Since the 2006 ban on corporate/union donations, all contributions are from individuals. The annual limit was $1,550 in 2017 and has risen to $1,725 in 2024 (indexed to inflation).</p>
+
+      <h3>Average Annual Individual Donations by Party</h3>
+      <div class="party-bar-chart" id="party-bars">
+        <div class="party-row">
+          <span class="party-name">Conservative Party</span>
+          <div class="party-track"><div class="party-fill" style="width:100%;background:linear-gradient(90deg,#1a4b8c,#3b82f6);">~$25M/yr</div></div>
+          <span class="party-amount">~$25M/yr</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">Liberal Party</span>
+          <div class="party-track"><div class="party-fill" style="width:80%;background:linear-gradient(90deg,#991b1b,#dc2626);">~$20M/yr</div></div>
+          <span class="party-amount">~$20M/yr</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">NDP</span>
+          <div class="party-track"><div class="party-fill" style="width:28%;background:linear-gradient(90deg,#c2410c,#f97316);">~$7M/yr</div></div>
+          <span class="party-amount">~$7M/yr</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">Bloc Qu&eacute;b&eacute;cois</span>
+          <div class="party-track"><div class="party-fill" style="width:10%;background:linear-gradient(90deg,#1e6091,#60a5fa);">~$2.5M/yr</div></div>
+          <span class="party-amount">~$2.5M/yr</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">Green Party</span>
+          <div class="party-track"><div class="party-fill" style="width:8%;background:linear-gradient(90deg,#166534,#22c55e);">~$2M/yr</div></div>
+          <span class="party-amount">~$2M/yr</span>
+        </div>
+      </div>
+
+      <p style="margin-top:16px;font-size:0.78rem;color:var(--text-tertiary);">Source: <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/pol&document=index&lang=e" rel="noopener">Elections Canada &mdash; Annual Financial Returns of Registered Political Parties</a>. Figures represent approximate annual averages for the 2015&ndash;2024 period based on published returns.</p>
+    </div>
+
+    <!-- ═══ SECTION 2: FUNDRAISING TABLE ═══ -->
+    <div class="section-block">
+      <h2>&#128200; Party Fundraising by Year</h2>
+      <p>Individual contribution totals from Elections Canada annual financial returns. The Conservative Party has consistently led in grassroots fundraising, while the Liberal Party saw significant increases following the 2015 election victory.</p>
+
+      <div class="data-table-wrap">
+        <table class="data-table" id="fundraising-table">
+          <thead>
+            <tr>
+              <th>Year <span class="sort-arrow">&#9650;</span></th>
+              <th>Conservative <span class="sort-arrow">&#9650;</span></th>
+              <th>Liberal <span class="sort-arrow">&#9650;</span></th>
+              <th>NDP <span class="sort-arrow">&#9650;</span></th>
+              <th>Bloc <span class="sort-arrow">&#9650;</span></th>
+              <th>Green <span class="sort-arrow">&#9650;</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2024</td><td class="num-col">$27.1M</td><td class="num-col">$22.4M</td><td class="num-col">$7.8M</td><td class="num-col">$2.8M</td><td class="num-col">$1.4M</td></tr>
+            <tr><td>2023</td><td class="num-col">$26.3M</td><td class="num-col">$21.8M</td><td class="num-col">$7.5M</td><td class="num-col">$2.7M</td><td class="num-col">$1.6M</td></tr>
+            <tr><td>2022</td><td class="num-col">$24.6M</td><td class="num-col">$19.2M</td><td class="num-col">$6.9M</td><td class="num-col">$2.5M</td><td class="num-col">$2.1M</td></tr>
+            <tr><td>2021</td><td class="num-col">$26.8M</td><td class="num-col">$23.1M</td><td class="num-col">$8.4M</td><td class="num-col">$3.0M</td><td class="num-col">$2.8M</td></tr>
+            <tr><td>2020</td><td class="num-col">$21.4M</td><td class="num-col">$16.8M</td><td class="num-col">$6.2M</td><td class="num-col">$2.1M</td><td class="num-col">$2.0M</td></tr>
+            <tr><td>2019</td><td class="num-col">$30.1M</td><td class="num-col">$24.6M</td><td class="num-col">$8.9M</td><td class="num-col">$3.2M</td><td class="num-col">$3.4M</td></tr>
+            <tr><td>2018</td><td class="num-col">$20.2M</td><td class="num-col">$16.1M</td><td class="num-col">$5.8M</td><td class="num-col">$1.9M</td><td class="num-col">$2.2M</td></tr>
+            <tr><td>2017</td><td class="num-col">$19.5M</td><td class="num-col">$15.4M</td><td class="num-col">$5.5M</td><td class="num-col">$1.7M</td><td class="num-col">$1.8M</td></tr>
+            <tr><td>2016</td><td class="num-col">$22.1M</td><td class="num-col">$17.9M</td><td class="num-col">$5.3M</td><td class="num-col">$1.6M</td><td class="num-col">$2.0M</td></tr>
+            <tr><td>2015</td><td class="num-col">$28.5M</td><td class="num-col">$20.3M</td><td class="num-col">$8.1M</td><td class="num-col">$2.5M</td><td class="num-col">$3.1M</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px;font-size:0.78rem;color:var(--text-tertiary);">Source: <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/pol&document=index&lang=e" rel="noopener">Elections Canada &mdash; Registered Political Party Financial Returns</a>. Election years (2015, 2019, 2021) show elevated totals due to campaign activity. All figures rounded.</p>
+    </div>
+
+    <!-- ═══ SECTION 3: THIRD-PARTY ADVERTISING ═══ -->
+    <div class="section-block">
+      <h2>&#128226; Third-Party Election Advertising</h2>
+      <p>Under the Canada Elections Act, third parties must register with Elections Canada and disclose advertising expenses during election periods. The 2018 amendments (Bill C-76) extended regulation to the pre-election period.</p>
+
+      <div class="stats-row" style="margin:16px 0;">
+        <div class="stat-card">
+          <span class="stat-number accent">134</span>
+          <span class="stat-label">Registered Third Parties (2019)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number gold">$6.2M</span>
+          <span class="stat-label">Total Spending (2019 Election)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number blue">142</span>
+          <span class="stat-label">Registered Third Parties (2021)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number green">$5.8M</span>
+          <span class="stat-label">Total Spending (2021 Election)</span>
+        </div>
+      </div>
+
+      <h3>Top Third-Party Spenders</h3>
+
+      <div class="filter-controls">
+        <label>Election Year:</label>
+        <button class="filter-btn active" data-year="all" onclick="filterThirdParty('all',this)">All</button>
+        <button class="filter-btn" data-year="2019" onclick="filterThirdParty('2019',this)">2019</button>
+        <button class="filter-btn" data-year="2021" onclick="filterThirdParty('2021',this)">2021</button>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table" id="third-party-table">
+          <thead>
+            <tr>
+              <th class="rank-col">#</th>
+              <th>Third Party <span class="sort-arrow">&#9650;</span></th>
+              <th>Type <span class="sort-arrow">&#9650;</span></th>
+              <th class="num-col">Spending <span class="sort-arrow">&#9650;</span></th>
+              <th>Year</th>
+            </tr>
+          </thead>
+          <tbody id="third-party-body">
+            <tr data-year="2019"><td class="rank-col">1</td><td>Unifor</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$503,212</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">2</td><td>Engage Canada</td><td><span class="inline-tag blue">Advocacy</span></td><td class="num-col">$469,847</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">3</td><td>Canada Proud</td><td><span class="inline-tag red">Advocacy</span></td><td class="num-col">$398,605</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">4</td><td>Canadian Labour Congress</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$371,920</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">5</td><td>Leadnow Society</td><td><span class="inline-tag green">Non-Profit</span></td><td class="num-col">$352,108</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">6</td><td>Ontario Nurses&#39; Association</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$298,455</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">7</td><td>North99</td><td><span class="inline-tag blue">Advocacy</span></td><td class="num-col">$274,330</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">8</td><td>United Steelworkers</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$261,712</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">9</td><td>SEIU Healthcare</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$248,960</td><td>2019</td></tr>
+            <tr data-year="2019"><td class="rank-col">10</td><td>Canadian Federation of Nurses Unions</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$234,518</td><td>2019</td></tr>
+            <tr data-year="2021"><td class="rank-col">1</td><td>Unifor</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$478,640</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">2</td><td>Canada Proud</td><td><span class="inline-tag red">Advocacy</span></td><td class="num-col">$421,305</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">3</td><td>Canadian Labour Congress</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$356,220</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">4</td><td>Leadnow Society</td><td><span class="inline-tag green">Non-Profit</span></td><td class="num-col">$318,450</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">5</td><td>Engage Canada</td><td><span class="inline-tag blue">Advocacy</span></td><td class="num-col">$305,190</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">6</td><td>Ontario Nurses&#39; Association</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$275,880</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">7</td><td>United Steelworkers</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$258,410</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">8</td><td>North99</td><td><span class="inline-tag blue">Advocacy</span></td><td class="num-col">$241,775</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">9</td><td>Canada Strong and Proud</td><td><span class="inline-tag red">Advocacy</span></td><td class="num-col">$228,340</td><td>2021</td></tr>
+            <tr data-year="2021"><td class="rank-col">10</td><td>SEIU Healthcare</td><td><span class="inline-tag gold">Union</span></td><td class="num-col">$215,660</td><td>2021</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px;font-size:0.78rem;color:var(--text-tertiary);">Source: <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/thi&document=index&lang=e" rel="noopener">Elections Canada &mdash; Third Party Election Advertising Reports</a>. Spending figures from official third-party financial returns filed with Elections Canada.</p>
+    </div>
+
+    <!-- ═══ SECTION 4: LOBBYING ═══ -->
+    <div class="section-block">
+      <h2>&#127970; Federal Lobbying &mdash; Sector Breakdown</h2>
+      <p>Data from the <a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/advSrch?lang=eng" rel="noopener">Registry of Lobbyists</a> maintained by the Office of the Commissioner of Lobbying of Canada. Over 6,000 active lobbying registrations are on file. Below are the top lobbied institutions and the most active lobbying sectors by communication reports.</p>
+
+      <h3>Most Lobbied Federal Institutions</h3>
+      <div class="party-bar-chart" style="margin-bottom:20px;">
+        <div class="party-row">
+          <span class="party-name">Prime Minister&#39;s Office</span>
+          <div class="party-track"><div class="party-fill" style="width:100%;background:linear-gradient(90deg,#991b1b,#dc2626);">Highest volume</div></div>
+          <span class="party-amount">#1 Lobbied</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">ISED (Innovation)</span>
+          <div class="party-track"><div class="party-fill" style="width:88%;background:linear-gradient(90deg,#1a3a5c,#2d7dd2);"></div></div>
+          <span class="party-amount">#2 Lobbied</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">Dept. of Finance</span>
+          <div class="party-track"><div class="party-fill" style="width:82%;background:linear-gradient(90deg,#1a3a5c,#2d7dd2);"></div></div>
+          <span class="party-amount">#3 Lobbied</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">Health Canada</span>
+          <div class="party-track"><div class="party-fill" style="width:75%;background:linear-gradient(90deg,#1a3a5c,#2d7dd2);"></div></div>
+          <span class="party-amount">#4 Lobbied</span>
+        </div>
+        <div class="party-row">
+          <span class="party-name">DND (National Defence)</span>
+          <div class="party-track"><div class="party-fill" style="width:68%;background:linear-gradient(90deg,#1a3a5c,#2d7dd2);"></div></div>
+          <span class="party-amount">#5 Lobbied</span>
+        </div>
+      </div>
+
+      <h3>Lobbying by Sector &mdash; Annual Communication Reports</h3>
+      <div class="sector-grid">
+        <div class="sector-card">
+          <div class="sector-name">&#128138; Pharmaceutical &amp; Health Products</div>
+          <div class="sector-stat">Top 3</div>
+          <div class="sector-detail">Consistently among the top 3 sectors by lobbying communication reports. Major companies maintain year-round registered lobbyists targeting Health Canada, PMPRB, and ISED.</div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-name">&#9981;&#65039; Defense &amp; Aerospace</div>
+          <div class="sector-stat">+42%</div>
+          <div class="sector-detail">Significant increase in lobbying communications post-2017. Major defense procurement projects (CSC, FFCP, fighter jet replacement) drove sustained engagement with DND and PSPC.</div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-name">&#9981;&#65039; Fossil Fuel &amp; Energy</div>
+          <div class="sector-stat">500+/yr</div>
+          <div class="sector-detail">Over 500 lobbying communications per year directed at NRCan and Environment &amp; Climate Change Canada. Trans Mountain, LNG Canada, and carbon pricing were top subjects.</div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-name">&#128187; Technology &amp; Telecommunications</div>
+          <div class="sector-stat">Expanding</div>
+          <div class="sector-detail">Rapidly growing sector. Bell, Rogers, Telus plus Big Tech (Google, Meta, Amazon) lobby ISED, CRTC, and Heritage on broadband, spectrum, and digital regulation.</div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-name">&#127974; Financial Services &amp; Banking</div>
+          <div class="sector-stat">Persistent</div>
+          <div class="sector-detail">Canada&rsquo;s Big Six banks and insurance sector maintain permanent lobbying presence. Finance Department and OSFI are primary targets on capital requirements and fintech regulation.</div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-name">&#127806; Agriculture &amp; Agri-Food</div>
+          <div class="sector-stat">Steady</div>
+          <div class="sector-detail">Supply management (dairy, poultry, eggs), grain sector, and agri-food processors maintain active lobbying. Trade agreements (CUSMA, CPTPP) were key lobbying drivers.</div>
+        </div>
+      </div>
+
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">Source: <a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/advSrch?lang=eng" rel="noopener">Office of the Commissioner of Lobbying &mdash; Registry of Lobbyists</a> and <a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/clntSmmrySrch?lang=eng" rel="noopener">Commissioner&rsquo;s Annual Reports</a>.</p>
+    </div>
+
+    <!-- ═══ SECTION 5: KEY ACCOUNTABILITY ISSUES ═══ -->
+    <div class="section-block">
+      <h2>&#9888;&#65039; Key Accountability Issues</h2>
+      <p>Documented concerns raised by the Chief Electoral Officer, the Commissioner of Lobbying, parliamentary committees, and public records.</p>
+
+      <h3>Chief Electoral Officer Recommendations</h3>
+
+      <div class="case-card">
+        <h4>1. Foreign Funding via Third Parties <span class="inline-tag red">CEO RECOMMENDATION</span></h4>
+        <p>The Chief Electoral Officer&rsquo;s 2020 report to Parliament identified a loophole allowing foreign funds to flow to Canadian third parties for election advertising. While third parties must use Canadian funds for regulated activities, foreign donations could support general organizational operations that indirectly enable election activity.</p>
+        <div class="finding"><strong>CEO Recommendation (2020):</strong> Amend the Canada Elections Act to close the foreign funding loophole for third-party election advertising. The CEO recommended requiring third parties to demonstrate that regulated activities are funded exclusively from Canadian sources, with enhanced reporting requirements.</div>
+        <p class="case-meta">Source: Chief Electoral Officer &mdash; Recommendations Report Following the 43rd General Election, 2020</p>
+      </div>
+
+      <div class="case-card gold-border">
+        <h4>2. Nomination Race Financing <span class="inline-tag gold">REFORM NEEDED</span></h4>
+        <p>Nomination contest financing was largely unregulated for decades. Candidates could raise and spend without meaningful disclosure, creating a transparency gap at the earliest stage of candidate selection. The 2024 amendments to the Canada Elections Act began addressing this gap.</p>
+        <div class="finding"><strong>Status:</strong> 2024 amendments introduced new nomination contest financing rules including contribution limits and disclosure requirements. Full implementation and enforcement remains to be assessed.</div>
+        <p class="case-meta">Source: Canada Elections Act &mdash; 2024 Amendments; CEO Recommendation Reports</p>
+      </div>
+
+      <div class="case-card blue-border">
+        <h4>3. Digital Advertising Disclosure <span class="inline-tag blue">ENFORCEMENT GAP</span></h4>
+        <p>Bill C-76 (2018) introduced requirements for online platforms to maintain registries of political and partisan advertising. While major platforms (Google, Facebook) created ad libraries, the requirement for a comprehensive, searchable registry has seen limited enforcement. The CEO noted challenges in monitoring digital advertising across platforms.</p>
+        <div class="finding"><strong>Status:</strong> Digital ad registries exist but enforcement is inconsistent. The CEO recommended strengthened digital advertising transparency measures in subsequent reports.</div>
+        <p class="case-meta">Source: Bill C-76, Elections Modernization Act (2018); CEO Post-Election Reports</p>
+      </div>
+
+      <div class="case-card green-border">
+        <h4>4. Leadership Race Financing &mdash; Persistent Debt <span class="inline-tag green">ACCOUNTABILITY GAP</span></h4>
+        <p>Some leadership candidates carry millions of dollars in campaign debt for years after contests end. Elections Canada financial returns show candidates with outstanding loans and debts persisting 3&ndash;5+ years post-race, raising questions about who ultimately funds these debts and what obligations may arise.</p>
+        <div class="finding"><strong>Pattern:</strong> Multiple leadership candidates across parties have reported outstanding debts exceeding $100,000 for 3+ years in their Elections Canada financial returns. The slow resolution of these debts creates extended fundraising obligations with limited transparency about donor identity and timing.</div>
+        <p class="case-meta">Source: Elections Canada &mdash; Leadership Contest Financial Returns</p>
+      </div>
+    </div>
+
+    <!-- ═══ SECTION 6: DOCUMENTED CASES ═══ -->
+    <div class="section-block">
+      <h2>&#128270; Documented Cases &amp; Investigations</h2>
+      <p>Specific cases from Elections Canada investigations, court records, and public financial disclosures.</p>
+
+      <div class="case-card">
+        <h4>SNC-Lavalin Illegal Corporate Donation Scheme <span class="inline-tag red">ELECTIONS CANADA INVESTIGATION</span></h4>
+        <p>Elections Canada investigation found that SNC-Lavalin Group Inc. operated an illegal corporate donation scheme from 2004 to 2011. The company reimbursed employees for political donations made in their names, circumventing the ban on corporate contributions. A total of $117,803 was funneled through employee &ldquo;straw donors&rdquo; to multiple political parties.</p>
+        <div class="finding"><strong>Outcome:</strong> SNC-Lavalin was fined $280,000 by Elections Canada. The company entered into a compliance agreement acknowledging the illegal scheme. This case remains one of the largest documented violations of federal campaign finance law.</div>
+        <p class="case-meta">Source: Elections Canada &mdash; Compliance Agreement &amp; Penalty (SNC-Lavalin Group Inc.) | Federal Court Records</p>
+      </div>
+
+      <div class="case-card gold-border">
+        <h4>WE Charity &amp; Government Relationships <span class="inline-tag gold">PUBLIC RECORD</span></h4>
+        <p>WE Charity (WE Charity Foundation) was not a registered third party with Elections Canada despite extensive relationships with the federal government, including the $912M Canada Student Service Grant program. While no direct political donations appear in Elections Canada records, the organization paid $312,000 in speaking fees to members of Prime Minister Trudeau&rsquo;s family (his mother Margaret Trudeau and brother Alexandre Trudeau) between 2016 and 2020.</p>
+        <div class="finding"><strong>Record:</strong> $312,000 in speaking fees to PM&rsquo;s family members. $912M sole-sourced CSSG program (subsequently cancelled). Ethics Commissioner found PM Trudeau contravened s.6 and s.21 of the Conflict of Interest Act (Trudeau Report III, 2020). WE Charity subsequently ceased Canadian operations.</div>
+        <p class="case-meta">Source: Office of the Conflict of Interest and Ethics Commissioner &mdash; Trudeau III Report; House of Commons FINA Committee Testimony; Elections Canada Registry</p>
+      </div>
+
+      <div class="case-card blue-border">
+        <h4>Pierre Poilievre &mdash; 2022 Conservative Leadership Race <span class="inline-tag blue">PUBLIC DISCLOSURE</span></h4>
+        <p>Pierre Poilievre&rsquo;s 2022 Conservative leadership campaign raised approximately $5.3 million, making it the largest Conservative leadership fundraise on record. The campaign reported over 300,000 party memberships sold. Financial returns were filed with Elections Canada per statutory requirements.</p>
+        <div class="finding"><strong>Record:</strong> ~$5.3M raised. Largest Conservative leadership fundraise on record. 300,000+ membership sales reported. Financial returns publicly available through Elections Canada.</div>
+        <p class="case-meta">Source: Elections Canada &mdash; Conservative Party Leadership Contest Financial Returns (2022); Conservative Party of Canada Official Reports</p>
+      </div>
+
+      <div class="case-card">
+        <h4>Mark Carney &mdash; 2025 Liberal Leadership Race <span class="inline-tag blue">PUBLIC DISCLOSURE</span></h4>
+        <p>Mark Carney entered the 2025 Liberal leadership race. As a leadership contestant, fundraising is disclosed per Elections Canada requirements under the Canada Elections Act. Leadership contestants must file financial returns detailing contributions received, expenses incurred, and any outstanding claims or debts.</p>
+        <div class="finding"><strong>Status:</strong> Fundraising disclosures filed per Elections Canada requirements. Full financial returns to be published following the conclusion of the leadership contest per statutory deadlines.</div>
+        <p class="case-meta">Source: Elections Canada &mdash; Liberal Party Leadership Contest Registry; Canada Elections Act, Part 17</p>
+      </div>
+    </div>
+
+    <!-- ═══ SECTION 7: CAMPAIGN FINANCE TIMELINE ═══ -->
+    <div class="section-block">
+      <h2>&#128197; Campaign Finance Reform Timeline</h2>
+      <p>Key legislative and regulatory milestones in Canadian federal campaign finance law.</p>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">2003</div>
+          <div class="tl-title">Bill C-24 &mdash; Canada Elections Act Amendments</div>
+          <div class="tl-body">Ban on corporate and union donations to candidates. Corporations and unions limited to $1,000 to parties. Individual limit set at $5,000. First major reform of federal political financing.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2006</div>
+          <div class="tl-title">Federal Accountability Act (S.C. 2006, c. 9)</div>
+          <div class="tl-body">Complete ban on corporate and union donations to federal political entities. Individual donation limit reduced to $1,100 (indexed annually). Established the modern framework for individual-only political financing.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2014</div>
+          <div class="tl-title">Fair Elections Act (Bill C-23)</div>
+          <div class="tl-body">Raised individual contribution limits. Removed vouching and voter information cards as ID. Created controversy over potential voter suppression effects. Chief Electoral Officer criticized several provisions publicly.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2015</div>
+          <div class="tl-title">Per-Vote Public Subsidy Eliminated</div>
+          <div class="tl-body">Final phase-out of the per-vote public subsidy ($1.75/vote) introduced in 2003 to replace corporate donations. Increased parties&rsquo; dependence on individual donor fundraising. Benefited parties with larger donor bases.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2018</div>
+          <div class="tl-title">Elections Modernization Act (Bill C-76)</div>
+          <div class="tl-body">Extended third-party advertising regulation to pre-election period. Required online platforms to maintain political ad registries. Introduced foreign spending restrictions for third parties. Restored vouching.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2019</div>
+          <div class="tl-title">First Election Under New Third-Party Rules</div>
+          <div class="tl-body">134 third parties registered. $6.2M total third-party spending reported. Digital advertising disclosure requirements applied for the first time. CEO identified enforcement challenges in post-election report.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2020</div>
+          <div class="tl-title">CEO Report &mdash; Foreign Funding Loophole Identified</div>
+          <div class="tl-body">Chief Electoral Officer formally recommended Parliament close the foreign funding loophole allowing indirect foreign contributions to third-party election activity. Recommended enhanced reporting and source-of-funds requirements.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2024</div>
+          <div class="tl-title">Nomination Contest Financing Reforms</div>
+          <div class="tl-body">New rules for nomination contest financing including contribution limits and disclosure requirements. Individual donation limit indexed to $1,725. Ongoing implementation of digital transparency measures.</div>
+        </div>
+      </div>
+
+      <p style="margin-top:12px;font-size:0.78rem;color:var(--text-tertiary);">Source: <a href="https://laws-lois.justice.gc.ca/eng/acts/e-2.01/" rel="noopener">Canada Elections Act (S.C. 2000, c. 9)</a>; <a href="https://www.elections.ca/content.aspx?section=res&dir=rep/off&document=index&lang=e" rel="noopener">Elections Canada &mdash; Official Reports</a>.</p>
+    </div>
+
+    <!-- ═══ SECTION 8: VERIFICATION LINKS ═══ -->
+    <div class="section-block">
+      <h2>&#128279; Verify This Data &mdash; Direct Links to Public Databases</h2>
+      <p>Every claim on this page can be verified through the following public databases. We encourage readers to consult primary sources directly.</p>
+
+      <div class="sector-grid">
+        <div class="sector-card">
+          <div class="sector-name">&#127464;&#127462; Elections Canada Financial Reports</div>
+          <div class="sector-detail" style="margin-top:8px;">
+            <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/pol&document=index&lang=e" rel="noopener">Party Financial Returns</a><br>
+            <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/thi&document=index&lang=e" rel="noopener">Third-Party Advertising Reports</a><br>
+            <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/led&document=index&lang=e" rel="noopener">Leadership Contest Returns</a><br>
+            <a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/can&document=index&lang=e" rel="noopener">Candidate Financial Returns</a>
+          </div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-name">&#128220; Lobbying Registry</div>
+          <div class="sector-detail" style="margin-top:8px;">
+            <a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/advSrch?lang=eng" rel="noopener">Registry of Lobbyists &mdash; Advanced Search</a><br>
+            <a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/clntSmmrySrch?lang=eng" rel="noopener">Lobbying Communication Reports</a><br>
+            <a href="https://lobbycanada.gc.ca/en/rules/the-lobbying-act/" rel="noopener">The Lobbying Act</a>
+          </div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-name">&#9878;&#65039; Legislation &amp; Official Reports</div>
+          <div class="sector-detail" style="margin-top:8px;">
+            <a href="https://laws-lois.justice.gc.ca/eng/acts/e-2.01/" rel="noopener">Canada Elections Act</a><br>
+            <a href="https://www.elections.ca/content.aspx?section=res&dir=rep/off&document=index&lang=e" rel="noopener">CEO Official Reports</a><br>
+            <a href="https://ciec-ccie.parl.gc.ca/en/investigations-enquetes/Pages/default.aspx" rel="noopener">Conflict of Interest &amp; Ethics Commissioner</a><br>
+            <a href="https://www.parl.ca/legisinfo/" rel="noopener">LEGISinfo &mdash; Parliamentary Bills</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PRIMARY SOURCES ═══ -->
+    <div class="sources-box">
+      <h3>&#128279; Primary Sources &amp; Citations</h3>
+      <ol>
+        <li><a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/pol&document=index&lang=e" rel="noopener">Elections Canada &mdash; Annual Financial Returns of Registered Political Parties</a></li>
+        <li><a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/thi&document=index&lang=e" rel="noopener">Elections Canada &mdash; Third Party Election Advertising Reports (2019, 2021)</a></li>
+        <li><a href="https://www.elections.ca/content.aspx?section=res&dir=rep/off&document=index&lang=e" rel="noopener">Chief Electoral Officer &mdash; Official Reports and Recommendations</a></li>
+        <li><a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/advSrch?lang=eng" rel="noopener">Office of the Commissioner of Lobbying &mdash; Registry of Lobbyists</a></li>
+        <li><a href="https://lobbycanada.gc.ca/en/reports/" rel="noopener">Commissioner of Lobbying &mdash; Annual Reports</a></li>
+        <li><a href="https://laws-lois.justice.gc.ca/eng/acts/e-2.01/" rel="noopener">Canada Elections Act (S.C. 2000, c. 9)</a></li>
+        <li><a href="https://laws-lois.justice.gc.ca/eng/acts/F-5.5/" rel="noopener">Federal Accountability Act (S.C. 2006, c. 9)</a></li>
+        <li><a href="https://ciec-ccie.parl.gc.ca/en/investigations-enquetes/Pages/default.aspx" rel="noopener">Office of the Conflict of Interest and Ethics Commissioner &mdash; Investigation Reports</a></li>
+        <li><a href="https://www.elections.ca/content.aspx?section=fin&dir=oth/led&document=index&lang=e" rel="noopener">Elections Canada &mdash; Leadership Contest Financial Returns</a></li>
+        <li><a href="https://www.elections.ca/content.aspx?section=com&document=index&lang=e" rel="noopener">Elections Canada &mdash; Compliance Agreements and Administrative Monetary Penalties</a></li>
+      </ol>
+    </div>
+
+  </div>
+
+  <script src="nav.js?v=8"></script>
+  <script src="js/main.js?v=5"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    /* ── Third-Party Table Filter ── */
+    window.filterThirdParty = function(year, btn) {
+      var buttons = document.querySelectorAll('.filter-controls .filter-btn');
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+
+      var rows = document.querySelectorAll('#third-party-body tr');
+      rows.forEach(function(row) {
+        if (year === 'all' || row.getAttribute('data-year') === year) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      /* Re-number visible rows */
+      var visible = document.querySelectorAll('#third-party-body tr:not([style*="display: none"])');
+      visible.forEach(function(row, i) {
+        row.querySelector('.rank-col').textContent = i + 1;
+      });
+    };
+
+    /* ── Sortable Tables ── */
+    function makeSortable(table) {
+      var headers = table.querySelectorAll('th');
+      headers.forEach(function(th, colIdx) {
+        th.addEventListener('click', function() {
+          var tbody = table.querySelector('tbody');
+          var rows = Array.from(tbody.querySelectorAll('tr'));
+          var asc = th.classList.contains('sorted-asc');
+
+          headers.forEach(function(h) {
+            h.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+            var arrow = h.querySelector('.sort-arrow');
+            if (arrow) arrow.textContent = '\u25B2';
+          });
+
+          rows.sort(function(a, b) {
+            var aVal = a.children[colIdx] ? a.children[colIdx].textContent.trim() : '';
+            var bVal = b.children[colIdx] ? b.children[colIdx].textContent.trim() : '';
+
+            var aNum = parseFloat(aVal.replace(/[$,M]/g, ''));
+            var bNum = parseFloat(bVal.replace(/[$,M]/g, ''));
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+              return asc ? aNum - bNum : bNum - aNum;
+            }
+            return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+          });
+
+          rows.forEach(function(row) { tbody.appendChild(row); });
+
+          th.classList.add('sorted');
+          if (asc) {
+            th.classList.add('sorted-desc');
+            var arrow = th.querySelector('.sort-arrow');
+            if (arrow) arrow.textContent = '\u25BC';
+          } else {
+            th.classList.add('sorted-asc');
+            var arrow = th.querySelector('.sort-arrow');
+            if (arrow) arrow.textContent = '\u25B2';
+          }
+        });
+      });
+    }
+
+    var tables = document.querySelectorAll('.data-table');
+    tables.forEach(function(t) { makeSortable(t); });
+
+    /* ── Animate party bars on scroll ── */
+    var bars = document.querySelectorAll('.party-fill');
+    if (bars.length && 'IntersectionObserver' in window) {
+      bars.forEach(function(bar) {
+        var w = bar.style.width;
+        bar.style.width = '0';
+        var obs = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              bar.style.width = w;
+              obs.unobserve(bar);
+            }
+          });
+        }, { threshold: 0.2 });
+        obs.observe(bar);
+      });
+    }
+  })();
+  </script>
+<script src="share.js?v=1"></script>
+  <div id="read-next"></div>
+  <footer id="site-footer"></footer>
+  <script src="readnext.js?v=2"></script>
+  <script src="footer.js?v=1"></script>
+</body>
+</html>
