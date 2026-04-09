@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1.26M Government Contracts Scanned — 70,270 Anomalies Found | TENET5</title>
+<meta name="description" content="Deep analysis of 1,264,467 Canadian government procurement contracts. 70,270 anomalies detected including 57 vendor concentration flags and 70,213 amendment chains. Criminal Code implications mapped.">
+<meta property="og:title" content="1.26M Government Contracts Scanned — 70,270 Anomalies Found">
+<meta property="og:description" content="Deep analysis of 1.26M Canadian government contracts. 70,270 anomalies: vendor concentration patterns, amendment chains, name-variant shell games. Criminal Code s.121, s.380, s.418 mapped.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tenet-5.github.io/procurement-deep-dive.html">
+<meta property="og:site_name" content="TENET5 — Canadian Government Accountability">
+<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_CA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="1.26M Government Contracts Scanned — 70,270 Anomalies Found">
+<meta name="twitter:description" content="Algorithmic scan of every Canadian government contract on open.canada.ca. 70,270 anomalies. Vendor concentration. Amendment chains. Criminal Code mapped.">
+<meta name="twitter:image" content="https://tenet-5.github.io/img/og-card.png">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="keywords" content="Canadian procurement anomalies, government contracts Canada, vendor concentration, amendment chains, IBM Canada government, Groupe Signature, MDA Systems, sole source contracts, open.canada.ca, proactive disclosure, Criminal Code s.121, s.380, s.418, s.504 private prosecution, TENET5">
+<link rel="canonical" href="https://tenet-5.github.io/procurement-deep-dive.html">
+<meta name="theme-color" content="#1a1f36">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="style.css?v=5">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   PROCUREMENT DEEP DIVE — Inline Styles
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Layout ────────────────────────────────────────────────── */
+.pdd-wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+  color: var(--text-primary);
+}
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.pdd-hero {
+  text-align: center;
+  padding: 56px 0 40px;
+  border-bottom: 2px solid rgba(196,30,58,0.4);
+  margin-bottom: 48px;
+}
+.pdd-hero h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  color: var(--text-primary);
+  margin: 0 0 12px;
+  line-height: 1.15;
+}
+.pdd-hero .subtitle {
+  font-size: 0.88rem;
+  color: var(--text-tertiary);
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+.pdd-hero .gen-date {
+  font-size: 0.7rem;
+  color: var(--text-quaternary);
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Hero Stats Grid ──────────────────────────────────────── */
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin: 32px 0 0;
+}
+.hero-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px 16px;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.hero-stat:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+.hero-stat .val {
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+.hero-stat .lbl {
+  font-size: 0.67rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-top: 8px;
+}
+.hero-stat.s-total .val { color: var(--accent); }
+.hero-stat.s-anomalies .val { color: #ef4444; }
+.hero-stat.s-high .val { color: #f59e0b; }
+.hero-stat.s-vc .val { color: #3b82f6; }
+.hero-stat.s-amend .val { color: #a855f7; }
+
+/* ── Section Headings ─────────────────────────────────────── */
+.sec-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.55rem;
+  color: var(--text-primary);
+  margin: 56px 0 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-heading .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+.sec-desc {
+  font-size: 0.86rem;
+  color: var(--text-tertiary);
+  line-height: 1.75;
+  margin-bottom: 24px;
+  max-width: 820px;
+}
+
+/* ── Search / Filter Bar ──────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0 24px;
+  flex-wrap: wrap;
+}
+.filter-bar input,
+.filter-bar select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: border-color 0.2s;
+}
+.filter-bar input:focus,
+.filter-bar select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+.filter-bar input {
+  flex: 1;
+  min-width: 220px;
+}
+.filter-bar select {
+  min-width: 160px;
+}
+.filter-count {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 12px;
+}
+
+/* ── Data Tables ──────────────────────────────────────────── */
+.data-table-wrap {
+  overflow-x: auto;
+  margin: 16px 0 32px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.data-table th {
+  background: var(--bg-surface);
+  color: var(--text-tertiary);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.data-table tbody tr:hover {
+  background: var(--bg-card-h);
+}
+.data-table .mono {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.data-table .vendor-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  max-width: 280px;
+}
+.data-table .dept {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Severity Badges ──────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.badge-high {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+}
+.badge-medium {
+  background: rgba(251,191,36,0.12);
+  color: #fbbf24;
+}
+.badge-critical {
+  background: rgba(239,68,68,0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.badge-vc {
+  background: rgba(59,130,246,0.12);
+  color: #3b82f6;
+}
+.badge-amend {
+  background: rgba(168,85,247,0.12);
+  color: #a855f7;
+}
+
+/* ── Alert Cards (name variants, etc.) ────────────────────── */
+.alert-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+.alert-card h4 {
+  color: var(--text-primary);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+.alert-card p {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.alert-card .alert-detail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.alert-card .alert-detail strong {
+  color: var(--accent-bright);
+}
+
+/* ── Department Risk Cards ────────────────────────────────── */
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.dept-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+.dept-card:hover {
+  border-color: var(--accent);
+}
+.dept-card h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.dept-card .dept-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.dept-card .dept-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dept-card .dept-stat:last-child { border-bottom: none; }
+.dept-card .dept-stat .ds-val {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ── Criminal Code Section ────────────────────────────────── */
+.cc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.cc-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  border-top: 3px solid var(--accent);
+}
+.cc-box h4 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.cc-box .cc-section {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.cc-box p {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.cc-box .cc-applies {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+}
+.cc-box .cc-applies strong {
+  color: var(--text-primary);
+}
+.cc-box .cc-penalty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #ef4444;
+  margin-top: 8px;
+}
+
+/* ── Methodology ──────────────────────────────────────────── */
+.method-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+  margin: 24px 0;
+}
+.method-box h4 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.method-box p, .method-box li {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+.method-box code {
+  background: var(--bg-surface);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82em;
+  color: var(--text-primary);
+}
+.method-box ul {
+  padding-left: 1.5em;
+  margin: 10px 0;
+}
+.method-box li {
+  margin-bottom: 6px;
+}
+
+/* ── Loading / Error ──────────────────────────────────────── */
+.pdd-loading {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+}
+.pdd-loading .spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.pdd-error {
+  display: none;
+  text-align: center;
+  padding: 60px 20px;
+  color: #ef4444;
+  font-size: 0.9rem;
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px;
+  margin: 40px 0;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .pdd-hero h1 { font-size: 1.8rem; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hero-stat { padding: 16px 12px; }
+  .hero-stat .val { font-size: 1.6rem; }
+  .data-table { font-size: 0.76rem; }
+  .data-table th, .data-table td { padding: 8px 10px; }
+  .filter-bar { flex-direction: column; }
+  .filter-bar input, .filter-bar select { min-width: 100%; }
+  .cc-grid { grid-template-columns: 1fr; }
+  .dept-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .hero-stats { grid-template-columns: 1fr; }
+  .pdd-wrap { padding: 0 14px 60px; }
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<nav id="site-nav"></nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     A. HERO
+     ═══════════════════════════════════════════════════════════ -->
+<header class="pdd-hero" id="main">
+  <h1>1,264,467 Government Contracts Scanned<br>70,270 Anomalies Found</h1>
+  <p class="subtitle">Algorithmic analysis of every proactive disclosure contract published by the Government of Canada on open.canada.ca. Two anomaly types detected at scale: vendor concentration and amendment chains. Every number is computed from the government's own data.</p>
+  <div class="gen-date" id="gen-date"></div>
+
+  <div class="hero-stats">
+    <div class="hero-stat s-total">
+      <div class="val" id="stat-total">--</div>
+      <div class="lbl">Contracts Scanned</div>
+    </div>
+    <div class="hero-stat s-anomalies">
+      <div class="val" id="stat-anomalies">--</div>
+      <div class="lbl">Anomalies Detected</div>
+    </div>
+    <div class="hero-stat s-high">
+      <div class="val" id="stat-high">--</div>
+      <div class="lbl">High Severity</div>
+    </div>
+    <div class="hero-stat s-vc">
+      <div class="val" id="stat-vc">--</div>
+      <div class="lbl">Vendor Concentration</div>
+    </div>
+    <div class="hero-stat s-amend">
+      <div class="val" id="stat-amend">--</div>
+      <div class="lbl">Amendment Chains</div>
+    </div>
+  </div>
+</header>
+
+<!-- SHARE BAR -->
+<div id="share-bar" class="share-bar">
+  <span class="share-bar-label">SHARE THIS INVESTIGATION</span>
+  <div class="share-bar-buttons">
+    <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
+    <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
+    <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
+    <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
+    <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">Copy Link</button>
+  </div>
+</div>
+
+<!-- LOADING STATE -->
+<div class="pdd-loading" id="pdd-loading">
+  <div class="spinner"></div>
+  <div>Loading 1.26M contract analysis...</div>
+</div>
+<div class="pdd-error" id="pdd-error"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT (hidden until data loads)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="pdd-wrap" id="pdd-content" style="display:none;">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       B. VENDOR CONCENTRATION ANALYSIS
+       ═══════════════════════════════════════════════════════════ -->
+  <h2 class="sec-heading"><span class="num">01 &mdash; VENDOR CONCENTRATION</span>When One Vendor Captures a Department</h2>
+  <p class="sec-desc">Vendor concentration occurs when a single company receives a disproportionate share of a department's total contract spending. This creates dependency, reduces competition, and raises the cost of switching. The threshold for flagging is 15% of a department's total spend going to one vendor. Of the 57 concentration flags, every one exceeds that threshold.</p>
+
+  <div class="filter-bar">
+    <input type="text" id="vc-search" placeholder="Search vendor names...">
+    <select id="vc-severity">
+      <option value="">All Severities</option>
+      <option value="HIGH">High</option>
+      <option value="MEDIUM">Medium</option>
+    </select>
+    <select id="vc-sort">
+      <option value="concentration">Sort: Concentration %</option>
+      <option value="spend">Sort: Dollar Amount</option>
+      <option value="vendor">Sort: Vendor Name</option>
+    </select>
+  </div>
+  <div class="filter-count" id="vc-count"></div>
+  <div class="data-table-wrap">
+    <table class="data-table" id="vc-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Vendor</th>
+          <th>Department</th>
+          <th>Vendor Spend</th>
+          <th>Dept. Total</th>
+          <th>Concentration</th>
+          <th>Severity</th>
+        </tr>
+      </thead>
+      <tbody id="vc-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Name-Variant Alerts -->
+  <div class="alert-card" id="alert-groupe">
+    <h4>Name-Variant Alert: Groupe Signature sur le Saint-Laurent</h4>
+    <p>This entity appears under three distinct name variants in the proactive disclosure data, all within the same department (Infrastructure Canada / <code>infc</code>). The combined concentration of these three entries at Infrastructure Canada is significant. This pattern may indicate a single economic entity receiving contracts under multiple registered names, which fragments visibility and defeats concentration analysis unless the variants are linked.</p>
+    <div class="alert-detail" id="alert-groupe-detail"></div>
+  </div>
+
+  <div class="alert-card" id="alert-mda">
+    <h4>Name-Variant Alert: MDA / MacDonald Dettwiler</h4>
+    <p>MDA appears under at least two name variants at the Canadian Space Agency (<code>csa-asc</code>): "MDA SYSTEMS LTD." and "MACDONALD, DETTWILER &amp; ASSOCIATES LTD." (plus a third corporate variant). Combined, these entries represent a dominant share of CSA's total contract spending. The fragmentation across corporate names reduces the apparent concentration of any single entry.</p>
+    <div class="alert-detail" id="alert-mda-detail"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       C. AMENDMENT CHAIN ANALYSIS
+       ═══════════════════════════════════════════════════════════ -->
+  <h2 class="sec-heading"><span class="num">02 &mdash; AMENDMENT CHAINS</span>Contracts That Never Stop Growing</h2>
+  <p class="sec-desc">An amendment chain occurs when a contract is modified repeatedly after award. Each amendment extends the scope, timeline, or value without re-competing the work. A single amendment is normal. Ten is unusual. Forty or more is a red flag for institutional capture: the vendor becomes entrenched and competition is effectively eliminated. Of 70,213 amendment chain flags, 38,779 are high severity.</p>
+
+  <div class="filter-bar">
+    <input type="text" id="ac-search" placeholder="Search vendor or contract number...">
+    <select id="ac-dept-filter">
+      <option value="">All Departments</option>
+    </select>
+    <select id="ac-sort">
+      <option value="amendments">Sort: Amendment Count</option>
+      <option value="value">Sort: Total Value</option>
+      <option value="vendor">Sort: Vendor Name</option>
+    </select>
+  </div>
+  <div class="filter-count" id="ac-count"></div>
+  <div class="data-table-wrap">
+    <table class="data-table" id="ac-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Vendor</th>
+          <th>Department</th>
+          <th>Contract #</th>
+          <th>Amendments</th>
+          <th>Total Value</th>
+          <th>Severity</th>
+        </tr>
+      </thead>
+      <tbody id="ac-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Department breakdown for amendments -->
+  <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--text-primary);margin:32px 0 8px;">Amendment Chains by Department</h3>
+  <p class="sec-desc">Which departments have the most amendment chains, indicating systemic over-reliance on contract modifications rather than competitive re-procurement.</p>
+  <div class="data-table-wrap">
+    <table class="data-table" id="ac-dept-table">
+      <thead>
+        <tr>
+          <th>Department</th>
+          <th>Amendment Chains</th>
+          <th>High Severity</th>
+          <th>Total Value</th>
+          <th>Avg. Amendments</th>
+        </tr>
+      </thead>
+      <tbody id="ac-dept-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       D. DEPARTMENT RISK MAP
+       ═══════════════════════════════════════════════════════════ -->
+  <h2 class="sec-heading"><span class="num">03 &mdash; DEPARTMENT RISK MAP</span>Highest Anomaly Concentrations by Department</h2>
+  <p class="sec-desc">Departments ranked by total anomaly count across both vendor concentration and amendment chain flags. Departments with anomalies in both categories present compounded risk: vendors that dominate spending and also hold contracts that are repeatedly amended.</p>
+
+  <div class="dept-grid" id="dept-grid"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       E. CRIMINAL CODE IMPLICATIONS
+       ═══════════════════════════════════════════════════════════ -->
+  <h2 class="sec-heading"><span class="num">04 &mdash; CRIMINAL CODE IMPLICATIONS</span>Applicable Offences</h2>
+  <p class="sec-desc">The patterns identified in this analysis may engage several provisions of the Criminal Code of Canada. This is not a legal opinion. These are the statutory provisions that describe the conduct patterns observed in the data.</p>
+
+  <div class="cc-grid">
+    <div class="cc-box">
+      <div class="cc-section">CRIMINAL CODE s.121</div>
+      <h4>Frauds on the Government</h4>
+      <p>Every one who directly or indirectly gives, offers, or agrees to give a benefit to a government official, or who, being a government official, demands or accepts a benefit, in connection with the transaction of business with the government. Vendor concentration patterns where a single entity captures 40%+ of a department's spending, combined with name-variant fragmentation, describe the kind of institutional relationship this section targets.</p>
+      <div class="cc-applies"><strong>Applies to:</strong> Vendor concentration flags where a single economic entity operates under multiple names to capture a disproportionate share of departmental spending.</div>
+      <div class="cc-penalty">Maximum penalty: 5 years imprisonment</div>
+    </div>
+
+    <div class="cc-box">
+      <div class="cc-section">CRIMINAL CODE s.380</div>
+      <h4>Fraud</h4>
+      <p>Every one who, by deceit, falsehood, or other fraudulent means, defrauds the public or any person of any property, money, or valuable security. Operating under multiple name variants to fragment visibility and avoid concentration detection constitutes a form of misrepresentation in the procurement context. The three Groupe Signature variants at Infrastructure Canada and the MDA variants at CSA are patterns that match this description.</p>
+      <div class="cc-applies"><strong>Applies to:</strong> Name-variant patterns where the same economic entity appears under different registered names to circumvent single-vendor visibility.</div>
+      <div class="cc-penalty">Maximum penalty: 14 years imprisonment (over $1M)</div>
+    </div>
+
+    <div class="cc-box">
+      <div class="cc-section">CRIMINAL CODE s.418</div>
+      <h4>Selling Defective Stores to Government</h4>
+      <p>Every one who knowingly sells or delivers defective stores to Her Majesty or commits fraud in connection with government contracts. Amendment chains where contracts are amended 40+ times transform the original scope beyond recognition. The original competitive basis for the award no longer reflects the actual work being performed, which constitutes a form of constructive fraud on the procurement process.</p>
+      <div class="cc-applies"><strong>Applies to:</strong> Extreme amendment chains (40+ amendments) where the original contract scope has been fundamentally altered without re-competition.</div>
+      <div class="cc-penalty">Maximum penalty: 14 years imprisonment</div>
+    </div>
+
+    <div class="cc-box">
+      <div class="cc-section">CRIMINAL CODE s.504</div>
+      <h4>Private Prosecution Pathway</h4>
+      <p>Any person who, on reasonable grounds, believes that a person has committed an indictable offence may lay an information before a justice of the peace. This is the mechanism by which the patterns documented on this page can be referred to the courts. The data comes from the government's own proactive disclosure records. The anomalies are algorithmically derived and independently verifiable.</p>
+      <div class="cc-applies"><strong>Pathway:</strong> Gather evidence from open.canada.ca proactive disclosure &rarr; Retain counsel &rarr; Lay information before JP &rarr; Pre-enquete hearing &rarr; Crown may intervene under s.579.</div>
+      <div class="cc-penalty">Available for all indictable offences listed above</div>
+    </div>
+  </div>
+
+  <p style="font-size:0.82rem;color:var(--text-tertiary);line-height:1.7;margin-top:8px;">See <a href="criminal-code-analysis.html" style="color:var(--accent);">Criminal Code Analysis</a> for the full 50-finding analysis with detailed evidence chains and source citations for each finding.</p>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       F. METHODOLOGY
+       ═══════════════════════════════════════════════════════════ -->
+  <h2 class="sec-heading"><span class="num">05 &mdash; METHODOLOGY</span>Data Sources &amp; Detection Process</h2>
+
+  <div class="method-box">
+    <h4>Data Source</h4>
+    <p>All contract data is sourced from the Government of Canada's proactive disclosure CSV files published at <a href="https://open.canada.ca/data/en/dataset/d8f85d91-7dec-4fd1-8f59-35571db28571" target="_blank" rel="noopener" style="color:var(--accent);">open.canada.ca</a>. These files are published quarterly under the Access to Information Act and contain every federal contract over $10,000. No proprietary data sources are used. Every anomaly on this page can be independently verified by downloading the same CSV files.</p>
+  </div>
+
+  <div class="method-box">
+    <h4>Detection Algorithms</h4>
+    <ul>
+      <li><strong>Vendor Concentration:</strong> For each department, total contract values are aggregated by vendor name. Any vendor receiving more than 15% of a department's total spend is flagged. High severity is assigned at 30%+ concentration. This is a standard procurement audit technique used by auditors general worldwide.</li>
+      <li><strong>Amendment Chain:</strong> Contracts are grouped by contract number. Any contract with more than 5 amendments is flagged. High severity is assigned at 20+ amendments. The amendment count reflects the number of times the contract was modified after initial award. Each amendment represents a decision to extend scope or value without re-competing the work.</li>
+    </ul>
+  </div>
+
+  <div class="method-box">
+    <h4>Name-Variant Detection</h4>
+    <p>Vendor names in the proactive disclosure data are not normalized. The same economic entity may appear under different legal names (e.g., trade name vs. corporate name vs. abbreviated name). This analysis flags cases where multiple high-concentration entries share obvious name similarity within the same department. Definitive corporate linkage requires SEDAR+ filings or Corporations Canada records, which are publicly available but not incorporated into this automated scan.</p>
+  </div>
+
+  <div class="method-box">
+    <h4>Limitations &amp; Disclaimer</h4>
+    <p>This is an algorithmic anomaly scan, not an investigation. Not every anomaly represents wrongdoing. Vendor concentration may be legitimate when the vendor is the sole qualified provider. Amendment chains may reflect genuinely evolving requirements. The purpose of this analysis is to identify patterns that warrant human review, not to make findings of fact. All data is from public government records. This analysis does not constitute legal advice.</p>
+  </div>
+
+</div><!-- /pdd-wrap -->
+
+<footer id="site-footer"></footer>
+
+<script src="nav.js?v=7"></script>
+<script src="footer.js?v=1"></script>
+<script src="share.js?v=1"></script>
+<script>
+(function() {
+  'use strict';
+
+  var DATA = null;
+  var vcAnomalies = [];
+  var acAnomalies = [];
+
+  // ── HELPERS ──────────────────────────────────────────────
+  function esc(s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  function fmtDollar(n) {
+    if (n == null || isNaN(n)) return '$0';
+    var abs = Math.abs(n);
+    if (abs >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+    if (abs >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
+    if (abs >= 1e3) return '$' + Math.round(n).toLocaleString('en-CA');
+    return '$' + n.toFixed(2);
+  }
+
+  function fmtDollarFull(n) {
+    if (n == null || isNaN(n)) return '$0';
+    return '$' + Math.round(n).toLocaleString('en-CA');
+  }
+
+  function fmtNum(n) {
+    if (n == null) return '0';
+    return Number(n).toLocaleString('en-CA');
+  }
+
+  function deptLabel(code) {
+    var labels = {
+      'ssc-spc': 'Shared Services Canada',
+      'dfo-mpo': 'Fisheries & Oceans',
+      'csa-asc': 'Canadian Space Agency',
+      'esdc-edsc': 'Employment & Social Dev.',
+      'infc': 'Infrastructure Canada',
+      'cbsa-asfc': 'Border Services Agency',
+      'aafc-aac': 'Agriculture & Agri-Food',
+      'tbs-sct': 'Treasury Board',
+      'vac-acc': 'Veterans Affairs',
+      'hc-sc': 'Health Canada',
+      'statcan': 'Statistics Canada',
+      'elections': 'Elections Canada',
+      'cic': 'Immigration (IRCC)',
+      'isc-sac': 'Indigenous Services',
+      'pptc': 'Passport Canada',
+      'fin': 'Finance Canada',
+      'cnsc-ccsn': 'Nuclear Safety Comm.',
+      'ps-sp': 'Public Safety',
+      'csps-efpc': 'School of Public Service',
+      'cas-satj': 'Courts Administration',
+      'iic-iac': 'Invest in Canada',
+      'atssc-scdata': 'Admin. Tribunals',
+      'opc-cpvp': 'Privacy Commissioner',
+      'nbc-ccbn': 'National Battlefields',
+      'feddevontario': 'FedDev Ontario',
+      'osgg-bsgg': 'Governor General',
+      'ocl-cal': 'Library of Parliament',
+      'oci-bec': 'Corr. Investigator',
+      'casdo-ocena': 'Accessibility Standards',
+      'ocsec-bccst': 'Clerk of Privy Council',
+      'snsicp-scpssnr': 'Nat. Security Intel.',
+      'nsira-ossnr': 'NSIRA',
+      'psic-ispc': 'Public Sector Integrity',
+      'sirc-csars': 'SIRC',
+      'erc-cee': 'Energy Regulator',
+      'oto-boc': 'Taxpayers Ombudsman',
+      'oic-ci': 'Info. Commissioner',
+      'osfi-bsif': 'Financial Institutions',
+      'tsb-bst': 'Transportation Safety',
+      'fcac-acfc': 'Financial Consumer Agency',
+      'cwa-aec': 'Canadian Water Agency',
+      'pacifican': 'PacifiCan',
+      'wd-deo': 'Western Economic Div.'
+    };
+    return labels[code] || code.toUpperCase();
+  }
+
+  // ── FETCH DATA ──────────────────────────────────────────
+  fetch('data/contracts/anomaly_scan_20260409_035111.json')
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(data) {
+      DATA = data;
+      vcAnomalies = data.anomalies.filter(function(a) { return a.type === 'VENDOR_CONCENTRATION'; });
+      acAnomalies = data.anomalies.filter(function(a) { return a.type === 'AMENDMENT_CHAIN'; });
+
+      document.getElementById('pdd-loading').style.display = 'none';
+      document.getElementById('pdd-content').style.display = 'block';
+      render();
+    })
+    .catch(function(err) {
+      document.getElementById('pdd-loading').style.display = 'none';
+      var errEl = document.getElementById('pdd-error');
+      errEl.style.display = 'block';
+      errEl.textContent = 'Failed to load contract data: ' + err.message + '. The JSON file may still be generating.';
+    });
+
+  function render() {
+    renderGenDate();
+    renderHeroStats();
+    renderVCTable(vcAnomalies);
+    renderAlerts();
+    renderACTable(acAnomalies.slice(0, 200));
+    populateACDeptFilter();
+    renderACDeptBreakdown();
+    renderDeptRiskMap();
+    bindFilters();
+  }
+
+  // ── A. HERO STATS ──────────────────────────────────────
+  function renderGenDate() {
+    if (DATA.scan_timestamp) {
+      var d = new Date(DATA.scan_timestamp);
+      document.getElementById('gen-date').textContent = 'Scan completed ' + d.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+    }
+  }
+
+  function renderHeroStats() {
+    document.getElementById('stat-total').textContent = fmtNum(DATA.total_contracts_scanned);
+    document.getElementById('stat-anomalies').textContent = fmtNum(DATA.total_anomalies);
+    document.getElementById('stat-high').textContent = fmtNum(DATA.high_severity_count);
+    document.getElementById('stat-vc').textContent = fmtNum(DATA.anomalies_by_type.VENDOR_CONCENTRATION || 0);
+    document.getElementById('stat-amend').textContent = fmtNum(DATA.anomalies_by_type.AMENDMENT_CHAIN || 0);
+  }
+
+  // ── B. VENDOR CONCENTRATION TABLE ─────────────────────
+  function renderVCTable(items) {
+    var tbody = document.getElementById('vc-tbody');
+    document.getElementById('vc-count').textContent = 'Showing ' + items.length + ' of ' + vcAnomalies.length + ' vendor concentration flags';
+
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-quaternary);padding:30px;">No matches found.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = items.map(function(a, i) {
+      var sevClass = a.severity === 'HIGH' ? 'badge-high' : 'badge-medium';
+      return '<tr>' +
+        '<td class="mono">' + (i + 1) + '</td>' +
+        '<td class="vendor-name">' + esc(a.vendor) + '</td>' +
+        '<td class="dept">' + esc(deptLabel(a.department)) + '<br><span style="opacity:0.6;">' + esc(a.department) + '</span></td>' +
+        '<td class="mono">' + fmtDollar(a.vendor_spend) + '</td>' +
+        '<td class="mono" style="color:var(--text-tertiary);">' + fmtDollar(a.department_total) + '</td>' +
+        '<td class="mono" style="color:' + (a.concentration_pct >= 30 ? '#ef4444' : '#fbbf24') + ';font-weight:700;">' + a.concentration_pct.toFixed(1) + '%</td>' +
+        '<td><span class="badge ' + sevClass + '">' + esc(a.severity) + '</span></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ── Name-Variant Alerts ────────────────────────────────
+  function renderAlerts() {
+    // Groupe Signature
+    var gs = vcAnomalies.filter(function(a) { return a.vendor.toLowerCase().indexOf('groupe signature') !== -1; });
+    if (gs.length > 0) {
+      var totalSpend = gs.reduce(function(s, a) { return s + a.vendor_spend; }, 0);
+      var deptTotal = gs[0].department_total;
+      var combinedPct = (totalSpend / deptTotal * 100).toFixed(1);
+      var detail = '<strong>Variants found:</strong><br>';
+      gs.forEach(function(a) {
+        detail += '&bull; "' + esc(a.vendor) + '" &mdash; ' + fmtDollarFull(a.vendor_spend) + ' (' + a.concentration_pct.toFixed(1) + '%)<br>';
+      });
+      detail += '<br><strong>Combined spend:</strong> ' + fmtDollarFull(totalSpend) + ' of ' + fmtDollarFull(deptTotal) + ' = <strong style="color:#ef4444;">' + combinedPct + '% of Infrastructure Canada</strong>';
+      document.getElementById('alert-groupe-detail').innerHTML = detail;
+    }
+
+    // MDA / MacDonald Dettwiler
+    var mda = vcAnomalies.filter(function(a) {
+      var v = a.vendor.toLowerCase();
+      return (v.indexOf('mda') !== -1 || v.indexOf('macdonald') !== -1) && a.department === 'csa-asc';
+    });
+    if (mda.length > 0) {
+      var mdaSpend = mda.reduce(function(s, a) { return s + a.vendor_spend; }, 0);
+      var csaTotal = mda[0].department_total;
+      var mdaPct = (mdaSpend / csaTotal * 100).toFixed(1);
+      var mdaDetail = '<strong>Variants found:</strong><br>';
+      mda.forEach(function(a) {
+        mdaDetail += '&bull; "' + esc(a.vendor) + '" &mdash; ' + fmtDollarFull(a.vendor_spend) + ' (' + a.concentration_pct.toFixed(1) + '%)<br>';
+      });
+      mdaDetail += '<br><strong>Combined spend:</strong> ' + fmtDollarFull(mdaSpend) + ' of ' + fmtDollarFull(csaTotal) + ' = <strong style="color:#ef4444;">' + mdaPct + '% of Canadian Space Agency</strong>';
+      document.getElementById('alert-mda-detail').innerHTML = mdaDetail;
+    }
+  }
+
+  // ── C. AMENDMENT CHAIN TABLE ──────────────────────────
+  function renderACTable(items) {
+    var tbody = document.getElementById('ac-tbody');
+    var total = acAnomalies.length;
+    var showing = Math.min(items.length, 200);
+    document.getElementById('ac-count').textContent = 'Showing top ' + showing + ' of ' + fmtNum(total) + ' amendment chain flags (sorted by selected criteria)';
+
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-quaternary);padding:30px;">No matches found.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = items.slice(0, 200).map(function(a, i) {
+      var sevClass = a.severity === 'HIGH' ? 'badge-high' : 'badge-medium';
+      return '<tr>' +
+        '<td class="mono">' + (i + 1) + '</td>' +
+        '<td class="vendor-name">' + esc(a.vendor) + '</td>' +
+        '<td class="dept">' + esc(deptLabel(a.department)) + '<br><span style="opacity:0.6;">' + esc(a.department) + '</span></td>' +
+        '<td class="mono" style="font-size:0.74rem;">' + esc(a.contract_number || '?') + '</td>' +
+        '<td class="mono" style="color:' + (a.amendment_count >= 40 ? '#ef4444' : a.amendment_count >= 20 ? '#fbbf24' : 'var(--text-primary)') + ';font-weight:700;">' + a.amendment_count + '</td>' +
+        '<td class="mono">' + fmtDollar(a.total_value) + '</td>' +
+        '<td><span class="badge ' + sevClass + '">' + esc(a.severity) + '</span></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function populateACDeptFilter() {
+    var depts = {};
+    acAnomalies.forEach(function(a) { depts[a.department] = (depts[a.department] || 0) + 1; });
+    var sorted = Object.keys(depts).sort(function(a, b) { return depts[b] - depts[a]; });
+    var select = document.getElementById('ac-dept-filter');
+    sorted.slice(0, 40).forEach(function(d) {
+      var opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = deptLabel(d) + ' (' + fmtNum(depts[d]) + ')';
+      select.appendChild(opt);
+    });
+  }
+
+  // ── Amendment Department Breakdown ─────────────────────
+  function renderACDeptBreakdown() {
+    var depts = {};
+    acAnomalies.forEach(function(a) {
+      if (!depts[a.department]) {
+        depts[a.department] = { count: 0, high: 0, totalValue: 0, totalAmend: 0 };
+      }
+      depts[a.department].count++;
+      if (a.severity === 'HIGH') depts[a.department].high++;
+      depts[a.department].totalValue += (a.total_value || 0);
+      depts[a.department].totalAmend += (a.amendment_count || 0);
+    });
+
+    var sorted = Object.keys(depts).sort(function(a, b) { return depts[b].count - depts[a].count; });
+    var tbody = document.getElementById('ac-dept-tbody');
+    tbody.innerHTML = sorted.slice(0, 30).map(function(d) {
+      var dd = depts[d];
+      var avg = dd.count > 0 ? (dd.totalAmend / dd.count).toFixed(1) : '0';
+      return '<tr>' +
+        '<td class="vendor-name">' + esc(deptLabel(d)) + '<br><span class="dept">' + esc(d) + '</span></td>' +
+        '<td class="mono">' + fmtNum(dd.count) + '</td>' +
+        '<td class="mono" style="color:#ef4444;">' + fmtNum(dd.high) + '</td>' +
+        '<td class="mono">' + fmtDollar(dd.totalValue) + '</td>' +
+        '<td class="mono">' + avg + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ── D. DEPARTMENT RISK MAP ────────────────────────────
+  function renderDeptRiskMap() {
+    var depts = {};
+    DATA.anomalies.forEach(function(a) {
+      if (!depts[a.department]) {
+        depts[a.department] = { total: 0, vc: 0, ac: 0, high: 0, spend: 0 };
+      }
+      depts[a.department].total++;
+      if (a.type === 'VENDOR_CONCENTRATION') {
+        depts[a.department].vc++;
+        depts[a.department].spend += (a.vendor_spend || 0);
+      }
+      if (a.type === 'AMENDMENT_CHAIN') depts[a.department].ac++;
+      if (a.severity === 'HIGH') depts[a.department].high++;
+    });
+
+    var sorted = Object.keys(depts).sort(function(a, b) { return depts[b].total - depts[a].total; });
+    var grid = document.getElementById('dept-grid');
+
+    grid.innerHTML = sorted.slice(0, 12).map(function(d) {
+      var dd = depts[d];
+      return '<div class="dept-card">' +
+        '<h4>' + esc(d) + '</h4>' +
+        '<div class="dept-name">' + esc(deptLabel(d)) + '</div>' +
+        '<div class="dept-stat"><span>Total Anomalies</span><span class="ds-val" style="color:var(--accent);">' + fmtNum(dd.total) + '</span></div>' +
+        '<div class="dept-stat"><span>High Severity</span><span class="ds-val" style="color:#ef4444;">' + fmtNum(dd.high) + '</span></div>' +
+        '<div class="dept-stat"><span>Vendor Concentration</span><span class="ds-val" style="color:#3b82f6;">' + dd.vc + '</span></div>' +
+        '<div class="dept-stat"><span>Amendment Chains</span><span class="ds-val" style="color:#a855f7;">' + fmtNum(dd.ac) + '</span></div>' +
+        (dd.spend > 0 ? '<div class="dept-stat"><span>Concentrated Spend</span><span class="ds-val">' + fmtDollar(dd.spend) + '</span></div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  // ── FILTER BINDING ────────────────────────────────────
+  function bindFilters() {
+    // Vendor Concentration filters
+    var vcSearch = document.getElementById('vc-search');
+    var vcSev = document.getElementById('vc-severity');
+    var vcSort = document.getElementById('vc-sort');
+    var vcTimeout;
+
+    function applyVCFilters() {
+      var q = vcSearch.value.toLowerCase();
+      var sev = vcSev.value;
+      var sort = vcSort.value;
+
+      var filtered = vcAnomalies.filter(function(a) {
+        if (sev && a.severity !== sev) return false;
+        if (q && a.vendor.toLowerCase().indexOf(q) === -1 && deptLabel(a.department).toLowerCase().indexOf(q) === -1 && a.department.toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+
+      if (sort === 'spend') {
+        filtered.sort(function(a, b) { return (b.vendor_spend || 0) - (a.vendor_spend || 0); });
+      } else if (sort === 'vendor') {
+        filtered.sort(function(a, b) { return a.vendor.localeCompare(b.vendor); });
+      } else {
+        filtered.sort(function(a, b) { return (b.concentration_pct || 0) - (a.concentration_pct || 0); });
+      }
+
+      renderVCTable(filtered);
+    }
+
+    vcSearch.addEventListener('input', function() { clearTimeout(vcTimeout); vcTimeout = setTimeout(applyVCFilters, 200); });
+    vcSev.addEventListener('change', applyVCFilters);
+    vcSort.addEventListener('change', applyVCFilters);
+
+    // Amendment Chain filters
+    var acSearch = document.getElementById('ac-search');
+    var acDept = document.getElementById('ac-dept-filter');
+    var acSort = document.getElementById('ac-sort');
+    var acTimeout;
+
+    function applyACFilters() {
+      var q = acSearch.value.toLowerCase();
+      var dept = acDept.value;
+      var sort = acSort.value;
+
+      var filtered = acAnomalies.filter(function(a) {
+        if (dept && a.department !== dept) return false;
+        if (q && a.vendor.toLowerCase().indexOf(q) === -1 && (a.contract_number || '').toLowerCase().indexOf(q) === -1 && a.department.toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+
+      if (sort === 'value') {
+        filtered.sort(function(a, b) { return (b.total_value || 0) - (a.total_value || 0); });
+      } else if (sort === 'vendor') {
+        filtered.sort(function(a, b) { return a.vendor.localeCompare(b.vendor); });
+      } else {
+        filtered.sort(function(a, b) { return (b.amendment_count || 0) - (a.amendment_count || 0); });
+      }
+
+      renderACTable(filtered);
+    }
+
+    acSearch.addEventListener('input', function() { clearTimeout(acTimeout); acTimeout = setTimeout(applyACFilters, 200); });
+    acDept.addEventListener('change', applyACFilters);
+    acSort.addEventListener('change', applyACFilters);
+  }
+
+})();
+</script>
+<script src="js/ai-panel.js"></script>
+</body>
+</html>
