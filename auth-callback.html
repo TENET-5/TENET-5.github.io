@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signing you in… — TENET5</title>
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    .auth-callback-wrap {
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; flex-direction: column; gap: 16px;
+    }
+    .auth-spinner {
+      width: 40px; height: 40px; border: 3px solid #e5e7eb;
+      border-top-color: var(--accent, #c41e3a);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .auth-msg { color: var(--text-secondary, #3d4355); font-size: 15px; }
+  </style>
+</head>
+<body>
+  <div class="auth-callback-wrap">
+    <div class="auth-spinner"></div>
+    <p class="auth-msg" id="auth-msg">Completing sign-in…</p>
+  </div>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    (async () => {
+      const SUPABASE_URL  = window.SUPABASE_URL  || 'https://YOUR_PROJECT.supabase.co';
+      const SUPABASE_ANON = window.SUPABASE_ANON || 'YOUR_ANON_KEY';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+      const msg = document.getElementById('auth-msg');
+      try {
+        const { data, error } = await sb.auth.exchangeCodeForSession(window.location.href);
+        if (error) throw error;
+        msg.textContent = `Welcome, ${data.user?.user_metadata?.full_name || 'friend'}! Redirecting…`;
+        setTimeout(() => {
+          const returnTo = sessionStorage.getItem('t5-auth-return') || '/';
+          sessionStorage.removeItem('t5-auth-return');
+          window.location.href = returnTo;
+        }, 1200);
+      } catch(e) {
+        msg.textContent = 'Sign-in failed: ' + e.message + '. Redirecting to home…';
+        setTimeout(() => window.location.href = '/', 2500);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Municipal Accountability — Belleville & Quinte West | TENET5</title>
+  <meta name="description" content="Municipal accountability investigation for Belleville, Ontario and Quinte West, Ontario. Council, budgets, sunshine list, court records. All from public data.">
+  <meta property="og:title" content="Municipal Accountability — Belleville & Quinte West">
+  <meta property="og:description" content="Local government accountability investigation. Council records, $100K+ salaries, court cases, and budget analysis for Ontario municipalities.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/municipal-accountability.html">
+  <meta property="og:site_name" content="TENET5 — Canadian Government Accountability">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    .muni-wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    .muni-header { text-align:center; padding:40px 0 20px; border-bottom:2px solid rgba(196,30,58,0.3); margin-bottom:24px; }
+    .muni-header h1 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--text-primary); margin-bottom:8px; }
+    .muni-header .subtitle { font-size:0.85rem; color:var(--text-tertiary); max-width:600px; margin:0 auto; }
+
+    .muni-tabs { display:flex; gap:8px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .muni-tab { background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:8px 20px; font-size:0.82rem; color:var(--text-tertiary); cursor:pointer; font-family:inherit; transition:all 0.2s; }
+    .muni-tab:hover { border-color:rgba(196,30,58,0.4); color:var(--text-primary); }
+    .muni-tab.active { background:rgba(196,30,58,0.12); border-color:rgba(196,30,58,0.5); color:var(--accent); font-weight:600; }
+
+    .muni-section { background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:24px; margin-bottom:24px; }
+    .muni-section h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--text-primary); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid rgba(196,30,58,0.15); }
+
+    .council-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+    .council-card { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px; transition:border-color 0.2s; }
+    .council-card:hover { border-color:rgba(196,30,58,0.3); }
+    .council-name { font-weight:700; font-size:0.9rem; color:var(--text-primary); }
+    .council-role { font-size:0.72rem; color:var(--accent); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin:2px 0; }
+    .council-ward { font-size:0.72rem; color:var(--text-tertiary); }
+    .council-notes { font-size:0.72rem; color:var(--text-tertiary); margin-top:6px; font-style:italic; }
+
+    .sunshine-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+    .sunshine-table th { text-align:left; padding:8px 12px; background:rgba(196,30,58,0.06); color:var(--text-tertiary); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); cursor:pointer; }
+    .sunshine-table th:hover { color:var(--accent); }
+    .sunshine-table td { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.03); color:var(--text-primary); }
+    .sunshine-table tr:hover td { background:rgba(196,30,58,0.04); }
+    .salary-amount { font-weight:700; color:var(--accent); font-family:'JetBrains Mono',monospace; }
+
+    .case-card { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:16px; margin-bottom:12px; }
+    .case-title { font-weight:700; font-size:0.85rem; color:var(--text-primary); margin-bottom:4px; }
+    .case-court { font-size:0.68rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; }
+    .case-summary { font-size:0.78rem; color:var(--text-tertiary); line-height:1.6; margin-top:6px; }
+
+    .budget-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+    .budget-card { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+    .budget-year { font-size:0.72rem; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.5px; }
+    .budget-amount { font-size:1.4rem; font-weight:800; color:var(--accent); margin:4px 0; }
+    .budget-label { font-size:0.68rem; color:var(--text-tertiary); }
+
+    .muni-meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:20px; }
+    .meta-tile { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
+    .meta-val { font-size:1.2rem; font-weight:800; color:var(--text-primary); }
+    .meta-label { font-size:0.62rem; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.5px; }
+
+    .disclaimer { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:12px 16px; font-size:0.72rem; color:var(--text-tertiary); line-height:1.7; margin-bottom:16px; }
+    .loading { text-align:center; padding:60px; color:var(--text-tertiary); }
+  </style>
+  <meta name="theme-color" content="#1a1f36">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+  <div id="share-bar" class="share-bar">
+    <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
+    <div class="share-bar-buttons">
+      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
+      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
+      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
+      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
+      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
+    </div>
+  </div>
+
+  <div id="main" class="muni-wrap">
+    <div class="muni-header">
+      <h1>Municipal Accountability</h1>
+      <p class="subtitle">Local government investigation. Council records, budgets, $100K+ salaries, and court cases. All from public records.</p>
+    </div>
+
+    <div class="muni-tabs">
+      <button class="muni-tab active" onclick="loadCity('belleville',this)">Belleville</button>
+      <button class="muni-tab" onclick="loadCity('quinte_west',this)">Quinte West</button>
+    </div>
+
+    <div id="muni-content" class="loading">Loading municipal data...</div>
+  </div>
+
+  <script src="nav.js?v=7"></script>
+  <script src="js/main.js?v=5"></script>
+  <script src="share.js?v=1"></script>
+  <script>
+  (function() {
+    'use strict';
+    var cache = {};
+    var currentCity = 'belleville';
+
+    // Auto-detect from URL params
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('city')) currentCity = params.get('city').replace(/-/g, '_');
+
+    window.loadCity = function(city, btn) {
+      currentCity = city;
+      document.querySelectorAll('.muni-tab').forEach(function(t) { t.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+
+      if (cache[city]) {
+        renderCity(cache[city]);
+      } else {
+        document.getElementById('muni-content').innerHTML = '<div class="loading">Loading ' + city.replace(/_/g, ' ') + ' data...</div>';
+        fetch('data/municipal/' + city + '.json')
+          .then(function(r) { return r.json(); })
+          .then(function(data) { cache[city] = data; renderCity(data); })
+          .catch(function(err) {
+            document.getElementById('muni-content').innerHTML = '<div class="loading">Data not available for ' + city.replace(/_/g, ' ') + '. Run the municipal collector first.</div>';
+          });
+      }
+    };
+
+    function fmt(n) { return Number(n).toLocaleString('en-CA'); }
+    function fmtDollar(n) { return '$' + Number(n).toLocaleString('en-CA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function renderCity(data) {
+      var el = document.getElementById('muni-content');
+      var h = '';
+
+      // Meta tiles
+      h += '<div class="muni-meta">';
+      h += '<div class="meta-tile"><div class="meta-val">' + esc(data.municipality || '') + '</div><div class="meta-label">Municipality</div></div>';
+      h += '<div class="meta-tile"><div class="meta-val">' + fmt(data.population || 0) + '</div><div class="meta-label">Population</div></div>';
+      h += '<div class="meta-tile"><div class="meta-val">' + esc(data.region || '') + '</div><div class="meta-label">Region</div></div>';
+      h += '<div class="meta-tile"><div class="meta-val">' + (data.council ? data.council.length : 0) + '</div><div class="meta-label">Council Members</div></div>';
+      h += '</div>';
+
+      // Council
+      h += '<div class="muni-section">';
+      h += '<h2>City Council</h2>';
+      h += '<div class="disclaimer">Council information from municipal websites. Serving on city council is a vital public service. Inclusion here is for transparency, not accusation.</div>';
+      if (data.council && data.council.length > 0) {
+        h += '<div class="council-grid">';
+        data.council.forEach(function(c) {
+          h += '<div class="council-card">';
+          h += '<div class="council-name">' + esc(c.name) + '</div>';
+          h += '<div class="council-role">' + esc(c.role) + '</div>';
+          h += '<div class="council-ward">' + esc(c.ward || '') + '</div>';
+          if (c.notes) h += '<div class="council-notes">' + esc(c.notes) + '</div>';
+          h += '</div>';
+        });
+        h += '</div>';
+      } else {
+        h += '<p style="color:var(--text-tertiary);">Council data not yet collected.</p>';
+      }
+      h += '</div>';
+
+      // Sunshine List
+      h += '<div class="muni-section">';
+      h += '<h2>Sunshine List ($100K+ Salaries)</h2>';
+      h += '<div class="disclaimer">Ontario Public Sector Salary Disclosure. All employees earning $100,000+ must be publicly disclosed. This is a legal requirement, not an allegation.</div>';
+      if (data.sunshine_list && data.sunshine_list.length > 0) {
+        h += '<table class="sunshine-table">';
+        h += '<thead><tr><th>Name</th><th>Position</th><th>Employer</th><th>Salary</th></tr></thead>';
+        h += '<tbody>';
+        data.sunshine_list.sort(function(a, b) { return (b.salary || 0) - (a.salary || 0); });
+        data.sunshine_list.forEach(function(s) {
+          h += '<tr>';
+          h += '<td>' + esc(s.name) + '</td>';
+          h += '<td>' + esc(s.position) + '</td>';
+          h += '<td>' + esc(s.employer) + '</td>';
+          h += '<td class="salary-amount">' + fmtDollar(s.salary) + '</td>';
+          h += '</tr>';
+        });
+        h += '</tbody></table>';
+      } else {
+        h += '<p style="color:var(--text-tertiary);">Sunshine List data not yet collected. Run the sunshine list scraper to populate.</p>';
+      }
+      h += '</div>';
+
+      // Court Records
+      h += '<div class="muni-section">';
+      h += '<h2>Court Records</h2>';
+      h += '<div class="disclaimer">Court cases involving municipal entities from CanLII public records. Being involved in litigation is common for municipalities and does not imply wrongdoing.</div>';
+      if (data.court_cases && data.court_cases.length > 0) {
+        data.court_cases.forEach(function(c) {
+          h += '<div class="case-card">';
+          h += '<div class="case-court">' + esc(c.court || 'Ontario Court') + '</div>';
+          h += '<div class="case-title">' + esc(c.title || c.case_name || 'Untitled') + '</div>';
+          h += '<div class="case-summary">' + esc(c.summary || c.snippet || 'No summary available.') + '</div>';
+          if (c.url) h += '<div style="margin-top:6px;"><a href="' + esc(c.url) + '" target="_blank" rel="noopener" style="color:var(--accent);font-size:0.72rem;">View on CanLII</a></div>';
+          h += '</div>';
+        });
+      } else {
+        h += '<p style="color:var(--text-tertiary);">Court records not yet collected.</p>';
+      }
+      h += '</div>';
+
+      // Budget
+      h += '<div class="muni-section">';
+      h += '<h2>Budget & Finance</h2>';
+      h += '<div class="disclaimer">Municipal budget data from public financial statements. Budget figures are approximate and may vary by reporting method.</div>';
+      if (data.budget_highlights && data.budget_highlights.length > 0) {
+        h += '<div class="budget-grid">';
+        data.budget_highlights.forEach(function(b) {
+          h += '<div class="budget-card">';
+          h += '<div class="budget-year">' + esc(String(b.year || '')) + '</div>';
+          if (b.total_budget) h += '<div class="budget-amount">' + fmtDollar(b.total_budget) + '</div>';
+          if (b.property_tax_rate) h += '<div class="budget-label">Tax Rate: ' + b.property_tax_rate + '%</div>';
+          if (b.source_url) h += '<div style="margin-top:6px;"><a href="' + esc(b.source_url) + '" target="_blank" rel="noopener" style="color:var(--accent);font-size:0.68rem;">Source</a></div>';
+          h += '</div>';
+        });
+        h += '</div>';
+      } else {
+        h += '<p style="color:var(--text-tertiary);">Budget data not yet collected.</p>';
+      }
+      h += '</div>';
+
+      // Cross-Reference
+      h += '<div class="muni-section">';
+      h += '<h2>Cross-Reference: Federal/Provincial Connections</h2>';
+      h += '<div class="disclaimer">Checking if any municipal officials appear in federal lobbying or provincial donation records. Cross-referencing is algorithmic and may produce false matches.</div>';
+      if (data.cross_references && data.cross_references.length > 0) {
+        data.cross_references.forEach(function(cr) {
+          h += '<div class="case-card">';
+          h += '<div class="case-title">' + esc(cr.name) + '</div>';
+          h += '<div class="case-summary">' + esc(cr.connection) + '</div>';
+          h += '</div>';
+        });
+      } else {
+        h += '<p style="color:var(--text-tertiary);">No cross-references found yet. Expand analysis to include lobbying and donation datasets.</p>';
+      }
+      h += '</div>';
+
+      // Source footer
+      h += '<div style="text-align:center;padding:30px 0;border-top:1px solid var(--border);margin-top:20px;">';
+      h += '<p style="font-size:0.72rem;color:var(--text-tertiary);">Data collected from: ' + esc(data.website || '') + ' | Ontario Sunshine List | CanLII | Ontario Ombudsman</p>';
+      h += '<p style="font-size:0.68rem;color:var(--text-tertiary);margin-top:4px;">Last collected: ' + esc(data.collected_at || 'Unknown') + '</p>';
+      h += '</div>';
+
+      el.innerHTML = h;
+    }
+
+    // Auto-load on page ready
+    loadCity(currentCity, document.querySelector('.muni-tab[onclick*="' + currentCity + '"]'));
+  })();
+  </script>
+  <script src="js/ai-panel.js"></script>
+  <footer id="site-footer"></footer>
+  <script src="footer.js?v=1"></script>
+</body>
+</html>
