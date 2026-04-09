@@ -102,6 +102,16 @@
       This dashboard pulls together data from 6 government databases — lobbying contacts, political donations, parliamentary votes, MP profiles, and procurement contracts. Use the search bar to look up any MP, organization, or bill. Every number links back to its government source.
     </div>
 
+    <!-- Active Local AI Research Briefing Container -->
+    <div id="ai-insights-container" style="max-width:1100px; margin: 0 auto 30px auto; display: none;">
+      <h2 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #a0a0a6; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        🤖 LIRIL Field Notes / Active AI Research
+      </h2>
+      <div id="ai-insights-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
     <!-- Topline Stats -->
     <div class="stats-row" id="stats-row">
       <div class="stat-card"><span class="num" id="s-records">--</span><div class="label">Total Records</div></div>
@@ -179,6 +189,21 @@
       <span><span style="color:#6e6e76;">ABCXYZ N vs NP Millennial Falcon:</span> <strong style="color:#39ff14;">ONLINE</strong></span>
       <span><span style="color:#6e6e76;">Empirical Magic Handoff:</span> <strong style="color:#39ff14;">SECURED</strong></span>
       <span><span style="color:#6e6e76;">Discovery Protection:</span> <strong style="color:#39ff14;">ACTIVE</strong></span>
+    </div>
+
+    <!-- Active LIRIL Nitter Sweep Hook -->
+    <div style="background: var(--bg-surface); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+      <h2 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        ⚙️ Native STARK LIRIL Sweep 
+      </h2>
+      <p style="color: var(--text-tertiary); font-size: 0.8rem; line-height: 1.5; margin-bottom: 16px;">
+        Trigger a live N-vs-NP timeline scrape directly through the local TENET-5 OS ABCXYZ Telemetry Hub. Initiates the Nitter Bridge and Explainable AI convergence scan over Port 8091.
+      </p>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="osint-target" placeholder="Enter target (e.g. ToddSmithPC, CanduEnergy)..." style="flex: 1; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">
+        <button id="osint-trigger-btn" style="background: #e53555; color: white; border: none; border-radius: 6px; padding: 0 24px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Initiate Scan</button>
+      </div>
+      <div id="osint-sweep-result" style="display: none; margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.3); border-left: 4px solid #60a5fa; font-size: 0.8rem; color: #a0a0a6; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace;"></div>
     </div>
 
     <!-- Scraper Automation Status -->
@@ -396,6 +421,34 @@
       setupSearch();
     }
 
+    function renderAIInsights() {
+      if (!DATA.ai_insights || !DATA.ai_insights.insights) return;
+      var container = document.getElementById('ai-insights-container');
+      var grid = document.getElementById('ai-insights-grid');
+      var insights = DATA.ai_insights.insights;
+      if (insights.length === 0) return;
+      
+      container.style.display = 'block';
+      grid.innerHTML = '';
+      
+      insights.forEach(function(insight) {
+        var bdColor = 'rgba(96, 165, 250, 0.4)';
+        if (insight.severity === 'CRITICAL') bdColor = 'rgba(229, 53, 85, 0.5)';
+        if (insight.severity === 'HIGH') bdColor = 'rgba(250, 204, 21, 0.5)';
+        
+        var d = new Date(insight.timestamp);
+        var timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        var html = '<div style="background: var(--bg-card); border: 1px solid var(--border); border-top: 3px solid ' + bdColor + '; border-radius: 8px; padding: 16px;">';
+        html += '<div style="font-size: 0.65rem; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 6px;">' + timeStr + ' &bull; ' + insight.vector + '</div>';
+        html += '<h3 style="font-size: 0.9rem; color: var(--text-primary); margin: 0 0 10px 0;">' + insight.title + '</h3>';
+        html += '<p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">' + insight.content + '</p>';
+        html += '<div style="font-size: 0.7rem; font-family: monospace; color: #60a5fa;">[NODES: ' + insight.nodes.join(' × ') + ']</div>';
+        html += '</div>';
+        grid.innerHTML += html;
+      });
+    }
+
     function setupSearch() {
       var input = document.getElementById('search-input');
       var results = document.getElementById('search-results');
@@ -484,31 +537,73 @@
     loadJSON('data/all_mps.json', 'mps');
     loadJSON('data/financial_transaction_analysis.json', 'financial');
     loadJSON('data/social_media_analysis.json', 'social');
+    
+    // Non-blocking load for AI Insights so it doesn't break the main loader
+    fetch('data/ai_generated_insights.json').then(function(r) { return r.json(); }).then(function(d) {
+      DATA['ai_insights'] = d;
+      renderAIInsights();
+    }).catch(function(e) { console.log("AI Insights unavailable"); });
 
-    // ── Scraper Automation Status ──
-    fetch('data/scraper_status.json').then(function(r){if(!r.ok)throw new Error();return r.json();}).catch(function(){return null;}).then(function(status){if(!status)return;
-      var panel = document.getElementById('scraper-status');
-      panel.style.display = 'block';
-      var dt = new Date(status.last_run);
-      var ago = Math.floor((Date.now() - dt.getTime()) / 3600000);
-      var agoStr = ago < 1 ? 'Just now' : ago + 'h ago';
-      document.getElementById('scraper-last-run').textContent = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ' (' + agoStr + ')';
-      document.getElementById('scraper-ok').textContent = status.ok_count;
-      document.getElementById('scraper-total').textContent = status.scraper_count;
-      document.getElementById('scraper-duration').textContent = status.total_duration_s + 's';
-      // Health bars
-      var bars = document.getElementById('scraper-bars');
-      (status.results || []).forEach(function(r){
-        var color = r.status === 'OK' ? '#39ff14' : r.status === 'TIMEOUT' ? '#facc15' : '#e53555';
-        var bar = document.createElement('div');
-        bar.style.cssText = 'flex:1; height:4px; border-radius:2px; background:' + color + '; opacity:0.8;';
-        bar.title = r.name + ': ' + r.status + ' (' + r.duration_s + 's)';
-        bars.appendChild(bar);
+      // ── Scraper Automation Status ──
+      fetch('data/scraper_status.json').then(function(r){if(!r.ok)throw new Error();return r.json();}).catch(function(){return null;}).then(function(status){if(!status)return;
+        var panel = document.getElementById('scraper-status');
+        panel.style.display = 'block';
+        var dt = new Date(status.last_run);
+        var ago = Math.floor((Date.now() - dt.getTime()) / 3600000);
+        var agoStr = ago < 1 ? 'Just now' : ago + 'h ago';
+        document.getElementById('scraper-last-run').textContent = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ' (' + agoStr + ')';
+        document.getElementById('scraper-ok').textContent = status.ok_count;
+        document.getElementById('scraper-total').textContent = status.scraper_count;
+        document.getElementById('scraper-duration').textContent = status.total_duration_s + 's';
+        // Health bars
+        var bars = document.getElementById('scraper-bars');
+        (status.results || []).forEach(function(r){
+          var color = r.status === 'OK' ? '#39ff14' : r.status === 'TIMEOUT' ? '#facc15' : '#e53555';
+          var bar = document.createElement('div');
+          bar.style.cssText = 'flex:1; height:4px; border-radius:2px; background:' + color + '; opacity:0.8;';
+          bar.title = r.name + ': ' + r.status + ' (' + r.duration_s + 's)';
+          bars.appendChild(bar);
+        });
+      }).catch(function(){
+        // No status file yet — leave panel hidden
       });
-    }).catch(function(){
-      // No status file yet — leave panel hidden
-    });
-  })();
+
+      // ── Live OSINT Telemetry Binding ──
+      var triggerBtn = document.getElementById('osint-trigger-btn');
+      if (triggerBtn) {
+        triggerBtn.addEventListener('click', function() {
+          var targetObj = document.getElementById('osint-target').value.trim();
+          if (!targetObj) return;
+          var resPanel = document.getElementById('osint-sweep-result');
+          
+          triggerBtn.textContent = 'Scanning...';
+          triggerBtn.disabled = true;
+          resPanel.style.display = 'block';
+          resPanel.innerHTML = '<span style="color:#facc15;">Initiating LIRIL Temporal Handshake on port 8091...</span>';
+          
+          fetch('http://127.0.0.1:8091/api/osint_trigger?target=' + encodeURIComponent(targetObj))
+            .then(function(res) {
+              if (!res.ok) throw new Error('OSINT Local Core offline or rejected target.');
+              return res.json();
+            })
+            .then(function(data) {
+              triggerBtn.textContent = 'Initiate Scan';
+              triggerBtn.disabled = false;
+              
+              var formatted = '<strong style="color:white;">Target Analyzed:</strong> ' + (data.target || targetObj) + '\n';
+              formatted += '<strong style="color:white;">Primary Vector detected:</strong> ' + (data.primary_vector || 'unknown') + '\n';
+              formatted += '<strong style="color:white;">Edge Nodes Found:</strong> ' + ((data.edges_discovered || []).join(', ') || 'none') + '\n\n';
+              formatted += '<span style="color:#39ff14;">Empirical Handoff pushed to Chronos Matrix for indexing.</span>';
+              resPanel.innerHTML = formatted;
+            })
+            .catch(function(err) {
+              triggerBtn.textContent = 'Initiate Scan';
+              triggerBtn.disabled = false;
+              resPanel.innerHTML = '<span style="color:#e53555;">[FAILURE] ABCXYZ SATOR core not active on port 8091, or timeout occurred:</span>\n' + err.message;
+            });
+        });
+      }
+    })();
   </script>
   <div id="read-next"></div>
   <footer id="site-footer"></footer>

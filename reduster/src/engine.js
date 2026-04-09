@@ -44,6 +44,7 @@ import { initObjectives, updateObjectives, toggleObjectivesList, onLoot } from '
 import { preloadModels } from './models.js';
 import { updateHUD, addKillFeed, initCompass, updateCompass, updateReloadBar, showHitMarker, showWeaponName, updateLowHealthPulse } from './hud.js';
 import { updateDayNight, updateCombatEffects } from './effects.js';
+import { loadGame, applySaveData } from './savegame.js';
 import { updateWeather, getWind, getWeatherType } from './weather.js';
 import { initAudio, startEnvironmentAmbient, updateAmbientWeather, updateWildlifeAudio } from './audio.js';
 import { spawnEnemies, updateEnemies, notifyEnemyHit, getEnemies } from './enemies.js';
@@ -223,6 +224,14 @@ export async function startGame(canvas, onProgress) {
 
   // ── Player + Weapon + Enemies ──
   createPlayer(scene, camera);
+
+  // ── Phase 25/26 Parity: SATOR Telemetry Load Game Sync ──
+  console.log('[Engine] Synchronizing with SATOR ABCXYZ telemetry...');
+  const activeSave = await loadGame();
+  if (activeSave) {
+    applySaveData(activeSave, camera);
+  }
+
   try {
     const wpnNode = createWeaponModel(scene, camera, STATE.equippedWeapon);
     registerWeaponNode(wpnNode);

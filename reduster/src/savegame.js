@@ -4,7 +4,7 @@
 // Phase 25: Cross-engine parity with Godot SaveSystem.gd v2
 
 import { STATE } from './state.js';
-import { transmitSatorEvent } from './telemetry.js';
+import { transmitSatorEvent, fetchSatorState } from './telemetry.js';
 import { serializeMissions, deserializeMissions } from './objectives.js';
 
 const SAVE_KEY = 'redDuster_saveData';
@@ -87,14 +87,21 @@ export function saveGame() {
 }
 
 /**
- * Load saved game from localStorage.
+ * Load saved game from localStorage or SATOR Telemetry hub.
  * Returns the save data object, or null if no save exists.
  */
-export function loadGame() {
+export async function loadGame() {
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) { console.log('[Save] No save data found'); return null; }
-    const data = JSON.parse(raw);
+    // Phase 25/26 Parity: Ping SATOR hub first for Godot save telemetry
+    let data = await fetchSatorState();
+
+    if (!data) {
+      // Fallback to local browser storage
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) { console.log('[Save] No save data found locally or on SATOR'); return null; }
+      data = JSON.parse(raw);
+    }
+    
     // Accept both v1 and v2 saves
     if (data.version < 1 || data.version > SAVE_VERSION) {
       console.warn('[Save] Save version mismatch, ignoring');

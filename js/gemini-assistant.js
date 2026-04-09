@@ -12,41 +12,77 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'tenet5_gemini_key';
+  const STORAGE_KEY = 'tenet5_gemini_token';
   const HISTORY_KEY = 'tenet5_gemini_history';
   const MODEL = 'gemini-2.5-flash';
   const MAX_HISTORY = 50;
+  
+  // ── 0-Auth Client Provisioning ───────────────────────────────
+  const GOOGLE_CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+  let tokenClient;
 
-  let apiKey = null;
+  let oAuthToken = null;
   let conversationHistory = [];
   let panelEl = null;
   let isOpen = false;
 
+  // ── Dynamic Script Injection ──────────────────────────────────
+  function loadGSI() {
+    if (document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) return;
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/generative-language.retriever',
+        callback: (response) => {
+          if (response.error !== undefined) {
+            console.error('OAuth Error:', response.error);
+            return;
+          }
+          setToken(response.access_token);
+          // Hide login UI, show prompts
+          if (panelEl) {
+            panelEl.querySelector('#gemini-key-setup').style.display = 'none';
+            panelEl.querySelector('#gemini-prompts').style.display = 'block';
+          }
+        },
+      });
+    };
+    document.head.appendChild(script);
+  }
+
   // ── Key Management ───────────────────────────────────────────
-  function getStoredKey() {
+  function getStoredToken() {
     try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
   }
 
-  function setKey(key) {
-    apiKey = key;
-    try { localStorage.setItem(STORAGE_KEY, key); } catch (e) { /* silent */ }
+  function setToken(token) {
+    oAuthToken = token;
+    try { localStorage.setItem(STORAGE_KEY, token); } catch (e) { /* silent */ }
   }
 
-  function clearKey() {
-    apiKey = null;
+  function clearToken() {
+    oAuthToken = null;
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* silent */ }
   }
 
-  function hasKey() {
-    return !!(apiKey || getStoredKey());
+  function hasToken() {
+    return !!(oAuthToken || getStoredToken());
   }
 
-  // ── Gemini API Call ──────────────────────────────────────────
-  async function generateContent(prompt, context) {
-    const key = apiKey || getStoredKey();
-    if (!key) throw new Error('No API key. Set your Gemini key in settings.');
+  function triggerOAuthLogin() {
+    if (!tokenClient) {
+      alert("Google Identity Services failed to load.");
+      return;
+    }
+    // Requests a fresh access token from Google
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
 
-    // Build system instruction
+  async function generateContent(prompt, context) {
     const systemInstruction = [
       'You are a research assistant for TENET5, a Canadian OSINT investigation platform.',
       'You help users analyze government data, lobbying records, procurement contracts, and parliamentary records.',
@@ -55,40 +91,103 @@
       context ? 'Current page context: ' + context : ''
     ].filter(Boolean).join(' ');
 
-    const body = {
-      contents: [{ parts: [{ text: prompt }] }],
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-        topP: 0.95
-      }
-    };
-
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent?key=' + key;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(function () { return {}; });
-      if (response.status === 401 || response.status === 403) {
-        throw new Error('Invalid API key. Check your Gemini API key in settings.');
-      }
-      throw new Error(err.error?.message || 'Gemini API error: ' + response.status);
+    const token = oAuthToken || getStoredToken();
+    
+    // Check if cloud token is missing, attempt to use FREE built-in browser AI
+    if (!token) {
+        if ('ai' in window && 'languageModel' in window.ai) {
+            try {
+                const capabilities = await window.ai.languageModel.capabilities();
+                if (capabilities.available !== 'no') {
+                    const session = await window.ai.languageModel.create({
+                        systemPrompt: systemInstruction
+                    });
+                    const text = await session.prompt(prompt);
+                    _addToHistory({ role: 'user', text: prompt, timestamp: Date.now() });
+                    _addToHistory({ role: 'assistant', text: text + '\n\n*(Generated locally via Chrome Built-in AI)*', timestamp: Date.now() });
+                    return text;
+                }
+            } catch (err) {
+                console.warn("Local AI failed:", err);
+            }
+        }
+        throw new Error('No Local AI found. Please Sign In with Google or use Chrome 127+ with AI enabled.');
     }
 
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+    try {
+      const { GoogleGenerativeAI } = await import("https://esm.run/@google/generative-ai");
+      
+      // Monkey-patch fetch to force Authorization: Bearer if the SDK overrides it
+      const customFetch = (url, options) => {
+          options = options || {};
+          options.headers = options.headers || new Headers();
+          // Remove the ?key= query string if the SDK appends it blindly
+          if (typeof url === 'string') {
+              url = url.split('?key=')[0];
+          }
+          if (options.headers instanceof Headers) {
+              options.headers.set('Authorization', `Bearer ${token}`);
+          } else {
+              options.headers['Authorization'] = `Bearer ${token}`;
+          }
+          return fetch(url, options);
+      };
 
-    // Save to history
-    _addToHistory({ role: 'user', text: prompt, timestamp: Date.now() });
-    _addToHistory({ role: 'assistant', text: text, timestamp: Date.now() });
+      // Pass token as dummy key so SDK doesn't complain
+      const genAI = new GoogleGenerativeAI(token);
+      const model = genAI.getGenerativeModel({
+        model: MODEL,
+        systemInstruction: systemInstruction,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 4096,
+          topP: 0.95
+        }
+      }, { apiClient: "tenet5-assistant", customFetch: customFetch });
 
-    return text;
+      const result = await model.generateContent(prompt);
+      const text = result.response.text() || 'No response generated.';
+
+      // Save to history
+      _addToHistory({ role: 'user', text: prompt, timestamp: Date.now() });
+      _addToHistory({ role: 'assistant', text: text, timestamp: Date.now() });
+
+      return text;
+    } catch (err) {
+      if (err.message && err.message.includes('API key not valid')) {
+        throw new Error('Invalid API key. Check your Gemini API key in settings.');
+      }
+      throw err;
+    }
+  }
+
+  // ── Gemini Embeddings Call ───────────────────────────────────
+  async function generateEmbeddings(text) {
+    const token = oAuthToken || getStoredToken();
+    if (!token) throw new Error('Not authenticated. Please sign in with Google.');
+    
+    try {
+      const { GoogleGenerativeAI } = await import("https://esm.run/@google/generative-ai");
+      
+      const customFetch = (url, options) => {
+          options = options || {};
+          options.headers = options.headers || new Headers();
+          if (typeof url === 'string') url = url.split('?key=')[0];
+          if (options.headers instanceof Headers) {
+              options.headers.set('Authorization', `Bearer ${token}`);
+          } else {
+              options.headers['Authorization'] = `Bearer ${token}`;
+          }
+          return fetch(url, options);
+      };
+
+      const genAI = new GoogleGenerativeAI(token);
+      const model = genAI.getGenerativeModel({ model: "text-embedding-004" }, { customFetch: customFetch });
+      const result = await model.embedContent(text);
+      return result.embedding.values;
+    } catch (err) {
+      throw err;
+    }
   }
 
   // ── Pre-built Research Prompts ───────────────────────────────
@@ -186,14 +285,16 @@
         <div class="gemini-welcome" id="gemini-welcome">
           <h3>TENET5 AI Research</h3>
           <p>Use Google's Gemini AI to analyze evidence, cross-reference data, and conduct research.</p>
-          <div class="gemini-key-setup" id="gemini-key-setup">
-            <label>Enter your Gemini API key:</label>
-            <div style="display:flex;gap:6px;margin-top:4px;">
-              <input type="password" class="gemini-key-input" id="gemini-key-input"
-                     placeholder="AIza..." autocomplete="off" />
-              <button class="gemini-btn-sm" id="gemini-key-save">Save</button>
+          <div class="gemini-key-setup" id="gemini-key-setup" style="text-align: center; margin: 15px 0;">
+            <div id="local-ai-status" style="margin-bottom: 12px; padding: 8px; background: var(--bg-surface); border-radius: 4px; border: 1px solid var(--border); font-size: 0.85em; display: none;">
+                <span style="color:var(--color-green)">✅ Local built-in Browser AI active.</span><br/>Zero setup required. Just chat!
             </div>
-            <p class="gemini-key-note">Get a free key at <a href="https://aistudio.google.com/" target="_blank" rel="noopener" style="color:var(--accent-bright)">aistudio.google.com</a>. Stored locally only.</p>
+            <p style="font-size: 0.9em; margin-bottom: 10px;">Or sign in to Cloud AI for advanced models & telemetry:</p>
+            <button class="gemini-btn-sm" id="gemini-oauth-btn" style="width: 100%; padding: 10px; background: white; color: black; border: 1px solid #ccc; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20c11.045 0 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571c.001-.001.002-.001.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+              Sign in with Google
+            </button>
+            <p class="gemini-key-note" style="margin-top: 8px;">Zero-Auth Token Gateway (Delegation scopes required)</p>
           </div>
           <div class="gemini-prompts" id="gemini-prompts">
             <p style="font-size:0.75rem;color:var(--text-quaternary);margin-bottom:8px;">Quick research prompts:</p>
@@ -215,12 +316,9 @@
       </div>
 
       <div class="gemini-settings-panel" id="gemini-settings-panel">
-        <h4>Settings</h4>
-        <label>Gemini API Key</label>
-        <input type="password" id="gemini-settings-key" class="gemini-key-input" placeholder="AIza..." />
-        <button class="gemini-btn-sm" id="gemini-settings-save" style="margin-top:4px;">Save Key</button>
-        <button class="gemini-btn-sm" id="gemini-settings-clear" style="background:var(--color-critical);margin-top:4px;">Remove Key</button>
-        <p class="gemini-key-note">Your key is stored in localStorage only. Never sent to TENET5.</p>
+        <h4>Authentication</h4>
+        <button class="gemini-btn-sm" id="gemini-settings-clear" style="background:var(--color-critical);margin-top:4px;">Sign Out</button>
+        <p class="gemini-key-note">Removes the OAuth token from local storage.</p>
       </div>
     `;
 
@@ -238,14 +336,9 @@
     trigger.addEventListener('click', togglePanel);
     panelEl.querySelector('#gemini-close-btn').addEventListener('click', closePanel);
 
-    // Key setup
-    panelEl.querySelector('#gemini-key-save').addEventListener('click', function () {
-      const val = panelEl.querySelector('#gemini-key-input').value.trim();
-      if (val) {
-        setKey(val);
-        panelEl.querySelector('#gemini-key-setup').style.display = 'none';
-        panelEl.querySelector('#gemini-prompts').style.display = 'block';
-      }
+    // Key setup (replaced by OAuth logic)
+    panelEl.querySelector('#gemini-oauth-btn').addEventListener('click', function () {
+      triggerOAuthLogin();
     });
 
     // Quick prompts
@@ -279,21 +372,13 @@
     panelEl.querySelector('#gemini-settings-btn').addEventListener('click', function () {
       const sp = panelEl.querySelector('#gemini-settings-panel');
       sp.classList.toggle('visible');
-      if (sp.classList.contains('visible')) {
-        panelEl.querySelector('#gemini-settings-key').value = getStoredKey() || '';
-      }
-    });
-
-    panelEl.querySelector('#gemini-settings-save').addEventListener('click', function () {
-      const val = panelEl.querySelector('#gemini-settings-key').value.trim();
-      if (val) setKey(val);
-      panelEl.querySelector('#gemini-settings-panel').classList.remove('visible');
     });
 
     panelEl.querySelector('#gemini-settings-clear').addEventListener('click', function () {
-      clearKey();
-      panelEl.querySelector('#gemini-settings-key').value = '';
+      clearToken();
       panelEl.querySelector('#gemini-settings-panel').classList.remove('visible');
+      panelEl.querySelector('#gemini-key-setup').style.display = 'block';
+      panelEl.querySelector('#gemini-prompts').style.display = 'none';
     });
 
     // Clear history
@@ -304,8 +389,23 @@
     });
 
     // Update key setup visibility
-    if (hasKey()) {
+    if (hasToken()) {
       panelEl.querySelector('#gemini-key-setup').style.display = 'none';
+      panelEl.querySelector('#gemini-prompts').style.display = 'block';
+    } else {
+      panelEl.querySelector('#gemini-prompts').style.display = 'none';
+      
+      // Auto-detect Local browser AI
+      if ('ai' in window && 'languageModel' in window.ai) {
+          window.ai.languageModel.capabilities().then(cap => {
+              if (cap.available !== 'no') {
+                  const localMsg = panelEl.querySelector('#local-ai-status');
+                  if (localMsg) localMsg.style.display = 'block';
+                  // Force show prompts because local AI works!
+                  panelEl.querySelector('#gemini-prompts').style.display = 'block';
+              }
+          }).catch(console.error);
+      }
     }
   }
 
@@ -371,7 +471,8 @@
 
   // ── Init ─────────────────────────────────────────────────────
   function init() {
-    apiKey = getStoredKey();
+    loadGSI(); // Inject zero-auth SDK
+    oAuthToken = getStoredToken();
     _loadHistory();
 
     // Build the trigger button immediately
@@ -380,9 +481,10 @@
 
   window.tenet5Gemini = {
     generateContent: generateContent,
-    setKey: setKey,
-    clearKey: clearKey,
-    hasKey: hasKey,
+    generateEmbeddings: generateEmbeddings,
+    setToken: setToken,
+    clearToken: clearToken,
+    hasToken: hasToken,
     togglePanel: togglePanel,
     clearHistory: clearHistory,
     RESEARCH_PROMPTS: RESEARCH_PROMPTS

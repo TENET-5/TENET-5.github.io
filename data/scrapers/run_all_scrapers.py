@@ -108,9 +108,17 @@ SCRAPERS = [
         'name': 'network_topology_analyzer',
         'file': 'network_topology_analyzer.py',
         'description': 'Cross-references all sources into influence network',
-        'priority': 99,  # Always runs last
+        'priority': 98,
         'timeout': 600,
         'outputs': ['network_analysis/'],
+    },
+    {
+        'name': 'local_ai_research_agent',
+        'file': 'local_ai_research_agent.py',
+        'description': 'LIRIL Local AI actively researches OSINT connections into insights',
+        'priority': 100,  # Always runs last to capture final data correlations
+        'timeout': 300,
+        'outputs': [],
     },
 ]
 

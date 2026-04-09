@@ -23,6 +23,14 @@
 
   <div class="page-container" style="max-width:960px;">
 
+    <!-- Autonomous 24/7 AI Expansion Override -->
+    <div id="autonomous-ai-expansion" style="display:none; margin-bottom:var(--s-xl); border:1px solid #60a5fa; border-top: 4px solid #3b82f6; border-radius:var(--r-md); background:var(--bg-card); padding:var(--s-md); position:relative; overflow:hidden;">
+      <div style="font-family:var(--font-mono); font-size:0.75rem; color:#3b82f6; letter-spacing:1px; margin-bottom:12px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(59,130,246,0.2); padding-bottom:10px;">
+        <span style="font-size:1.1rem;">🤖</span> STARK LOCAL AI CONTINUOUS ANALYSIS OVERRIDE
+      </div>
+      <div id="ai-expansion-content"></div>
+    </div>
+
     <!-- Source Attribution -->
     <div class="evidence-box info" style="margin-bottom:var(--s-xl);">
       <div class="evidence-title">📋 Data Sources</div>
@@ -367,3 +375,29 @@
       }
     })();
   </script>
+  <script>
+    // ── STARK Local AI Asynchronous Content CMS Loading
+    fetch('data/ai_expansions/quinte-west.json')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data.insights || data.insights.length === 0) return;
+        document.getElementById('autonomous-ai-expansion').style.display = 'block';
+        var html = '';
+        data.insights.forEach(function(insight) {
+           var alertColor = insight.severity === 'CRITICAL' ? '#ef4444' : '#f59e0b';
+           html += '<div style="margin-bottom:16px;">';
+           html += '<h3 style="color:var(--text-primary); font-size:1.05rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;">';
+           html += '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:' + alertColor + ';"></span>';
+           html += insight.title + '</h3>';
+           html += '<p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; margin-bottom:8px;">' + insight.content + '</p>';
+           if (insight.topological_vector) {
+             html += '<div style="font-family:var(--font-mono); font-size:0.65rem; color:#9ca3af; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:4px; display:inline-block;">N-vs-NP VECTOR HASH: ' + insight.topological_vector + '</div>';
+           }
+           html += '</div>';
+        });
+        document.getElementById('ai-expansion-content').innerHTML = html;
+      })
+      .catch(function(e) { console.log('AI expansion feed currently dormant for this sector.'); });
+  </script>
+</body>
+</html>
