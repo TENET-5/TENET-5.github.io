@@ -171,16 +171,16 @@ body {
   background-image: radial-gradient(circle, rgba(26,37,53,0.2) 1px, transparent 1px);
   background-size: 50px 50px; pointer-events: none;
 }
-.canvas svg {
+.canvas canvas {
   position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 0;
 }
-.canvas svg line { stroke-linecap: round; transition: opacity 0.3s; }
 
 /* ── NODE CARDS ── */
 .node {
   position: absolute; width: 170px;
-  background: var(--card); border: 1px solid var(--border);
+  background: rgba(17, 24, 32, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   border-radius: var(--radius); padding: 10px 12px;
   cursor: pointer; z-index: 2; user-select: none;
   transition: border-color 0.25s, box-shadow 0.25s, opacity 0.3s, transform 0.3s;
@@ -422,7 +422,7 @@ body {
 <div class="canvas-wrap" id="wrap" style="top:84px;">
   <div class="canvas" id="board">
     <div class="canvas-grid"></div>
-    <svg id="lines"></svg>
+    <canvas id="lines"></canvas>
   </div>
 </div>
 
@@ -492,7 +492,7 @@ body {
   threads.push(...HUB_THREADS);
 
   const board = document.getElementById('board');
-  const svg = document.getElementById('lines');
+  const cvs = document.getElementById('lines');
   const wrap = document.getElementById('wrap');
   const detailPanel = document.getElementById('detailPanel');
   const detailContent = document.getElementById('detailContent');
@@ -581,9 +581,11 @@ body {
 
   // ── Apply force-directed spacing to prevent overlap ──
   // We use percentage coords from JSON but spread them better
+  let tickCount = 0;
+  let animFrameId = null;
+
   function computePositions() {
     // Group nodes by primary category for clustering
-    const catGroups = {};
     const catAnchors = {
       'israel':  { cx: 0.15, cy: 0.22 },
       'ccp':     { cx: 0.82, cy: 0.15 },
@@ -611,32 +613,63 @@ body {
       const jitterY = (Math.random() - 0.5) * 0.10;
       n._px = Math.max(0.03, Math.min(0.96, rawX * 0.5 + anchor.cx * 0.5 + jitterX));
       n._py = Math.max(0.04, Math.min(0.95, rawY * 0.5 + anchor.cy * 0.5 + jitterY));
+      n.vx = 0;
+      n.vy = 0;
     });
 
+    tickCount = 0;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    requestAnimationFrame(tick);
+  }
+
+  function tick() {
+    tickCount++;
+    if (tickCount > 180) {
+      drawLines();
+      return; // Sleep safely after graph calms down
+    }
+
+    const cooling = Math.max(0.01, 1.0 - (tickCount / 180));
+
     // Force-directed repulsion to spread nodes out
-    for (let iter = 0; iter < 60; iter++) {
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i], b = nodes[j];
-          let dx = a._px - b._px;
-          let dy = a._py - b._py;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const minDist = 0.065; // ~6.5% of board
-          if (dist < minDist && dist > 0.001) {
-            const force = (minDist - dist) / dist * 0.45;
-            a._px += dx * force;
-            a._py += dy * force;
-            b._px -= dx * force;
-            b._py -= dy * force;
-          }
-          // Clamp
-          a._px = Math.max(0.02, Math.min(0.97, a._px));
-          a._py = Math.max(0.03, Math.min(0.96, a._py));
-          b._px = Math.max(0.02, Math.min(0.97, b._px));
-          b._py = Math.max(0.03, Math.min(0.96, b._py));
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        if (nodeEls[a.id] && nodeEls[a.id].classList.contains('dim')) continue;
+        if (nodeEls[b.id] && nodeEls[b.id].classList.contains('dim')) continue;
+        let dx = a._px - b._px;
+        let dy = a._py - b._py;
+        const distSq = dx * dx + dy * dy;
+        const minDistSq = 0.005; // ~(0.07^2)
+        if (distSq < minDistSq && distSq > 0.000001) {
+          const dist = Math.sqrt(distSq);
+          const force = (0.07 - dist) / dist * 0.45 * cooling;
+          a.vx += dx * force;
+          a.vy += dy * force;
+          b.vx -= dx * force;
+          b.vy -= dy * force;
         }
       }
     }
+
+    nodes.forEach(n => {
+      n._px += n.vx;
+      n._py += n.vy;
+      n.vx *= 0.5; // Friction
+      n.vy *= 0.5;
+      n._px = Math.max(0.02, Math.min(0.97, n._px));
+      n._py = Math.max(0.03, Math.min(0.96, n._py));
+
+      // Translate DOM nodes dynamically
+      const el = nodeEls[n.id];
+      if (el) {
+        el.style.left = (n._px * BOARD_W) + 'px';
+        el.style.top = (n._py * BOARD_H) + 'px';
+      }
+    });
+
+    drawLines();
+    animFrameId = requestAnimationFrame(tick);
   }
 
   computePositions();
@@ -701,9 +734,16 @@ body {
 
   // ── Draw lines (progressive: only for selected/hovered node) ──
   function drawLines() {
-    svg.innerHTML = '';
-    svg.setAttribute('width', BOARD_W);
-    svg.setAttribute('height', BOARD_H);
+    if (cvs.tagName !== 'CANVAS') return;
+    const ctx = cvs.getContext('2d');
+    
+    if (cvs.width !== BOARD_W) {
+      cvs.width = BOARD_W;
+      cvs.height = BOARD_H;
+    }
+    
+    ctx.clearRect(0, 0, BOARD_W, BOARD_H);
+    ctx.globalCompositeOperation = 'lighter';
 
     threads.forEach(t => {
       const fromEl = nodeEls[t.from];
@@ -711,7 +751,6 @@ body {
       if (!fromEl || !toEl) return;
       if (fromEl.classList.contains('dim') || toEl.classList.contains('dim')) return;
 
-      // Progressive disclosure: full opacity for selected connections, dim for rest
       const isHighlighted = selectedId && (t.from === selectedId || t.to === selectedId);
       const str = t.strength || 1;
 
@@ -720,36 +759,37 @@ body {
       const x2 = parseFloat(toEl.style.left) + 85;
       const y2 = parseFloat(toEl.style.top) + 20;
 
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', x1);
-      line.setAttribute('y1', y1);
-      line.setAttribute('x2', x2);
-      line.setAttribute('y2', y2);
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      
+      const cpX = (x1 + x2) / 2 + (y1 - y2) * 0.15;
+      const cpY = (y1 + y2) / 2 + (x2 - x1) * 0.15;
+      ctx.quadraticCurveTo(cpX, cpY, x2, y2);
 
       if (isHighlighted) {
         const colors = { 3: 'rgba(230,57,70,0.7)', 2: 'rgba(58,134,255,0.6)', 1: 'rgba(200,214,229,0.45)' };
-        line.setAttribute('stroke', colors[str] || colors[1]);
-        line.setAttribute('stroke-width', str * 2);
+        ctx.strokeStyle = colors[str] || colors[1];
+        ctx.lineWidth = str * 2;
+        ctx.shadowColor = ctx.strokeStyle;
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
       } else {
-        line.setAttribute('stroke', selectedId ? 'rgba(90,106,122,0.06)' : 'rgba(90,106,122,0.12)');
-        line.setAttribute('stroke-width', 1);
+        ctx.strokeStyle = selectedId ? 'rgba(90,106,122,0.06)' : 'rgba(90,106,122,0.15)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
-
-      svg.appendChild(line);
 
       // Labels only for highlighted connections
       if (isHighlighted && t.label) {
-        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        txt.setAttribute('x', (x1 + x2) / 2);
-        txt.setAttribute('y', (y1 + y2) / 2 - 6);
-        txt.setAttribute('text-anchor', 'middle');
-        txt.setAttribute('fill', 'rgba(200,214,229,0.6)');
-        txt.setAttribute('font-size', '11');
-        txt.setAttribute('font-family', "'JetBrains Mono', monospace");
-        txt.textContent = t.label;
-        svg.appendChild(txt);
+        ctx.font = '11px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(200,214,229,0.8)';
+        ctx.fillText(t.label, (x1 + x2) / 2, (y1 + y2) / 2 - 8);
       }
     });
+
+    ctx.globalCompositeOperation = 'source-over';
   }
 
   drawLines();

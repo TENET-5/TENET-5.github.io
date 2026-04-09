@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entity Profiler & Document Viewer | TENET5</title>
+  <meta name="description" content="Programmable profiling dashboard mapping entities to documented actions and financial vectors.">
+  <meta property="og:title" content="Entity Architecture Viewer">
+  <meta name="theme-color" content="#1a1f36">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    /* Specific Entity UI Tokens */
+    .entity-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--s-md);
+      font-family: var(--font-body);
+    }
+    .entity-header {
+      text-align: center;
+      padding: var(--s-lg) 0 var(--s-md);
+      border-bottom: 2px solid var(--border-accent);
+      margin-bottom: var(--s-lg);
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: var(--s-xl);
+    }
+    
+    /* Premium Data Cards (Glassmorphism + Shadows) */
+    .entity-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      transition: all 0.3s var(--ease-spring);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .entity-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(196, 30, 58, 0.4);
+    }
+    .entity-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--text-tertiary); /* Default top bar */
+      transition: background 0.3s;
+    }
+    .entity-card[data-risk="High"]::before { background: var(--color-critical); }
+    .entity-card[data-risk="Medium"]::before { background: var(--color-warning); }
+    .entity-card[data-risk="Low"]::before { background: var(--color-info); }
+    
+    .entity-role {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-quaternary);
+      margin-top: 12px;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .entity-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+    .entity-inst {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+    
+    /* Interactive Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 6, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-content {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 40px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      transform: translateY(20px);
+      transition: transform 0.3s var(--ease-spring);
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
+    
+    .close-btn {
+      position: absolute;
+      top: 24px; right: 24px;
+      background: none; border: none;
+      font-size: 1.5rem;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 8px;
+    }
+    .close-btn:hover { color: var(--accent); }
+    
+    /* Timeline within Modal */
+    .timeline {
+      margin-top: 30px;
+      position: relative;
+      padding-left: 20px;
+      border-left: 2px solid var(--border-hover);
+    }
+    .timeline-event {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .timeline-event::before {
+      content: '';
+      position: absolute;
+      left: -26px; top: 6px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 2px solid var(--accent);
+    }
+    .evt-date {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .evt-type {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .evt-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+    .evt-src {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      background: var(--bg-surface);
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="entity-wrap">
+    <div class="entity-header">
+      <h1>Entity & Document Profiler</h1>
+      <p class="subtitle" style="color:var(--text-tertiary);">Structural framework for analyzing chronological entity profiles.</p>
+    </div>
+
+    <!-- Toolbar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-family:var(--font-mono); font-size:0.8rem;">
+      <span style="color:var(--text-quaternary);" id="load-status">Attempting data extraction...</span>
+      <input type="text" id="search-filter" placeholder="Filter entities..." style="padding:10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg-surface); color:var(--text-primary); outline:none;">
+    </div>
+
+    <div class="grid-container" id="entity-grid">
+      <!-- Injected by Javascript -->
+    </div>
+  </div>
+
+  <!-- Interactive Modal -->
+  <div class="modal-overlay" id="entity-modal">
+    <div class="modal-content">
+      <button class="close-btn" id="close-modal">&times;</button>
+      <span class="entity-role" id="modal-role" style="font-size: 0.8rem; color: var(--accent);"></span>
+      <h2 id="modal-name" style="margin-bottom: 8px;"></h2>
+      <p id="modal-inst" style="color: var(--text-tertiary); font-style: italic; margin-bottom: 24px;"></p>
+      
+      <p id="modal-summary" style="font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);"></p>
+      
+      <h3 style="margin-top: 40px; font-family: var(--font-headline); font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Documented Actions</h3>
+      <div class="timeline" id="modal-timeline">
+        <!-- Rendered events go here -->
+      </div>
+    </div>
+  </div>
+
+  <footer id="site-footer"></footer>
+
+  <script src="nav.js?v=8"></script>
+  <script src="footer.js?v=1"></script>
+  
+  <script>
+    (function() {
+      const grid = document.getElementById('entity-grid');
+      const search = document.getElementById('search-filter');
+      const status = document.getElementById('load-status');
+      let cachedEntities = [];
+
+      // Modal elements
+      const modal = document.getElementById('entity-modal');
+      const closeBtn = document.getElementById('close-modal');
+      
+      closeBtn.onclick = () => modal.classList.remove('active');
+      modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
+
+      function renderGrid(data) {
+        grid.innerHTML = '';
+        if(data.length === 0) {
+          grid.innerHTML = '<p style="color:var(--text-tertiary);">No profiles loaded / match constraints.</p>';
+          return;
+        }
+
+        data.forEach(ent => {
+          const card = document.createElement('div');
+          card.className = 'entity-card';
+          card.setAttribute('data-risk', ent.risk_vector || 'Low');
+          
+          card.innerHTML = `
+            <span class="entity-role">${ent.primary_role}</span>
+            <div class="entity-name">${ent.display_name}</div>
+            <div class="entity-inst">${ent.institution}</div>
+            <div style="font-size:0.8rem; color:var(--text-tertiary); line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${ent.summary}</div>
+            <div style="margin-top:16px; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-quaternary); font-weight:600;">${(ent.actions || []).length} LOGGED ACTIONS</div>
+          `;
+          
+          card.addEventListener('click', () => openModal(ent));
+          grid.appendChild(card);
+        });
+      }
+
+      function openModal(ent) {
+        document.getElementById('modal-role').textContent = ent.primary_role;
+        document.getElementById('modal-name').textContent = ent.display_name;
+        document.getElementById('modal-inst').textContent = ent.institution;
+        document.getElementById('modal-summary').textContent = ent.summary;
+        
+        const tline = document.getElementById('modal-timeline');
+        tline.innerHTML = '';
+        
+        if (ent.actions && ent.actions.length > 0) {
+          ent.actions.forEach(a => {
+            const ev = document.createElement('div');
+            ev.className = 'timeline-event';
+            ev.innerHTML = `
+              <div class="evt-date">${a.date}</div>
+              <div class="evt-type">${a.action_type}</div>
+              <div class="evt-desc">${a.description}</div>
+              ${a.source_url ? '<a href="'+a.source_url+'" target="_blank" rel="noopener" class="evt-src">Source Documentation &nearr;</a>' : ''}
+            `;
+            tline.appendChild(ev);
+          });
+        } else {
+          tline.innerHTML = '<span style="color:var(--text-quaternary); font-size:0.85rem; font-style:italic;">No chronology explicitly mapped.</span>';
+        }
+        
+        modal.classList.add('active');
+      }
+
+      search.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        const filtered = cachedEntities.filter(ent => 
+          ent.display_name.toLowerCase().includes(q) || 
+          ent.primary_role.toLowerCase().includes(q) ||
+          ent.institution.toLowerCase().includes(q)
+        );
+        renderGrid(filtered);
+      });
+
+      // Preferentially load from the template created for the system
+      fetch('data/entities_template.json')
+        .then(res => res.json())
+        .then(data => {
+          cachedEntities = data.entities || [];
+          status.textContent = 'Data Pipeline Sync: OK (' + cachedEntities.length + ' entities parsed)';
+          status.style.color = 'var(--color-green)';
+          renderGrid(cachedEntities);
+        })
+        .catch(err => {
+          status.textContent = 'Waiting for entity JSON pipeline execution.';
+        });
+    })();
+  </script>
+</body>
+</html>

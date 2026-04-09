@@ -559,9 +559,20 @@
         </div>
       </div>
 
-      <!-- ═══ F. CONNECTION TO CRIMINAL CODE ═══ -->
+      <!-- ═══ F. N-VS-NP MATRIX ═══ -->
+      <div class="section-head" id="n-vs-np">
+        <span class="num">05</span> N-vs-NP Empirical Matrix
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-tertiary);margin:0 0 14px;line-height:1.6;">
+        Data hand-off convergence mapping. This matrix visually plots the structural vectors linking the CIJA lobbying pipeline to the unhindered passage of MAID legislation via RCMP command failures.
+      </p>
+      <div class="matrix-wrapper" style="width:100%; height:500px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; margin-bottom:28px;">
+         <canvas id="matrixCanvas"></canvas>
+      </div>
+
+      <!-- ═══ G. CONNECTION TO CRIMINAL CODE ═══ -->
       <div class="section-head">
-        <span class="num">05</span> Related Analysis
+        <span class="num">06</span> Related Analysis
       </div>
       <div class="connect-box">
         <h3>Cross-Reference with Legal Findings</h3>
@@ -647,6 +658,7 @@
       renderTopInfluence();
       renderNetworkStats();
       bindEvents();
+      renderMatrix();
     }
 
     // ═══════════════════════════════════════
@@ -930,6 +942,100 @@
       return d.innerHTML;
     }
 
+    // ═══════════════════════════════════════
+    // F. N-VS-NP MATRIX
+    // ═══════════════════════════════════════
+    function renderMatrix() {
+      var cvs = document.getElementById('matrixCanvas');
+      if (!cvs) return;
+      var ctx = cvs.getContext('2d');
+      var wrap = cvs.parentElement;
+      cvs.width = wrap.clientWidth;
+      cvs.height = wrap.clientHeight;
+
+      var nodes = [
+        { id: 'cija', lbl: 'CIJA Lobbying ($678K)', cx: 0.15, cy: 0.2, type: 'org', col: '#d8b4fe' },
+        { id: 'mendicino', lbl: 'Marco Mendicino (63x Lobbied)', cx: 0.4, cy: 0.3, type: 'official', col: '#93c5fd' },
+        { id: 'paulson', lbl: 'Bob Paulson (RCMP)', cx: 0.65, cy: 0.4, type: 'official', col: '#9ca3af' },
+        { id: 'bill_c14', lbl: 'MAID C-14 Passes (2016)', cx: 0.85, cy: 0.6, type: 'event', col: '#e53555' },
+        
+        { id: 'lantsman', lbl: 'Melissa Lantsman (15x Lobbied)', cx: 0.4, cy: 0.7, type: 'official', col: '#93c5fd' },
+        { id: 'lucki', lbl: 'Brenda Lucki (RCMP)', cx: 0.65, cy: 0.8, type: 'official', col: '#9ca3af' },
+        { id: 'bill_c7', lbl: 'MAID C-7 Passes (2021)', cx: 0.85, cy: 0.9, type: 'event', col: '#e53555' }
+      ];
+
+      var edges = [
+        { from: 0, to: 1 }, { from: 0, to: 4 },
+        { from: 1, to: 2 }, { from: 4, to: 5 },
+        { from: 2, to: 3 }, { from: 5, to: 6 },
+        { from: 3, to: 6, dash: [5,5] } // Legislative expansion
+      ];
+
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        // Draw grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.lineWidth = 1;
+        for (var i=1; i<10; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * (cvs.width/10), 0);
+          ctx.lineTo(i * (cvs.width/10), cvs.height);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, i * (cvs.height/10));
+          ctx.lineTo(cvs.width, i * (cvs.height/10));
+          ctx.stroke();
+        }
+
+        // Draw connections
+        edges.forEach(function(e) {
+          var n1 = nodes[e.from], n2 = nodes[e.to];
+          ctx.beginPath();
+          ctx.moveTo(n1.cx * cvs.width, n1.cy * cvs.height);
+          // quadratic curve for handoff trajectory
+          var midX = ((n1.cx + n2.cx) * cvs.width) / 2;
+          var midY = Math.min(n1.cy, n2.cy) * cvs.height - 50;
+          ctx.quadraticCurveTo(midX, midY, n2.cx * cvs.width, n2.cy * cvs.height);
+          
+          ctx.strokeStyle = 'rgba(196,30,58,0.5)';
+          ctx.lineWidth = 2;
+          if (e.dash) ctx.setLineDash(e.dash);
+          else ctx.setLineDash([]);
+          ctx.stroke();
+        });
+        ctx.setLineDash([]); // reset
+
+        // Draw nodes
+        nodes.forEach(function(n) {
+          var px = n.cx * cvs.width, py = n.cy * cvs.height;
+          
+          // Glow
+          ctx.shadowColor = n.col;
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(px, py, 6, 0, Math.PI*2);
+          ctx.fillStyle = n.col;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Label
+          ctx.fillStyle = '#fff';
+          ctx.font = '11px JetBrains Mono';
+          ctx.textAlign = 'center';
+          ctx.fillText(n.lbl, px, py + 20);
+        });
+      }
+      
+      // Handle resizing
+      window.addEventListener('resize', function() {
+        cvs.width = wrap.clientWidth;
+        cvs.height = wrap.clientHeight;
+        requestAnimationFrame(draw);
+      });
+
+      requestAnimationFrame(draw);
+    }
   })();
   </script>
   <script src="js/ai-panel.js"></script>

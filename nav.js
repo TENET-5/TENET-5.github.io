@@ -27,6 +27,7 @@
       items: [
         { label: 'Investigation Board', href: 'conspiracy-board.html', desc: 'Node graph of influence networks' },
         { label: 'OSINT Dashboard', href: 'osint-dashboard.html', desc: 'Aggregated intelligence data' },
+        { label: 'Entity Profiler', href: 'entity-viewer.html', desc: 'Chronological timeline & documents', hot: true },
         { label: 'Network Analysis', href: 'network-analysis.html', desc: 'Cross-referenced topology', hot: true },
         { label: 'N-vs-NP Matrix', href: 'corruption-map.html#n-vs-np', desc: 'LIRIL Pipeline Convergence', hot: true },
         { label: 'Dossier Viewer', href: 'dossier-viewer.html', desc: 'Generated intelligence dossiers', hot: true },
@@ -45,6 +46,7 @@
         { label: 'Genocide Evidence', href: 'genocide-evidence.html', desc: 'Pattern documentation' },
         { label: 'Policy Harm Index', href: 'harm-index.html', desc: 'Quantified policy damage' },
         { label: 'The Pattern (T4)', href: 't4-comparison.html', desc: 'Historical comparison' },
+        { label: 'RCMP Complicity', href: 'rcmp-complicity.html', desc: 'Law enforcement failure analysis', hot: true },
         { label: 'The Boot', href: 'the-boot.html', desc: 'Institutional mechanics' },
       ]
     },
