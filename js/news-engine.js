@@ -1,270 +1,144 @@
 /**
- * TENET5 Canadian News Intelligence Engine
- *
- * RSS feed aggregation from major Canadian news sources via rss2json.com CORS proxy.
- * Categorization, deduplication, caching, and intelligence report formatting.
- *
- * Exported API (ES module):
- *   fetchAllNews()                  — fetch, parse, dedupe, sort, cache
- *   getCachedNews()                 — return cache or null
- *   categorizeArticle(title, desc)  — keyword classification
+ * Autonomous News Intelligence Engine
+ * Fetches Canadian news RSS via rss2json and uses Vertex AI to generate an intel brief.
  */
 
-// ── RSS Sources ──────────────────────────────────────────────────
 const RSS_FEEDS = [
-  {
-    id: 'cbc-politics',
-    name: 'CBC Politics',
-    source: 'CBC',
-    url: 'https://www.cbc.ca/webfeed/rss/rss-politics'
-  },
-  {
-    id: 'cbc-canada',
-    name: 'CBC Canada',
-    source: 'CBC',
-    url: 'https://www.cbc.ca/webfeed/rss/rss-canada'
-  },
-  {
-    id: 'global-canada',
-    name: 'Global News Canada',
-    source: 'Global',
-    url: 'https://globalnews.ca/canada/feed/'
-  },
-  {
-    id: 'ctv-top',
-    name: 'CTV Top Stories',
-    source: 'CTV',
-    url: 'https://www.ctvnews.ca/rss/ctvnews-ca-top-stories-public-rss-1.822009'
-  }
+  { name: 'CBC Politics', url: 'https://www.cbc.ca/cmlink/rss-politics' },
+  { name: 'CBC Canada', url: 'https://www.cbc.ca/cmlink/rss-canada' },
+  { name: 'Global News CA', url: 'https://globalnews.ca/canada/feed/' }
 ];
 
-// ── rss2json.com CORS proxy ──────────────────────────────────────
-const RSS2JSON_BASE = 'https://api.rss2json.com/v1/api.json?rss_url=';
+let globalHeadlines = [];
 
-// ── Cache Configuration ──────────────────────────────────────────
-const CACHE_KEY = 'tenet5_news_v2';
-const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
-
-// ── Category Keywords ────────────────────────────────────────────
-const CATEGORY_RULES = {
-  'Politics': [
-    'parliament', 'liberal', 'conservative', 'ndp', 'bloc', 'trudeau',
-    'poilievre', 'carney', 'singh', 'election', 'ballot', 'campaign',
-    'caucus', 'senate', 'commons', 'minister', 'prime minister',
-    'political', 'partisan', 'legislation', 'bill c-', 'bill s-',
-    'governor general', 'cabinet', 'opposition', 'riding', 'mp ',
-    'member of parliament', 'house of commons', 'throne speech',
-    'prorogation', 'filibuster', 'whip', 'backbencher'
-  ],
-  'Defence': [
-    'military', 'defence', 'defense', 'armed forces', 'caf',
-    'nato', 'norad', 'frigate', 'submarine', 'fighter jet',
-    'procurement', 'dnd', 'national defence', 'troops', 'deploy',
-    'warfare', 'army', 'navy', 'air force', 'special forces',
-    'peacekeeping', 'veteran', 'soldier', 'battalion', 'regiment'
-  ],
-  'Justice': [
-    'court', 'judge', 'trial', 'prosecution', 'lawsuit', 'rcmp',
-    'police', 'criminal', 'sentence', 'verdict', 'supreme court',
-    'charter', 'rights', 'justice', 'attorney general', 'solicitor',
-    'investigation', 'fraud', 'corruption', 'inquiry', 'commissioner',
-    'csis', 'intelligence', 'warrant', 'bail', 'parole'
-  ],
-  'Foreign Affairs': [
-    'foreign', 'diplomatic', 'embassy', 'ambassador', 'treaty',
-    'sanctions', 'trade deal', 'tariff', 'g7', 'g20', 'united nations',
-    'un ', 'china', 'russia', 'ukraine', 'israel', 'gaza', 'iran',
-    'bilateral', 'multilateral', 'sovereignty', 'arctic', 'border',
-    'immigration', 'refugee', 'asylum', 'deportation', 'visa'
-  ],
-  'Indigenous': [
-    'indigenous', 'first nations', 'inuit', 'metis', 'mtis',
-    'reconciliation', 'residential school', 'treaty', 'reserve',
-    'band council', 'afn', 'assembly of first nations', 'undrip',
-    'murdered missing', 'mmiwg', 'land claim', 'self-governance',
-    'drinking water', 'boil water advisory'
-  ],
-  'Health/MAID': [
-    'maid', 'medical assistance in dying', 'euthanasia', 'assisted dying',
-    'health', 'hospital', 'healthcare', 'doctor', 'nurse', 'pandemic',
-    'vaccine', 'public health', 'mental health', 'opioid', 'overdose',
-    'fentanyl', 'drug', 'pharmacare', 'dental care', 'long-term care',
-    'disability', 'patient', 'diagnosis', 'surgery', 'wait time'
-  ],
-  'Economy': [
-    'economy', 'economic', 'inflation', 'gdp', 'bank of canada',
-    'interest rate', 'recession', 'trade', 'tariff', 'budget',
-    'deficit', 'surplus', 'tax', 'revenue', 'employment',
-    'unemployment', 'jobs', 'housing', 'mortgage', 'real estate',
-    'rent', 'affordability', 'cost of living', 'grocery', 'gas price',
-    'oil', 'energy', 'pipeline', 'stock market', 'dollar'
-  ]
-};
-
-// ── Categorize an article by title + description keywords ────────
-export function categorizeArticle(title, description) {
-  const text = ((title || '') + ' ' + (description || '')).toLowerCase();
-
-  for (const [category, keywords] of Object.entries(CATEGORY_RULES)) {
-    for (const kw of keywords) {
-      if (text.includes(kw)) {
-        return category;
+async function fetchNews() {
+  const container = document.getElementById('news-feed');
+  container.innerHTML = '<div style="text-align:center; padding: 2rem; color: #9ca3af;">Scanning networks...</div>';
+  
+  let allItems = [];
+  
+  for (const feed of RSS_FEEDS) {
+    try {
+      // Using rss2json proxy to bypass CORS
+      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`);
+      const data = await res.json();
+      
+      if (data.status === 'ok') {
+        const items = data.items.slice(0, 8).map(item => ({
+          title: item.title,
+          link: item.link,
+          date: new Date(item.pubDate),
+          source: feed.name
+        }));
+        allItems = allItems.concat(items);
       }
-    }
-  }
-  return 'Other';
-}
-
-// ── Strip HTML tags from a string ────────────────────────────────
-function stripHtml(html) {
-  if (!html) return '';
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-}
-
-// ── Normalize title for deduplication ────────────────────────────
-function normalizeTitle(title) {
-  return (title || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 60);
-}
-
-// ── Fetch a single RSS feed via rss2json.com ─────────────────────
-async function fetchFeed(feed) {
-  const url = RSS2JSON_BASE + encodeURIComponent(feed.url);
-
-  try {
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(12000)
-    });
-
-    if (!response.ok) {
-      console.warn('[NewsEngine] HTTP ' + response.status + ' for ' + feed.name);
-      return [];
-    }
-
-    const data = await response.json();
-
-    if (data.status !== 'ok' || !Array.isArray(data.items)) {
-      console.warn('[NewsEngine] Bad response from ' + feed.name);
-      return [];
-    }
-
-    return data.items.map(function (item) {
-      const desc = stripHtml(item.description || '');
-      const title = (item.title || '').trim();
-      const thumbnail = item.thumbnail || item.enclosure?.link || '';
-
-      return {
-        title: title,
-        link: item.link || '',
-        pubDate: item.pubDate || new Date().toISOString(),
-        source: feed.source,
-        description: desc,
-        thumbnail: thumbnail,
-        category: categorizeArticle(title, desc)
-      };
-    });
-  } catch (err) {
-    console.warn('[NewsEngine] Failed to fetch ' + feed.name + ':', err.message);
-    return [];
-  }
-}
-
-// ── Deduplicate articles by normalized title similarity ──────────
-function deduplicateArticles(articles) {
-  const seen = new Set();
-  const unique = [];
-
-  for (const article of articles) {
-    const key = normalizeTitle(article.title);
-    if (key.length < 10) {
-      unique.push(article);
-      continue;
-    }
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(article);
+    } catch (err) {
+      console.error(`Failed to fetch ${feed.name}:`, err);
     }
   }
 
-  return unique;
+  // Sort chronologically (newest first)
+  allItems.sort((a, b) => b.date - a.date);
+  
+  // Keep top 20
+  globalHeadlines = allItems.slice(0, 20);
+  
+  renderNews();
 }
 
-// ── Sort articles by publication date (newest first) ─────────────
-function sortByDate(articles) {
-  return articles.sort(function (a, b) {
-    return new Date(b.pubDate) - new Date(a.pubDate);
+function renderNews() {
+  const container = document.getElementById('news-feed');
+  if (globalHeadlines.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding: 2rem; color: #c41e3a;">Failed to retrieve news items.</div>';
+    return;
+  }
+  
+  let html = '';
+  globalHeadlines.forEach(item => {
+    html += `
+      <div class="news-item">
+        <div class="news-item-source">${item.source}</div>
+        <h3 class="news-item-title"><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
+        <div class="news-item-date">${item.date.toLocaleString()}</div>
+      </div>
+    `;
   });
+  
+  container.innerHTML = html;
 }
 
-// ── Cache: read ──────────────────────────────────────────────────
-export function getCachedNews() {
+async function generateAI_Brief() {
+  const contentDiv = document.getElementById('ai-brief-content');
+  const statusBadge = document.getElementById('brief-status');
+  const btn = document.getElementById('btn-generate-brief');
+
+  if (!window._t5firebaseVertexAI) {
+    alert("Firebase Vertex AI is not initialized. Are you signed in with Google?");
+    return;
+  }
+
+  if (globalHeadlines.length === 0) {
+    alert("No headlines to analyze.");
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.innerHTML = 'Analyzing...';
+  statusBadge.className = 'status-badge status-analyzing';
+  statusBadge.textContent = 'ANALYZING';
+  statusBadge.style.color = '#f5a623';
+  statusBadge.style.background = 'rgba(245, 166, 35, 0.1)';
+  statusBadge.style.borderColor = 'rgba(245, 166, 35, 0.2)';
+
+  let headlinesText = globalHeadlines.map(h => `- [${h.source}] ${h.title}`).join('\\n');
+  
+  const prompt = `You are the TENET5 autonomous intelligence engine. Analyze the following current Canadian headlines and write a structured "Intelligence Brief". Focus on major shifts, accountability issues, human rights, and governance anomalies.
+  
+Headlines:
+${headlinesText}
+
+Format the response using Markdown. Include exactly these sections:
+### 1. MACRO THEMES
+(Identify 2-3 major overlapping themes in the news today)
+### 2. ACCOUNTABILITY WATCH
+(Identify any accountability issues, policy changes, or political controversies)
+### 3. FORWARD IMPACT
+(What these events mean for the Canadian public in the short term)
+  
+Do not hallucinate. Only use the provided headlines. Make it professional and analytical.`;
+
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-
-    const cached = JSON.parse(raw);
-    const age = Date.now() - (cached.timestamp || 0);
-
-    if (age > CACHE_TTL) {
-      localStorage.removeItem(CACHE_KEY);
-      return null;
+    const model = window._t5firebaseVertexAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    
+    // Convert Markdown to HTML
+    if (window.marked) {
+      contentDiv.innerHTML = window.marked.parse(text);
+    } else {
+      contentDiv.innerHTML = `<pre style="white-space:pre-wrap; font-family:inherit;">${text}</pre>`;
     }
-
-    return cached.articles || null;
-  } catch (e) {
-    return null;
+    
+    statusBadge.className = 'status-badge status-live';
+    statusBadge.textContent = 'ANALYSIS COMPLETE';
+    statusBadge.style.color = '#00ff80';
+    statusBadge.style.background = 'rgba(0, 255, 128, 0.1)';
+    statusBadge.style.borderColor = 'rgba(0, 255, 128, 0.2)';
+    
+  } catch (err) {
+    console.error("AI Brief generation failed", err);
+    contentDiv.innerHTML = `<div style="color:#c41e3a; text-align:center;">Brief generation failed: ${err.message}. Ensure you are signed in and Firebase Auth is configured.</div>`;
+    statusBadge.textContent = 'ERROR';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Regenerate Brief';
   }
 }
 
-// ── Cache: write ─────────────────────────────────────────────────
-function setCachedNews(articles) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      articles: articles,
-      timestamp: Date.now()
-    }));
-  } catch (e) {
-    // localStorage full or disabled — silent
+document.addEventListener('DOMContentLoaded', () => {
+  fetchNews();
+  const btn = document.getElementById('btn-generate-brief');
+  if (btn) {
+    btn.addEventListener('click', generateAI_Brief);
   }
-}
-
-// ── Main entry point: fetch all feeds, dedupe, sort, cache ───────
-export async function fetchAllNews() {
-  // Return cache if valid
-  const cached = getCachedNews();
-  if (cached && cached.length > 0) {
-    return cached;
-  }
-
-  // Fetch all feeds in parallel
-  const results = await Promise.allSettled(
-    RSS_FEEDS.map(function (feed) {
-      return fetchFeed(feed);
-    })
-  );
-
-  // Flatten successful results
-  let allArticles = [];
-  for (const result of results) {
-    if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-      allArticles = allArticles.concat(result.value);
-    }
-  }
-
-  // Deduplicate and sort
-  allArticles = deduplicateArticles(allArticles);
-  allArticles = sortByDate(allArticles);
-
-  // Cache results
-  if (allArticles.length > 0) {
-    setCachedNews(allArticles);
-  }
-
-  return allArticles;
-}
+});

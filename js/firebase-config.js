@@ -4,6 +4,7 @@
  * All client-side — works on GitHub Pages with zero backend.
  */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getVertexAI, getGenerativeModel } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-vertexai-preview.js';
 import { getAuth, GoogleAuthProvider, TwitterAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
@@ -19,13 +20,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const vertexAI = getVertexAI(app);
 const googleProvider = new GoogleAuthProvider();
 const twitterProvider = new TwitterAuthProvider();
+
+if (isConfigured()) {
+  try { window._t5firebaseVertexAI = { vertexAI, getGenerativeModel }; } catch (e) {}
+}
 
 function isConfigured() { return firebaseConfig.apiKey !== "PLACEHOLDER_API_KEY"; }
 
 export {
-  app, auth, db, googleProvider, twitterProvider,
+  app, auth, db, vertexAI, getGenerativeModel, googleProvider, twitterProvider,
   signInWithPopup, signOut, onAuthStateChanged,
   collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp,
   doc, setDoc, getDoc, isConfigured
