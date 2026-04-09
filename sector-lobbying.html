@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Who Lobbies Canada — 359,251 Contacts by Industry | TENET5</title>
-  <meta name="description" content="Complete breakdown of 359,251 registered lobbying communications by industry. Every sector's top organizations and government targets. The regulated lobby the regulator.">
-  <meta property="og:title" content="Who Lobbies Canada — 359,251 Contacts by Industry">
-  <meta property="og:description" content="Oil 10,794. Banking 7,497. Pharma 4,776. Israel 2,176 (539 per org — 22x China). The regulated lobby the regulator.">
+  <title>Sector Lobbying Dashboard — 359,251 Communications | TENET5</title>
+  <meta name="description" content="Complete breakdown of 359,251 registered lobbying communications across 12 industry sectors. Deep-dive analysis of Oil &amp; Gas, Banking, Pharma, and Big Tech lobbying patterns in Canada.">
+  <meta property="og:title" content="Sector Lobbying Dashboard — 359,251 Communications">
+  <meta property="og:description" content="12 sectors. 359,251 registered contacts. Every sector's #1 target is the government body that regulates it.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/sector-lobbying.html">
   <meta name="twitter:card" content="summary">
   <link rel="stylesheet" href="style.css?v=5">
   <meta name="theme-color" content="#1a1f36">
@@ -14,32 +16,575 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    /* ── Layout ──────────────────────────────────────────── */
+    .sl-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      color: var(--text-primary);
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .sl-header {
+      text-align: center;
+      padding: 48px 0 24px;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.4);
+      margin-bottom: 32px;
+    }
+    .sl-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: var(--text-primary);
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+    .sl-header .subtitle {
+      font-size: 0.88rem;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .sl-header .source-line {
+      font-size: 0.72rem;
+      color: var(--text-quaternary);
+      margin-top: 10px;
+    }
+    .sl-header .source-line a { color: var(--text-tertiary); }
+
+    /* ── Hero Stats ─────────────────────────────────────── */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+    .hero-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 14px;
+      text-align: center;
+      transition: border-color 0.2s ease;
+    }
+    .hero-stat:hover { border-color: rgba(196, 30, 58, 0.3); }
+    .hero-stat .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      display: block;
+      line-height: 1.1;
+    }
+    .hero-stat .num.accent { color: var(--accent); }
+    .hero-stat .num.blue { color: #2563eb; }
+    .hero-stat .num.gold { color: #d97706; }
+    .hero-stat .num.green { color: #059669; }
+    .hero-stat .label {
+      font-size: 0.62rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Pull Quote ─────────────────────────────────────── */
+    .sl-pullquote {
+      background: rgba(196, 30, 58, 0.04);
+      border-left: 4px solid var(--accent);
+      padding: 18px 24px;
+      margin-bottom: 36px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* ── LIRIL Attribution ──────────────────────────────── */
+    .liril-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+    .liril-bar a { color: var(--color-blue); }
+
+    /* ── Section Headers ────────────────────────────────── */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+      color: var(--text-primary);
+      margin: 40px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+
+    /* ── Bar Chart ──────────────────────────────────────── */
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 130px 1fr 80px;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+    .bar-row .bar-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bar-row .bar-track {
+      height: 28px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-row .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      min-width: 2px;
+    }
+    .bar-row .bar-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+    }
+
+    /* ── Sector Cards ───────────────────────────────────── */
+    .sector-cards { margin-bottom: 36px; }
+    .sector-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s ease;
+    }
+    .sector-card:hover { border-color: rgba(196, 30, 58, 0.25); }
+    .sector-card-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .sector-card-header:hover { background: var(--bg-surface); }
+    .sector-card .sc-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .sector-card .sc-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex: 1;
+    }
+    .sector-card .sc-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      text-align: right;
+      display: flex;
+      gap: 16px;
+    }
+    .sector-card .sc-meta .sc-comms { color: var(--accent); font-weight: 600; }
+    .sector-card .sc-chevron {
+      color: var(--text-quaternary);
+      font-size: 0.8rem;
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+    .sector-card.open .sc-chevron { transform: rotate(180deg); }
+    .sector-card-body {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .sector-card.open .sector-card-body { display: block; }
+
+    /* ── Deep Dive Internals ────────────────────────────── */
+    .deep-section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-quaternary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 16px 0 8px;
+    }
+    .org-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 6px;
+    }
+    .org-pill {
+      font-size: 0.72rem;
+      padding: 6px 10px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .org-pill .org-name { color: var(--text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .org-pill .org-count { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-primary); flex-shrink: 0; }
+
+    .target-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .target-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      padding: 4px 10px;
+      background: rgba(196, 30, 58, 0.06);
+      border: 1px solid rgba(196, 30, 58, 0.15);
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+    .target-tag strong { color: var(--accent); }
+
+    .pattern-note {
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      font-style: italic;
+      line-height: 1.6;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(196, 30, 58, 0.03);
+      border-radius: 6px;
+      border-left: 3px solid rgba(196, 30, 58, 0.2);
+    }
+
+    /* ── Cross-Reference Section ────────────────────────── */
+    .xref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .xref-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .xref-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .xref-card p {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+    }
+    .xref-card .xref-sectors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .xref-tag {
+      font-size: 0.62rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 8px;
+      background: var(--bg-surface);
+      border-radius: 3px;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Criminal Code Section ──────────────────────────── */
+    .cc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .cc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 16px;
+    }
+    .cc-card .cc-section {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .cc-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+    .cc-card p {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+    }
+
+    /* ── Comparison Table ───────────────────────────────── */
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-bottom: 36px;
+    }
+    .comp-table th {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .comp-table th:hover { color: var(--text-primary); }
+    .comp-table th.num-col { text-align: right; }
+    .comp-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .comp-table tr:hover td { background: rgba(196, 30, 58, 0.02); }
+    .comp-table .sector-name { font-weight: 600; }
+    .comp-table .num-col { text-align: right; font-family: 'JetBrains Mono', monospace; }
+    .comp-table .highlight-row td { color: var(--accent); font-weight: 700; }
+    .comp-table .per-org-bar {
+      display: inline-block;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--accent);
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── Concentration Index ────────────────────────────── */
+    .conc-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .conc-bar {
+      width: 60px;
+      height: 8px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .conc-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    /* ── Source Note ─────────────────────────────────────── */
+    .source-note {
+      font-size: 0.7rem;
+      color: var(--text-quaternary);
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      line-height: 1.7;
+    }
+    .source-note a { color: var(--text-tertiary); }
+
+    /* ── Share Bar ───────────────────────────────────────── */
+    .share-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .bar-row { grid-template-columns: 90px 1fr 60px; }
+      .bar-row .bar-label { font-size: 0.65rem; }
+      .sector-card .sc-meta { flex-direction: column; gap: 2px; }
+      .org-grid { grid-template-columns: 1fr; }
+      .xref-grid { grid-template-columns: 1fr; }
+      .cc-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
   <nav id="site-nav"></nav>
 
-  <div style="max-width:960px;margin:0 auto;padding:var(--s-lg) var(--s-md);">
+  <div class="sl-wrap">
 
-    <header class="page-header" style="text-align:left;border-bottom:none;padding-left:0;">
-      <h1 style="font-size:var(--text-4xl);">Who Lobbies Canada</h1>
-      <p class="page-subtitle" style="text-align:left;margin:0;">359,251 registered lobbying communications broken down by industry. Every sector's top organizations and their government targets.</p>
-      <p class="page-meta" style="text-align:left;">Source: Commissioner of Lobbying raw CSV (57MB) | Mined by <a href="liril.html">LIRIL</a></p>
+    <!-- LIRIL Attribution -->
+    <div class="liril-bar">
+      <span style="font-size:1.2rem;">&#129302;</span>
+      <p style="margin:0;"><a href="liril.html">LIRIL</a> mined 57MB of raw lobbying CSVs from the Commissioner of Lobbying, classified 359,251 communications across 12 sectors, and identified lobbying concentration patterns.</p>
+    </div>
+
+    <!-- Header -->
+    <header class="sl-header">
+      <h1>Sector Lobbying Dashboard</h1>
+      <p class="subtitle">359,251 registered lobbying communications broken down across 12 industry sectors. Every sector, every organization, every government target. The regulated lobby the regulator.</p>
+      <p class="source-line">Source: <a href="https://lobbycanada.gc.ca/en/open-data/">Commissioner of Lobbying of Canada</a> &mdash; Communication_PrimaryExport.csv + Communication_DpohExport.csv (57MB) | Mined by <a href="liril.html">LIRIL</a></p>
     </header>
 
-    <div class="stat-row" style="margin-bottom:var(--s-lg);">
-      <div class="stat-card"><span class="stat-number">359K</span><div class="stat-label">Total Contacts</div></div>
-      <div class="stat-card"><span class="stat-number blue">20K</span><div class="stat-label">PMO Contacts</div></div>
-      <div class="stat-card"><span class="stat-number gold">18K</span><div class="stat-label">Senate Contacts</div></div>
-      <div class="stat-card"><span class="stat-number">539</span><div class="stat-label">Israel per Org</div></div>
+    <!-- Hero Stats -->
+    <div class="hero-stats" id="hero-stats">
+      <div class="hero-stat"><span class="num accent">359,251</span><div class="label">Total Communications</div></div>
+      <div class="hero-stat"><span class="num blue">12</span><div class="label">Sectors Tracked</div></div>
+      <div class="hero-stat"><span class="num gold" id="h-orgs">--</span><div class="label">Organizations</div></div>
+      <div class="hero-stat"><span class="num green" id="h-avg">--</span><div class="label">Avg per Org</div></div>
+      <div class="hero-stat"><span class="num accent">539</span><div class="label">Israel per Org</div></div>
     </div>
 
-    <div class="pull-quote" style="margin-bottom:var(--s-xl);">Every sector's #1 lobbying target is the government body that regulates it.</div>
-
-    <div id="sector-list"></div>
-
-    <div style="font-size:var(--text-xs);color:var(--text-quaternary);padding:var(--s-md);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);margin-top:var(--s-lg);line-height:1.7;">
-      <strong>Source:</strong> <a href="https://lobbycanada.gc.ca/en/open-data/" style="color:var(--text-tertiary);">Commissioner of Lobbying of Canada</a> — Communication_PrimaryExport.csv + Communication_DpohExport.csv (57MB combined). All data from public government records. Lobbying is legal and registered in Canada. Being lobbied does not imply wrongdoing. <a href="about.html" style="color:var(--text-tertiary);">Methodology.</a>
+    <!-- Pull Quote -->
+    <div class="sl-pullquote">
+      Every sector's #1 lobbying target is the government body that regulates it. Oil lobbies NRCan. Banks lobby Finance. Pharma lobbies Health Canada. The pattern is universal.
     </div>
+
+    <!-- Share Bar -->
+    <div id="share-bar"></div>
+
+    <!-- ═══ SECTOR BAR CHART ═══ -->
+    <h2 class="section-title">Communications by Sector</h2>
+    <div class="bar-chart" id="sector-bars"></div>
+
+    <!-- ═══ EXPANDABLE SECTOR CARDS ═══ -->
+    <h2 class="section-title">Sector Deep Dives</h2>
+    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:-12px 0 16px;">Click any sector to expand detailed analysis with top organizations, government targets, and lobbying patterns.</p>
+    <div class="sector-cards" id="sector-cards"></div>
+
+    <!-- ═══ COMPARISON TABLE ═══ -->
+    <h2 class="section-title">Full Sector Comparison</h2>
+    <table class="comp-table" id="comp-table">
+      <thead>
+        <tr>
+          <th data-sort="name">Sector</th>
+          <th class="num-col" data-sort="comms">Communications</th>
+          <th class="num-col" data-sort="orgs">Organizations</th>
+          <th class="num-col" data-sort="per">Per Org</th>
+          <th data-sort="conc">Concentration</th>
+        </tr>
+      </thead>
+      <tbody id="comp-tbody"></tbody>
+    </table>
+
+    <!-- ═══ CROSS-REFERENCE: LOBBYING vs BILL CATEGORIES ═══ -->
+    <h2 class="section-title">Cross-Reference: Lobbying Sectors vs Bill Categories</h2>
+    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:-12px 0 16px;">Which parliamentary bill categories align with which lobbying sectors? When a sector lobbies heavily and bills in that domain pass, the connection is worth examining.</p>
+    <div class="xref-grid">
+      <div class="xref-card">
+        <h4>Finance Bills (17 tracked)</h4>
+        <p>17 finance-related bills in the 45th Parliament. The banking sector made 7,497 lobbying contacts with Finance Canada (3,703), OSFI (884), and PMO (308).</p>
+        <div class="xref-sectors"><span class="xref-tag">Banking: 7,497</span><span class="xref-tag">Insurance: 1,483</span></div>
+      </div>
+      <div class="xref-card">
+        <h4>Healthcare Bills (13 tracked)</h4>
+        <p>13 healthcare bills. Pharma lobbied Health Canada 1,611 times and the Public Health Agency 232 times. 115 pharmaceutical organizations registered.</p>
+        <div class="xref-sectors"><span class="xref-tag">Pharma: 4,776</span></div>
+      </div>
+      <div class="xref-card">
+        <h4>Environment Bills (6 tracked)</h4>
+        <p>6 environment bills. Oil and Gas lobbied Environment and Climate Change Canada 1,924 times while simultaneously targeting NRCan 4,609 times for approvals.</p>
+        <div class="xref-sectors"><span class="xref-tag">Oil &amp; Gas: 10,794</span><span class="xref-tag">Mining: 5,253</span></div>
+      </div>
+      <div class="xref-card">
+        <h4>Technology Bills (5 tracked)</h4>
+        <p>5 technology bills. Big Tech lobbied Heritage (530 contacts) and ISED as C-9 (Online Harms Act) was being debated. CIJA lobbied for the same bill.</p>
+        <div class="xref-sectors"><span class="xref-tag">Big Tech: 3,527</span><span class="xref-tag">Telecom: 5,338</span></div>
+      </div>
+      <div class="xref-card">
+        <h4>Trade Bills (7 tracked)</h4>
+        <p>7 trade-related bills. Agriculture (16,222 contacts) dominates trade lobbying. Ag Canada is the most-lobbied department in the entire dataset.</p>
+        <div class="xref-sectors"><span class="xref-tag">Agriculture: 16,222</span></div>
+      </div>
+      <div class="xref-card">
+        <h4>Defense Bills (4 tracked)</h4>
+        <p>4 defense bills. The defense sector made 2,534 lobbying contacts, primarily targeting the Department of National Defence.</p>
+        <div class="xref-sectors"><span class="xref-tag">Defense: 2,534</span></div>
+      </div>
+      <div class="xref-card">
+        <h4>Justice Bills (31 tracked)</h4>
+        <p>The largest bill category (31 bills). The Israel Lobby's 2,176 contacts relate to hate speech legislation (C-9). 4 organizations generating 539 contacts each is the highest per-org concentration of any sector.</p>
+        <div class="xref-sectors"><span class="xref-tag">Israel Lobby: 2,176</span><span class="xref-tag">Big Tech: 3,527</span></div>
+      </div>
+      <div class="xref-card">
+        <h4>Governance Bills (7 tracked)</h4>
+        <p>7 governance bills on electoral and institutional reform. Multiple sectors target PMO and PCO on governance matters, but no single sector dominates this category.</p>
+        <div class="xref-sectors"><span class="xref-tag">Cross-sector PMO targeting</span></div>
+      </div>
+    </div>
+
+    <!-- ═══ CRIMINAL CODE IMPLICATIONS ═══ -->
+    <h2 class="section-title">Criminal Code Implications</h2>
+    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:-12px 0 16px;">When lobbying patterns show systemic concentration where the regulated lobby the regulator, several Criminal Code provisions become relevant.</p>
+    <div class="cc-grid">
+      <div class="cc-card">
+        <div class="cc-section">Criminal Code s. 119</div>
+        <h4>Bribery of Judicial Officers &amp; Officials</h4>
+        <p>Prohibits offering or accepting consideration for official acts. When a single sector contacts its own regulator thousands of times, the line between access and influence warrants scrutiny.</p>
+      </div>
+      <div class="cc-card">
+        <div class="cc-section">Criminal Code s. 121</div>
+        <h4>Frauds on the Government</h4>
+        <p>Prohibits offering benefits to government officials. The revolving door between lobbied departments and lobby organizations creates structural conflicts of interest that s. 121 was designed to address.</p>
+      </div>
+      <div class="cc-card">
+        <div class="cc-section">Criminal Code s. 122</div>
+        <h4>Breach of Trust by Public Officer</h4>
+        <p>When officials make decisions favouring the exact sectors that lobby them most intensively, s. 122 applies. Oil lobbied NRCan 4,609 times; NRCan approved pipelines that went billions over budget.</p>
+      </div>
+      <div class="cc-card">
+        <div class="cc-section">Criminal Code s. 380</div>
+        <h4>Fraud (General)</h4>
+        <p>Applies when lobbying leads to procurement or regulatory outcomes that defraud the public. The Trans Mountain pipeline cost overrun from $5.4B to $34.2B while its proponent lobbied NRCan and PMO extensively.</p>
+      </div>
+      <div class="cc-card">
+        <div class="cc-section">Lobbying Act s. 10.11</div>
+        <h4>Designated Public Office Holders</h4>
+        <p>All communications with designated officials must be reported. The data shows reporting compliance, but the concentration patterns reveal whether the Act achieves its transparency goal or merely documents regulatory capture.</p>
+      </div>
+      <div class="cc-card">
+        <div class="cc-section">Criminal Code s. 465</div>
+        <h4>Conspiracy</h4>
+        <p>When multiple organizations within a sector coordinate lobbying to the same targets on the same issues, the question of concerted action arises. The banking sector's coordinated targeting of Finance Canada is a case study.</p>
+      </div>
+    </div>
+
+    <!-- Source Note -->
+    <div class="source-note">
+      <strong>Source:</strong> <a href="https://lobbycanada.gc.ca/en/open-data/">Commissioner of Lobbying of Canada</a> &mdash; Communication_PrimaryExport.csv + Communication_DpohExport.csv (57MB combined). All data from public government records. Lobbying is legal and registered in Canada. Being lobbied does not imply wrongdoing. Criminal Code sections cited for structural context, not accusation. <a href="about.html">Methodology.</a>
+    </div>
+
   </div>
 
   <script src="nav.js?v=7"></script>
@@ -47,102 +592,228 @@
   <footer id="site-footer"></footer>
   <script src="readnext.js?v=2"></script>
   <script src="footer.js?v=1"></script>
+  <script src="share.js?v=1"></script>
+  <script src="js/ai-panel.js"></script>
   <script>
   (function() {
     'use strict';
+
+    var SECTOR_META = {
+      'Agriculture':      { icon: '\uD83C\uDF3E', color: '#059669' },
+      'Oil & Gas':        { icon: '\uD83D\uDEE2\uFE0F', color: '#d97706' },
+      'Banking':          { icon: '\uD83C\uDFE6', color: '#2563eb' },
+      'Telecom':          { icon: '\uD83D\uDCF1', color: '#7c3aed' },
+      'Mining':           { icon: '\u26CF\uFE0F', color: '#6b7280' },
+      'Pharma':           { icon: '\uD83D\uDC8A', color: '#059669' },
+      'Big Tech':         { icon: '\uD83D\uDCBB', color: '#7c3aed' },
+      'Defense':          { icon: '\uD83D\uDEE1\uFE0F', color: '#6b7280' },
+      'Israel Lobby':     { icon: '\uD83C\uDDEE\uD83C\uDDF1', color: '#c41e3a' },
+      'Insurance':        { icon: '\uD83D\uDCCA', color: '#2563eb' },
+      'China Connected':  { icon: '\uD83C\uDDE8\uD83C\uDDF3', color: '#dc2626' },
+      'Real Estate':      { icon: '\uD83C\uDFE0', color: '#d97706' }
+    };
+
+    var DEEP_KEYS = {
+      'Oil & Gas': 'oil_gas_deep',
+      'Banking': 'banking_deep',
+      'Pharma': 'pharma_deep',
+      'Big Tech': 'big_tech_deep'
+    };
+
     fetch('data/sector_lobbying_analysis.json').then(function(r) { return r.json(); }).then(function(d) {
-      var list = document.getElementById('sector-list');
-      var html = '';
 
-      // Sector cards with deep data
-      var sectors = [
-        { key: 'oil_gas_deep', name: 'Oil & Gas', icon: '🛢', color: 'var(--color-warning)' },
-        { key: 'banking_deep', name: 'Banking & Finance', icon: '🏦', color: 'var(--color-blue)' },
-        { key: 'pharma_deep', name: 'Pharmaceutical', icon: '💊', color: 'var(--color-green)' },
-        { key: 'big_tech_deep', name: 'Big Tech', icon: '💻', color: '#7c3aed' },
-      ];
+      // ── Compute totals ──
+      var sectors = d.sectors;
+      var sectorNames = Object.keys(sectors);
+      var totalOrgs = 0;
+      sectorNames.forEach(function(k) { totalOrgs += sectors[k].orgs; });
+      var avgPerOrg = Math.round(d.total_comms / totalOrgs);
 
-      sectors.forEach(function(s) {
-        var data = d[s.key];
-        if (!data) return;
+      document.getElementById('h-orgs').textContent = totalOrgs.toLocaleString();
+      document.getElementById('h-avg').textContent = avgPerOrg.toLocaleString();
 
-        html += '<div style="background:var(--bg-card);border:1px solid var(--border);border-left:4px solid ' + s.color + ';border-radius:0 var(--r-md) var(--r-md) 0;padding:var(--s-md);margin-bottom:var(--s-md);">';
-        html += '<h2 style="font-family:var(--font-headline);font-size:var(--text-2xl);margin-bottom:var(--s-xs);">' + s.icon + ' ' + s.name + '</h2>';
-        html += '<p style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--accent);margin-bottom:var(--s-sm);"><strong>' + data.total_comms.toLocaleString() + '</strong> communications from <strong>' + data.organizations + '</strong> organizations</p>';
+      // ── Sort sectors by comms descending ──
+      var sorted = sectorNames.slice().sort(function(a, b) { return sectors[b].comms - sectors[a].comms; });
+      var maxComms = sectors[sorted[0]].comms;
 
-        // Top orgs
-        if (data.top) {
-          html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--s-xs);margin-bottom:var(--s-sm);">';
-          data.top.slice(0, 6).forEach(function(org) {
-            html += '<div style="font-size:var(--text-xs);padding:6px 10px;background:var(--bg-surface);border-radius:var(--r-sm);"><strong style="color:var(--text-primary);">' + org.comms.toLocaleString() + '</strong> <span style="color:var(--text-tertiary);">' + org.name + '</span></div>';
-          });
-          html += '</div>';
-        }
+      // ── Bar Chart ──
+      var barsHTML = '';
+      sorted.forEach(function(name) {
+        var s = sectors[name];
+        var meta = SECTOR_META[name] || { icon: '\u2022', color: '#6b7280' };
+        var pct = (s.comms / maxComms * 100).toFixed(1);
+        barsHTML += '<div class="bar-row">';
+        barsHTML += '<span class="bar-label" title="' + name + '">' + meta.icon + ' ' + name + '</span>';
+        barsHTML += '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + meta.color + ';"></div></div>';
+        barsHTML += '<span class="bar-value">' + s.comms.toLocaleString() + '</span>';
+        barsHTML += '</div>';
+      });
+      document.getElementById('sector-bars').innerHTML = barsHTML;
 
-        // Targets
-        if (data.targets) {
-          html += '<div style="font-size:var(--text-xs);color:var(--text-tertiary);line-height:1.8;">';
-          html += '<strong style="color:var(--text-secondary);">Top targets:</strong> ';
-          var targetList = [];
-          if (typeof data.targets === 'object') {
-            Object.entries(data.targets).slice(0, 4).forEach(function(t) {
-              targetList.push(t[0] + ' (' + t[1].toLocaleString() + ')');
+      // ── Sector Cards ──
+      var cardsHTML = '';
+      sorted.forEach(function(name) {
+        var s = sectors[name];
+        var meta = SECTOR_META[name] || { icon: '\u2022', color: '#6b7280' };
+        var perOrg = s.orgs > 0 ? Math.round(s.comms / s.orgs) : 0;
+        var deepKey = DEEP_KEYS[name];
+        var deep = deepKey ? d[deepKey] : null;
+
+        cardsHTML += '<div class="sector-card" style="border-left:3px solid ' + meta.color + ';">';
+        cardsHTML += '<div class="sector-card-header" onclick="this.parentElement.classList.toggle(\'open\')">';
+        cardsHTML += '<span class="sc-icon">' + meta.icon + '</span>';
+        cardsHTML += '<span class="sc-name">' + name + '</span>';
+        cardsHTML += '<div class="sc-meta"><span class="sc-comms">' + s.comms.toLocaleString() + ' comms</span><span>' + s.orgs + ' orgs</span><span>' + perOrg + '/org</span></div>';
+        cardsHTML += '<span class="sc-chevron">\u25BC</span>';
+        cardsHTML += '</div>';
+
+        cardsHTML += '<div class="sector-card-body">';
+
+        if (deep) {
+          // Top organizations
+          var topList = deep.top || deep.top_lobbyists || [];
+          if (topList.length) {
+            cardsHTML += '<div class="deep-section-label">Top Organizations</div>';
+            cardsHTML += '<div class="org-grid">';
+            topList.forEach(function(org) {
+              cardsHTML += '<div class="org-pill"><span class="org-name">' + org.name + '</span><span class="org-count">' + org.comms.toLocaleString() + '</span></div>';
+            });
+            cardsHTML += '</div>';
+          }
+
+          // Targets
+          var targets = deep.targets || deep.targets_by_institution || {};
+          var targetKeys = Object.keys(targets);
+          if (targetKeys.length) {
+            cardsHTML += '<div class="deep-section-label">Government Targets</div>';
+            cardsHTML += '<div class="target-list">';
+            targetKeys.forEach(function(t) {
+              cardsHTML += '<span class="target-tag">' + t + ' <strong>' + targets[t].toLocaleString() + '</strong></span>';
+            });
+            cardsHTML += '</div>';
+          }
+
+          // Cross references
+          if (deep.cross_reference) {
+            cardsHTML += '<div class="deep-section-label">Cross-References</div>';
+            Object.keys(deep.cross_reference).forEach(function(k) {
+              cardsHTML += '<p style="font-size:0.72rem;color:var(--text-tertiary);margin-bottom:4px;"><strong style="color:var(--text-secondary);">' + k.replace(/_/g, ' ') + ':</strong> ' + deep.cross_reference[k] + '</p>';
             });
           }
-          html += targetList.join(' | ');
-          html += '</div>';
+
+          // Pattern
+          if (deep.pattern) {
+            cardsHTML += '<div class="pattern-note">' + deep.pattern + '</div>';
+          }
+
+          // Special notes
+          if (deep.transcanada_note) {
+            cardsHTML += '<div class="pattern-note" style="border-left-color:#d97706;">' + deep.transcanada_note + '</div>';
+          }
+          if (deep.timeline_surge) {
+            cardsHTML += '<p style="font-size:0.72rem;color:var(--text-tertiary);margin-top:8px;">Lobbying volume: <strong style="color:var(--text-primary);">' + deep.timeline_surge + '</strong></p>';
+          }
+        } else {
+          // Basic card for sectors without deep data
+          cardsHTML += '<p style="font-size:0.78rem;color:var(--text-tertiary);padding:8px 0;">';
+          cardsHTML += '<strong>' + s.comms.toLocaleString() + '</strong> registered communications from <strong>' + s.orgs + '</strong> organizations. ';
+          cardsHTML += 'Average of <strong>' + perOrg + '</strong> communications per organization.';
+          cardsHTML += '</p>';
+
+          // Israel Lobby special
+          if (name === 'Israel Lobby') {
+            cardsHTML += '<div class="deep-section-label">Government Targets</div>';
+            cardsHTML += '<div class="target-list">';
+            cardsHTML += '<span class="target-tag">House of Commons <strong>1,664</strong></span>';
+            cardsHTML += '<span class="target-tag">PMO <strong>186</strong></span>';
+            cardsHTML += '<span class="target-tag">Global Affairs <strong>158</strong></span>';
+            cardsHTML += '<span class="target-tag">Senate <strong>100</strong></span>';
+            cardsHTML += '</div>';
+            cardsHTML += '<div class="pattern-note">4 organizations generate 539 communications each &mdash; the most concentrated lobbying of any sector. The per-org rate is 22x that of China-connected organizations. CIJA CEO is the #2 individual lobbyist in all of Canada.</div>';
+          }
         }
 
-        // Pattern
-        if (data.pattern) {
-          html += '<p style="font-size:var(--text-xs);color:var(--text-tertiary);margin-top:var(--s-xs);font-style:italic;">' + data.pattern + '</p>';
-        }
+        cardsHTML += '</div></div>';
+      });
+      document.getElementById('sector-cards').innerHTML = cardsHTML;
 
-        html += '</div>';
+      // ── Comparison Table ──
+      var maxPerOrg = 0;
+      sorted.forEach(function(name) {
+        var s = sectors[name];
+        var po = s.orgs > 0 ? Math.round(s.comms / s.orgs) : 0;
+        if (po > maxPerOrg) maxPerOrg = po;
       });
 
-      // Israel Lobby — special treatment
-      html += '<div style="background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:0 var(--r-md) var(--r-md) 0;padding:var(--s-md);margin-bottom:var(--s-md);">';
-      html += '<h2 style="font-family:var(--font-headline);font-size:var(--text-2xl);margin-bottom:var(--s-xs);">🇮🇱 Israel Lobby</h2>';
-      html += '<p style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--accent);margin-bottom:var(--s-sm);"><strong>2,176</strong> communications from <strong>4</strong> organizations — <strong>539 per org</strong> (22x China)</p>';
-      html += '<div style="font-size:var(--text-xs);color:var(--text-tertiary);line-height:1.8;">';
-      html += '<strong style="color:var(--text-secondary);">Top targets:</strong> House of Commons (1,664) | PMO (186) | Global Affairs (158) | Senate (100)';
-      html += '</div>';
-      html += '<p style="font-size:var(--text-xs);color:var(--text-tertiary);margin-top:var(--s-xs);font-style:italic;">4 orgs generate 539 comms each — the most concentrated lobbying of any sector. Shimon Fogel (CIJA CEO) is the #2 individual lobbyist in all of Canada.</p>';
-      html += '</div>';
+      var tHTML = '';
+      sorted.forEach(function(name) {
+        var s = sectors[name];
+        var meta = SECTOR_META[name] || { icon: '\u2022', color: '#6b7280' };
+        var perOrg = s.orgs > 0 ? Math.round(s.comms / s.orgs) : 0;
+        var concPct = (perOrg / maxPerOrg * 100).toFixed(0);
+        var isHighConc = perOrg > 200;
+        var rowClass = name === 'Israel Lobby' ? ' class="highlight-row"' : '';
+        var concColor = perOrg > 400 ? '#dc2626' : perOrg > 100 ? '#d97706' : '#059669';
 
-      // Comparison table
-      html += '<h2 style="font-family:var(--font-headline);font-size:var(--text-2xl);margin:var(--s-xl) 0 var(--s-md);">Sector Comparison</h2>';
-      html += '<table style="width:100%;border-collapse:collapse;font-size:var(--text-sm);">';
-      html += '<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);text-transform:uppercase;">Sector</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">Comms</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">Orgs</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">Per Org</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--border);color:var(--text-tertiary);font-size:var(--text-xs);">#1 Target</th></tr></thead><tbody>';
+        tHTML += '<tr' + rowClass + '>';
+        tHTML += '<td class="sector-name">' + meta.icon + ' ' + name + '</td>';
+        tHTML += '<td class="num-col">' + s.comms.toLocaleString() + '</td>';
+        tHTML += '<td class="num-col">' + s.orgs + '</td>';
+        tHTML += '<td class="num-col"><span class="per-org-bar" style="width:' + concPct + '%;max-width:40px;background:' + concColor + ';"></span>' + perOrg + '</td>';
+        tHTML += '<td><div class="conc-bar-wrap"><div class="conc-bar"><div class="conc-fill" style="width:' + concPct + '%;background:' + concColor + ';"></div></div>';
+        tHTML += '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.65rem;color:' + concColor + ';">' + (isHighConc ? 'HIGH' : perOrg > 50 ? 'MED' : 'LOW') + '</span></div></td>';
+        tHTML += '</tr>';
+      });
+      document.getElementById('comp-tbody').innerHTML = tHTML;
 
-      var rows = [
-        ['Agriculture', 16222, 83, 195, 'Ag Canada'],
-        ['Oil & Gas', 10794, 64, 169, 'NRCan (4,609)'],
-        ['Banking', 7497, 61, 123, 'Finance (3,703)'],
-        ['Telecom', 5338, 36, 148, 'ISED'],
-        ['Mining', 5253, 64, 82, 'NRCan'],
-        ['Pharma', 4776, 115, 42, 'Health Canada (1,611)'],
-        ['Big Tech', 3527, 40, 88, 'Heritage (530)'],
-        ['Defense', 2534, 34, 75, 'DND'],
-        ['Israel Lobby', 2176, 4, 539, 'House + PMO'],
-        ['Insurance', 1483, 10, 148, 'Finance'],
-        ['China', 74, 3, 25, 'Various']
-      ];
+      // ── Table Sorting ──
+      var sortCol = 'comms';
+      var sortDir = -1;
+      document.querySelectorAll('.comp-table th[data-sort]').forEach(function(th) {
+        th.addEventListener('click', function() {
+          var col = this.dataset.sort;
+          if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = -1; }
 
-      rows.forEach(function(r) {
-        var isIsrael = r[0] === 'Israel Lobby';
-        var style = isIsrael ? ' style="color:var(--accent);font-weight:700;"' : '';
-        html += '<tr><td style="padding:6px 8px;border-bottom:1px solid var(--border);"' + style + '>' + r[0] + '</td>';
-        html += '<td style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border);"' + style + '>' + r[1].toLocaleString() + '</td>';
-        html += '<td style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border);"' + style + '>' + r[2] + '</td>';
-        html += '<td style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border);font-weight:700;"' + style + '>' + r[3] + '</td>';
-        html += '<td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text-tertiary);">' + r[4] + '</td></tr>';
+          var rows = sorted.slice().sort(function(a, b) {
+            var sa = sectors[a], sb = sectors[b];
+            var va, vb;
+            if (col === 'name') { va = a; vb = b; }
+            else if (col === 'comms') { va = sa.comms; vb = sb.comms; }
+            else if (col === 'orgs') { va = sa.orgs; vb = sb.orgs; }
+            else if (col === 'per' || col === 'conc') { va = sa.orgs > 0 ? sa.comms / sa.orgs : 0; vb = sb.orgs > 0 ? sb.comms / sb.orgs : 0; }
+            else { va = sa.comms; vb = sb.comms; }
+            if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+            if (va < vb) return -1 * sortDir;
+            if (va > vb) return 1 * sortDir;
+            return 0;
+          });
+
+          // Rebuild table
+          var html = '';
+          rows.forEach(function(name) {
+            var s = sectors[name];
+            var meta = SECTOR_META[name] || { icon: '\u2022', color: '#6b7280' };
+            var perOrg = s.orgs > 0 ? Math.round(s.comms / s.orgs) : 0;
+            var concPct = (perOrg / maxPerOrg * 100).toFixed(0);
+            var isHighConc = perOrg > 200;
+            var rowClass = name === 'Israel Lobby' ? ' class="highlight-row"' : '';
+            var concColor = perOrg > 400 ? '#dc2626' : perOrg > 100 ? '#d97706' : '#059669';
+            html += '<tr' + rowClass + '>';
+            html += '<td class="sector-name">' + meta.icon + ' ' + name + '</td>';
+            html += '<td class="num-col">' + s.comms.toLocaleString() + '</td>';
+            html += '<td class="num-col">' + s.orgs + '</td>';
+            html += '<td class="num-col"><span class="per-org-bar" style="width:' + concPct + '%;max-width:40px;background:' + concColor + ';"></span>' + perOrg + '</td>';
+            html += '<td><div class="conc-bar-wrap"><div class="conc-bar"><div class="conc-fill" style="width:' + concPct + '%;background:' + concColor + ';"></div></div>';
+            html += '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.65rem;color:' + concColor + ';">' + (isHighConc ? 'HIGH' : perOrg > 50 ? 'MED' : 'LOW') + '</span></div></td>';
+            html += '</tr>';
+          });
+          document.getElementById('comp-tbody').innerHTML = html;
+        });
       });
 
-      html += '</tbody></table>';
-
-      list.innerHTML = html;
+    }).catch(function(err) {
+      console.error('Failed to load sector lobbying data:', err);
+      document.getElementById('sector-bars').innerHTML = '<p style="color:var(--text-quaternary);text-align:center;padding:20px;">Failed to load data. Please try refreshing.</p>';
     });
   })();
   </script>
