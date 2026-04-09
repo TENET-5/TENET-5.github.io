@@ -83,6 +83,10 @@
       <div class="stat-card"><span class="num" style="color:#60a5fa" id="s-charities">--</span><div class="label">Key Charities</div></div>
     </div>
 
+    <div class="flow-wrapper" style="width:100%; height:450px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; margin-bottom:30px; position:relative; overflow:hidden;">
+      <canvas id="flowCanvas"></canvas>
+    </div>
+
     <div class="section" id="charities-section">
       <h2>Key Organizations</h2>
       <div class="org-grid" id="org-grid"></div>
@@ -212,7 +216,132 @@
       if (d.academic_paper) srcHTML += '<br><strong>Academic Paper:</strong> <a href="' + d.academic_paper.source + '" target="_blank" rel="noopener">' + d.academic_paper.title + '</a><br>';
       if (d.petition) srcHTML += '<strong>Parliamentary Petition:</strong> <a href="' + d.petition.source + '" target="_blank" rel="noopener">Petition ' + d.petition.number + '</a><br>';
       document.getElementById('sources').innerHTML = srcHTML;
+      
+      // Init flow engine after data binds
+      renderFlow();
     });
+    
+    // ═══════════════════════════════════════
+    // F. CAPITAL FLOW ENGINE
+    // ═══════════════════════════════════════
+    function renderFlow() {
+      var cvs = document.getElementById('flowCanvas');
+      if (!cvs) return;
+      var ctx = cvs.getContext('2d');
+      var wrap = cvs.parentElement;
+      cvs.width = wrap.clientWidth;
+      cvs.height = wrap.clientHeight;
+
+      var nodes = [
+        // Origins
+        { id: 'jnf', lbl: 'JNF Canada (Revoked)', cx: 0.15, cy: 0.2, type: 'org', col: '#ef4444' },
+        { id: 'neeman', lbl: 'Neeman Foundation', cx: 0.15, cy: 0.45, type: 'org', col: '#ef4444' },
+        { id: 'hesed', lbl: 'Hesed Foundation', cx: 0.15, cy: 0.7, type: 'org', col: '#fbbf24' },
+        { id: 'mizrachi', lbl: 'Mizrachi Org', cx: 0.15, cy: 0.9, type: 'org', col: '#fbbf24' },
+        
+        // Destinations
+        { id: 'idf', lbl: 'IDF Bases/Operations', cx: 0.85, cy: 0.3, type: 'military', col: '#60a5fa' },
+        { id: 'settle', lbl: 'Illegal Settlements', cx: 0.85, cy: 0.6, type: 'settlement', col: '#60a5fa' },
+        { id: 'sar', lbl: 'Sar-El (Enlistment)', cx: 0.85, cy: 0.85, type: 'military', col: '#60a5fa' }
+      ];
+
+      var edges = [
+        { from: 0, to: 4, amt: 5 }, { from: 0, to: 5, amt: 8 },
+        { from: 1, to: 4, amt: 3 }, { from: 1, to: 6, amt: 4 },
+        { from: 2, to: 5, amt: 4 },
+        { from: 3, to: 4, amt: 2 }, { from: 3, to: 5, amt: 3 }
+      ];
+
+      var particles = [];
+      for(var i=0; i<60; i++) {
+        var e = edges[Math.floor(Math.random()*edges.length)];
+        particles.push({ edge: e, progress: Math.random(), speed: 0.002 + Math.random()*0.003 });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        // Draw grid
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        for (var i=1; i<20; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * (cvs.width/20), 0);
+          ctx.lineTo(i * (cvs.width/20), cvs.height);
+          ctx.stroke();
+        }
+
+        // Draw static connections
+        edges.forEach(function(e) {
+          var n1 = nodes[e.from], n2 = nodes[e.to];
+          ctx.beginPath();
+          ctx.moveTo(n1.cx * cvs.width, n1.cy * cvs.height);
+          var midX = ((n1.cx + n2.cx) * cvs.width) / 2;
+          var midY = Math.min(n1.cy, n2.cy) * cvs.height - 20;
+          ctx.quadraticCurveTo(midX, midY, n2.cx * cvs.width, n2.cy * cvs.height);
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+
+        // Update & Draw Particles (Money Flow)
+        particles.forEach(function(p) {
+          p.progress += p.speed;
+          if (p.progress >= 1) {
+            p.progress = 0;
+            p.edge = edges[Math.floor(Math.random()*edges.length)];
+          }
+          
+          var n1 = nodes[p.edge.from], n2 = nodes[p.edge.to];
+          var startX = n1.cx * cvs.width, startY = n1.cy * cvs.height;
+          var endX = n2.cx * cvs.width, endY = n2.cy * cvs.height;
+          var midX = ((n1.cx + n2.cx) * cvs.width) / 2;
+          var midY = Math.min(n1.cy, n2.cy) * cvs.height - 20;
+
+          // Quadratic Bezier interpolation
+          var t = p.progress;
+          var mt = 1 - t;
+          var px = (mt * mt * startX) + (2 * mt * t * midX) + (t * t * endX);
+          var py = (mt * mt * startY) + (2 * mt * t * midY) + (t * t * endY);
+
+          ctx.shadowColor = '#e53555';
+          ctx.shadowBlur = 8;
+          ctx.fillStyle = '#e53555';
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+
+        // Draw nodes
+        nodes.forEach(function(n) {
+          var px = n.cx * cvs.width, py = n.cy * cvs.height;
+          ctx.shadowColor = n.col;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(px, py, 6, 0, Math.PI*2);
+          ctx.fillStyle = n.col;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Labels
+          ctx.fillStyle = '#fff';
+          ctx.font = '11px JetBrains Mono';
+          var textX = n.cx < 0.5 ? px - 15 : px + 15;
+          ctx.textAlign = n.cx < 0.5 ? 'right' : 'left';
+          ctx.fillText(n.lbl, textX, py + 4);
+        });
+
+        requestAnimationFrame(draw);
+      }
+      
+      window.addEventListener('resize', function() {
+        cvs.width = wrap.clientWidth;
+        cvs.height = wrap.clientHeight;
+      });
+
+      requestAnimationFrame(draw);
+    }
   })();
   </script>
 
