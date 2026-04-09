@@ -103,6 +103,24 @@
         { label: 'Search', href: 'search.html', desc: 'Full-site search' },
       ]
     },
+    {
+      section: 'Community',
+      icon: '💬',
+      items: [
+        { label: 'Live Chat', href: 'chat.html', desc: 'Real-time discussion', hot: true },
+        { label: 'AI Research', href: 'chat.html#ai', desc: 'Gemini-powered analysis', hot: true },
+        { label: 'News Intelligence', href: 'news.html', desc: 'Canadian news aggregation', hot: true },
+      ]
+    },
+    {
+      section: 'Municipal',
+      icon: '🏛️',
+      items: [
+        { label: 'Municipal Hub', href: 'municipal-accountability.html', desc: 'All municipalities', hot: true },
+        { label: 'Belleville', href: 'municipal-accountability.html?city=belleville', desc: 'City of Belleville', hot: true },
+        { label: 'Quinte West', href: 'municipal-accountability.html?city=quinte-west', desc: 'City of Quinte West', hot: true },
+      ]
+    },
   ];
 
   function getCurrentPage() {
@@ -153,6 +171,9 @@
     html += '<a href="foreign-influence.html"' + (currentPage === 'foreign-influence.html' ? ' class="active"' : '') + '>Influence</a>';
     html += '<a href="my-story.html"' + (currentPage === 'my-story.html' ? ' class="active"' : '') + '>My Story</a>';
     html += '</div>';
+
+    // Auth container (populated by auth-ui.js)
+    html += '<div id="auth-container" class="t5-auth"></div>';
 
     // Right side: search + menu button
     html += '<div class="t5-right">';
@@ -298,11 +319,31 @@
 .t5-quick a.active { color: #ededed !important; background: rgba(196,30,58,0.12); }\
 \
 /* Right side */\
+.t5-auth {\
+  display: flex;\
+  align-items: center;\
+  margin-left: auto;\
+  margin-right: 8px;\
+}\
+.auth-user { display:flex; align-items:center; gap:8px; }\
+.auth-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid rgba(196,30,58,0.4); }\
+.auth-avatar-initial { display:flex; align-items:center; justify-content:center; background:rgba(196,30,58,0.2); color:#c41e3a; font-size:0.72rem; font-weight:700; }\
+.auth-name { font-size:0.72rem; color:#c8c8cc; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }\
+.auth-btn { border:none; border-radius:4px; padding:5px 10px; font-size:0.68rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; }\
+.auth-btn-google { background:#c41e3a; color:#fff; }\
+.auth-btn-google:hover { background:#d42a45; }\
+.auth-btn-twitter { background:#1a1a24; color:#fff; border:1px solid #333; }\
+.auth-btn-twitter:hover { border-color:#c41e3a; }\
+.auth-btn-logout { background:transparent; color:#6e6e76; border:1px solid #333; }\
+.auth-btn-logout:hover { color:#fff; border-color:#c41e3a; }\
+.auth-login-buttons { display:flex; gap:6px; }\
+.auth-offline-label { font-size:0.65rem; color:#6e6e76; }\
+@media(max-width:700px) { .t5-auth { display:none; } }\
+\
 .t5-right {\
   display: flex;\
   align-items: center;\
   gap: 8px;\
-  margin-left: auto;\
 }\
 \
 /* Search button */\
