@@ -23,6 +23,29 @@
     .btn:hover { border-color: var(--accent); color: var(--accent); }
     .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn-primary:hover { background: var(--accent-bright); }
+    .campaign-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+    .campaign-tab { padding: 8px 16px; border-radius: var(--r-md) var(--r-md) 0 0; font-size: var(--text-sm); font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); transition: all 0.2s; border-bottom: none; }
+    .campaign-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .campaign-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .contact-list { display: grid; gap: 8px; margin-bottom: var(--s-md); }
+    .contact-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.2s; }
+    .contact-card:hover { border-color: var(--accent); }
+    .contact-card.selected { border-color: var(--accent); background: rgba(99,102,241,0.05); }
+    .contact-card input[type="checkbox"] { flex-shrink: 0; }
+    .contact-card .cc-name { font-weight: 600; color: var(--text-primary); font-size: var(--text-sm); }
+    .contact-card .cc-role { font-size: var(--text-xs); color: var(--text-tertiary); }
+    .contact-card .cc-badge { margin-left: auto; font-size: var(--text-xs); font-weight: 700; padding: 2px 8px; border-radius: 100px; white-space: nowrap; }
+    .badge-clean { background: rgba(5,150,105,0.1); color: var(--color-green); }
+    .badge-flagged { background: rgba(220,38,38,0.1); color: var(--color-critical); }
+    .campaign-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: var(--s-md); }
+    .stat-chip { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-md); padding: 8px 16px; font-size: var(--text-sm); }
+    .stat-chip strong { color: var(--text-primary); }
+    .progress-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-md); margin-bottom: var(--s-md); display: none; }
+    .progress-bar { height: 8px; background: var(--border); border-radius: 100px; overflow: hidden; margin: 8px 0; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 100px; transition: width 0.3s; }
+    .dedup-note { background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.2); border-radius: var(--r-md); padding: 12px 16px; font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--s-md); line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -39,6 +62,21 @@
       <p style="margin:0;line-height:1.7;"><strong>Clean MPs (score 0):</strong> Full evidence report + correct legal tools (s.122 breach of trust, s.504 private prosecution, Lobbying Act, C-70). They become allies who push for structural reform. <strong>Flagged MPs:</strong> Report showing their peers' criminal/ethics records but omitting their own. They think they have ammo — but the reform catches everyone. <strong>Tier 1 MPs:</strong> Get the opposition's criminal convictions, ethics violations, and specific scandals. Data now includes 28 criminal/ethics entries from the dirt dossier + 8 active feuds from the rivalries database.</p>
     </div>
 
+    <div class="dedup-note">
+      <strong>Smart Targeting:</strong> Each recipient receives only the evidence relevant to their role and jurisdiction. Flagged individuals receive their peers' records — not their own — triggering horizontal accountability across the system simultaneously. All evidence sourced from official Government of Canada publications.
+    </div>
+
+    <div class="campaign-tabs">
+      <button class="campaign-tab active" onclick="switchTab('mps', this)">MPs</button>
+      <button class="campaign-tab" onclick="switchTab('senate', this)">Senate</button>
+      <button class="campaign-tab" onclick="switchTab('media', this)">Media</button>
+      <button class="campaign-tab" onclick="switchTab('thinktanks', this)">Think Tanks</button>
+      <button class="campaign-tab" onclick="switchTab('premiers', this)">Premiers</button>
+      <button class="campaign-tab" onclick="switchTab('courts', this)">Courts &amp; Oversight</button>
+      <button class="campaign-tab" onclick="switchTab('fullcampaign', this)">&#x26A1; FULL CAMPAIGN</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-mps">
     <div class="btn-row" style="margin-bottom:var(--s-sm);">
       <button class="btn btn-primary" onclick="generateLaunchPackage()">Download Full Launch Package</button>
       <button class="btn" onclick="generateETHI()">ETHI Briefs</button>
@@ -75,15 +113,38 @@
         <div id="email-body"></div>
       </div>
     </div>
+    </div><!-- end tab-mps -->
+
+    <div class="tab-panel" id="tab-senate">
+      <div id="senate-content"></div>
+    </div>
+    <div class="tab-panel" id="tab-media">
+      <div id="media-content"></div>
+    </div>
+    <div class="tab-panel" id="tab-thinktanks">
+      <div id="thinktanks-content"></div>
+    </div>
+    <div class="tab-panel" id="tab-premiers">
+      <div id="premiers-content"></div>
+    </div>
+    <div class="tab-panel" id="tab-courts">
+      <div id="courts-content"></div>
+    </div>
+    <div class="tab-panel" id="tab-fullcampaign">
+      <div id="fullcampaign-content"></div>
+    </div>
   </div>
 
   <script src="nav.js?v=7"></script>
   <footer id="site-footer"></footer>
   <script src="footer.js?v=1"></script>
+  <script src="js/campaign-data.js"></script>
+  <script src="js/campaign-engine.js"></script>
   <script>
   (function() {
     'use strict';
     var ALL = [];
+    window.ALL = ALL;
     var BASE = 'https://tenet-5.github.io/';
 
     // Get MP's email address from directory
@@ -377,6 +438,7 @@
       EMAIL_DIR = results[5];
       ALL = [].concat(d.tier1_highest || [], d.tier2_moderate || [], d.tier3_low || [], d.tier4_clean || []);
       ALL.sort(function(a, b) { return a.name.localeCompare(b.name); });
+      window.ALL = ALL;
 
       var select = document.getElementById('mp-select');
       ALL.forEach(function(mp, i) {
@@ -619,6 +681,246 @@
         'Total: ' + stats.total + ' emails\n' +
         'Priority targets: ' + priorities.length + '\n\n' +
         'File downloaded as TENET5-launch-package-' + timestamp + '.txt');
+    };
+
+    // Expose for full campaign generator
+    window.generateEmail = generateEmail;
+    window.getMPEmail = getMPEmail;
+
+    // === TAB SWITCHING ===
+    window.switchTab = function(tabId, btn) {
+      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+      document.querySelectorAll('.campaign-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.getElementById('tab-' + tabId).classList.add('active');
+      btn.classList.add('active');
+
+      if (tabId === 'senate' && !window._senateInit) initContactTab('senate', CAMPAIGN_CONTACTS.senators);
+      if (tabId === 'media' && !window._mediaInit) initContactTab('media', CAMPAIGN_CONTACTS.media);
+      if (tabId === 'thinktanks' && !window._thinktanksInit) initContactTab('thinktanks', CAMPAIGN_CONTACTS.thinkTanks);
+      if (tabId === 'premiers' && !window._premiersInit) initContactTab('premiers', CAMPAIGN_CONTACTS.premiers);
+      if (tabId === 'courts' && !window._courtsInit) initContactTab('courts', [].concat(CAMPAIGN_CONTACTS.military, CAMPAIGN_CONTACTS.courts));
+      if (tabId === 'fullcampaign' && !window._fullcampaignInit) initFullCampaign();
+    };
+
+    // === CONTACT TAB RENDERER ===
+    function initContactTab(tabId, contacts) {
+      window['_' + tabId + 'Init'] = true;
+      var elId = tabId === 'courts' ? 'courts-content' : tabId + '-content';
+      var el = document.getElementById(elId);
+      if (!el) return;
+
+      var flagged = contacts.filter(function(c) { return c.flagScore > 0; });
+      var clean = contacts.filter(function(c) { return c.flagScore === 0; });
+
+      var html = '';
+      html += '<div class="campaign-stats">';
+      html += '<div class="stat-chip"><strong>' + contacts.length + '</strong> total contacts</div>';
+      html += '<div class="stat-chip"><strong>' + clean.length + '</strong> clean</div>';
+      if (flagged.length) html += '<div class="stat-chip"><strong>' + flagged.length + '</strong> flagged</div>';
+      html += '</div>';
+
+      html += '<div class="btn-row">';
+      html += '<button class="btn btn-primary" onclick="generateTabPackage(\'' + tabId + '\')">Generate &amp; Download Package</button>';
+      html += '<button class="btn" onclick="selectAllInTab(\'' + tabId + '\', true)">Select All</button>';
+      html += '<button class="btn" onclick="selectAllInTab(\'' + tabId + '\', false)">Deselect All</button>';
+      html += '</div>';
+
+      html += '<div class="contact-list" id="' + tabId + '-list">';
+      contacts.forEach(function(c, i) {
+        var isFlagged = c.flagScore > 0;
+        html += '<label class="contact-card">';
+        html += '<input type="checkbox" class="contact-cb" data-tab="' + tabId + '" data-idx="' + i + '" checked>';
+        html += '<div><div class="cc-name">' + c.name + '</div>';
+        html += '<div class="cc-role">' + c.role +
+          (c.province && c.province !== 'National' ? ' \u2014 ' + c.province : '') +
+          (c.email ? ' | ' + c.email : '') + '</div></div>';
+        html += '<span class="cc-badge ' + (isFlagged ? 'badge-flagged' : 'badge-clean') + '">' +
+          (isFlagged ? 'FLAGGED (' + c.flagScore + ')' : 'CLEAN') + '</span>';
+        html += '</label>';
+      });
+      html += '</div>';
+
+      html += '<div id="' + tabId + '-preview" class="email-preview" style="display:none;margin-top:var(--s-md);"></div>';
+
+      el.innerHTML = html;
+      window['_contacts_' + tabId] = contacts;
+    }
+
+    window.selectAllInTab = function(tabId, val) {
+      document.querySelectorAll('[data-tab="' + tabId + '"]').forEach(function(cb) { cb.checked = val; });
+    };
+
+    window.generateTabPackage = function(tabId) {
+      var contacts = window['_contacts_' + tabId];
+      if (!contacts) { alert('Data not loaded'); return; }
+      var allFlagged = CAMPAIGN_CONTACTS.all.filter(function(c) { return c.flagScore > 0; });
+
+      var selected = [];
+      document.querySelectorAll('[data-tab="' + tabId + '"]').forEach(function(cb) {
+        if (cb.checked) selected.push(contacts[parseInt(cb.dataset.idx)]);
+      });
+      if (!selected.length) { alert('No contacts selected'); return; }
+
+      var output = '';
+      var timestamp = new Date().toISOString().split('T')[0];
+      output += '\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n';
+      output += '\u2551  TENET5 CAMPAIGN PACKAGE \u2014 ' + tabId.toUpperCase() + '\n';
+      output += '\u2551  Generated: ' + timestamp + '\n';
+      output += '\u2551  Recipients: ' + selected.length + '\n';
+      output += '\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\n';
+
+      selected.forEach(function(c) {
+        var email = generateCampaignEmail(c, allFlagged);
+        output += '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n';
+        output += 'TO: ' + c.name + (c.org ? ' \u2014 ' + c.org : '') + '\n';
+        if (c.email) output += 'EMAIL: ' + c.email + '\n';
+        output += 'SUBJECT: ' + email.subject + '\n';
+        output += '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\n';
+        output += email.body + '\n\n\n';
+      });
+
+      var blob = new Blob([output], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'tenet5-campaign-' + tabId + '-' + timestamp + '.txt';
+      a.click();
+    };
+
+    // === FULL CAMPAIGN LAUNCHER ===
+    function initFullCampaign() {
+      window._fullcampaignInit = true;
+      var el = document.getElementById('fullcampaign-content');
+      if (!el || typeof CAMPAIGN_CONTACTS === 'undefined') {
+        if (el) el.innerHTML = '<p style="color:var(--color-critical)">Campaign data not loaded. Refresh and try again.</p>';
+        return;
+      }
+
+      var stats = CAMPAIGN_CONTACTS.stats;
+      var mpCount = ALL ? ALL.length : 0;
+      var total = stats.total + mpCount;
+
+      var html = '';
+      html += '<div class="campaign-stats">';
+      html += '<div class="stat-chip"><strong>' + mpCount + '</strong> MPs</div>';
+      html += '<div class="stat-chip"><strong>' + stats.senators + '</strong> Senators</div>';
+      html += '<div class="stat-chip"><strong>' + stats.media + '</strong> Media</div>';
+      html += '<div class="stat-chip"><strong>' + stats.thinkTanks + '</strong> Think Tanks</div>';
+      html += '<div class="stat-chip"><strong>' + stats.premiers + '</strong> Premiers &amp; Opposition</div>';
+      html += '<div class="stat-chip"><strong>' + (stats.military + stats.courts) + '</strong> Courts &amp; Military</div>';
+      html += '<div class="stat-chip" style="border-color:var(--accent);"><strong style="font-size:var(--text-lg);">' + total + '</strong> TOTAL</div>';
+      html += '</div>';
+
+      html += '<div class="progress-wrap" id="full-progress-wrap">';
+      html += '<div id="full-progress-label" style="font-size:var(--text-sm);color:var(--text-secondary);">Generating...</div>';
+      html += '<div class="progress-bar"><div class="progress-fill" id="full-progress-fill" style="width:0%"></div></div>';
+      html += '</div>';
+
+      html += '<div class="btn-row">';
+      html += '<button class="btn btn-primary" style="font-size:var(--text-base);padding:12px 24px;" onclick="generateFullCampaign()">&#x26A1; Generate Full Package (' + total + ' recipients)</button>';
+      html += '</div>';
+
+      html += '<div style="margin-top:var(--s-md);font-size:var(--text-sm);color:var(--text-tertiary);line-height:1.8;">';
+      html += '<strong>What this generates:</strong><br>';
+      html += '&#x2022; Every MP gets a personalized email based on their lobbying score and party<br>';
+      html += '&#x2022; Every Senator gets a brief \u2014 flagged senators get their peers\' ethics records<br>';
+      html += '&#x2022; Every media outlet gets a press pitch tailored to their editorial stance<br>';
+      html += '&#x2022; Every think tank gets a policy evidence brief<br>';
+      html += '&#x2022; Every Premier gets a provincial jurisdiction accountability brief<br>';
+      html += '&#x2022; Every court/oversight body gets a formal legal complaint format<br>';
+      html += '<br><strong>File size:</strong> approximately 2\u20134 MB text file. Open in any text editor. Each email is clearly separated.';
+      html += '</div>';
+
+      el.innerHTML = html;
+    }
+
+    window.generateFullCampaign = function() {
+      if (!ALL || !ALL.length) { alert('MP data not loaded yet. Please wait.'); return; }
+      if (typeof CAMPAIGN_CONTACTS === 'undefined') { alert('Campaign data not loaded.'); return; }
+
+      var progressWrap = document.getElementById('full-progress-wrap');
+      var progressFill = document.getElementById('full-progress-fill');
+      var progressLabel = document.getElementById('full-progress-label');
+      progressWrap.style.display = 'block';
+
+      var allFlagged = CAMPAIGN_CONTACTS.all.filter(function(c) { return c.flagScore > 0; });
+      var timestamp = new Date().toISOString().split('T')[0];
+      var allContacts = CAMPAIGN_CONTACTS.all;
+      var totalCount = ALL.length + allContacts.length;
+      var processed = 0;
+      var output = '';
+
+      output += '\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n';
+      output += '\u2551  TENET5 FULL CAMPAIGN PACKAGE\n';
+      output += '\u2551  Generated: ' + timestamp + '\n';
+      output += '\u2551  Total Recipients: ' + totalCount + '\n';
+      output += '\u2551  Generated by LIRIL \u2014 tenet-5.github.io\n';
+      output += '\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\n';
+      output += 'STRATEGY: Each recipient receives evidence tailored to their role.\n';
+      output += 'Flagged individuals receive peers\' records, not their own.\n';
+      output += 'All data from official Government of Canada sources.\n\n\n';
+
+      var chunks = [
+        { label: 'MPs \u2014 Tier 1', items: ALL.filter(function(m) { return m.score >= 7; }), type: 'mp' },
+        { label: 'MPs \u2014 Clean', items: ALL.filter(function(m) { return m.score === 0; }), type: 'mp' },
+        { label: 'MPs \u2014 Moderate', items: ALL.filter(function(m) { return m.score > 0 && m.score < 7; }), type: 'mp' },
+        { label: 'Senate', items: CAMPAIGN_CONTACTS.senators, type: 'contact' },
+        { label: 'Media', items: CAMPAIGN_CONTACTS.media, type: 'contact' },
+        { label: 'Think Tanks', items: CAMPAIGN_CONTACTS.thinkTanks, type: 'contact' },
+        { label: 'Premiers', items: CAMPAIGN_CONTACTS.premiers, type: 'contact' },
+        { label: 'Military', items: CAMPAIGN_CONTACTS.military, type: 'contact' },
+        { label: 'Courts & Oversight', items: CAMPAIGN_CONTACTS.courts, type: 'contact' }
+      ];
+
+      var chunkIdx = 0;
+
+      function processChunk() {
+        if (chunkIdx >= chunks.length) {
+          progressLabel.textContent = 'Done! Preparing download...';
+          progressFill.style.width = '100%';
+          setTimeout(function() {
+            var blob = new Blob([output], { type: 'text/plain' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'tenet5-FULL-campaign-' + timestamp + '.txt';
+            a.click();
+            progressWrap.style.display = 'none';
+          }, 500);
+          return;
+        }
+
+        var chunk = chunks[chunkIdx];
+        progressLabel.textContent = 'Generating: ' + chunk.label + ' (' + chunk.items.length + ' items)...';
+
+        output += '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
+        output += '  ' + chunk.label.toUpperCase() + '\n';
+        output += '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n';
+
+        chunk.items.forEach(function(item) {
+          var email;
+          if (chunk.type === 'mp') {
+            email = generateEmail(item);
+            var mpEmail = getMPEmail(item);
+            output += '\u2500\u2500 ' + item.name + ' (' + item.party + ', ' + item.province + ', Score ' + item.score + ')' + (mpEmail ? ' | ' + mpEmail : '') + ' \u2500\u2500\n';
+            output += 'Subject: ' + email.subject + '\n\n' + email.body + '\n\n\n';
+          } else {
+            email = generateCampaignEmail(item, allFlagged);
+            output += '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n';
+            output += 'TO: ' + item.name + (item.org ? ' \u2014 ' + item.org : '') + '\n';
+            if (item.email) output += 'EMAIL: ' + item.email + '\n';
+            output += 'SUBJECT: ' + email.subject + '\n';
+            output += '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\n';
+            output += email.body + '\n\n\n';
+          }
+          processed++;
+        });
+
+        var pct = Math.round((processed / totalCount) * 100);
+        progressFill.style.width = pct + '%';
+        chunkIdx++;
+        setTimeout(processChunk, 10);
+      }
+
+      processChunk();
     };
 
   })();
