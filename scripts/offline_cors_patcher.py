@@ -11,21 +11,35 @@ if not os.path.exists(js_dir):
 db_path = os.path.join(js_dir, "offline_db.js")
 polyfill_path = os.path.join(js_dir, "offline_fetch.js")
 
-# 1. Bundle all JSON in data/ into offline_db.js
+# 1. Bundle all JSON in data/ and MD in evidence/ into offline_db.js
 db_content = "window.TENET_OFFLINE_DB = {};\n"
-for root, dirs, files in os.walk(data_dir):
-    for filename in files:
-        if filename.endswith(".json"):
-            filepath = os.path.join(root, filename)
-            rel_path = os.path.relpath(filepath, base_dir).replace("\\", "/")
-            try:
-                with open(filepath, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                
-                # Write to DB string
-                db_content += f"window.TENET_OFFLINE_DB['{rel_path}'] = {json.dumps(data)};\n"
-            except Exception as e:
-                print(f"Failed to read {rel_path}: {e}")
+
+def process_dir(directory):
+    global db_content
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            if filename.endswith(".json"):
+                filepath = os.path.join(root, filename)
+                rel_path = os.path.relpath(filepath, base_dir).replace("\\", "/")
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    db_content += f"window.TENET_OFFLINE_DB['{rel_path}'] = {json.dumps(data)};\n"
+                except Exception as e:
+                    print(f"Failed to read {rel_path}: {e}")
+            elif filename.endswith(".md"):
+                filepath = os.path.join(root, filename)
+                rel_path = os.path.relpath(filepath, base_dir).replace("\\", "/")
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        data = f.read()
+                    db_content += f"window.TENET_OFFLINE_DB['{rel_path}'] = {json.dumps(data)};\n"
+                except Exception as e:
+                    print(f"Failed to read {rel_path}: {e}")
+
+process_dir(data_dir)
+process_dir(os.path.join(base_dir, "evidence"))
+
 
 with open(db_path, "w", encoding="utf-8") as f:
     f.write(db_content)
@@ -48,7 +62,7 @@ polyfill_code = """// TEMPORAL NODE: Offline CORS Fetch Bypass
                     ok: true,
                     status: 200,
                     json: () => Promise.resolve(window.TENET_OFFLINE_DB[relativeUrl]),
-                    text: () => Promise.resolve(JSON.stringify(window.TENET_OFFLINE_DB[relativeUrl]))
+                    text: () => Promise.resolve(typeof window.TENET_OFFLINE_DB[relativeUrl] === 'string' ? window.TENET_OFFLINE_DB[relativeUrl] : JSON.stringify(window.TENET_OFFLINE_DB[relativeUrl]))
                 });
             }
         }
@@ -70,7 +84,9 @@ target_files = [
     "municipal-accountability.html",
     "sector-lobbying.html",
     "voting-records.html",
-    "corruption-map.html"
+    "corruption-map.html",
+    "osint-dashboard.html",
+    "dossier-viewer.html"
 ]
 
 injection = '<script src="js/offline_db.js"></script>\\n<script src="js/offline_fetch.js"></script>\\n'
