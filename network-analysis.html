@@ -364,6 +364,14 @@
     var sortAsc = false;
     var hoveredNode = null;
 
+    // Zoom and pan state
+    var viewZoom = 1;
+    var viewPanX = 0;
+    var viewPanY = 0;
+    var isPanning = false;
+    var panStartX = 0;
+    var panStartY = 0;
+
     // ── DATA LOADING (OFFLINE PARITY) ──
     function loadData() {
       // Resolve statically mapped window variables
@@ -626,6 +634,11 @@
       ctx.fillStyle = '#08080d';
       ctx.fillRect(0, 0, w, h);
 
+      // Apply zoom/pan transform
+      ctx.save();
+      ctx.translate(viewPanX, viewPanY);
+      ctx.scale(viewZoom, viewZoom);
+
       // Build hover connection set for highlighting
       var hoveredConnections = {};
       if (hoveredNode) {
@@ -747,6 +760,23 @@
         ctx.fillText(label, lx, ly);
       });
 
+      // Restore transform before drawing HUD elements
+      ctx.restore();
+
+      // Zoom indicator (fixed position, not affected by transform)
+      if (viewZoom !== 1) {
+        ctx.globalAlpha = 0.6;
+        ctx.fillStyle = '#08080d';
+        ctx.beginPath();
+        ctx.roundRect(12, h - 32, 80, 22, 4);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#888';
+        ctx.font = '11px JetBrains Mono, monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText((viewZoom * 100).toFixed(0) + '%', 20, h - 16);
+      }
+
       updateFilterInfo();
     }
 
@@ -843,45 +873,93 @@
       renderTable();
     });
 
-    // Canvas hover tooltip
+    // Transform screen coords to graph coords (accounts for zoom/pan)
+    function screenToGraph(sx, sy) {
+      return { x: (sx - viewPanX) / viewZoom, y: (sy - viewPanY) / viewZoom };
+    }
+
+    // Canvas hover tooltip + zoom/pan
     var canvas = document.getElementById('network-canvas');
     var tooltip = document.getElementById('canvas-tooltip');
+
     canvas.addEventListener('mousemove', function(e) {
       var rect = canvas.getBoundingClientRect();
-      var mx = e.clientX - rect.left;
-      var my = e.clientY - rect.top;
+      var sx = e.clientX - rect.left;
+      var sy = e.clientY - rect.top;
+
+      // Handle panning
+      if (isPanning) {
+        viewPanX += e.movementX;
+        viewPanY += e.movementY;
+        return;
+      }
+
+      // Hit test in graph coordinates
+      var g = screenToGraph(sx, sy);
       var found = null;
       for (var i = 0; i < positioned.length; i++) {
         var p = positioned[i];
         if (!isNodeVisible(p.node)) continue;
-        var dx = mx - p.x, dy = my - p.y;
-        if (dx * dx + dy * dy < (p.r + 6) * (p.r + 6)) { found = p; break; }
+        var dx = g.x - p.x, dy = g.y - p.y;
+        var hitR = (p.r + 6) / viewZoom;
+        if (dx * dx + dy * dy < hitR * hitR) { found = p; break; }
       }
       if (found !== hoveredNode) {
         hoveredNode = found;
-        draw();
       }
       if (found) {
         var n = found.node;
         tooltip.querySelector('.tt-name').textContent = n.label;
-        tooltip.querySelector('.tt-type').textContent = (n.type || 'entity') + (n.influence_score ? ' • Score: ' + n.influence_score.toFixed(1) : '');
+        tooltip.querySelector('.tt-type').textContent = (n.type || 'entity') + (n.influence_score ? ' \u2022 Score: ' + n.influence_score.toFixed(1) : '');
         var cats = (n.categories || []).filter(function(c){return c!=='person'&&c!=='org';});
         tooltip.querySelector('.tt-cats').innerHTML = cats.map(function(c){return '<span class="badge '+getCatBadge(c)+'">'+c+'</span>';}).join('');
         tooltip.querySelector('.tt-detail').textContent = n.subtitle || n.detail || '';
         tooltip.style.display = 'block';
-        var tx = e.clientX - rect.left + 16;
-        var ty = e.clientY - rect.top - 10;
-        if (tx + 280 > rect.width) tx = e.clientX - rect.left - 290;
+        var tx = sx + 16;
+        var ty = sy - 10;
+        if (tx + 360 > rect.width) tx = sx - 370;
+        if (ty + 200 > rect.height) ty = sy - 200;
         tooltip.style.left = tx + 'px';
         tooltip.style.top = ty + 'px';
       } else {
         tooltip.style.display = 'none';
       }
     });
+
+    // Mouse wheel zoom
+    canvas.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+
+      var delta = e.deltaY > 0 ? 0.9 : 1.1;
+      var newZoom = Math.max(0.3, Math.min(5, viewZoom * delta));
+
+      // Zoom toward mouse position
+      viewPanX = mx - (mx - viewPanX) * (newZoom / viewZoom);
+      viewPanY = my - (my - viewPanY) * (newZoom / viewZoom);
+      viewZoom = newZoom;
+    }, { passive: false });
+
+    // Right-click or middle-click drag to pan
+    canvas.addEventListener('mousedown', function(e) {
+      if (e.button === 1 || e.button === 2) { // middle or right click
+        isPanning = true;
+        panStartX = e.clientX;
+        panStartY = e.clientY;
+        e.preventDefault();
+      }
+    });
+    canvas.addEventListener('mouseup', function(e) {
+      isPanning = false;
+    });
+    canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
     canvas.addEventListener('mouseleave', function() {
       hoveredNode = null;
+      isPanning = false;
       tooltip.style.display = 'none';
-      draw();
     });
 
     // Resize handler
