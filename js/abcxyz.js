@@ -79,16 +79,18 @@
       // Register page visibility tracking
       this._trackEngagement();
 
-      console.log(
-        '%c[ABCXYZ] %cN-vs-NP MillennialFalcon Tracking v' + VERSION + ' — ACTIVE',
-        'color:#c41e3a;font-weight:bold',
-        'color:#059669'
-      );
-      console.log(
-        '%c[ABCXYZ] %cSession: ' + this.sessionHash.slice(0, 16) + '… | Seed: ' + this.satorSeed,
-        'color:#c41e3a;font-weight:bold',
-        'color:#6b7280'
-      );
+      if (window.T5_DEBUG) {
+        console.log(
+          '%c[ABCXYZ] %cN-vs-NP MillennialFalcon Tracking v' + VERSION + ' — ACTIVE',
+          'color:#c41e3a;font-weight:bold',
+          'color:#059669'
+        );
+        console.log(
+          '%c[ABCXYZ] %cSession: ' + this.sessionHash.slice(0, 16) + '… | Seed: ' + this.satorSeed,
+          'color:#c41e3a;font-weight:bold',
+          'color:#6b7280'
+        );
+      }
     }
 
     // ── Page Visit Accountability ────────────────────────────────

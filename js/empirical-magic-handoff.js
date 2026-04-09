@@ -96,11 +96,13 @@
       this._updateUI();
       this._injectFooterIndicator();
 
-      console.log(
-        '%c[EMPIRICAL MAGIC] %cHandoff chain: ' + this.chain.length + ' blocks | Hash: ' + block.hash.slice(0, 12) + '…',
-        'color:#d97706;font-weight:bold',
-        'color:#6b7280'
-      );
+      if (window.T5_DEBUG) {
+        console.log(
+          '%c[EMPIRICAL MAGIC] %cHandoff chain: ' + this.chain.length + ' blocks | Hash: ' + block.hash.slice(0, 12) + '…',
+          'color:#d97706;font-weight:bold',
+          'color:#6b7280'
+        );
+      }
     }
 
     // ── Scroll Depth Tracking ───────────────────────────────────
