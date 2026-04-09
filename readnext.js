@@ -104,9 +104,17 @@
     'voting-records.html': {
       current: 'Voting Records',
       next: [
+        { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How 25 key MPs voted on MAID, firearms, censorship' },
         { href: 'hansard-dashboard.html', label: 'Hansard Dashboard', desc: '151 bills tracked in Parliament' },
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'What the voting patterns reveal' },
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'How lobbying connects to votes' },
+      ]
+    },
+    'mp-voting-records.html': {
+      current: 'MP Voting Records',
+      next: [
+        { href: 'voting-records.html', label: 'Full Voting Records', desc: '151 bills, 94 divisions — complete Parliament tracker' },
+        { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'All 340 MPs scored against lobbying and CIJA data' },
+        { href: 'hansard-dashboard.html', label: 'Hansard Dashboard', desc: 'Deep dive into Hansard division records' },
       ]
     },
     'dossier-viewer.html': {
