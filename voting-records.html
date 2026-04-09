@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Parliamentary Voting Records — 45th Parliament | TENET5</title>
-  <meta name="description" content="Searchable voting records for all 94 recorded divisions in Canada's 45th Parliament. See how every party voted on every bill. Data from OpenParliament.ca.">
+  <meta name="description" content="Full voting analysis for Canada's 45th Parliament: 151 bills, 94 recorded divisions, 20 contentious votes. Search, filter, and analyze how every party voted on every bill.">
+  <meta property="og:title" content="Parliamentary Voting Records — 151 Bills, 94 Votes">
+  <meta property="og:description" content="Complete voting analysis for Canada's 45th Parliament. 20 contentious votes where margins were razor-thin. See how every party voted.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/voting-records.html">
+  <meta name="twitter:card" content="summary">
   <link rel="stylesheet" href="style.css?v=5">
   <meta name="theme-color" content="#1a1f36">
   <meta name="color-scheme" content="light dark">
@@ -12,56 +17,401 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    .vr-wrap { max-width: 1100px; margin: 0 auto; padding: 20px; font-family: 'JetBrains Mono', 'Courier New', monospace; color: var(--text-primary); }
-    .vr-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid rgba(196, 30, 58, 0.4); margin-bottom: 24px; }
-    .vr-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--text-primary); letter-spacing: -1px; margin-bottom: 8px; }
-    .vr-header .subtitle { font-size: 0.85rem; color: var(--text-tertiary); }
+    /* ── Layout ──────────────────────────────────────────── */
+    .vr-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      color: var(--text-primary);
+    }
 
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 24px; }
-    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
-    .stat-card .num { font-size: 1.5rem; font-weight: 700; display: block; line-height: 1.1; }
-    .stat-card .num.red { color: #e53555; }
-    .stat-card .num.blue { color: #60a5fa; }
-    .stat-card .num.green { color: #4ade80; }
-    .stat-card .num.yellow { color: #facc15; }
-    .stat-card .label { font-size: 0.6rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+    /* ── Header ─────────────────────────────────────────── */
+    .vr-header {
+      text-align: center;
+      padding: 48px 0 24px;
+      border-bottom: 2px solid rgba(196, 30, 58, 0.4);
+      margin-bottom: 32px;
+    }
+    .vr-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: var(--text-primary);
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+    .vr-header .subtitle {
+      font-size: 0.88rem;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .vr-header .source-line {
+      font-size: 0.72rem;
+      color: var(--text-quaternary);
+      margin-top: 10px;
+    }
+    .vr-header .source-line a { color: var(--text-tertiary); }
 
-    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
-    .controls input, .controls select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 0.82rem; }
-    .controls input { flex: 1; min-width: 200px; }
-    .controls select { min-width: 120px; }
-    .controls input:focus, .controls select:focus { outline: none; border-color: rgba(196,30,58,0.5); }
-    #vr-count { font-size: 0.72rem; color: var(--text-tertiary); white-space: nowrap; }
+    /* ── LIRIL Attribution ──────────────────────────────── */
+    .liril-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+    .liril-bar a { color: var(--color-blue); }
 
-    .vote-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-    .vote-table th { background: var(--bg-surface); color: var(--text-tertiary); font-size: 0.65rem; letter-spacing: 0.5px; text-transform: uppercase; padding: 8px; text-align: left; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
-    .vote-table th:hover { color: var(--text-primary); }
-    .vote-table td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    .vote-table tr:hover td { background: rgba(255,255,255,0.02); }
+    /* ── Hero Stats ─────────────────────────────────────── */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .hero-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 12px;
+      text-align: center;
+      transition: border-color 0.2s ease;
+    }
+    .hero-stat:hover { border-color: rgba(196, 30, 58, 0.3); }
+    .hero-stat .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: block;
+      line-height: 1.1;
+    }
+    .hero-stat .num.accent { color: var(--accent); }
+    .hero-stat .num.blue { color: #2563eb; }
+    .hero-stat .num.gold { color: #d97706; }
+    .hero-stat .num.green { color: #059669; }
+    .hero-stat .num.red { color: #ef4444; }
+    .hero-stat .label {
+      font-size: 0.6rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-    .vote-desc { color: var(--text-secondary); max-width: 360px; }
-    .vote-bill { color: #60a5fa; font-weight: 600; }
-    .vote-date { color: var(--text-tertiary); white-space: nowrap; }
+    /* ── Section Titles ─────────────────────────────────── */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+      color: var(--text-primary);
+      margin: 40px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+
+    /* ── Bills by Category Chart ────────────────────────── */
+    .cat-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 36px;
+    }
+    .cat-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 50px;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .cat-row:hover .cat-fill { filter: brightness(1.15); }
+    .cat-row.active .cat-label { color: var(--accent); font-weight: 700; }
+    .cat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-align: right;
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
+    .cat-track {
+      height: 24px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .cat-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+    }
+    .cat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+    }
+
+    /* ── Bill Type Pills ────────────────────────────────── */
+    .type-pills {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .type-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 20px;
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+    .type-pill .tp-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: block;
+      color: var(--text-primary);
+    }
+    .type-pill .tp-label {
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* ── Party Voting Patterns ──────────────────────────── */
+    .party-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+    .party-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .party-card .pc-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .party-card .pc-bar-wrap {
+      height: 8px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 8px;
+    }
+    .party-card .pc-yea-fill {
+      height: 100%;
+      background: #4ade80;
+      border-radius: 4px 0 0 4px;
+    }
+    .party-card .pc-nay-fill {
+      height: 100%;
+      background: #ef4444;
+      border-radius: 0 4px 4px 0;
+    }
+    .party-card .pc-stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-tertiary);
+      display: flex;
+      justify-content: space-between;
+    }
+    .party-card .pc-yea { color: #4ade80; font-weight: 600; }
+    .party-card .pc-nay { color: #ef4444; font-weight: 600; }
+    .party-card .pc-dissent {
+      font-size: 0.62rem;
+      color: var(--text-quaternary);
+      margin-top: 6px;
+    }
+
+    /* ── Contentious Votes Table ─────────────────────────── */
+    .cont-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-bottom: 36px;
+    }
+    .cont-table th {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .cont-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .cont-table tr:hover td { background: rgba(196, 30, 58, 0.02); }
+    .cont-desc { color: var(--text-secondary); max-width: 340px; }
+    .cont-bill { color: #2563eb; font-weight: 600; }
+    .cont-date { color: var(--text-tertiary); white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
 
     .result-passed { color: #4ade80; font-weight: 600; }
     .result-failed { color: #ef4444; font-weight: 600; }
-    .result-tie { color: #facc15; font-weight: 600; }
+    .result-tie { color: #d97706; font-weight: 600; }
 
-    .party-bar { display: flex; gap: 3px; flex-wrap: wrap; }
-    .pb { font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
-    .pb-yea { background: rgba(74,222,128,0.12); color: #4ade80; }
-    .pb-nay { background: rgba(239,68,68,0.12); color: #ef4444; }
+    /* Yea/Nay proportional bar */
+    .tally-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 160px;
+    }
+    .tally-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      min-width: 28px;
+      text-align: right;
+    }
+    .tally-num.yea { color: #4ade80; }
+    .tally-num.nay { color: #ef4444; }
+    .tally-track {
+      flex: 1;
+      height: 10px;
+      display: flex;
+      border-radius: 3px;
+      overflow: hidden;
+      background: var(--bg-surface);
+    }
+    .tally-yea-fill { background: #4ade80; height: 100%; }
+    .tally-nay-fill { background: #ef4444; height: 100%; }
 
-    .tally { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
-    .tally-yea { color: #4ade80; }
-    .tally-nay { color: #ef4444; }
+    /* Party vote pills */
+    .pv-bar { display: flex; gap: 3px; flex-wrap: wrap; }
+    .pv {
+      font-size: 0.58rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 600;
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pv-yea { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .pv-nay { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .pv-abs { background: rgba(156,163,175,0.12); color: #9ca3af; }
 
-    .source-note { font-size: 0.7rem; color: var(--text-quaternary); margin-top: 20px; padding: 16px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; line-height: 1.7; }
+    /* ── Controls / Filters ─────────────────────────────── */
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .controls input, .controls select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+    .controls input { flex: 1; min-width: 200px; }
+    .controls select { min-width: 120px; }
+    .controls input:focus, .controls select:focus { outline: none; border-color: rgba(196,30,58,0.5); }
+    .controls .filter-count {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── All Votes Table ────────────────────────────────── */
+    .vote-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-bottom: 32px;
+    }
+    .vote-table th {
+      background: var(--bg-surface);
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .vote-table th:hover { color: var(--text-primary); }
+    .vote-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .vote-table tr:hover td { background: rgba(196, 30, 58, 0.02); }
+    .vote-desc { color: var(--text-secondary); max-width: 360px; }
+    .vote-bill { color: #2563eb; font-weight: 600; }
+    .vote-date { color: var(--text-tertiary); white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
+
+    .tally-inline {
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+    .ti-yea { color: #4ade80; }
+    .ti-nay { color: #ef4444; }
+
+    /* ── Source Note ─────────────────────────────────────── */
+    .source-note {
+      font-size: 0.7rem;
+      color: var(--text-quaternary);
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      line-height: 1.7;
+    }
     .source-note a { color: var(--text-tertiary); }
 
+    /* ── Share Bar ───────────────────────────────────────── */
+    .share-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
     @media (max-width: 700px) {
-      .vote-table { font-size: 0.7rem; }
-      .party-bar { display: none; }
+      .hero-stats { grid-template-columns: repeat(3, 1fr); }
+      .cat-row { grid-template-columns: 80px 1fr 40px; }
+      .party-grid { grid-template-columns: repeat(2, 1fr); }
+      .pv-bar { display: none; }
+      .tally-bar-wrap { min-width: 100px; }
+      .cont-desc { max-width: 180px; }
+      .vote-desc { max-width: 180px; }
     }
   </style>
 </head>
@@ -69,20 +419,70 @@
   <nav id="site-nav"></nav>
 
   <div class="vr-wrap">
-<!-- LIRIL Analysis -->    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s-sm) var(--s-md);margin:var(--s-sm) 0;display:flex;gap:var(--s-xs);align-items:center;">      <span style="font-size:1.2rem;">🤖</span>      <p style="font-size:var(--text-xs);color:var(--text-tertiary);margin:0;"><a href="liril.html">LIRIL</a> collected all 94 recorded divisions from OpenParliament.ca API, decoded party breakdowns, and matched lobbying timing against vote dates.</p>    </div>
-    <div class="vr-header">
+
+    <!-- LIRIL Attribution -->
+    <div class="liril-bar">
+      <span style="font-size:1.2rem;">&#129302;</span>
+      <p style="margin:0;"><a href="liril.html">LIRIL</a> collected all 94 recorded divisions from OpenParliament.ca API, decoded party breakdowns, categorized 151 bills, and matched lobbying timing against vote dates.</p>
+    </div>
+
+    <!-- Header -->
+    <header class="vr-header">
       <h1>Parliamentary Voting Records</h1>
-      <p class="subtitle">All 94 recorded divisions in Canada's 45th Parliament (Session 45-1). Data from OpenParliament.ca.</p>
+      <p class="subtitle">Complete voting analysis for Canada's 45th Parliament (Session 45-1). 151 bills tracked, 94 recorded divisions, 5 parties analyzed. Every vote, every bill, every party position.</p>
+      <p class="source-line">Source: <a href="https://openparliament.ca/api/">OpenParliament.ca</a> (CC-BY) | Original data: House of Commons of Canada | Collected 2026-04-05</p>
+    </header>
+
+    <!-- Hero Stats -->
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="num accent" id="s-bills">151</span><div class="label">Bills Tracked</div></div>
+      <div class="hero-stat"><span class="num blue" id="s-votes">94</span><div class="label">Recorded Votes</div></div>
+      <div class="hero-stat"><span class="num gold" id="s-contentious">20</span><div class="label">Contentious</div></div>
+      <div class="hero-stat"><span class="num green" id="s-passed">--</span><div class="label">Passed</div></div>
+      <div class="hero-stat"><span class="num red" id="s-failed">--</span><div class="label">Failed</div></div>
+      <div class="hero-stat"><span class="num" style="color:#d97706" id="s-tied">--</span><div class="label">Tied</div></div>
+      <div class="hero-stat"><span class="num" style="color:#7c3aed" id="s-mps">340</span><div class="label">MPs</div></div>
     </div>
 
-    <div class="stats-row" id="stats-row">
-      <div class="stat-card"><span class="num red" id="s-total">--</span><div class="label">Total Votes</div></div>
-      <div class="stat-card"><span class="num green" id="s-passed">--</span><div class="label">Passed</div></div>
-      <div class="stat-card"><span class="num" style="color:#ef4444" id="s-failed">--</span><div class="label">Failed</div></div>
-      <div class="stat-card"><span class="num yellow" id="s-tie">--</span><div class="label">Tied</div></div>
-      <div class="stat-card"><span class="num blue" id="s-dissent">--</span><div class="label">Had Dissent</div></div>
+    <!-- Share Bar -->
+    <div id="share-bar"></div>
+
+    <!-- ═══ BILLS BY CATEGORY ═══ -->
+    <h2 class="section-title">Bills by Category</h2>
+    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:-12px 0 16px;">151 bills classified into 12 categories. Click a category to filter the votes table below.</p>
+    <div class="cat-chart" id="cat-chart"></div>
+
+    <!-- Bill Type Breakdown -->
+    <div class="type-pills" id="type-pills">
+      <div class="type-pill"><span class="tp-num">72</span><div class="tp-label">Private Member Bills</div></div>
+      <div class="type-pill"><span class="tp-num">52</span><div class="tp-label">Senate Bills</div></div>
+      <div class="type-pill"><span class="tp-num">27</span><div class="tp-label">Government Bills</div></div>
     </div>
 
+    <!-- ═══ PARTY VOTING PATTERNS ═══ -->
+    <h2 class="section-title">Party Voting Patterns</h2>
+    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:-12px 0 16px;">How each party voted across all 94 recorded divisions. Green bar = Yea votes. Red bar = Nay votes.</p>
+    <div class="party-grid" id="party-grid"></div>
+
+    <!-- ═══ CONTENTIOUS VOTES ═══ -->
+    <h2 class="section-title">Contentious Votes</h2>
+    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:-12px 0 16px;">The 20 closest votes where margins were under 5%. These are the votes where individual attendance and party discipline determined the outcome.</p>
+    <table class="cont-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Result</th>
+          <th>Yea / Nay</th>
+          <th>Parties</th>
+        </tr>
+      </thead>
+      <tbody id="cont-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);padding:30px;">Loading contentious votes...</td></tr></tbody>
+    </table>
+
+    <!-- ═══ ALL VOTES (SEARCHABLE) ═══ -->
+    <h2 class="section-title">All Recorded Divisions</h2>
     <div class="controls">
       <input type="text" id="vr-search" placeholder="Search bills, descriptions...">
       <select id="vr-result">
@@ -97,8 +497,12 @@
         <option value="Liberal">LPC voted Yes</option>
         <option value="Bloc">Bloc voted Yes</option>
         <option value="NDP">NDP voted Yes</option>
+        <option value="Green">Green voted Yes</option>
       </select>
-      <span id="vr-count"></span>
+      <select id="vr-category">
+        <option value="">All Categories</option>
+      </select>
+      <span class="filter-count" id="vr-count"></span>
     </div>
 
     <table class="vote-table">
@@ -112,46 +516,210 @@
           <th>Party Breakdown</th>
         </tr>
       </thead>
-      <tbody id="vr-tbody"><tr><td colspan="6" style="text-align:center;color:#4a4a52;padding:40px;">Loading votes...</td></tr></tbody>
+      <tbody id="vr-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);padding:40px;">Loading votes...</td></tr></tbody>
     </table>
 
+    <!-- Source Note -->
     <div class="source-note">
       <strong>Source:</strong> <a href="https://openparliament.ca/votes/" target="_blank" rel="noopener">OpenParliament.ca</a> (CC-BY licence). Original data from the House of Commons of Canada. Collected 2026-04-05.<br>
-      <strong>Note:</strong> Party breakdown shows majority position. Disagreement score indicates % of party members who voted against their party's majority. Only recorded divisions are shown — voice votes are not included.
+      <strong>Note:</strong> Party breakdown shows majority position. Dissent indicates % of party members who voted against their party's majority. Only recorded divisions shown &mdash; voice votes are not included. Bill categorization is automated keyword-based and may contain classification errors.<br>
+      <strong>Methodology:</strong> Contentious votes defined as margin &lt;5%. Category labels from algorithmic keyword matching. <a href="about.html">Full methodology.</a>
     </div>
+
   </div>
 
   <script src="nav.js?v=7"></script>
+  <div id="read-next"></div>
+  <footer id="site-footer"></footer>
+  <script src="readnext.js?v=2"></script>
+  <script src="footer.js?v=1"></script>
   <script src="share.js?v=1"></script>
+  <script src="js/ai-panel.js"></script>
   <script>
   (function() {
     'use strict';
-    var VOTES = [];
+
+    var PARTY_LABELS = { Conservative: 'CPC', Liberal: 'LPC', Bloc: 'BQ', NDP: 'NDP', Green: 'GPC' };
+    var PARTY_COLORS = { Conservative: '#1e3a8a', Liberal: '#dc2626', Bloc: '#60a5fa', NDP: '#f97316', Green: '#22c55e' };
+    var CAT_COLORS = {
+      other: '#6b7280', justice: '#c41e3a', finance: '#2563eb', healthcare: '#059669',
+      social: '#7c3aed', governance: '#d97706', trade: '#059669', environment: '#22c55e',
+      immigration: '#f97316', technology: '#60a5fa', indigenous: '#d97706', defense: '#6b7280'
+    };
+
+    var ALL_VOTES = [];
+    var ALL_BILLS = [];
+    var ANALYSIS = null;
     var sortCol = 'number';
     var sortDir = -1;
+    var activeCat = '';
 
-    function getPartyVote(v, partyShort) {
-      var found = (v.party_breakdown || []).find(function(p) {
-        return p.party && p.party.short_name && p.party.short_name.en === partyShort;
+    fetch('data/analysis.json').then(function(r) { return r.json(); }).then(function(data) {
+      ANALYSIS = data;
+      ALL_VOTES = data.all_votes || [];
+      ALL_BILLS = data.all_bills || [];
+
+      buildHeroStats();
+      buildCategoryChart();
+      buildPartyGrid();
+      buildContentiousTable();
+      buildCategoryFilter();
+      renderVotes();
+      bindEvents();
+    }).catch(function(err) {
+      console.error('Failed to load analysis data:', err);
+    });
+
+    function buildHeroStats() {
+      var passed = ALL_VOTES.filter(function(v) { return v.result === 'Passed'; }).length;
+      var failed = ALL_VOTES.filter(function(v) { return v.result === 'Failed'; }).length;
+      var tied = ALL_VOTES.filter(function(v) { return v.result === 'Tie'; }).length;
+      document.getElementById('s-passed').textContent = passed;
+      document.getElementById('s-failed').textContent = failed;
+      document.getElementById('s-tied').textContent = tied;
+      document.getElementById('s-votes').textContent = ALL_VOTES.length;
+      document.getElementById('s-contentious').textContent = (ANALYSIS.contentious_votes || []).length;
+    }
+
+    function buildCategoryChart() {
+      var cats = ANALYSIS.bills_by_category || {};
+      var catNames = Object.keys(cats).sort(function(a, b) { return cats[b] - cats[a]; });
+      var maxCat = cats[catNames[0]] || 1;
+
+      var html = '';
+      catNames.forEach(function(name) {
+        var count = cats[name];
+        var pct = (count / maxCat * 100).toFixed(1);
+        var color = CAT_COLORS[name] || '#6b7280';
+        html += '<div class="cat-row" data-cat="' + name + '">';
+        html += '<span class="cat-label">' + name + '</span>';
+        html += '<div class="cat-track"><div class="cat-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>';
+        html += '<span class="cat-value">' + count + '</span>';
+        html += '</div>';
       });
-      return found ? found.vote : null;
+      document.getElementById('cat-chart').innerHTML = html;
+
+      // Click to filter
+      document.querySelectorAll('.cat-row').forEach(function(row) {
+        row.addEventListener('click', function() {
+          var cat = this.dataset.cat;
+          if (activeCat === cat) {
+            activeCat = '';
+            document.querySelectorAll('.cat-row').forEach(function(r) { r.classList.remove('active'); });
+          } else {
+            activeCat = cat;
+            document.querySelectorAll('.cat-row').forEach(function(r) { r.classList.remove('active'); });
+            this.classList.add('active');
+          }
+          document.getElementById('vr-category').value = activeCat;
+          renderVotes();
+        });
+      });
     }
 
-    function hasDissent(v) {
-      return (v.party_breakdown || []).some(function(p) { return p.disagreement > 0.01; });
+    function buildPartyGrid() {
+      var patterns = ANALYSIS.party_voting_patterns || {};
+      var partyOrder = ['Conservative', 'Liberal', 'Bloc', 'NDP', 'Green'];
+      var html = '';
+
+      partyOrder.forEach(function(name) {
+        var p = patterns[name];
+        if (!p) return;
+        var yeaPct = (p.yea / p.total_votes * 100).toFixed(0);
+        var nayPct = (100 - yeaPct).toFixed(0);
+        var dissent = (p.avg_dissent * 100).toFixed(1);
+        var color = PARTY_COLORS[name] || '#6b7280';
+
+        html += '<div class="party-card" style="border-top:3px solid ' + color + ';">';
+        html += '<div class="pc-name">' + name + ' (' + PARTY_LABELS[name] + ')</div>';
+        html += '<div class="pc-bar-wrap"><div class="pc-yea-fill" style="width:' + yeaPct + '%;"></div><div class="pc-nay-fill" style="width:' + nayPct + '%;"></div></div>';
+        html += '<div class="pc-stats"><span class="pc-yea">' + p.yea + ' Yea (' + p.yea_pct + '%)</span><span class="pc-nay">' + p.nay + ' Nay</span></div>';
+        html += '<div class="pc-dissent">Avg dissent: ' + dissent + '%</div>';
+        html += '</div>';
+      });
+
+      document.getElementById('party-grid').innerHTML = html;
     }
 
-    function render() {
+    function buildContentiousTable() {
+      var cont = ANALYSIS.contentious_votes || [];
+      if (!cont.length) {
+        document.getElementById('cont-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);padding:20px;">No contentious votes found</td></tr>';
+        return;
+      }
+
+      var html = '';
+      cont.forEach(function(v) {
+        var total = v.yea_total + v.nay_total;
+        var yeaPct = total > 0 ? (v.yea_total / total * 100).toFixed(0) : 50;
+        var nayPct = total > 0 ? (v.nay_total / total * 100).toFixed(0) : 50;
+        var resultClass = v.result === 'Passed' ? 'result-passed' : v.result === 'Failed' ? 'result-failed' : 'result-tie';
+
+        var billMatch = (v.bill_url || '').match(/\/(C-\d+|S-\d+)\//);
+        var billLabel = billMatch ? billMatch[1] : '';
+        var desc = v.description || '';
+
+        // Party votes
+        var pvHTML = '';
+        var partyOrder = ['Conservative', 'Liberal', 'Bloc', 'NDP', 'Green'];
+        partyOrder.forEach(function(p) {
+          var vote = v.party_votes ? v.party_votes[p] : null;
+          if (!vote) return;
+          var cls = vote === 'Yes' ? 'pv-yea' : vote === 'No' ? 'pv-nay' : 'pv-abs';
+          pvHTML += '<span class="pv ' + cls + '">' + PARTY_LABELS[p] + '</span>';
+        });
+
+        html += '<tr>';
+        html += '<td style="font-family:\'JetBrains Mono\',monospace;font-weight:600;">' + v.number + '</td>';
+        html += '<td class="cont-date">' + v.date + '</td>';
+        html += '<td class="cont-desc">' + (billLabel ? '<span class="cont-bill">' + billLabel + '</span> ' : '') + desc.substring(0, 120) + (desc.length > 120 ? '...' : '') + '</td>';
+        html += '<td class="' + resultClass + '">' + v.result + '</td>';
+        html += '<td><div class="tally-bar-wrap"><span class="tally-num yea">' + v.yea_total + '</span><div class="tally-track"><div class="tally-yea-fill" style="width:' + yeaPct + '%;"></div><div class="tally-nay-fill" style="width:' + nayPct + '%;"></div></div><span class="tally-num nay">' + v.nay_total + '</span></div></td>';
+        html += '<td><div class="pv-bar">' + pvHTML + '</div></td>';
+        html += '</tr>';
+      });
+
+      document.getElementById('cont-tbody').innerHTML = html;
+    }
+
+    function buildCategoryFilter() {
+      var cats = ANALYSIS.bills_by_category || {};
+      var catNames = Object.keys(cats).sort(function(a, b) { return cats[b] - cats[a]; });
+      var sel = document.getElementById('vr-category');
+      catNames.forEach(function(name) {
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name.charAt(0).toUpperCase() + name.slice(1) + ' (' + cats[name] + ')';
+        sel.appendChild(opt);
+      });
+    }
+
+    // Build a bill lookup by URL for category matching
+    function getBillCategory(billUrl) {
+      if (!billUrl) return '';
+      var found = ALL_BILLS.find(function(b) { return b.url === billUrl; });
+      return found ? found.category : '';
+    }
+
+    function renderVotes() {
       var q = (document.getElementById('vr-search').value || '').toLowerCase();
       var resultF = document.getElementById('vr-result').value;
       var partyF = document.getElementById('vr-party').value;
+      var catF = document.getElementById('vr-category').value || activeCat;
 
-      var filtered = VOTES.filter(function(v) {
-        var desc = ((v.description && v.description.en) || '').toLowerCase();
+      var filtered = ALL_VOTES.filter(function(v) {
+        var desc = (v.description || '').toLowerCase();
         var bill = (v.bill_url || '').toLowerCase();
         if (q && desc.indexOf(q) === -1 && bill.indexOf(q) === -1) return false;
-        if (resultF && v.result !== resultF) return false;
-        if (partyF && getPartyVote(v, partyF) !== 'Yes') return false;
+        if (resultF) {
+          if (resultF === 'Tie' && v.result !== 'Tie') return false;
+          if (resultF !== 'Tie' && v.result !== resultF) return false;
+        }
+        if (partyF && v.party_votes && v.party_votes[partyF] !== 'Yes') return false;
+        if (catF) {
+          var bCat = getBillCategory(v.bill_url);
+          if (bCat !== catF) return false;
+        }
         return true;
       });
 
@@ -160,73 +728,68 @@
         if (sortCol === 'number') { va = a.number; vb = b.number; }
         else if (sortCol === 'date') { va = a.date; vb = b.date; }
         else if (sortCol === 'result') { va = a.result; vb = b.result; }
-        else { va = (a.description && a.description.en) || ''; vb = (b.description && b.description.en) || ''; }
+        else { va = (a.description || ''); vb = (b.description || ''); }
         if (va < vb) return -1 * sortDir;
         if (va > vb) return 1 * sortDir;
         return 0;
       });
 
-      document.getElementById('vr-count').textContent = filtered.length + ' of ' + VOTES.length + ' votes';
+      document.getElementById('vr-count').textContent = filtered.length + ' of ' + ALL_VOTES.length + ' votes';
 
       var tbody = document.getElementById('vr-tbody');
       if (!filtered.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#4a4a52;padding:20px;">No matching votes</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-quaternary);padding:20px;">No matching votes</td></tr>';
         return;
       }
 
+      var partyOrder = ['Conservative', 'Liberal', 'Bloc', 'NDP', 'Green'];
+
       tbody.innerHTML = filtered.map(function(v) {
-        var desc = (v.description && v.description.en) || '';
+        var desc = v.description || '';
         var billMatch = (v.bill_url || '').match(/\/(C-\d+|S-\d+)\//);
         var billLabel = billMatch ? billMatch[1] : '';
         var resultClass = v.result === 'Passed' ? 'result-passed' : v.result === 'Failed' ? 'result-failed' : 'result-tie';
-        var parties = ['Conservative', 'Liberal', 'Bloc', 'NDP', 'Green'];
-        var partyLabels = { Conservative: 'CPC', Liberal: 'LPC', Bloc: 'BQ', NDP: 'NDP', Green: 'GPC' };
 
-        var partyHTML = parties.map(function(p) {
-          var vote = getPartyVote(v, p);
+        var pvHTML = partyOrder.map(function(p) {
+          var vote = v.party_votes ? v.party_votes[p] : null;
           if (!vote) return '';
-          var cls = vote === 'Yes' ? 'pb-yea' : 'pb-nay';
-          return '<span class="pb ' + cls + '">' + partyLabels[p] + '</span>';
+          var cls = vote === 'Yes' ? 'pv-yea' : vote === 'No' ? 'pv-nay' : 'pv-abs';
+          return '<span class="pv ' + cls + '">' + PARTY_LABELS[p] + '</span>';
         }).join('');
 
         return '<tr>' +
-          '<td>' + v.number + '</td>' +
+          '<td style="font-family:\'JetBrains Mono\',monospace;">' + v.number + '</td>' +
           '<td class="vote-date">' + v.date + '</td>' +
           '<td class="vote-desc">' + (billLabel ? '<span class="vote-bill">' + billLabel + '</span> ' : '') + desc.substring(0, 120) + (desc.length > 120 ? '...' : '') + '</td>' +
           '<td class="' + resultClass + '">' + v.result + '</td>' +
-          '<td class="tally"><span class="tally-yea">' + v.yea_total + '</span>–<span class="tally-nay">' + v.nay_total + '</span></td>' +
-          '<td><div class="party-bar">' + partyHTML + '</div></td>' +
+          '<td class="tally-inline"><span class="ti-yea">' + v.yea_total + '</span> &ndash; <span class="ti-nay">' + v.nay_total + '</span></td>' +
+          '<td><div class="pv-bar">' + pvHTML + '</div></td>' +
           '</tr>';
       }).join('');
     }
 
-    fetch('data/votes_45-1.json').then(function(r) { return r.json(); }).then(function(data) {
-      VOTES = data;
-      document.getElementById('s-total').textContent = data.length;
-      document.getElementById('s-passed').textContent = data.filter(function(v) { return v.result === 'Passed'; }).length;
-      document.getElementById('s-failed').textContent = data.filter(function(v) { return v.result === 'Failed'; }).length;
-      document.getElementById('s-tie').textContent = data.filter(function(v) { return v.result === 'Tie'; }).length;
-      document.getElementById('s-dissent').textContent = data.filter(hasDissent).length;
-      render();
-    });
-
-    document.getElementById('vr-search').addEventListener('input', render);
-    document.getElementById('vr-result').addEventListener('change', render);
-    document.getElementById('vr-party').addEventListener('change', render);
-
-    document.querySelectorAll('th[data-sort]').forEach(function(th) {
-      th.addEventListener('click', function() {
-        var col = this.dataset.sort;
-        if (sortCol === col) sortDir *= -1;
-        else { sortCol = col; sortDir = -1; }
-        render();
+    function bindEvents() {
+      document.getElementById('vr-search').addEventListener('input', renderVotes);
+      document.getElementById('vr-result').addEventListener('change', renderVotes);
+      document.getElementById('vr-party').addEventListener('change', renderVotes);
+      document.getElementById('vr-category').addEventListener('change', function() {
+        activeCat = this.value;
+        document.querySelectorAll('.cat-row').forEach(function(r) {
+          r.classList.toggle('active', r.dataset.cat === activeCat);
+        });
+        renderVotes();
       });
-    });
+
+      document.querySelectorAll('.vote-table th[data-sort]').forEach(function(th) {
+        th.addEventListener('click', function() {
+          var col = this.dataset.sort;
+          if (sortCol === col) sortDir *= -1;
+          else { sortCol = col; sortDir = -1; }
+          renderVotes();
+        });
+      });
+    }
   })();
   </script>
-  <div id="read-next"></div>
-  <footer id="site-footer"></footer>
-  <script src="readnext.js?v=2"></script>
-  <script src="footer.js?v=1"></script>
 </body>
 </html>
