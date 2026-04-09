@@ -38,7 +38,8 @@
       icon: '🩸',
       items: [
         { label: 'The 504 Charges', href: 'accountability.html', desc: 'Criminal accountability database' },
-        { label: 'Criminal Code Analysis', href: 'criminal-code-analysis.html', desc: '50 findings mapped to CC sections', hot: true },
+        { label: 'Criminal Code Analysis', href: 'criminal-code-analysis.html', desc: '81 findings mapped to CC sections', hot: true },
+        { label: 'Charges Sheet', href: 'charges-sheet.html', desc: '38 officials, 42 charges', hot: true },
         { label: 'Genocide Evidence', href: 'genocide-evidence.html', desc: 'Pattern documentation' },
         { label: 'Policy Harm Index', href: 'harm-index.html', desc: 'Quantified policy damage' },
         { label: 'The Pattern (T4)', href: 't4-comparison.html', desc: 'Historical comparison' },
@@ -68,7 +69,9 @@
         { label: '5GW Subversion', href: '5gw-subversion.html', desc: 'Fifth-generation warfare' },
         { label: 'Hansard Dashboard', href: 'hansard-dashboard.html', desc: 'Debate analysis' },
         { label: 'Hansard Evidence', href: 'hansard-evidence.html', desc: 'Parliamentary records' },
-        { label: 'Voting Records', href: 'voting-records.html', desc: 'MP voting patterns' },
+        { label: 'Voting Records', href: 'voting-records.html', desc: '151 bills, 94 votes analyzed', hot: true },
+        { label: 'Sector Lobbying', href: 'sector-lobbying.html', desc: '359K comms, 12 sectors', hot: true },
+        { label: 'Provincial Analysis', href: 'provincial-analysis.html', desc: 'All 10 provinces', hot: true },
         { label: 'Infographics', href: 'infographics.html', desc: 'Visual data presentations' },
       ]
     },
