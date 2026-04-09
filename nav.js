@@ -48,6 +48,7 @@
         { label: 'The Pattern (T4)', href: 't4-comparison.html', desc: 'Historical comparison' },
         { label: 'RCMP Complicity', href: 'rcmp-complicity.html', desc: 'Law enforcement failure analysis', hot: true },
         { label: 'The Boot', href: 'the-boot.html', desc: 'Institutional mechanics' },
+        { label: 'MAID Report', href: 'rcmp-maid-accountability.html', desc: 'RCMP commissioners & MAID deaths', hot: true },
       ]
     },
     {
@@ -65,6 +66,9 @@
         { label: 'Charity Pipeline', href: 'charity-pipeline.html', desc: 'Charity fund routing' },
         { label: 'Arms Pipeline', href: 'arms-pipeline.html', desc: 'Canadian arms export tracking' },
         { label: 'Carney Conflicts', href: 'carney-conflicts.html', desc: 'PM conflict-of-interest analysis' },
+        { label: 'AG Findings Database', href: 'ag-findings.html', desc: '12 AG reports, $103B+ documented', hot: true },
+        { label: 'Phoenix Pay Disaster', href: 'phoenix-pay.html', desc: '$309M→$2.2B, 150K affected', hot: true },
+        { label: 'Elections & Finance', href: 'elections-finance.html', desc: 'Campaign finance, lobbying data', hot: true },
       ]
     },
     {
