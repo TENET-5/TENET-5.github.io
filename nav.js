@@ -99,6 +99,7 @@
       items: [
         { label: 'Red Duster FPS', href: 'red-duster-game.html', desc: 'Tactical simulator', special: 'game' },
         { label: 'Bloggins', href: 'bloggins.html', desc: 'Raccoon intelligence AI', special: 'green' },
+        { label: 'LIRIL (AI)', href: 'liril.html', desc: "Daniel Perry's private AI system", hot: true },
         { label: 'Search', href: 'search.html', desc: 'Full-site search' },
       ]
     },
