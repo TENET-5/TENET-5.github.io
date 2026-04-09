@@ -91,6 +91,7 @@
       section: 'About & Action',
       icon: '📖',
       items: [
+        { label: 'Take Action', href: 'take-action.html', desc: 's.504 prosecution, complaints, contact MPs', hot: true },
         { label: 'My Story', href: 'my-story.html', desc: 'Daniel Perry\'s account' },
         { label: 'Open Letter to MPs', href: 'open-letter.html', desc: 'Direct address to parliament' },
         { label: 'MP Briefing', href: 'mp-brief.html', desc: 'Concise brief for MPs' },
@@ -129,6 +130,8 @@
         { label: 'Calgary', href: 'calgary.html', desc: 'Green Line, arena deal', hot: true },
         { label: 'Belleville', href: 'belleville.html', desc: 'City of Belleville' },
         { label: 'Quinte West', href: 'quinte-west.html', desc: 'City of Quinte West' },
+        { label: 'Kingston', href: 'municipal-accountability.html?city=kingston', desc: 'Third Crossing, housing crisis' },
+        { label: 'Peterborough', href: 'municipal-accountability.html?city=peterborough', desc: 'Del Mastro conviction, opioid crisis' },
       ]
     },
   ];
