@@ -99,11 +99,22 @@ try {
     STATE.callsign = p.callsign || 'ECHO-1';
     
     if (p.stats) {
-      STATE.maxHealth = 50 + (p.stats.Endurance * 10) || 100;
+      STATE.maxHealth = 50 + ((p.stats.Endurance || 5) * 10);
       STATE.health = STATE.maxHealth;
-      STATE.stamina = 50 + (p.stats.Agility * 10) || 100;
-      STATE.maxAmmo = (p.stats.Strength > 7) ? 40 : 30; // Better handling allows drum mags
-      STATE.reserveAmmo = (p.stats.Strength * 15);
+      
+      // Phase 25 Parity: Link missing survival boundary caps
+      STATE.maxHunger = 60 + ((p.stats.Endurance || 5) * 8);
+      STATE.hunger = STATE.maxHunger;
+      
+      STATE.maxThirst = 60 + ((p.stats.Endurance || 5) * 8);
+      STATE.thirst = STATE.maxThirst;
+      
+      // Stamina derived from Agility
+      STATE.stamina = 50 + ((p.stats.Agility || 5) * 10);
+      
+      // Loadout derived from Strength
+      STATE.maxAmmo = ((p.stats.Strength || 5) > 7) ? 40 : 30; // Better handling allows drum mags
+      STATE.reserveAmmo = ((p.stats.Strength || 5) * 15);
     }
   }
 } catch (e) {

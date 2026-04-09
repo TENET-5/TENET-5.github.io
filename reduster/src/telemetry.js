@@ -46,3 +46,22 @@ export async function transmitSatorEvent(eventName, payloadStr) {
     _offlineCache.push({ event: eventName, payloadStr: payloadStr });
   }
 }
+
+/**
+ * Fetch the latest cross-engine save file chronometry from the SATOR ABCXYZ hub.
+ * This ensures parity between Godot and Web Native versions.
+ */
+export async function fetchSatorState() {
+  try {
+    const res = await fetch('http://127.0.0.1:8091/api/save', {
+      method: 'GET',
+      mode: 'cors'
+    });
+    if (!res.ok) throw new Error('SATOR Save endpoint unreachable.');
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.warn('[STARK] SATOR Hub Save Sync offline, defaulting to localStorage parity.');
+    return null;
+  }
+}
