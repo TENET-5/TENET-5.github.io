@@ -647,6 +647,22 @@
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
       ]
     },
+        'dnd-procurement.html': {
+      current: 'DND Procurement',
+      next: [
+        { href: 'phoenix-pay.html', label: 'Phoenix Pay Disaster', desc: 'Same pattern — $309M became $2.2B' },
+        { href: 'ag-findings.html', label: 'AG Findings Database', desc: '12 AG reports, $103B+ documented waste' },
+        { href: 'procurement-deep-dive.html', label: 'Procurement Deep Dive', desc: '1.26M contracts, 70K anomalies' },
+      ]
+    },
+        'senate-expenses.html': {
+      current: 'Senate Expenses',
+      next: [
+        { href: 'charges-sheet.html', label: 'Charges Sheet', desc: '38 officials, 42 charges documented' },
+        { href: 'elections-finance.html', label: 'Elections & Finance', desc: 'Campaign finance disclosures' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: '12 AG reports, $103B+ documented' },
+      ]
+    },
   };
 
   function getCurrentPage() {

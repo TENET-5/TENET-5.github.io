@@ -76,6 +76,7 @@
         { label: 'Carney Conflicts', href: 'carney-conflicts.html', desc: 'PM conflict-of-interest analysis' },
         { label: 'AG Findings Database', href: 'ag-findings.html', desc: '12 AG reports, $103B+ documented', hot: true },
         { label: 'Phoenix Pay Disaster', href: 'phoenix-pay.html', desc: '$309M→$2.2B, 150K affected', hot: true },
+        { label: 'Senate Expenses', href: 'senate-expenses.html', desc: 'Duffy/Wallin/Brazeau — $500K scandal', hot: true },
         { label: 'Elections & Finance', href: 'elections-finance.html', desc: 'Campaign finance, lobbying data', hot: true },
       ]
     },
@@ -101,6 +102,7 @@
       icon: '🎖',
       domain: 'ETHICS',
       items: [
+        { label: 'DND Procurement', href: 'dnd-procurement.html', desc: '$100B+ betrayal — ships, jets, LAVs', hot: true },
         { label: 'PPCLI Lawsuit', href: 'lawsuit-ppcli.html', desc: 'Active legal proceedings' },
         { label: 'CFNIS Investigation', href: 'cfnis.html', desc: 'Military police misconduct' },
         { label: 'Legal Proceedings', href: 'legal.html', desc: 'Full legal framework' },
