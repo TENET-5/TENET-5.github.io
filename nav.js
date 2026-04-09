@@ -37,6 +37,7 @@
       icon: '🩸',
       items: [
         { label: 'The 504 Charges', href: 'accountability.html', desc: 'Criminal accountability database' },
+        { label: 'Criminal Code Analysis', href: 'criminal-code-analysis.html', desc: '50 findings mapped to CC sections', hot: true },
         { label: 'Genocide Evidence', href: 'genocide-evidence.html', desc: 'Pattern documentation' },
         { label: 'Policy Harm Index', href: 'harm-index.html', desc: 'Quantified policy damage' },
         { label: 'The Pattern (T4)', href: 't4-comparison.html', desc: 'Historical comparison' },

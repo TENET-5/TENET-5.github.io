@@ -52,9 +52,10 @@ function renderChat(container, user) {
 
   container.innerHTML =
     '<div class="chat-messages" id="chat-messages"></div>' +
-    '<div class="chat-input-bar">' +
+    '<div class="chat-input-bar" style="flex-wrap: wrap;">' +
       '<input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." maxlength="500" autocomplete="off">' +
       '<button id="chat-send" class="chat-send-btn">Send</button>' +
+      '<button id="chat-ai-summary" class="chat-send-btn" style="background:var(--bg-surface);color:var(--text-primary);border:1px solid var(--border);" title="Generate Intelligence Summary of Chat">&#10024; AI Summary</button>' +
     '</div>';
 
   // Wire send button
@@ -67,9 +68,45 @@ function renderChat(container, user) {
       sendMessage(input);
     }
   });
+  
+  var summaryBtn = document.getElementById('chat-ai-summary');
+  if (summaryBtn) {
+    summaryBtn.addEventListener('click', generateChatSummary);
+  }
 
   // Start listening for messages
   startListening();
+}
+
+async function generateChatSummary() {
+  if (!window._t5firebaseVertexAI) {
+    alert("Firebase Vertex AI is configuring or offline. Cannot generate summary.");
+    return;
+  }
+  
+  var btn = document.getElementById('chat-ai-summary');
+  var prevHtml = btn.innerHTML;
+  btn.innerHTML = '&#9203; Analyzing...';
+  btn.disabled = true;
+
+  try {
+    var msgs = Array.from(document.querySelectorAll('.chat-msg-text')).map(el => el.textContent).join('\\n');
+    if (!msgs || msgs.length < 10) throw new Error("Not enough chat content to summarize.");
+    
+    var model = window._t5firebaseVertexAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    var prompt = "Summarize the following community investigation chat. Identify key themes, facts, or anomalies mentioned. Keep it brief and structured:\\n" + msgs;
+    
+    var result = await model.generateContent(prompt);
+    var text = result.response.text();
+    
+    alert("INTELLIGENCE SUMMARY:\\n\\n" + text);
+  } catch (err) {
+    console.error("AI Summary error:", err);
+    alert("Error generating summary: " + err.message);
+  } finally {
+    btn.innerHTML = prevHtml;
+    btn.disabled = false;
+  }
 }
 
 function startListening() {

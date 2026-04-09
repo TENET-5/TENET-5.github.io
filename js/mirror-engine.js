@@ -18,6 +18,7 @@
   var DATA_FILES = {
     mps: 'data/mp_full_analysis.json',
     dossier: 'data/mp_criminal_ethics_dossier.json',
+    criminalCode: 'data/criminal_code_analysis.json',
     cija: 'data/cija_deep_analysis.json',
     lobbying: 'data/lobbying_analysis.json',
     crossref: 'data/cross_reference_findings.json',
@@ -254,6 +255,33 @@
       }
     }
     h += '</div>';
+
+    // ── Section 2B: Criminal Code Findings ──
+    var ccData = DATA.criminalCode;
+    if (ccData && ccData.findings) {
+      h += sectionHeader('2B', 'Criminal Code Analysis — Applicable Sections');
+      h += '<p style="font-size:0.78rem;color:#6b7280;margin-bottom:10px;">Findings mapped to specific Criminal Code of Canada sections. ' + fmt(ccData.statistics.total_findings) + ' total findings across ' + Object.keys(ccData.statistics.by_section).length + ' legal sections. All findings are actionable via s.504 (private prosecution).</p>';
+      var ccFindings = ccData.findings.filter(function(f) {
+        // Omit findings about this recipient if they're a flagged MP
+        if (!data.omitted) return true;
+        return !nameMatch(f.entity, targetName);
+      });
+      var severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+      ccFindings.sort(function(a, b) { return (severityOrder[a.severity] || 9) - (severityOrder[b.severity] || 9); });
+      ccFindings.slice(0, 15).forEach(function(f) {
+        var borderColor = f.severity === 'critical' ? '#ef4444' : f.severity === 'high' ? '#f59e0b' : '#eab308';
+        h += '<div style="background:#fafaf8;border:1px solid #e5e5e3;border-left:3px solid ' + borderColor + ';border-radius:4px;padding:10px 14px;margin:6px 0;font-size:0.78rem;">';
+        h += '<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:700;color:#1a1f36;">' + esc(f.entity) + '</span><span style="font-size:0.65rem;padding:2px 8px;border-radius:10px;background:' + borderColor + '20;color:' + borderColor + ';font-weight:600;text-transform:uppercase;">' + esc(f.severity) + '</span></div>';
+        h += '<div style="color:#6b7280;margin-top:4px;"><strong>CC ' + esc(f.section) + '</strong> — ' + esc(f.section_title) + ' (max: ' + esc(f.max_penalty) + ')</div>';
+        h += '<div style="color:#3d4355;margin-top:4px;">' + esc(f.description.substring(0, 200)) + (f.description.length > 200 ? '...' : '') + '</div>';
+        if (f.action) h += '<div style="color:#c41e3a;margin-top:4px;font-weight:600;font-size:0.72rem;">' + esc(f.action) + '</div>';
+        h += '</div>';
+      });
+      if (ccFindings.length > 15) {
+        h += '<div style="text-align:center;font-size:0.72rem;color:#9ca3af;margin-top:8px;">+ ' + (ccFindings.length - 15) + ' additional findings. See <a href="https://tenet-5.github.io/criminal-code-analysis.html" style="color:#c41e3a;">full Criminal Code analysis</a>.</div>';
+      }
+      h += '</div>';
+    }
 
     // ── Section 3: Lobbying Patterns ──
     h += sectionHeader('3', 'Lobbying Contact Patterns');
