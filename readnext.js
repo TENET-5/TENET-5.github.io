@@ -642,9 +642,17 @@
     'whistleblower-guide.html': {
       current: 'Whistleblower Guide',
       next: [
+        { href: 'whistleblower-failures.html', label: 'Whistleblower Failures', desc: 'How Canada punishes truth-tellers — PSDPA, PSIC, and systemic retaliation' },
         { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
         { href: 'veterans.html', label: 'Veterans', desc: 'Veterans advocacy and support' },
-        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
+      ]
+    },
+    'whistleblower-failures.html': {
+      current: 'Whistleblower Failures',
+      next: [
+        { href: 'whistleblower-guide.html', label: 'Whistleblower Guide', desc: 'How to safely report wrongdoing' },
+        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Institutional failures in law enforcement' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General reports documenting systemic waste' },
       ]
     },
         'dnd-procurement.html': {
