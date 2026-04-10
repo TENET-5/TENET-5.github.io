@@ -687,6 +687,22 @@
         { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Full pattern documentation' },
       ]
     },
+    'lobbying-deepdive.html': {
+      current: 'Lobbying Deep Dive',
+      next: [
+        { href: 'elections-finance.html', label: 'Elections & Finance', desc: 'Campaign contributions and lobbying data' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, UFWD pipelines' },
+        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: 'How pharma lobbying connects to MAID expansion' },
+      ]
+    },
+    'veterans-betrayal.html': {
+      current: 'Veterans Betrayal',
+      next: [
+        { href: 'dnd-procurement.html', label: 'DND Procurement', desc: '$100B+ in military procurement betrayals' },
+        { href: 'rcmp-maid-accountability.html', label: 'RCMP & MAID', desc: 'Commissioner dereliction of duty' },
+        { href: 'phoenix-pay.html', label: 'Phoenix Pay Disaster', desc: '$309M→$2.2B payroll catastrophe' },
+      ]
+    },
   };
 
   function getCurrentPage() {
