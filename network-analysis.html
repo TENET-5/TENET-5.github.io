@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#050810">
   <meta name="color-scheme" content="light dark">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
     /* ── DARK GLASSMORPHISM OVERRIDE ── */
@@ -570,12 +570,11 @@
       if (w === 0 || h === 0) return requestAnimationFrame(tick); 
 
       tickCount++;
-      // Aggressive cooling: fast convergence, then subtle drift
+      // Cooling: fast convergence, then subtle drift
       var cooling = Math.max(0.01, 1.0 - (tickCount * 0.003));
       var drift = tickCount > 300 ? 0.008 : 0;
 
-      // Repulsion — NO distance cutoff. Every node repels every other.
-      // Strength 2500 (was 600) to overcome 6392 edges pulling inward.
+      // Repulsion — Push nodes apart
       for (var i = 0; i < positioned.length; i++) {
         var a = positioned[i];
         if (!isNodeVisible(a.node)) continue;
@@ -595,31 +594,34 @@
           if (distSq < 1) distSq = 1;
           var dist = Math.sqrt(distSq);
 
-          // Strong repulsion with soft minimum distance
-          var minDist = a.r + b.r + 12;
-          var force = 8000 / distSq;
-          if (dist < minDist) force *= 8; // extra push when overlapping
-          var fx = (dx / dist) * force * cooling;
-          var fy = (dy / dist) * force * cooling;
-          a.vx -= fx;
-          a.vy -= fy;
-          b.vx += fx;
-          b.vy += fy;
+          // Force drops off linearly to 220px to spread the graph wide
+          if (dist < 220) {
+            var force = (220 - dist) * 0.0006;
+            // Strict anti-overlap collision bounce
+            var collisionDist = a.r + b.r + 14;
+            if (dist < collisionDist) force += (collisionDist - dist) * 0.02;
+            
+            var fx = (dx / dist) * force * cooling;
+            var fy = (dy / dist) * force * cooling;
+            a.vx -= fx;
+            a.vy -= fy;
+            b.vx += fx;
+            b.vy += fy;
+          }
         }
       }
 
-      // Edge attraction — subsample edges to prevent blob collapse.
-      // 6392 edges × 64 avg degree = massive inward pull that overwhelms repulsion.
-      // Only apply springs on ~15% of edges per tick (stochastic thinning).
+      // Edge attraction — soft links
       allEdges.forEach(function(e) {
-        if (Math.random() > 0.15) return; // skip 85% of edges per tick
+        if (Math.random() > 0.25) return; // smooth out spring forces
         var s = nodeMap[e.source];
         var t = nodeMap[e.target];
         if (s && t && isNodeVisible(s.node) && isNodeVisible(t.node)) {
           var dx = t.x - s.x;
           var dy = t.y - s.y;
           var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          var force = (dist - 200) * 0.0008 * cooling;
+          // Ideal resting length of 90
+          var force = (dist - 90) * 0.00015 * cooling; 
           s.vx += dx / dist * force;
           s.vy += dy / dist * force;
           t.vx -= dx / dist * force;
@@ -627,22 +629,22 @@
         }
       });
 
-      // Mild center gravity to prevent drift to edges
+      // Very mild center gravity to keep them on screen, but not dense
       positioned.forEach(function(p) {
         if (!isNodeVisible(p.node)) return;
-        p.vx += (w / 2 - p.x) * 0.0003;
-        p.vy += (h / 2 - p.y) * 0.0003;
+        p.vx += (w / 2 - p.x) * 0.00008;
+        p.vy += (h / 2 - p.y) * 0.00008;
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.85;
-        p.vy *= 0.85;
+        p.vx *= 0.82;
+        p.vy *= 0.82;
 
-        // Soft boundary with bounce
-        var pad = p.r + 10;
-        if (p.x < pad) { p.x = pad; p.vx *= -0.3; }
-        if (p.x > w - pad) { p.x = w - pad; p.vx *= -0.3; }
-        if (p.y < pad) { p.y = pad; p.vy *= -0.3; }
-        if (p.y > h - pad) { p.y = h - pad; p.vy *= -0.3; }
+        // Soft boundary reflection
+        var pad = p.r + 20;
+        if (p.x < pad) { p.x = pad; p.vx += 0.5; }
+        if (p.x > w - pad) { p.x = w - pad; p.vx -= 0.5; }
+        if (p.y < pad) { p.y = pad; p.vy += 0.5; }
+        if (p.y > h - pad) { p.y = h - pad; p.vy -= 0.5; }
       });
 
       drawFrame(w, h); 
