@@ -13,7 +13,7 @@
  * On sub-pages: Board available as FAB overlay (backwards compatible)
  *
  * Cognitive Science: Miller's Law, Gestalt, Zeigarnik, Fitts, Method of Loci
- * LIRIL/SATOR: ART×TECHNOLOGY dual gate (AVIVA + KAYAK)
+ * TENET5 OSINT/SATOR: ART×TECHNOLOGY dual gate (AVIVA + KAYAK)
  */
 (function() {
   'use strict';

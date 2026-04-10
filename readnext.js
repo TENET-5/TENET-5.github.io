@@ -52,7 +52,7 @@
       next: [
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'See all the patterns we found' },
         { href: 'voting-records.html', label: 'Voting Records', desc: 'How every party voted on every bill' },
-        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI that found all of this' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI that found all of this' },
       ]
     },
     'accountability.html': {
@@ -68,7 +68,7 @@
       next: [
         { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
         { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
-        { href: 'findings.html', label: 'All 26+ Findings', desc: 'What LIRIL found in the data' },
+        { href: 'findings.html', label: 'All 26+ Findings', desc: 'What TENET5 OSINT found in the data' },
       ]
     },
     'my-story.html': {
@@ -83,12 +83,12 @@
       current: 'About & Methodology',
       next: [
         { href: 'index.html', label: 'The Evidence', desc: 'Start with the numbers' },
-        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the analysis' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 investigation panels' },
       ]
     },
     'liril.html': {
-      current: 'Meet LIRIL',
+      current: 'Meet TENET5 OSINT',
       next: [
         { href: 'findings.html', label: 'What She Found', desc: '26+ panels from 7M records' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the data yourself' },
@@ -234,7 +234,7 @@
     'ai-research.html': {
       current: 'AI Research',
       next: [
-        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the analysis' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'search.html', label: 'Search', desc: 'Search across the full dataset' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
       ]
@@ -251,7 +251,7 @@
       current: 'Bloggins',
       next: [
         { href: 'red-duster-game.html', label: 'Red Duster Game', desc: 'The interactive investigation game' },
-        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the project' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -300,7 +300,7 @@
       next: [
         { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
         { href: 'news.html', label: 'News', desc: 'Latest investigation updates' },
-        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the analysis' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
       ]
     },
     'community.html': {
@@ -547,7 +547,7 @@
       current: 'Red Duster Game',
       next: [
         { href: 'bloggins.html', label: 'Bloggins', desc: 'The story behind the game' },
-        { href: 'liril.html', label: 'Meet LIRIL', desc: 'The AI behind the project' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -725,6 +725,14 @@
         { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'State enterprises burning billions' },
         { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Engineered affordability collapse' },
         { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who profited from pandemic contracts' },
+      ]
+    },
+    'indigenous-accountability.html': {
+      current: 'Indigenous Accountability',
+      next: [
+        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations against disabled Canadians' },
+        { href: 'covid-accountability.html', label: 'COVID Accountability', desc: 'ArriveCAN, CERB fraud, $500B pandemic spending' },
+        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
       ]
     },
     'immigration-policy.html': {

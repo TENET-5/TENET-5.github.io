@@ -187,15 +187,8 @@
 
     <!-- System Status -->
     <div class="sys-status">
-      <span><span class="label">ABCXYZ N vs NP Millennial Falcon:</span> <span class="online" id="falcon-status">ONLINE</span></span>
-      <span><span class="label">Empirical Magic Handoff:</span> <span class="online" id="handoff-status">SECURED</span></span>
+      <span><span class="label">Intelligence Engine:</span> <span class="online">ONLINE</span></span>
       <span><span class="label">Dossiers Loaded:</span> <span class="online" id="dossier-count">--</span></span>
-    </div>
-
-    <!-- Live matrix telemetry marquee -->
-    <div id="live-telemetry-feed" style="background:#0a0f18; border:1px solid rgba(57,255,20,0.3); border-radius:4px; padding:10px 15px; margin-bottom:20px; display:flex; align-items:center; gap:15px; overflow:hidden;">
-        <div style="color:#39ff14; font-weight:bold; font-size:0.7rem; letter-spacing:2px; white-space:nowrap; animation:blink 2s infinite;">LIVE TELEMETRY</div>
-        <div id="telemetry-marquee-content" style="color:#60a5fa; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">AWAITING SAT-COM LINK...</div>
     </div>
 
     <!-- Dossier Search/Filter -->
@@ -615,27 +608,6 @@
         if (show) visible++;
       searchCount.textContent = visible + ' of ' + DOSSIERS.length + ' dossiers';
     });
-    
-    // Live Telemetry Hook
-    async function fetchLiveTelemetry() {
-        try {
-            const res = await fetch('http://127.0.0.1:8091/api/discoveries');
-            if(!res.ok) throw new Error('API Sync Failed');
-            const json = await res.json();
-            if(json.data && json.data.length > 0) {
-                const latest = json.data[0];
-                const vector = latest.discovery_value?.topological_vector || latest.discovery_value?.event || 'ENCRYPTED HASH';
-                const sig = latest.crypto_signature || 'UNKNOWN';
-                document.getElementById('telemetry-marquee-content').innerHTML = 
-                    '<span style="color:#fbbf24;">[' + sig + ']</span> VECTOR: ' + vector + 
-                    '<span style="color:#64748b; margin-left:15px;">| ABCXYZ EMPIRICAL HANDOFF ESTABLISHED</span>';
-            }
-        } catch(err) {
-            console.error("Telemetry error", err);
-        }
-    }
-    setInterval(fetchLiveTelemetry, 3000);
-    fetchLiveTelemetry();
 
   })();
   </script>

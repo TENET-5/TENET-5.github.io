@@ -1,4 +1,4 @@
-// ── Web Audio Engine + LIRIL Voice TTS ──
+// ── Web Audio Engine + TENET5 OSINT Voice TTS ──
 
 let audioCtx = null;
 let _masterGain = null;
@@ -779,7 +779,7 @@ export function playSpatialSound(type, x, y, z, volume = 1.0) {
   }
 }
 
-// ── LIRIL AI Voice — British Female Tactical Callouts ──
+// ── TENET5 OSINT AI Voice — British Female Tactical Callouts ──
 export const lirilVoice = {
   synth: window.speechSynthesis,
   voice: null,
@@ -796,7 +796,7 @@ export const lirilVoice = {
         voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female')) ||
         voices.find(v => v.lang.startsWith('en')) ||
         voices[0];
-      if (this.voice) console.log('[LIRIL Voice]', this.voice.name, this.voice.lang);
+      if (this.voice) console.log('[TENET5 OSINT Voice]', this.voice.name, this.voice.lang);
     };
     loadVoices();
     if (this.synth.onvoiceschanged !== undefined) this.synth.onvoiceschanged = loadVoices;
@@ -817,7 +817,7 @@ export const lirilVoice = {
   }
 };
 
-export const LIRIL_CALLOUTS = {
+export const TENET5 OSINT_CALLOUTS = {
   waveStart: [
     'Contacts ahead. Stay sharp.',
     'Hostiles inbound. Weapons free.',
@@ -843,7 +843,7 @@ export const LIRIL_CALLOUTS = {
 };
 
 export function lirilSay(category) {
-  const lines = LIRIL_CALLOUTS[category];
+  const lines = TENET5 OSINT_CALLOUTS[category];
   if (!lines || !lines.length) return;
   lirilVoice.speak(lines[Math.floor(Math.random() * lines.length)], category === 'death' || category === 'bossWave');
 }
