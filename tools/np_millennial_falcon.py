@@ -57,7 +57,7 @@ class MillennialFalconTracker:
         # Write to empirical magic handoff memory (SQLite matrix ledger)
         conn = sqlite3.connect(self.db_path)
         conn.execute(
-            "INSERT INTO falcon_discoveries (discovery_key, discovery_value, crypto_signature, timestamp) VALUES (?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO falcon_discoveries (discovery_key, discovery_value, crypto_signature, timestamp) VALUES (?, ?, ?, ?)",
             (subset_key, json.dumps(data_point), signature, time.time())
         )
         conn.commit()
