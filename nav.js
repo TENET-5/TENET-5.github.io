@@ -229,7 +229,7 @@
 
     // Progress bar
     html += '<div class="t5-progress"></div>';
-    html += '<a href="index.html" class="t5-brand">TENET5<span class="t5-page-count">' + totalPages + '</span></a>';
+    html += '<a href="index.html" class="t5-brand">TENET<sub style="font-size: 0.7em; vertical-align: baseline; position: relative; bottom: -0.25em;">5</sub><span class="t5-page-count" style="margin-left: 6px;">' + totalPages + '</span></a>';
 
     // Quick links (visible on desktop)
     html += '<div class="t5-quick">';
