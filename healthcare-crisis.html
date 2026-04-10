@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Killing Fields of Neglect: Canada's Healthcare Collapse | Canadian Government Accountability</title>
+  <meta name="description" content="Millions without a family doctor. Wait times that kill. A workforce in freefall. Every number sourced from CIHI, Statistics Canada, the PBO, and Health Canada's own reports.">
+  <meta property="og:title" content="The Killing Fields of Neglect: Canada's Healthcare Collapse">
+  <meta property="og:description" content="6.5 million Canadians have no family doctor. Specialist wait times doubled in a decade. Emergency rooms buckling coast to coast. All from government data.">
+  <meta property="og:url" content="https://tenet-5.github.io/healthcare-crisis.html">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Killing Fields of Neglect: Canada's Healthcare Collapse">
+  <meta name="twitter:description" content="Millions without doctors. Wait times that kill. A system in deliberate collapse. Government data proves it.">
+  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap">
+  <meta name="theme-color" content="#1a1f36">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F3E5;</text></svg>">
+  <style>
+    /* ── HEALTHCARE BAR CHART ── */
+    .hc-chart{margin:2rem 0 1.5rem}
+    .hc-bar-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem}
+    .hc-bar-label{min-width:180px;font-size:0.82rem;font-weight:600;color:var(--text-primary,#1a1f36);text-align:right}
+    .hc-bar-track{flex:1;height:32px;background:rgba(0,0,0,0.04);border-radius:6px;overflow:hidden;position:relative}
+    .hc-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:0.6rem;min-width:fit-content;transition:width 0.8s ease}
+    .hc-bar-fill span{font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:700;color:#fff;white-space:nowrap}
+    .hc-bar-fill.crisis{background:linear-gradient(90deg,#991b1b,#dc2626)}
+    .hc-bar-fill.warning{background:linear-gradient(90deg,#92400e,#d97706)}
+    .hc-bar-fill.severe{background:linear-gradient(90deg,#7c2d12,#b91c1c)}
+    .hc-bar-fill.benchmark{background:linear-gradient(90deg,#065f46,#059669)}
+
+    /* ── STAT CARDS ── */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2rem 0}
+    .stat-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e5e5e3);border-radius:12px;padding:1.4rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#dc2626}
+    .stat-card.green::before{background:#059669}
+    .stat-card.amber::before{background:#d97706}
+    .stat-card .stat-number{font-family:'JetBrains Mono',Georgia,serif;font-size:clamp(2rem,4vw,2.8rem);font-weight:900;color:var(--text-primary,#1a1f36);line-height:1.1;margin-bottom:0.3rem;letter-spacing:-0.03em}
+    .stat-card .stat-number.red{color:#dc2626}
+    .stat-card .stat-label{font-size:0.78rem;color:var(--text-tertiary,#6b7280);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem}
+    .stat-card .stat-source{font-size:0.7rem;color:var(--text-tertiary,#6b7280);font-style:italic;margin-top:0.4rem}
+
+    /* ── DARK STAT CARDS ── */
+    .dark-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem;margin:2rem 0}
+    .dark-stat{background:#1a1f36;border-radius:12px;padding:1.5rem 1.6rem;text-align:center;color:#fff}
+    .dark-stat .ds-number{font-family:'JetBrains Mono',monospace;font-size:clamp(2.2rem,5vw,3rem);font-weight:900;color:#dc2626;line-height:1.1;margin-bottom:0.3rem}
+    .dark-stat .ds-label{font-size:0.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.7);margin-bottom:0.6rem}
+    .dark-stat .ds-context{font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.6}
+    .dark-stat .ds-source{font-size:0.7rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:0.5rem}
+
+    /* ── PROVINCE CARDS ── */
+    .province-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.4rem;margin:2rem 0}
+    .province-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e5e5e3);border-radius:12px;padding:1.5rem 1.6rem;position:relative;overflow:hidden}
+    .province-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#dc2626}
+    .province-card h3{font-size:1.1rem;font-weight:800;color:var(--text-primary,#1a1f36);margin:0 0 0.3rem}
+    .province-card .prov-authority{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#dc2626;margin-bottom:0.8rem}
+    .province-card ul{list-style:none;padding:0;margin:0}
+    .province-card ul li{padding:0.4rem 0;border-bottom:1px solid var(--border,#e5e5e3);font-size:0.88rem;color:var(--text-secondary,#3d4355);line-height:1.6}
+    .province-card ul li:last-child{border-bottom:none}
+    .province-card ul li strong{color:var(--text-primary,#1a1f36)}
+    .province-card .prov-source{font-size:0.7rem;color:var(--text-tertiary,#6b7280);font-style:italic;margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid var(--border,#e5e5e3)}
+
+    /* ── FUNDING TABLE ── */
+    .funding-table{width:100%;border-collapse:collapse;margin:2rem 0;font-size:0.88rem}
+    .funding-table th{background:#1a1f36;color:#fff;padding:0.9rem 1rem;text-align:left;font-weight:700;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase}
+    .funding-table td{padding:0.8rem 1rem;border-bottom:1px solid var(--border,#e5e5e3);vertical-align:top;line-height:1.6}
+    .funding-table tr:nth-child(even){background:rgba(0,0,0,0.015)}
+    .funding-table .deficit{color:#dc2626;font-weight:700}
+    .funding-table .surplus{color:#059669;font-weight:700}
+
+    /* ── COMPARISON BARS ── */
+    .intl-compare{margin:2rem 0}
+    .intl-row{display:flex;align-items:center;gap:1rem;margin-bottom:0.8rem;padding:0.7rem 1rem;background:var(--bg-card,#fff);border:1px solid var(--border,#e5e5e3);border-radius:8px}
+    .intl-country{min-width:130px;font-size:0.85rem;font-weight:700;color:var(--text-primary,#1a1f36)}
+    .intl-country.canada{color:#dc2626}
+    .intl-bar-track{flex:1;height:24px;background:rgba(0,0,0,0.04);border-radius:4px;overflow:hidden}
+    .intl-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:0.5rem}
+    .intl-bar-fill span{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:700;color:#fff}
+    .intl-bar-fill.good{background:#059669}
+    .intl-bar-fill.mid{background:#d97706}
+    .intl-bar-fill.bad{background:#dc2626}
+
+    /* ── PIPELINE BOX ── */
+    .pipeline-box{background:rgba(220,38,38,0.04);border:1px solid rgba(220,38,38,0.15);border-left:4px solid #dc2626;border-radius:10px;padding:1.3rem 1.5rem;margin:1.5rem 0}
+    .pipeline-box p{margin:0 0 0.6rem;line-height:1.8;color:var(--text-primary,#1a1f36)}
+    .pipeline-box p:last-child{margin-bottom:0}
+
+    /* ── VERDICT BOX ── */
+    .verdict-box{background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);border-left:4px solid #dc2626;border-radius:10px;padding:1.3rem 1.5rem;margin:1.5rem 0}
+    .verdict-box p{margin:0;line-height:1.8;color:var(--text-primary,#1a1f36)}
+
+    /* ── SOURCE LIST ── */
+    .source-list{list-style:none;padding:0;margin:1.5rem 0;counter-reset:source-counter}
+    .source-list li{counter-increment:source-counter;padding:0.8rem 1rem 0.8rem 3.5rem;border-bottom:1px solid var(--border,#e5e5e3);font-size:0.88rem;color:var(--text-secondary,#3d4355);line-height:1.7;position:relative}
+    .source-list li::before{content:counter(source-counter);position:absolute;left:0.8rem;top:0.8rem;background:#1a1f36;color:#fff;width:1.8rem;height:1.8rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+    .source-list li strong{color:var(--text-primary,#1a1f36)}
+
+    /* ── WORKFORCE GRID ── */
+    .workforce-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin:2rem 0}
+    .workforce-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e5e5e3);border-top:3px solid #dc2626;border-radius:10px;padding:1.4rem 1.5rem}
+    .workforce-card h4{font-size:0.95rem;font-weight:800;color:var(--text-primary,#1a1f36);margin:0 0 0.6rem}
+    .workforce-card p{font-size:0.88rem;color:var(--text-secondary,#3d4355);line-height:1.7;margin:0 0 0.4rem}
+    .workforce-card .wf-source{font-size:0.7rem;color:var(--text-tertiary,#6b7280);font-style:italic}
+
+    /* ── DEATH CALLOUT ── */
+    .death-callout{text-align:center;margin:2rem 0;padding:2rem;background:#1a1f36;border-radius:16px;color:#fff}
+    .death-callout .dc-number{font-family:'JetBrains Mono',monospace;font-size:clamp(3rem,8vw,5rem);font-weight:900;color:#dc2626;line-height:1;margin-bottom:0.5rem}
+    .death-callout .dc-label{font-size:1rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7)}
+    .death-callout .dc-context{font-size:0.9rem;color:rgba(255,255,255,0.5);margin-top:0.8rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.7}
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+
+  <!-- ── SHARE BAR ── -->
+  <div id="share-bar" class="share-bar">
+    <span class="share-bar-label">&#128226; SHARE THIS. EVERY CANADIAN NEEDS TO SEE THESE NUMBERS.</span>
+    <div class="share-bar-buttons">
+      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
+      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
+      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
+      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
+      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       SECTION 1: HERO
+       ══════════════════════════════════════════════════════════════ -->
+  <header class="hero" id="main">
+    <div class="flag">&#127464;&#127462;</div>
+    <h1>The Killing Fields of Neglect:<br>Canada's Healthcare Collapse</h1>
+    <p class="subtitle">Our grandparents stormed Juno Beach so their children would have a country worth living in. Instead, their grandchildren die on waitlists. Every number on this page comes from the Government of Canada's own institutions: CIHI, Statistics Canada, the Parliamentary Budget Officer, Health Canada, and provincial health authorities.</p>
+  </header>
+
+  <!-- DEATH CALLOUT -->
+  <div class="death-callout">
+    <div class="dc-number">6,500,000+</div>
+    <div class="dc-label">Canadians Without a Family Doctor</div>
+    <div class="dc-context">According to Statistics Canada's Canadian Community Health Survey, approximately one in five Canadians reports not having a regular family doctor or nurse practitioner. This is not a staffing inconvenience &mdash; it is a systemic failure that kills people.</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 2: THE NUMBERS THAT DAMN THEM
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="numbers">
+      <h2><span class="section-num">01</span> The Numbers That Damn Them</h2>
+
+      <p>These are not estimates from advocacy groups. These are the Canadian government's own measurements of its own failure. The men who waded through the surf at Normandy built a healthcare system meant to serve every citizen. Look at what the political class has done to it.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number red">6.5M+</div>
+          <div class="stat-label">Without a Family Doctor</div>
+          <div class="stat-source">Statistics Canada, Canadian Community Health Survey</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number red">27.7 wks</div>
+          <div class="stat-label">Median Specialist Wait</div>
+          <div class="stat-source">Fraser Institute / CIHI, Your Health System Wait Times</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number red">~30%</div>
+          <div class="stat-label">ER Visits Exceeding Benchmarks</div>
+          <div class="stat-source">CIHI, Your Health System</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number red">~23,000</div>
+          <div class="stat-label">Nursing Vacancies Nationwide</div>
+          <div class="stat-source">CIHI, Health Workforce Database</div>
+        </div>
+      </div>
+
+      <h3>The Waiting Game &mdash; Visualized</h3>
+      <p>According to CIHI's <em>Your Health System</em> benchmarks, here is how long Canadians wait for critical procedures compared to clinically recommended timeframes:</p>
+
+      <div class="hc-chart">
+        <div class="hc-bar-row">
+          <div class="hc-bar-label">Hip Replacement</div>
+          <div class="hc-bar-track">
+            <div class="hc-bar-fill crisis" style="width:78%"><span>~39 weeks median</span></div>
+          </div>
+        </div>
+        <div class="hc-bar-row">
+          <div class="hc-bar-label">Knee Replacement</div>
+          <div class="hc-bar-track">
+            <div class="hc-bar-fill crisis" style="width:82%"><span>~42 weeks median</span></div>
+          </div>
+        </div>
+        <div class="hc-bar-row">
+          <div class="hc-bar-label">Cataract Surgery</div>
+          <div class="hc-bar-track">
+            <div class="hc-bar-fill warning" style="width:48%"><span>~16 weeks median</span></div>
+          </div>
+        </div>
+        <div class="hc-bar-row">
+          <div class="hc-bar-label">Hip Fracture Repair</div>
+          <div class="hc-bar-track">
+            <div class="hc-bar-fill severe" style="width:35%"><span>~15% beyond 48hr target</span></div>
+          </div>
+        </div>
+        <div class="hc-bar-row">
+          <div class="hc-bar-label">Radiation Therapy</div>
+          <div class="hc-bar-track">
+            <div class="hc-bar-fill warning" style="width:40%"><span>~21% beyond benchmark</span></div>
+          </div>
+        </div>
+        <div class="hc-bar-row">
+          <div class="hc-bar-label">CT / MRI Scans</div>
+          <div class="hc-bar-track">
+            <div class="hc-bar-fill severe" style="width:60%"><span>~30% beyond benchmark</span></div>
+          </div>
+        </div>
+        <div class="hc-bar-row">
+          <div class="hc-bar-label">CIHI Benchmark</div>
+          <div class="hc-bar-track">
+            <div class="hc-bar-fill benchmark" style="width:20%"><span>Target</span></div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-tertiary,#6b7280);font-style:italic;">Source: CIHI, Your Health System &mdash; Wait Times benchmarks. Bars represent approximate proportion of patients waiting beyond clinically recommended timeframes.</p>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> The men who built this country's healthcare system after the war intended it as a covenant &mdash; that no Canadian would suffer or die for lack of care. According to the government's own data, that covenant is broken. Millions wait. Thousands die waiting. And the politicians who allowed it face no consequences.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 3: THE BUDGET BETRAYAL
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="budget">
+      <h2><span class="section-num">02</span> The Budget Betrayal</h2>
+
+      <p>The Parliamentary Budget Officer (PBO) has repeatedly documented the fiscal gap between what the federal government <em>promises</em> for healthcare and what it actually delivers. According to the PBO's Fiscal Sustainability Reports, the Canada Health Transfer (CHT) has consistently failed to keep pace with provincial healthcare cost growth.</p>
+
+      <div class="dark-stat-grid">
+        <div class="dark-stat">
+          <div class="ds-number">~22%</div>
+          <div class="ds-label">Federal Share of Health Spending</div>
+          <div class="ds-context">The federal share of provincial/territorial health spending has declined from approximately 50% at Medicare's founding to roughly 22% in recent years.</div>
+          <div class="ds-source">PBO, Fiscal Sustainability Reports / CIHI NHEX</div>
+        </div>
+        <div class="dark-stat">
+          <div class="ds-number">$52.1B</div>
+          <div class="ds-label">CHT for 2024&ndash;25</div>
+          <div class="ds-context">The Canada Health Transfer for 2024&ndash;25, which provinces say falls billions short of actual need.</div>
+          <div class="ds-source">Department of Finance Canada, Federal Transfers</div>
+        </div>
+        <div class="dark-stat">
+          <div class="ds-number">$8,563</div>
+          <div class="ds-label">Per-Capita Health Spending</div>
+          <div class="ds-context">Canada's per-capita health expenditure according to CIHI's National Health Expenditure Trends &mdash; high by OECD standards, yet outcomes consistently lag.</div>
+          <div class="ds-source">CIHI, National Health Expenditure Trends (NHEX)</div>
+        </div>
+        <div class="dark-stat">
+          <div class="ds-number">~$5B</div>
+          <div class="ds-label">Mental Health Funding Gap</div>
+          <div class="ds-context">Mental health receives approximately 7% of health budgets despite accounting for an estimated 20%+ of disease burden. The PBO and Mental Health Commission have both flagged chronic underfunding.</div>
+          <div class="ds-source">PBO / Mental Health Commission of Canada</div>
+        </div>
+      </div>
+
+      <h3>Canada Health Transfer &mdash; The Declining Federal Share</h3>
+      <p>According to CIHI's <em>National Health Expenditure Trends</em> and the PBO's fiscal analyses, the federal government's share of healthcare funding has eroded steadily:</p>
+
+      <table class="funding-table">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Federal Share (approx.)</th>
+            <th>CHT Growth Rate</th>
+            <th>Provincial Cost Growth</th>
+            <th>Gap</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1966 (Medicare founding)</td>
+            <td>~50%</td>
+            <td>N/A</td>
+            <td>N/A</td>
+            <td>&mdash;</td>
+          </tr>
+          <tr>
+            <td>1996&ndash;2004 (Chretien cuts)</td>
+            <td class="deficit">~15&ndash;18%</td>
+            <td>Frozen/reduced</td>
+            <td>~7% annually</td>
+            <td class="deficit">Massive</td>
+          </tr>
+          <tr>
+            <td>2004&ndash;2017 (Health Accord)</td>
+            <td>~20&ndash;25%</td>
+            <td>6% escalator</td>
+            <td>~5&ndash;6%</td>
+            <td>Narrowing</td>
+          </tr>
+          <tr>
+            <td>2017&ndash;2023 (Escalator cut)</td>
+            <td class="deficit">~22%</td>
+            <td>3% or GDP growth</td>
+            <td>~5&ndash;7%</td>
+            <td class="deficit">Widening</td>
+          </tr>
+          <tr>
+            <td>2023&ndash;present</td>
+            <td class="deficit">~22%</td>
+            <td>Bilateral deals + 5% guarantee</td>
+            <td>~6&ndash;8% (post-COVID)</td>
+            <td class="deficit">Persistent</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.8rem;color:var(--text-tertiary,#6b7280);font-style:italic;">Sources: PBO Fiscal Sustainability Reports; CIHI National Health Expenditure Trends (NHEX); Department of Finance Canada, Federal Transfer data.</p>
+
+      <div class="verdict-box">
+        <p><strong>The Budget Betrayal:</strong> When Jean Chr&eacute;tien slashed the federal health transfer in the 1990s, he broke the back of Canadian healthcare. Every Prime Minister since has failed to restore it. The PBO's own numbers prove that the federal government walks away from its obligation while Canadians die in hospital hallways. Our grandfathers didn't storm Juno Beach for a country that nickel-and-dimes its sick.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 4: WAITLIST IMPACT BY PROVINCE
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="provinces">
+      <h2><span class="section-num">03</span> Waitlist Impact by Province</h2>
+
+      <p>The crisis is national, but the suffering is local. Provincial health authorities document the devastation in their own performance reports. Here is what they admit to &mdash; in their own data.</p>
+
+      <div class="province-grid">
+        <!-- ONTARIO -->
+        <div class="province-card">
+          <h3>Ontario</h3>
+          <div class="prov-authority">Ontario Health / Health Quality Ontario</div>
+          <ul>
+            <li><strong>~2.3 million</strong> without a primary care provider, according to provincial estimates</li>
+            <li>ER wait times for admitted patients regularly exceed <strong>12&ndash;16 hours</strong> at high-volume hospitals</li>
+            <li>Surgical backlogs post-COVID estimated at <strong>hundreds of thousands</strong> of procedures</li>
+            <li>Long-term care waitlist exceeds <strong>38,000</strong> people</li>
+            <li>"Hallway medicine" formally documented as routine in multiple Ontario hospitals</li>
+          </ul>
+          <div class="prov-source">Sources: Ontario Health Annual Reports; Health Quality Ontario system performance data; Ontario Long-Term Care Association</div>
+        </div>
+
+        <!-- BRITISH COLUMBIA -->
+        <div class="province-card">
+          <h3>British Columbia</h3>
+          <div class="prov-authority">BC Patient Safety &amp; Quality Council</div>
+          <ul>
+            <li><strong>~1 million</strong> British Columbians report lacking a regular family doctor</li>
+            <li>Specialist referral-to-treatment times among the <strong>longest in Canada</strong></li>
+            <li>Multiple rural ER closures due to physician shortages documented annually</li>
+            <li>Toxic drug crisis intersects with healthcare gaps &mdash; <strong>2,500+</strong> illicit drug deaths in 2023 alone</li>
+            <li>Mental health wait times for youth measured in <strong>months</strong>, not weeks</li>
+          </ul>
+          <div class="prov-source">Sources: BC Patient Safety &amp; Quality Council reports; BC Ministry of Health performance data; BC Coroners Service (drug deaths)</div>
+        </div>
+
+        <!-- ALBERTA -->
+        <div class="province-card">
+          <h3>Alberta</h3>
+          <div class="prov-authority">Alberta Health Services Performance Reports</div>
+          <ul>
+            <li><strong>~800,000</strong> Albertans estimated without a family physician</li>
+            <li>ER wait times in Edmonton and Calgary routinely exceed <strong>4&ndash;6 hours</strong> for non-urgent cases</li>
+            <li>EMS "Code Red" events (no ambulances available) reported in major cities</li>
+            <li>Physician departures accelerating &mdash; Alberta Medical Association reports growing dissatisfaction</li>
+            <li>Rural communities face <strong>chronic specialist shortages</strong></li>
+          </ul>
+          <div class="prov-source">Sources: Alberta Health Services Performance Reports; Alberta Medical Association surveys; Alberta Health Annual Reports</div>
+        </div>
+
+        <!-- QUEBEC -->
+        <div class="province-card">
+          <h3>Quebec</h3>
+          <div class="prov-authority">INSPQ / MSSS (Minist&egrave;re de la Sant&eacute;)</div>
+          <ul>
+            <li>Quebec's family medicine enrollment system (GAMF) reports <strong>~1 million+</strong> on waitlists for a family doctor</li>
+            <li>ER occupancy rates in Montreal hospitals regularly exceed <strong>150&ndash;200%</strong></li>
+            <li>Nursing staff shortages compounded by <strong>mandatory overtime</strong> laws</li>
+            <li>CHSLD (long-term care) crisis exposed during COVID &mdash; documented by the Commissaire &agrave; la sant&eacute; et au bien-&ecirc;tre</li>
+            <li>Provincial Auditor General has flagged <strong>systemic management failures</strong></li>
+          </ul>
+          <div class="prov-source">Sources: INSPQ surveillance data; MSSS performance indicators; Commissaire &agrave; la sant&eacute; et au bien-&ecirc;tre reports; V&eacute;rificateur g&eacute;n&eacute;ral du Qu&eacute;bec</div>
+        </div>
+
+        <!-- SASKATCHEWAN -->
+        <div class="province-card">
+          <h3>Saskatchewan</h3>
+          <div class="prov-authority">Saskatchewan Health Authority (SHA)</div>
+          <ul>
+            <li>Surgical wait times among the <strong>highest per capita</strong> in Canada</li>
+            <li>Physician recruitment crisis particularly acute in <strong>northern communities</strong></li>
+            <li>SHA performance reports document rising ER volumes against <strong>flat staffing</strong></li>
+            <li>Mental health and addictions services face <strong>critical capacity</strong> shortfalls</li>
+          </ul>
+          <div class="prov-source">Sources: Saskatchewan Health Authority Annual Reports; Saskatchewan Ministry of Health Plan</div>
+        </div>
+
+        <!-- MANITOBA -->
+        <div class="province-card">
+          <h3>Manitoba</h3>
+          <div class="prov-authority">Manitoba Health / Shared Health</div>
+          <ul>
+            <li>Winnipeg ER wait times among the <strong>worst in Canada</strong> for admitted patients</li>
+            <li>Northern and Indigenous communities face <strong>severe access barriers</strong> documented by the Manitoba Centre for Health Policy</li>
+            <li>Diagnostic imaging backlogs measured in <strong>months</strong></li>
+            <li>Personal care home waitlists growing while facilities operate below capacity due to <strong>staffing shortages</strong></li>
+          </ul>
+          <div class="prov-source">Sources: Manitoba Health Annual Reports; Shared Health performance data; Manitoba Centre for Health Policy</div>
+        </div>
+
+        <!-- ATLANTIC CANADA -->
+        <div class="province-card">
+          <h3>Atlantic Canada</h3>
+          <div class="prov-authority">Provincial Health Authorities (NB, NS, PEI, NL)</div>
+          <ul>
+            <li>Nova Scotia: <strong>~145,000+</strong> on the "Need a Family Practice" waitlist (NS Health Authority)</li>
+            <li>New Brunswick: Bilingual staffing requirements compound physician shortages &mdash; <strong>rural ERs face closures</strong> (Horizon/Vitalit&eacute; Health Networks)</li>
+            <li>Newfoundland &amp; Labrador: <strong>Highest per-capita ER usage</strong> in Canada, reflecting primary care gaps (Eastern Health / CIHI)</li>
+            <li>PEI: Despite targeted recruitment, <strong>thousands remain</strong> without a family doctor (Health PEI)</li>
+            <li>Aging populations across all four provinces accelerate demand against <strong>shrinking supply</strong></li>
+          </ul>
+          <div class="prov-source">Sources: Nova Scotia Health Authority; Horizon &amp; Vitalit&eacute; Health Networks (NB); Eastern Health (NL); Health PEI; respective provincial health department annual reports</div>
+        </div>
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>Coast to Coast:</strong> There is no province where the system works. From the fog of Newfoundland to the rain of Vancouver Island, Canadians wait, suffer, and die &mdash; and their own health authorities document every failure. This is not anecdote. This is official data from every provincial health system in the country.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 5: THE MAID PIPELINE
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="maid-pipeline">
+      <h2><span class="section-num">04</span> The MAID Pipeline: When the System Fails, They Offer Death</h2>
+
+      <p>This is the section that should make every Canadian's blood boil. Health Canada's own MAID Annual Reports document a disturbing pattern: as healthcare access deteriorates, medically assisted death expands. The data doesn't require interpretation &mdash; the government published it themselves.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number red">15,280+</div>
+          <div class="stat-label">MAID Deaths in 2023</div>
+          <div class="stat-source">Health Canada, 5th Annual Report on MAID</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number red">4.7%</div>
+          <div class="stat-label">Of All Deaths in Canada</div>
+          <div class="stat-source">Health Canada, 5th Annual Report on MAID</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number red">~60,000+</div>
+          <div class="stat-label">Total MAID Deaths Since 2016</div>
+          <div class="stat-source">Health Canada, MAID Annual Reports (cumulative)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number red">~35%</div>
+          <div class="stat-label">Annual Growth Rate</div>
+          <div class="stat-source">Health Canada, 4th &amp; 5th Annual Reports</div>
+        </div>
+      </div>
+
+      <h3>What Health Canada's Own Reports Document</h3>
+
+      <div class="pipeline-box">
+        <p><strong>Inadequate Services as a Factor:</strong> Health Canada's 4th and 5th Annual Reports on MAID document that a percentage of Track 2 (non-end-of-life) MAID recipients identified "inadequate access to support services" as a factor in their request. Health Canada reports this data directly.</p>
+      </div>
+
+      <div class="pipeline-box">
+        <p><strong>Track 2 Demographics:</strong> According to Health Canada's 4th and 5th Annual Reports, Track 2 MAID recipients (those whose death is not reasonably foreseeable) are disproportionately younger, more likely to cite disability-related suffering, and more likely to report inadequate community supports. The government's own data breaks this down by age group, condition, and reported contributing factors.</p>
+      </div>
+
+      <div class="pipeline-box">
+        <p><strong>Parliamentary Testimony:</strong> Hansard records from the Special Joint Committee on MAID (2022&ndash;2023) include testimony from disability advocates, physicians, and ethicists who documented cases where patients cited inability to access housing, home care, or pain management as reasons for requesting MAID. This testimony is part of the permanent parliamentary record.</p>
+      </div>
+
+      <div class="pipeline-box">
+        <p><strong>Geographic and Socioeconomic Patterns:</strong> Health Canada's reports and parliamentary committee testimony document geographic variation in MAID rates. The PBO's fiscal analyses have examined the cost differential between providing adequate services versus MAID provision. These are public documents available on the PBO and Health Canada websites.</p>
+      </div>
+
+      <h3>The Cost Comparison</h3>
+      <p>The Parliamentary Budget Officer and Health Canada's own data allow a grim comparison:</p>
+
+      <div class="dark-stat-grid">
+        <div class="dark-stat">
+          <div class="ds-number">~$2,327</div>
+          <div class="ds-label">Average Cost of MAID Provision</div>
+          <div class="ds-context">Published cost estimates for the MAID process including assessments, medications, and administration.</div>
+          <div class="ds-source">Published medical cost analyses / PBO fiscal notes</div>
+        </div>
+        <div class="dark-stat">
+          <div class="ds-number">$50,000+</div>
+          <div class="ds-label">Annual Home Care per Patient</div>
+          <div class="ds-context">According to CIHI, comprehensive home care for complex needs patients costs tens of thousands per year.</div>
+          <div class="ds-source">CIHI, Home Care Reporting System data</div>
+        </div>
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Pattern Health Canada's Own Data Reveals:</strong> A healthcare system that cannot provide adequate home care, pain management, disability supports, or mental health services &mdash; but can efficiently deliver death within ten days. Health Canada publishes the MAID numbers. Provincial health authorities publish the waitlist numbers. The PBO publishes the cost analysis. These aren't conspiracy theories. These are three separate arms of the Canadian government documenting a pipeline from neglect to death. The men who fought at Ortona and Caen didn't watch their friends die so their grandchildren could be offered a needle instead of a nurse.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 6: THE WORKFORCE CRISIS
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="workforce">
+      <h2><span class="section-num">05</span> The Workforce Crisis: Who's Left to Care?</h2>
+
+      <p>You cannot run a healthcare system without healthcare workers. According to CIHI's Health Workforce Database and the Canadian Medical Association, the workforce crisis is not coming &mdash; it is here.</p>
+
+      <div class="workforce-grid">
+        <div class="workforce-card">
+          <h4>Physician Supply</h4>
+          <p>According to CIHI's Supply, Distribution and Migration of Physicians data, Canada has approximately <strong>2.8 physicians per 1,000 population</strong> &mdash; below the OECD average of ~3.7. Rural communities have significantly fewer, with some regions reporting fewer than 1 per 1,000.</p>
+          <div class="wf-source">Source: CIHI, Health Workforce Database &mdash; Physicians</div>
+        </div>
+        <div class="workforce-card">
+          <h4>Nursing Shortage</h4>
+          <p>CIHI's Health Workforce data documents approximately <strong>23,000 nursing vacancies</strong> nationally. The Canadian Federation of Nurses Unions reports vacancy rates between <strong>10&ndash;20%</strong> in acute care settings, with even higher rates in long-term care and rural facilities.</p>
+          <div class="wf-source">Source: CIHI, Health Workforce Database &mdash; Nursing; Canadian Federation of Nurses Unions</div>
+        </div>
+        <div class="workforce-card">
+          <h4>Credential Recognition Failure</h4>
+          <p>The Auditor General of Canada has reported that <strong>thousands</strong> of internationally educated health professionals face years-long delays in credential recognition. The AG's reports document bureaucratic barriers that leave qualified physicians and nurses working outside their profession while Canadians die without care.</p>
+          <div class="wf-source">Source: Office of the Auditor General of Canada, reports on immigration and credential recognition</div>
+        </div>
+        <div class="workforce-card">
+          <h4>Physician Burnout</h4>
+          <p>The Canadian Medical Association's National Physician Health Survey documents that over <strong>50%</strong> of physicians report high levels of burnout, with <strong>1 in 3</strong> screening positive for depression. CMA position papers warn of an accelerating exodus from clinical practice.</p>
+          <div class="wf-source">Source: CMA National Physician Health Survey; CMA position papers on physician wellness</div>
+        </div>
+        <div class="workforce-card">
+          <h4>International Nurse Ratios</h4>
+          <p>According to OECD Health Statistics, Canada has approximately <strong>10.0 nurses per 1,000 population</strong>. While this appears near the OECD average, vacancy rates and geographic maldistribution mean many communities have far fewer practicing nurses than the ratio suggests.</p>
+          <div class="wf-source">Source: OECD Health Statistics; CIHI Health Workforce Database</div>
+        </div>
+        <div class="workforce-card">
+          <h4>The Aging Workforce</h4>
+          <p>CIHI data shows a growing proportion of physicians and nurses approaching retirement age. Over <strong>35%</strong> of family physicians are aged 55 or older. Without replacement, the already-critical shortage will accelerate within a decade.</p>
+          <div class="wf-source">Source: CIHI, Health Workforce Database; CMA Physician Workforce surveys</div>
+        </div>
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Workforce Verdict:</strong> You can't care for the sick when the caregivers are gone. CIHI documents the vacancies. The CMA documents the burnout. The Auditor General documents the credential barriers. And the OECD documents how Canada compares to the rest of the world. Every report says the same thing: we are running out of people willing and able to keep Canadians alive. The generation that built this system would be ashamed.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 7: INTERNATIONAL COMPARISON
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="international">
+      <h2><span class="section-num">06</span> International Comparison: Canada Among Peers</h2>
+
+      <p>Canadians are told they have "one of the best healthcare systems in the world." The data tells a different story. According to the Commonwealth Fund and OECD, Canada consistently ranks near the bottom among wealthy nations.</p>
+
+      <h3>Commonwealth Fund "Mirror, Mirror" Rankings</h3>
+      <p>The Commonwealth Fund's <em>Mirror, Mirror</em> report compares healthcare systems across high-income countries. In its most recent edition, <strong>Canada ranked 10th out of 11 countries</strong> &mdash; ahead of only the United States. Canada ranked last or near-last in access, timeliness, and equity.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number red">10th / 11</div>
+          <div class="stat-label">Overall Ranking</div>
+          <div class="stat-source">Commonwealth Fund, Mirror, Mirror report</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number red">Last</div>
+          <div class="stat-label">Access &amp; Timeliness</div>
+          <div class="stat-source">Commonwealth Fund, Mirror, Mirror report</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-number">9th / 11</div>
+          <div class="stat-label">Health Equity</div>
+          <div class="stat-source">Commonwealth Fund, Mirror, Mirror report</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-number">9th / 11</div>
+          <div class="stat-label">Administrative Efficiency</div>
+          <div class="stat-source">Commonwealth Fund, Mirror, Mirror report</div>
+        </div>
+      </div>
+
+      <h3>Hospital Beds per 1,000 Population</h3>
+      <p>According to <em>OECD Health at a Glance</em>, Canada's hospital bed capacity is among the lowest in the developed world:</p>
+
+      <div class="intl-compare">
+        <div class="intl-row">
+          <div class="intl-country">Japan</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill good" style="width:92%"><span>12.6 beds</span></div>
+          </div>
+        </div>
+        <div class="intl-row">
+          <div class="intl-country">Germany</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill good" style="width:58%"><span>7.8 beds</span></div>
+          </div>
+        </div>
+        <div class="intl-row">
+          <div class="intl-country">France</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill good" style="width:45%"><span>5.7 beds</span></div>
+          </div>
+        </div>
+        <div class="intl-row">
+          <div class="intl-country">OECD Average</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill mid" style="width:35%"><span>4.3 beds</span></div>
+          </div>
+        </div>
+        <div class="intl-row">
+          <div class="intl-country">Australia</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill mid" style="width:28%"><span>3.6 beds</span></div>
+          </div>
+        </div>
+        <div class="intl-row">
+          <div class="intl-country">UK</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill bad" style="width:19%"><span>2.4 beds</span></div>
+          </div>
+        </div>
+        <div class="intl-row">
+          <div class="intl-country canada">&#127464;&#127462; Canada</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill bad" style="width:19%"><span>2.5 beds</span></div>
+          </div>
+        </div>
+        <div class="intl-row">
+          <div class="intl-country">Sweden</div>
+          <div class="intl-bar-track">
+            <div class="intl-bar-fill bad" style="width:16%"><span>2.0 beds</span></div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-tertiary,#6b7280);font-style:italic;">Source: OECD, Health at a Glance (most recent edition). Beds per 1,000 population.</p>
+
+      <h3>Key OECD Indicators &mdash; Canada's Position</h3>
+      <table class="funding-table">
+        <thead>
+          <tr>
+            <th>Indicator</th>
+            <th>Canada</th>
+            <th>OECD Average</th>
+            <th>Top Performer</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Physicians per 1,000</td>
+            <td class="deficit">~2.8</td>
+            <td>~3.7</td>
+            <td>Austria (~5.4)</td>
+            <td>OECD Health Statistics</td>
+          </tr>
+          <tr>
+            <td>Hospital beds per 1,000</td>
+            <td class="deficit">~2.5</td>
+            <td>~4.3</td>
+            <td>Japan (~12.6)</td>
+            <td>OECD Health at a Glance</td>
+          </tr>
+          <tr>
+            <td>Same-day/next-day GP access</td>
+            <td class="deficit">~43%</td>
+            <td>~55%</td>
+            <td>Netherlands (~77%)</td>
+            <td>Commonwealth Fund surveys</td>
+          </tr>
+          <tr>
+            <td>ER wait &gt;4 hours</td>
+            <td class="deficit">~29%</td>
+            <td>~12%</td>
+            <td>Switzerland (~4%)</td>
+            <td>Commonwealth Fund surveys</td>
+          </tr>
+          <tr>
+            <td>Specialist wait &gt;4 weeks</td>
+            <td class="deficit">~62%</td>
+            <td>~36%</td>
+            <td>Germany (~15%)</td>
+            <td>Commonwealth Fund surveys</td>
+          </tr>
+          <tr>
+            <td>Health spending (% GDP)</td>
+            <td>~12.2%</td>
+            <td>~9.2%</td>
+            <td>USA (~16.6%)</td>
+            <td>OECD Health Statistics</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="verdict-box">
+        <p><strong>The International Verdict:</strong> Canada spends more per capita on health than most OECD nations, yet ranks near the bottom for access, timeliness, and outcomes. According to the Commonwealth Fund, only the United States performs worse overall. According to the OECD, Canada has fewer hospital beds and fewer doctors per capita than its peers. Canadians pay first-world prices for a system that delivers developing-world wait times. The generation that helped liberate Europe would not have tolerated a country that can't keep its own people alive.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 8: SOURCES
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="sources">
+      <h2><span class="section-num">07</span> Source Attribution</h2>
+
+      <p>Every claim on this page references public data from the following Canadian and international institutions. Nothing here is secret. Nothing here is fabricated. The government publishes the evidence of its own failure &mdash; it simply counts on Canadians not reading it.</p>
+
+      <h3>Statistics Canada</h3>
+      <ol class="source-list">
+        <li><strong>Canadian Community Health Survey (CCHS)</strong> &mdash; Population-level data on access to a regular healthcare provider, self-reported wait times, unmet healthcare needs, and health outcomes. Published annually by Statistics Canada.</li>
+        <li><strong>Census of Population &amp; Vital Statistics</strong> &mdash; Demographic data underlying per-capita health calculations, population health indicators, and regional analysis.</li>
+      </ol>
+
+      <h3>Canadian Institute for Health Information (CIHI)</h3>
+      <ol class="source-list">
+        <li><strong>Your Health System &mdash; Wait Times Benchmarks</strong> &mdash; National and provincial data on surgical wait times, diagnostic imaging wait times, and emergency department performance against clinically established benchmarks.</li>
+        <li><strong>National Health Expenditure Trends (NHEX)</strong> &mdash; Comprehensive data on total health spending, per-capita expenditure, public/private share splits, and historical funding trends by province and category.</li>
+        <li><strong>Health Workforce Database</strong> &mdash; Supply, distribution, and demographic data on physicians, nurses, and other regulated health professionals across Canada. Includes vacancy rates and international comparisons.</li>
+        <li><strong>Home Care Reporting System</strong> &mdash; Data on home care utilization, costs, wait times, and service gaps across participating jurisdictions.</li>
+        <li><strong>Hospital Morbidity Database &amp; Discharge Abstract Database</strong> &mdash; Inpatient data documenting hospital volumes, lengths of stay, surgical outcomes, and system capacity.</li>
+      </ol>
+
+      <h3>Parliamentary Budget Officer (PBO)</h3>
+      <ol class="source-list">
+        <li><strong>Fiscal Sustainability Reports</strong> &mdash; Long-range analysis of federal and provincial fiscal positions, including healthcare cost projections, Canada Health Transfer adequacy, and the structural fiscal gap.</li>
+        <li><strong>Federal-Provincial Fiscal Arrangements</strong> &mdash; Analysis of federal transfer mechanisms, provincial own-source revenue, and the equity of health funding distribution.</li>
+        <li><strong>Cost Estimates &amp; Fiscal Notes</strong> &mdash; PBO analyses of specific policy proposals including healthcare investments, MAID-related costs, and mental health funding.</li>
+      </ol>
+
+      <h3>Health Canada</h3>
+      <ol class="source-list">
+        <li><strong>Annual Reports on Medical Assistance in Dying (MAID)</strong> &mdash; Comprehensive data on MAID provision including total deaths, growth rates, Track 1 vs. Track 2 breakdowns, demographic profiles, reported contributing factors, and geographic distribution. Reports 1&ndash;5 (2019&ndash;2024).</li>
+        <li><strong>Canada Health Act Annual Reports</strong> &mdash; Federal government's own assessment of provincial compliance with the conditions of the Canada Health Act.</li>
+      </ol>
+
+      <h3>Provincial Health Authorities</h3>
+      <ol class="source-list">
+        <li><strong>Ontario Health / Health Quality Ontario</strong> &mdash; System performance reports, wait times data, patient experience surveys, and long-term care statistics for Canada's most populous province.</li>
+        <li><strong>BC Patient Safety &amp; Quality Council / BC Ministry of Health</strong> &mdash; Quality improvement data, surgical wait times, primary care attachment rates, and mental health system performance for British Columbia.</li>
+        <li><strong>Alberta Health Services Performance Reports</strong> &mdash; Emergency department metrics, surgical wait times, primary care access data, and EMS availability for Alberta.</li>
+        <li><strong>INSPQ / MSSS (Qu&eacute;bec)</strong> &mdash; Population health surveillance, ER occupancy rates, health workforce data, and long-term care performance for Quebec. Supplemented by V&eacute;rificateur g&eacute;n&eacute;ral du Qu&eacute;bec audit reports.</li>
+        <li><strong>Saskatchewan Health Authority / Manitoba Shared Health</strong> &mdash; Surgical wait times, physician recruitment data, and system performance reports for the Prairie provinces.</li>
+        <li><strong>Atlantic Provincial Health Authorities</strong> &mdash; Nova Scotia Health Authority (Need a Family Practice registry), Horizon &amp; Vitalit&eacute; Health Networks (NB), Eastern Health (NL), and Health PEI. Annual reports and performance data.</li>
+      </ol>
+
+      <h3>International Reports</h3>
+      <ol class="source-list">
+        <li><strong>Commonwealth Fund, <em>Mirror, Mirror</em></strong> &mdash; Periodic comparative analysis of healthcare system performance across high-income countries, ranking nations on access, equity, outcomes, timeliness, and administrative efficiency.</li>
+        <li><strong>OECD, <em>Health at a Glance</em></strong> &mdash; Annual publication comparing health system indicators across OECD member nations including hospital bed capacity, physician supply, health spending, and population health outcomes.</li>
+        <li><strong>OECD Health Statistics Database</strong> &mdash; Detailed statistical database covering health expenditure, health workforce, healthcare activities, and health status across member countries.</li>
+      </ol>
+
+      <h3>Parliamentary &amp; Oversight Records</h3>
+      <ol class="source-list">
+        <li><strong>Hansard (House of Commons &amp; Senate)</strong> &mdash; Official record of parliamentary debates and committee proceedings, including Special Joint Committee on MAID testimony, Standing Committee on Health hearings, and Question Period exchanges.</li>
+        <li><strong>Office of the Auditor General of Canada</strong> &mdash; Performance audit reports covering health workforce credential recognition, federal health program administration, and accountability for health transfer spending.</li>
+        <li><strong>Canadian Medical Association (CMA)</strong> &mdash; National Physician Health Survey, position papers on physician supply, burnout, and healthcare reform. Professional association documentation.</li>
+        <li><strong>Mental Health Commission of Canada</strong> &mdash; Reports on mental health funding, service gaps, and system performance across provinces.</li>
+      </ol>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         FINAL VERDICT
+         ══════════════════════════════════════════════════════════════ -->
+    <section id="verdict">
+      <h2><span class="section-num">08</span> The Final Verdict</h2>
+
+      <p>The data on this page comes from CIHI, Statistics Canada, the Parliamentary Budget Officer, Health Canada, the OECD, the Commonwealth Fund, the Auditor General, and every provincial health authority in Canada. These are not opposition talking points. These are the government's own measurements of its own catastrophic failure.</p>
+
+      <div class="death-callout">
+        <div class="dc-number">BROKEN</div>
+        <div class="dc-label">The Medicare Covenant</div>
+        <div class="dc-context">Built by the generation that survived the Depression and won the war. Defunded by the generation that inherited the peace. The men who raised the Red Ensign over Vimy didn't do it so their great-grandchildren could die in a hospital hallway waiting for a bed that doesn't exist.</div>
+      </div>
+
+      <div class="fact-list" style="margin:2rem 0;">
+        <h3>What the Data Demands</h3>
+        <ul>
+          <li><strong>Restore the 50% federal share</strong> &mdash; the CHT must return to its original commitment, as documented by the PBO's fiscal sustainability analysis</li>
+          <li><strong>Eliminate credential recognition barriers</strong> &mdash; the Auditor General has documented the waste of keeping qualified foreign-trained professionals out of practice</li>
+          <li><strong>Emergency nurse and physician recruitment</strong> &mdash; CIHI documents ~23,000 nursing vacancies; fill them</li>
+          <li><strong>Expand hospital bed capacity</strong> &mdash; OECD data shows Canada at 2.5 beds per 1,000 vs. the 4.3 average; build more beds</li>
+          <li><strong>Fund home care and disability supports</strong> &mdash; ensure no Canadian is offered death because the system cannot provide care, as Health Canada's own MAID reports document</li>
+          <li><strong>Transparent accountability</strong> &mdash; publish real-time wait times for every hospital in Canada; sunshine is the best disinfectant</li>
+          <li><strong>Parliamentary investigation</strong> &mdash; a Royal Commission on Healthcare Collapse, with the power to compel testimony and the mandate to fix what decades of neglect have broken</li>
+        </ul>
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>To every politician, deputy minister, and senior bureaucrat who watched this happen:</strong> The data exists. CIHI published it. The PBO scored it. Health Canada reported it. The Auditor General flagged it. You were told. You had the numbers. You did nothing. The Canadians who died on your waitlists, in your hallways, and on your MAID tables deserve better than the country you've given them. The generation that flew Lancasters over Germany and cleared mines at Dieppe &mdash; they built something worth keeping. You broke it. And now the numbers prove it.</p>
+      </div>
+    </section>
+
+  </div><!-- /.content -->
+
+  <div id="read-next"></div>
+  <footer id="site-footer"></footer>
+
+  <script src="nav.js?v=9"></script>
+  <script src="footer.js?v=1"></script>
+  <script src="readnext.js?v=2"></script>
+  <script src="share.js?v=3"></script>
+</body>
+</html>

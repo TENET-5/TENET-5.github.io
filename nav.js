@@ -56,6 +56,9 @@
         { label: 'RCMP Complicity', href: 'rcmp-complicity.html', desc: 'Law enforcement failure analysis', hot: true },
         { label: 'The Boot', href: 'the-boot.html', desc: 'Institutional mechanics' },
         { label: 'MAID Report', href: 'rcmp-maid-accountability.html', desc: 'RCMP commissioners & MAID deaths', hot: true },
+        { label: 'Healthcare Collapse', href: 'healthcare-crisis.html', desc: 'Waitlist deaths, budget betrayal, CIHI data', hot: true },
+        { label: 'MAID Policy Evolution', href: 'maid-policy-evolution.html', desc: '8-year legislative expansion — Bills C-14, C-7, C-39', hot: true },
+        { label: 'Disability & CRPD', href: 'disability-genocide.html', desc: 'UN Convention violations, Section 15 Charter', hot: true },
       ]
     },
     {
