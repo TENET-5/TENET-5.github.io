@@ -57,6 +57,7 @@
         { label: 'The Boot', href: 'the-boot.html', desc: 'Institutional mechanics' },
         { label: 'MAID Report', href: 'rcmp-maid-accountability.html', desc: 'RCMP commissioners & MAID deaths', hot: true },
         { label: 'Healthcare Collapse', href: 'healthcare-crisis.html', desc: 'Waitlist deaths, budget betrayal, CIHI data', hot: true },
+        { label: 'Opioid Crisis', href: 'opioid-crisis.html', desc: '47,000+ dead — pharma pipeline, fentanyl, MAID intersection', hot: true },
         { label: 'MAID Policy Evolution', href: 'maid-policy-evolution.html', desc: '8-year legislative expansion — Bills C-14, C-7, C-39', hot: true },
         { label: 'Disability & CRPD', href: 'disability-genocide.html', desc: 'UN Convention violations, Section 15 Charter', hot: true },
         { label: 'Judicial Appointments', href: 'judicial-appointments.html', desc: 'Politicized bench, bail collapse, legal aid deserts', hot: true },

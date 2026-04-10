@@ -666,9 +666,17 @@
     'healthcare-crisis.html': {
       current: 'Healthcare Crisis',
       next: [
+        { href: 'opioid-crisis.html', label: 'Opioid Crisis', desc: '47,000+ dead — pharma pipeline, fentanyl, and the MAID intersection' },
         { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
         { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations, Charter Section 15' },
-        { href: 'rcmp-maid-accountability.html', label: 'RCMP & MAID', desc: 'Commissioner dereliction of duty' },
+      ]
+    },
+    'opioid-crisis.html': {
+      current: 'Opioid Crisis',
+      next: [
+        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
+        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
+        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations against disabled Canadians' },
       ]
     },
     'maid-policy-evolution.html': {

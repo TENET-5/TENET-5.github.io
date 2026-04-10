@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opioid Crisis | Canadian Government Accountability</title>
+  <meta name="description" content="47,000+ Canadians dead from opioid toxicity since 2016. PHAC data, Health Canada records, BC Coroners Service reports — the government's own numbers indict them.">
+  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap">
+  <style>
+    /* Page-specific chart and source styles (matching site investigation pages) */
+    .oc-chart { margin: 2rem 0; }
+    .oc-bar-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 80px;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .oc-bar-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary, #aaa);
+      text-align: right;
+    }
+    .oc-bar-track {
+      height: 28px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .oc-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding-left: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      transition: width 0.6s ease;
+    }
+    .oc-bar-fill.crisis { background: linear-gradient(90deg, #dc2626, #991b1b); }
+    .oc-bar-fill.high { background: linear-gradient(90deg, #ea580c, #c2410c); }
+    .oc-bar-fill.moderate { background: linear-gradient(90deg, #d97706, #b45309); }
+    .oc-bar-fill.early { background: linear-gradient(90deg, #ca8a04, #a16207); }
+    .oc-bar-value {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary, #eee);
+      text-align: right;
+    }
+    .oc-chart-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-secondary, #aaa);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .oc-chart-note {
+      font-size: 0.75rem;
+      color: var(--text-quaternary, #666);
+      margin-top: 0.75rem;
+      font-style: italic;
+    }
+    .source-block {
+      background: rgba(255,255,255,0.02);
+      border-left: 3px solid var(--accent, #c41e3a);
+      border-radius: 0 6px 6px 0;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      font-size: 0.82rem;
+      color: var(--text-tertiary, #888);
+      line-height: 1.7;
+    }
+    .source-block strong {
+      color: var(--text-secondary, #aaa);
+      font-weight: 600;
+    }
+    .source-block a {
+      color: var(--accent-bright, #e85d75);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .alert-card {
+      background: linear-gradient(135deg, rgba(220,38,38,0.06), rgba(0,0,0,0));
+      border: 1px solid rgba(220,38,38,0.25);
+      border-left: 4px solid #dc2626;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .alert-card h3 {
+      color: #fca5a5;
+      margin: 0 0 0.75rem 0;
+      font-size: 1.05rem;
+    }
+    .alert-card p { margin: 0.5rem 0; }
+    .fact-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+    }
+    .fact-list li {
+      position: relative;
+      padding: 0.75rem 0 0.75rem 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      line-height: 1.7;
+    }
+    .fact-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0.5rem;
+      color: var(--accent, #c41e3a);
+      font-weight: 700;
+    }
+    .fact-list li strong { color: var(--text-primary, #eee); }
+    .verdict-box {
+      background: linear-gradient(135deg, rgba(196,30,58,0.08), rgba(0,0,0,0));
+      border: 1px solid rgba(196,30,58,0.3);
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+    .compare-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.88rem;
+    }
+    .compare-tbl th {
+      background: rgba(255,255,255,0.04);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-secondary, #aaa);
+      border-bottom: 2px solid rgba(196,30,58,0.3);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .compare-tbl td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-secondary, #bbb);
+    }
+    .compare-tbl tr:hover td { background: rgba(255,255,255,0.02); }
+    .compare-tbl .highlight { color: #fca5a5; font-weight: 700; }
+    .action-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+      counter-reset: action;
+    }
+    .action-list li {
+      counter-increment: action;
+      padding: 1rem 1rem 1rem 3.5rem;
+      margin-bottom: 0.75rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      position: relative;
+      line-height: 1.7;
+    }
+    .action-list li::before {
+      content: counter(action, decimal-leading-zero);
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      font-weight: 900;
+      color: var(--accent, #c41e3a);
+      font-size: 1.1rem;
+    }
+    .death-callout {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      margin: 2rem 0;
+      background: linear-gradient(135deg, rgba(220,38,38,0.08), rgba(0,0,0,0));
+      border: 1px solid rgba(220,38,38,0.2);
+      border-radius: 12px;
+    }
+    .dc-number {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      color: #dc2626;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .dc-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary, #eee);
+      margin-bottom: 0.75rem;
+    }
+    .dc-context {
+      font-size: 0.9rem;
+      color: var(--text-tertiary, #888);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .pipeline-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-left: 3px solid rgba(196,30,58,0.3);
+      background: rgba(255,255,255,0.015);
+      border-radius: 0 6px 6px 0;
+    }
+    .pipeline-step .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent, #c41e3a);
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.8rem;
+      border-radius: 50%;
+    }
+    .timeline-item {
+      padding: 1.25rem 1.25rem 1.25rem 2rem;
+      border-left: 3px solid rgba(196,30,58,0.3);
+      margin-bottom: 1rem;
+      background: rgba(255,255,255,0.015);
+      border-radius: 0 8px 8px 0;
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 1.5rem;
+      width: 11px;
+      height: 11px;
+      background: var(--accent, #c41e3a);
+      border-radius: 50%;
+    }
+    .ti-date {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent-bright, #e85d75);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+    .ti-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary, #eee);
+      margin-bottom: 0.5rem;
+    }
+    .ti-body {
+      font-size: 0.88rem;
+      color: var(--text-secondary, #bbb);
+      line-height: 1.7;
+    }
+    @media (max-width: 640px) {
+      .oc-bar-row { grid-template-columns: 45px 1fr 60px; gap: 0.4rem; }
+      .oc-bar-label { font-size: 0.75rem; }
+      .oc-bar-value { font-size: 0.75rem; }
+      .oc-bar-fill { font-size: 0.65rem; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <nav id="site-nav"></nav>
+
+  <!-- SHARE BAR -->
+  <div id="share-bar" class="share-bar">
+    <span class="share-bar-label">📢 21 CANADIANS DIE EVERY DAY FROM OVERDOSE. SHARE THIS.</span>
+    <div class="share-bar-buttons">
+      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
+      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
+      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
+      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
+      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">📋 Copy Link</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero" id="main">
+    <div class="flag">🇨🇦</div>
+    <h1>Poisoned to Death on Canadian Soil:<br>The Opioid Catastrophe</h1>
+    <p class="subtitle">
+      The generation that took morphine for shrapnel wounds at Juno Beach came home and built lives.
+      Their grandchildren are dying in alleys from poisoned fentanyl while Parliament debates semantics.
+      Every number on this page comes from the Public Health Agency of Canada, Health Canada, the BC Coroners Service,
+      Statistics Canada, and the government's own commissioned reports. They cannot deny what their own data proves:
+      <strong style="color:#fff;">47,000+ dead since 2016 — and counting.</strong>
+    </p>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- ============================================================ -->
+    <!-- SECTION 01: THE DEATH TOLL -->
+    <!-- ============================================================ -->
+    <section id="death-toll">
+      <h2><span class="section-num">01</span> The Death Toll</h2>
+      <p>
+        These are not advocacy estimates. These are body counts from the federal government's own surveillance system.
+        The Public Health Agency of Canada publishes quarterly reports on opioid- and stimulant-related harms, and every
+        quarter the numbers climb. The men who stormed the beaches would ask one question: <em>how many more have to die
+        before someone is held accountable?</em>
+      </p>
+
+      <div class="death-callout">
+        <div class="dc-number">47,000+</div>
+        <div class="dc-label">Apparent Opioid Toxicity Deaths — January 2016 to June 2024</div>
+        <div class="dc-context">
+          According to the Public Health Agency of Canada's national surveillance data, more than 47,000 Canadians
+          have died from apparent opioid toxicity since January 2016. This surpasses Canadian military deaths
+          in World War II (approximately 45,400). A country that honours its war dead with cenotaphs has no
+          monument for the poisoned.
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">~8,049</div>
+          <div class="stat-label">Opioid Deaths in 2023</div>
+          <div class="stat-source">PHAC, Opioid- and Stimulant-related Harms, 2024</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">~22</div>
+          <div class="stat-label">Canadians Dying Per Day (2023)</div>
+          <div class="stat-source">PHAC quarterly surveillance data</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#ea580c;">76%</div>
+          <div class="stat-label">Deaths Involving Fentanyl (2023)</div>
+          <div class="stat-source">PHAC, Apparent Opioid Toxicity Deaths</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#ea580c;">73%</div>
+          <div class="stat-label">Victims Aged 20–49</div>
+          <div class="stat-source">PHAC demographic breakdowns, 2024</div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-number" style="color:#f59e0b;">~80%</div>
+          <div class="stat-label">Victims Male</div>
+          <div class="stat-source">PHAC demographic data</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">48.4</div>
+          <div class="stat-label">Deaths per 100k — British Columbia (2023)</div>
+          <div class="stat-source">BC Coroners Service, Illicit Drug Toxicity Deaths</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number blue">~1,900</div>
+          <div class="stat-label">Traffic Deaths in Canada (2021)</div>
+          <div class="stat-source">Transport Canada, Canadian Motor Vehicle Traffic Collision Statistics</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number blue">~13,241</div>
+          <div class="stat-label">MAID Deaths (2022)</div>
+          <div class="stat-source">Health Canada, 4th Annual Report on MAID</div>
+        </div>
+      </div>
+
+      <p>
+        Consider those last two numbers. Opioid deaths in 2023 exceeded traffic fatalities by more than
+        four to one. Canada loses more citizens to poisoned drug supply every year than it does to car
+        accidents, homicides, and house fires combined. And yet traffic safety has a federal ministry,
+        national campaigns, and billions in infrastructure spending. The opioid dead get quarterly
+        press releases.
+      </p>
+
+      <!-- ANNUAL DEATH CHART -->
+      <div class="oc-chart">
+        <div class="oc-chart-title">Apparent Opioid Toxicity Deaths in Canada — Annual Trend</div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2016</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill early" style="width:35%">2,862</div></div>
+          <div class="oc-bar-value">2,862</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2017</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill moderate" style="width:49%">3,998</div></div>
+          <div class="oc-bar-value">3,998</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2018</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill moderate" style="width:55%">4,458</div></div>
+          <div class="oc-bar-value">4,458</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2019</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill moderate" style="width:46%">3,711</div></div>
+          <div class="oc-bar-value">3,711</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2020</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill high" style="width:77%">6,214</div></div>
+          <div class="oc-bar-value">6,214</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2021</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill crisis" style="width:93%">7,560</div></div>
+          <div class="oc-bar-value">7,560</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2022</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill crisis" style="width:92%">7,328</div></div>
+          <div class="oc-bar-value">7,328</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2023</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill crisis" style="width:100%">~8,049</div></div>
+          <div class="oc-bar-value">~8,049</div>
+        </div>
+        <div class="oc-bar-row">
+          <div class="oc-bar-label">2024*</div>
+          <div class="oc-bar-track"><div class="oc-bar-fill crisis" style="width:50%">~3,800</div></div>
+          <div class="oc-bar-value">~3,800</div>
+        </div>
+        <div class="oc-chart-note">
+          * 2024 figure covers January–June only (partial year). 2023 figure is preliminary.
+          Source: PHAC, Opioid- and Stimulant-related Harms in Canada (updated quarterly).
+        </div>
+      </div>
+
+      <div class="source-block">
+        <strong>Sources:</strong> Public Health Agency of Canada (PHAC), <em>Opioid- and Stimulant-related Harms in Canada</em>,
+        quarterly surveillance reports (2016–2024). BC Coroners Service, <em>Illicit Drug Toxicity Deaths in BC</em>,
+        monthly statistical reports. Transport Canada, <em>Canadian Motor Vehicle Traffic Collision Statistics</em> (2021).
+        Health Canada, <em>Fourth Annual Report on Medical Assistance in Dying in Canada</em> (2023).
+        Statistics Canada, Table 13-10-0392-01, Deaths by cause of death.
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> More Canadians have now died from opioid poisoning than were killed
+        fighting in World War II. The annual toll exceeds traffic deaths by 4:1. British Columbia alone —
+        one province — loses more than 2,500 people per year. This is not a health policy failure. It is a
+        mass casualty event that the government has chosen to manage with press releases rather than action.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 02: HOW WE GOT HERE — THE PHARMA PIPELINE -->
+    <!-- ============================================================ -->
+    <section id="pharma-pipeline">
+      <h2><span class="section-num">02</span> How We Got Here — The Pharma Pipeline</h2>
+      <p>
+        The opioid crisis did not fall from the sky. It was manufactured — literally — by pharmaceutical companies
+        that marketed addictive painkillers as safe, by a regulator (Health Canada) that approved them without
+        adequate controls, and by a medical establishment that prescribed them by the millions. The same healthcare
+        system that created a generation of opioid-dependent Canadians now offers some of them MAID as a way out.
+      </p>
+
+      <div class="timeline-item">
+        <div class="ti-date">1996</div>
+        <div class="ti-title">OxyContin Arrives in Canada</div>
+        <div class="ti-body">
+          Purdue Pharma introduces OxyContin (controlled-release oxycodone) to the Canadian market.
+          Health Canada approves the drug. Marketing materials downplay addiction risk, claiming the
+          controlled-release mechanism makes abuse unlikely. Canadian physicians begin prescribing at
+          escalating rates. Between 1996 and 2004, oxycodone prescriptions in Canada increase by over
+          850% according to IMS Health data.
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-date">2001–2006</div>
+        <div class="ti-title">Prescription Rates Explode</div>
+        <div class="ti-body">
+          Canada becomes the second-highest per-capita consumer of prescription opioids in the world,
+          behind only the United States. The International Narcotics Control Board (INCB) flags Canada's
+          consumption levels. Health Canada takes no meaningful regulatory action. Pharmaceutical
+          sales representatives continue visiting doctors' offices with branded materials.
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-date">2007</div>
+        <div class="ti-title">Purdue Pharma Canada — The $20 Million Slap</div>
+        <div class="ti-body">
+          Purdue Pharma (parent company) pleads guilty in the U.S. to misleading regulators about
+          OxyContin's addictive properties, paying US$634.5 million in fines. In Canada, Purdue Pharma
+          Canada reaches a $20 million settlement with Ontario over misleading marketing — a fraction
+          of the estimated billions in Canadian OxyContin sales revenue. No individual executives face
+          criminal charges in Canada.
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-date">2012</div>
+        <div class="ti-title">OxyContin Reformulated — Too Late</div>
+        <div class="ti-body">
+          Purdue replaces OxyContin with OxyNEO, a tamper-resistant formulation. By this point, an
+          estimated 200,000+ Canadians are dependent on prescription opioids. Many who can no longer
+          access or afford prescription drugs transition to illicit heroin — and within years, to
+          fentanyl. The reformulation shifts the crisis from the pharmacy to the street.
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-date">2016–Present</div>
+        <div class="ti-title">Fentanyl Replaces Heroin — Deaths Skyrocket</div>
+        <div class="ti-body">
+          Illicitly manufactured fentanyl, primarily synthesized from Chinese-sourced precursor chemicals,
+          floods the Canadian drug supply. Deaths accelerate from 2,862 in 2016 to over 8,000 in 2023.
+          The pharmaceutical companies that created the addicted population face minimal consequences.
+          The street supply that now kills them operates with impunity.
+        </div>
+      </div>
+
+      <div class="alert-card">
+        <h3>⚠️ Pharmaceutical Lobbying</h3>
+        <p>
+          According to the Office of the Commissioner of Lobbying of Canada, pharmaceutical companies
+          and industry associations conducted thousands of registered lobbying communications with
+          federal officials between 2005 and 2020. Innovative Medicines Canada (formerly Rx&amp;D), the
+          pharmaceutical industry's primary lobby group, maintained active registrations with Health
+          Canada, Finance Canada, and the PMO throughout the period when opioid prescriptions peaked
+          and the crisis escalated.
+        </p>
+        <p>
+          Between 2010 and 2018, pharmaceutical manufacturers collectively spent hundreds of millions
+          on lobbying, marketing, and continuing medical education programs directed at Canadian
+          healthcare providers — while addiction rates climbed and overdose deaths mounted.
+        </p>
+      </div>
+
+      <div class="source-block">
+        <strong>Sources:</strong> Office of the Commissioner of Lobbying of Canada, Lobbyist Registry
+        (searchable at lobbycanada.gc.ca). International Narcotics Control Board (INCB), Annual Reports
+        (2005–2012). IMS Health (now IQVIA), Canadian prescription data. Ontario Superior Court filings,
+        <em>Ontario v. Purdue Pharma Canada</em> (2007 settlement). U.S. Department of Justice, Purdue
+        Pharma plea agreement (2007). Health Canada, Drug Product Database.
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> Health Canada approved OxyContin with insufficient controls.
+        Purdue Pharma Canada marketed it with claims that downplayed addiction. When caught, the
+        penalty was $20 million — a rounding error against billions in revenue. The regulatory body
+        that was supposed to protect Canadians instead enabled the creation of a dependent population
+        that would later die in the tens of thousands. No Health Canada official has ever been held
+        accountable for this failure.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 03: BC DECRIMINALIZATION EXPERIMENT -->
+    <!-- ============================================================ -->
+    <section id="bc-decrim">
+      <h2><span class="section-num">03</span> The BC Decriminalization Experiment</h2>
+      <p>
+        In January 2023, British Columbia became the first Canadian province to decriminalize personal
+        possession of small amounts of illicit drugs — including opioids, cocaine, and methamphetamine — up to a
+        cumulative 2.5 grams. The three-year federal exemption under Section 56(1) of the <em>Controlled Drugs
+        and Substances Act</em> was presented as a bold, evidence-based experiment. Sixteen months later,
+        the province reversed course.
+      </p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">2,511</div>
+          <div class="stat-label">BC Illicit Drug Deaths in 2023</div>
+          <div class="stat-source">BC Coroners Service, 2024 Annual Report</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#ea580c;">Jan 2023</div>
+          <div class="stat-label">Decriminalization Pilot Began</div>
+          <div class="stat-source">Health Canada, Section 56(1) Exemption</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#f59e0b;">May 2024</div>
+          <div class="stat-label">Public Use Re-Criminalized</div>
+          <div class="stat-source">BC Government, Bill 34</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="ti-date">January 31, 2023</div>
+        <div class="ti-title">Decriminalization Begins</div>
+        <div class="ti-body">
+          BC's three-year Health Canada exemption takes effect. Adults (18+) possessing up to 2.5 grams
+          of illicit drugs for personal use will not be arrested or charged. Instead, police are directed
+          to offer referrals to health and social services. The policy does not include mandatory treatment,
+          mandatory engagement with health services, or consequences for refusing referrals.
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-date">2023 — Throughout</div>
+        <div class="ti-title">Results: Deaths Do Not Decrease</div>
+        <div class="ti-body">
+          Despite decriminalization, BC records 2,511 illicit drug toxicity deaths in 2023 — a rate of
+          approximately 48.4 per 100,000 population. Public drug use in transit stations, parks, hospital
+          entrances, and downtown cores increases visibly. Municipalities including Kamloops, Kelowna,
+          Prince George, and parts of Metro Vancouver report sharp increases in public disorder complaints.
+          Emergency room visits for overdose remain at crisis levels.
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-date">May 2024</div>
+        <div class="ti-title">BC Reverses Course</div>
+        <div class="ti-body">
+          Premier David Eby announces Bill 34, restricting drug use in public spaces including parks,
+          beaches, transit, and within 15 metres of playgrounds, pools, skate parks, sports fields, and
+          building entrances. Police regain the power to compel users to leave public spaces. The
+          federal government amends BC's exemption to accommodate the restrictions. The "bold experiment"
+          lasted sixteen months before the province effectively admitted it was failing.
+        </div>
+      </div>
+
+      <h3>The Comparison They Don't Want You to Make</h3>
+      <table class="compare-tbl">
+        <thead>
+          <tr>
+            <th>Factor</th>
+            <th>Portugal (2001)</th>
+            <th>BC, Canada (2023)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Drug Possession</td>
+            <td>Decriminalized (all drugs, personal amounts)</td>
+            <td>Decriminalized (up to 2.5g cumulative)</td>
+          </tr>
+          <tr>
+            <td>Mandatory Treatment</td>
+            <td><strong>Yes</strong> — Dissuasion Commissions compel treatment engagement</td>
+            <td class="highlight">No — voluntary referrals only</td>
+          </tr>
+          <tr>
+            <td>Consequences for Refusal</td>
+            <td><strong>Yes</strong> — administrative penalties, mandated appearances</td>
+            <td class="highlight">None</td>
+          </tr>
+          <tr>
+            <td>Treatment Capacity</td>
+            <td>Massively expanded before decriminalization</td>
+            <td class="highlight">Not expanded before or concurrent with decriminalization</td>
+          </tr>
+          <tr>
+            <td>Drug-related Deaths After</td>
+            <td>Decreased by ~80% over two decades</td>
+            <td class="highlight">Did not decrease</td>
+          </tr>
+          <tr>
+            <td>Public Drug Use</td>
+            <td>Decreased (enforcement via Commissions)</td>
+            <td class="highlight">Increased visibly</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Alberta, under Premier Danielle Smith, took a fundamentally different approach: the <em>Recovery Alberta</em>
+        model emphasizing mandatory treatment pathways, recovery-oriented care, and expansion of treatment bed capacity.
+        While the full results remain to be seen, the Alberta approach at least acknowledges what BC refused to admit —
+        that decriminalization without mandatory treatment infrastructure is not compassion. It is abandonment.
+      </p>
+
+      <div class="source-block">
+        <strong>Sources:</strong> BC Coroners Service, <em>Illicit Drug Toxicity Deaths in BC: January 1, 2012 to
+        December 31, 2023</em>. Health Canada, <em>Subsection 56(1) Class Exemption for the Province of British
+        Columbia</em> (January 2023). Government of British Columbia, Bill 34 — <em>Restricting Public Use of
+        Illegal Substances Act</em> (2024). European Monitoring Centre for Drugs and Drug Addiction (EMCDDA),
+        <em>Drug Policy Profiles: Portugal</em> (2011, updated 2019). Government of Alberta, <em>Recovery Alberta
+        Act</em> (2024).
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> BC adopted the part of Portugal's model that was politically convenient
+        (decriminalization) and ignored the part that actually works (mandatory treatment engagement and
+        infrastructure). The result was entirely predictable: deaths did not decrease, public disorder
+        increased, and the province reversed course within sixteen months. This was not an evidence-based
+        experiment — it was an ideology-based experiment that used addicted people as test subjects.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 04: SAFE SUPPLY — THE DEBATE -->
+    <!-- ============================================================ -->
+    <section id="safe-supply">
+      <h2><span class="section-num">04</span> "Safe Supply" — The Debate</h2>
+      <p>
+        The federal government has spent more than $800 million on its opioid response since 2017.
+        A central pillar of that response has been "safer supply" — government-funded programs that
+        prescribe pharmaceutical-grade opioids (primarily hydromorphone tablets) to people with opioid
+        use disorder, on the theory that providing a known-potency alternative to the toxic street supply
+        will prevent overdose deaths. The results have been controversial.
+      </p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-number" style="color:#f59e0b;">$800M+</div>
+          <div class="stat-label">Federal Opioid Response Spending (2017–2024)</div>
+          <div class="stat-source">Health Canada, Canadian Drugs and Substances Strategy reports</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">↑181%</div>
+          <div class="stat-label">Death Increase During Funding Period</div>
+          <div class="stat-source">PHAC: 2,862 (2016) → ~8,049 (2023)</div>
+        </div>
+      </div>
+
+      <ul class="fact-list">
+        <li>
+          <strong>Hydromorphone "Dilaudid" prescribing:</strong> Safer supply programs, particularly in
+          Ontario and BC, prescribe hydromorphone 8mg tablets — a potent opioid — to registered patients.
+          Prescriptions are intended to be consumed on-site or under observation, but enforcement of
+          consumption protocols varies by program.
+        </li>
+        <li>
+          <strong>Diversion documented:</strong> Police services in London, Ontario; Vancouver; and other
+          cities have reported significant diversion of prescribed hydromorphone to the illicit market.
+          The London Police Service reported recovering safer-supply hydromorphone tablets during
+          street-level drug investigations. London city council passed a resolution in 2023 calling for
+          a review of the federal program.
+        </li>
+        <li>
+          <strong>Whistleblower testimony:</strong> Healthcare workers in London, Ontario's safer supply
+          programs reported to media (London Free Press, National Post) that program participants were
+          observed selling prescribed tablets outside clinics, and that oversight was inadequate to prevent
+          systematic diversion.
+        </li>
+        <li>
+          <strong>No controlled trials:</strong> As of 2024, Health Canada has not published results from
+          randomized controlled trials demonstrating that safer supply programs reduce overdose deaths at
+          a population level. The evidence base consists primarily of observational cohort studies and
+          program evaluations.
+        </li>
+        <li>
+          <strong>Deaths continued to climb:</strong> Federal opioid response spending began in 2017
+          (2,862 deaths in 2016). By 2023, annual deaths had reached approximately 8,049 — a 181% increase
+          during the period of maximum federal funding.
+        </li>
+      </ul>
+
+      <div class="alert-card">
+        <h3>⚠️ The Spending-to-Deaths Ratio</h3>
+        <p>
+          The federal government committed $800+ million to opioid response between 2017 and 2024.
+          During that same period, approximately 41,000 Canadians died from opioid toxicity. That works
+          out to approximately $19,500 per death — not to prevent the death, but spent while the death
+          occurred. The question is not whether the government spent money. The question is whether the
+          money accomplished anything. The death curve answers that question.
+        </p>
+      </div>
+
+      <div class="source-block">
+        <strong>Sources:</strong> Health Canada, <em>Canadian Drugs and Substances Strategy</em> funding
+        announcements (2017–2024). PHAC, Opioid- and Stimulant-related Harms surveillance data.
+        London Free Press, reporting on safer supply diversion (2023). London, Ontario City Council,
+        Resolution re: Federal Safer Supply Review (2023). National Post, "Safer supply drugs being
+        diverted to street" (2023). Canadian Centre on Substance Use and Addiction (CCSA),
+        <em>Safer Supply</em> evidence reviews.
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> $800 million spent. 41,000 dead during the spending period.
+        No population-level RCTs proving the flagship "safer supply" program works. Documented diversion
+        of prescribed opioids to street markets. When the Red Ensign generation spent money, they built
+        things — hospitals, highways, a national railway. This generation spent $800 million and got a
+        steeper death curve. That is not a policy. It is a monument to bureaucratic failure.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 05: THE FENTANYL PIPELINE -->
+    <!-- ============================================================ -->
+    <section id="fentanyl-pipeline">
+      <h2><span class="section-num">05</span> The Fentanyl Pipeline</h2>
+      <p>
+        The drug killing Canadians is not what most of them think they're taking. Fentanyl — a synthetic opioid
+        50 to 100 times more potent than morphine — has contaminated the illicit drug supply across Canada. It is
+        found in pills sold as oxycodone, in powder sold as heroin, in cocaine, and even in methamphetamine.
+        The supply chain is international. The failure to interdict it is Canadian.
+      </p>
+
+      <div class="pipeline-step">
+        <div class="step-num">1</div>
+        <div>
+          <strong>Precursor Chemicals — China</strong><br>
+          The raw chemical precursors for fentanyl synthesis (primarily NPP and ANPP, along with newer
+          designer precursors) originate overwhelmingly from chemical manufacturers in China. Despite
+          China's 2019 scheduling of fentanyl as a class, precursor chemicals continue to flow via
+          modified molecular structures and mislabelled shipments. The U.S. Congressional Research
+          Service, the DEA, and the RCMP have all identified China as the primary source.
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">2</div>
+        <div>
+          <strong>Synthesis — Mexican Cartels &amp; Domestic Labs</strong><br>
+          Precursors are shipped to Mexico, where Sinaloa and Jalisco New Generation (CJNG) cartels
+          operate industrial-scale fentanyl synthesis laboratories. Finished fentanyl — as powder or
+          pressed into counterfeit pills — is then trafficked north. A smaller but significant volume
+          is synthesized in clandestine laboratories within Canada, particularly in BC and Ontario.
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">3</div>
+        <div>
+          <strong>Entry — Border &amp; Ports</strong><br>
+          Fentanyl enters Canada through the mail system (Canada Post parcels from overseas), the
+          Port of Vancouver (concealed in shipping containers), overland border crossings, and
+          via the US-Canada land border. The Canada Border Services Agency (CBSA) conducts
+          interdiction operations but has publicly acknowledged capacity limitations. The Port of
+          Vancouver processes over 3 million TEUs (twenty-foot equivalent units) of container
+          traffic annually; physical inspection rates remain in the low single-digit percentages.
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">4</div>
+        <div>
+          <strong>Distribution — Organized Crime Networks</strong><br>
+          RCMP Federal Serious and Organized Crime (FSOC) investigations have identified multiple
+          organized crime networks — including Hells Angels-affiliated groups, independent trafficking
+          cells, and transnational organizations — distributing fentanyl across Canadian provinces.
+          Distribution increasingly occurs via encrypted communications and dark web marketplaces,
+          with cryptocurrency (primarily Bitcoin and Monero) used for transactions.
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">5</div>
+        <div>
+          <strong>Street Supply — The Killing Floor</strong><br>
+          By the time fentanyl reaches end users, it has been cut, pressed, and mixed with unpredictable
+          potency. Carfentanil — approximately 100 times more potent than fentanyl itself — has been
+          detected in Canadian drug samples. The BC Centre on Substance Use's drug checking services
+          have found fentanyl in substances sold as heroin, cocaine, MDMA, and counterfeit benzodiazepines.
+          Users often do not know they are consuming fentanyl until it is too late.
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">76%</div>
+          <div class="stat-label">Of Opioid Deaths Involving Fentanyl (2023)</div>
+          <div class="stat-source">PHAC surveillance data</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#ea580c;">3M+</div>
+          <div class="stat-label">TEUs Through Port of Vancouver (Annual)</div>
+          <div class="stat-source">Vancouver Fraser Port Authority, Annual Statistics</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#f59e0b;">100×</div>
+          <div class="stat-label">Carfentanil Potency vs. Fentanyl</div>
+          <div class="stat-source">CCSA, Carfentanil factsheet</div>
+        </div>
+      </div>
+
+      <div class="source-block">
+        <strong>Sources:</strong> RCMP, <em>Federal Policing Annual Reports</em> and Project-specific
+        media releases. CBSA, Annual Enforcement Reports and seizure data releases. U.S. Congressional
+        Research Service, <em>Fentanyl: China's Role</em> (updated 2023). U.S. DEA, <em>National Drug
+        Threat Assessment</em> (2023). Vancouver Fraser Port Authority, <em>Annual Statistics</em>.
+        BC Centre on Substance Use, Drug Checking Results (2022–2024). Canadian Centre on Substance
+        Use and Addiction (CCSA), <em>Carfentanil</em> factsheet.
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> The fentanyl pipeline runs from Chinese chemical factories
+        through Mexican cartel labs to Canadian streets — and at every checkpoint, Canadian enforcement
+        is outmatched. The Port of Vancouver moves 3 million containers per year with single-digit
+        physical inspection rates. CBSA is understaffed and under-equipped. The RCMP makes arrests
+        that barely dent supply. A country that can build a cross-continent railway and mobilize
+        a million soldiers apparently cannot secure its borders against a white powder that fits
+        in a shoebox and kills 22 people a day.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 06: INDIGENOUS COMMUNITIES -->
+    <!-- ============================================================ -->
+    <section id="indigenous">
+      <h2><span class="section-num">06</span> Indigenous Communities — Disproportionate Impact</h2>
+      <p>
+        The opioid crisis hits every community, but it does not hit them equally. First Nations people
+        in British Columbia die from illicit drug toxicity at five to six times the rate of non-Indigenous
+        residents. This disproportion is not an accident — it is the predictable result of intergenerational
+        trauma, chronic underfunding of on-reserve healthcare, geographic isolation from treatment
+        services, and a federal government that has consistently failed its treaty obligations.
+      </p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">5–6×</div>
+          <div class="stat-label">First Nations Overdose Rate vs. General Population (BC)</div>
+          <div class="stat-source">FNHA / BC Coroners Service, 2023</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#ea580c;">~21%</div>
+          <div class="stat-label">Of BC Overdose Deaths — First Nations (5.4% of BC Population)</div>
+          <div class="stat-source">FNHA, Overdose Data and First Nations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#f59e0b;">0</div>
+          <div class="stat-label">Supervised Consumption Sites on Federal Reserves</div>
+          <div class="stat-source">Health Canada, Supervised Consumption Sites listings</div>
+        </div>
+      </div>
+
+      <ul class="fact-list">
+        <li>
+          <strong>FNHA Data (BC):</strong> The First Nations Health Authority reports that First Nations
+          people in BC die from toxic drug poisoning at a rate of 5 to 6 times the provincial average.
+          In 2023, First Nations people accounted for approximately 21% of illicit drug toxicity deaths
+          in BC despite comprising roughly 5.4% of the provincial population.
+        </li>
+        <li>
+          <strong>On-reserve healthcare gaps:</strong> Many First Nations reserves — particularly in
+          northern and remote regions of BC, Ontario, Manitoba, and Saskatchewan — have nursing stations
+          without physicians, no addiction treatment beds, no pharmacotherapy (methadone/suboxone)
+          programs, and limited or no access to naloxone distribution. Indigenous Services Canada (ISC)
+          funds on-reserve health services but chronic underfunding has been documented by the Auditor
+          General of Canada in multiple reports (2015, 2017, 2021).
+        </li>
+        <li>
+          <strong>Intergenerational trauma:</strong> The connection between residential school trauma,
+          the Sixties Scoop, child welfare overrepresentation, and substance use disorder is documented
+          in the Truth and Reconciliation Commission's Final Report (2015) and the National Inquiry
+          into Missing and Murdered Indigenous Women and Girls (2019). Addiction in Indigenous communities
+          cannot be understood outside the context of deliberate colonial violence.
+        </li>
+        <li>
+          <strong>Jordan's Principle applicability:</strong> Jordan's Principle — the child-first
+          principle ensuring First Nations children receive public services without jurisdictional
+          disputes — should apply to addiction treatment services for First Nations youth. In practice,
+          jurisdictional disputes between federal (ISC) and provincial health authorities continue to
+          delay or deny treatment access for First Nations individuals, particularly those living off-reserve.
+        </li>
+        <li>
+          <strong>Zero supervised consumption on reserves:</strong> As of 2024, there are zero
+          Health Canada-approved supervised consumption sites operating on federal First Nations
+          reserves. All supervised consumption and overdose prevention sites operate in urban centres.
+          The people dying at the highest rates have the least access to harm reduction infrastructure.
+        </li>
+      </ul>
+
+      <div class="source-block">
+        <strong>Sources:</strong> First Nations Health Authority (FNHA), <em>Overdose Data and First Nations
+        in BC</em> (2023). BC Coroners Service, <em>Illicit Drug Toxicity Deaths</em>, First Nations
+        demographic breakdowns. Auditor General of Canada, Reports on Indigenous health services funding
+        (2015, 2017, 2021). Truth and Reconciliation Commission of Canada, <em>Final Report</em> (2015).
+        National Inquiry into Missing and Murdered Indigenous Women and Girls, <em>Reclaiming Power and
+        Place</em> (2019). Health Canada, <em>Supervised Consumption Sites: Status of Applications</em>.
+        Indigenous Services Canada, <em>Non-Insured Health Benefits Program</em> annual reports.
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> First Nations people die at 5–6 times the rate of non-Indigenous
+        Canadians. They have zero supervised consumption sites on reserves. They face chronic healthcare
+        underfunding documented by Canada's own Auditor General. The same government that issued a
+        formal apology for residential schools presides over a crisis that kills Indigenous people at
+        six times the national rate and has built zero treatment infrastructure where they live.
+        The apology rings hollow when the body count keeps climbing.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 07: THE MAID INTERSECTION -->
+    <!-- ============================================================ -->
+    <section id="maid-intersection">
+      <h2><span class="section-num">07</span> The MAID Intersection</h2>
+      <p>
+        Here is the through-line that no one in government wants to discuss: the same healthcare system that
+        enabled mass opioid addiction through regulatory failure, that failed to provide adequate treatment,
+        and that presides over 22 deaths per day — now offers Medical Assistance in Dying to people whose
+        suffering includes addiction and its consequences. The pipeline from pharmaceutical dependence to
+        state-administered death is not hypothetical. It is documented.
+      </p>
+
+      <div class="alert-card">
+        <h3>🚨 The Pipeline: Addiction → Poverty → Disability → MAID</h3>
+        <p>
+          The pathway is documented in Health Canada's own annual MAID reports and in media investigations:
+        </p>
+        <ul class="fact-list">
+          <li>
+            <strong>Step 1 — Addiction:</strong> Pharmaceutical marketing and regulatory failure create
+            opioid dependence (Section 02 above).
+          </li>
+          <li>
+            <strong>Step 2 — Loss of function:</strong> Chronic addiction leads to job loss, housing
+            instability, social isolation, and physical deterioration.
+          </li>
+          <li>
+            <strong>Step 3 — Disability &amp; chronic conditions:</strong> Years of substance use create
+            qualifying medical conditions — chronic pain, organ damage, mental illness, neurological
+            impairment — that meet MAID eligibility criteria under Track 2 (non-reasonably-foreseeable
+            natural death).
+          </li>
+          <li>
+            <strong>Step 4 — MAID request:</strong> Individuals in advanced stages of addiction-related
+            suffering, often homeless or in inadequate care, request MAID. Health Canada's own data shows
+            that "inadequate access to services" is cited as a factor in a significant percentage of
+            Track 2 MAID requests.
+          </li>
+        </ul>
+      </div>
+
+      <ul class="fact-list">
+        <li>
+          <strong>Track 2 MAID — expanded eligibility:</strong> Bill C-7 (2021) expanded MAID eligibility
+          to individuals whose natural death is <em>not</em> reasonably foreseeable. This created a
+          pathway for people with chronic conditions — including those resulting from long-term substance
+          use — to access MAID. Between 2021 and 2023, Track 2 MAID cases increased rapidly.
+        </li>
+        <li>
+          <strong>Mental illness and MAID:</strong> Track 2 MAID expansion to individuals whose sole
+          underlying condition is a mental illness (MAID-MD) was originally scheduled for March 2023.
+          It has been delayed twice — first to March 2024, then to March 2027 via Bill C-62. Substance
+          use disorder is classified as a mental illness under the DSM-5. When MAID-MD eventually
+          proceeds, individuals with addiction as a primary diagnosis could become eligible.
+        </li>
+        <li>
+          <strong>Documented cases:</strong> Media investigations by the Associated Press, CTV News,
+          and the Toronto Star have documented cases of Canadians with substance use disorders, mental
+          illness, and homelessness being offered or approved for MAID — in some cases when their
+          primary complaint was lack of access to treatment, housing, or income support.
+        </li>
+        <li>
+          <strong>Health Canada's own data:</strong> Health Canada's Fourth Annual Report on MAID (2023)
+          notes that for Track 2 recipients, common conditions include neurological conditions, chronic
+          pain, and multiple comorbidities. The report acknowledges that "perceptions of being a burden"
+          and "isolation/loneliness" are among the end-of-life concerns cited by MAID applicants — social
+          conditions directly correlated with addiction and poverty.
+        </li>
+      </ul>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-number" style="color:#dc2626;">13,241</div>
+          <div class="stat-label">MAID Deaths in 2022</div>
+          <div class="stat-source">Health Canada, 4th Annual Report on MAID</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#ea580c;">4.1%</div>
+          <div class="stat-label">Of All Canadian Deaths (2022)</div>
+          <div class="stat-source">Health Canada / Statistics Canada</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#f59e0b;">2027</div>
+          <div class="stat-label">MAID for Mental Illness Delayed Until</div>
+          <div class="stat-source">Bill C-62, Parliament of Canada</div>
+        </div>
+      </div>
+
+      <div class="source-block">
+        <strong>Sources:</strong> Health Canada, <em>Fourth Annual Report on Medical Assistance in Dying
+        in Canada</em> (2023). Parliament of Canada, Bill C-7, <em>An Act to amend the Criminal Code
+        (medical assistance in dying)</em> (2021). Parliament of Canada, Bill C-62, <em>An Act to amend
+        the Criminal Code</em> (2024 — MAID-MD delay). Associated Press, "Canada's expanding euthanasia
+        program" (2022–2023). CTV News, investigative reporting on MAID and vulnerable Canadians (2022).
+        Toronto Star, MAID and homelessness investigations (2022–2023). DSM-5, substance use disorder
+        classification. Health Canada, <em>MAID Annual Reports</em> (2019–2023), data on end-of-life
+        concerns and Track 2 conditions.
+      </div>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> The government that failed to regulate pharma. That failed to
+        interdict fentanyl. That failed to fund treatment beds. That experimented with decriminalization
+        without treatment. That spent $800 million while deaths tripled. That same government now operates
+        the largest euthanasia program in the world — and the people harmed by every one of those failures
+        are sliding into eligibility. The pipeline is not a conspiracy theory. It is a sequence of
+        documented policy failures, each one feeding the next, ending at a needle that the state administers
+        deliberately. The men who built this country would be sick.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 08: WHAT MUST CHANGE -->
+    <!-- ============================================================ -->
+    <section id="what-must-change">
+      <h2><span class="section-num">08</span> What Must Change</h2>
+      <p>
+        The opioid crisis is not an unsolvable mystery. Other countries have addressed similar crises with
+        measurable results. Portugal cut drug-related deaths by 80% over two decades — but it required
+        mandatory treatment engagement, not just decriminalization. Switzerland reduced heroin deaths with
+        supervised injectable heroin programs paired with housing and employment support. What these
+        successes share is accountability, infrastructure, and political will. Canada has demonstrated none
+        of the three.
+      </p>
+
+      <ol class="action-list">
+        <li>
+          <strong>Mandatory Treatment Capacity Before Decriminalization</strong><br>
+          No further decriminalization pilots without concurrent, funded, operational treatment
+          infrastructure. Portugal built the treatment system first. BC decriminalized first and built
+          nothing. Every province must publish treatment bed targets — by region, by population need —
+          with funded timelines. The Parliamentary Budget Officer should cost the shortfall.
+        </li>
+        <li>
+          <strong>Hold Purdue Pharma Fully Accountable</strong><br>
+          The $20 million Canadian settlement was an insult. Provinces should pursue full cost-recovery
+          litigation — as U.S. states did, securing a combined $6 billion+ from Purdue and the Sackler
+          family. British Columbia's class action (launched 2018, ongoing) must be resourced to its
+          conclusion. Every dollar recovered should be legislatively earmarked for addiction treatment
+          — not general revenue.
+        </li>
+        <li>
+          <strong>Border Interdiction Funding</strong><br>
+          CBSA needs the resources to physically inspect more than single-digit percentages of containers
+          at the Port of Vancouver. Dedicated fentanyl interdiction units, advanced detection technology
+          (ion mobility spectrometry, canine units), and international intelligence-sharing agreements
+          with the U.S. DEA and INTERPOL must be funded. The 2024 federal budget allocated $137 million
+          to border security — a fraction of what is needed.
+        </li>
+        <li>
+          <strong>Provincial Treatment Bed Targets</strong><br>
+          Every province must publish a public, auditable target for addiction treatment beds per 100,000
+          population, benchmarked against WHO and CCSA guidelines. The current bed shortfall is measured
+          in the tens of thousands nationally. The Auditor General should audit treatment capacity annually
+          and publish findings. Provinces that fail to meet targets should face federal health transfer
+          consequences under the <em>Canada Health Act</em>.
+        </li>
+        <li>
+          <strong>End the Jurisdictional Shell Game</strong><br>
+          Addiction treatment for First Nations falls between ISC (federal), provincial health authorities,
+          and band-administered programs — with each level pointing at the others when service gaps
+          are identified. A single federal point of accountability — reportable to Parliament — must
+          be established for Indigenous addiction services. Jordan's Principle must be explicitly extended
+          to addiction treatment for all First Nations people, on- and off-reserve, adults and children.
+        </li>
+        <li>
+          <strong>Independent Review of "Safer Supply" Programs</strong><br>
+          An independent, non-governmental body (not Health Canada reviewing its own programs) must
+          conduct a rigorous, peer-reviewed evaluation of safer supply outcomes — including population-level
+          mortality, diversion rates, and comparison with treatment-first alternatives. If the programs
+          are not reducing deaths, the funding must be redirected to evidence-based treatment.
+        </li>
+        <li>
+          <strong>MAID Safeguards for Addiction-Related Conditions</strong><br>
+          Until treatment capacity is adequate, MAID eligibility must exclude conditions directly
+          resulting from untreated addiction where treatment has not been offered and exhausted. No
+          Canadian should receive a lethal injection because the government failed to provide a
+          treatment bed. This is not a restriction on autonomy — it is a minimum standard of care.
+        </li>
+      </ol>
+
+      <div class="verdict-box">
+        <p><strong>The Verdict:</strong> None of this is radical. Mandatory treatment exists in
+        Portugal. Border interdiction works when funded. Pharma accountability exists in every
+        U.S. state that pursued it. Treatment bed targets are basic health planning. Ending
+        jurisdictional blame-shifting is basic governance. Reviewing programs for effectiveness
+        is basic accountability. The only thing standing between 22 daily deaths and meaningful
+        action is political will. The generation that built this country in four years of total
+        war would find it incomprehensible that their descendants cannot muster the will to stop
+        a preventable mass casualty event in peacetime.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- MASTER SOURCE LIST -->
+    <!-- ============================================================ -->
+    <section id="sources">
+      <h2><span class="section-num">⚖</span> Sources &amp; Official Records</h2>
+      <p>
+        Every claim in this investigation is sourced from official government publications, judicial records,
+        peer-reviewed data, or documented media investigations. The following is the complete source list:
+      </p>
+
+      <div class="source-block">
+        <strong>Federal Government / PHAC:</strong><br>
+        • Public Health Agency of Canada (PHAC), <em>Opioid- and Stimulant-related Harms in Canada</em>,
+        quarterly surveillance reports (2016–2024).<br>
+        • Health Canada, <em>Canadian Drugs and Substances Strategy</em> (2017–present), funding announcements.<br>
+        • Health Canada, <em>Medical Assistance in Dying Annual Reports</em>, 1st through 4th editions (2019–2023).<br>
+        • Health Canada, <em>Supervised Consumption Sites: Status of Applications</em>.<br>
+        • Health Canada, <em>Subsection 56(1) Class Exemption for British Columbia</em> (January 2023).<br>
+        • Health Canada, Drug Product Database — OxyContin / OxyNEO listings.<br>
+        • Statistics Canada, Table 13-10-0392-01, <em>Deaths and age-specific mortality rates, by selected
+        grouped causes</em>.<br>
+        • Auditor General of Canada, Reports on Indigenous health services (2015, 2017, 2021).<br>
+        • Parliamentary Budget Officer, fiscal reports on health transfer spending.
+      </div>
+
+      <div class="source-block">
+        <strong>Provincial / Territorial:</strong><br>
+        • BC Coroners Service, <em>Illicit Drug Toxicity Deaths in BC</em>, monthly and annual statistical reports.<br>
+        • First Nations Health Authority (FNHA), <em>Overdose Data and First Nations in BC</em> (2023).<br>
+        • Government of British Columbia, Bill 34 — <em>Restricting Public Use of Illegal Substances Act</em> (2024).<br>
+        • Government of Alberta, <em>Recovery Alberta Act</em> (2024).<br>
+        • Transport Canada, <em>Canadian Motor Vehicle Traffic Collision Statistics</em> (2021).
+      </div>
+
+      <div class="source-block">
+        <strong>Parliament / Legislation:</strong><br>
+        • Parliament of Canada, Bill C-7, <em>An Act to amend the Criminal Code (medical assistance in dying)</em> (2021).<br>
+        • Parliament of Canada, Bill C-62, <em>An Act to amend the Criminal Code</em> (2024 — MAID-MD delay to 2027).<br>
+        • Office of the Commissioner of Lobbying of Canada, Lobbyist Registry (lobbycanada.gc.ca).
+      </div>
+
+      <div class="source-block">
+        <strong>Judicial / Legal:</strong><br>
+        • Ontario Superior Court, <em>Ontario v. Purdue Pharma Canada</em> (2007 settlement).<br>
+        • U.S. Department of Justice, Purdue Pharma plea agreement (2007).<br>
+        • British Columbia class action against opioid manufacturers (filed 2018, ongoing).
+      </div>
+
+      <div class="source-block">
+        <strong>International / Academic:</strong><br>
+        • International Narcotics Control Board (INCB), <em>Annual Reports</em> (2005–2012), Canada opioid
+        consumption data.<br>
+        • European Monitoring Centre for Drugs and Drug Addiction (EMCDDA), <em>Drug Policy Profiles:
+        Portugal</em> (2011, updated 2019).<br>
+        • U.S. Congressional Research Service, <em>Fentanyl: China's Role in the Production and Supply</em>
+        (updated 2023).<br>
+        • U.S. Drug Enforcement Administration (DEA), <em>National Drug Threat Assessment</em> (2023).<br>
+        • Canadian Centre on Substance Use and Addiction (CCSA), factsheets and evidence reviews.<br>
+        • BC Centre on Substance Use, Drug Checking Results (2022–2024).<br>
+        • DSM-5, substance use disorder classification.<br>
+        • Truth and Reconciliation Commission of Canada, <em>Final Report</em> (2015).<br>
+        • National Inquiry into Missing and Murdered Indigenous Women and Girls, <em>Reclaiming Power
+        and Place</em> (2019).
+      </div>
+
+      <div class="source-block">
+        <strong>Law Enforcement / Border:</strong><br>
+        • RCMP, <em>Federal Policing Annual Reports</em> and project-specific media releases.<br>
+        • Canada Border Services Agency (CBSA), enforcement and seizure data releases.<br>
+        • Vancouver Fraser Port Authority, <em>Annual Statistics</em>.<br>
+        • London Police Service (Ontario), statements on safer supply diversion.
+      </div>
+
+      <div class="source-block">
+        <strong>Media Investigations:</strong><br>
+        • London Free Press, reporting on safer supply diversion in London, Ontario (2023).<br>
+        • National Post, "Safer supply drugs being diverted to street" (2023).<br>
+        • Associated Press, Canada euthanasia program expansion investigations (2022–2023).<br>
+        • CTV News, investigative reporting on MAID and vulnerable Canadians (2022).<br>
+        • Toronto Star, MAID and homelessness investigations (2022–2023).
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <section id="closing" style="text-align:center; padding: 3rem 0 2rem;">
+      <p class="pull-quote">
+        The men who took morphine for battlefield wounds at Juno Beach came home and built a country.
+        Their grandchildren are dying in alleys from poisoned fentanyl — 22 every day — while Parliament
+        debates semantics and Health Canada publishes quarterly reports. 47,000 dead and counting.
+        This is the government's own data. They cannot deny it. They can only hope you never read it.
+        You just did.
+      </p>
+    </section>
+
+  </div><!-- /.content -->
+
+  <!-- READ NEXT -->
+  <div id="read-next"></div>
+
+  <!-- FOOTER -->
+  <footer id="site-footer"></footer>
+
+  <!-- SCRIPTS -->
+  <script src="nav.js?v=9"></script>
+  <script src="footer.js?v=1"></script>
+  <script src="readnext.js?v=2"></script>
+  <script>
+    /* Share functions (same pattern as other investigation pages) */
+    function shareUrl() { return encodeURIComponent(window.location.href); }
+    function shareTitle() { return encodeURIComponent(document.title); }
+    function shareX() { window.open('https://twitter.com/intent/tweet?url=' + shareUrl() + '&text=' + shareTitle(), '_blank'); }
+    function shareFacebook() { window.open('https://www.facebook.com/sharer/sharer.php?u=' + shareUrl(), '_blank'); }
+    function shareReddit() { window.open('https://reddit.com/submit?url=' + shareUrl() + '&title=' + shareTitle(), '_blank'); }
+    function shareLinkedIn() { window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + shareUrl(), '_blank'); }
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href).then(function() {
+        var btn = document.getElementById('copy-btn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(function() { btn.textContent = '📋 Copy Link'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
