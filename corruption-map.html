@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Corruption &amp; Influence Map — Network Graph Visualization | TENET5</title>
-  <meta name="description" content="Interactive corruption and influence map visualizing 200 entities and 6,392 connections across lobbying, treason roster, OSINT, and financial datasets. All from public records.">
+  <meta name="description" content="Interactive corruption and influence map visualizing 382 entities and 6,802 connections across lobbying, treason roster, OSINT, and financial datasets. All from public records.">
   <meta property="og:title" content="Corruption &amp; Influence Map — Network Graph Visualization">
-  <meta property="og:description" content="200 entities, 6,392 connections. Cross-referenced influence network across lobbying records, treason roster, OSINT vault, and financial analysis. Public record only.">
+  <meta property="og:description" content="382 entities, 6,802 connections. Cross-referenced influence network across lobbying records, treason roster, OSINT vault, and financial analysis. Public record only.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://tenet-5.github.io/corruption-map.html">
   <meta property="og:site_name" content="TENET5 — Canadian Government Accountability">
@@ -16,7 +16,7 @@
   <meta property="og:locale" content="en_CA">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Corruption &amp; Influence Map — Network Graph Visualization">
-  <meta name="twitter:description" content="200 entities, 6,392 connections mapped across 5 investigative data vectors. Cross-referenced influence topology from public records.">
+  <meta name="twitter:description" content="382 entities, 6,802 connections mapped across 5 investigative data vectors. Cross-referenced influence topology from public records.">
   <meta name="twitter:image" content="https://tenet-5.github.io/img/og-findings.png">
   <meta name="theme-color" content="#1a1f36">
   <meta name="color-scheme" content="light dark">
@@ -24,6 +24,45 @@
   <link rel="stylesheet" href="style.css?v=5">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
+
+    /* ── DARK GLASSMORPHISM OVERRIDE ── */
+    body {
+      --bg:          #050810;
+      --bg-elevated: #0a0e1a;
+      --bg-card:     rgba(10, 14, 22, 0.55);
+      --bg-card-h:   rgba(15, 20, 32, 0.65);
+      --bg-surface:  rgba(12, 16, 26, 0.60);
+      --bg-table:    rgba(8, 12, 20, 0.45);
+      --text-primary:   #e8e8ec;
+      --text-secondary: #b0b4c0;
+      --text-tertiary:  #7a7f90;
+      --text-quaternary:#555a6b;
+      --border:      rgba(255, 255, 255, 0.06);
+      --border-hover:rgba(255, 255, 255, 0.12);
+      background: #050810;
+      color: #e8e8ec;
+    }
+    /* Ambient gradient orbs behind content */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 600px 500px at 15% 20%, rgba(196,30,58,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 400px at 80% 60%, rgba(88,28,135,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 350px at 50% 90%, rgba(37,99,235,0.05) 0%, transparent 70%);
+    }
+
+    /* ── GLASS MIXIN ── */
+    .glass {
+      background: rgba(10, 14, 22, 0.55);
+      backdrop-filter: blur(12px) saturate(160%);
+      -webkit-backdrop-filter: blur(12px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
 
     /* ── LAYOUT ── */
     .cm-wrap {
@@ -84,14 +123,21 @@
       margin-bottom: 28px;
     }
     .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: rgba(10, 14, 22, 0.55);
+      backdrop-filter: blur(12px) saturate(160%);
+      -webkit-backdrop-filter: blur(12px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
       padding: 18px 16px;
       text-align: center;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s, background 0.3s, transform 0.2s;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
     }
-    .stat-card:hover { border-color: rgba(196,30,58,0.35); }
+    .stat-card:hover {
+      border-color: rgba(196,30,58,0.35);
+      background: rgba(15, 20, 32, 0.65);
+      transform: translateY(-2px);
+    }
     .stat-card .big {
       font-size: 1.9rem;
       font-weight: 700;
@@ -140,9 +186,12 @@
       align-items: center;
       margin-bottom: 16px;
       padding: 12px 16px;
-      background: var(--bg-surface);
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: 8px;
+      background: rgba(10, 14, 22, 0.50);
+      backdrop-filter: blur(10px) saturate(150%);
+      -webkit-backdrop-filter: blur(10px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
     }
     .search-bar .sw {
       flex: 1;
@@ -175,6 +224,19 @@
       font-size: 0.65rem;
       color: var(--text-quaternary);
       white-space: nowrap;
+    }
+
+    /* ── TABLE GLASS WRAPPER ── */
+    .table-glass {
+      background: rgba(10, 14, 22, 0.45);
+      backdrop-filter: blur(8px) saturate(140%);
+      -webkit-backdrop-filter: blur(8px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 4px 12px 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      overflow-x: auto;
+      margin-bottom: 28px;
     }
 
     /* ── SORTABLE TABLE ── */
@@ -284,16 +346,23 @@
       margin-bottom: 28px;
     }
     .cat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: rgba(10, 14, 22, 0.55);
+      backdrop-filter: blur(10px) saturate(150%);
+      -webkit-backdrop-filter: blur(10px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
       padding: 14px 16px;
       display: flex;
       align-items: center;
       gap: 14px;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s, background 0.3s, transform 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
     }
-    .cat-card:hover { border-color: rgba(196,30,58,0.3); }
+    .cat-card:hover {
+      border-color: rgba(196,30,58,0.3);
+      background: rgba(15, 20, 32, 0.65);
+      transform: translateY(-1px);
+    }
     .cat-bar-wrap {
       flex: 1;
       min-width: 0;
@@ -332,14 +401,21 @@
       margin-bottom: 28px;
     }
     .top-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: rgba(10, 14, 22, 0.55);
+      backdrop-filter: blur(10px) saturate(150%);
+      -webkit-backdrop-filter: blur(10px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
       padding: 16px 18px;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s, background 0.3s, transform 0.2s;
       position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
     }
-    .top-card:hover { border-color: rgba(196,30,58,0.4); }
+    .top-card:hover {
+      border-color: rgba(196,30,58,0.4);
+      background: rgba(15, 20, 32, 0.65);
+      transform: translateY(-1px);
+    }
     .top-card .rank {
       position: absolute;
       top: 10px;
@@ -388,10 +464,13 @@
       margin-bottom: 28px;
     }
     .netstats-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: rgba(10, 14, 22, 0.55);
+      backdrop-filter: blur(10px) saturate(150%);
+      -webkit-backdrop-filter: blur(10px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
       padding: 18px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     .netstats-card h3 {
       font-size: 0.72rem;
@@ -416,11 +495,14 @@
 
     /* ── CONNECTIONS BOX ── */
     .connect-box {
-      background: rgba(96,165,250,0.04);
-      border: 1px solid rgba(96,165,250,0.2);
-      border-radius: 8px;
+      background: rgba(10, 14, 22, 0.50);
+      backdrop-filter: blur(10px) saturate(150%);
+      -webkit-backdrop-filter: blur(10px) saturate(150%);
+      border: 1px solid rgba(96,165,250,0.15);
+      border-radius: 12px;
       padding: 20px 24px;
       margin-bottom: 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     }
     .connect-box h3 {
       font-size: 0.82rem;
@@ -463,6 +545,9 @@
   </style>
 <script src="js/offline_db.js"></script>\n<script src="js/offline_fetch.js"></script>\n</head>
 <body>
+  <!-- ── ANIMATED NETWORK BACKGROUND ── -->
+  <canvas id="bg-network" style="position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:0.15;"></canvas>
+
   <a href="#main" class="skip-link">Skip to content</a>
   <nav id="site-nav"></nav>
 
@@ -471,7 +556,7 @@
     <!-- ── HERO ── -->
     <div class="cm-hero">
       <h1>Corruption &amp; Influence Map</h1>
-      <p class="sub">Cross-referenced network graph of 200 entities and 6,392 connections across lobbying records, treason roster, OSINT vault, financial analysis, and investigation board datasets. Every data point sourced from public records.</p>
+      <p class="sub" id="hero-sub">Cross-referenced network graph of <strong>382</strong> entities and <strong>6,802</strong> connections across lobbying records, treason roster, OSINT vault, financial analysis, and investigation board datasets. Every data point sourced from public records.</p>
     </div>
 
     <!-- ── LOADING STATE ── -->
@@ -509,6 +594,7 @@
         <span class="info" id="overlap-info">--</span>
       </div>
 
+      <div class="table-glass">
       <table class="cm-table" id="overlap-table">
         <thead>
           <tr>
@@ -521,6 +607,7 @@
         </thead>
         <tbody id="overlap-tbody"></tbody>
       </table>
+      </div>
 
       <!-- ═══ C. CATEGORY ANALYSIS ═══ -->
       <div class="section-head">
@@ -599,6 +686,227 @@
   <script src="footer.js?v=1"></script>
   <script src="readnext.js?v=2"></script>
   <script src="share.js?v=1"></script>
+
+  <!-- ── ANIMATED NETWORK BACKGROUND ── -->
+  <script>
+  (function() {
+    'use strict';
+    var cvs = document.getElementById('bg-network');
+    if (!cvs) return;
+    var ctx = cvs.getContext('2d');
+    var W, H, rafId;
+    var TAU = Math.PI * 2;
+    var lastTime = 0;
+    var particles = [];
+    var edges = [];
+    var pulses = [];
+    var isMobile = window.innerWidth < 768;
+    var MAX_P = isMobile ? 40 : 80;
+    var MAX_E = isMobile ? 60 : 120;
+    var MAX_PULSE = isMobile ? 15 : 30;
+
+    var CAT_COLORS = {
+      treason_roster:   'rgba(229, 53, 85, 0.7)',
+      lobbied_official: 'rgba(192, 132, 252, 0.7)',
+      political_donor:  'rgba(57, 255, 20, 0.5)',
+      osint_target:     'rgba(96, 165, 250, 0.7)',
+      person:           'rgba(252, 165, 165, 0.6)',
+      org:              'rgba(216, 180, 254, 0.6)',
+      official:         'rgba(147, 197, 253, 0.6)',
+      event:            'rgba(250, 204, 21, 0.5)',
+      default:          'rgba(156, 163, 175, 0.5)'
+    };
+
+    function hash(s) {
+      var h = 0;
+      for (var i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+      return Math.abs(h);
+    }
+
+    function resize() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      cvs.width = W;
+      cvs.height = H;
+    }
+    // Defer resize until layout is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', resize);
+    } else {
+      resize();
+    }
+    // Also resize after a short delay to catch late layout
+    setTimeout(resize, 100);
+
+    // Start with random particles before data loads
+    function initRandom() {
+      particles = [];
+      edges = [];
+      pulses = [];
+      for (var i = 0; i < MAX_P; i++) {
+        var keys = Object.keys(CAT_COLORS);
+        particles.push({
+          x: Math.random(),
+          y: Math.random(),
+          vx: (Math.random() - 0.5) * 0.00008,
+          vy: (Math.random() - 0.5) * 0.00008,
+          radius: 1.5 + Math.random() * 1.5,
+          color: CAT_COLORS[keys[Math.floor(Math.random() * keys.length)]],
+          phase: Math.random() * TAU
+        });
+      }
+      // Random edges between nearby particles
+      for (var j = 0; j < MAX_E; j++) {
+        var a = Math.floor(Math.random() * particles.length);
+        var b = Math.floor(Math.random() * particles.length);
+        if (a !== b) edges.push({ from: a, to: b });
+      }
+      initPulses();
+    }
+
+    function initPulses() {
+      pulses = [];
+      for (var i = 0; i < MAX_PULSE && i < edges.length; i++) {
+        pulses.push({
+          edge: edges[Math.floor(Math.random() * edges.length)],
+          progress: Math.random(),
+          speed: 0.001 + Math.random() * 0.002
+        });
+      }
+    }
+
+    // Upgrade to real data
+    window.__bgNetworkUpdate = function(data) {
+      if (!data || !data.nodes) return;
+      var nodes = data.nodes;
+      var dataEdges = data.edges || [];
+      particles = [];
+      edges = [];
+
+      // Sample nodes
+      var sampled = [];
+      var step = Math.max(1, Math.floor(nodes.length / MAX_P));
+      for (var i = 0; i < nodes.length && sampled.length < MAX_P; i += step) {
+        var n = nodes[i];
+        var cats = n.categories || [];
+        var catKey = cats[0] || n.type || 'default';
+        sampled.push(n.id);
+        particles.push({
+          x: (hash(n.id || '' + i) % 1000) / 1000,
+          y: (hash((n.id || '') + 'y') % 1000) / 1000,
+          vx: (Math.random() - 0.5) * 0.00006,
+          vy: (Math.random() - 0.5) * 0.00006,
+          radius: Math.min(3, 1.5 + (n.influence_score || 0) / 200),
+          color: CAT_COLORS[catKey] || CAT_COLORS.default,
+          phase: Math.random() * TAU
+        });
+      }
+
+      // Build index for edge lookup
+      var idxMap = {};
+      sampled.forEach(function(id, idx) { idxMap[id] = idx; });
+
+      // Sample edges between visible nodes
+      var edgeCount = 0;
+      for (var j = 0; j < dataEdges.length && edgeCount < MAX_E; j++) {
+        var e = dataEdges[j];
+        var fi = idxMap[e.source];
+        var ti = idxMap[e.target];
+        if (fi !== undefined && ti !== undefined) {
+          edges.push({ from: fi, to: ti });
+          edgeCount++;
+        }
+      }
+
+      initPulses();
+    };
+
+    function tick(now) {
+      if (document.hidden) { rafId = requestAnimationFrame(tick); return; }
+      var dt = Math.min(now - lastTime, 33);
+      lastTime = now;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Draw edges
+      ctx.lineWidth = 0.5;
+      for (var i = 0; i < edges.length; i++) {
+        var e = edges[i];
+        var p1 = particles[e.from], p2 = particles[e.to];
+        if (!p1 || !p2) continue;
+        var x1 = p1.x * W, y1 = p1.y * H;
+        var x2 = p2.x * W, y2 = p2.y * H;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        var mx = (x1 + x2) / 2, my = Math.min(y1, y2) - 30;
+        ctx.quadraticCurveTo(mx, my, x2, y2);
+        ctx.strokeStyle = 'rgba(196, 30, 58, 0.15)';
+        ctx.stroke();
+      }
+
+      // Update + draw particles
+      for (var j = 0; j < particles.length; j++) {
+        var p = particles[j];
+        p.x += p.vx * dt + Math.sin(now * 0.0007 + p.phase) * 0.000015;
+        p.y += p.vy * dt + Math.cos(now * 0.0005 + p.phase) * 0.000015;
+        if (p.x < -0.05) p.x = 1.05;
+        if (p.x > 1.05) p.x = -0.05;
+        if (p.y < -0.05) p.y = 1.05;
+        if (p.y > 1.05) p.y = -0.05;
+
+        ctx.beginPath();
+        ctx.arc(p.x * W, p.y * H, p.radius, 0, TAU);
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // Traveling pulses along edges
+      for (var k = 0; k < pulses.length; k++) {
+        var pulse = pulses[k];
+        pulse.progress += pulse.speed;
+        if (pulse.progress >= 1) {
+          pulse.progress = 0;
+          pulse.edge = edges[Math.floor(Math.random() * edges.length)];
+        }
+        var pe = pulse.edge;
+        var n1 = particles[pe.from], n2 = particles[pe.to];
+        if (!n1 || !n2) continue;
+        var sx = n1.x * W, sy = n1.y * H;
+        var ex = n2.x * W, ey = n2.y * H;
+        var cmx = (sx + ex) / 2, cmy = Math.min(sy, ey) - 30;
+        var t = pulse.progress, mt = 1 - t;
+        var px = mt * mt * sx + 2 * mt * t * cmx + t * t * ex;
+        var py = mt * mt * sy + 2 * mt * t * cmy + t * t * ey;
+
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, TAU);
+        ctx.fillStyle = n1.color;
+        ctx.shadowColor = n1.color;
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      rafId = requestAnimationFrame(tick);
+    }
+
+    initRandom();
+    rafId = requestAnimationFrame(tick);
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        isMobile = window.innerWidth < 768;
+        resize();
+      }, 250);
+    });
+  })();
+  </script>
+
   <script>
   (function() {
     'use strict';
@@ -645,6 +953,15 @@
         overlaps = data.entity_overlaps || [];
         document.getElementById('cm-loading').style.display = 'none';
         document.getElementById('cm-content').style.display = 'block';
+        // Upgrade background animation to real network data
+        if (window.__bgNetworkUpdate) window.__bgNetworkUpdate(data);
+        // Update hero with live counts
+        var heroSub = document.getElementById('hero-sub');
+        if (heroSub) {
+          heroSub.innerHTML = 'Cross-referenced network graph of <strong>' +
+            (data.nodes || []).length.toLocaleString() + '</strong> entities and <strong>' +
+            (data.edges || []).length.toLocaleString() + '</strong> connections across lobbying records, treason roster, OSINT vault, financial analysis, and investigation board datasets. Every data point sourced from public records.';
+        }
         renderAll();
       })
       .catch(function(err) {
