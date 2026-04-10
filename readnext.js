@@ -703,6 +703,30 @@
         { href: 'phoenix-pay.html', label: 'Phoenix Pay Disaster', desc: '$309M→$2.2B payroll catastrophe' },
       ]
     },
+    'housing-crisis.html': {
+      current: 'Housing Crisis',
+      next: [
+        { href: 'covid-accountability.html', label: 'COVID Accountability', desc: 'ArriveCAN, CERB fraud, $500B pandemic spending' },
+        { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'Canada Post, CBC, Via Rail — $7B+ burned' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'How lobbyists shaped housing policy' },
+      ]
+    },
+    'crown-corporations.html': {
+      current: 'Crown Corporations',
+      next: [
+        { href: 'ag-findings.html', label: 'AG Findings Database', desc: '12 AG reports, $103B+ documented failures' },
+        { href: 'phoenix-pay.html', label: 'Phoenix Pay Disaster', desc: '$309M→$2.2B — the payroll catastrophe' },
+        { href: 'senate-expenses.html', label: 'Senate Expenses', desc: 'Duffy/Wallin/Brazeau — $500K scandal' },
+      ]
+    },
+    'covid-accountability.html': {
+      current: 'COVID Accountability',
+      next: [
+        { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'State enterprises burning billions' },
+        { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Engineered affordability collapse' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who profited from pandemic contracts' },
+      ]
+    },
   };
 
   function getCurrentPage() {

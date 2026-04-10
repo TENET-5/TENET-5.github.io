@@ -82,6 +82,9 @@
         { label: 'Senate Expenses', href: 'senate-expenses.html', desc: 'Duffy/Wallin/Brazeau — $500K scandal', hot: true },
         { label: 'Elections & Finance', href: 'elections-finance.html', desc: 'Campaign finance, lobbying data', hot: true },
         { label: 'Lobbying Deep Dive', href: 'lobbying-deepdive.html', desc: '359K communications, pharma→MAID pipeline', hot: true },
+        { label: 'Crown Corporations', href: 'crown-corporations.html', desc: 'Canada Post, CBC, Via Rail — $7B+ burned', hot: true },
+        { label: 'COVID Accountability', href: 'covid-accountability.html', desc: 'ArriveCAN, CERB fraud, $500B pandemic spend', hot: true },
+        { label: 'Housing Crisis', href: 'housing-crisis.html', desc: 'Engineered affordability collapse — CMHC data', hot: true },
       ]
     },
     {
