@@ -75,6 +75,7 @@
         { label: 'Cross-Reference Engine', href: 'cross-reference.html', desc: 'Lobbying vs. voting correlation' },
         { label: 'Foreign Influence', href: 'foreign-influence.html', desc: 'CIJA, CCP, UFWD pipelines' },
         { label: 'Foreign Interference Deep Dive', href: 'foreign-interference-deep.html', desc: 'NSICOP, Hogue, PRC ops, Han Dong, Bill C-70', hot: true },
+        { label: 'CIJA-IHRA-MAID Pipeline', href: 'cija-maid-pipeline.html', desc: '2,138 lobbying contacts: IHRA \u2192 Criminal Code \u2192 HRA \u2192 MAID', hot: true },
         { label: 'Procurement Analysis', href: 'procurement-analysis.html', desc: 'Contract anomalies' },
         { label: 'Procurement Deep Dive', href: 'procurement-deep-dive.html', desc: '1.26M contracts, 70K anomalies', hot: true },
         { label: 'Procurement Registry', href: 'procurement-registry.html', desc: 'Full contract database' },
