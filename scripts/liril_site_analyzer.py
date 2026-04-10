@@ -114,11 +114,47 @@ def analyze_network(d):
             f"Network contains {len(nodes)} entities and {len(edges)} documented relationships",
             f"Indigenous accountability cluster: MMIWG, child welfare ($47.8B), water crisis (30yr), incarceration (32%)",
             "Human cost pipeline: housing → homelessness → food banks → healthcare collapse → opioids → MAID",
-            "CCP infiltration chain: Sidewinder (1997) → Winnipeg Lab → Hogue Commission → NSICOP (27 years)",
+            "CCP infiltration chain: Trotsky (1917) → Gouzenko (1945) → Sidewinder (1997) → Hogue (2024)",
             "Carbon paradox: $13B/yr carbon tax, only 7% emission reduction, $34B oil pipeline built",
+            f"107-year failure chain: 1917 (Trotsky released) → 2024 (NSICOP names classified)",
+            f"RCMP connected to every enforcement failure: {edge_count.get('rcmp_federal', 0)} edges",
+        ],
+        "cross_cluster_gaps": _find_cluster_gaps(nodes, edges),
+        "weak_evidence": [
+            {"name": n["label"], "score": n.get("influence_score", 0), "sources": n.get("source_count", 1)}
+            for n in sorted(
+                [n for n in nodes if n.get("influence_score", 0) >= 40
+                 and n.get("source_count", 1) <= 1 and n.get("type") != "donor"],
+                key=lambda x: -x.get("influence_score", 0),
+            )[:10]
         ],
     }
     return analysis
+
+
+def _find_cluster_gaps(nodes, edges):
+    """Find categories that should be connected but aren't."""
+    from collections import defaultdict
+    # Build category co-occurrence from edges
+    cat_connections = defaultdict(set)
+    node_map = {n["id"]: n for n in nodes}
+    for e in edges:
+        s_cats = set(node_map.get(e["source"], {}).get("categories", []))
+        t_cats = set(node_map.get(e["target"], {}).get("categories", []))
+        for sc in s_cats:
+            for tc in t_cats:
+                if sc != tc:
+                    cat_connections[sc].add(tc)
+
+    # Find major categories not connected to each other
+    major_cats = ["maid_legislation", "ccp", "financial_vector", "israel",
+                  "india", "media", "cfnis", "osint_target", "treason_roster"]
+    gaps = []
+    for i, c1 in enumerate(major_cats):
+        for c2 in major_cats[i+1:]:
+            if c2 not in cat_connections.get(c1, set()):
+                gaps.append(f"{c1} ↔ {c2}")
+    return gaps[:10] if gaps else ["No major gaps found — all clusters connected"]
 
 
 def generate_ai_report(analysis):
