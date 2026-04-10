@@ -54,6 +54,7 @@
         { label: 'Policy Harm Index', href: 'harm-index.html', desc: 'Quantified policy damage' },
         { label: 'The Pattern (T4)', href: 't4-comparison.html', desc: 'Historical comparison' },
         { label: 'RCMP Complicity', href: 'rcmp-complicity.html', desc: 'Law enforcement failure analysis', hot: true },
+        { label: 'RCMP Reform', href: 'rcmp-reform.html', desc: 'Institutional failures & accountability gaps', hot: true },
         { label: 'The Boot', href: 'the-boot.html', desc: 'Institutional mechanics' },
         { label: 'MAID Report', href: 'rcmp-maid-accountability.html', desc: 'RCMP commissioners & MAID deaths', hot: true },
         { label: 'Healthcare Collapse', href: 'healthcare-crisis.html', desc: 'Waitlist deaths, budget betrayal, CIHI data', hot: true },
@@ -72,6 +73,7 @@
       items: [
         { label: 'Cross-Reference Engine', href: 'cross-reference.html', desc: 'Lobbying vs. voting correlation' },
         { label: 'Foreign Influence', href: 'foreign-influence.html', desc: 'CIJA, CCP, UFWD pipelines' },
+        { label: 'Foreign Interference Deep Dive', href: 'foreign-interference-deep.html', desc: 'NSICOP, Hogue, PRC ops, Han Dong, Bill C-70', hot: true },
         { label: 'Procurement Analysis', href: 'procurement-analysis.html', desc: 'Contract anomalies' },
         { label: 'Procurement Deep Dive', href: 'procurement-deep-dive.html', desc: '1.26M contracts, 70K anomalies', hot: true },
         { label: 'Procurement Registry', href: 'procurement-registry.html', desc: 'Full contract database' },
@@ -98,6 +100,8 @@
         { label: 'Environment & Climate', href: 'environment-climate.html', desc: 'Trans Mountain $34B, carbon tax, broken emission targets', hot: true },
         { label: 'National Debt Crisis', href: 'debt-fiscal.html', desc: '$1.2T debt, $54B interest — more than healthcare transfers', hot: true },
         { label: 'Whistleblower Failures', href: 'whistleblower-failures.html', desc: 'PSDPA, Norman, Colvin — Canada punishes truth-tellers', hot: true },
+        { label: 'WEF & Davos Connections', href: 'wef-davos.html', desc: 'Schwab\'s "penetrate the cabinets" — YGLs, Davos attendance, policy alignment', hot: true },
+        { label: 'Political Appointments', href: 'appointments.html', desc: 'DPPs, judicial stacking, Confucius Institute CCP ops', hot: true },
       ]
     },
     {
