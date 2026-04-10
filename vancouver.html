@@ -208,40 +208,6 @@
       </div>
     </section>
 
-    <!-- AI Deep Dive Research -->
-    <section style="margin-bottom:var(--s-xl);">
-      <h2 style="font-family:var(--font-headline);font-size:var(--text-3xl);border-bottom:1px solid var(--border);padding-bottom:var(--s-xs);">🤖 AI Deep Dive Research</h2>
-      <p style="color:var(--text-secondary);line-height:1.7;margin-bottom:var(--s-md);">
-        Use Google Gemini to research Vancouver governance issues in real-time with live Google Search grounding.
-        Your API key stays in your browser — never sent to our servers.
-      </p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--s-md);">
-        <button class="preset-q" style="padding:6px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:20px;font-size:.8rem;cursor:pointer;color:var(--text-secondary);" data-q="Vancouver development industry campaign finance 2022 — detail the contributions to ABC Vancouver and Ken Sim, including shell company routing, individual developer contributions, and any violations of the 2018 ban on corporate donations.">Vancouver development industry campaign finance</button>
-        <button class="preset-q" style="padding:6px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:20px;font-size:.8rem;cursor:pointer;color:var(--text-secondary);" data-q="Broadway Plan Vancouver upzoning benefits — quantify the land value uplift, document Community Amenity Contribution levels versus value created, and identify which developers and landowners benefited most.">Broadway Plan upzoning benefits</button>
-        <button class="preset-q" style="padding:6px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:20px;font-size:.8rem;cursor:pointer;color:var(--text-secondary);" data-q="Vancouver police budget per capita comparison — compare VPD per-capita spending to Toronto, Calgary, Ottawa, Edmonton, and major US cities. Document budget growth 2015-2024 and compare to crime outcomes.">Vancouver police budget per capita</button>
-        <button class="preset-q" style="padding:6px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:20px;font-size:.8rem;cursor:pointer;color:var(--text-secondary);" data-q="Vancouver city procurement bypass audit 2021 — what did the auditor find? Which contracts bypassed competition? What departments were most frequently non-compliant? What recommendations were made and implemented?">City procurement bypass audit</button>
-        <button class="preset-q" style="padding:6px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:20px;font-size:.8rem;cursor:pointer;color:var(--text-secondary);" data-q="Vancouver homeless spending versus outcomes — document annual housing/homelessness budget 2018-2024, compare to unsheltered population counts from same period, and identify where money is being spent and why numbers have not decreased.">Homeless spending vs outcomes</button>
-        <button class="preset-q" style="padding:6px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:20px;font-size:.8rem;cursor:pointer;color:var(--text-secondary);" data-q="Ken Sim Vancouver conflicts of interest — investigate all potential conflicts between his business background, ABC party donor network, and decisions made as mayor regarding development approvals, police budget, and city contracts.">Ken Sim conflicts of interest</button>
-      </div>
-
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input type="text" id="vancouver-query" placeholder="Type a custom research query about Vancouver…"
-          style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--bg);color:var(--text-primary);outline:none;">
-        <button id="vancouver-research-btn" style="padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:500;cursor:pointer;white-space:nowrap;">🔍 Research</button>
-      </div>
-
-      <div id="vancouver-result" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;">
-        <div id="vancouver-loading" style="display:flex;align-items:center;gap:10px;color:var(--text-tertiary);font-size:.875rem;">
-          <div style="width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;"></div>
-          Researching…
-        </div>
-        <div id="vancouver-content" style="font-size:.9rem;line-height:1.75;color:var(--text-primary);display:none;"></div>
-        <div style="margin-top:8px;text-align:right;display:none" id="vancouver-copy-row">
-          <button id="vancouver-copy" style="padding:4px 10px;background:none;border:1px solid var(--border);border-radius:5px;font-size:.78rem;cursor:pointer;">📋 Copy</button>
-        </div>
-      </div>
-    </section>
-
     <!-- Related Investigations -->
     <div style="display:flex;gap:var(--s-md);margin:var(--s-xl) 0;flex-wrap:wrap;">
       <a href="calgary.html" class="cta-card" style="flex:1;min-width:200px;text-decoration:none;">
@@ -264,83 +230,5 @@
   <script src="nav.js?v=9"></script>
   <script src="footer.js?v=1"></script>
   <script src="readnext.js?v=2"></script>
-  <script src="js/abcxyz.js?v=2"></script>
-  <script src="js/gemini-assistant.js?v=1"></script>
-  <script>
-    (function() {
-      'use strict';
-      document.querySelectorAll('.preset-q').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          document.getElementById('vancouver-query').value = this.dataset.q;
-          runResearch(this.dataset.q);
-        });
-      });
-      document.getElementById('vancouver-research-btn').addEventListener('click', function() {
-        var q = document.getElementById('vancouver-query').value.trim();
-        if (q) runResearch(q);
-      });
-      document.getElementById('vancouver-query').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { var q = this.value.trim(); if (q) runResearch(q); }
-      });
-      document.getElementById('vancouver-copy').addEventListener('click', function() {
-        var text = document.getElementById('vancouver-content').innerText;
-        navigator.clipboard.writeText(text).then(function() {
-          document.getElementById('vancouver-copy').textContent = '✅ Copied';
-          setTimeout(function() { document.getElementById('vancouver-copy').textContent = '📋 Copy'; }, 2000);
-        });
-      });
-
-      async function runResearch(query) {
-        var apiKey = localStorage.getItem('tenet5_gemini_key') || '';
-        if (!apiKey) {
-          apiKey = prompt('Enter your Google AI Studio API key (free at aistudio.google.com/apikey).\nStored locally in your browser only.');
-          if (!apiKey) return;
-          localStorage.setItem('tenet5_gemini_key', apiKey.trim());
-        }
-        apiKey = apiKey.trim();
-        var resultEl = document.getElementById('vancouver-result');
-        var loadingEl = document.getElementById('vancouver-loading');
-        var contentEl = document.getElementById('vancouver-content');
-        var copyRow = document.getElementById('vancouver-copy-row');
-        resultEl.style.display = 'block';
-        loadingEl.style.display = 'flex';
-        contentEl.style.display = 'none';
-        contentEl.innerHTML = '';
-        copyRow.style.display = 'none';
-        resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        var promptText = '[Vancouver British Columbia Municipal Intelligence Investigation]\n\n' + query + '\n\nProvide a detailed, factual research report. Use public records, news sources, government databases. Cite sources. Flag any accountability concerns, conflicts of interest, or anomalies found.';
-        try {
-          var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }] }],
-              tools: [{ googleSearch: {} }],
-              generationConfig: { temperature: 0.35, maxOutputTokens: 2048 }
-            })
-          });
-          if (!response.ok) { var err = await response.json(); throw new Error(err.error && err.error.message || 'API error ' + response.status); }
-          var data = await response.json();
-          var text = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || 'No content generated.';
-          var html = text
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/^## (.+)$/gm,'<h3 style="color:var(--accent);margin:1rem 0 .3rem;font-size:.95rem;border-bottom:1px solid var(--border);padding-bottom:.2rem;">$1</h3>')
-            .replace(/^### (.+)$/gm,'<h4 style="font-weight:600;margin:.75rem 0 .2rem;">$1</h4>')
-            .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-            .replace(/^\* (.+)$/gm,'<li style="margin:.2rem 0">$1</li>')
-            .replace(/^- (.+)$/gm,'<li style="margin:.2rem 0">$1</li>')
-            .replace(/\n\n/g,'</p><p style="margin:.4rem 0">');
-          loadingEl.style.display = 'none';
-          contentEl.style.display = 'block';
-          contentEl.innerHTML = '<p style="margin:.4rem 0">' + html + '</p>';
-          copyRow.style.display = 'block';
-        } catch(e) {
-          loadingEl.style.display = 'none';
-          contentEl.style.display = 'block';
-          contentEl.innerHTML = '<div style="color:#dc2626;padding:10px;background:#fef2f2;border-radius:6px;">❌ ' + e.message + '<br><small>Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></small></div>';
-        }
-      }
-    })();
-  </script>
 </body>
 </html>
