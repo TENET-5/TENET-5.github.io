@@ -823,6 +823,14 @@
         { href: 'arms-exports.html', label: 'Arms Exports', desc: 'Selling oil AND weapons while preaching green' },
       ]
     },
+    'debt-fiscal.html': {
+      current: 'National Debt Crisis',
+      next: [
+        { href: 'cra-enforcement.html', label: 'CRA Enforcement', desc: 'Two-tier tax collection while debt explodes' },
+        { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'State enterprises burning billions we borrow' },
+        { href: 'environment-climate.html', label: 'Environment & Climate', desc: 'Trans Mountain $34B — borrowed against the future' },
+      ]
+    },
   };
 
   function getCurrentPage() {
