@@ -778,9 +778,17 @@
     'immigration-policy.html': {
       current: 'Immigration Policy',
       next: [
+        { href: 'tfw-abuse.html', label: 'TFW Program Abuse', desc: '239K+ tied workers, LMIA fraud, wage suppression machine' },
         { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Immigration-housing gap documented by CMHC' },
         { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'System capacity vs. population growth' },
-        { href: 'infrastructure-deficit.html', label: 'Infrastructure Deficit', desc: '$357B crumbling under population pressure' },
+      ]
+    },
+    'tfw-abuse.html': {
+      current: 'TFW Program Abuse',
+      next: [
+        { href: 'immigration-policy.html', label: 'Immigration Policy', desc: 'IRCC backlogs, capacity collapse, broken system' },
+        { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Population surge without housing to match' },
+        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'Workforce exploitation meets system collapse' },
       ]
     },
     'infrastructure-deficit.html': {
