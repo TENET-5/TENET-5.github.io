@@ -530,9 +530,17 @@
     'rcmp-complicity.html': {
       current: 'RCMP Complicity',
       next: [
+        { href: 'rcmp-reform.html', label: 'RCMP Reform', desc: 'Institutional failures and the case for fundamental reform' },
         { href: 'rcmp-maid-accountability.html', label: 'RCMP MAID Accountability', desc: 'MAID enforcement oversight' },
         { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
-        { href: 'charges-sheet.html', label: 'Charges Sheet', desc: 'Specific charges and evidence mapping' },
+      ]
+    },
+    'rcmp-reform.html': {
+      current: 'RCMP Reform',
+      next: [
+        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Documented law enforcement failures' },
+        { href: 'whistleblower-failures.html', label: 'Whistleblower Failures', desc: 'How Canada silences those who speak up' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'Foreign interference in Canadian democracy' },
       ]
     },
     'rcmp-maid-accountability.html': {
@@ -829,6 +837,22 @@
         { href: 'cra-enforcement.html', label: 'CRA Enforcement', desc: 'Two-tier tax collection while debt explodes' },
         { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'State enterprises burning billions we borrow' },
         { href: 'environment-climate.html', label: 'Environment & Climate', desc: 'Trans Mountain $34B — borrowed against the future' },
+      ]
+    },
+    'wef-davos.html': {
+      current: 'WEF & Davos Connections',
+      next: [
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, UFWD — the full influence investigation' },
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, WEF Board member, 100+ recusals' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: '359K communications — who\'s buying Canadian policy' },
+      ]
+    },
+    'foreign-interference-deep.html': {
+      current: 'Foreign Interference Deep Dive',
+      next: [
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP — the broader picture' },
+        { href: 'treason-trajectory.html', label: 'Treason Trajectory', desc: 'The pattern of betrayal mapped across decades' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of government misconduct' },
       ]
     },
   };
