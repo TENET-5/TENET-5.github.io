@@ -735,6 +735,22 @@
         { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
       ]
     },
+    'privacy-surveillance.html': {
+      current: 'Privacy & Surveillance',
+      next: [
+        { href: 'judicial-appointments.html', label: 'Judicial Appointments', desc: 'Who appoints the judges enforcing surveillance law' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who lobbied for Bill C-26 and C-63' },
+        { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How your MP voted on surveillance bills' },
+      ]
+    },
+    'judicial-appointments.html': {
+      current: 'Judicial Appointments',
+      next: [
+        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-26, C-11, C-63 — the laws judges will interpret' },
+        { href: 'rcmp-maid-accountability.html', label: 'RCMP & MAID', desc: 'Law enforcement that failed to enforce the law' },
+        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'Carter v Canada — the SCC decision that started MAID' },
+      ]
+    },
     'immigration-policy.html': {
       current: 'Immigration Policy',
       next: [

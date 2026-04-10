@@ -59,6 +59,8 @@
         { label: 'Healthcare Collapse', href: 'healthcare-crisis.html', desc: 'Waitlist deaths, budget betrayal, CIHI data', hot: true },
         { label: 'MAID Policy Evolution', href: 'maid-policy-evolution.html', desc: '8-year legislative expansion — Bills C-14, C-7, C-39', hot: true },
         { label: 'Disability & CRPD', href: 'disability-genocide.html', desc: 'UN Convention violations, Section 15 Charter', hot: true },
+        { label: 'Judicial Appointments', href: 'judicial-appointments.html', desc: 'Politicized bench, bail collapse, legal aid deserts', hot: true },
+        { label: 'Privacy & Surveillance', href: 'privacy-surveillance.html', desc: 'C-26, C-11, C-63 — warrantless surveillance state', hot: true },
       ]
     },
     {
