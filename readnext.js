@@ -727,6 +727,30 @@
         { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who profited from pandemic contracts' },
       ]
     },
+    'immigration-policy.html': {
+      current: 'Immigration Policy',
+      next: [
+        { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Immigration-housing gap documented by CMHC' },
+        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'System capacity vs. population growth' },
+        { href: 'infrastructure-deficit.html', label: 'Infrastructure Deficit', desc: '$357B crumbling under population pressure' },
+      ]
+    },
+    'infrastructure-deficit.html': {
+      current: 'Infrastructure Deficit',
+      next: [
+        { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Where the infrastructure money should have gone' },
+        { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'State enterprises burning billions' },
+        { href: 'covid-accountability.html', label: 'COVID Accountability', desc: '$500B spent, infrastructure ignored' },
+      ]
+    },
+    'cra-enforcement.html': {
+      current: 'CRA Enforcement',
+      next: [
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who lobbies CRA for lenient enforcement' },
+        { href: 'elections-finance.html', label: 'Elections & Finance', desc: 'Campaign finance — follow the donor money' },
+        { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'Where lost tax revenue should have gone' },
+      ]
+    },
   };
 
   function getCurrentPage() {

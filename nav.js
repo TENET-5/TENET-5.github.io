@@ -85,6 +85,9 @@
         { label: 'Crown Corporations', href: 'crown-corporations.html', desc: 'Canada Post, CBC, Via Rail — $7B+ burned', hot: true },
         { label: 'COVID Accountability', href: 'covid-accountability.html', desc: 'ArriveCAN, CERB fraud, $500B pandemic spend', hot: true },
         { label: 'Housing Crisis', href: 'housing-crisis.html', desc: 'Engineered affordability collapse — CMHC data', hot: true },
+        { label: 'Immigration Policy', href: 'immigration-policy.html', desc: 'TFW abuse, IRCC backlogs, capacity collapse', hot: true },
+        { label: 'Infrastructure Deficit', href: 'infrastructure-deficit.html', desc: '$357B crumbling — bridges, water, transit', hot: true },
+        { label: 'CRA Enforcement', href: 'cra-enforcement.html', desc: 'Two-tier tax justice, offshore havens, $25B+ gap', hot: true },
       ]
     },
     {
