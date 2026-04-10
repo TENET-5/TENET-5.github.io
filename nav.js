@@ -232,7 +232,7 @@
 
     // Progress bar
     html += '<div class="t5-progress"></div>';
-    html += '<a href="index.html" class="t5-brand">TENET<sub style="font-size: 0.7em; vertical-align: baseline; position: relative; bottom: -0.25em;">5</sub><span class="t5-page-count" style="margin-left: 6px;">' + totalPages + '</span></a>';
+    html += '<a href="index.html" class="t5-brand" style="display:flex; align-items:center;"><img src="img/tenet5_logo.png" alt="TENET5 Logo" style="height:28px; width:auto; border-radius:4px; margin-right:4px;"><span class="t5-page-count">' + totalPages + '</span></a>';
 
     // Quick links (visible on desktop)
     html += '<div class="t5-quick">';
