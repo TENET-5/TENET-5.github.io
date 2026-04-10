@@ -61,6 +61,7 @@
         { label: 'Disability & CRPD', href: 'disability-genocide.html', desc: 'UN Convention violations, Section 15 Charter', hot: true },
         { label: 'Judicial Appointments', href: 'judicial-appointments.html', desc: 'Politicized bench, bail collapse, legal aid deserts', hot: true },
         { label: 'Privacy & Surveillance', href: 'privacy-surveillance.html', desc: 'C-26, C-11, C-63 — warrantless surveillance state', hot: true },
+        { label: 'Media Concentration', href: 'media-concentration.html', desc: '3 conglomerates, $1.4B CBC, death of independent press', hot: true },
       ]
     },
     {
