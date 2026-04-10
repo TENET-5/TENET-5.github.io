@@ -799,6 +799,14 @@
         { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'Where lost tax revenue should have gone' },
       ]
     },
+    'environment-climate.html': {
+      current: 'Environment & Climate',
+      next: [
+        { href: 'infrastructure-deficit.html', label: 'Infrastructure Deficit', desc: 'Where climate infrastructure money should have gone' },
+        { href: 'indigenous-accountability.html', label: 'Indigenous Accountability', desc: 'Contaminated sites on First Nations land' },
+        { href: 'arms-exports.html', label: 'Arms Exports', desc: 'Selling oil AND weapons while preaching green' },
+      ]
+    },
   };
 
   function getCurrentPage() {
