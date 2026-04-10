@@ -363,6 +363,7 @@
     var sortField = 'score';
     var sortAsc = false;
     var hoveredNode = null;
+    var focusedNode = null;
 
     // Zoom and pan state
     var viewZoom = 1;
@@ -847,7 +848,6 @@
     // Search
     document.getElementById('entity-search').addEventListener('input', function() {
       searchTerm = this.value.trim().toLowerCase();
-      draw();
       renderTable();
     });
 
@@ -858,7 +858,6 @@
       document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
       activeCategory = btn.getAttribute('data-cat');
-      draw();
       renderTable();
     });
 
@@ -958,7 +957,6 @@
     canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
     // Left-click: zoom into clicked node and show its connection subgraph
-    var focusedNode = null;
     canvas.addEventListener('click', function(e) {
       if (isPanning) return;
       var rect = canvas.getBoundingClientRect();
@@ -1014,7 +1012,7 @@
     var resizeTimer;
     window.addEventListener('resize', function() {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function() { layoutNodes(); draw(); }, 200);
+      resizeTimer = setTimeout(function() { initPhysics(); }, 200);
     });
 
     loadData();
