@@ -21,48 +21,9 @@
   <meta name="theme-color" content="#1a1f36">
   <meta name="color-scheme" content="light dark">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
-
-    /* ── DARK GLASSMORPHISM OVERRIDE ── */
-    body {
-      --bg:          #050810;
-      --bg-elevated: #0a0e1a;
-      --bg-card:     rgba(10, 14, 22, 0.55);
-      --bg-card-h:   rgba(15, 20, 32, 0.65);
-      --bg-surface:  rgba(12, 16, 26, 0.60);
-      --bg-table:    rgba(8, 12, 20, 0.45);
-      --text-primary:   #e8e8ec;
-      --text-secondary: #b0b4c0;
-      --text-tertiary:  #7a7f90;
-      --text-quaternary:#555a6b;
-      --border:      rgba(255, 255, 255, 0.06);
-      --border-hover:rgba(255, 255, 255, 0.12);
-      background: #050810;
-      color: #e8e8ec;
-    }
-    /* Ambient gradient orbs behind content */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 600px 500px at 15% 20%, rgba(196,30,58,0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 500px 400px at 80% 60%, rgba(88,28,135,0.07) 0%, transparent 70%),
-        radial-gradient(ellipse 400px 350px at 50% 90%, rgba(37,99,235,0.05) 0%, transparent 70%);
-    }
-
-    /* ── GLASS MIXIN ── */
-    .glass {
-      background: rgba(10, 14, 22, 0.55);
-      backdrop-filter: blur(12px) saturate(160%);
-      -webkit-backdrop-filter: blur(12px) saturate(160%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
 
     /* ── LAYOUT ── */
     .cm-wrap {
@@ -544,6 +505,7 @@
     }
   </style>
 <script src="js/offline_db.js"></script>\n<script src="js/offline_fetch.js"></script>\n
+
 <!-- TENET5 SEO INJECT -->
   <!-- Dynamic SEO Enforced by TENET5 automated pipeline -->
   <meta property="og:title" content="Corruption &amp; Influence Map — Network Graph Visualization | TENET5">
@@ -1300,21 +1262,27 @@
       cvs.height = wrap.clientHeight;
 
       var nodes = [
-        { id: 'cija', lbl: 'CIJA Lobbying ($678K)', cx: 0.15, cy: 0.2, type: 'org', col: '#d8b4fe' },
+        { id: 'cija', lbl: 'CIJA Pipeline: MF-A0DA...E3B', cx: 0.15, cy: 0.2, type: 'org', col: '#d8b4fe' },
         { id: 'mendicino', lbl: 'Marco Mendicino (63x Lobbied)', cx: 0.4, cy: 0.3, type: 'official', col: '#93c5fd' },
+        { id: 'abcxyz', lbl: 'Target Alpha: MF-BE91...2D8', cx: 0.15, cy: 0.5, type: 'osint_target', col: '#39ff14' },
         { id: 'paulson', lbl: 'Bob Paulson (RCMP)', cx: 0.65, cy: 0.4, type: 'official', col: '#9ca3af' },
         { id: 'bill_c14', lbl: 'MAID C-14 Passes (2016)', cx: 0.85, cy: 0.6, type: 'event', col: '#e53555' },
         
         { id: 'lantsman', lbl: 'Melissa Lantsman (15x Lobbied)', cx: 0.4, cy: 0.7, type: 'official', col: '#93c5fd' },
         { id: 'lucki', lbl: 'Brenda Lucki (RCMP)', cx: 0.65, cy: 0.8, type: 'official', col: '#9ca3af' },
+        { id: 'cfnis_proxy', lbl: 'CFNIS Proxy: MF-D6CC...394', cx: 0.65, cy: 0.6, type: 'treason_roster', col: '#e53555' },
         { id: 'bill_c7', lbl: 'MAID C-7 Passes (2021)', cx: 0.85, cy: 0.9, type: 'event', col: '#e53555' }
       ];
 
       var edges = [
-        { from: 0, to: 1 }, { from: 0, to: 4 },
-        { from: 1, to: 2 }, { from: 4, to: 5 },
-        { from: 2, to: 3 }, { from: 5, to: 6 },
-        { from: 3, to: 6, dash: [5,5] } // Legislative expansion
+        { from: 2, to: 0 }, // abcxyz drives CIJA
+        { from: 0, to: 1 }, { from: 0, to: 5 }, // CIJA lobbies Mendicino/Lantsman
+        { from: 1, to: 3 }, { from: 5, to: 6 }, // Officials to RCMP Command
+        { from: 3, to: 4 }, { from: 6, to: 8 }, // RCMP stands down -> MAID passes
+        { from: 4, to: 8, dash: [5,5] }, // Legislative expansion
+        { from: 0, to: 7, dash: [2,4] }, // CIJA friction handled by CFNIS Proxy
+        { from: 7, to: 3, dash: [2,4] }, // CFNIS proxy magic handoff to RCMP
+        { from: 7, to: 6, dash: [2,4] }
       ];
 
       function draw() {
