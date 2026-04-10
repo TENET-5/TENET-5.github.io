@@ -663,6 +663,30 @@
         { href: 'ag-findings.html', label: 'AG Findings', desc: '12 AG reports, $103B+ documented' },
       ]
     },
+    'healthcare-crisis.html': {
+      current: 'Healthcare Crisis',
+      next: [
+        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
+        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations, Charter Section 15' },
+        { href: 'rcmp-maid-accountability.html', label: 'RCMP & MAID', desc: 'Commissioner dereliction of duty' },
+      ]
+    },
+    'maid-policy-evolution.html': {
+      current: 'MAID Policy Evolution',
+      next: [
+        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
+        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations against disabled Canadians' },
+        { href: 't4-comparison.html', label: 'The Pattern (T4)', desc: 'Historical comparison to Aktion T4' },
+      ]
+    },
+    'disability-genocide.html': {
+      current: 'Disability & CRPD Violations',
+      next: [
+        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: 'How they legislated death over 8 years' },
+        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'System collapse feeds the MAID pipeline' },
+        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Full pattern documentation' },
+      ]
+    },
   };
 
   function getCurrentPage() {
