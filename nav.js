@@ -14,12 +14,12 @@
  *  - Recently visited pages (localStorage)
  *  - Reading progress bar
  *  - Keyboard shortcuts (/, ?, Escape, h, j, k)
- *  - LIRIL domain classification badges
+ *  - TENET5 OSINT domain classification badges
  *
  * Include this script in every page: <script src="nav.js?v=9"></script>
  * Place a <nav id="site-nav"></nav> element where the nav should appear.
  *
- * LIRIL/SATOR: BUFFER gate — navigational routing for all content
+ * TENET5 OSINT/SATOR: BUFFER gate — navigational routing for all content
  */
 (function () {
   'use strict';
@@ -35,7 +35,7 @@
         { label: 'OSINT Dashboard', href: 'osint-dashboard.html', desc: 'Aggregated intelligence data' },
         { label: 'Entity Profiler', href: 'entity-viewer.html', desc: 'Chronological timeline & documents', hot: true },
         { label: 'Network Analysis', href: 'network-analysis.html', desc: 'Cross-referenced topology', hot: true },
-        { label: 'N-vs-NP Matrix', href: 'corruption-map.html#n-vs-np', desc: 'LIRIL Pipeline Convergence', hot: true },
+        { label: 'N-vs-NP Matrix', href: 'corruption-map.html#n-vs-np', desc: 'TENET5 OSINT Pipeline Convergence', hot: true },
         { label: 'Dossier Viewer', href: 'dossier-viewer.html', desc: 'Generated intelligence dossiers', hot: true },
         { label: 'Evidence Archive', href: 'evidence.html', desc: 'Complete evidence repository' },
         { label: 'Evidence Index', href: 'evidence-index.html', desc: 'Categorized evidence finder' },
@@ -85,6 +85,7 @@
         { label: 'Crown Corporations', href: 'crown-corporations.html', desc: 'Canada Post, CBC, Via Rail — $7B+ burned', hot: true },
         { label: 'COVID Accountability', href: 'covid-accountability.html', desc: 'ArriveCAN, CERB fraud, $500B pandemic spend', hot: true },
         { label: 'Housing Crisis', href: 'housing-crisis.html', desc: 'Engineered affordability collapse — CMHC data', hot: true },
+        { label: 'Indigenous Accountability', href: 'indigenous-accountability.html', desc: 'Broken treaties, TRC, MMIWG, veterans betrayal', hot: true },
         { label: 'Immigration Policy', href: 'immigration-policy.html', desc: 'TFW abuse, IRCC backlogs, capacity collapse', hot: true },
         { label: 'Infrastructure Deficit', href: 'infrastructure-deficit.html', desc: '$357B crumbling — bridges, water, transit', hot: true },
         { label: 'CRA Enforcement', href: 'cra-enforcement.html', desc: 'Two-tier tax justice, offshore havens, $25B+ gap', hot: true },
@@ -149,7 +150,7 @@
       items: [
         { label: 'Red Duster FPS', href: 'red-duster-game.html', desc: 'Tactical simulator', special: 'game' },
         { label: 'Bloggins', href: 'bloggins.html', desc: 'Raccoon intelligence AI', special: 'green' },
-        { label: 'LIRIL (AI)', href: 'liril.html', desc: "Daniel Perry's private AI system", hot: true },
+        { label: 'TENET5 OSINT (AI)', href: 'liril.html', desc: "Daniel Perry's private AI system", hot: true },
         { label: 'Search', href: 'search.html', desc: 'Full-site search' },
         { label: 'Report Generator', href: 'report-generator.html', desc: 'Generate investigation reports' },
         { label: 'AI Research', href: 'ai-research.html', desc: 'AI-powered research tools' },
