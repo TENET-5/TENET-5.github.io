@@ -80,6 +80,7 @@
         { label: 'Corruption Map', href: 'corruption-map.html', desc: 'Documented failures' },
         { label: 'Charity Pipeline', href: 'charity-pipeline.html', desc: 'Charity fund routing' },
         { label: 'Arms Pipeline', href: 'arms-pipeline.html', desc: 'Canadian arms export tracking' },
+        { label: 'Arms Exports', href: 'arms-exports.html', desc: 'Saudi LAV deal, Yemen deaths, $15B export scandal', hot: true },
         { label: 'Carney Conflicts', href: 'carney-conflicts.html', desc: 'PM conflict-of-interest analysis' },
         { label: 'AG Findings Database', href: 'ag-findings.html', desc: '12 AG reports, $103B+ documented', hot: true },
         { label: 'Phoenix Pay Disaster', href: 'phoenix-pay.html', desc: '$309M→$2.2B, 150K affected', hot: true },

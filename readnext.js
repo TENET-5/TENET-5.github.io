@@ -679,6 +679,22 @@
         { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations against disabled Canadians' },
       ]
     },
+    'media-concentration.html': {
+      current: 'Media Concentration',
+      next: [
+        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-11 content regulation connects to media control' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who lobbies for media subsidies and C-18 deals' },
+        { href: 'elections-finance.html', label: 'Elections & Finance', desc: 'Media owners as political donors' },
+      ]
+    },
+    'arms-exports.html': {
+      current: 'Arms Exports',
+      next: [
+        { href: 'dnd-procurement.html', label: 'Defence Procurement', desc: '$100B military procurement — where the money goes' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Defence industry lobbying contacts' },
+        { href: 'veterans-betrayal.html', label: 'Veterans Betrayal', desc: 'Canada sells weapons abroad, neglects its own soldiers' },
+      ]
+    },
     'maid-policy-evolution.html': {
       current: 'MAID Policy Evolution',
       next: [
