@@ -96,6 +96,8 @@
         { label: 'Infrastructure Deficit', href: 'infrastructure-deficit.html', desc: '$357B crumbling — bridges, water, transit', hot: true },
         { label: 'CRA Enforcement', href: 'cra-enforcement.html', desc: 'Two-tier tax justice, offshore havens, $25B+ gap', hot: true },
         { label: 'Environment & Climate', href: 'environment-climate.html', desc: 'Trans Mountain $34B, carbon tax, broken emission targets', hot: true },
+        { label: 'National Debt Crisis', href: 'debt-fiscal.html', desc: '$1.2T debt, $54B interest — more than healthcare transfers', hot: true },
+        { label: 'Whistleblower Failures', href: 'whistleblower-failures.html', desc: 'PSDPA, Norman, Colvin — Canada punishes truth-tellers', hot: true },
       ]
     },
     {
