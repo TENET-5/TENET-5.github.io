@@ -64,6 +64,7 @@
         { label: 'Judicial Appointments', href: 'judicial-appointments.html', desc: 'Politicized bench, bail collapse, legal aid deserts', hot: true },
         { label: 'Privacy & Surveillance', href: 'privacy-surveillance.html', desc: 'C-26, C-11, C-63 — warrantless surveillance state', hot: true },
         { label: 'Media Concentration', href: 'media-concentration.html', desc: '3 conglomerates, $1.4B CBC, death of independent press', hot: true },
+        { label: 'Telecom Oligopoly', href: 'telecom-oligopoly.html', desc: 'Big Three 87% market share, CRTC capture, highest OECD prices', hot: true },
       ]
     },
     {
@@ -254,7 +255,7 @@
     html += '<a href="osint-dashboard.html"' + (currentPage === 'osint-dashboard.html' ? ' class="active"' : '') + '>OSINT</a>';
     html += '<a href="evidence.html"' + (currentPage === 'evidence.html' ? ' class="active"' : '') + '>Evidence</a>';
     html += '<a href="foreign-influence.html"' + (currentPage === 'foreign-influence.html' ? ' class="active"' : '') + '>Influence</a>';
-    html += '<a href="my-story.html"' + (currentPage === 'my-story.html' ? ' class="active"' : '') + '>My Story</a>';
+    html += '<a href="https://github.com/TENET-5/tenet5" target="_blank" style="color:#dc2626; font-weight:bold;" title="View Open Source Code">Code (GitHub)</a>';
     html += '</div>';
 
     // Auth container (populated by auth-ui.js)

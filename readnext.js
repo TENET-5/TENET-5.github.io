@@ -698,9 +698,17 @@
     'media-concentration.html': {
       current: 'Media Concentration',
       next: [
+        { href: 'telecom-oligopoly.html', label: 'Telecom Oligopoly', desc: 'Big Three control 87% of wireless — highest OECD prices, CRTC captured' },
         { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-11 content regulation connects to media control' },
         { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who lobbies for media subsidies and C-18 deals' },
-        { href: 'elections-finance.html', label: 'Elections & Finance', desc: 'Media owners as political donors' },
+      ]
+    },
+    'telecom-oligopoly.html': {
+      current: 'Telecom Oligopoly',
+      next: [
+        { href: 'media-concentration.html', label: 'Media Concentration', desc: 'Same conglomerates own the news that covers telecom — Rogers, Bell, TELUS' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: '1,400+ lobbying contacts — who writes the CRTC rules' },
+        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-26 gives telecom carriers warrantless surveillance powers' },
       ]
     },
     'arms-exports.html': {
