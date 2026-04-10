@@ -94,6 +94,7 @@
         { label: 'Immigration Policy', href: 'immigration-policy.html', desc: 'TFW abuse, IRCC backlogs, capacity collapse', hot: true },
         { label: 'Infrastructure Deficit', href: 'infrastructure-deficit.html', desc: '$357B crumbling — bridges, water, transit', hot: true },
         { label: 'CRA Enforcement', href: 'cra-enforcement.html', desc: 'Two-tier tax justice, offshore havens, $25B+ gap', hot: true },
+        { label: 'Environment & Climate', href: 'environment-climate.html', desc: 'Trans Mountain $34B, carbon tax, broken emission targets', hot: true },
       ]
     },
     {
