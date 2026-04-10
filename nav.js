@@ -92,6 +92,7 @@
         { label: 'Housing Crisis', href: 'housing-crisis.html', desc: 'Engineered affordability collapse — CMHC data', hot: true },
         { label: 'Indigenous Accountability', href: 'indigenous-accountability.html', desc: 'Broken treaties, TRC, MMIWG, veterans betrayal', hot: true },
         { label: 'Immigration Policy', href: 'immigration-policy.html', desc: 'TFW abuse, IRCC backlogs, capacity collapse', hot: true },
+        { label: 'TFW Program Abuse', href: 'tfw-abuse.html', desc: '239K+ tied workers, LMIA fraud, wage suppression', hot: true },
         { label: 'Infrastructure Deficit', href: 'infrastructure-deficit.html', desc: '$357B crumbling — bridges, water, transit', hot: true },
         { label: 'CRA Enforcement', href: 'cra-enforcement.html', desc: 'Two-tier tax justice, offshore havens, $25B+ gap', hot: true },
         { label: 'Environment & Climate', href: 'environment-climate.html', desc: 'Trans Mountain $34B, carbon tax, broken emission targets', hot: true },
