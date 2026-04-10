@@ -211,7 +211,7 @@
     // ── Header ──
     h += '<div style="text-align:center;padding:20px 0 16px;border-bottom:2px solid #c41e3a;margin-bottom:20px;">';
     h += '<div style="font-size:0.65rem;letter-spacing:4px;color:#c41e3a;text-transform:uppercase;margin-bottom:8px;">Canadian Government Accountability Report</div>';
-    h += '<div style="font-family:Georgia,serif;font-size:1.6rem;font-weight:900;color:#1a1f36;line-height:1.3;">Public Record Intelligence Brief</div>';
+    h += '<div style="font-family:Georgia,serif;font-size:1.6rem;font-weight:900;color:#e8e8ec;line-height:1.3;">Public Record Intelligence Brief</div>';
     h += '<div style="font-size:0.8rem;color:#6b7280;margin-top:6px;">Prepared for: ' + esc(targetName) + '</div>';
     h += '<div style="font-size:0.7rem;color:#9ca3af;margin-top:4px;">From: Daniel Perry — Canadian Forces Veteran, Afghanistan</div>';
     h += '</div>';
@@ -270,8 +270,8 @@
       ccFindings.sort(function(a, b) { return (severityOrder[a.severity] || 9) - (severityOrder[b.severity] || 9); });
       ccFindings.slice(0, 15).forEach(function(f) {
         var borderColor = f.severity === 'critical' ? '#ef4444' : f.severity === 'high' ? '#f59e0b' : '#eab308';
-        h += '<div style="background:#fafaf8;border:1px solid #e5e5e3;border-left:3px solid ' + borderColor + ';border-radius:4px;padding:10px 14px;margin:6px 0;font-size:0.78rem;">';
-        h += '<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:700;color:#1a1f36;">' + esc(f.entity) + '</span><span style="font-size:0.65rem;padding:2px 8px;border-radius:10px;background:' + borderColor + '20;color:' + borderColor + ';font-weight:600;text-transform:uppercase;">' + esc(f.severity) + '</span></div>';
+        h += '<div style="background:rgba(10,14,22,0.6);border:1px solid rgba(255,255,255,0.08);border-left:3px solid ' + borderColor + ';border-radius:4px;padding:10px 14px;margin:6px 0;font-size:0.78rem;">';
+        h += '<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:700;color:#e8e8ec;">' + esc(f.entity) + '</span><span style="font-size:0.65rem;padding:2px 8px;border-radius:10px;background:' + borderColor + '20;color:' + borderColor + ';font-weight:600;text-transform:uppercase;">' + esc(f.severity) + '</span></div>';
         h += '<div style="color:#6b7280;margin-top:4px;"><strong>CC ' + esc(f.section) + '</strong> — ' + esc(f.section_title) + ' (max: ' + esc(f.max_penalty) + ')</div>';
         h += '<div style="color:#3d4355;margin-top:4px;">' + esc(f.description.substring(0, 200)) + (f.description.length > 200 ? '...' : '') + '</div>';
         if (f.action) h += '<div style="color:#c41e3a;margin-top:4px;font-weight:600;font-size:0.72rem;">' + esc(f.action) + '</div>';
@@ -292,7 +292,7 @@
       }).slice(0, 15);
       h += '<p style="font-size:0.78rem;color:#6b7280;margin-bottom:10px;">Top 15 most-contacted Members of Parliament by registered lobbyists (Commissioner of Lobbying open data):</p>';
       h += '<table style="width:100%;border-collapse:collapse;font-size:0.78rem;">';
-      h += '<thead><tr style="background:#f8f8f6;"><th style="text-align:left;padding:6px 10px;border-bottom:1px solid #e5e5e3;">MP</th><th style="text-align:right;padding:6px 10px;border-bottom:1px solid #e5e5e3;">Meetings</th></tr></thead>';
+      h += '<thead><tr style="background:rgba(10,14,22,0.55);"><th style="text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.07);">MP</th><th style="text-align:right;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.07);">Meetings</th></tr></thead>';
       h += '<tbody>';
       topMPs.forEach(function(mp) {
         h += '<tr><td style="padding:5px 10px;border-bottom:1px solid #f0f0ee;">' + esc(mp.name) + '</td>';
@@ -314,8 +314,8 @@
     var strat = data.strategy || DATA.strategy;
     if (strat && strat.policies) {
       strat.policies.forEach(function(p) {
-        h += '<div style="background:#f8f8f6;border:1px solid #e5e5e3;border-left:3px solid #c41e3a;border-radius:4px;padding:10px 14px;margin:8px 0;">';
-        h += '<div style="font-weight:700;font-size:0.82rem;color:#1a1f36;">' + esc(p.name || p.title || '') + '</div>';
+        h += '<div style="background:rgba(10,14,22,0.55);border:1px solid rgba(255,255,255,0.08);border-left:3px solid #c41e3a;border-radius:4px;padding:10px 14px;margin:8px 0;">';
+        h += '<div style="font-weight:700;font-size:0.82rem;color:#e8e8ec;">' + esc(p.name || p.title || '') + '</div>';
         h += '<div style="font-size:0.75rem;color:#6b7280;margin-top:4px;">' + esc(p.description || p.summary || '') + '</div>';
         h += '</div>';
       });
@@ -329,8 +329,8 @@
         { name: 'P5: Military Oversight Independence Act', desc: 'Remove CFNIS from military chain of command. Give MPCC binding investigative power.' }
       ];
       policies.forEach(function(p) {
-        h += '<div style="background:#f8f8f6;border:1px solid #e5e5e3;border-left:3px solid #c41e3a;border-radius:4px;padding:10px 14px;margin:8px 0;">';
-        h += '<div style="font-weight:700;font-size:0.82rem;color:#1a1f36;">' + esc(p.name) + '</div>';
+        h += '<div style="background:rgba(10,14,22,0.55);border:1px solid rgba(255,255,255,0.08);border-left:3px solid #c41e3a;border-radius:4px;padding:10px 14px;margin:8px 0;">';
+        h += '<div style="font-weight:700;font-size:0.82rem;color:#e8e8ec;">' + esc(p.name) + '</div>';
         h += '<div style="font-size:0.75rem;color:#6b7280;margin-top:4px;">' + esc(p.desc) + '</div>';
         h += '</div>';
       });
@@ -367,7 +367,7 @@
     h += '</div>';
 
     // ── Footer ──
-    h += '<div style="text-align:center;padding:20px 0;border-top:2px solid #e5e5e3;margin-top:20px;font-size:0.72rem;color:#9ca3af;">';
+    h += '<div style="text-align:center;padding:20px 0;border-top:2px solid rgba(255,255,255,0.1);margin-top:20px;font-size:0.72rem;color:#9ca3af;">';
     h += '<p>Every number in this report is sourced from Canadian government public records.</p>';
     h += '<p>Prepared by Daniel Perry — Canadian Forces combat veteran, former Signals Operator, Afghanistan</p>';
     h += '<p style="margin-top:8px;"><a href="https://tenet-5.github.io/" style="color:#c41e3a;">tenet-5.github.io</a></p>';
@@ -398,16 +398,16 @@
 
   // ── Helper: Section header ──
   function sectionHeader(num, title) {
-    return '<div style="margin-top:20px;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;padding-bottom:8px;border-bottom:1px solid #e5e5e3;">' +
+    return '<div style="margin-top:20px;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.07);">' +
       '<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#c41e3a;color:#fff;font-size:0.7rem;font-weight:700;">' + num + '</span>' +
-      '<span style="font-family:Georgia,serif;font-size:1.05rem;font-weight:700;color:#1a1f36;">' + esc(title) + '</span></div>';
+      '<span style="font-family:Georgia,serif;font-size:1.05rem;font-weight:700;color:#e8e8ec;">' + esc(title) + '</span></div>';
   }
 
   // ── Helper: Dossier card ──
   function dossierCard(entry, type) {
     var borderColor = type === 'conviction' ? '#ef4444' : type === 'foreign' ? '#8b5cf6' : '#f59e0b';
-    var h = '<div style="background:#fafaf8;border:1px solid #e5e5e3;border-left:3px solid ' + borderColor + ';border-radius:4px;padding:10px 14px;margin:6px 0;font-size:0.78rem;">';
-    h += '<div style="font-weight:700;color:#1a1f36;">' + esc(entry.name) + ' <span style="color:#9ca3af;font-weight:400;">(' + esc(entry.party) + ')</span></div>';
+    var h = '<div style="background:rgba(10,14,22,0.6);border:1px solid rgba(255,255,255,0.08);border-left:3px solid ' + borderColor + ';border-radius:4px;padding:10px 14px;margin:6px 0;font-size:0.78rem;">';
+    h += '<div style="font-weight:700;color:#e8e8ec;">' + esc(entry.name) + ' <span style="color:#9ca3af;font-weight:400;">(' + esc(entry.party) + ')</span></div>';
     h += '<div style="color:#6b7280;margin-top:4px;">' + esc(entry.offence || entry.allegations || entry.issue || '') + '</div>';
     if (entry.sentence) h += '<div style="color:#ef4444;margin-top:2px;font-weight:600;">' + esc(entry.sentence) + '</div>';
     h += '</div>';
@@ -415,8 +415,8 @@
   }
 
   function ethicsCard(entry) {
-    var h = '<div style="background:#fafaf8;border:1px solid #e5e5e3;border-left:3px solid #f59e0b;border-radius:4px;padding:10px 14px;margin:6px 0;font-size:0.78rem;">';
-    h += '<div style="font-weight:700;color:#1a1f36;">' + esc(entry.name) + ' <span style="color:#9ca3af;font-weight:400;">(' + esc(entry.party || entry.role || '') + ')</span></div>';
+    var h = '<div style="background:rgba(10,14,22,0.6);border:1px solid rgba(255,255,255,0.08);border-left:3px solid #f59e0b;border-radius:4px;padding:10px 14px;margin:6px 0;font-size:0.78rem;">';
+    h += '<div style="font-weight:700;color:#e8e8ec;">' + esc(entry.name) + ' <span style="color:#9ca3af;font-weight:400;">(' + esc(entry.party || entry.role || '') + ')</span></div>';
     if (entry.violations && entry.violations.length > 0) {
       entry.violations.forEach(function(v) {
         h += '<div style="color:#6b7280;margin-top:4px;">' + esc(v.case || '') + ' (' + (v.year || '') + '): ' + esc(v.finding || '') + '</div>';
