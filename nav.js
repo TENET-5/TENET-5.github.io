@@ -81,6 +81,7 @@
         { label: 'Phoenix Pay Disaster', href: 'phoenix-pay.html', desc: '$309M→$2.2B, 150K affected', hot: true },
         { label: 'Senate Expenses', href: 'senate-expenses.html', desc: 'Duffy/Wallin/Brazeau — $500K scandal', hot: true },
         { label: 'Elections & Finance', href: 'elections-finance.html', desc: 'Campaign finance, lobbying data', hot: true },
+        { label: 'Lobbying Deep Dive', href: 'lobbying-deepdive.html', desc: '359K communications, pharma→MAID pipeline', hot: true },
       ]
     },
     {
@@ -113,6 +114,7 @@
         { label: 'Whistleblower Guide', href: 'whistleblower-guide.html', desc: 'Protected disclosure' },
         { label: 'Acelephius Report', href: 'acelephius-report.html', desc: 'Intelligence assessment' },
         { label: 'Acelephius Wardoll', href: 'acelephius-wardoll.html', desc: 'Wardoll analysis document' },
+        { label: 'Veterans Betrayal', href: 'veterans-betrayal.html', desc: 'VAC failures, MAID offers, lapsed funding', hot: true },
       ]
     },
     {
