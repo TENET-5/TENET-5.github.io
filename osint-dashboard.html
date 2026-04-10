@@ -3,158 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LIRIL Tactical Dashboard | TENET5</title>
-  <meta name="theme-color" content="#0a0a0c">
+  <title>OSINT Intelligence Dashboard | TENET5</title>
+  <meta name="description" content="Open-source intelligence dashboard tracking Canadian government accountability across 70+ scandal clusters and 370+ documented entities.">
+  <meta name="theme-color" content="#1a1f36">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
   <link rel="stylesheet" href="style.css?v=6">
   <style>
-    body { background-color: #050508; color: #c8c8ce; font-family: 'JetBrains Mono', monospace; margin: 0; padding: 0; }
-    #dash-container { max-width: 1400px; margin: 0 auto; padding: 20px; display: grid; gap: 20px; grid-template-columns: 350px 1fr; height: 95vh; }
-    
-    @media (max-width: 800px) {
-      #dash-container { grid-template-columns: 1fr; height: auto; }
-    }
-    
-    .panel { background: rgba(10, 15, 25, 0.9); border: 1px solid rgba(57, 255, 20, 0.15); border-radius: 8px; padding: 20px; overflow-y: auto; position: relative; }
-    .panel::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
-    
-    h2 { font-size: 0.9rem; color: #39ff14; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; }
-    
-    /* Live Telemetry Feed */
-    .telemetry-feed { display: flex; flex-direction: column; gap: 10px; }
-    .telemetry-card { 
-      background: #0f121a; border-left: 3px solid rgba(255, 50, 80, 0.6); 
-      padding: 12px; border-radius: 4px; font-size: 0.8rem;
-      transition: background 0.2s, border-left 0.2s;
-    }
-    .telemetry-card:hover { background: #161a26; border-left: 3px solid #ff3250; cursor: pointer; }
-    .telemetry-card.active { border-left: 3px solid #39ff14; background: rgba(57, 255, 20, 0.05); }
-    
-    .vector-label { color: var(--text-tertiary); font-size: 0.7rem; }
-    .vector-value { color: #ff3250; font-weight: bold; letter-spacing: 1px; }
-    
-    /* Main Viewer */
-    .viewer { background: #000; border: 1px solid #1a1f36; font-family: 'Courier New', Courier, monospace; position: relative; }
-    .viewer pre { white-space: pre-wrap; font-size: 0.85rem; color: #60a5fa; padding: 20px; margin: 0; }
-    
-    .status-bar {
-      grid-column: 1 / -1; background: #0a0f18; display: flex; justify-content: space-between; padding: 10px 20px;
-      border: 1px solid rgba(57,255,20,0.2); font-size: 0.8rem; border-radius: 4px;
-    }
-    .status-indicator { display: inline-block; width: 8px; height: 8px; background: #39ff14; border-radius: 50%; box-shadow: 0 0 10px #39ff14; margin-right: 8px; animation: blink 2s infinite; }
-    
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    @keyframes scrollBg { from { background-position: 0 0; } to { background-position: 0 1000px; } }
-    
-    .matrix-overlay {
-      position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; opacity: 0.05;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, #39ff14 2px, #39ff14 4px);
-      z-index: 10;
-    }
-
-    #loading { color: #39ff14; text-align: center; margin-top: 50px; font-size: 1.2rem; }
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .dash-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .dash-card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin: 0 0 12px 0; }
+    .dash-big { font-size: 2.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .dash-big.red { color: var(--color-red); }
+    .dash-big.blue { color: var(--color-blue); }
+    .dash-big.green { color: var(--color-green); }
+    .dash-big.yellow { color: #facc15; }
+    .dash-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .cluster-list { list-style: none; padding: 0; margin: 0; }
+    .cluster-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .cluster-list li:last-child { border-bottom: none; }
+    .cluster-badge { padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+    .badge-critical { background: rgba(255,50,80,0.15); color: #ff3250; }
+    .badge-high { background: rgba(255,165,0,0.15); color: #ffa500; }
+    .badge-medium { background: rgba(96,165,250,0.15); color: #60a5fa; }
+    .timeline-item { padding: 12px 0 12px 20px; border-left: 2px solid var(--border); position: relative; font-size: 0.85rem; }
+    .timeline-item::before { content: ''; position: absolute; left: -5px; top: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--color-red); }
+    .timeline-year { font-weight: 700; color: var(--color-red); font-family: 'JetBrains Mono', monospace; }
+    .source-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 20px; padding: 12px; background: var(--bg-surface); border-radius: 6px; }
   </style>
 </head>
 <body>
-  
+  <a href="#main" class="skip-link">Skip to content</a>
   <nav id="site-nav"></nav>
 
-  <div id="dash-container">
-    <div class="panel">
-      <h2>&#128225; LIVE TELEMETRY</h2>
-      <div id="loading">Establishing SAT-COM Link...</div>
-      <div class="telemetry-feed" id="feed-container">
-        <!-- Javascript renders feed here -->
+  <header class="hero">
+    <h1>OSINT Intelligence Dashboard</h1>
+    <p class="subtitle">Open-source intelligence overview — all data sourced from public records, parliamentary proceedings, Auditor General reports, and official government documents.</p>
+  </header>
+
+  <div class="content" id="main">
+
+    <div class="dash-grid" id="stats-grid">
+      <div class="dash-card"><h3>Network Entities</h3><div class="dash-big red" id="d-nodes">--</div><div class="dash-sub">Documented actors, events, organizations</div></div>
+      <div class="dash-card"><h3>Documented Connections</h3><div class="dash-big blue" id="d-edges">--</div><div class="dash-sub">Sourced relationships between entities</div></div>
+      <div class="dash-card"><h3>Scandal Clusters</h3><div class="dash-big yellow" id="d-clusters">--</div><div class="dash-sub">Independent investigation areas</div></div>
+      <div class="dash-card"><h3>Criminal Findings</h3><div class="dash-big red" id="d-findings">--</div><div class="dash-sub">Including 6 Rome Statute charges</div></div>
+      <div class="dash-card"><h3>Financial Exposure</h3><div class="dash-big green">$613B+</div><div class="dash-sub">Documented waste, fraud, and liabilities</div></div>
+      <div class="dash-card"><h3>Deaths Documented</h3><div class="dash-big red">361,000+</div><div class="dash-sub">MAID + opioid + Yemen (Canadian arms)</div></div>
+    </div>
+
+    <section>
+      <h2>Investigation Clusters</h2>
+      <p>Each cluster represents an independent investigation area with cross-referenced entities and sourced evidence chains.</p>
+      <ul class="cluster-list" id="cluster-list">
+        <li><span>MAID Legislation (76,475+ deaths)</span> <span class="cluster-badge badge-critical">CRITICAL</span></li>
+        <li><span>CCP Foreign Interference (107-year chain)</span> <span class="cluster-badge badge-critical">CRITICAL</span></li>
+        <li><span>Financial / Procurement ($613B+)</span> <span class="cluster-badge badge-critical">CRITICAL</span></li>
+        <li><span>Indigenous Accountability (8 connected nodes)</span> <span class="cluster-badge badge-critical">CRITICAL</span></li>
+        <li><span>India — Nijjar State Assassination</span> <span class="cluster-badge badge-high">HIGH</span></li>
+        <li><span>Israel Lobby (2,156 contacts)</span> <span class="cluster-badge badge-high">HIGH</span></li>
+        <li><span>Military / CFNIS (misconduct + Afghan detainee)</span> <span class="cluster-badge badge-high">HIGH</span></li>
+        <li><span>Media Concentration (Big Three oligopoly)</span> <span class="cluster-badge badge-medium">MEDIUM</span></li>
+        <li><span>Housing Crisis ($724K avg, 60K homeless/night)</span> <span class="cluster-badge badge-critical">CRITICAL</span></li>
+        <li><span>Opioid Crisis (52,000+ dead)</span> <span class="cluster-badge badge-critical">CRITICAL</span></li>
+        <li><span>Healthcare Collapse (6M without doctor)</span> <span class="cluster-badge badge-critical">CRITICAL</span></li>
+        <li><span>WEF / Davos Ties (Schwab: "penetrated" cabinet)</span> <span class="cluster-badge badge-high">HIGH</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>107-Year Institutional Failure Timeline</h2>
+      <p>The same institutional pattern — detect the threat, accommodate it, suppress the evidence — repeating for over a century.</p>
+      <div>
+        <div class="timeline-item"><span class="timeline-year">1917</span> — Trotsky detained at Halifax harbour. Released. Co-led Bolshevik revolution. Millions died.</div>
+        <div class="timeline-item"><span class="timeline-year">1945</span> — Gouzenko exposes Soviet spy ring inside Canadian government. RCMP had missed it.</div>
+        <div class="timeline-item"><span class="timeline-year">1950</span> — PROFUNC launched. Surveilled socialists for 33 years. Missed real threats.</div>
+        <div class="timeline-item"><span class="timeline-year">1997</span> — Project Sidewinder finds 200+ CCP businesses. Report suppressed. Documents destroyed.</div>
+        <div class="timeline-item"><span class="timeline-year">2016</span> — MAID Bill C-14 authorized. RCMP stood down. 76,475+ will die.</div>
+        <div class="timeline-item"><span class="timeline-year">2018</span> — Meng Wanzhou arrested. Two Michaels taken hostage. 1,019 days.</div>
+        <div class="timeline-item"><span class="timeline-year">2019</span> — Winnipeg Lab: scientist shipped Ebola to Wuhan. Covered up.</div>
+        <div class="timeline-item"><span class="timeline-year">2021</span> — MAID C-7 expanded. Veterans offered death instead of care.</div>
+        <div class="timeline-item"><span class="timeline-year">2023</span> — Nijjar assassinated on Canadian soil by Indian agents.</div>
+        <div class="timeline-item"><span class="timeline-year">2024</span> — NSICOP: parliamentarians "wittingly" aiding foreign states. Names classified.</div>
       </div>
-    </div>
-    
-    <div class="panel viewer">
-      <h2>&#9881; LIRIL TOPOLOGICAL DECRYPTION</h2>
-      <div class="matrix-overlay"></div>
-      <pre id="json-viewer">Awaiting target selection...</pre>
-    </div>
-    
-    <div class="status-bar">
-      <div><span class="status-indicator"></span><strong>QUAD HUB:</strong> NATS CONNECTED (127.0.0.1:8091)</div>
-      <div><strong>LIRIL ENGINE:</strong> ACTIVE</div>
-    </div>
+    </section>
+
+    <section>
+      <h2>Data Sources</h2>
+      <p>Every entity and connection in this network is sourced from publicly available records:</p>
+      <ul>
+        <li>Commissioner of Lobbying of Canada — registered lobbying contacts</li>
+        <li>Elections Canada — political donation records</li>
+        <li>Auditor General of Canada — audit reports and findings</li>
+        <li>Parliamentary Budget Officer — fiscal analyses</li>
+        <li>House of Commons / Senate — voting records, committee testimony</li>
+        <li>Canadian Human Rights Tribunal — discrimination findings</li>
+        <li>Ethics Commissioner — conflict of interest violations</li>
+        <li>Health Canada — MAID annual reports</li>
+        <li>RCMP — public statements and investigation updates</li>
+        <li>CBC, Globe and Mail, Global News — investigative journalism</li>
+      </ul>
+      <div class="source-note">
+        <strong>Methodology:</strong> All data from public government sources. Cross-referencing increases confidence — entities appearing in 2+ independent datasets are flagged as multi-source. Correlation does not imply causation. All subjects are entitled to due process. Lobbying is legal and registered in Canada.
+      </div>
+    </section>
+
+    <section>
+      <h2>Explore the Data</h2>
+      <div class="dash-grid">
+        <a href="network-analysis.html" class="dash-card" style="text-decoration:none;color:inherit;"><h3>Network Analysis</h3><div style="font-size:0.9rem;">Interactive force-directed graph with zoom, pan, click-to-focus. Filter by category.</div></a>
+        <a href="entity-viewer.html" class="dash-card" style="text-decoration:none;color:inherit;"><h3>Entity Profiler</h3><div style="font-size:0.9rem;">Search and browse all documented entities with profiles and connections.</div></a>
+        <a href="findings.html" class="dash-card" style="text-decoration:none;color:inherit;"><h3>Cross-Reference Findings</h3><div style="font-size:0.9rem;">Algorithmic patterns from 7M+ Canadian government records.</div></a>
+        <a href="criminal-code-analysis.html" class="dash-card" style="text-decoration:none;color:inherit;"><h3>Criminal Code Analysis</h3><div style="font-size:0.9rem;">87 findings including 6 Rome Statute charges.</div></a>
+        <a href="corruption-map.html" class="dash-card" style="text-decoration:none;color:inherit;"><h3>Corruption Map</h3><div style="font-size:0.9rem;">Multi-source entity overlap analysis.</div></a>
+        <a href="conspiracy-board.html" class="dash-card" style="text-decoration:none;color:inherit;"><h3>Investigation Board</h3><div style="font-size:0.9rem;">Visual pinboard connecting evidence across investigations.</div></a>
+      </div>
+    </section>
+
   </div>
 
-  <script src="js/x-ai-glow.js"></script>
-  <script src="nav.js"></script>
+  <footer id="site-footer"></footer>
+  <script src="nav.js?v=9"></script>
+  <script src="footer.js?v=1"></script>
   <script>
-    let currentFeed = [];
-    
-    function formatTime(timestamp) {
-      if(!timestamp) return 'UNKNOWN';
-      const d = new Date(timestamp * 1000);
-      return d.toLocaleTimeString() + '.' + d.getMilliseconds().toString().padStart(3, '0');
-    }
+    // Load live stats from network data
+    fetch('data/network_analysis/influence_network.json', {cache:'no-store'})
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        document.getElementById('d-nodes').textContent = d.nodes.length;
+        document.getElementById('d-edges').textContent = d.edges.length.toLocaleString();
+        // Count unique categories
+        var cats = {};
+        d.nodes.forEach(function(n) { (n.categories || []).forEach(function(c) { cats[c] = true; }); });
+        document.getElementById('d-clusters').textContent = Object.keys(cats).length + '+';
+      })
+      .catch(function() {});
 
-    function renderFeed(data) {
-      const container = document.getElementById('feed-container');
-      const loader = document.getElementById('loading');
-      if(loader) loader.style.display = 'none';
-      
-      container.innerHTML = '';
-      data.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'telemetry-card x-glow-target';
-        
-        let type = "UNKNOWN_PKT";
-        if(item.discovery_value && item.discovery_value.event) {
-          type = item.discovery_value.event.toUpperCase();
-        }
-        
-        const sig = item.crypto_signature || 'UNVERIFIED';
-        const vec = (item.discovery_value && item.discovery_value.topological_vector) ? item.discovery_value.topological_vector : 'ENCRYPTED';
-        
-        card.innerHTML = \`
-          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-            <strong style="color:#fff;">\${type}</strong>
-            <span style="color:#888;">\${formatTime(item.timestamp)}</span>
-          </div>
-          <div class="vector-label">VECTOR: <span class="vector-value">\${vec}</span></div>
-          <div class="vector-label" style="margin-top:4px;">SIG: <span style="color:#39ff14;">\${sig}</span></div>
-        \`;
-        
-        card.onclick = () => {
-          document.querySelectorAll('.telemetry-card').forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          document.getElementById('json-viewer').textContent = JSON.stringify(item.discovery_value, null, 2);
-        };
-        
-        container.appendChild(card);
-      });
-      
-      // Auto select first
-      if(data.length > 0 && document.getElementById('json-viewer').textContent === 'Awaiting target selection...') {
-        container.children[0].click();
-      }
-    }
-
-    async function fetchTelemetry() {
-      try {
-        const res = await fetch('http://127.0.0.1:8091/api/discoveries');
-        if(!res.ok) throw new Error('API offline');
-        const json = await res.json();
-        
-        // Deep compare to avoid re-rendering constantly if unchanged
-        if(JSON.stringify(json.data) !== JSON.stringify(currentFeed)) {
-          currentFeed = json.data;
-          renderFeed(currentFeed);
-        }
-      } catch(err) {
-        console.error("SAT-COM link failed. Retrying...", err);
-        const loader = document.getElementById('loading');
-        if(loader && loader.style.display !== 'none') {
-            loader.innerHTML = '<span style="color:#ff3250">SAT-COM OFFLINE. AWAITING CONNECTION...</span>';
-        }
-      }
-    }
-
-    // Poll every 2 seconds
-    setInterval(fetchTelemetry, 2000);
-    fetchTelemetry();
+    fetch('data/criminal_code_analysis.json', {cache:'no-store'})
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        document.getElementById('d-findings').textContent = d.statistics.total_findings;
+      })
+      .catch(function() {});
   </script>
 </body>
 </html>
