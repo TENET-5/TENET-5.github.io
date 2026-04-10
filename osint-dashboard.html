@@ -3,611 +3,154 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OSINT Intelligence Dashboard | TENET5</title>
-  <meta name="description" content="Aggregated intelligence from 7M+ Canadian government records. Lobbying contacts, political contributions, parliamentary votes, and cross-referenced investigation data.">
-  <meta property="og:title" content="OSINT Intelligence Dashboard">
-  <meta property="og:description" content="7M+ government records aggregated. Lobbying, contributions, votes, and cross-referenced patterns.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://tenet-5.github.io/osint-dashboard.html">
-  <meta name="twitter:card" content="summary">
-  <link rel="stylesheet" href="style.css?v=5">
-  <meta name="theme-color" content="#1a1f36">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>LIRIL Tactical Dashboard | TENET5</title>
+  <meta name="theme-color" content="#0a0a0c">
+  <link rel="stylesheet" href="style.css?v=6">
   <style>
-    .dash-wrap { max-width: 1100px; margin: 0 auto; padding: 20px; font-family: 'JetBrains Mono', 'Courier New', monospace; color: var(--text-primary); }
-    .dash-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid rgba(196, 30, 58, 0.4); margin-bottom: 30px; }
-    .dash-header h1 { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: var(--text-primary); letter-spacing: -1px; margin-bottom: 8px; }
-    .dash-header .subtitle { font-size: 0.85rem; color: var(--text-tertiary); }
-    .dash-header .live-badge { display: inline-block; background: rgba(57,255,20,0.1); border: 1px solid rgba(57,255,20,0.3); color: #39ff14; padding: 4px 14px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; margin-top: 10px; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
-
-    /* Stats Row */
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 30px; }
-    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; transition: border-color 0.2s; }
-    .stat-card:hover { border-color: rgba(196, 30, 58, 0.3); }
-    .stat-card .num { font-size: 1.6rem; font-weight: 700; color: #e53555; display: block; line-height: 1.1; }
-    .stat-card .num.blue { color: #60a5fa; }
-    .stat-card .num.green { color: #39ff14; }
-    .stat-card .num.yellow { color: #facc15; }
-    .stat-card .label { font-size: 0.6rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
-
-    /* Search */
-    .search-section { margin-bottom: 30px; }
-    .search-box { width: 100%; padding: 14px 18px; background: var(--bg-surface); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
-    .search-box:focus { border-color: rgba(196, 30, 58, 0.5); }
-    .search-box::placeholder { color: var(--text-quaternary); }
-    .search-results { margin-top: 12px; display: none; }
-    .search-results.active { display: block; }
-    .result-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.2s; }
-    .result-item:hover { border-color: rgba(196,30,58,0.3); }
-    .result-name { color: var(--text-primary); font-size: 0.85rem; }
-    .result-meta { color: var(--text-tertiary); font-size: 0.7rem; }
-    .result-tag { font-size: 0.6rem; padding: 3px 8px; border-radius: 3px; font-weight: 600; letter-spacing: 0.5px; }
-    .tag-mp { background: rgba(96,165,250,0.15); color: #60a5fa; }
-    .tag-lobby { background: rgba(249,115,22,0.15); color: #f97316; }
-    .tag-donor { background: rgba(57,255,20,0.15); color: #39ff14; }
-    .tag-bill { background: rgba(196,30,58,0.15); color: #e53555; }
-
-    /* Panel Grid */
-    .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-    .panel { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
-    .panel h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .panel h2 a { color: #e53555; text-decoration: none; font-size: 0.65rem; }
-    .panel h2 a:hover { text-decoration: underline; }
-
-    /* Table */
-    .mini-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-    .mini-table th { text-align: left; color: var(--text-tertiary); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    .mini-table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-    .mini-table tr:hover td { background: rgba(255,255,255,0.02); }
-    .mini-table .num-col { text-align: right; font-weight: 600; color: var(--text-primary); }
-
-    /* Tools Grid */
-    .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 30px; }
-    .tool-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-decoration: none; transition: all 0.2s; display: block; }
-    .tool-card:hover { border-color: rgba(196,30,58,0.4); transform: translateY(-2px); }
-    .tool-card h3 { color: var(--text-primary); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600; }
-    .tool-card p { color: var(--text-tertiary); font-size: 0.7rem; line-height: 1.5; margin: 0; }
-    .tool-card .tool-stat { color: #e53555; font-size: 0.65rem; font-weight: 700; margin-top: 8px; display: block; }
-
-    /* Sources */
-    .sources { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-size: 0.7rem; color: var(--text-quaternary); line-height: 1.8; }
-    .sources a { color: var(--text-tertiary); }
-    .sources a:hover { color: #e53555; }
-    .sources strong { color: var(--text-tertiary); }
-
-    .loading { text-align: center; padding: 40px; color: var(--text-quaternary); font-size: 0.8rem; }
-
-    @media (max-width: 700px) {
-      .panel-grid { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    body { background-color: #050508; color: #c8c8ce; font-family: 'JetBrains Mono', monospace; margin: 0; padding: 0; }
+    #dash-container { max-width: 1400px; margin: 0 auto; padding: 20px; display: grid; gap: 20px; grid-template-columns: 350px 1fr; height: 95vh; }
+    
+    .panel { background: rgba(10, 15, 25, 0.9); border: 1px solid rgba(57, 255, 20, 0.15); border-radius: 8px; padding: 20px; overflow-y: auto; position: relative; }
+    .panel::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+    
+    h2 { font-size: 0.9rem; color: #39ff14; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; }
+    
+    /* Live Telemetry Feed */
+    .telemetry-feed { display: flex; flex-direction: column; gap: 10px; }
+    .telemetry-card { 
+      background: #0f121a; border-left: 3px solid rgba(255, 50, 80, 0.6); 
+      padding: 12px; border-radius: 4px; font-size: 0.8rem;
+      transition: background 0.2s, border-left 0.2s;
     }
+    .telemetry-card:hover { background: #161a26; border-left: 3px solid #ff3250; cursor: pointer; }
+    .telemetry-card.active { border-left: 3px solid #39ff14; background: rgba(57, 255, 20, 0.05); }
+    
+    .vector-label { color: var(--text-tertiary); font-size: 0.7rem; }
+    .vector-value { color: #ff3250; font-weight: bold; letter-spacing: 1px; }
+    
+    /* Main Viewer */
+    .viewer { background: #000; border: 1px solid #1a1f36; font-family: 'Courier New', Courier, monospace; position: relative; }
+    .viewer pre { white-space: pre-wrap; font-size: 0.85rem; color: #60a5fa; padding: 20px; margin: 0; }
+    
+    .status-bar {
+      grid-column: 1 / -1; background: #0a0f18; display: flex; justify-content: space-between; padding: 10px 20px;
+      border: 1px solid rgba(57,255,20,0.2); font-size: 0.8rem; border-radius: 4px;
+    }
+    .status-indicator { display: inline-block; width: 8px; height: 8px; background: #39ff14; border-radius: 50%; box-shadow: 0 0 10px #39ff14; margin-right: 8px; animation: blink 2s infinite; }
+    
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes scrollBg { from { background-position: 0 0; } to { background-position: 0 1000px; } }
+    
+    .matrix-overlay {
+      position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; opacity: 0.05;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, #39ff14 2px, #39ff14 4px);
+      z-index: 10;
+    }
+
+    #loading { color: #39ff14; text-align: center; margin-top: 50px; font-size: 1.2rem; }
   </style>
-<script src="js/offline_db.js"></script>\n<script src="js/offline_fetch.js"></script>\n</head>
+</head>
 <body>
+  
   <nav id="site-nav"></nav>
 
-  <div class="dash-wrap">
-    <div class="dash-header">
-      <h1>OSINT Intelligence Dashboard</h1>
-      <p class="subtitle">Aggregated from Canadian government open data. All records from public sources.</p>
-      <div class="live-badge" id="status-badge">LOADING DATASETS...</div>
-    </div>
-
-    <!-- Plain language intro -->
-    <div style="max-width:700px;margin:0 auto var(--s-md);font-size:var(--text-sm);line-height:1.7;color:var(--text-secondary);text-align:center;">
-<!-- LIRIL Analysis -->    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s-sm) var(--s-md);margin:var(--s-sm) auto;max-width:700px;display:flex;gap:var(--s-xs);align-items:center;">      <span style="font-size:1.2rem;">🤖</span>      <p style="font-size:var(--text-xs);color:var(--text-tertiary);margin:0;"><a href="liril.html">LIRIL</a> aggregates 6.8M records from 4 government databases in real time. Search across MPs, organizations, bills, and donors simultaneously.</p>    </div>
-      This dashboard pulls together data from 6 government databases — lobbying contacts, political donations, parliamentary votes, MP profiles, and procurement contracts. Use the search bar to look up any MP, organization, or bill. Every number links back to its government source.
-    </div>
-
-    <!-- Active Local AI Research Briefing Container -->
-    <div id="ai-insights-container" style="max-width:1100px; margin: 0 auto 30px auto; display: none;">
-      <h2 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #a0a0a6; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-        🤖 LIRIL Field Notes / Active AI Research
-      </h2>
-      <div id="ai-insights-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-        <!-- Filled by JS -->
+  <div id="dash-container">
+    <div class="panel">
+      <h2>&#128225; LIVE TELEMETRY</h2>
+      <div id="loading">Establishing SAT-COM Link...</div>
+      <div class="telemetry-feed" id="feed-container">
+        <!-- Javascript renders feed here -->
       </div>
     </div>
-
-    <!-- Topline Stats -->
-    <div class="stats-row" id="stats-row">
-      <div class="stat-card"><span class="num" id="s-records">--</span><div class="label">Total Records</div></div>
-      <div class="stat-card"><span class="num blue" id="s-mps">--</span><div class="label">MPs Tracked</div></div>
-      <div class="stat-card"><span class="num" id="s-lobbying">--</span><div class="label">Lobby Contacts</div></div>
-      <div class="stat-card"><span class="num green" id="s-donations">--</span><div class="label">Donations</div></div>
-      <div class="stat-card"><span class="num yellow" id="s-bills">--</span><div class="label">Bills</div></div>
-      <div class="stat-card"><span class="num blue" id="s-votes">--</span><div class="label">Recorded Votes</div></div>
+    
+    <div class="panel viewer">
+      <h2>&#9881; LIRIL TOPOLOGICAL DECRYPTION</h2>
+      <div class="matrix-overlay"></div>
+      <pre id="json-viewer">Awaiting target selection...</pre>
     </div>
-
-    <!-- Unified Search -->
-    <div class="search-section">
-      <input type="text" class="search-box" id="search-input" placeholder="Search MPs, organizations, bills... (e.g. 'Housefather', 'SNC-Lavalin', 'C-21')" autocomplete="off">
-      <div class="search-results" id="search-results"></div>
-    </div>
-
-    <!-- Intelligence Panels -->
-    <div class="panel-grid">
-      <!-- Most Lobbied Officials -->
-      <div class="panel">
-        <h2>Most Lobbied Officials <a href="lobbying-tracker.html">Full tracker &rarr;</a></h2>
-        <table class="mini-table" id="lobby-table">
-          <thead><tr><th>Official</th><th>Institution</th><th class="num-col">Meetings</th></tr></thead>
-          <tbody id="lobby-body"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
-
-      <!-- Top Party Contributions -->
-      <div class="panel">
-        <h2>Political Contributions <a href="contributions-tracker.html">Full tracker &rarr;</a></h2>
-        <table class="mini-table" id="contrib-table">
-          <thead><tr><th>Party</th><th class="num-col">Records</th><th class="num-col">Total $</th></tr></thead>
-          <tbody id="contrib-body"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
-
-      <!-- Parliamentary Bills -->
-      <div class="panel">
-        <h2>Bills by Category <a href="hansard-dashboard.html">Full dashboard &rarr;</a></h2>
-        <table class="mini-table" id="bills-table">
-          <thead><tr><th>Category</th><th class="num-col">Count</th></tr></thead>
-          <tbody id="bills-body"><tr><td colspan="2" class="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
-
-      <!-- Top Lobbying Organizations -->
-      <div class="panel">
-        <h2>Top Lobbying Organizations <a href="cross-reference.html">Cross-ref &rarr;</a></h2>
-        <table class="mini-table" id="org-table">
-          <thead><tr><th>Organization</th><th class="num-col">Communications</th></tr></thead>
-          <tbody id="org-body"><tr><td colspan="2" class="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
-
-      <!-- Financial Transaction Tracker -->
-      <div class="panel">
-        <h2>Financial Trajectory <a href="cross-reference.html">ABCXYZ Engine &rarr;</a></h2>
-        <table class="mini-table" id="finance-table">
-          <thead><tr><th>Entity</th><th>Vector</th><th class="num-col">Risk</th></tr></thead>
-          <tbody id="finance-body"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
-
-      <!-- Social Media Monitor -->
-      <div class="panel">
-        <h2>Social Intelligence <a href="dossier-viewer.html">Dossiers &rarr;</a></h2>
-        <table class="mini-table" id="social-table">
-          <thead><tr><th>Target</th><th>Primary Vector</th></tr></thead>
-          <tbody id="social-body"><tr><td colspan="2" class="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div style="background: rgba(10, 10, 15, 0.95); border: 1px solid rgba(57, 255, 20, 0.25); border-radius: 8px; padding: 12px 20px; margin-bottom: 14px; font-size: 0.7rem; color: #39ff14; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'JetBrains Mono', monospace;">
-      <span><span style="color:#6e6e76;">ABCXYZ N vs NP Millennial Falcon:</span> <strong style="color:#39ff14;">ONLINE</strong></span>
-      <span><span style="color:#6e6e76;">Empirical Magic Handoff:</span> <strong style="color:#39ff14;">SECURED</strong></span>
-      <span><span style="color:#6e6e76;">Discovery Protection:</span> <strong style="color:#39ff14;">ACTIVE</strong></span>
-    </div>
-
-    <!-- Active LIRIL Nitter Sweep Hook -->
-    <div style="background: var(--bg-surface); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-      <h2 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        ⚙️ Native STARK LIRIL Sweep 
-      </h2>
-      <p style="color: var(--text-tertiary); font-size: 0.8rem; line-height: 1.5; margin-bottom: 16px;">
-        Trigger a live N-vs-NP timeline scrape directly through the local TENET-5 OS ABCXYZ Telemetry Hub. Initiates the Nitter Bridge and Explainable AI convergence scan over Port 8091.
-      </p>
-      <div style="display: flex; gap: 10px;">
-        <input type="text" id="osint-target" placeholder="Enter target (e.g. ToddSmithPC, CanduEnergy)..." style="flex: 1; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">
-        <button id="osint-trigger-btn" style="background: #e53555; color: white; border: none; border-radius: 6px; padding: 0 24px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Initiate Scan</button>
-      </div>
-      <div id="osint-sweep-result" style="display: none; margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.3); border-left: 4px solid #60a5fa; font-size: 0.8rem; color: #a0a0a6; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace;"></div>
-    </div>
-
-    <!-- Scraper Automation Status -->
-    <div id="scraper-status" style="background: var(--bg-surface); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 14px 20px; margin-bottom: 24px; display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary);">
-          &#9881; Scraper Automation Status
-        </div>
-        <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.68rem; font-family: 'JetBrains Mono', monospace;">
-          <span><span style="color:#6e6e76;">Last Run:</span> <strong id="scraper-last-run" style="color:#60a5fa;">--</strong></span>
-          <span><span style="color:#6e6e76;">Scrapers:</span> <strong id="scraper-ok" style="color:#39ff14;">-</strong>/<strong id="scraper-total" style="color:#a0a0a6;">-</strong></span>
-          <span><span style="color:#6e6e76;">Duration:</span> <strong id="scraper-duration" style="color:#facc15;">--</strong></span>
-          <span><span style="color:#6e6e76;">Next:</span> <strong style="color:#60a5fa;">03:00 AM</strong></span>
-        </div>
-      </div>
-      <div id="scraper-bars" style="display: flex; gap: 4px; margin-top: 10px;"></div>
-    </div>
-
-    <!-- Investigation Tools -->
-    <h2 style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:#a0a0a6; margin-bottom:16px;">Investigation Tools</h2>
-    <div class="tools-grid">
-      <a href="dossier-viewer.html" class="tool-card" style="border-color: rgba(57,255,20,0.2);">
-        <h3>&#128203; Dossier Viewer</h3>
-        <p>Browse all OSINT intelligence dossiers generated by the Millennial Falcon tracking system.</p>
-        <span class="tool-stat">6 active dossiers</span>
-      </a>
-      <a href="conspiracy-board.html" class="tool-card">
-        <h3>Investigation Board</h3>
-        <p>Interactive node graph mapping foreign influence networks, lobbying pipelines, and institutional connections.</p>
-        <span class="tool-stat">94 nodes, 169 connections</span>
-      </a>
-      <a href="cross-reference.html" class="tool-card">
-        <h3>Cross-Reference Engine</h3>
-        <p>Matches lobbying contacts against donations, votes, and MP profiles to surface correlations.</p>
-        <span class="tool-stat">4 datasets cross-linked</span>
-      </a>
-      <a href="corruption-map.html" class="tool-card">
-        <h3>Corruption Map</h3>
-        <p>Documented procurement failures with Auditor General findings, cost overruns, and criminal referrals.</p>
-        <span class="tool-stat">18 confirmed cases</span>
-      </a>
-      <a href="procurement-analysis.html" class="tool-card">
-        <h3>Procurement Anomaly Scanner</h3>
-        <p>Automated detection of sole-source contracts, cost overruns, vendor concentration, and split contracts.</p>
-        <span class="tool-stat">1.13M contracts analyzed</span>
-      </a>
-      <a href="foreign-influence.html" class="tool-card">
-        <h3>Foreign Influence Tracker</h3>
-        <p>Documents lobby-to-vote pipelines, CCP Senate mechanisms, media ownership, and NSICOP findings.</p>
-        <span class="tool-stat">8,792 speeches analyzed</span>
-      </a>
-      <a href="hansard-evidence.html" class="tool-card">
-        <h3>Hansard Evidence</h3>
-        <p>Parliamentary debate records with keyword analysis, vote records, and MP speech patterns.</p>
-        <span class="tool-stat">Parliament 45-1 session</span>
-      </a>
-      <a href="network-analysis.html" class="tool-card" style="border-color: rgba(196,30,58,0.2);">
-        <h3>&#128300; Network Analysis</h3>
-        <p>Cross-referenced influence topology across treason roster, investigation board, OSINT vault, and lobbying data.</p>
-        <span class="tool-stat">5 data vectors cross-linked</span>
-      </a>
-      <a href="#" class="tool-card" style="border-color: rgba(96,165,250,0.2);">
-        <h3>&#127470;&#127473; CIJA Pipeline Tracker</h3>
-        <p>Dedicated CIJA lobby-to-vote pathway analysis mapping Israel advocacy organizations to parliamentary votes.</p>
-        <span class="tool-stat">579 lobbying instances tracked</span>
-      </a>
-    </div>
-
-    <!-- Data Sources -->
-    <div class="sources">
-      <strong>Data Sources:</strong>
-      <a href="https://lobbycanada.gc.ca/en/open-data/" target="_blank" rel="noopener">Office of the Commissioner of Lobbying</a> |
-      <a href="https://www.elections.ca/content.aspx?section=fin&dir=oda&document=index&lang=e" target="_blank" rel="noopener">Elections Canada Open Data</a> |
-      <a href="https://openparliament.ca/api/" target="_blank" rel="noopener">OpenParliament.ca API (CC-BY)</a> |
-      <a href="https://www.parl.ca/legisinfo" target="_blank" rel="noopener">LEGISinfo</a> |
-      <a href="https://open.canada.ca/data/en/dataset?q=contracts" target="_blank" rel="noopener">open.canada.ca Contracts</a> |
-      <a href="https://www.oag-bvg.gc.ca" target="_blank" rel="noopener">Auditor General of Canada</a>
-      <br><br>
-      <strong>Methodology:</strong> All data is downloaded from public government sources and stored as static JSON. No live API calls are made from this page. Cross-referencing is algorithmic — correlation does not imply causation. All lobbying activity shown is legal and registered. Verify independently before drawing conclusions.
+    
+    <div class="status-bar">
+      <div><span class="status-indicator"></span><strong>QUAD HUB:</strong> NATS CONNECTED (127.0.0.1:8091)</div>
+      <div><strong>LIRIL ENGINE:</strong> ACTIVE</div>
     </div>
   </div>
 
-  <footer>
-    <div class="footer-grid">
-      <div class="footer-col">
-        <h4>Investigation</h4>
-        <a href="accountability.html">The 504 Database</a>
-        <a href="conspiracy-board.html">Investigation Board</a>
-        <a href="evidence.html">Evidence Archive</a>
-        <a href="network-analysis.html">Network Analysis</a>
-        <a href="dossier-viewer.html">Dossier Viewer</a>
-      </div>
-      <div class="footer-col">
-        <h4>Follow the Money</h4>
-        <a href="cross-reference.html">Cross-Reference Engine</a>
-        <a href="foreign-influence.html">Foreign Influence</a>
-        <a href="corruption-map.html">Corruption Map</a>
-        <a href="procurement-analysis.html">Procurement Analysis</a>
-        <a href="lobbying-tracker.html">Lobbying Tracker</a>
-        <a href="contributions-tracker.html">Contributions Tracker</a>
-      </div>
-      <div class="footer-col">
-        <h4>Legal &amp; Military</h4>
-        <a href="legal.html">Legal Framework</a>
-        <a href="lawsuit-ppcli.html">PPCLI Lawsuit</a>
-        <a href="cfnis.html">CFNIS Investigation</a>
-        <a href="whistleblower-guide.html">Whistleblower Guide</a>
-      </div>
-      <div class="footer-col">
-        <h4>About</h4>
-        <a href="my-story.html">My Story</a>
-        <a href="open-letter.html">Open Letter to MPs</a>
-        <a href="timeline.html">Master Timeline</a>
-        <a href="history.html">FAQ &amp; History</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Daniel Perry. Canadian Forces combat veteran, Afghanistan. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <script src="nav.js?v=9"></script>
-  <script src="share.js?v=1"></script>
+  <script src="js/x-ai-glow.js"></script>
+  <script src="nav.js"></script>
   <script>
-  (function() {
-    'use strict';
-
-    var DATA = { lobbying: null, contributions: null, analysis: null, mps: null, financial: null, social: null };
-    var loaded = 0;
-
-    function fmt(n) {
-      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-      if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
-      return n.toLocaleString();
-    }
-
-    function money(n) {
-      if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
-      if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
-      return '$' + n.toLocaleString();
-    }
-
-    function shortInst(s) {
-      return s.replace(/\s*\([^)]*\)\s*/g, '').substring(0, 30);
-    }
-
-    function onDataReady() {
-      // Stats
-      var totalRecords = (DATA.contributions.total_records || 0) + (DATA.lobbying.total_dpoh_contacts || 0) + (DATA.analysis.metadata.total_bills || 0);
-      document.getElementById('s-records').textContent = fmt(totalRecords);
-      document.getElementById('s-mps').textContent = DATA.analysis.metadata.total_mps;
-      document.getElementById('s-lobbying').textContent = fmt(DATA.lobbying.total_dpoh_contacts);
-      document.getElementById('s-donations').textContent = fmt(DATA.contributions.total_records);
-      document.getElementById('s-bills').textContent = DATA.analysis.metadata.total_bills;
-      document.getElementById('s-votes').textContent = DATA.analysis.metadata.total_votes;
-      document.getElementById('status-badge').textContent = 'ALL DATASETS LOADED — ' + fmt(totalRecords) + ' RECORDS';
-      document.getElementById('status-badge').style.borderColor = 'rgba(57,255,20,0.5)';
-
-      // Lobby table
-      var lb = document.getElementById('lobby-body');
-      lb.innerHTML = '';
-      var top10 = (DATA.lobbying.top_lobbied_officials || []).slice(0, 10);
-      top10.forEach(function(o) {
-        lb.innerHTML += '<tr><td>' + o.name + '</td><td>' + shortInst(o.institution) + '</td><td class="num-col">' + o.meetings.toLocaleString() + '</td></tr>';
-      });
-
-      // Contributions table
-      var cb = document.getElementById('contrib-body');
-      cb.innerHTML = '';
-      (DATA.contributions.party_donations || []).slice(0, 8).forEach(function(p) {
-        cb.innerHTML += '<tr><td>' + p.party.replace(' of Canada', '').replace(' Party', '') + '</td><td class="num-col">' + fmt(p.count) + '</td><td class="num-col">' + money(p.total_amount) + '</td></tr>';
-      });
-
-      // Bills table
-      var bb = document.getElementById('bills-body');
-      bb.innerHTML = '';
-      var cats = DATA.analysis.bills_by_category || {};
-      var sorted = Object.entries(cats).sort(function(a, b) { return b[1] - a[1]; });
-      sorted.forEach(function(c) {
-        bb.innerHTML += '<tr><td>' + c[0].charAt(0).toUpperCase() + c[0].slice(1) + '</td><td class="num-col">' + c[1] + '</td></tr>';
-      });
-
-      // Organizations table
-      var ob = document.getElementById('org-body');
-      ob.innerHTML = '';
-      (DATA.lobbying.top_organizations || []).slice(0, 10).forEach(function(o) {
-        ob.innerHTML += '<tr><td>' + o.name.substring(0, 40) + '</td><td class="num-col">' + o.communications.toLocaleString() + '</td></tr>';
-      });
-
-      // Finance table
-      var fb = document.getElementById('finance-body');
-      if (fb) {
-        fb.innerHTML = '';
-        if (DATA.financial && DATA.financial.transactions) {
-          var f_list = Object.values(DATA.financial.transactions).sort(function(a,b){ return b.risk_factor - a.risk_factor; }).slice(0, 8);
-          f_list.forEach(function(f) {
-            fb.innerHTML += '<tr><td style="text-transform:capitalize">' + f.entity.replace('_', ' ') + '</td><td>' + f.flow + '</td><td class="num-col" style="color:var(--red)">' + f.risk_factor.toFixed(2) + '</td></tr>';
-          });
-        }
-      }
-
-      // Social table
-      var sb = document.getElementById('social-body');
-      if (sb) {
-        sb.innerHTML = '';
-        if (DATA.social && DATA.social.targets) {
-          var s_list = Object.entries(DATA.social.targets).slice(0, 8);
-          s_list.forEach(function(s) {
-            sb.innerHTML += '<tr><td>@' + s[0] + '</td><td style="text-transform:capitalize">' + (s[1].primary_vector || 'unknown').replace('_', ' ') + '</td></tr>';
-          });
-        }
-      }
-
-      // Search
-      setupSearch();
-    }
-
-    function renderAIInsights() {
-      if (!DATA.ai_insights || !DATA.ai_insights.insights) return;
-      var container = document.getElementById('ai-insights-container');
-      var grid = document.getElementById('ai-insights-grid');
-      var insights = DATA.ai_insights.insights;
-      if (insights.length === 0) return;
-      
-      container.style.display = 'block';
-      grid.innerHTML = '';
-      
-      insights.forEach(function(insight) {
-        var bdColor = 'rgba(96, 165, 250, 0.4)';
-        if (insight.severity === 'CRITICAL') bdColor = 'rgba(229, 53, 85, 0.5)';
-        if (insight.severity === 'HIGH') bdColor = 'rgba(250, 204, 21, 0.5)';
-        
-        var d = new Date(insight.timestamp);
-        var timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        var html = '<div style="background: var(--bg-card); border: 1px solid var(--border); border-top: 3px solid ' + bdColor + '; border-radius: 8px; padding: 16px;">';
-        html += '<div style="font-size: 0.65rem; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 6px;">' + timeStr + ' &bull; ' + insight.vector + '</div>';
-        html += '<h3 style="font-size: 0.9rem; color: var(--text-primary); margin: 0 0 10px 0;">' + insight.title + '</h3>';
-        html += '<p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">' + insight.content + '</p>';
-        html += '<div style="font-size: 0.7rem; font-family: monospace; color: #60a5fa;">[NODES: ' + insight.nodes.join(' × ') + ']</div>';
-        html += '</div>';
-        grid.innerHTML += html;
-      });
-    }
-
-    function setupSearch() {
-      var input = document.getElementById('search-input');
-      var results = document.getElementById('search-results');
-
-      input.addEventListener('input', function() {
-        var q = this.value.trim().toLowerCase();
-        if (q.length < 2) { results.className = 'search-results'; results.innerHTML = ''; return; }
-
-        var matches = [];
-
-        // Search MPs
-        if (DATA.mps && DATA.mps.mps) {
-          DATA.mps.mps.forEach(function(mp) {
-            var name = (mp.given_name + ' ' + mp.family_name).toLowerCase();
-            if (name.indexOf(q) !== -1) {
-              var party = mp.current_party ? mp.current_party.short_name.en : '?';
-              var riding = mp.current_riding ? mp.current_riding.name.en : '';
-              var prov = mp.current_riding ? mp.current_riding.province : '';
-              matches.push({ name: mp.given_name + ' ' + mp.family_name, meta: party + ' — ' + riding + ', ' + prov, tag: 'MP', tagClass: 'tag-mp' });
-            }
-          });
-        }
-
-        // Search lobbied officials
-        (DATA.lobbying.top_lobbied_officials || []).forEach(function(o) {
-          if (o.name.toLowerCase().indexOf(q) !== -1) {
-            matches.push({ name: o.name, meta: o.title + ' — ' + o.meetings + ' meetings', tag: 'LOBBY', tagClass: 'tag-lobby' });
-          }
-        });
-
-        // Search organizations
-        (DATA.lobbying.top_organizations || []).forEach(function(o) {
-          if (o.name.toLowerCase().indexOf(q) !== -1) {
-            matches.push({ name: o.name, meta: o.communications + ' communications', tag: 'ORG', tagClass: 'tag-lobby' });
-          }
-        });
-
-        // Search bills
-        if (DATA.analysis.contentious_votes) {
-          DATA.analysis.contentious_votes.forEach(function(v) {
-            if ((v.bill || '').toLowerCase().indexOf(q) !== -1 || (v.description || '').toLowerCase().indexOf(q) !== -1) {
-              matches.push({ name: v.bill + ': ' + (v.description || '').substring(0, 60), meta: 'Yea: ' + v.yea + ' Nay: ' + v.nay, tag: 'VOTE', tagClass: 'tag-bill' });
-            }
-          });
-        }
-
-        // Search donors
-        if (DATA.contributions.top_donors) {
-          DATA.contributions.top_donors.forEach(function(d) {
-            if (d.name.toLowerCase().indexOf(q) !== -1) {
-              matches.push({ name: d.name, meta: money(d.total_amount) + ' total contributions', tag: 'DONOR', tagClass: 'tag-donor' });
-            }
-          });
-        }
-
-        // Render
-        if (matches.length === 0) {
-          results.className = 'search-results active';
-          results.innerHTML = '<div class="result-item"><span class="result-name" style="color:#6e6e76;">No results for "' + q + '"</span></div>';
-          return;
-        }
-
-        results.className = 'search-results active';
-        results.innerHTML = matches.slice(0, 15).map(function(m) {
-          return '<div class="result-item"><div><div class="result-name">' + m.name + '</div><div class="result-meta">' + m.meta + '</div></div><span class="result-tag ' + m.tagClass + '">' + m.tag + '</span></div>';
-        }).join('');
-      });
-    }
-
-    function loadJSON(url, key) {
-      fetch(url).then(function(r) { return r.json(); }).then(function(d) {
-        DATA[key] = d;
-        loaded++;
-        if (loaded === 6) onDataReady();
-      }).catch(function(e) {
-        console.warn('Failed to load ' + url, e);
-        DATA[key] = {};
-        loaded++;
-        if (loaded === 6) onDataReady();
-      });
-    }
-
-    loadJSON('data/lobbying_analysis.json', 'lobbying');
-    loadJSON('data/contributions_analysis.json', 'contributions');
-    loadJSON('data/analysis.json', 'analysis');
-    loadJSON('data/all_mps.json', 'mps');
-    loadJSON('data/financial_transaction_analysis.json', 'financial');
-    loadJSON('data/social_media_analysis.json', 'social');
+    let currentFeed = [];
     
-    // Non-blocking load for AI Insights so it doesn't break the main loader
-    fetch('data/ai_generated_insights.json').then(function(r) { return r.json(); }).then(function(d) {
-      DATA['ai_insights'] = d;
-      renderAIInsights();
-    }).catch(function(e) { /* AI Insights unavailable — silent fallback */ });
+    function formatTime(timestamp) {
+      if(!timestamp) return 'UNKNOWN';
+      const d = new Date(timestamp * 1000);
+      return d.toLocaleTimeString() + '.' + d.getMilliseconds().toString().padStart(3, '0');
+    }
 
-      // ── Scraper Automation Status ──
-      fetch('data/scraper_status.json').then(function(r){if(!r.ok)throw new Error();return r.json();}).catch(function(){return null;}).then(function(status){if(!status)return;
-        var panel = document.getElementById('scraper-status');
-        panel.style.display = 'block';
-        var dt = new Date(status.last_run);
-        var ago = Math.floor((Date.now() - dt.getTime()) / 3600000);
-        var agoStr = ago < 1 ? 'Just now' : ago + 'h ago';
-        document.getElementById('scraper-last-run').textContent = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ' (' + agoStr + ')';
-        document.getElementById('scraper-ok').textContent = status.ok_count;
-        document.getElementById('scraper-total').textContent = status.scraper_count;
-        document.getElementById('scraper-duration').textContent = status.total_duration_s + 's';
-        // Health bars
-        var bars = document.getElementById('scraper-bars');
-        (status.results || []).forEach(function(r){
-          var color = r.status === 'OK' ? '#39ff14' : r.status === 'TIMEOUT' ? '#facc15' : '#e53555';
-          var bar = document.createElement('div');
-          bar.style.cssText = 'flex:1; height:4px; border-radius:2px; background:' + color + '; opacity:0.8;';
-          bar.title = r.name + ': ' + r.status + ' (' + r.duration_s + 's)';
-          bars.appendChild(bar);
-        });
-      }).catch(function(){
-        // No status file yet — leave panel hidden
+    function renderFeed(data) {
+      const container = document.getElementById('feed-container');
+      const loader = document.getElementById('loading');
+      if(loader) loader.style.display = 'none';
+      
+      container.innerHTML = '';
+      data.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'telemetry-card x-glow-target';
+        
+        let type = "UNKNOWN_PKT";
+        if(item.discovery_value && item.discovery_value.event) {
+          type = item.discovery_value.event.toUpperCase();
+        }
+        
+        const sig = item.crypto_signature || 'UNVERIFIED';
+        const vec = (item.discovery_value && item.discovery_value.topological_vector) ? item.discovery_value.topological_vector : 'ENCRYPTED';
+        
+        card.innerHTML = \`
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <strong style="color:#fff;">\${type}</strong>
+            <span style="color:#888;">\${formatTime(item.timestamp)}</span>
+          </div>
+          <div class="vector-label">VECTOR: <span class="vector-value">\${vec}</span></div>
+          <div class="vector-label" style="margin-top:4px;">SIG: <span style="color:#39ff14;">\${sig}</span></div>
+        \`;
+        
+        card.onclick = () => {
+          document.querySelectorAll('.telemetry-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          document.getElementById('json-viewer').textContent = JSON.stringify(item.discovery_value, null, 2);
+        };
+        
+        container.appendChild(card);
       });
-
-      // ── Live OSINT Telemetry Binding ──
-      var triggerBtn = document.getElementById('osint-trigger-btn');
-      if (triggerBtn) {
-        triggerBtn.addEventListener('click', function() {
-          var targetObj = document.getElementById('osint-target').value.trim();
-          if (!targetObj) return;
-          var resPanel = document.getElementById('osint-sweep-result');
-          
-          triggerBtn.textContent = 'Scanning...';
-          triggerBtn.disabled = true;
-          resPanel.style.display = 'block';
-          resPanel.innerHTML = '<span style="color:#facc15;">Initiating LIRIL Temporal Handshake on port 8091...</span>';
-          
-          fetch('http://127.0.0.1:8091/api/osint_trigger?target=' + encodeURIComponent(targetObj))
-            .then(function(res) {
-              if (!res.ok) throw new Error('OSINT Local Core offline or rejected target.');
-              return res.json();
-            })
-            .then(function(data) {
-              triggerBtn.textContent = 'Initiate Scan';
-              triggerBtn.disabled = false;
-              
-              var formatted = '<strong style="color:white;">Target Analyzed:</strong> ' + (data.target || targetObj) + '\n';
-              formatted += '<strong style="color:white;">Primary Vector detected:</strong> ' + (data.primary_vector || 'unknown') + '\n';
-              formatted += '<strong style="color:white;">Edge Nodes Found:</strong> ' + ((data.edges_discovered || []).join(', ') || 'none') + '\n\n';
-              formatted += '<span style="color:#39ff14;">Empirical Handoff pushed to Chronos Matrix for indexing.</span>';
-              resPanel.innerHTML = formatted;
-            })
-            .catch(function(err) {
-              triggerBtn.textContent = 'Initiate Scan';
-              triggerBtn.disabled = false;
-              resPanel.innerHTML = '<span style="color:#e53555;">[FAILURE] ABCXYZ SATOR core not active on port 8091, or timeout occurred:</span>\n' + err.message;
-            });
-        });
+      
+      // Auto select first
+      if(data.length > 0 && document.getElementById('json-viewer').textContent === 'Awaiting target selection...') {
+        container.children[0].click();
       }
-    })();
+    }
+
+    async function fetchTelemetry() {
+      try {
+        const res = await fetch('http://127.0.0.1:8091/api/discoveries');
+        if(!res.ok) throw new Error('API offline');
+        const json = await res.json();
+        
+        // Deep compare to avoid re-rendering constantly if unchanged
+        if(JSON.stringify(json.data) !== JSON.stringify(currentFeed)) {
+          currentFeed = json.data;
+          renderFeed(currentFeed);
+        }
+      } catch(err) {
+        console.error("SAT-COM link failed. Retrying...", err);
+        const loader = document.getElementById('loading');
+        if(loader && loader.style.display !== 'none') {
+            loader.innerHTML = '<span style="color:#ff3250">SAT-COM OFFLINE. AWAITING CONNECTION...</span>';
+        }
+      }
+    }
+
+    // Poll every 2 seconds
+    setInterval(fetchTelemetry, 2000);
+    fetchTelemetry();
   </script>
-  <div id="read-next"></div>
-  <footer id="site-footer"></footer>
-  <script src="readnext.js?v=2"></script>
-  <script src="footer.js?v=1"></script>
 </body>
 </html>
