@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI/CD Status — TENET5 Build Pipeline | TENET5</title>
+  <meta name="description" content="TENET5 build pipeline status. LIRIL classification engine, staging-to-production sync, GitHub Pages deployment health.">
+  <link rel="stylesheet" href="style.css?v=8">
+  <meta name="theme-color" content="#050810">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x2699;&#xFE0F;</text></svg>">
+  <style>
+    .status-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; margin:2rem 0; }
+    .status-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:1.4rem; backdrop-filter:blur(12px); }
+    .status-card h3 { color:#fff; font-size:0.95rem; margin:0 0 0.8rem; display:flex; align-items:center; gap:0.5rem; }
+    .status-card p { color:var(--text-secondary); font-size:0.85rem; line-height:1.7; margin:0; }
+    .status-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .dot-green { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,0.5); }
+    .dot-yellow { background:#facc15; box-shadow:0 0 6px rgba(250,204,21,0.5); }
+    .liril-bar { font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:rgba(0,212,255,0.7); padding:0.7rem 0; display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .pipeline-flow { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:1.5rem; margin:2rem 0; font-family:'JetBrains Mono',monospace; }
+    .pipeline-flow pre { color:var(--text-secondary); font-size:0.8rem; line-height:1.8; white-space:pre-wrap; margin:0; }
+    .metric-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.85rem; }
+    .metric-row:last-child { border-bottom:none; }
+    .metric-label { color:var(--text-tertiary); }
+    .metric-value { color:#fff; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="content">
+    <section class="page-hero">
+      <div class="hero-tag">SYSTEM — CI/CD STATUS</div>
+      <h1>Build Pipeline Status</h1>
+      <p class="hero-sub">TENET5 Canadian Accountability Project — build, classify, deploy pipeline health.</p>
+    </section>
+
+    <div class="liril-bar">
+      <span>🧠 LIRIL NPU — CI/CD → META [system-page]</span>
+      <span>SEED:118400</span>
+      <span>SATOR·OPERA·row3</span>
+      <span>NATS:4223</span>
+    </div>
+
+    <div class="status-grid">
+      <div class="status-card">
+        <h3><span class="status-dot dot-green"></span> GitHub Pages</h3>
+        <p>Production deployment via <code>git push origin main</code> to TENET-5.github.io. Static HTML — no server-side processing. Pages deploy automatically on push.</p>
+        <div style="margin-top:1rem;">
+          <div class="metric-row"><span class="metric-label">Repo</span><span class="metric-value">TENET-5/TENET-5.github.io</span></div>
+          <div class="metric-row"><span class="metric-label">Branch</span><span class="metric-value">main</span></div>
+          <div class="metric-row"><span class="metric-label">Type</span><span class="metric-value">Static HTML</span></div>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <h3><span class="status-dot dot-green"></span> LIRIL Classification</h3>
+        <p>NPU classification engine. Processes records at build time. SEED:118400, tick:118.4Hz. All classifications baked into static HTML — no runtime dependency.</p>
+        <div style="margin-top:1rem;">
+          <div class="metric-row"><span class="metric-label">SEED</span><span class="metric-value">118400</span></div>
+          <div class="metric-row"><span class="metric-label">Records</span><span class="metric-value">1,105</span></div>
+          <div class="metric-row"><span class="metric-label">Categories</span><span class="metric-value">6</span></div>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <h3><span class="status-dot dot-green"></span> Staging Pipeline</h3>
+        <p>Development at <code>tenet5-pages-tmp/</code>. Changes reviewed, CSS validated, links audited, then promoted to production.</p>
+        <div style="margin-top:1rem;">
+          <div class="metric-row"><span class="metric-label">Staging</span><span class="metric-value">tenet5-pages-tmp/</span></div>
+          <div class="metric-row"><span class="metric-label">Production</span><span class="metric-value">TENET-5.github.io/</span></div>
+          <div class="metric-row"><span class="metric-label">Sync</span><span class="metric-value">Manual promote</span></div>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <h3><span class="status-dot dot-green"></span> NATS Backbone</h3>
+        <p>Message transport for build-time classification. LIRIL publishes to <code>tenet.liril.classify</code>, receives results on <code>tenet.liril.result</code>. Not required at page load.</p>
+        <div style="margin-top:1rem;">
+          <div class="metric-row"><span class="metric-label">Port</span><span class="metric-value">4223</span></div>
+          <div class="metric-row"><span class="metric-label">Protocol</span><span class="metric-value">NATS</span></div>
+          <div class="metric-row"><span class="metric-label">Required at runtime</span><span class="metric-value">No</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-family:'Playfair Display',serif;color:#fff;margin:2rem 0 1rem;">Build Pipeline</h2>
+
+    <div class="pipeline-flow">
+      <pre>
+Records (accountability.html)
+    ↓
+LIRIL NPU classify (SEED:118400)
+    ↓  tenet.liril.classify → tenet.liril.result
+    ↓
+HTML data attributes baked:
+    data-type, data-level, data-party, data-search
+    ↓
+Staging (tenet5-pages-tmp/)
+    ↓  CSS audit, link check, nav verify
+    ↓
+Production (TENET-5.github.io/)
+    ↓  git add → git commit → git push origin main
+    ↓
+GitHub Pages CDN → tenet-5.github.io
+      </pre>
+    </div>
+
+    <h2 style="font-family:'Playfair Display',serif;color:#fff;margin:2rem 0 1rem;">Site Inventory</h2>
+
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:1.4rem;margin:1rem 0;">
+      <div class="metric-row"><span class="metric-label">accountability.html</span><span class="metric-value">1,105 records — The 504 Database</span></div>
+      <div class="metric-row"><span class="metric-label">records.html</span><span class="metric-value">Gateway/index page for the 504</span></div>
+      <div class="metric-row"><span class="metric-label">arrivecan.html</span><span class="metric-value">ArriveCAN — $59.5M investigation</span></div>
+      <div class="metric-row"><span class="metric-label">foreign-interference.html</span><span class="metric-value">Foreign Interference — Hogue Commission</span></div>
+      <div class="metric-row"><span class="metric-label">maid-accountability.html</span><span class="metric-value">MAID — 60,167+ deaths</span></div>
+      <div class="metric-row"><span class="metric-label">rcmp-commissioners.html</span><span class="metric-value">RCMP Commissioners — 4 profiles</span></div>
+      <div class="metric-row"><span class="metric-label">senate-expenses.html</span><span class="metric-value">Senate Expense Scandal</span></div>
+      <div class="metric-row"><span class="metric-label">ag-findings.html</span><span class="metric-value">Auditor General Findings</span></div>
+      <div class="metric-row"><span class="metric-label">phoenix-pay.html</span><span class="metric-value">Phoenix Pay System</span></div>
+      <div class="metric-row"><span class="metric-label">scandals.html</span><span class="metric-value">Political Scandals Timeline</span></div>
+      <div class="metric-row"><span class="metric-label">carney-conflicts.html</span><span class="metric-value">Carney–Brookfield Conflicts</span></div>
+      <div class="metric-row"><span class="metric-label">cfnis.html</span><span class="metric-value">CFNIS Investigation</span></div>
+      <div class="metric-row"><span class="metric-label">s504-covey-bae.html</span><span class="metric-value">s.504 Private Prosecution — Covey &amp; Bae</span></div>
+      <div class="metric-row"><span class="metric-label">indigenous-accountability.html</span><span class="metric-value">Indigenous Accountability — TRC, MMIWG</span></div>
+      <div class="metric-row"><span class="metric-label">liril-analysis.html</span><span class="metric-value">LIRIL NPU Classification System</span></div>
+      <div class="metric-row"><span class="metric-label">dossier-viewer.html</span><span class="metric-value">Dossier Viewer</span></div>
+      <div class="metric-row"><span class="metric-label">charges-sheet.html</span><span class="metric-value">Charges Sheet</span></div>
+    </div>
+
+    <div style="text-align:center;margin:2.5rem 0;">
+      <a href="index.html" style="display:inline-block;padding:0.8rem 1.5rem;background:#c41e3a;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;">← Home</a>
+      <a href="liril-analysis.html" style="display:inline-block;padding:0.8rem 1.5rem;background:transparent;color:var(--text-secondary);text-decoration:none;border:2px solid var(--border);border-radius:6px;font-weight:700;margin-left:1rem;">LIRIL Analysis</a>
+    </div>
+  </div>
+
+<script src="nav.js?v=9"></script>
+<div id="read-next"></div>
+<footer id="site-footer"></footer>
+<script src="share.js?v=1"></script>
+<script src="readnext.js?v=2"></script>
+<script src="footer.js?v=2"></script>
+</body>
+</html>
