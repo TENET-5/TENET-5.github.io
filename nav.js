@@ -14,12 +14,12 @@
  *  - Recently visited pages (localStorage)
  *  - Reading progress bar
  *  - Keyboard shortcuts (/, ?, Escape, h, j, k)
- *  - TENET5 OSINT domain classification badges
+ *  - Domain classification badges
  *
  * Include this script in every page: <script src="nav.js?v=9"></script>
  * Place a <nav id="site-nav"></nav> element where the nav should appear.
  *
- * TENET5 OSINT/SATOR: BUFFER gate — navigational routing for all content
+ * Navigation routing for all content
  */
 (function () {
   'use strict';
@@ -33,16 +33,16 @@
       items: [
         { label: 'Investigation Board', href: 'conspiracy-board.html', desc: 'Node graph of influence networks' },
         { label: 'OSINT Dashboard', href: 'osint-dashboard.html', desc: 'Aggregated intelligence data' },
-        { label: 'Anomaly Radar', href: 'anomaly-radar.html', desc: 'AI-driven anomaly detection', hot: true },
-        { label: 'Predictive Forecast', href: 'predictive-forecast.html', desc: 'AI-driven heuristic mapping', hot: true },
-        { label: 'Sentiment Matrix', href: 'sentiment-matrix.html', desc: 'Social polarity heuristics', hot: true },
-        { label: 'Knowledge Graph', href: 'knowledge-graph.html', desc: 'Relational logic mapping', hot: true },
-        { label: 'Entity Registry', href: 'entity-registry.html', desc: 'Formal disambiguation map', hot: true },
-        { label: 'Contextual Reasoning', href: 'contextual-reasoning.html', desc: 'AI deductive logic inferences', hot: true },
-        { label: 'System Health', href: 'system-health.html', desc: 'Daemon loop & infrastructure monitor', hot: true },
-        { label: 'Dark Web Intelligence', href: 'darkweb-intel.html', desc: 'Autonomous Tor indexing feeds', hot: true },
-        { label: 'Social Media Intelligence', href: 'social-intel.html', desc: 'Social platform extraction matrix', hot: true },
-        { label: 'Threat Intelligence', href: 'threat-intel.html', desc: 'IOC and network vector mapping', hot: true },
+        { label: 'Anomaly Radar', href: 'anomaly-radar.html', desc: 'AI-driven anomaly detection', hot: true, coming: true },
+        { label: 'Predictive Forecast', href: 'predictive-forecast.html', desc: 'AI-driven heuristic mapping', hot: true, coming: true },
+        { label: 'Sentiment Matrix', href: 'sentiment-matrix.html', desc: 'Social polarity heuristics', hot: true, coming: true },
+        { label: 'Knowledge Graph', href: 'knowledge-graph.html', desc: 'Relational logic mapping', hot: true, coming: true },
+        { label: 'Entity Registry', href: 'entity-registry.html', desc: 'Formal disambiguation map', hot: true, coming: true },
+        { label: 'Contextual Reasoning', href: 'contextual-reasoning.html', desc: 'AI deductive logic inferences', hot: true, coming: true },
+        { label: 'System Health', href: 'system-health.html', desc: 'Infrastructure monitor', hot: true, coming: true },
+        { label: 'Dark Web Intelligence', href: 'darkweb-intel.html', desc: 'Tor indexing feeds', hot: true, coming: true },
+        { label: 'Social Media Intelligence', href: 'social-intel.html', desc: 'Social platform extraction matrix', hot: true, coming: true },
+        { label: 'Threat Intelligence', href: 'threat-intel.html', desc: 'IOC and network vector mapping', hot: true, coming: true },
         { label: 'Entity Profiler', href: 'entity-viewer.html', desc: 'Chronological timeline & documents', hot: true },
         { label: 'Network Analysis', href: 'network-analysis.html', desc: 'Cross-referenced topology', hot: true },
         { label: 'N-vs-NP Matrix', href: 'corruption-map.html#n-vs-np', desc: 'TENET5 OSINT Pipeline Convergence', hot: true },
@@ -74,7 +74,7 @@
         { label: 'Judicial Appointments', href: 'judicial-appointments.html', desc: 'Politicized bench, bail collapse, legal aid deserts', hot: true },
         { label: 'Privacy & Surveillance', href: 'privacy-surveillance.html', desc: 'C-26, C-11, C-63 — warrantless surveillance state', hot: true },
         { label: 'Media Concentration', href: 'media-concentration.html', desc: '3 conglomerates, $1.4B CBC, death of independent press', hot: true },
-        { label: 'Telecom Oligopoly', href: 'telecom-oligopoly.html', desc: 'Big Three 87% market share, CRTC capture, highest OECD prices', hot: true },
+        { label: 'Telecom Oligopoly', href: 'telecom-oligopoly.html', desc: 'Big Three 87% market share, CRTC capture, highest OECD prices', hot: true, coming: true },
       ]
     },
     {
@@ -176,7 +176,7 @@
       items: [
         { label: 'Red Duster FPS', href: 'red-duster-game.html', desc: 'Tactical simulator', special: 'game' },
         { label: 'Bloggins', href: 'bloggins.html', desc: 'Raccoon intelligence AI', special: 'green' },
-        { label: 'TENET5 OSINT (AI)', href: 'liril.html', desc: "Daniel Perry's private AI system", hot: true },
+        { label: 'OSINT AI', href: 'liril.html', desc: "AI research system", hot: true, coming: true },
         { label: 'Search', href: 'search.html', desc: 'Full-site search' },
         { label: 'Report Generator', href: 'report-generator.html', desc: 'Generate investigation reports' },
         { label: 'AI Research', href: 'ai-research.html', desc: 'AI-powered research tools' },
@@ -188,8 +188,8 @@
       icon: '💬',
       domain: 'ART',
       items: [
-        { label: 'Live Chat', href: 'chat.html', desc: 'Real-time discussion', hot: true },
-        { label: 'AI Research', href: 'chat.html#ai', desc: 'Gemini-powered analysis', hot: true },
+        { label: 'Live Chat', href: 'chat.html', desc: 'Real-time discussion', hot: true, coming: true },
+        { label: 'AI Research', href: 'chat.html#ai', desc: 'Gemini-powered analysis', hot: true, coming: true },
         { label: 'News Intelligence', href: 'news.html', desc: 'Canadian news aggregation', hot: true },
         { label: 'Community Hub', href: 'community.html', desc: 'Join the community' },
       ]
@@ -318,12 +318,20 @@
         var cls = 't5-mega-link';
         if (item.href === currentPage) cls += ' active';
         if (item.hot) cls += ' hot';
+        if (item.coming) cls += ' coming';
         if (item.special === 'game') cls += ' game';
         if (item.special === 'green') cls += ' green';
-        html += '<a href="' + item.href + '" class="' + cls + '">';
-        html += '<span class="t5-ml-name">' + item.label + '</span>';
-        html += '<span class="t5-ml-desc">' + item.desc + '</span>';
-        html += '</a>';
+        if (item.coming) {
+          html += '<span class="' + cls + '" style="opacity:0.5;cursor:default">';
+          html += '<span class="t5-ml-name">' + item.label + ' <small style="color:#ffcc00;font-size:0.7em">COMING SOON</small></span>';
+          html += '<span class="t5-ml-desc">' + item.desc + '</span>';
+          html += '</span>';
+        } else {
+          html += '<a href="' + item.href + '" class="' + cls + '">';
+          html += '<span class="t5-ml-name">' + item.label + '</span>';
+          html += '<span class="t5-ml-desc">' + item.desc + '</span>';
+          html += '</a>';
+        }
       }
       html += '</div></div>';
     }
