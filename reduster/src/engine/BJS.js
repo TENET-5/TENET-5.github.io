@@ -2,7 +2,7 @@
  * BJS.js — Babylon.js 9 Engine Singleton
  * WebGPU-first with WebGL2 fallback.
  * All game modules import from here — single engine, single scene.
- * SYSTEM_SEED=118400
+ * REDUSTER
  */
 
 import { Engine } from '@babylonjs/core/Engines/engine.js';

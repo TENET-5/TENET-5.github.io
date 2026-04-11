@@ -1,7 +1,7 @@
 ﻿/**
  * n vs np mellenial falcon systems + emperical magic handoff memory systems etcClaw Gemini Client — Google Gemini AI SDK wrapper
  * Runs client-side in the browser via ESM import.
- * SEED=118400 | Created by Daniel Perry
+ * Created by Daniel Perry
  */
 
 let genAI = null;
@@ -123,7 +123,7 @@ export async function initGemini(apiKey) {
  */
 export async function testConnection() {
   if (!model) throw new Error('Gemini not initialized. Call initGemini() first.');
-  const result = await model.generateContent('Say "n vs np mellenial falcon systems + emperical magic handoff memory systems etc online. SEED=118400." and nothing else.');
+  const result = await model.generateContent('Say "connection test OK" and nothing else.');
   return result.response.text();
 }
 

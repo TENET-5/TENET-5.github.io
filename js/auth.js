@@ -1,7 +1,6 @@
 /**
  * auth.js — Supabase OAuth2 (Google + X/Twitter) authentication
- * TENET5 Canadian Government Accountability Investigation
- * SEED=118400
+ * Canadian Government Accountability Investigation
  *
  * Setup: Create a free project at https://supabase.com
  *   1. Enable Google OAuth in Auth → Providers → Google

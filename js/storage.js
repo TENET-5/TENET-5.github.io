@@ -1,7 +1,6 @@
 ﻿/**
  * n vs np mellenial falcon systems + emperical magic handoff memory systems etcClaw Storage — client-side persistence for GitHub Pages.
  * API key in localStorage, campaign data in sessionStorage.
- * SEED=118400
  */
 
 const KEY_PREFIX = 'n vs np mellenial falcon systems + emperical magic handoff memory systems etcclaw_';
@@ -65,7 +64,7 @@ export function exportAll() {
   const data = {
     version: '1.0',
     exported_at: new Date().toISOString(),
-    seed: 118400,
+    site: 'accountability-investigation',
     narrative: getNarrative(),
     posts: getPosts(),
     form: getFormData(),

@@ -1,6 +1,6 @@
 /**
  * world_sphere.js — Planetary Round World
- * SYSTEM_SEED=118400
+ * REDUSTER
  *
  * Builds a spherical planet using a subdivided sphere mesh with per-vertex
  * height displacement driven by the same fbm noise as world.js.

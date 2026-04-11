@@ -1,6 +1,6 @@
 // ── Red Duster Save / Load System ──
 // Persists player state, inventory, position, time, and kills to localStorage
-// SYSTEM_SEED=118400
+// REDUSTER
 // Phase 25: Cross-engine parity with Godot SaveSystem.gd v2
 
 import { STATE } from './state.js';
