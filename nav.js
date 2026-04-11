@@ -39,6 +39,7 @@
         { label: 'Knowledge Graph', href: 'knowledge-graph.html', desc: 'Relational logic mapping', hot: true },
         { label: 'Entity Registry', href: 'entity-registry.html', desc: 'Formal disambiguation map', hot: true },
         { label: 'Contextual Reasoning', href: 'contextual-reasoning.html', desc: 'AI deductive logic inferences', hot: true },
+        { label: 'System Health', href: 'system-health.html', desc: 'Daemon loop & infrastructure monitor', hot: true },
         { label: 'Dark Web Intelligence', href: 'darkweb-intel.html', desc: 'Autonomous Tor indexing feeds', hot: true },
         { label: 'Social Media Intelligence', href: 'social-intel.html', desc: 'Social platform extraction matrix', hot: true },
         { label: 'Threat Intelligence', href: 'threat-intel.html', desc: 'IOC and network vector mapping', hot: true },
