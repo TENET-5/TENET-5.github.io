@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predictive Forecast | TENET5 Analytics</title>
+  <meta name="description" content="TENET5 Autonomous Predictive Heuristics. Projecting timeline volatility.">
+  <meta name="theme-color" content="#050810">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x23F3;</text></svg>">
+  <link rel="stylesheet" href="style.css?v=6">
+  <style>
+    .forecast-wrap { max-width: 1050px; margin: 0 auto; padding: 20px; font-family: 'JetBrains Mono', 'Courier New', monospace; color: var(--text-primary); }
+
+    .forecast-header { text-align: center; padding: 30px 0 20px; border-bottom: 2px solid #8b5cf6; margin-bottom: 30px; }
+    .forecast-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #8b5cf6; letter-spacing: -1px; margin-bottom: 8px; }
+    .forecast-header .subtitle { font-size: 0.85rem; color: var(--text-tertiary); }
+
+    .sys-status { 
+      background: rgba(139, 92, 246, 0.05); 
+      border: 1px solid rgba(139, 92, 246, 0.3); 
+      border-radius: 8px; 
+      padding: 14px 20px; 
+      margin-bottom: 24px; 
+      font-size: 0.75rem; 
+      color: #8b5cf6; 
+      text-transform: uppercase; 
+      letter-spacing: 1.5px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sys-status .label { color: var(--text-tertiary); }
+    .sys-status .online { color: #8b5cf6; font-weight: 700; animation: blink 2s infinite;}
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .prediction-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .prediction-card {
+        background: #0a0a0c;
+        border-top: 4px solid #8b5cf6;
+        border-radius: 6px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .p-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #222; padding-bottom: 10px;}
+    .p-type { font-weight: bold; color: #fff; font-size: 1rem; font-family: 'Inter', sans-serif;}
+    .p-conf { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;}
+    
+    .p-horizon { font-size: 0.8rem; color: #f59e0b; margin-top: -5px;}
+    
+    .p-projection {
+        font-size: 0.9rem;
+        color: #c8c8ce;
+        line-height: 1.5;
+        font-family: "Inter", sans-serif;
+    }
+
+    .p-meta {
+        font-size: 0.65rem;
+        color: #666;
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 1px dashed #222;
+    }
+    .hash { color: #8b5cf6; word-break: break-all;}
+
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="forecast-wrap">
+    <div class="forecast-header">
+      <h1>Predictive Forecast</h1>
+      <div class="subtitle">Heuristic Timeline Projection Matrix</div>
+    </div>
+
+    <div class="sys-status">
+      <div><span class="label">Scanner Loop:</span> <span class="online">ACTIVE TICK (300s)</span></div>
+      <div><span class="label">Confidence Gate:</span> HEURISTIC BAYESIAN</div>
+      <div><span class="label">Active Forecasts:</span> <span id="idx-count">0</span></div>
+    </div>
+
+    <div class="prediction-grid" id="prediction-list">
+        <div id="loader" style="padding:20px; color:#8b5cf6; font-size:0.8rem; text-align:center;">GENERATING TEMPORAL MODELS...</div>
+    </div>
+  </div>
+
+  <script src="nav.js?v=11"></script>
+  <script>
+    const tpTpl = buildNavHtml();
+    document.getElementById('nav-placeholder').innerHTML = tpTpl;
+    if(typeof attachNavEvents === 'function') attachNavEvents();
+
+    async function fetchPredictions() {
+        try {
+            const response = await fetch('http://127.0.0.1:8091/api/predictions');
+            if(!response.ok) throw new Error('Daemon Offline');
+            
+            const payload = await response.json();
+            
+            if (payload && payload.status === "success") {
+                const results = payload.data || [];
+                document.getElementById('idx-count').innerText = results.length;
+                renderList(results);
+            }
+        } catch(error) {
+            console.error(error);
+            document.getElementById('idx-count').innerText = "DISCONNECTED";
+            document.getElementById('prediction-list').innerHTML = `<div style="text-align:center; color:#ef4444; margin-top:40px; width:100%;">ERROR: STARK PREDICTIVE BRIDGE OFFLINE. START UNIFIED DAEMON.</div>`;
+        }
+    }
+
+    function renderList(results) {
+        const listDiv = document.getElementById('prediction-list');
+        listDiv.innerHTML = "";
+
+        if (results.length === 0) {
+            listDiv.innerHTML = `<div style="color:#888; padding:20px; text-align:center; width: 100%;">No forecasts generated. System baseline flat.</div>`;
+            return;
+        }
+
+        results.forEach((item) => {
+            const timeStr = new Date(item.timestamp * 1000).toLocaleString();
+            
+            const el = document.createElement('div');
+            el.className = "prediction-card";
+            el.innerHTML = `
+                <div class="p-head">
+                    <div class="p-type">${item.forecast_type.replace(/_/g, ' ')}</div>
+                    <div class="p-conf">${item.confidence_score}% CONF</div>
+                </div>
+                <div class="p-horizon">Timeline Horizon: ${item.temporal_horizon}</div>
+                <div class="p-projection">
+                    ${item.projection}
+                </div>
+                <div class="p-meta">
+                    <div>Generated: ${timeStr}</div>
+                    <div class="hash">${item.crypto_signature}</div>
+                </div>
+            `;
+            listDiv.appendChild(el);
+        });
+    }
+
+    fetchPredictions();
+    setInterval(fetchPredictions, 30000); // Poll every 30s
+  </script>
+</body>
+</html>
