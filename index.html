@@ -210,6 +210,33 @@
           <p>Comparing modern medical demographics to the Aktion T4 precursor.</p>
         </div>
       </a>
+
+      <!-- Card 5: MAID Death Timeline -->
+      <a href="accountability.html" class="media-card">
+        <img class="lazy" src="img/infographics/maid_death_timeline.png" alt="MAID Deaths Timeline 2016-2024 — 76,475 Cumulative Deaths" loading="lazy">
+        <div class="media-card-content">
+          <h3>The Death Curve</h3>
+          <p>Year-by-year MAID death acceleration. 1,018 in 2016 → 16,265 in 2024. The numbers don't lie.</p>
+        </div>
+      </a>
+
+      <!-- Card 6: Follow the Money -->
+      <a href="cross-reference.html" class="media-card">
+        <img class="lazy" src="img/infographics/follow_the_money.png" alt="Follow the Money — $1.2B tracked through lobbying and donations" loading="lazy">
+        <div class="media-card-content">
+          <h3>Follow the Money</h3>
+          <p>$1.2 billion in political money traced. 350K lobbying contacts. See who paid who.</p>
+        </div>
+      </a>
+
+      <!-- Card 7: Section 504 How-To -->
+      <a href="charges-sheet.html" class="media-card">
+        <img class="lazy" src="img/infographics/section_504_howto.png" alt="How to use Section 504 — Private Criminal Prosecution" loading="lazy">
+        <div class="media-card-content">
+          <h3>How s.504 Works</h3>
+          <p>Any Canadian citizen can lay criminal charges. Here's the step-by-step process.</p>
+        </div>
+      </a>
     </div>
 
     <!-- Data methodology callout -->
@@ -494,6 +521,118 @@
   <!-- No external AI/API integrations — all data is local, all analysis is sourced from public records -->
 
   <!-- board.js removed from index — content must be visible on landing (Stanford credibility) -->
-  <!-- Investigation board available at conspiracy-board.html -->
+
+  <!-- Scroll-Reveal Animation Engine -->
+  <style>
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .media-card {
+      opacity: 0;
+      transform: translateY(40px) scale(0.97);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .media-card.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .stat-hero-item {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .stat-hero-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Stagger the stat items */
+    .stat-hero-item:nth-child(1) { transition-delay: 0.1s; }
+    .stat-hero-item:nth-child(2) { transition-delay: 0.2s; }
+    .stat-hero-item:nth-child(3) { transition-delay: 0.3s; }
+    .stat-hero-item:nth-child(4) { transition-delay: 0.4s; }
+    .stat-hero-item:nth-child(5) { transition-delay: 0.5s; }
+    /* Stagger the media cards */
+    .media-card:nth-child(1) { transition-delay: 0.05s; }
+    .media-card:nth-child(2) { transition-delay: 0.15s; }
+    .media-card:nth-child(3) { transition-delay: 0.25s; }
+    .media-card:nth-child(4) { transition-delay: 0.35s; }
+    .media-card:nth-child(5) { transition-delay: 0.45s; }
+    .media-card:nth-child(6) { transition-delay: 0.55s; }
+    .media-card:nth-child(7) { transition-delay: 0.65s; }
+
+    /* Pulse animation for the death count */
+    @keyframes pulseRed {
+      0%, 100% { text-shadow: 0 0 10px rgba(239,68,68,0); }
+      50% { text-shadow: 0 0 25px rgba(239,68,68,0.4); }
+    }
+    .stat-hero-num:first-child { animation: pulseRed 3s infinite; }
+
+    /* Subtle glow on media cards hover */
+    .media-card:hover img {
+      transform: scale(1.03);
+      transition: transform 0.4s ease;
+    }
+  </style>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // Scroll-reveal observer
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    // Observe all revealable elements
+    document.querySelectorAll('.media-card, .stat-hero-item, .narrative-intro, .credibility-card, [class*="section"]').forEach(function(el) {
+      observer.observe(el);
+    });
+
+    // Animated stat counter
+    function animateCounter(el, target, duration) {
+      var start = 0;
+      var startTime = null;
+      var isComma = target.indexOf(',') !== -1;
+      var numTarget = parseInt(target.replace(/[^0-9]/g, ''), 10);
+      if (isNaN(numTarget) || numTarget === 0) return;
+
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        var current = Math.floor(eased * numTarget);
+        el.textContent = current.toLocaleString('en-CA');
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = target; // ensure exact final value
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Counter observer
+    var counterObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && !entry.target.dataset.counted) {
+          entry.target.dataset.counted = '1';
+          var text = entry.target.textContent.trim();
+          animateCounter(entry.target, text, 1800);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-hero-num').forEach(function(el) {
+      counterObserver.observe(el);
+    });
+  })();
+  </script>
 </body>
 </html>
