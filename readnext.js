@@ -55,6 +55,22 @@
         { href: 'voting-records.html', label: 'Voting Records', desc: 'How every party voted on every bill' },
       ]
     },
+    'epstein-maxwell.html': {
+      current: 'Epstein & Maxwell Network',
+      next: [
+        { href: 'epstein-canadian-connections.html', label: 'Canadian Political Entanglement', desc: 'SDNY records mapping deeper Canadian institutional intersections' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'How lobbying translates to systemic decay' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Browse the unsealed records' },
+      ]
+    },
+    'epstein-canadian-connections.html': {
+      current: 'Canadian Political Entanglement',
+      next: [
+        { href: 'epstein-maxwell.html', label: 'Epstein & Maxwell Network', desc: 'The elite global trafficking structure' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: 'Review the actual accountability tracking database' },
+        { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: 'Browse the remaining 12 OSINT targets' },
+      ]
+    },
     'accountability.html': {
       current: 'The 504 Database',
       next: [
