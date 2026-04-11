@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIRIL NPU Analysis — AI Classification System | TENET5</title>
+  <meta name="description" content="How LIRIL classifies Canadian government accountability records. NPU architecture, SATOR routing, classification categories, and methodology documentation.">
+  <meta property="og:title" content="LIRIL NPU Analysis — Classification Methodology">
+  <meta property="og:description" content="LIRIL is the Neural Processing Unit that classifies every record in The 504 Database. SEED:118400. SATOR·OPERA routing. Built on TENET5 mesh architecture.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/liril-analysis.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-analysis.html">
+  <link rel="stylesheet" href="style.css?v=8">
+  <meta name="theme-color" content="#050810">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F9E0;</text></svg>">
+  <style>
+    .inv-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin:2rem 0; }
+    .inv-stat { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:1.2rem; text-align:center; backdrop-filter:blur(12px); }
+    .inv-stat .num { font-size:1.8rem; font-weight:900; font-family:'JetBrains Mono',monospace; display:block; }
+    .inv-stat .lbl { font-size:0.72rem; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-top:0.3rem; }
+    .num-cyan { color:#00d4ff; } .num-gold { color:#facc15; } .num-blue { color:#3b82f6; } .num-purple { color:#a855f7; }
+    .timeline-section { padding:2rem 0; border-bottom:1px solid var(--border); }
+    .timeline-section:last-child { border-bottom:none; }
+    .liril-bar { font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:rgba(0,212,255,0.7); padding:0.7rem 0; display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .arch-box { background:var(--bg-card); border:1px solid rgba(0,212,255,0.2); border-radius:var(--r-md); padding:1.4rem; margin:1rem 0; font-family:'JetBrains Mono',monospace; }
+    .arch-box h4 { color:#00d4ff; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.1em; margin:0 0 0.8rem; }
+    .arch-box pre { color:var(--text-secondary); font-size:0.82rem; line-height:1.7; margin:0; white-space:pre-wrap; overflow-x:auto; }
+    .class-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; margin:1.5rem 0; }
+    .class-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:1.2rem; }
+    .class-card h4 { margin:0 0 0.5rem; font-size:0.95rem; }
+    .class-card .pct { font-family:'JetBrains Mono',monospace; font-size:1.2rem; font-weight:900; }
+    .class-card p { color:var(--text-secondary); font-size:0.82rem; line-height:1.6; margin:0.5rem 0 0; }
+    .method-step { display:flex; gap:1rem; align-items:flex-start; margin:1.2rem 0; }
+    .step-num { min-width:36px; height:36px; display:flex; align-items:center; justify-content:center; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:50%; color:#00d4ff; font-weight:900; font-family:'JetBrains Mono',monospace; font-size:0.85rem; }
+    .step-content { flex:1; }
+    .step-content h4 { color:#fff; font-size:0.92rem; margin:0 0 0.3rem; }
+    .step-content p { color:var(--text-secondary); font-size:0.85rem; line-height:1.7; margin:0; }
+    .source-cite { font-size:0.78rem; color:var(--text-tertiary); font-style:italic; margin-top:1rem; border-top:1px solid var(--border); padding-top:0.8rem; }
+    .sator-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:2px; max-width:300px; margin:1.5rem auto; font-family:'JetBrains Mono',monospace; text-align:center; }
+    .sator-cell { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); padding:0.6rem; font-size:0.9rem; font-weight:700; color:#00d4ff; }
+    .sator-cell.active { background:rgba(0,212,255,0.15); color:#fff; }
+  </style>
+</head>
+<body>
+  <nav id="site-nav"></nav>
+
+  <div class="content">
+    <section class="page-hero">
+      <div class="hero-tag">🧠 SYSTEM — LIRIL NPU</div>
+      <h1>LIRIL Classification System</h1>
+      <p class="hero-sub">Every record in The 504 Database is classified by LIRIL — the Neural Processing Unit at the core of TENET5. This page documents how LIRIL processes, classifies, and routes accountability records. All classifications are baked at build time, not generated dynamically, ensuring reproducibility and auditability.</p>
+    </section>
+
+    <div class="liril-bar">
+      <span>🧠 LIRIL NPU — Self-Reference → META 100% [system-page]</span>
+      <span>SEED:118400</span>
+      <span>tick:118.4Hz</span>
+      <span>SATOR·OPERA·row3</span>
+      <span>NATS:4223 ✓</span>
+    </div>
+
+    <div class="inv-stat-grid">
+      <div class="inv-stat"><span class="num num-cyan">118,400</span><span class="lbl">SEED Value</span></div>
+      <div class="inv-stat"><span class="num num-gold">118.4Hz</span><span class="lbl">Tick Rate</span></div>
+      <div class="inv-stat"><span class="num num-blue">1,105</span><span class="lbl">Records Classified</span></div>
+      <div class="inv-stat"><span class="num num-purple">6</span><span class="lbl">Classification Categories</span></div>
+      <div class="inv-stat"><span class="num num-cyan">5×5×5</span><span class="lbl">Loom Dimensions</span></div>
+      <div class="inv-stat"><span class="num num-gold">NATS</span><span class="lbl">Message Backbone</span></div>
+    </div>
+
+    <!-- What is LIRIL -->
+    <div class="timeline-section">
+      <h2 style="font-family:'Playfair Display',serif;color:#fff;border-bottom:3px solid rgba(0,212,255,0.5);display:inline-block;padding-bottom:0.3rem;">What is LIRIL?</h2>
+
+      <p style="color:var(--text-secondary);line-height:1.8;margin:1rem 0;">LIRIL is the ethics gate and classification engine of the TENET5 system. Named for the palindromic center of the SATOR square (SATOR → AREPO → TENET → OPERA → ROTAS), LIRIL processes every input through a deterministic classification pipeline before any other agent sees it.</p>
+
+      <p style="color:var(--text-secondary);line-height:1.8;">In the context of The 504 Database, LIRIL classifies each government accountability record into one of six categories based on keyword analysis, source verification, and severity assessment. The classification results appear as banners on investigation pages and as data attributes on individual records.</p>
+
+      <div class="arch-box">
+        <h4>Architecture</h4>
+        <pre>
+Input Record
+    ↓
+LIRIL NPU (SEED:118400)
+    ↓
+┌─────────────────────────────┐
+│  1. Keyword extraction      │
+│  2. Source verification     │
+│  3. Severity scoring        │
+│  4. Category assignment     │
+│  5. Confidence calculation  │
+│  6. SATOR routing           │
+└─────────────────────────────┘
+    ↓
+Classification Result
+    ↓
+NATS publish → tenet.liril.classify
+    ↓
+Build-time bake → HTML data attributes
+        </pre>
+      </div>
+    </div>
+
+    <!-- SATOR Square -->
+    <div class="timeline-section">
+      <h2 style="font-family:'Playfair Display',serif;color:#fff;border-bottom:3px solid rgba(0,212,255,0.5);display:inline-block;padding-bottom:0.3rem;">The SATOR Square</h2>
+
+      <p style="color:var(--text-secondary);line-height:1.8;margin:1rem 0;">LIRIL's routing is based on the SATOR square — a 5×5 Latin palindrome that reads the same in all directions. In the TENET5 architecture, each row of the SATOR square maps to a routing function:</p>
+
+      <div class="sator-grid">
+        <div class="sator-cell">S</div><div class="sator-cell">A</div><div class="sator-cell">T</div><div class="sator-cell">O</div><div class="sator-cell">R</div>
+        <div class="sator-cell">A</div><div class="sator-cell">R</div><div class="sator-cell">E</div><div class="sator-cell">P</div><div class="sator-cell">O</div>
+        <div class="sator-cell active">T</div><div class="sator-cell active">E</div><div class="sator-cell active">N</div><div class="sator-cell active">E</div><div class="sator-cell active">T</div>
+        <div class="sator-cell">O</div><div class="sator-cell">P</div><div class="sator-cell">E</div><div class="sator-cell">R</div><div class="sator-cell">A</div>
+        <div class="sator-cell">R</div><div class="sator-cell">O</div><div class="sator-cell">T</div><div class="sator-cell">A</div><div class="sator-cell">S</div>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.88rem;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:0.6rem 1rem;background:var(--bg-card);color:var(--text-tertiary);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--border);">Row</th>
+            <th style="text-align:left;padding:0.6rem 1rem;background:var(--bg-card);color:var(--text-tertiary);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--border);">Word</th>
+            <th style="text-align:left;padding:0.6rem 1rem;background:var(--bg-card);color:var(--text-tertiary);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--border);">Function</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Row 1</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;font-weight:700;">SATOR</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Sower — input ingestion, record creation</td></tr>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Row 2</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;font-weight:700;">AREPO</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Plough — data extraction, keyword parsing</td></tr>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);font-weight:700;">Row 3</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#fff;font-family:'JetBrains Mono',monospace;font-weight:900;">TENET</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#fff;font-weight:700;">Holds/Principle — classification decision, routing core</td></tr>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Row 4</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;font-weight:700;">OPERA</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Works — output generation, page building</td></tr>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Row 5</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;font-weight:700;">ROTAS</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Wheels — deployment, publishing, sync</td></tr>
+        </tbody>
+      </table>
+
+      <p style="color:var(--text-secondary);line-height:1.8;">LIRIL operates at Row 3 — TENET — the center axis. It is the pivot point between ingestion (rows 1–2) and output (rows 4–5). Every classification decision passes through the TENET row. The LIRIL bar on each page shows <code>SATOR·OPERA·row3</code> — indicating data was sown (SATOR), worked (OPERA), and classified at the center (row3 = TENET).</p>
+    </div>
+
+    <!-- Classification Categories -->
+    <div class="timeline-section">
+      <h2 style="font-family:'Playfair Display',serif;color:#fff;border-bottom:3px solid rgba(0,212,255,0.5);display:inline-block;padding-bottom:0.3rem;">Classification Categories</h2>
+
+      <p style="color:var(--text-secondary);line-height:1.8;margin:1rem 0;">LIRIL classifies each record into one of six categories. Classifications are deterministic — the same input always produces the same output given the same SEED value.</p>
+
+      <div class="class-grid">
+        <div class="class-card">
+          <h4 style="color:#dc2626;">CONVICTION</h4>
+          <span class="pct" style="color:#dc2626;">60 records</span>
+          <p>Criminal conviction documented. Individual found guilty by a court. Sentence recorded. Source: court records, Hansard, or official government announcements.</p>
+        </div>
+        <div class="class-card">
+          <h4 style="color:#f97316;">CHARGE</h4>
+          <span class="pct" style="color:#f97316;">93 records</span>
+          <p>Criminal charge laid but no conviction yet recorded. Includes charges by RCMP, provincial police, or via s.504 private prosecution. Presumption of innocence applies.</p>
+        </div>
+        <div class="class-card">
+          <h4 style="color:#a855f7;">ETHICS</h4>
+          <span class="pct" style="color:#a855f7;">24 records</span>
+          <p>Ethics violation found by the Conflict of Interest and Ethics Commissioner, Senate Ethics Officer, or provincial ethics commissioner. Not criminal, but documented breach of public trust standards.</p>
+        </div>
+        <div class="class-card">
+          <h4 style="color:#facc15;">SCANDAL</h4>
+          <span class="pct" style="color:#facc15;">774 records</span>
+          <p>Documented accountability failure: misuse of public funds, breach of public trust, failure to act, or systemic negligence. Source: Auditor General reports, parliamentary committee findings, investigative journalism with primary sources.</p>
+        </div>
+        <div class="class-card">
+          <h4 style="color:#3b82f6;">EXPENSE</h4>
+          <span class="pct" style="color:#3b82f6;">15 records</span>
+          <p>Improper expense claim documented by parliamentary expense auditors, AG, or Senate/House expense review processes. Typically involves ineligible claims, overclaiming, or dual-claiming.</p>
+        </div>
+        <div class="class-card">
+          <h4 style="color:#14b8a6;">CONFLICT</h4>
+          <span class="pct" style="color:#14b8a6;">14 records</span>
+          <p>Documented conflict of interest — personal financial interest intersecting with public duty. May or may not trigger a formal ethics investigation. Includes revolving door, post-office lobbying, and undisclosed interests.</p>
+        </div>
+      </div>
+
+      <p style="color:var(--text-tertiary);font-size:0.82rem;margin-top:1rem;">Record counts as of last build. Total: 1,105 records across all categories.</p>
+    </div>
+
+    <!-- Classification Methodology -->
+    <div class="timeline-section">
+      <h2 style="font-family:'Playfair Display',serif;color:#fff;border-bottom:3px solid rgba(0,212,255,0.5);display:inline-block;padding-bottom:0.3rem;">Classification Methodology</h2>
+
+      <p style="color:var(--text-secondary);line-height:1.8;margin:1rem 0;">Each record passes through a 5-step classification pipeline:</p>
+
+      <div class="method-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Keyword Extraction</h4>
+          <p>Record text is parsed for accountability-relevant keywords: "convicted", "charged", "ethics violation", "misuse of funds", "conflict of interest", etc. Keywords are weighted by specificity — "convicted in court" scores higher than "alleged misconduct".</p>
+        </div>
+      </div>
+
+      <div class="method-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Source Verification</h4>
+          <p>Each record's source is categorized: primary (court records, Hansard, AG reports), secondary (investigative journalism with primary source citations), or tertiary (general media). Primary sources receive highest confidence. Records with only tertiary sources are flagged for review.</p>
+        </div>
+      </div>
+
+      <div class="method-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Severity Scoring</h4>
+          <p>Records are scored on a severity scale based on: public impact (number of citizens affected), financial scale (dollars involved), institutional level (municipal/provincial/federal), and whether criminal conduct is documented.</p>
+        </div>
+      </div>
+
+      <div class="method-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Category Assignment</h4>
+          <p>Based on keyword match + source quality + severity, LIRIL assigns one of the six categories. The decision is deterministic — keyword-decisive means a strong keyword match overrides other signals. This is the <code>[keyword-decisive]</code> tag shown in LIRIL bars.</p>
+        </div>
+      </div>
+
+      <div class="method-step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>Confidence Calculation</h4>
+          <p>Final confidence percentage reflects how strongly the evidence supports the classification. 99% = primary source directly confirms category. 90%+ = strong keyword match with secondary source. Below 85% = flagged for manual review. Confidence is shown in the LIRIL bar on each page (e.g., "ETHICS 99%").</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Build-Time Baking -->
+    <div class="timeline-section">
+      <h2 style="font-family:'Playfair Display',serif;color:#fff;border-bottom:3px solid rgba(0,212,255,0.5);display:inline-block;padding-bottom:0.3rem;">Build-Time Baking</h2>
+
+      <p style="color:var(--text-secondary);line-height:1.8;margin:1rem 0;">LIRIL classifications are <strong>baked at build time</strong>, not computed on page load. This is a deliberate architectural choice:</p>
+
+      <ul style="color:var(--text-secondary);line-height:2;padding-left:1.5rem;">
+        <li><strong>Reproducibility:</strong> Given the same SEED (118400) and the same input data, LIRIL produces identical classifications every time</li>
+        <li><strong>Auditability:</strong> Every classification result is committed to the Git repository as static HTML. The full classification history is in version control</li>
+        <li><strong>No runtime dependency:</strong> The site works without any backend, API, or live connection to the TENET5 mesh. NATS is used during the build process, not at page load</li>
+        <li><strong>Tamper evidence:</strong> Because classifications are in Git, any modification is visible in the commit history. You cannot change a record's classification without creating a Git commit</li>
+      </ul>
+
+      <div class="arch-box">
+        <h4>Build Pipeline</h4>
+        <pre>
+Records (HTML) → LIRIL classify (SEED:118400)
+    ↓
+NATS publish: tenet.liril.classify → tenet.liril.result
+    ↓
+HTML data attributes written:
+  data-type="conviction|charge|ethics|scandal|expense|conflict"
+  data-level="federal|provincial|municipal"
+  data-party="lib|con|ndp|ind"
+    ↓
+Git commit → Git push → GitHub Pages deploy
+    ↓
+Static HTML served — no runtime classification
+        </pre>
+      </div>
+    </div>
+
+    <!-- NATS Integration -->
+    <div class="timeline-section">
+      <h2 style="font-family:'Playfair Display',serif;color:#fff;border-bottom:3px solid rgba(0,212,255,0.5);display:inline-block;padding-bottom:0.3rem;">NATS Integration</h2>
+
+      <p style="color:var(--text-secondary);line-height:1.8;margin:1rem 0;">LIRIL communicates over NATS (Neural Autonomic Transport System) on port 4223. The following subjects are used during the build process:</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.85rem;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:0.6rem 1rem;background:var(--bg-card);color:var(--text-tertiary);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--border);">Subject</th>
+            <th style="text-align:left;padding:0.6rem 1rem;background:var(--bg-card);color:var(--text-tertiary);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--border);">Direction</th>
+            <th style="text-align:left;padding:0.6rem 1rem;background:var(--bg-card);color:var(--text-tertiary);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--border);">Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;">tenet.liril.classify</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Build → LIRIL</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Submit record for classification</td></tr>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;">tenet.liril.result</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">LIRIL → Build</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Return classification result + confidence</td></tr>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;">tenet.liril.status</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">LIRIL → NATS</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Heartbeat at 118.4Hz (SEED/1000)</td></tr>
+          <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:#00d4ff;font-family:'JetBrains Mono',monospace;">tenet.liril.audit</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">LIRIL → Build</td><td style="padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary);">Classification audit trail</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Transparency -->
+    <div class="timeline-section">
+      <h2 style="font-family:'Playfair Display',serif;color:#fff;border-bottom:3px solid rgba(0,212,255,0.5);display:inline-block;padding-bottom:0.3rem;">Transparency Commitment</h2>
+
+      <p style="color:var(--text-secondary);line-height:1.8;margin:1rem 0;">The 504 Database is built on the principle that government accountability records should be publicly accessible, machine-readable, and independently verifiable. LIRIL's classification system is documented here because:</p>
+
+      <ul style="color:var(--text-secondary);line-height:2;padding-left:1.5rem;">
+        <li><strong>No classification is hidden.</strong> Every record's category is visible in the HTML source as <code>data-type</code> attributes.</li>
+        <li><strong>No algorithm is undisclosed.</strong> The keyword-decisive method is documented on this page. The SEED is public.</li>
+        <li><strong>No record is unsourced.</strong> Every record in the database links to primary or secondary sources — AG reports, court records, Hansard, committee testimony, or investigative journalism with cited primary documents.</li>
+        <li><strong>Version history is public.</strong> The TENET-5.github.io repository is open. Every classification change is a Git commit.</li>
+        <li><strong>Section 504 is the foundation.</strong> Criminal Code s.504 gives every Canadian the right to lay an information before a justice. This database provides the documented evidence base for citizens to exercise that right.</li>
+      </ul>
+    </div>
+
+    <div style="text-align:center;margin:2.5rem 0;">
+      <a href="accountability.html" style="display:inline-block;padding:0.8rem 1.5rem;background:#c41e3a;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;">← The 504 Database</a>
+      <a href="records.html" style="display:inline-block;padding:0.8rem 1.5rem;background:transparent;color:var(--text-secondary);text-decoration:none;border:2px solid var(--border);border-radius:6px;font-weight:700;margin-left:1rem;">Records Index</a>
+      <a href="index.html" style="display:inline-block;padding:0.8rem 1.5rem;background:transparent;color:var(--text-secondary);text-decoration:none;border:2px solid var(--border);border-radius:6px;font-weight:700;margin-left:1rem;">Home</a>
+    </div>
+  </div>
+
+<script src="nav.js?v=9"></script>
+<div id="read-next"></div>
+<footer id="site-footer"></footer>
+<script src="share.js?v=1"></script>
+<script src="readnext.js?v=2"></script>
+<script src="footer.js?v=2"></script>
+</body>
+</html>
