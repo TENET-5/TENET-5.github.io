@@ -83,11 +83,11 @@
       current: 'About & Methodology',
       next: [
         { href: 'index.html', label: 'The Evidence', desc: 'Start with the numbers' },
-        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
+        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 investigation panels' },
       ]
     },
-    'liril.html': {
+    'liril-analysis.html': {
       current: 'Meet TENET5 OSINT',
       next: [
         { href: 'findings.html', label: 'What She Found', desc: '26+ panels from 7M records' },
@@ -234,7 +234,7 @@
     'ai-research.html': {
       current: 'AI Research',
       next: [
-        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
+        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'search.html', label: 'Search', desc: 'Search across the full dataset' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
       ]
@@ -251,7 +251,7 @@
       current: 'Bloggins',
       next: [
         { href: 'red-duster-game.html', label: 'Red Duster Game', desc: 'The interactive investigation game' },
-        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
+        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -300,13 +300,13 @@
       next: [
         { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
         { href: 'news.html', label: 'News', desc: 'Latest investigation updates' },
-        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
+        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
       ]
     },
     'community.html': {
       current: 'Community',
       next: [
-        { href: 'chat.html', label: 'Chat', desc: 'Live discussion channel' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the full database' },
         { href: 'news.html', label: 'News', desc: 'Latest investigation updates' },
         { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
       ]
@@ -467,7 +467,7 @@
       current: 'News',
       next: [
         { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
-        { href: 'chat.html', label: 'Chat', desc: 'Live discussion channel' },
+        { href: 'community.html', label: 'Community', desc: 'Discussion and collaboration' },
         { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
       ]
     },
@@ -555,7 +555,7 @@
       current: 'Red Duster Game',
       next: [
         { href: 'bloggins.html', label: 'Bloggins', desc: 'The story behind the game' },
-        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
+        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
