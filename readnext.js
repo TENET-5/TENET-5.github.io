@@ -83,11 +83,11 @@
       current: 'About & Methodology',
       next: [
         { href: 'index.html', label: 'The Evidence', desc: 'Start with the numbers' },
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 investigation panels' },
       ]
     },
-    'liril-analysis.html': {
+    'liril.html': {
       current: 'Meet TENET5 OSINT',
       next: [
         { href: 'findings.html', label: 'What She Found', desc: '26+ panels from 7M records' },
@@ -234,7 +234,7 @@
     'ai-research.html': {
       current: 'AI Research',
       next: [
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'search.html', label: 'Search', desc: 'Search across the full dataset' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
       ]
@@ -251,7 +251,7 @@
       current: 'Bloggins',
       next: [
         { href: 'red-duster-game.html', label: 'Red Duster Game', desc: 'The interactive investigation game' },
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -300,13 +300,13 @@
       next: [
         { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
         { href: 'news.html', label: 'News', desc: 'Latest investigation updates' },
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
       ]
     },
     'community.html': {
       current: 'Community',
       next: [
-        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the full database' },
+        { href: 'chat.html', label: 'Chat', desc: 'Live discussion channel' },
         { href: 'news.html', label: 'News', desc: 'Latest investigation updates' },
         { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
       ]
@@ -467,7 +467,7 @@
       current: 'News',
       next: [
         { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
-        { href: 'community.html', label: 'Community', desc: 'Discussion and collaboration' },
+        { href: 'chat.html', label: 'Chat', desc: 'Live discussion channel' },
         { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
       ]
     },
@@ -555,7 +555,7 @@
       current: 'Red Duster Game',
       next: [
         { href: 'bloggins.html', label: 'Bloggins', desc: 'The story behind the game' },
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
+        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -869,78 +869,6 @@
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'How elite networks purchase Canadian policy' },
         { href: 'wef-davos.html', label: 'WEF & Davos Connections', desc: 'The same elite circles — Carney, Brookfield, Davos' },
         { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'How political donations translate to policy' },
-      ]
-    },
-    'appointments.html': {
-      current: 'GIC Appointments',
-      next: [
-        { href: 'judicial-appointments.html', label: 'Judicial Appointments', desc: 'Who appoints the judges — and why it matters' },
-        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who lobbies for government appointments' },
-        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals' },
-      ]
-    },
-    'arrivecan.html': {
-      current: 'ArriveCAN',
-      next: [
-        { href: 'ag-findings.html', label: 'AG Findings', desc: '12 AG reports, $103B+ documented waste' },
-        { href: 'procurement-deep-dive.html', label: 'Procurement Deep Dive', desc: '1.26M contracts, 70K anomalies flagged' },
-        { href: 'covid-accountability.html', label: 'COVID Accountability', desc: 'ArriveCAN, CERB fraud, $500B pandemic spending' },
-      ]
-    },
-    'caf-recruitment.html': {
-      current: 'CAF Recruitment Crisis',
-      next: [
-        { href: 'dnd-procurement.html', label: 'DND Procurement', desc: '$100B+ military procurement betrayals' },
-        { href: 'veterans-betrayal.html', label: 'Veterans Betrayal', desc: 'Broken promises to those who served' },
-        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-      ]
-    },
-    'cicd-status.html': {
-      current: 'CI/CD Status',
-      next: [
-        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data' },
-        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
-        { href: 'liril-analysis.html', label: 'LIRIL Analysis', desc: 'AI infrastructure behind the data' },
-      ]
-    },
-    'foreign-interference.html': {
-      current: 'Foreign Interference',
-      next: [
-        { href: 'foreign-interference-deep.html', label: 'Deep Dive', desc: 'C-70, Hogue Commission, Beijing stations, NSICOP' },
-        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
-        { href: 'epstein-maxwell.html', label: 'Epstein & Maxwell', desc: 'Elite trafficking — same institutional failure pattern' },
-      ]
-    },
-    'liril-analysis.html': {
-      current: 'LIRIL Analysis',
-      next: [
-        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the data yourself' },
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ patterns from 7M records' },
-        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
-      ]
-    },
-    'maid-accountability.html': {
-      current: 'MAID Accountability',
-      next: [
-        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
-        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations' },
-        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'System collapse feeds the MAID pipeline' },
-      ]
-    },
-    'rcmp-commissioners.html': {
-      current: 'RCMP Commissioners',
-      next: [
-        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Documented law enforcement failures' },
-        { href: 'rcmp-reform.html', label: 'RCMP Reform', desc: 'The case for fundamental institutional reform' },
-        { href: 'rcmp-maid-accountability.html', label: 'RCMP & MAID', desc: 'Commissioner dereliction of duty' },
-      ]
-    },
-    'records.html': {
-      current: 'Records Database',
-      next: [
-        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
-        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Full index of sourced evidence' },
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
       ]
     },
   };
