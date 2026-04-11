@@ -114,8 +114,16 @@
     'cfnis.html': {
       current: 'CFNIS Investigation',
       next: [
+        { href: 's504-covey-bae.html', label: 's.504 Prosecution: Covey & Bae', desc: 'Information filed against CFNIS under Criminal Code s.504' },
         { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
-        { href: 'my-story.html', label: 'My Story', desc: 'Six years of institutional retaliation' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
+      ]
+    },
+    's504-covey-bae.html': {
+      current: 's.504 Prosecution — Covey & Bae',
+      next: [
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
+        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
       ]
     },
