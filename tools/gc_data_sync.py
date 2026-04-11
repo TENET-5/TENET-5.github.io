@@ -357,6 +357,94 @@ def update_lobbying_data(lobbying):
     return lobby_path
 
 
+# ── Class wrapper for Unified Daemon integration ─────────────────────────
+class GCDataSync:
+    """Daemon-compatible wrapper for autonomous GC data ingestion.
+    
+    Usage (from unified_daemon.py):
+        syncer = GCDataSync()
+        report = syncer.ingest_all()
+    """
+    
+    def __init__(self, data_dir: str = DATA_DIR, evidence_dir: str = EVIDENCE_DIR):
+        self.data_dir = data_dir
+        self.evidence_dir = evidence_dir
+    
+    def ingest_all(self) -> dict:
+        """Run full ingestion cycle. Returns structured report dict.
+        
+        Returns:
+            {
+                "datasets_ingested": int,
+                "datasets_total": int,
+                "anomalies_detected": int,
+                "fiscal_loaded": bool,
+                "lobbying_loaded": bool,
+                "elections_loaded": bool,
+                "timestamp": str,
+                "signature": str,
+            }
+        """
+        try:
+            # 1. Proactive Disclosure
+            pd_results = sync_proactive_disclosure()
+            live_count = sum(1 for v in pd_results.values() if v.get("status") == "LIVE")
+            
+            # 2. Fiscal
+            fiscal = build_fiscal_snapshot()
+            update_debt_fiscal_data(fiscal)
+            
+            # 3. Lobbying
+            lobbying = build_lobbying_snapshot()
+            update_lobbying_data(lobbying)
+            
+            # 4. Elections
+            elections = build_elections_snapshot()
+            
+            # 5. Save report
+            json_path, md_path = save_sync_report(pd_results, fiscal, lobbying, elections)
+            
+            # 6. Detect anomalies (vendor concentration from contracts)
+            anomaly_count = 0
+            contracts_data = pd_results.get("contracts", {})
+            if contracts_data.get("csv_resource"):
+                csv_url = contracts_data["csv_resource"].get("url", "")
+                if csv_url:
+                    sample = fetch_csv_sample(csv_url, max_rows=100)
+                    vendors = {}
+                    for row in sample:
+                        v = row.get("vendor_name", row.get("supplier", "unknown"))
+                        vendors[v] = vendors.get(v, 0) + 1
+                    anomaly_count = sum(1 for c in vendors.values() if c >= 3)
+            
+            timestamp = datetime.now(timezone.utc).isoformat()
+            sig = blake2b_sign(f"ingest_all:{timestamp}")
+            
+            return {
+                "datasets_ingested": live_count,
+                "datasets_total": len(PD_DATASETS),
+                "anomalies_detected": anomaly_count,
+                "fiscal_loaded": True,
+                "lobbying_loaded": True,
+                "elections_loaded": True,
+                "timestamp": timestamp,
+                "signature": sig,
+                "json_report": json_path,
+                "evidence_report": md_path,
+            }
+        except Exception as e:
+            return {
+                "datasets_ingested": 0,
+                "datasets_total": len(PD_DATASETS),
+                "anomalies_detected": 0,
+                "fiscal_loaded": False,
+                "lobbying_loaded": False,
+                "elections_loaded": False,
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+
 def main():
     print("╔══════════════════════════════════════════════════════════╗")
     print("║  TENET5 — Government of Canada Data Synchronizer        ║")
