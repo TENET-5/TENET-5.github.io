@@ -33,6 +33,15 @@
       items: [
         { label: 'Investigation Board', href: 'conspiracy-board.html', desc: 'Node graph of influence networks' },
         { label: 'OSINT Dashboard', href: 'osint-dashboard.html', desc: 'Aggregated intelligence data' },
+        { label: 'Anomaly Radar', href: 'anomaly-radar.html', desc: 'AI-driven anomaly detection', hot: true },
+        { label: 'Predictive Forecast', href: 'predictive-forecast.html', desc: 'AI-driven heuristic mapping', hot: true },
+        { label: 'Sentiment Matrix', href: 'sentiment-matrix.html', desc: 'Social polarity heuristics', hot: true },
+        { label: 'Knowledge Graph', href: 'knowledge-graph.html', desc: 'Relational logic mapping', hot: true },
+        { label: 'Entity Registry', href: 'entity-registry.html', desc: 'Formal disambiguation map', hot: true },
+        { label: 'Contextual Reasoning', href: 'contextual-reasoning.html', desc: 'AI deductive logic inferences', hot: true },
+        { label: 'Dark Web Intelligence', href: 'darkweb-intel.html', desc: 'Autonomous Tor indexing feeds', hot: true },
+        { label: 'Social Media Intelligence', href: 'social-intel.html', desc: 'Social platform extraction matrix', hot: true },
+        { label: 'Threat Intelligence', href: 'threat-intel.html', desc: 'IOC and network vector mapping', hot: true },
         { label: 'Entity Profiler', href: 'entity-viewer.html', desc: 'Chronological timeline & documents', hot: true },
         { label: 'Network Analysis', href: 'network-analysis.html', desc: 'Cross-referenced topology', hot: true },
         { label: 'N-vs-NP Matrix', href: 'corruption-map.html#n-vs-np', desc: 'TENET5 OSINT Pipeline Convergence', hot: true },
@@ -128,6 +137,7 @@
       icon: '🎖',
       domain: 'ETHICS',
       items: [
+        { label: 'CAF Degradation', href: 'caf-recruitment.html', desc: 'OSINT on systemic lowering of CAF cognitive standards', hot: true },
         { label: 'DND Procurement', href: 'dnd-procurement.html', desc: '$100B+ betrayal — ships, jets, LAVs', hot: true },
         { label: 'PPCLI Lawsuit', href: 'lawsuit-ppcli.html', desc: 'Active legal proceedings' },
         { label: 'CFNIS Investigation', href: 'cfnis.html', desc: 'Military police misconduct' },
