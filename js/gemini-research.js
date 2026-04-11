@@ -1,7 +1,7 @@
 /**
  * gemini-research.js — Google Gemini AI Research & Commentary integration
  * Allows signed-in Google users to use their Gemini AI for research on the site
- * TENET5 | SEED=118400
+ * Canadian Government Accountability Investigation
  *
  * Uses Google AI Studio API (client-side ESM)
  * Docs: https://ai.google.dev/gemini-api/docs/quickstart?lang=web

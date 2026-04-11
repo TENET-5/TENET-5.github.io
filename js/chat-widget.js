@@ -1,7 +1,6 @@
 /**
  * chat-widget.js — Floating live chat widget injected into every page
- * TENET5 Canadian Government Accountability Investigation
- * SEED=118400
+ * Canadian Government Accountability Investigation
  *
  * Usage: <script type="module" src="/js/chat-widget.js"></script>
  * Auto-injects the full widget into the page DOM.

@@ -1,6 +1,6 @@
 // ── TENET5 Weather System ──
 // Rain, fog, snow, wind — affects visibility and ballistics
-// SYSTEM_SEED=118400
+// REDUSTER
 
 import { ParticleSystem } from '@babylonjs/core/Particles/particleSystem.js';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';

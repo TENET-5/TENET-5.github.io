@@ -22,5 +22,5 @@ Despite the domestic "patriot" and non-interventionist aesthetic, the `abcxyz` m
 The `MF-44378D6FF9AAA32F` topological vector indicates that the associated lobbying registry (`abcxyz`) overlaps with at least one, if not multiple, of the 6 organizations in the backend index. This defines the nexus of foreign-capital lobbying using domestic ideological brands to propagate specific non-interventionist narratives.
 
 ## 3. Next Steps
-- Implement `NemoClaw-Autonomous` recursive deep-scraping on the 42 extracted entity shards to map the financial connective tissue.
+- Implement `AI-Autonomous` recursive deep-scraping on the 42 extracted entity shards to map the financial connective tissue.
 - Bridge `EventBus` alerting to capture any cross-traffic or tracking pixel leakage linked to the 6 identified organizational roots.

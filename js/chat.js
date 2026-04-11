@@ -1,7 +1,6 @@
 /**
  * chat.js — Live chat via Supabase Realtime
- * TENET5 Canadian Government Accountability Investigation
- * SEED=118400
+ * Canadian Government Accountability Investigation
  *
  * Supabase setup:
  *   Run this SQL in your Supabase SQL editor:
