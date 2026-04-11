@@ -1,8 +1,7 @@
-<!-- ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
      SHARED NAV COMPONENT — include in every page via JS
      Canadian Accountability Project — ABCXYZ.github.io
-     ═══════════════════════════════════════════════════════ -->
-<script>
+     ═══════════════════════════════════════════════════════ */
 (function() {
   // LIRIL NPU baked analysis results — no API, pure local inference
   window.LIRIL_SITE_DATA = {
@@ -129,4 +128,3 @@
     }
   });
 })();
-</script>
