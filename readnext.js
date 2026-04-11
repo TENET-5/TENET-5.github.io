@@ -50,9 +50,9 @@
     'foreign-influence.html': {
       current: 'Foreign Influence',
       next: [
+        { href: 'epstein-maxwell.html', label: 'Epstein & Maxwell Network', desc: 'Elite trafficking, Nygard conviction, Canadian political donations' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'See all the patterns we found' },
         { href: 'voting-records.html', label: 'Voting Records', desc: 'How every party voted on every bill' },
-        { href: 'liril.html', label: 'Meet TENET5 OSINT', desc: 'The AI that found all of this' },
       ]
     },
     'accountability.html': {
@@ -850,17 +850,25 @@
     'wef-davos.html': {
       current: 'WEF & Davos Connections',
       next: [
+        { href: 'epstein-maxwell.html', label: 'Epstein & Maxwell Network', desc: 'Elite trafficking — same circles, same impunity' },
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, UFWD — the full influence investigation' },
         { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, WEF Board member, 100+ recusals' },
-        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: '359K communications — who\'s buying Canadian policy' },
       ]
     },
     'foreign-interference-deep.html': {
       current: 'Foreign Interference Deep Dive',
       next: [
+        { href: 'epstein-maxwell.html', label: 'Epstein & Maxwell Network', desc: 'Elite trafficking networks — the Canadian parallel with Peter Nygard' },
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP — the broader picture' },
         { href: 'treason-trajectory.html', label: 'Treason Trajectory', desc: 'The pattern of betrayal mapped across decades' },
-        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of government misconduct' },
+      ]
+    },
+    'epstein-maxwell.html': {
+      current: 'Epstein & Maxwell Network',
+      next: [
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'How elite networks purchase Canadian policy' },
+        { href: 'wef-davos.html', label: 'WEF & Davos Connections', desc: 'The same elite circles — Carney, Brookfield, Davos' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'How political donations translate to policy' },
       ]
     },
   };
