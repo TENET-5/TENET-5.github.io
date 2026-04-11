@@ -47,6 +47,7 @@
       <a href="/ag-findings.html"                id="nav-ag">AG Findings</a>
       <a href="/phoenix-pay.html"                id="nav-phoenix">Phoenix Pay</a>
       <a href="/foreign-interference.html"       id="nav-foreign">Foreign Interference</a>
+      <a href="/s504-covey-bae.html"             id="nav-504" style="color:#ef4444;">s.504</a>
       <a href="/liril-analysis.html"             id="nav-liril">LIRIL Analysis</a>
     </nav>
     <div class="liril-status-pill" title="LIRIL NPU — Local inference, no external API">
@@ -77,6 +78,7 @@
         <li><a href="/ag-findings.html">Auditor General Findings</a></li>
         <li><a href="/phoenix-pay.html">Phoenix Pay Disaster</a></li>
         <li><a href="/foreign-interference.html">Foreign Interference</a></li>
+        <li><a href="/s504-covey-bae.html" style="color:#ef4444;">s.504 Covey &amp; Bae</a></li>
       </ul>
     </div>
     <div>
