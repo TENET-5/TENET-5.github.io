@@ -649,6 +649,7 @@
         '<p><kbd>←</kbd> <kbd>→</kbd> — Previous/Next page</p>' +
         '<p><kbd>Home</kbd> / <kbd>End</kbd> — First/Last slide</p>' +
         '<p><kbd>N</kbd> — Narrate current slide (LIRIL)</p>' +
+        '<p><kbd>A</kbd> — Toggle auto-narrate on slide change</p>' +
         '<p><kbd>S</kbd> — Cycle speech rate (slow/normal/fast)</p>' +
         '<p><kbd>Esc</kbd> — Stop narration</p>' +
         '<p><kbd>?</kbd> — Show this help</p>' +
@@ -702,6 +703,12 @@
       if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         if (window.__TENET5_LIRIL_CYCLE_RATE) window.__TENET5_LIRIL_CYCLE_RATE();
+        return;
+      }
+
+      if ((e.key === 'a' || e.key === 'A') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        if (window.__TENET5_LIRIL_TOGGLE_AUTO) window.__TENET5_LIRIL_TOGGLE_AUTO();
         return;
       }
 
@@ -1105,7 +1112,8 @@
     keepaliveTimer: null,
     token: 0,
     subtitle: null,
-    rateIdx: 1
+    rateIdx: 1,
+    autoNarrate: false
   };
   var narrationIndexByPage = null;
   var narrationIndexPromise = null;
@@ -1445,6 +1453,14 @@
         if (!lirilNarration.speaking) hideSubtitle();
       }, 1500);
     };
+    window.__TENET5_LIRIL_TOGGLE_AUTO = function () {
+      lirilNarration.autoNarrate = !lirilNarration.autoNarrate;
+      showSubtitle('Auto-narrate: ' + (lirilNarration.autoNarrate ? 'ON' : 'OFF'));
+      setTimeout(function () {
+        if (!lirilNarration.speaking) hideSubtitle();
+      }, 1500);
+      if (lirilNarration.autoNarrate) narrateCurrentSlide();
+    };
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stopNarration();
@@ -1524,6 +1540,9 @@
         lirilNarration.activeSlide = slides[idx] || null;
         if (lirilNarration.speaking) stopNarration();
         updateNarrationButton();
+        if (lirilNarration.autoNarrate) {
+          setTimeout(function () { narrateCurrentSlide(); }, 300);
+        }
       });
       initKeyboardNav(slides, tracker);
       initTouchNav();
