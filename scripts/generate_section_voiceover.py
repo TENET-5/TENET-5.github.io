@@ -13,10 +13,12 @@ from html.parser import HTMLParser
 
 import edge_tts
 
-# ── Voice config — PROFESSIONAL OBJECTIVE (LIRIL CANON) ─────────────────────
-VOICE = "en-US-AriaNeural" # LIRIL's formal, objective tone
-RATE = "+0%"      
-PITCH = "+0Hz"    
+# ── Voice config — LIRIL CANON (must match generate_voiceover.py) ────────────
+# AvaMultilingual is LIRIL's canonical voice. DO NOT change without updating
+# generate_voiceover.py simultaneously — voice drift causes male/female mismatch.
+VOICE = "en-US-AvaMultilingualNeural"
+RATE = "+10%"      # Match page narration pacing
+PITCH = "-4Hz"     # Match page narration depth
 OUTPUT_DIR = Path(__file__).parent.parent / "audio" / "dossiers"
 
 class NarrateParser(HTMLParser):
