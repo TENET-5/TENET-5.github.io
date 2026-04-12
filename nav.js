@@ -56,6 +56,13 @@
             '<a href="/follow-the-money.html" id="nav-money" style="color: #facc15;">Follow $</a>' +
             '<a href="/sitemap.html" id="nav-sitemap">All Pages</a>' +
           '</div>' +
+          '<div class="nav-group nav-lang" style="margin-left: auto;">' +
+            '<select id="lang-selector" onchange="window.setSiteLanguage(this.value)" style="background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); border-radius: 4px; padding: 0.2rem; font-size: 0.85rem;">' +
+              '<option value="en">English</option>' +
+              '<option value="fr">Français</option>' +
+              '<option value="nf">Newfie</option>' +
+            '</select>' +
+          '</div>' +
         '</div>' +
         '<button class="nav-hamburger" id="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>' +
       '</div>' +
