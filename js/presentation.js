@@ -386,6 +386,7 @@
 
     // ── Stat grids & data panels ──
     '.inv-stat-grid', '.tl-quicknav', '.mpa-stats',
+    '.dash-grid',
     '.media-grid', '.cat-grid', '.category-grid',
     '.breakdown-grid', '.budget-grid', '.bill-cards',
     '.cc-cards', '.cc-grid',
@@ -559,7 +560,7 @@
 
     var hint = document.createElement('div');
     hint.className = 'pres-keyhint';
-    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 prev/next page \u00b7 ? for help';
+    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 page \u00b7 N narrate \u00b7 ? help';
     document.body.appendChild(hint);
     setTimeout(function () { hint.classList.add('pres-keyhint-fade'); }, 6000);
 
@@ -570,7 +571,7 @@
      SECTION 5: Scroll observation + active slide tracking
      ═══════════════════════════════════════════════════════════════════ */
 
-  function observeSlides(slides, ui) {
+  function observeSlides(slides, ui, onActiveChange) {
     var activeIdx = 0;
 
     var observer = new IntersectionObserver(function (entries) {
@@ -585,6 +586,7 @@
         if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
           activeIdx = idx;
           updateIndicator(ui, slides, idx);
+          if (typeof onActiveChange === 'function') onActiveChange(idx);
         }
       });
     }, {
@@ -635,6 +637,8 @@
         '<p><kbd>Space</kbd> — Next slide</p>' +
         '<p><kbd>←</kbd> <kbd>→</kbd> — Previous/Next page</p>' +
         '<p><kbd>Home</kbd> / <kbd>End</kbd> — First/Last slide</p>' +
+        '<p><kbd>N</kbd> — Narrate current slide (LIRIL)</p>' +
+        '<p><kbd>Esc</kbd> — Stop narration</p>' +
         '<p><kbd>?</kbd> — Show this help</p>' +
         '</div>' +
         '<button onclick="this.closest(\'.pres-keyboard-help\').remove()">Close</button>' +
@@ -654,6 +658,17 @@
       if (e.key === '?') {
         e.preventDefault();
         showKeyboardHelp();
+        return;
+      }
+
+      if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        if (window.__TENET5_LIRIL_NARRATE) window.__TENET5_LIRIL_NARRATE();
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (window.__TENET5_LIRIL_STOP) window.__TENET5_LIRIL_STOP();
         return;
       }
 
@@ -983,6 +998,7 @@
     indicator.className = 'pres-page-indicator';
     indicator.innerHTML =
       '<button class="pres-page-nav pres-page-prev" title="Previous page">\u2190</button>' +
+      '<button class="pres-page-nav pres-page-narrate" title="Narrate current slide">N</button>' +
       '<span class="pres-page-info">' +
         '<strong>' + (idx + 1) + '/' + PAGE_SEQUENCE.length + '</strong>' +
         ' \u00b7 ' + escHTML(group) +
@@ -1005,7 +1021,134 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     SECTION 12: Continue-slide observation
+     SECTION 12: LIRIL narration controls
+     ═══════════════════════════════════════════════════════════════════ */
+
+  var lirilNarration = {
+    button: null,
+    speaking: false,
+    activeSlide: null
+  };
+
+  function cleanNarrationText(text) {
+    if (!text) return '';
+    return text
+      .replace(/\s+/g, ' ')
+      .replace(/^[\s.,;:!?\-]+/, '')
+      .trim();
+  }
+
+  function getNarrationText(slide) {
+    if (!slide) return '';
+
+    var explicit = cleanNarrationText(slide.getAttribute('data-narrate') || '');
+    if (explicit) return explicit;
+
+    var legacy = cleanNarrationText(slide.getAttribute('data-narration') || '');
+    if (legacy) return legacy;
+
+    var narratedChild = slide.querySelector('[data-narrate], [data-narration]');
+    if (narratedChild) {
+      var childText = cleanNarrationText(
+        narratedChild.getAttribute('data-narrate') ||
+        narratedChild.getAttribute('data-narration') || ''
+      );
+      if (childText) return childText;
+    }
+
+    var heading = slide.querySelector('h1, h2, h3');
+    if (heading) {
+      var p = slide.querySelector('p');
+      var text = heading.textContent.trim();
+      if (p) text += '. ' + p.textContent.trim().substring(0, 180);
+      return cleanNarrationText(text);
+    }
+
+    return '';
+  }
+
+  function resolveNarrationVoice() {
+    var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    return voices.find(function (v) {
+      return v.lang && v.lang.indexOf('en-GB') === 0 && /female/i.test(v.name || '');
+    }) || voices.find(function (v) {
+      return v.lang && v.lang.indexOf('en-GB') === 0;
+    }) || voices.find(function (v) {
+      return v.lang && v.lang.indexOf('en') === 0;
+    }) || null;
+  }
+
+  function updateNarrationButton() {
+    if (!lirilNarration.button) return;
+    var text = getNarrationText(lirilNarration.activeSlide);
+    lirilNarration.button.disabled = !text;
+    lirilNarration.button.classList.toggle('pres-page-nav-active', lirilNarration.speaking);
+    lirilNarration.button.title = text ? 'Narrate current slide' : 'No narration available for this slide';
+  }
+
+  function stopNarration() {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    lirilNarration.speaking = false;
+    updateNarrationButton();
+  }
+
+  function narrateCurrentSlide() {
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
+
+    var text = getNarrationText(lirilNarration.activeSlide);
+    if (!text) return;
+
+    stopNarration();
+
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-GB';
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    var voice = resolveNarrationVoice();
+    if (voice) u.voice = voice;
+
+    u.onstart = function () {
+      lirilNarration.speaking = true;
+      updateNarrationButton();
+    };
+    u.onend = function () {
+      lirilNarration.speaking = false;
+      updateNarrationButton();
+    };
+    u.onerror = function () {
+      lirilNarration.speaking = false;
+      updateNarrationButton();
+    };
+
+    window.speechSynthesis.speak(u);
+  }
+
+  function initNarrationControls(slides, pageIndicator, activeIdx) {
+    if (!pageIndicator) return;
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
+
+    lirilNarration.button = pageIndicator.querySelector('.pres-page-narrate');
+    lirilNarration.activeSlide = slides[activeIdx || 0] || null;
+
+    if (!lirilNarration.button) return;
+
+    lirilNarration.button.addEventListener('click', function () {
+      narrateCurrentSlide();
+    });
+
+    window.__TENET5_LIRIL_NARRATE = narrateCurrentSlide;
+    window.__TENET5_LIRIL_STOP = stopNarration;
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stopNarration();
+    });
+
+    updateNarrationButton();
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SECTION 13: Continue-slide observation
      ═══════════════════════════════════════════════════════════════════ */
 
   function observeContinueSlide(continueSlide) {
@@ -1047,7 +1190,7 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     SECTION 13: Init — wire everything together
+      SECTION 14: Init — wire everything together
      ═══════════════════════════════════════════════════════════════════ */
 
   function init() {
@@ -1063,14 +1206,21 @@
       var continueSlide = buildContinueSlide();
 
       var ui = buildIndicator(slides);
-      var tracker = observeSlides(slides, ui);
+      var pageIndicator = buildPageIndicator();
+      var tracker = observeSlides(slides, ui, function (idx) {
+        lirilNarration.activeSlide = slides[idx] || null;
+        if (lirilNarration.speaking) stopNarration();
+        updateNarrationButton();
+      });
       initKeyboardNav(slides, tracker);
       observeContinueSlide(continueSlide);
-      buildPageIndicator();
+      initNarrationControls(slides, pageIndicator, 0);
 
       if (slides[0]) {
         slides[0].classList.add('pres-visible');
         triggerSprites(slides[0]);
+        lirilNarration.activeSlide = slides[0];
+        updateNarrationButton();
       }
     });
   }
