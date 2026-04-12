@@ -1630,11 +1630,14 @@
     voicesReady = true;
 
     /* 0. Restore the exact voice used on the previous page (sessionStorage) */
+    /* FIXED: validate restored voice is NOT male before trusting it */
+    var BANNED_MALE_P = ['david','mark','james','george','daniel','ryan','guy','thomas','richard','rishi','sean','oliver','liam','christopher','eric','andrew','brian','roger','malcolm','connor'];
+    function isMaleP(v) { var n = (v.name||'').toLowerCase(); return BANNED_MALE_P.some(function(m){ return n.indexOf(m)>=0; }); }
     try {
       var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
       if (saved) {
         var restored = voices.find(function (v) { return v.name === saved; });
-        if (restored) { cachedVoice = restored; return cachedVoice; }
+        if (restored && !isMaleP(restored)) { cachedVoice = restored; return cachedVoice; }
       }
     } catch (e) { /* private browsing */ }
 
@@ -1656,7 +1659,7 @@
     if (enGBFemale) { cachedVoice = enGBFemale; storeVoiceName(enGBFemale); return cachedVoice; }
 
     var enGBNonMale = voices.find(function (v) {
-      return v.lang && v.lang.indexOf('en-GB') === 0 && !/male/i.test(v.name || '');
+      return v.lang && v.lang.indexOf('en-GB') === 0 && !isMaleP(v);
     });
     if (enGBNonMale) { cachedVoice = enGBNonMale; storeVoiceName(enGBNonMale); return cachedVoice; }
 
