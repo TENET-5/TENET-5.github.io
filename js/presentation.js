@@ -652,6 +652,16 @@
     }
 
     document.addEventListener('keydown', function (e) {
+      var targetEl = e.target;
+      var isEditing = !!(
+        targetEl &&
+        (targetEl.tagName === 'INPUT' ||
+         targetEl.tagName === 'TEXTAREA' ||
+         targetEl.tagName === 'SELECT' ||
+         targetEl.isContentEditable)
+      );
+      if (isEditing) return;
+
       var cur = tracker.getActive();
       var target = null;
 
@@ -661,7 +671,7 @@
         return;
       }
 
-      if (e.key === 'n' || e.key === 'N') {
+      if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         if (window.__TENET5_LIRIL_NARRATE) window.__TENET5_LIRIL_NARRATE();
         return;
@@ -1304,12 +1314,18 @@
 
   function initNarrationControls(slides, pageIndicator, activeIdx) {
     if (!pageIndicator) return;
-    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
-
     lirilNarration.button = pageIndicator.querySelector('.pres-page-narrate');
     lirilNarration.activeSlide = slides[activeIdx || 0] || null;
 
     if (!lirilNarration.button) return;
+
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') {
+      lirilNarration.button.disabled = true;
+      lirilNarration.button.title = 'Narration unavailable in this browser';
+      window.__TENET5_LIRIL_NARRATE = function () {};
+      window.__TENET5_LIRIL_STOP = function () {};
+      return;
+    }
 
     lirilNarration.button.addEventListener('click', function () {
       narrateCurrentSlide();
