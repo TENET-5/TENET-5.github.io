@@ -696,3 +696,112 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   NARRATION-SYNCED ANIMATIONS — Triggered by LIRIL scroll narrator
+   Cards pulse, dots glow, stats heartbeat while LIRIL narrates.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Active narrating section ──────────────────────────────────────── */
+.tl-narrating .tl-node-card,
+.tl-narrating.stat-hero-banner,
+.tl-narrating.narrative-intro {
+  border-color: rgba(191, 97, 106, 0.4) !important;
+  box-shadow:
+    0 0 30px rgba(191, 97, 106, 0.15),
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 0 30px rgba(191, 97, 106, 0.03) !important;
+  animation: tl-narrate-pulse 2s ease-in-out infinite;
+  transform: scale(1.02);
+}
+
+/* Spine dot glows red while narrating */
+.tl-narrating.tl-node::after {
+  border-color: #BF616A !important;
+  background: #BF616A !important;
+  box-shadow: 0 0 0 6px rgba(191, 97, 106, 0.3), 0 0 30px rgba(191, 97, 106, 0.25) !important;
+  animation: tl-dot-pulse 1.5s ease-in-out infinite !important;
+}
+
+/* Death stat numbers heartbeat */
+.tl-narrating .tl-node-stat,
+.tl-narrating .stat-hero-num {
+  animation: tl-heartbeat 0.8s ease-in-out infinite;
+}
+
+/* Date badge turns red */
+.tl-narrating .tl-node-date {
+  color: #BF616A !important;
+  background: rgba(191, 97, 106, 0.15) !important;
+  transition: all 0.3s ease;
+}
+
+/* Hero section narrating — count pulses, headline glows */
+.tl-hero.tl-narrating .tl-hero-count {
+  animation: tl-heartbeat 0.8s ease-in-out infinite;
+  text-shadow: 0 0 60px rgba(191, 97, 106, 0.5);
+}
+.tl-hero.tl-narrating .tl-hero-headline {
+  animation: tl-text-glow 3s ease-in-out infinite;
+}
+
+/* ── Already narrated — heard indicator ────────────────────────────── */
+.tl-narrated .tl-node-card {
+  border-color: rgba(136, 192, 208, 0.15) !important;
+  box-shadow: 0 0 15px rgba(136, 192, 208, 0.05) !important;
+}
+.tl-narrated.tl-node::after {
+  background: #88C0D0 !important;
+  border-color: #88C0D0 !important;
+  box-shadow: 0 0 8px rgba(136, 192, 208, 0.3) !important;
+}
+.tl-narrated .tl-node-date {
+  color: #88C0D0 !important;
+}
+
+/* ── LIRIL narrator angry mode ─────────────────────────────────────── */
+.liril-narrator-angry .liril-narrator-inner {
+  border-color: rgba(191, 97, 106, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(191, 97, 106, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.liril-narrator-angry .liril-narrator-name {
+  color: #BF616A;
+  animation: tl-name-pulse 3s ease-in-out infinite;
+}
+.liril-narrator-angry .liril-progress-bar {
+  background: linear-gradient(90deg, #BF616A, #D08770) !important;
+}
+
+/* ── Narration keyframes ───────────────────────────────────────────── */
+@keyframes tl-narrate-pulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(191, 97, 106, 0.15), 0 4px 24px rgba(0,0,0,0.3), inset 0 0 30px rgba(191,97,106,0.03); }
+  50% { box-shadow: 0 0 50px rgba(191, 97, 106, 0.25), 0 4px 24px rgba(0,0,0,0.3), inset 0 0 40px rgba(191,97,106,0.06); }
+}
+@keyframes tl-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(191, 97, 106, 0.3), 0 0 30px rgba(191, 97, 106, 0.25); }
+  50% { box-shadow: 0 0 0 10px rgba(191, 97, 106, 0.15), 0 0 50px rgba(191, 97, 106, 0.35); }
+}
+@keyframes tl-heartbeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.15); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.08); }
+}
+@keyframes tl-text-glow {
+  0%, 100% { text-shadow: none; }
+  50% { text-shadow: 0 0 30px rgba(236, 239, 244, 0.15); }
+}
+@keyframes tl-name-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ── Smooth transitions for narration state changes ────────────────── */
+.tl-node-card,
+.stat-hero-banner,
+.narrative-intro {
+  transition: border-color 0.5s ease, box-shadow 0.5s ease, transform 0.5s ease;
+}
+
