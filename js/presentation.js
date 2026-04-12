@@ -203,7 +203,7 @@
     'convergence-matrix.html': 'Triple Threat Convergence',
     'conspiracy-board.html': 'Investigation Board',
     'timeline.html': 'Timeline \u2014 80 Years of Government Actions',
-    'maid-accountability.html': 'MAID \u2014 60,167 Deaths, Zero Accountability',
+    'maid-accountability.html': 'MAID \u2014 ~98,000 Deaths, Zero Accountability',
     'maid-policy-evolution.html': 'How They Legislated Death',
     'maid-voting-record.html': 'MAID Voting Record \u2014 173 MPs',
     'maid-exterminators.html': 'MAID Exterminator Tracing',
