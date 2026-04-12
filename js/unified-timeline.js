@@ -42,6 +42,8 @@
     { year: 2026, month: 4, title: 'Fox Ethics Breach — Then Promoted by Carney', desc: 'Ethics Commissioner finds DM Christiane Fox breached COI Act at IRCC. Carney already appointed her top DND civilian role in Dec 2025.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
     { year: 2026, month: 3, title: 'Indigenous Procurement Fraud Exposed', desc: 'Procurement Ombudsman: non-Indigenous businesses using Indigenous shell companies to access set-aside contracts. Reform delayed to 2028.', link: 'scandals.html', cat: 'waste', color: '#f59e0b' },
     { year: 2026, month: 3, title: 'Nijjar: Indian Consular Staff Assisted', desc: 'Globe and Mail: Indian consular staff in Vancouver supplied information assisting Nijjar assassination. Carney visits Modi, draws Sikh backlash.', link: 'foreign-interference.html', cat: 'foreign', color: '#60a5fa' },
+    { year: 2024, month: 7, title: 'CDS Carignan Appointed', desc: 'Gen Jennie Carignan becomes first female CDS. CAF at lowest strength in decades. AG flags recruiting failures. DM Fox (COI breach) appointed Dec 2025.', link: 'cds-accountability.html', cat: 'cfnis', color: '#a855f7' },
+    { year: 2026, month: 4, title: 'CDS Accountability Investigation Opened', desc: 'TENET5 investigation into CDS record: recruitment crisis, digital battle space surrender, foreign military access, compromised DND command chain. Criminal Code + NDA charges framework documented.', link: 'cds-accountability.html', cat: 'cfnis', color: '#a855f7' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
