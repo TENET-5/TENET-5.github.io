@@ -7,29 +7,16 @@
   if (window.__TENET5_NAV_LOADED) return;
   window.__TENET5_NAV_LOADED = true;
 
-  /* Heraldic Crest SVG — Tactical Chess Pawn with Man-Pack Radio
-     As requested, the crest has been converted into a pawn with a military radio. */
+  /* Brand Monogram — T5 in a clean rounded square */
   var crestSVG =
-    '<svg class="brand-crest" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<svg class="brand-crest" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
     '<defs><linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1">' +
     '<stop offset="0%" stop-color="#dcc175"/><stop offset="100%" stop-color="#a07c30"/>' +
     '</linearGradient></defs>' +
-    /* Antenna */
-    '<line x1="30" y1="55" x2="20" y2="15" stroke="url(#t5-gold)" stroke-width="2"/>' +
-    /* Backpack Radio */
-    '<rect x="25" y="55" width="15" height="25" rx="3" fill="#c41e3a" stroke="url(#t5-gold)" stroke-width="2"/>' +
-    '<rect x="28" y="52" width="4" height="3" fill="url(#t5-gold)"/>' +
-    /* Handset Wire */
-    '<path d="M35 60 Q45 65 40 70 T45 80" fill="none" stroke="url(#t5-gold)" stroke-width="1.5" stroke-dasharray="2,1"/>' +
-    /* Pawn Base */
-    '<path d="M30 110 L70 110 L65 95 L35 95 Z" fill="url(#t5-gold)"/>' +
-    /* Red Ring */
-    '<path d="M32 95 Q50 100 68 95 L63 90 Q50 95 37 90 Z" fill="#c41e3a"/>' +
-    /* Pawn Body */
-    '<path d="M37 90 C37 60, 45 45, 50 40 C55 45, 63 60, 63 90 Z" fill="url(#t5-gold)"/>' +
-    /* Collar & Head */
-    '<rect x="42" y="38" width="16" height="4" rx="2" fill="#c41e3a"/>' +
-    '<circle cx="50" cy="26" r="12" fill="url(#t5-gold)"/>' +
+    '<rect x="4" y="4" width="72" height="72" rx="14" ry="14" fill="none" stroke="url(#t5-gold)" stroke-width="3"/>' +
+    '<rect x="16" y="4" width="48" height="3" rx="1.5" fill="#b91c1c"/>' +
+    '<text x="28" y="56" font-family="Playfair Display,Georgia,serif" font-size="38" font-weight="700" fill="url(#t5-gold)" letter-spacing="-1">T</text>' +
+    '<text x="54" y="38" font-family="JetBrains Mono,monospace" font-size="18" font-weight="700" fill="#b91c1c">5</text>' +
     '</svg>';
 
   var headerHTML =
