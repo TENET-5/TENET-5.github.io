@@ -21,8 +21,8 @@ import edge_tts
 # AvaMultilingual is Microsoft's flagship neural voice — natural breathing,
 # human prosody, emotional range. Dramatically less robotic than ClaraNeural.
 VOICE = "en-US-AvaMultilingualNeural"
-RATE = "-8%"       # Slower for documentary gravitas
-PITCH = "-2Hz"     # Slightly warmer tone
+RATE = "+10%"      # Faster — urgency, anger, intensity
+PITCH = "-4Hz"     # Deeper — menacing, authoritative
 OUTPUT_DIR = Path(__file__).parent.parent / "audio"
 
 # ── Narration scripts per page ──────────────────────────────────────────

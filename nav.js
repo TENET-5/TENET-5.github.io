@@ -56,6 +56,8 @@
           '</div>' +
           '<div class="nav-group nav-tools">' +
             '<a href="/s504-covey-bae.html" id="nav-504">s.504</a>' +
+            '<a href="/publications.html" id="nav-publications">Publications</a>' +
+            '<a href="/ppcli-lawsuit.html" id="nav-kitshop">Kit Shop</a>' +
           '</div>' +
         '</div>' +
         '<button class="nav-hamburger" id="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>' +
