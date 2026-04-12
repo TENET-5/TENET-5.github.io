@@ -174,29 +174,84 @@
           position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%);
           width: 90%; max-width: 800px; text-align: center;
           z-index: 9997; pointer-events: none;
-          opacity: 0; transition: opacity 0.4s;
+          opacity: 0; transition: opacity 0.4s ease;
         }
         .liril-subtitle-text {
-          display: inline-block; background: rgba(9, 9, 11, 0.92);
-          color: #e8e4dc; padding: 12px 24px; border-radius: 6px;
-          font-size: 1rem; line-height: 1.6; border: 1px solid rgba(185, 28, 28, 0.2);
-          backdrop-filter: blur(8px); font-family: Inter, -apple-system, sans-serif;
+          display: inline-block; position: relative; overflow: hidden;
+          background: rgba(5, 5, 10, 0.95);
+          color: #e0ddd6; padding: 16px 28px 14px; border-radius: 4px;
+          font-size: 1rem; line-height: 1.65;
+          border: 1px solid rgba(14, 165, 233, 0.18);
+          backdrop-filter: blur(16px); font-family: Inter, -apple-system, sans-serif;
           max-width: 100%; text-align: left;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 0 40px rgba(14,165,233,0.015);
+        }
+        /* HUD corner brackets */
+        .liril-subtitle-text::before, .liril-subtitle-text::after {
+          content: ''; position: absolute; width: 12px; height: 12px;
+          border-color: rgba(34, 211, 238, 0.4); border-style: solid;
+          pointer-events: none;
+        }
+        .liril-subtitle-text::before {
+          top: 4px; left: 4px; border-width: 1px 0 0 1px;
+        }
+        .liril-subtitle-text::after {
+          bottom: 4px; right: 4px; border-width: 0 1px 1px 0;
+        }
+        /* Scan line animation inside subtitle */
+        .liril-subtitle-text .liril-scan {
+          position: absolute; top: 0; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(14,165,233,0.3), transparent);
+          animation: lirilScanSweep 3s ease-in-out infinite;
+          pointer-events: none;
+        }
+        @keyframes lirilScanSweep {
+          0% { top: 0; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { top: 100%; opacity: 0; }
         }
         .liril-badge {
-          display: block; font-size: 0.65rem; color: rgba(185, 28, 28, 0.6);
-          margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;
+          display: flex; align-items: center; gap: 6px;
+          font-size: 0.6rem; color: rgba(14, 165, 233, 0.55);
+          margin-bottom: 8px; font-family: 'IBM Plex Mono', monospace;
+          letter-spacing: 2.5px; text-transform: uppercase;
+        }
+        .liril-badge::before {
+          content: ''; display: inline-block; width: 5px; height: 5px;
+          background: #0ea5e9; border-radius: 50%;
+          animation: lirilBadgeDot 2s ease-in-out infinite;
+        }
+        @keyframes lirilBadgeDot {
+          0%, 100% { opacity: 1; box-shadow: 0 0 4px rgba(14,165,233,0.6); }
+          50% { opacity: 0.3; box-shadow: none; }
         }
         .liril-start-btn {
           position: fixed; bottom: 56px; right: 24px; z-index: 9998;
-          background: rgba(185, 28, 28, 0.9); color: white; border: none; border-radius: 6px;
-          padding: 8px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
-          font-family: Inter, sans-serif; transition: all 0.2s;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          background: rgba(14, 165, 233, 0.85); color: white;
+          border: 1px solid rgba(34, 211, 238, 0.3);
+          border-radius: 4px; padding: 8px 18px;
+          font-size: 0.75rem; font-weight: 600; cursor: pointer;
+          font-family: 'Rajdhani', Inter, sans-serif; letter-spacing: 0.08em;
+          text-transform: uppercase; transition: all 0.25s;
+          box-shadow: 0 2px 12px rgba(14,165,233,0.25);
+        }
+        .liril-start-btn:hover {
+          background: rgba(14, 165, 233, 1); border-color: #22d3ee;
+          box-shadow: 0 0 24px rgba(14,165,233,0.5);
+          transform: translateY(-1px);
         }
         .liril-counter {
-          font-size: 0.65rem; color: rgba(255, 255, 255, 0.3);
-          margin-top: 8px; text-align: right;
+          font-size: 0.6rem; color: rgba(255, 255, 255, 0.25);
+          margin-top: 10px; text-align: right;
+          font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.5px;
+        }
+        /* Active narration point highlight */
+        .liril-narrating-point {
+          outline: 2px solid rgba(14,165,233,0.3) !important;
+          outline-offset: 8px !important;
+          box-shadow: 0 0 30px rgba(14,165,233,0.06);
+          transition: outline 0.4s ease, box-shadow 0.4s ease;
         }
 
         /* Mobile Optimization */
@@ -405,17 +460,20 @@
 
       point.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Highlight
+      // Highlight via CSS class
       points.forEach(function(p) {
-        p.el.style.transition = 'outline 0.3s, outline-offset 0.3s';
-        p.el.style.outline = 'none';
-        p.el.style.outlineOffset = '0px';
+        p.el.classList.remove('liril-narrating-point');
       });
-      point.el.style.outline = '2px solid rgba(185,28,28,0.3)';
-      point.el.style.outlineOffset = '8px';
+      point.el.classList.add('liril-narrating-point');
 
       // Subtitle
       subtitleText.innerHTML = '';
+
+      // Scan line effect
+      var scanLine = document.createElement('div');
+      scanLine.className = 'liril-scan';
+      subtitleText.appendChild(scanLine);
+
       subtitleText.appendChild(badge.cloneNode(true));
 
       var textNode = document.createElement('span');
@@ -424,7 +482,7 @@
 
       var counter = document.createElement('div');
       counter.className = 'liril-counter';
-      counter.textContent = (idx + 1) + ' / ' + points.length + '  |  ' + getI18nStr('advance');
+      counter.textContent = (idx + 1) + ' / ' + points.length + '  \u2502  ' + getI18nStr('advance');
       subtitleText.appendChild(counter);
 
       subtitleBar.style.opacity = '1';
@@ -487,7 +545,7 @@
       startBtn.innerHTML = getI18nStr('start');
       startBtn.style.background = '';
       startBtn.setAttribute('aria-expanded', 'false');
-      points.forEach(function(p) { p.el.style.outline = 'none'; });
+      points.forEach(function(p) { p.el.classList.remove('liril-narrating-point'); });
       currentPoint = -1;
     }
 
