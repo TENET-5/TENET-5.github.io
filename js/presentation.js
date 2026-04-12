@@ -982,6 +982,25 @@
     }
   }
 
+  function prefetchAdjacentPages() {
+    var current = getCurrentPage();
+    var idx = getPageIndex(current);
+    if (idx === -1) return;
+
+    var pages = [];
+    if (idx + 1 < PAGE_SEQUENCE.length) pages.push(PAGE_SEQUENCE[idx + 1]);
+    if (idx - 1 >= 0) pages.push(PAGE_SEQUENCE[idx - 1]);
+
+    pages.forEach(function (page) {
+      if (document.querySelector('link[rel="prefetch"][href="' + page + '"]')) return;
+      var link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = page;
+      link.as = 'document';
+      document.head.appendChild(link);
+    });
+  }
+
   /* ═══════════════════════════════════════════════════════════════════
      SECTION 10: Continue slide — auto-advance at end of each page
      ═══════════════════════════════════════════════════════════════════ */
@@ -1561,6 +1580,7 @@
       initTouchNav();
       observeContinueSlide(continueSlide);
       initNarrationControls(slides, pageIndicator, 0);
+      prefetchAdjacentPages();
 
       // Mark dots that have narration (re-run after index loads)
       markNarratableDots(ui, slides);
