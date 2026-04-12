@@ -8,7 +8,7 @@
 (function() {
   'use strict';
 
-  document.addEventListener('DOMContentLoaded', function() {
+  function initWalkthrough() {
     var page = window.location.pathname.split('/').pop() || '';
     if (page === 'index.html' || page === '') return;
 
@@ -209,5 +209,46 @@
         window.speechSynthesis.getVoices();
       };
     }
-  });
+
+    // ── Rescan hook for dynamic pages ────────────────
+    // Pages that render after DOMContentLoaded (e.g. mp-analysis.html)
+    // can call window.lirilRescan() to re-collect narration points.
+    window.lirilRescan = function() {
+      if (isActive) endWalkthrough();
+      points.length = 0;
+      document.querySelectorAll('[data-narrate]').forEach(function(el) {
+        points.push({ el: el, text: el.getAttribute('data-narrate') });
+      });
+      if (points.length < 3) {
+        var selectors = ['section', '.timeline-section', '[data-chapter]', '.glass-panel'];
+        selectors.forEach(function(sel) {
+          document.querySelectorAll(sel).forEach(function(el) {
+            if (el.getAttribute('data-narrate')) return;
+            if (el.closest('nav, header, footer, #hud-controls')) return;
+            var h = el.querySelector('h1, h2, h3');
+            var p = el.querySelector('p');
+            if (h) {
+              var text = h.textContent.trim();
+              if (p) text += '. ' + p.textContent.trim().substring(0, 150);
+              if (text.length > 20) {
+                points.push({ el: el, text: text, auto: true });
+              }
+            }
+          });
+        });
+      }
+      // Show/hide button based on available points
+      if (points.length >= 2) {
+        startBtn.style.display = '';
+      } else {
+        startBtn.style.display = 'none';
+      }
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWalkthrough);
+  } else {
+    initWalkthrough();
+  }
 })();

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + encodeURIComponent(window.location.pathname.split('/').pop() + window.location.search));
+      }
+    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP Analysis — LIRIL Intelligence Report | TENET5</title>
+  <meta name="description" content="LIRIL AI analysis of Canadian Members of Parliament — lobbying data, voting record, flags, ethics, and accountability scoring.">
+  <link rel="stylesheet" href="style.css?v=17">
+  <meta name="theme-color" content="#2E3440">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <style>
+    .mpa-wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+    /* ── Hero ── */
+    .mpa-hero { text-align: center; padding: 48px 20px 32px; border-bottom: 2px solid var(--border); margin-bottom: 32px; }
+    .mpa-hero h1 { font-family: var(--font-headline); font-size: var(--text-4xl); color: var(--text-primary); margin: 0 0 8px; }
+    .mpa-hero .mpa-meta { font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 12px; }
+    .mpa-hero .mpa-meta span { margin: 0 6px; }
+    .mpa-hero-photo { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); margin-bottom: 12px; background: var(--bg-surface); }
+    .mpa-badge { display: inline-block; padding: 4px 14px; border-radius: 100px; font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono); letter-spacing: 0.05em; }
+    .mpa-badge-clean { background: rgba(5,150,105,0.1); color: var(--color-green); border: 1px solid rgba(5,150,105,0.2); }
+    .mpa-badge-low { background: rgba(37,99,235,0.1); color: var(--color-blue); border: 1px solid rgba(37,99,235,0.2); }
+    .mpa-badge-moderate { background: rgba(217,119,6,0.1); color: var(--color-warning); border: 1px solid rgba(217,119,6,0.2); }
+    .mpa-badge-high { background: rgba(220,38,38,0.1); color: var(--color-critical); border: 1px solid rgba(220,38,38,0.2); }
+    .mpa-score-big { font-size: var(--text-3xl); font-weight: 800; font-family: var(--font-mono); margin: 12px 0 4px; }
+
+    /* ── Sections ── */
+    .mpa-section { margin-bottom: 32px; padding: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-lg); }
+    .mpa-section h2 { font-family: var(--font-headline); font-size: var(--text-xl); color: var(--text-primary); margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .mpa-section h3 { font-size: var(--text-base); color: var(--text-secondary); margin: 16px 0 8px; }
+    .mpa-section p, .mpa-section li { font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.7; }
+    .mpa-section ul { padding-left: 20px; margin: 8px 0; }
+
+    /* ── Flag cards ── */
+    .mpa-flags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .mpa-flag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--r-md); font-size: var(--text-xs); font-weight: 600; font-family: var(--font-mono); }
+    .mpa-flag-CIJA_LOBBIED { background: rgba(220,38,38,0.08); color: var(--color-critical); border: 1px solid rgba(220,38,38,0.15); }
+    .mpa-flag-TOP_LOBBIED { background: rgba(217,119,6,0.08); color: var(--color-warning); border: 1px solid rgba(217,119,6,0.15); }
+    .mpa-flag-ON_BOARD { background: rgba(124,58,237,0.08); color: #7c3aed; border: 1px solid rgba(124,58,237,0.15); }
+    .mpa-flag-EMERGENCIES_ERA { background: rgba(37,99,235,0.05); color: var(--color-blue); border: 1px solid rgba(37,99,235,0.12); }
+
+    /* ── Stats row ── */
+    .mpa-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+    .mpa-stat { text-align: center; padding: 16px; background: var(--bg-surface); border-radius: var(--r-md); border: 1px solid var(--border); }
+    .mpa-stat-val { font-size: var(--text-2xl); font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); }
+    .mpa-stat-label { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 4px; }
+
+    /* ── Verdict ── */
+    .mpa-verdict { padding: 20px; border-radius: var(--r-lg); margin-top: 8px; }
+    .mpa-verdict-clean { background: rgba(5,150,105,0.06); border: 1px solid rgba(5,150,105,0.2); }
+    .mpa-verdict-flagged { background: rgba(220,38,38,0.04); border: 1px solid rgba(220,38,38,0.15); }
+    .mpa-verdict h3 { margin-top: 0; font-size: var(--text-base); }
+    .mpa-verdict p { font-size: var(--text-sm); margin: 8px 0 0; }
+
+    /* ── LIRIL narration tag ── */
+    .mpa-liril-tag { font-size: 0.6rem; color: rgba(185,28,28,0.5); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+    /* ── Nav strip ── */
+    .mpa-nav { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 24px 0; }
+    .mpa-nav a { font-size: var(--text-xs); color: var(--text-tertiary); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: var(--r-md); transition: all 0.2s; }
+    .mpa-nav a:hover { color: var(--text-primary); border-color: var(--accent); }
+
+    /* ── Search/index ── */
+    .mpa-index-wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .mpa-search { width: 100%; padding: 12px 16px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: var(--r-md); font-size: var(--text-sm); font-family: inherit; margin-bottom: 16px; }
+    .mpa-search:focus { outline: none; border-color: var(--accent); }
+    .mpa-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+    .mpa-list-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; }
+    .mpa-list-item:hover { border-color: var(--accent); background: var(--bg-surface); }
+    .mpa-list-name { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
+    .mpa-list-meta { font-size: var(--text-xs); color: var(--text-tertiary); }
+    .mpa-list-score { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 700; padding: 2px 8px; border-radius: 100px; margin-left: auto; flex-shrink: 0; }
+
+    .mpa-loading { text-align: center; padding: 60px 20px; color: var(--text-tertiary); font-size: var(--text-sm); }
+
+    @media (max-width: 640px) {
+      .mpa-hero h1 { font-size: var(--text-2xl); }
+      .mpa-stats { grid-template-columns: repeat(2, 1fr); }
+      .mpa-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="mpa-root">
+    <div class="mpa-loading" id="mpa-loading">
+      <div class="mpa-liril-tag">LIRIL INTELLIGENCE</div>
+      Loading MP Analysis...
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    'use strict';
+
+    /* ═══════════════════════════════════════════════════════════════
+       DATA LOADING
+       ═══════════════════════════════════════════════════════════════ */
+
+    var scoreData = null;   // mp_full_analysis.json
+    var allMps = null;      // all_mps.json
+    var dossierData = null; // mp_criminal_ethics_dossier.json
+    var maidData = null;    // maid_votes.json
+    var profileData = null; // mp_profiles.json
+
+    var root = document.getElementById('mpa-root');
+
+    function loadJSON(url) {
+      return fetch(url).then(function(r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      });
+    }
+
+    Promise.all([
+      loadJSON('data/mp_full_analysis.json'),
+      loadJSON('data/all_mps.json'),
+      loadJSON('data/mp_criminal_ethics_dossier.json'),
+      loadJSON('data/maid_votes.json'),
+      loadJSON('data/mp_profiles.json').catch(function() { return []; })
+    ]).then(function(results) {
+      scoreData = results[0];
+      allMps = results[1];
+      dossierData = results[2];
+      maidData = results[3];
+      profileData = results[4];
+      route();
+    }).catch(function(err) {
+      root.innerHTML = '<div class="mpa-loading">Failed to load data: ' + esc(err.message) + '</div>';
+    });
+
+    /* ═══════════════════════════════════════════════════════════════
+       ROUTING — ?mp=Name or index
+       ═══════════════════════════════════════════════════════════════ */
+
+    function route() {
+      var params = new URLSearchParams(window.location.search);
+      var mpName = params.get('mp');
+      if (mpName) {
+        renderAnalysis(mpName);
+      } else {
+        renderIndex();
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HELPERS
+       ═══════════════════════════════════════════════════════════════ */
+
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function getAllScored() {
+      var all = [];
+      ['tier1_highest','tier2_moderate','tier3_low','tier4_clean'].forEach(function(t) {
+        if (scoreData[t]) all = all.concat(scoreData[t]);
+      });
+      return all;
+    }
+
+    function findScored(name) {
+      var norm = name.toLowerCase().trim();
+      var all = getAllScored();
+      return all.find(function(m) { return m.name.toLowerCase() === norm; }) || null;
+    }
+
+    function findAllMp(name) {
+      if (!allMps || !allMps.mps) return null;
+      var norm = name.toLowerCase().trim();
+      return allMps.mps.find(function(m) { return m.name.toLowerCase() === norm; }) || null;
+    }
+
+    function findProfile(name) {
+      if (!profileData) return null;
+      var norm = name.toLowerCase().trim();
+      return profileData.find(function(p) { return p.name.toLowerCase() === norm; }) || null;
+    }
+
+    function findDossierEntries(name) {
+      var norm = name.toLowerCase().trim();
+      var entries = [];
+      ['criminal_convictions','ethics_commissioner_violations','foreign_interference_flagged','caucus_expulsions_resignations','other_misconduct'].forEach(function(cat) {
+        var items = dossierData[cat] || [];
+        items.forEach(function(item) {
+          if (item.name && item.name.toLowerCase() === norm) {
+            entries.push({ category: cat, data: item });
+          }
+        });
+      });
+      return entries;
+    }
+
+    function findMaidVotes(name) {
+      if (!maidData || !maidData.votes) return [];
+      var norm = name.toLowerCase().trim();
+      var results = [];
+      maidData.votes.forEach(function(vote) {
+        var members = vote.yea_members || [];
+        if (typeof members === 'string') { try { members = JSON.parse(members); } catch(e) { members = []; } }
+        var found = members.find(function(m) { return m.name && m.name.toLowerCase() === norm; });
+        if (found) results.push({ bill: vote.bill, date: vote.date, session: vote.session });
+      });
+      return results;
+    }
+
+    function tierLabel(score) {
+      if (score >= 7) return { text: 'HIGH RISK', cls: 'high', tier: 'Tier 1' };
+      if (score >= 3) return { text: 'MODERATE', cls: 'moderate', tier: 'Tier 2' };
+      if (score >= 1) return { text: 'LOW FLAGS', cls: 'low', tier: 'Tier 3' };
+      return { text: 'CLEAN', cls: 'clean', tier: 'Tier 4' };
+    }
+
+    var FLAG_LABELS = {
+      'CIJA_LOBBIED': { icon: '&#9888;', label: 'CIJA Lobbied', desc: 'Directly contacted by Canadian-Israel advocacy groups (+4 pts)' },
+      'TOP_LOBBIED': { icon: '&#128176;', label: 'Top Lobbied', desc: 'On Commissioner of Lobbying top contact list (+3 pts)' },
+      'ON_BOARD': { icon: '&#128270;', label: 'Investigation Board', desc: 'Named on TENET5 investigation board (+5 pts)' },
+      'EMERGENCIES_ERA': { icon: '&#9889;', label: 'Emergencies Era', desc: 'Served during Emergencies Act invocation (+2 pts)' }
+    };
+
+    var CAT_LABELS = {
+      'criminal_convictions': 'Criminal Conviction',
+      'ethics_commissioner_violations': 'Ethics Commissioner Violation',
+      'foreign_interference_flagged': 'Foreign Interference Flag',
+      'caucus_expulsions_resignations': 'Caucus Expulsion / Resignation',
+      'other_misconduct': 'Misconduct Record'
+    };
+
+    /* ═══════════════════════════════════════════════════════════════
+       INDEX VIEW — Search all 340 MPs
+       ═══════════════════════════════════════════════════════════════ */
+
+    function renderIndex() {
+      document.title = 'MP Analysis Index — LIRIL Intelligence | TENET5';
+      var all = getAllScored().sort(function(a,b) { return b.score - a.score; });
+
+      var html = '<div class="mpa-index-wrap">' +
+        '<div class="mpa-hero">' +
+          '<div class="mpa-liril-tag">LIRIL INTELLIGENCE REPORTS</div>' +
+          '<h1 data-narrate="LIRIL Intelligence Reports. Select any of the 340 Members of Parliament for a complete analysis including lobbying data, voting records, ethics history, and accountability scoring.">MP Analysis — All 340 Members</h1>' +
+          '<p class="mpa-meta">Select any MP for a complete LIRIL analysis</p>' +
+        '</div>' +
+        '<input type="text" class="mpa-search" id="mpa-search" placeholder="Search by name, party, riding, or province..." autocomplete="off">' +
+        '<div id="mpa-count" style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:12px;font-family:var(--font-mono);">Showing ' + all.length + ' of ' + all.length + ' MPs</div>' +
+        '<div class="mpa-list" id="mpa-list"></div>' +
+      '</div>';
+
+      root.innerHTML = html;
+
+      var listEl = document.getElementById('mpa-list');
+      var countEl = document.getElementById('mpa-count');
+
+      function renderList(filtered) {
+        var buf = '';
+        filtered.forEach(function(mp) {
+          var t = tierLabel(mp.score);
+          buf += '<a class="mpa-list-item" href="mp-analysis.html?mp=' + encodeURIComponent(mp.name) + '">' +
+            '<div>' +
+              '<div class="mpa-list-name">' + esc(mp.name) + '</div>' +
+              '<div class="mpa-list-meta">' + esc(mp.party) + ' · ' + esc(mp.riding) + ' · ' + esc(mp.province) + '</div>' +
+            '</div>' +
+            '<div class="mpa-list-score mpa-badge mpa-badge-' + t.cls + '">' + mp.score + '</div>' +
+          '</a>';
+        });
+        listEl.innerHTML = buf;
+        countEl.textContent = 'Showing ' + filtered.length + ' of ' + all.length + ' MPs';
+      }
+
+      renderList(all);
+
+      // Trigger walkthrough rescan for index view
+      if (typeof window.lirilRescan === 'function') window.lirilRescan();
+
+      document.getElementById('mpa-search').addEventListener('input', function() {
+        var q = this.value.toLowerCase().trim();
+        if (!q) return renderList(all);
+        var filtered = all.filter(function(mp) {
+          return mp.name.toLowerCase().indexOf(q) !== -1 ||
+                 mp.party.toLowerCase().indexOf(q) !== -1 ||
+                 mp.riding.toLowerCase().indexOf(q) !== -1 ||
+                 mp.province.toLowerCase().indexOf(q) !== -1;
+        });
+        renderList(filtered);
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ANALYSIS VIEW — Full LIRIL report for one MP
+       ═══════════════════════════════════════════════════════════════ */
+
+    function renderAnalysis(name) {
+      var scored = findScored(name);
+      if (!scored) {
+        root.innerHTML = '<div class="mpa-loading">MP not found: "' + esc(name) + '"<br><a href="mp-analysis.html" style="color:var(--accent)">Browse all MPs</a></div>';
+        return;
+      }
+
+      var mp = findAllMp(name);
+      var profile = findProfile(name);
+      var dossierEntries = findDossierEntries(name);
+      var maidVotes = findMaidVotes(name);
+      var t = tierLabel(scored.score);
+
+      document.title = scored.name + ' — LIRIL Analysis | TENET5';
+
+      var html = '<div class="mpa-wrap">';
+
+      /* ── Back nav ── */
+      html += '<div class="mpa-nav">' +
+        '<a href="mp-analysis.html">&larr; All MPs</a>' +
+        '<a href="mp-scorecard.html">Scorecard</a>' +
+        '<a href="mp-voting-records.html">Voting Records</a>' +
+        '<a href="maid-voting-record.html">MAID Votes</a>' +
+      '</div>';
+
+      /* ── Hero ── */
+      var photoHtml = '';
+      if (mp && mp.image) {
+        photoHtml = '<img class="mpa-hero-photo" src="https://openparliament.ca' + esc(mp.image) + '" alt="' + esc(scored.name) + '" onerror="this.style.display=\'none\'">';
+      }
+      html += '<section class="mpa-hero" data-narrate="LIRIL Intelligence Report on ' + esc(scored.name) + '. ' + esc(scored.party) + ' Member of Parliament for ' + esc(scored.riding) + ', ' + esc(scored.province) + '. Accountability score: ' + scored.score + ' out of 11. Classification: ' + esc(t.text) + '.">' +
+        '<div class="mpa-liril-tag">LIRIL INTELLIGENCE REPORT</div>' +
+        photoHtml +
+        '<h1>' + esc(scored.name) + '</h1>' +
+        '<p class="mpa-meta">' +
+          '<span>' + esc(scored.party) + '</span> · ' +
+          '<span>' + esc(scored.riding) + '</span> · ' +
+          '<span>' + esc(scored.province) + '</span>' +
+        '</p>' +
+        '<div class="mpa-score-big mpa-badge-' + t.cls + '">' + scored.score + ' / 11</div>' +
+        '<div class="mpa-badge mpa-badge-' + t.cls + '">' + t.tier + ' — ' + t.text + '</div>' +
+      '</section>';
+
+      /* ── Flags section ── */
+      if (scored.flags && scored.flags.length > 0) {
+        var flagNarr = esc(scored.name) + ' has ' + scored.flags.length + ' active flags: ' +
+          scored.flags.map(function(f) { return (FLAG_LABELS[f] || {}).label || f; }).join(', ') + '.';
+        if (scored.details) {
+          if (scored.details.cija_meetings) flagNarr += ' ' + scored.details.cija_meetings + ' documented CIJA meetings.';
+          if (scored.details.lobby_meetings) flagNarr += ' ' + scored.details.lobby_meetings + ' total lobbying contacts.';
+          if (scored.details.board_categories) flagNarr += ' Investigation board categories: ' + scored.details.board_categories + '.';
+        }
+
+        html += '<section class="mpa-section" data-narrate="' + esc(flagNarr) + '">' +
+          '<h2>Active Flags</h2>' +
+          '<div class="mpa-flags">';
+        scored.flags.forEach(function(f) {
+          var fl = FLAG_LABELS[f] || { icon: '&#9679;', label: f, desc: f };
+          html += '<div class="mpa-flag mpa-flag-' + f + '" title="' + esc(fl.desc) + '">' + fl.icon + ' ' + esc(fl.label) + '</div>';
+        });
+        html += '</div>';
+
+        // Details
+        if (scored.details && Object.keys(scored.details).length > 0) {
+          html += '<div class="mpa-stats">';
+          if (scored.details.cija_meetings) html += '<div class="mpa-stat"><div class="mpa-stat-val">' + scored.details.cija_meetings + '</div><div class="mpa-stat-label">CIJA Meetings</div></div>';
+          if (scored.details.lobby_meetings) html += '<div class="mpa-stat"><div class="mpa-stat-val">' + scored.details.lobby_meetings + '</div><div class="mpa-stat-label">Lobbying Contacts</div></div>';
+          if (scored.details.board_categories) html += '<div class="mpa-stat"><div class="mpa-stat-val">' + esc(scored.details.board_categories.split(',').length.toString()) + '</div><div class="mpa-stat-label">Board Categories</div></div>';
+          html += '</div>';
+        }
+        html += '</section>';
+      } else {
+        html += '<section class="mpa-section" data-narrate="' + esc(scored.name) + ' has zero flags in the TENET5 accountability database. No lobbying contacts with CIJA, not on the investigation board, and not flagged for the Emergencies Era. This MP is classified as clean.">' +
+          '<h2>Flags &amp; Scoring</h2>' +
+          '<div class="mpa-verdict mpa-verdict-clean">' +
+            '<h3>&#10003; Clean Record</h3>' +
+            '<p>No flags in the TENET5 accountability database. Score: 0/11.</p>' +
+          '</div>' +
+        '</section>';
+      }
+
+      /* ── MAID Voting ── */
+      var maidNarr = '';
+      if (maidVotes.length > 0) {
+        maidNarr = esc(scored.name) + ' voted YES on ' + maidVotes.map(function(v) { return 'Bill ' + v.bill; }).join(' and ') + '. ';
+        if (profile && profile.maid_position) maidNarr += profile.maid_position;
+      } else {
+        maidNarr = esc(scored.name) + ' did not vote YES on either MAID bill (C-14 or C-7), or their vote was not recorded in the available data.';
+      }
+
+      html += '<section class="mpa-section" data-narrate="' + esc(maidNarr) + '">' +
+        '<h2>MAID Voting Record</h2>';
+      if (maidVotes.length > 0) {
+        html += '<ul>';
+        maidVotes.forEach(function(v) {
+          html += '<li><strong>Bill ' + esc(v.bill) + '</strong> — Session ' + esc(v.session) + ' — ' + esc(v.date) + ' — Voted <span style="color:var(--color-critical);font-weight:700">YES</span></li>';
+        });
+        html += '</ul>';
+        if (profile && profile.maid_position) {
+          html += '<p style="margin-top:12px;">' + esc(profile.maid_position) + '</p>';
+        }
+      } else {
+        html += '<p>No recorded YES vote on Bill C-14 (2016) or Bill C-7 (2021).</p>';
+      }
+      html += '</section>';
+
+      /* ── Criminal / Ethics Dossier ── */
+      if (dossierEntries.length > 0) {
+        var dosNarr = esc(scored.name) + ' has ' + dossierEntries.length + ' entries in the criminal and ethics dossier: ' +
+          dossierEntries.map(function(e) { return (CAT_LABELS[e.category] || e.category); }).join(', ') + '.';
+
+        html += '<section class="mpa-section" data-narrate="' + esc(dosNarr) + '">' +
+          '<h2>Criminal &amp; Ethics Record</h2>';
+        dossierEntries.forEach(function(entry) {
+          html += '<div style="margin-bottom:16px;padding:12px;background:var(--bg-surface);border-radius:var(--r-md);border-left:3px solid var(--color-critical);">' +
+            '<h3 style="margin:0 0 4px;font-size:var(--text-sm);color:var(--color-critical);">' + esc(CAT_LABELS[entry.category] || entry.category) + '</h3>';
+          var d = entry.data;
+          if (d.offence) html += '<p><strong>Offence:</strong> ' + esc(d.offence) + '</p>';
+          if (d.sentence) html += '<p><strong>Sentence:</strong> ' + esc(d.sentence) + '</p>';
+          if (d.violations) html += '<p><strong>Violations:</strong> ' + esc(typeof d.violations === 'string' ? d.violations : JSON.stringify(d.violations)) + '</p>';
+          if (d.penalty) html += '<p><strong>Penalty:</strong> ' + esc(d.penalty) + '</p>';
+          if (d.allegations) html += '<p><strong>Allegations:</strong> ' + esc(d.allegations) + '</p>';
+          if (d.outcome) html += '<p><strong>Outcome:</strong> ' + esc(d.outcome) + '</p>';
+          if (d.reason) html += '<p><strong>Reason:</strong> ' + esc(d.reason) + '</p>';
+          if (d.issue) html += '<p><strong>Issue:</strong> ' + esc(d.issue) + '</p>';
+          if (d.source) html += '<p style="font-size:var(--text-xs);color:var(--text-tertiary);">Source: ' + esc(d.source) + '</p>';
+          html += '</div>';
+        });
+        html += '</section>';
+      }
+
+      /* ── Deep Profile (mp_profiles.json) ── */
+      if (profile) {
+        // Controversies
+        if (profile.controversies && profile.controversies.length > 0) {
+          var conNarr = esc(scored.name) + ' has ' + profile.controversies.length + ' documented controversies. ' +
+            profile.controversies.map(function(c) { return c.title; }).join('. ') + '.';
+
+          html += '<section class="mpa-section" data-narrate="' + esc(conNarr) + '">' +
+            '<h2>Documented Controversies</h2>';
+          profile.controversies.forEach(function(c) {
+            html += '<div style="margin-bottom:14px;">' +
+              '<h3>' + esc(c.title) + '</h3>' +
+              '<p>' + esc(c.details) + '</p>' +
+            '</div>';
+          });
+          html += '</section>';
+        }
+
+        // Lobbying highlights
+        if (profile.lobbying_highlights && profile.lobbying_highlights.length > 0) {
+          html += '<section class="mpa-section" data-narrate="Lobbying highlights for ' + esc(scored.name) + ': ' + esc(profile.lobbying_highlights.slice(0,2).join('. ')) + '.">' +
+            '<h2>Lobbying Highlights</h2><ul>';
+          profile.lobbying_highlights.forEach(function(h) {
+            html += '<li>' + esc(h) + '</li>';
+          });
+          html += '</ul></section>';
+        }
+
+        // Foreign connections
+        if (profile.foreign_connections && profile.foreign_connections.length > 0) {
+          html += '<section class="mpa-section" data-narrate="Foreign connections for ' + esc(scored.name) + ': ' + esc(profile.foreign_connections[0]) + '.">' +
+            '<h2>Foreign Connections</h2><ul>';
+          profile.foreign_connections.forEach(function(c) {
+            html += '<li>' + esc(c) + '</li>';
+          });
+          html += '</ul></section>';
+        }
+      }
+
+      /* ── Contact / Links ── */
+      if (mp) {
+        var contactNarr = 'Contact information for ' + esc(scored.name) + '. ';
+        if (mp.email) contactNarr += 'Email: ' + mp.email + '. ';
+        if (mp.voice) contactNarr += 'Phone: ' + mp.voice + '.';
+
+        html += '<section class="mpa-section" data-narrate="' + esc(contactNarr) + '">' +
+          '<h2>Contact &amp; Links</h2>' +
+          '<div class="mpa-stats">';
+        if (mp.email) html += '<div class="mpa-stat"><div class="mpa-stat-val" style="font-size:var(--text-sm);word-break:break-all;">' + esc(mp.email) + '</div><div class="mpa-stat-label">Email</div></div>';
+        if (mp.voice) html += '<div class="mpa-stat"><div class="mpa-stat-val" style="font-size:var(--text-sm);">' + esc(mp.voice) + '</div><div class="mpa-stat-label">Phone</div></div>';
+        html += '</div>';
+
+        if (mp.links && mp.links.length > 0) {
+          html += '<ul>';
+          mp.links.forEach(function(l) {
+            html += '<li><a href="' + esc(l.url) + '" target="_blank" rel="noopener" style="color:var(--accent);">' + esc(l.note || l.url) + '</a></li>';
+          });
+          html += '</ul>';
+        }
+        html += '</section>';
+      }
+
+      /* ── LIRIL Verdict ── */
+      var verdictNarr = 'LIRIL assessment for ' + esc(scored.name) + '. ';
+      if (scored.score === 0) {
+        verdictNarr += 'This MP has a clean record with no flags in any accountability database. No CIJA lobbying, not on the investigation board, no criminal or ethics findings.';
+      } else if (scored.score >= 7) {
+        verdictNarr += 'This MP is classified as high risk with a score of ' + scored.score + ' out of 11. Multiple flags across lobbying, investigation board participation, and the Emergencies Era. This individual warrants the highest level of public scrutiny.';
+      } else if (scored.score >= 3) {
+        verdictNarr += 'This MP has moderate flags with a score of ' + scored.score + '. Documented lobbying contacts or Emergencies Era service merit attention.';
+      } else {
+        verdictNarr += 'This MP has minimal flags with a score of ' + scored.score + '. Low-level indicators only.';
+      }
+
+      var verdictCls = scored.score === 0 ? 'clean' : 'flagged';
+      html += '<section class="mpa-section" data-narrate="' + esc(verdictNarr) + '">' +
+        '<h2>LIRIL Assessment</h2>' +
+        '<div class="mpa-verdict mpa-verdict-' + verdictCls + '">' +
+          '<div class="mpa-liril-tag">LIRIL AI VERDICT</div>' +
+          '<h3>' + (scored.score === 0 ? '&#10003; CLEAN' : '&#9888; ' + t.text + ' — Score ' + scored.score + '/11') + '</h3>' +
+          '<p>' + esc(verdictNarr) + '</p>' +
+        '</div>' +
+      '</section>';
+
+      /* ── Prev/Next MP nav ── */
+      var allMpsSorted = getAllScored().sort(function(a,b) { return a.name.localeCompare(b.name); });
+      var idx = allMpsSorted.findIndex(function(m) { return m.name.toLowerCase() === scored.name.toLowerCase(); });
+      html += '<div class="mpa-nav" style="margin-top:32px;">';
+      if (idx > 0) html += '<a href="mp-analysis.html?mp=' + encodeURIComponent(allMpsSorted[idx-1].name) + '">&larr; ' + esc(allMpsSorted[idx-1].name) + '</a>';
+      html += '<a href="mp-analysis.html">' + allMpsSorted.length + ' MPs</a>';
+      if (idx < allMpsSorted.length - 1) html += '<a href="mp-analysis.html?mp=' + encodeURIComponent(allMpsSorted[idx+1].name) + '">' + esc(allMpsSorted[idx+1].name) + ' &rarr;</a>';
+      html += '</div>';
+
+      html += '</div>'; // mpa-
