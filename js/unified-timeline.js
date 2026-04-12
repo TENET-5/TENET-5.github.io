@@ -26,6 +26,8 @@
     { year: 2026, month: 3, title: 'Bill C-25 Introduced', desc: 'Strong and Free Elections Act. Does NOT address military whistleblower protection.', link: 'foreign-interference.html', cat: 'foreign', color: '#3b82f6' },
     { year: 2026, month: 3, title: 'Phoenix: $9.3B Total', desc: 'AG confirms $4.2B replacement cost. 216K transactions backlogged.', link: 'phoenix-pay.html', cat: 'waste', color: '#f59e0b' },
     { year: 2026, month: 4, title: 's.504 Filed: 28 Counts', desc: 'Covey + Bae. Murder, mutiny, hate crime, obstruction.', link: 's504-covey-bae.html', cat: 'cfnis', color: '#a855f7' },
+    { year: 2025, month: 3, title: 'PM Carney Takes Office', desc: '500+ companies in blind trust. $6.8M Brookfield options. Democracy Watch: as many conflicts as Trump.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
+    { year: 2025, month: 6, title: 'ArriveCAN $64M Recovery Vote', desc: 'Parliament votes 172-165 to recover money. Every Liberal MP votes AGAINST.', link: 'arrivecan.html', cat: 'waste', color: '#f59e0b' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
