@@ -1260,6 +1260,8 @@
     var text = getNarrationText(lirilNarration.activeSlide);
     lirilNarration.button.disabled = !text;
     lirilNarration.button.classList.toggle('pres-page-nav-active', lirilNarration.speaking);
+    lirilNarration.button.setAttribute('aria-pressed', lirilNarration.speaking ? 'true' : 'false');
+    lirilNarration.button.setAttribute('aria-disabled', (!text).toString());
     lirilNarration.button.title = text ? 'Narrate current slide' : 'No narration available for this slide';
   }
 
@@ -1345,9 +1347,13 @@
 
     if (!lirilNarration.button) return;
 
+    lirilNarration.button.setAttribute('aria-label', 'Narrate current slide');
+    lirilNarration.button.setAttribute('aria-pressed', 'false');
+
     if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') {
       lirilNarration.button.disabled = true;
       lirilNarration.button.title = 'Narration unavailable in this browser';
+      lirilNarration.button.setAttribute('aria-disabled', 'true');
       window.__TENET5_LIRIL_NARRATE = function () {};
       window.__TENET5_LIRIL_STOP = function () {};
       return;
