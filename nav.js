@@ -7,28 +7,38 @@
   if (window.__TENET5_NAV_LOADED) return;
   window.__TENET5_NAV_LOADED = true;
 
-  /* Heraldic Crest SVG — Crown + Red Shield + Gold Maple Leaf
-     Crown = authority / sovereignty
-     Shield = protection / accountability
-     Maple Leaf = Canada
-     Gold = truth / integrity */
+  /* Caduceus SVG — Staff of Mercury with dual serpents + wings
+     Mercury = NATS message bus (mercury.infer)
+     Two serpents = dual RTX 5070 Ti GPUs intertwined
+     Wings = speed of inference
+     Staff = SATOR central axis
+     DO NOT REPLACE — this is the TENET5 logo per CLAUDE.md */
   var crestSVG =
-    '<svg class="brand-crest" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<defs><linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1">' +
+    '<svg class="brand-crest" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<defs>' +
+    '<linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1">' +
     '<stop offset="0%" stop-color="#dcc175"/><stop offset="100%" stop-color="#a07c30"/>' +
-    '</linearGradient></defs>' +
-    /* Crown */
-    '<path d="M28 30 L33 8 L41 24 L50 2 L59 24 L67 8 L72 30Z" fill="url(#t5-gold)"/>' +
-    '<rect x="26" y="30" width="48" height="8" rx="2" fill="url(#t5-gold)"/>' +
-    '<circle cx="50" cy="10" r="2.5" fill="#c41e3a"/>' +
-    '<circle cx="37" cy="18" r="1.8" fill="#1a3a6b"/><circle cx="63" cy="18" r="1.8" fill="#1a3a6b"/>' +
-    /* Red shield */
-    '<path d="M18 42 L18 82 Q18 102 50 118 Q82 102 82 82 L82 42Z" fill="#c41e3a" stroke="url(#t5-gold)" stroke-width="3"/>' +
-    /* Gold maple leaf */
-    '<path d="M50 52 L53 60 L62 56 L57 64 L66 70 L57 69 L55 80 L50 73 L45 80 L43 69 L34 70 L43 64 L38 56 L47 60Z" fill="#c9a84c"/>' +
-    '<rect x="48.5" y="78" width="3" height="10" rx="1" fill="#c9a84c"/>' +
-    /* Inner shield trace */
-    '<path d="M23 46 L23 80 Q23 98 50 112 Q77 98 77 80 L77 46Z" fill="none" stroke="#c9a84c" stroke-width="0.7" opacity="0.35"/>' +
+    '</linearGradient>' +
+    '<linearGradient id="t5-red" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#991b1b"/>' +
+    '</linearGradient>' +
+    '</defs>' +
+    /* Staff */
+    '<rect x="38" y="18" width="4" height="95" rx="2" fill="url(#t5-gold)"/>' +
+    '<circle cx="40" cy="14" r="6" fill="url(#t5-gold)" stroke="#a07c30" stroke-width="1"/>' +
+    /* Left serpent (GPU0) */
+    '<path d="M40 90 C20 82 58 70 28 60 C58 50 20 40 40 32" fill="none" stroke="url(#t5-red)" stroke-width="3" stroke-linecap="round"/>' +
+    /* Right serpent (GPU1) */
+    '<path d="M40 90 C60 82 22 70 52 60 C22 50 60 40 40 32" fill="none" stroke="url(#t5-red)" stroke-width="3" stroke-linecap="round"/>' +
+    /* Serpent heads */
+    '<circle cx="35" cy="30" r="3" fill="#dc2626"/>' +
+    '<circle cx="45" cy="30" r="3" fill="#dc2626"/>' +
+    /* Wings left */
+    '<path d="M30 28 C18 20 8 24 4 18 C10 22 16 18 24 22 C16 14 6 16 2 8 C10 14 18 12 26 20Z" fill="url(#t5-gold)" opacity="0.7"/>' +
+    /* Wings right */
+    '<path d="M50 28 C62 20 72 24 76 18 C70 22 64 18 56 22 C64 14 74 16 78 8 C70 14 62 12 54 20Z" fill="url(#t5-gold)" opacity="0.7"/>' +
+    /* Base orb */
+    '<circle cx="40" cy="113" r="4" fill="url(#t5-gold)" stroke="#a07c30" stroke-width="0.5"/>' +
     '</svg>';
 
   var headerHTML =
