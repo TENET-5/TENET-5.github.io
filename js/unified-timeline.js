@@ -44,6 +44,7 @@
     { year: 2026, month: 3, title: 'Nijjar: Indian Consular Staff Assisted', desc: 'Globe and Mail: Indian consular staff in Vancouver supplied information assisting Nijjar assassination. Carney visits Modi, draws Sikh backlash.', link: 'foreign-interference.html', cat: 'foreign', color: '#60a5fa' },
     { year: 2024, month: 7, title: 'CDS Carignan Appointed', desc: 'Gen Jennie Carignan becomes first female CDS. CAF at lowest strength in decades. AG flags recruiting failures. DM Fox (COI breach) appointed Dec 2025.', link: 'cds-accountability.html', cat: 'cfnis', color: '#a855f7' },
     { year: 2026, month: 4, title: 'CDS Accountability Investigation Opened', desc: 'TENET5 investigation into CDS record: recruitment crisis, digital battle space surrender, foreign military access, compromised DND command chain. Criminal Code + NDA charges framework documented.', link: 'cds-accountability.html', cat: 'cfnis', color: '#a855f7' },
+    { year: 2026, month: 4, title: 'Bill C-218 Second Reading Vote', desc: 'The Right to Recover Act — vote expected April 13-17, 2026. Needs 24 Liberal MPs to cross the floor. Liberals and Bloc signalled opposition. Would permanently block MAID for mental illness.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
