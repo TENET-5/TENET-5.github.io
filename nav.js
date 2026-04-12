@@ -3,30 +3,10 @@
      Canadian Accountability Project — ABCXYZ.github.io
      ═══════════════════════════════════════════════════════ */
 (function() {
-  // LIRIL NPU baked analysis results — no API, pure local inference
-  window.LIRIL_SITE_DATA = {
-    seed: 118400,
-    tick_hz: 118.4,
-    sator_row: 3,
-    sator_word: "OPERA",
-    last_classify_ts: 1775762162,
-    total_samples_trained: 9514,
-    gpu0_util: 44,
-    gpu1_util: 26,
-    nats_status: "connected",
-    domains: {
-      "MAID Accountability":       { domain: "ETHICS",     confidence: 0.99, device: "NPU",  method: "keyword-decisive" },
-      "Political Failure":         { domain: "ETHICS",     confidence: 0.75, device: "CPU",  method: "keyword_override", npu_original: "REASONING" },
-      "Disability/Ethics":         { domain: "ETHICS",     confidence: 0.99, device: "NPU",  method: "keyword-decisive" },
-      "Legal/Criminal":            { domain: "ETHICS",     confidence: 0.80, device: "NPU",  method: "keyword-decisive" },
-      "ArriveCAN/AG Findings":     { domain: "ETHICS",     confidence: 0.99, device: "NPU",  method: "keyword-decisive" },
-      "CERB Pandemic Spending":    { domain: "ETHICS",     confidence: 0.99, device: "NPU",  method: "keyword-decisive" },
-      "Zaccardelli/Arar":          { domain: "ETHICS",     confidence: 0.99, device: "NPU",  method: "keyword-decisive" },
-      "Phoenix Pay Disaster":      { domain: "TECHNOLOGY", confidence: 0.88, device: "NPU",  method: "keyword-decisive" },
-      "Foreign Interference":      { domain: "ETHICS",     confidence: 0.95, device: "NPU",  method: "keyword-decisive" },
-      "Senate Expenses Scandal":   { domain: "ETHICS",     confidence: 0.97, device: "NPU",  method: "keyword-decisive" },
-    },
-    route: { agent: "nemoclaw", domain: "ETHICS", fallback_from: "kyre" }
+  // Site configuration
+  window.SITE_DATA = {
+    updated: "2026-04-11",
+    source: "official government records"
   };
 
   const headerHTML = `
@@ -47,11 +27,11 @@
       <a href="/phoenix-pay.html"                id="nav-phoenix">Phoenix Pay</a>
       <a href="/foreign-interference.html"       id="nav-foreign">Foreign Interference</a>
       <a href="/s504-covey-bae.html"             id="nav-504" style="color:#ef4444;">s.504</a>
-      <a href="/liril-analysis.html"             id="nav-liril">LIRIL Analysis</a>
+      <a href="/liril-analysis.html"             id="nav-liril">Analysis</a>
     </nav>
-    <div class="liril-status-pill" title="LIRIL NPU — Local inference, no external API">
+    <div class="liril-status-pill" title="Canadian Accountability Project">
       <div class="dot"></div>
-      LIRIL·NPU &nbsp;|&nbsp; SEED:118400 &nbsp;|&nbsp; NATS:OK
+      Canadian Accountability Project
     </div>
     <button class="menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
   </div>
@@ -83,18 +63,17 @@
     <div>
       <h4>AI Analysis</h4>
       <ul>
-        <li><a href="/liril-analysis.html">LIRIL NPU Analysis</a></li>
+        <li><a href="/liril-analysis.html">Analysis Dashboard</a></li>
         <li><a href="/cicd-status.html">CI/CD Status</a></li>
         <li><a href="/about.html">About This Project</a></li>
       </ul>
     </div>
     <div>
-      <h4>Infrastructure</h4>
+      <h4>About</h4>
       <ul>
-        <li><span style="color:rgba(255,255,255,0.45)">LIRIL NPU — Local, no API</span></li>
-        <li><span style="color:rgba(255,255,255,0.45)">NemoClaw GPU0/GPU1 RTX 5070 Ti</span></li>
-        <li><span style="color:rgba(255,255,255,0.45)">NATS mesh — localhost</span></li>
-        <li><span style="color:rgba(255,255,255,0.45)">SEED: 118400 | TICK: 118.4Hz</span></li>
+        <li><span style="color:rgba(255,255,255,0.45)">All analysis performed locally</span></li>
+        <li><span style="color:rgba(255,255,255,0.45)">No external APIs or trackers</span></li>
+        <li><span style="color:rgba(255,255,255,0.45)">Sources: official records only</span></li>
       </ul>
     </div>
   </div>
@@ -102,7 +81,7 @@
     <span>© 2025 Canadian Accountability Project. All records sourced from official government, parliamentary, and court documents.</span>
     <span class="footer-liril-sig">
       <span class="dot"></span>
-      LIRIL·NPU·SATOR·OPERA·SEED:118400 — local inference only, no external data
+      Canadian Accountability Project
     </span>
   </div>
 </footer>`;
