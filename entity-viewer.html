@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entity Profiler & Document Viewer | TENET5</title>
+  <title>Entity Profiler & Document Viewer | CAP</title>
   <meta name="description" content="Programmable profiling dashboard mapping entities to documented actions and financial vectors.">
   <meta property="og:title" content="Entity Architecture Viewer">
-  <meta name="theme-color" content="#050810">
+  <meta name="theme-color" content="#2E3440">
   <meta name="color-scheme" content="light dark">
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=17">
   <style>
     /* Specific Entity UI Tokens */
     .entity-wrap {
@@ -29,7 +36,7 @@
       gap: 24px;
       margin-bottom: var(--s-xl);
     }
-    
+
     /* Premium Data Cards (Glassmorphism + Shadows) */
     .entity-card {
       background: var(--bg-card);
@@ -56,7 +63,7 @@
     .entity-card[data-risk="High"]::before { background: var(--color-critical); }
     .entity-card[data-risk="Medium"]::before { background: var(--color-warning); }
     .entity-card[data-risk="Low"]::before { background: var(--color-info); }
-    
+
     .entity-role {
       font-family: var(--font-mono);
       font-size: 0.7rem;
@@ -80,7 +87,7 @@
       font-style: italic;
       margin-bottom: 16px;
     }
-    
+
     /* Interactive Modal */
     .modal-overlay {
       position: fixed;
@@ -114,7 +121,7 @@
       transition: transform 0.3s var(--ease-spring);
     }
     .modal-overlay.active .modal-content { transform: translateY(0); }
-    
+
     .close-btn {
       position: absolute;
       top: 24px; right: 24px;
@@ -125,7 +132,7 @@
       padding: 8px;
     }
     .close-btn:hover { color: var(--accent); }
-    
+
     /* Timeline within Modal */
     .timeline {
       margin-top: 30px;
@@ -177,9 +184,6 @@
   </style>
 <!-- offline_db.js removed: 17MB blocking load -->
 
-
-
-
 <!-- TENET5 SEO INJECT -->
   <!-- Dynamic SEO Enforced by TENET5 automated pipeline -->
   <meta property="og:title" content="Entity Profiler & Document Viewer | TENET5">
@@ -206,20 +210,22 @@
 }
   </script>
 <!-- /TENET5 SEO INJECT -->
+    <link rel="stylesheet" href="css/inline_generated.css">
 </head>
 <body>
-  <nav id="site-nav"></nav>
 
-  <div class="entity-wrap">
+
+  <div id="site-header-frame"></div>
+<div class="entity-wrap">
     <div class="entity-header">
       <h1>Entity & Document Profiler</h1>
-      <p class="subtitle" style="color:var(--text-tertiary);">Structural framework for analyzing chronological entity profiles.</p>
+      <p class="subtitle tnt-style-407">Structural framework for analyzing chronological entity profiles.</p>
     </div>
 
     <!-- Toolbar -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-family:var(--font-mono); font-size:0.8rem;">
-      <span style="color:var(--text-quaternary);" id="load-status">Attempting data extraction...</span>
-      <input type="text" id="search-filter" placeholder="Filter entities..." style="padding:10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg-surface); color:var(--text-primary); outline:none;">
+    <div class="tnt-style-408">
+      <span class="tnt-style-409" id="load-status">Attempting data extraction...</span>
+      <input type="text" id="search-filter" placeholder="Filter entities..." class="tnt-style-410">
     </div>
 
     <div class="grid-container" id="entity-grid">
@@ -231,13 +237,13 @@
   <div class="modal-overlay" id="entity-modal">
     <div class="modal-content">
       <button class="close-btn" id="close-modal">&times;</button>
-      <span class="entity-role" id="modal-role" style="font-size: 0.8rem; color: var(--accent);"></span>
-      <h2 id="modal-name" style="margin-bottom: 8px;"></h2>
-      <p id="modal-inst" style="color: var(--text-tertiary); font-style: italic; margin-bottom: 24px;"></p>
-      
-      <p id="modal-summary" style="font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);"></p>
-      
-      <h3 style="margin-top: 40px; font-family: var(--font-headline); font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Documented Actions</h3>
+      <span class="entity-role tnt-style-411" id="modal-role"></span>
+      <h2 id="modal-name" class="tnt-style-412"></h2>
+      <p id="modal-inst" class="tnt-style-413"></p>
+
+      <p id="modal-summary" class="tnt-style-414"></p>
+
+      <h3 class="tnt-style-415">Documented Actions</h3>
       <div class="timeline" id="modal-timeline">
         <!-- Rendered events go here -->
       </div>
@@ -245,13 +251,7 @@
   </div>
 
   <div id="read-next"></div>
-  <footer id="site-footer"></footer>
-
-  <script src="nav.js?v=11"></script>
-  <script src="footer.js?v=2"></script>
-  <script src="readnext.js?v=2"></script>
-  
-  <script>
+<script>
     (function() {
       const grid = document.getElementById('entity-grid');
       const search = document.getElementById('search-filter');
@@ -261,14 +261,14 @@
       // Modal elements
       const modal = document.getElementById('entity-modal');
       const closeBtn = document.getElementById('close-modal');
-      
+
       closeBtn.onclick = () => modal.classList.remove('active');
       modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
 
       function renderGrid(data) {
         grid.innerHTML = '';
         if(data.length === 0) {
-          grid.innerHTML = '<p style="color:var(--text-tertiary);">No profiles loaded / match constraints.</p>';
+          grid.innerHTML = '<p class="tnt-style-407">No profiles loaded / match constraints.</p>';
           return;
         }
 
@@ -276,15 +276,15 @@
           const card = document.createElement('div');
           card.className = 'entity-card';
           card.setAttribute('data-risk', ent.risk_vector || 'Low');
-          
+
           card.innerHTML = `
             <span class="entity-role">${ent.primary_role}</span>
             <div class="entity-name">${ent.display_name}</div>
             <div class="entity-inst">${ent.institution}</div>
-            <div style="font-size:0.8rem; color:var(--text-tertiary); line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${ent.summary}</div>
-            <div style="margin-top:16px; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-quaternary); font-weight:600;">${(ent.actions || []).length} LOGGED ACTIONS</div>
+            <div class="tnt-style-416">${ent.summary}</div>
+            <div class="tnt-style-417">${(ent.actions || []).length} LOGGED ACTIONS</div>
           `;
-          
+
           card.addEventListener('click', () => openModal(ent));
           grid.appendChild(card);
         });
@@ -295,10 +295,10 @@
         document.getElementById('modal-name').textContent = ent.display_name;
         document.getElementById('modal-inst').textContent = ent.institution;
         document.getElementById('modal-summary').textContent = ent.summary;
-        
+
         const tline = document.getElementById('modal-timeline');
         tline.innerHTML = '';
-        
+
         if (ent.actions && ent.actions.length > 0) {
           ent.actions.forEach(a => {
             const ev = document.createElement('div');
@@ -312,9 +312,9 @@
             tline.appendChild(ev);
           });
         } else {
-          tline.innerHTML = '<span style="color:var(--text-quaternary); font-size:0.85rem; font-style:italic;">No chronology explicitly mapped.</span>';
+          tline.innerHTML = '<span class="tnt-style-418">No chronology explicitly mapped.</span>';
         }
-        
+
         modal.classList.add('active');
       }
 
@@ -342,6 +342,8 @@
         });
     })();
   </script>
-<script src="js/ux.js"></script>
+
+  <div id="site-footer-frame"></div>
+  <script src="shell.js?v=1"></script>
 </body>
 </html>

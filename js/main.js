@@ -4,6 +4,10 @@
 (function () {
   'use strict';
 
+  // Guard: prevent double execution
+  if (window.__TENET5_MAIN_LOADED) return;
+  window.__TENET5_MAIN_LOADED = true;
+
   // ── Horror Atmosphere Layers ────────────────────────────────────────────
   ['horror-pulse', 'horror-flicker', 'horror-scanlines', 'horror-glitch', 'horror-vignette', 'horror-redflash'].forEach(function(cls) {
     var el = document.createElement('div');
