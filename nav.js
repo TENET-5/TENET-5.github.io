@@ -7,38 +7,29 @@
   if (window.__TENET5_NAV_LOADED) return;
   window.__TENET5_NAV_LOADED = true;
 
-  /* Caduceus SVG — Staff of Mercury with dual serpents + wings
-     Mercury = NATS message bus (mercury.infer)
-     Two serpents = dual RTX 5070 Ti GPUs intertwined
-     Wings = speed of inference
-     Staff = SATOR central axis
-     DO NOT REPLACE — this is the TENET5 logo per CLAUDE.md */
+  /* Heraldic Crest SVG — Tactical Chess Pawn with Man-Pack Radio
+     As requested, the crest has been converted into a pawn with a military radio. */
   var crestSVG =
-    '<svg class="brand-crest" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<defs>' +
-    '<linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1">' +
+    '<svg class="brand-crest" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<defs><linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1">' +
     '<stop offset="0%" stop-color="#dcc175"/><stop offset="100%" stop-color="#a07c30"/>' +
-    '</linearGradient>' +
-    '<linearGradient id="t5-red" x1="0" y1="0" x2="0" y2="1">' +
-    '<stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#991b1b"/>' +
-    '</linearGradient>' +
-    '</defs>' +
-    /* Staff */
-    '<rect x="38" y="18" width="4" height="95" rx="2" fill="url(#t5-gold)"/>' +
-    '<circle cx="40" cy="14" r="6" fill="url(#t5-gold)" stroke="#a07c30" stroke-width="1"/>' +
-    /* Left serpent (GPU0) */
-    '<path d="M40 90 C20 82 58 70 28 60 C58 50 20 40 40 32" fill="none" stroke="url(#t5-red)" stroke-width="3" stroke-linecap="round"/>' +
-    /* Right serpent (GPU1) */
-    '<path d="M40 90 C60 82 22 70 52 60 C22 50 60 40 40 32" fill="none" stroke="url(#t5-red)" stroke-width="3" stroke-linecap="round"/>' +
-    /* Serpent heads */
-    '<circle cx="35" cy="30" r="3" fill="#dc2626"/>' +
-    '<circle cx="45" cy="30" r="3" fill="#dc2626"/>' +
-    /* Wings left */
-    '<path d="M30 28 C18 20 8 24 4 18 C10 22 16 18 24 22 C16 14 6 16 2 8 C10 14 18 12 26 20Z" fill="url(#t5-gold)" opacity="0.7"/>' +
-    /* Wings right */
-    '<path d="M50 28 C62 20 72 24 76 18 C70 22 64 18 56 22 C64 14 74 16 78 8 C70 14 62 12 54 20Z" fill="url(#t5-gold)" opacity="0.7"/>' +
-    /* Base orb */
-    '<circle cx="40" cy="113" r="4" fill="url(#t5-gold)" stroke="#a07c30" stroke-width="0.5"/>' +
+    '</linearGradient></defs>' +
+    /* Antenna */
+    '<line x1="30" y1="55" x2="20" y2="15" stroke="url(#t5-gold)" stroke-width="2"/>' +
+    /* Backpack Radio */
+    '<rect x="25" y="55" width="15" height="25" rx="3" fill="#c41e3a" stroke="url(#t5-gold)" stroke-width="2"/>' +
+    '<rect x="28" y="52" width="4" height="3" fill="url(#t5-gold)"/>' +
+    /* Handset Wire */
+    '<path d="M35 60 Q45 65 40 70 T45 80" fill="none" stroke="url(#t5-gold)" stroke-width="1.5" stroke-dasharray="2,1"/>' +
+    /* Pawn Base */
+    '<path d="M30 110 L70 110 L65 95 L35 95 Z" fill="url(#t5-gold)"/>' +
+    /* Red Ring */
+    '<path d="M32 95 Q50 100 68 95 L63 90 Q50 95 37 90 Z" fill="#c41e3a"/>' +
+    /* Pawn Body */
+    '<path d="M37 90 C37 60, 45 45, 50 40 C55 45, 63 60, 63 90 Z" fill="url(#t5-gold)"/>' +
+    /* Collar & Head */
+    '<rect x="42" y="38" width="16" height="4" rx="2" fill="#c41e3a"/>' +
+    '<circle cx="50" cy="26" r="12" fill="url(#t5-gold)"/>' +
     '</svg>';
 
   var headerHTML =
