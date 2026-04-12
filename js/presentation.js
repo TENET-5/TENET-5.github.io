@@ -707,14 +707,14 @@
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Slide overview');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);' +
-      'display:flex;align-items:center;justify-content:center;z-index:9998;';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);' +
+      'display:flex;align-items:center;justify-content:center;z-index:9998;backdrop-filter:blur(8px);';
 
     var panel = document.createElement('div');
-    panel.style.cssText = 'background:#0a0e1a;color:#e8e4dc;padding:1.5rem 2rem;' +
-      'border-radius:8px;border:1px solid #333;max-width:480px;width:90vw;' +
-      'max-height:70vh;overflow-y:auto;';
-    panel.innerHTML = '<h3 style="margin:0 0 1rem;font-size:1.1rem;">Slide Overview</h3>';
+    panel.style.cssText = 'background:rgba(6,10,22,0.95);color:#e8e4dc;padding:1.5rem 2rem;' +
+      'border-radius:6px;border:1px solid rgba(14,165,233,0.15);max-width:480px;width:90vw;' +
+      'max-height:70vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 1px rgba(14,165,233,0.2);';
+    panel.innerHTML = '<h3 style="margin:0 0 1rem;font-size:1.1rem;font-family:Rajdhani,Space Grotesk,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#0ea5e9;">Slide Overview</h3>';
 
     var list = document.createElement('ol');
     list.style.cssText = 'list-style:none;margin:0;padding:0;';
@@ -723,9 +723,9 @@
       if (sl.classList.contains('pres-slide--compact')) return;
       var label = getSlideLabel(sl);
       var li = document.createElement('li');
-      li.style.cssText = 'padding:0.35rem 0.5rem;border-radius:4px;cursor:pointer;' +
-        'font-size:0.9rem;margin-bottom:2px;' +
-        (i === activeIdx ? 'background:rgba(201,168,76,0.2);color:#c9a84c;font-weight:bold;' : '');
+      li.style.cssText = 'padding:0.35rem 0.5rem;border-radius:3px;cursor:pointer;' +
+        'font-size:0.9rem;margin-bottom:2px;transition:background 0.15s ease;' +
+        (i === activeIdx ? 'background:rgba(14,165,233,0.15);color:#22d3ee;font-weight:bold;border-left:2px solid #0ea5e9;padding-left:0.6rem;' : '');
       li.textContent = (i + 1) + '. ' + label;
       li.addEventListener('click', function () {
         closeToc();
@@ -769,21 +769,21 @@
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Go to page');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);' +
-      'display:flex;align-items:flex-start;justify-content:center;padding-top:12vh;z-index:9998;';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);' +
+      'display:flex;align-items:flex-start;justify-content:center;padding-top:12vh;z-index:9998;backdrop-filter:blur(8px);';
 
     var panel = document.createElement('div');
-    panel.style.cssText = 'background:#0a0e1a;color:#e8e4dc;padding:1.2rem 1.5rem;' +
-      'border-radius:8px;border:1px solid #444;max-width:520px;width:92vw;' +
-      'max-height:65vh;display:flex;flex-direction:column;';
+    panel.style.cssText = 'background:rgba(6,10,22,0.95);color:#e8e4dc;padding:1.2rem 1.5rem;' +
+      'border-radius:6px;border:1px solid rgba(14,165,233,0.15);max-width:520px;width:92vw;' +
+      'max-height:65vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 1px rgba(14,165,233,0.2);';
 
     var input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Search 136 investigation pages\u2026';
     input.setAttribute('aria-label', 'Search pages');
     input.style.cssText = 'width:100%;padding:0.6rem 0.8rem;font-size:1rem;' +
-      'background:#14181f;color:#e8e4dc;border:1px solid #555;border-radius:5px;' +
-      'outline:none;margin-bottom:0.8rem;box-sizing:border-box;';
+      'background:rgba(8,14,28,0.9);color:#e8e4dc;border:1px solid rgba(14,165,233,0.15);border-radius:4px;' +
+      'outline:none;margin-bottom:0.8rem;box-sizing:border-box;font-family:Inter,system-ui,sans-serif;';
 
     var resultsDiv = document.createElement('div');
     resultsDiv.style.cssText = 'overflow-y:auto;flex:1;';
@@ -816,17 +816,17 @@
         if (entry.group !== lastGroup) {
           lastGroup = entry.group;
           var groupEl = document.createElement('div');
-          groupEl.style.cssText = 'font-size:0.75rem;color:#c9a84c;padding:0.5rem 0.3rem 0.15rem;' +
-            'text-transform:uppercase;letter-spacing:0.05em;border-top:1px solid #222;margin-top:0.3rem;';
+          groupEl.style.cssText = 'font-size:0.7rem;color:#0ea5e9;padding:0.5rem 0.3rem 0.15rem;' +
+            'text-transform:uppercase;letter-spacing:0.1em;border-top:1px solid rgba(14,165,233,0.1);margin-top:0.3rem;font-family:Rajdhani,Space Grotesk,sans-serif;';
           groupEl.textContent = entry.group;
           resultsDiv.appendChild(groupEl);
         }
 
         var row = document.createElement('div');
         var isCurrent = entry.page === currentPage;
-        row.style.cssText = 'padding:0.35rem 0.5rem;border-radius:4px;cursor:pointer;' +
-          'font-size:0.88rem;margin-bottom:1px;' +
-          (isCurrent ? 'background:rgba(201,168,76,0.15);color:#c9a84c;' : '');
+        row.style.cssText = 'padding:0.35rem 0.5rem;border-radius:3px;cursor:pointer;' +
+          'font-size:0.88rem;margin-bottom:1px;transition:background 0.15s ease;' +
+          (isCurrent ? 'background:rgba(14,165,233,0.12);color:#22d3ee;border-left:2px solid #0ea5e9;padding-left:0.6rem;' : '');
         row.textContent = (entry.idx + 1) + '. ' + entry.title;
         row.addEventListener('click', function () {
           closeGoTo();
@@ -836,7 +836,7 @@
           if (!isCurrent) this.style.background = 'rgba(255,255,255,0.06)';
         });
         row.addEventListener('mouseleave', function () {
-          this.style.background = isCurrent ? 'rgba(201,168,76,0.15)' : '';
+          this.style.background = isCurrent ? 'rgba(14,165,233,0.12)' : '';
         });
         resultsDiv.appendChild(row);
         count++;
@@ -1168,7 +1168,7 @@
     container.classList.add('sprite-bars');
     var rows = slideEl.querySelectorAll('tr, .inv-stat, .stat-hero-item, [class*="stat-card"]');
     var count = Math.min(Math.max(rows.length || 6, 4), 12);
-    var colors = ['#dc2626', '#c9a84c', '#3b82f6', '#a855f7', '#22c55e', '#f97316'];
+    var colors = ['#dc2626', '#0ea5e9', '#3b82f6', '#a855f7', '#22c55e', '#f97316'];
 
     for (var i = 0; i < count; i++) {
       var bar = document.createElement('div');
@@ -1759,7 +1759,7 @@
     el.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);' +
       'max-width:80vw;padding:0.6rem 1.2rem;background:rgba(10,14,26,0.88);' +
       'color:#e8e4dc;font-size:0.95rem;line-height:1.4;border-radius:6px;' +
-      'border:1px solid rgba(201,168,76,0.3);z-index:9990;' +
+      'border:1px solid rgba(14,165,233,0.2);z-index:9990;' +
       'pointer-events:none;opacity:0;transition:opacity 0.25s ease;' +
       'text-align:center;';
     document.body.appendChild(el);
@@ -2164,7 +2164,7 @@
       initNarrationControls(slides, pageIndicator, 0);
       lirilNarration.badge = pageIndicator ? pageIndicator.querySelector('.pres-narration-badge') : null;
       if (lirilNarration.badge) {
-        lirilNarration.badge.style.cssText = 'font-size:0.7rem;color:#c9a84c;opacity:0.8;' +
+        lirilNarration.badge.style.cssText = 'font-size:0.7rem;color:#22d3ee;opacity:0.8;' +
           'white-space:nowrap;margin:0 0.3rem;display:none;';
       }
       updateNarrationBadge();
