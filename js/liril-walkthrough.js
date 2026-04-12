@@ -268,7 +268,7 @@
         }
         var chunk = chunkQueue.shift();
         var u = new SpeechSynthesisUtterance(chunk);
-        u.lang = window.LIRIL_I18N_LOCALE;
+        u.lang = 'en-GB'; // LIRIL is always British — never drift
         u.rate = 0.9;
         u.pitch = 1.1;
         if (voice) u.voice = voice;
@@ -284,20 +284,56 @@
     var cachedVoice = null;
     var voiceResolved = false;
 
+    // LIRIL voice priority: British female, then any known female, NEVER male
+    var PREFERRED_FEMALE = [
+      'google uk english female', 'microsoft hazel', 'microsoft susan',
+      'google uk english', 'karen', 'moira', 'fiona', 'serena',
+      'microsoft libby', 'microsoft sonia', 'martha', 'kate'
+    ];
+    var BANNED_MALE = [
+      'david', 'mark', 'james', 'george', 'daniel', 'ryan',
+      'guy', 'thomas', 'richard', 'rishi', 'sean', 'oliver'
+    ];
+
     function resolveVoice() {
       if (voiceResolved) return cachedVoice;
       var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-      var targetLang = window.LIRIL_I18N_LOCALE;
-      
+      if (voices.length === 0) return null;
+
+      var vName = function(v) { return v.name.toLowerCase(); };
+      var isMale = function(v) { return BANNED_MALE.some(function(m) { return vName(v).includes(m); }); };
+
+      // Priority 1: Known British female voices by name
       cachedVoice = voices.find(function(v) {
-        return v.lang.startsWith(targetLang) && v.name.toLowerCase().includes('female');
-      }) || voices.find(function(v) {
-        return v.lang.startsWith(targetLang);
-      }) || voices.find(function(v) {
+        return PREFERRED_FEMALE.some(function(p) { return vName(v).includes(p); }) && v.lang.startsWith('en-GB');
+      });
+
+      // Priority 2: Any en-GB voice with 'female' in name
+      if (!cachedVoice) cachedVoice = voices.find(function(v) {
+        return v.lang.startsWith('en-GB') && vName(v).includes('female');
+      });
+
+      // Priority 3: Any en-GB voice that is NOT male
+      if (!cachedVoice) cachedVoice = voices.find(function(v) {
+        return v.lang.startsWith('en-GB') && !isMale(v);
+      });
+
+      // Priority 4: Any English female voice (non-GB)
+      if (!cachedVoice) cachedVoice = voices.find(function(v) {
+        return v.lang.startsWith('en') && (vName(v).includes('female') || PREFERRED_FEMALE.some(function(p) { return vName(v).includes(p); }));
+      });
+
+      // Priority 5: Any English voice that is NOT male
+      if (!cachedVoice) cachedVoice = voices.find(function(v) {
+        return v.lang.startsWith('en') && !isMale(v);
+      });
+
+      // Last resort: first English voice (may be male on limited systems)
+      if (!cachedVoice) cachedVoice = voices.find(function(v) {
         return v.lang.startsWith('en');
       }) || null;
-      
-      if (voices.length > 0) voiceResolved = true;
+
+      voiceResolved = true;
       return cachedVoice;
     }
 
