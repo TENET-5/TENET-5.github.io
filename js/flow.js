@@ -18,6 +18,7 @@
     { href: 'maid-voting-record.html', num: '173', label: 'MPs Who Voted' },
     { href: 'cfnis.html', num: 'CFNIS', label: 'Military Police' },
     { href: 'rcmp-commissioners.html', num: '4', label: 'RCMP Chiefs' },
+    { href: 'follow-the-money.html', num: '$1.3T', label: 'Follow the Money' },
     { href: 'scandals.html', num: '11', label: 'Scandals' },
   ];
 
