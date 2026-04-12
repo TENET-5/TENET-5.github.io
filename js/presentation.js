@@ -627,7 +627,18 @@
 
   function initKeyboardNav(slides, tracker) {
     // Add keyboard help modal
+    function getKeyboardHelpModal() {
+      return document.querySelector('.pres-keyboard-help');
+    }
+
+    function closeKeyboardHelp() {
+      var existing = getKeyboardHelpModal();
+      if (existing) existing.remove();
+    }
+
     function showKeyboardHelp() {
+      if (getKeyboardHelpModal()) return;
+
       var modal = document.createElement('div');
       modal.className = 'pres-keyboard-help';
       modal.innerHTML = '<div class="pres-keyboard-help-inner">' +
@@ -678,6 +689,11 @@
       }
 
       if (e.key === 'Escape') {
+        if (getKeyboardHelpModal()) {
+          e.preventDefault();
+          closeKeyboardHelp();
+          return;
+        }
         if (window.__TENET5_LIRIL_STOP) window.__TENET5_LIRIL_STOP();
         return;
       }
