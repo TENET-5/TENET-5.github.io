@@ -1355,6 +1355,7 @@
         '<strong>' + (idx + 1) + '/' + PAGE_SEQUENCE.length + '</strong>' +
         ' \u00b7 ' + escHTML(group) +
       '</span>' +
+      '<span class="pres-narration-badge" aria-live="polite"></span>' +
       '<button class="pres-page-nav pres-page-next" title="Next page">\u2192</button>';
 
     document.body.appendChild(indicator);
@@ -1382,6 +1383,18 @@
     { label: 'Fast', value: 1.2 }
   ];
 
+  var RATE_STORAGE_KEY = 'liril-rate-idx';
+  var AUTO_NARRATE_KEY = 'liril-auto-narrate';
+
+  /* Restore rate + auto-narrate from sessionStorage */
+  var savedRate = 1;
+  var savedAuto = false;
+  try {
+    var sr = sessionStorage.getItem(RATE_STORAGE_KEY);
+    if (sr !== null) { var ri = parseInt(sr, 10); if (ri >= 0 && ri < SPEECH_RATES.length) savedRate = ri; }
+    savedAuto = sessionStorage.getItem(AUTO_NARRATE_KEY) === 'true';
+  } catch (e) { /* private browsing */ }
+
   var lirilNarration = {
     button: null,
     speaking: false,
@@ -1389,11 +1402,12 @@
     keepaliveTimer: null,
     token: 0,
     subtitle: null,
-    rateIdx: 1,
-    autoNarrate: false,
+    rateIdx: savedRate,
+    autoNarrate: savedAuto,
     narrateAllActive: false,
     narrateAllSlides: null,
-    narrateAllTracker: null
+    narrateAllTracker: null,
+    badge: null
   };
   var narrationIndexByPage = null;
   var narrationIndexPromise = null;
@@ -1661,6 +1675,31 @@
     lirilNarration.button.setAttribute('aria-pressed', lirilNarration.speaking ? 'true' : 'false');
     lirilNarration.button.setAttribute('aria-disabled', (!text).toString());
     lirilNarration.button.title = text ? 'Narrate current slide' : 'No narration available for this slide';
+    updateNarrationBadge();
+  }
+
+  function updateNarrationBadge() {
+    if (!lirilNarration.badge) return;
+    var parts = [];
+
+    // Voice name (short)
+    var v = cachedVoice;
+    if (v && v.name) {
+      var short = v.name.replace(/Microsoft\s+/i, '').replace(/Online\s*\(Natural\)/i, '').trim();
+      if (short.length > 18) short = short.substring(0, 16) + '\u2026';
+      parts.push(short);
+    }
+
+    // Rate
+    var rate = SPEECH_RATES[lirilNarration.rateIdx];
+    if (rate && rate.label !== 'Normal') parts.push(rate.value + '\u00d7');
+
+    // Modes
+    if (lirilNarration.narrateAllActive) parts.push('\u25b6 ALL');
+    else if (lirilNarration.autoNarrate) parts.push('AUTO');
+
+    lirilNarration.badge.textContent = parts.join(' \u00b7 ');
+    lirilNarration.badge.style.display = parts.length ? '' : 'none';
   }
 
   function getSubtitleEl() {
@@ -1802,6 +1841,7 @@
     lirilNarration.narrateAllActive = false;
     lirilNarration.narrateAllSlides = null;
     lirilNarration.narrateAllTracker = null;
+    updateNarrationBadge();
   }
 
   function narrateAllFrom(slides, tracker) {
@@ -1820,6 +1860,7 @@
     lirilNarration.narrateAllSlides = slides;
     lirilNarration.narrateAllTracker = tracker;
     showSubtitle('Narrate All: ON — Shift+N or Esc to stop');
+    updateNarrationBadge();
     setTimeout(function () { if (!lirilNarration.speaking) hideSubtitle(); }, 2000);
     narrateAllStep(slides, tracker);
   }
@@ -1954,15 +1995,19 @@
     };
     window.__TENET5_LIRIL_CYCLE_RATE = function () {
       lirilNarration.rateIdx = (lirilNarration.rateIdx + 1) % SPEECH_RATES.length;
+      try { sessionStorage.setItem(RATE_STORAGE_KEY, String(lirilNarration.rateIdx)); } catch (e) {}
       var preset = SPEECH_RATES[lirilNarration.rateIdx];
       showSubtitle('Speed: ' + preset.label + ' (' + preset.value + '×)');
+      updateNarrationBadge();
       setTimeout(function () {
         if (!lirilNarration.speaking) hideSubtitle();
       }, 1500);
     };
     window.__TENET5_LIRIL_TOGGLE_AUTO = function () {
       lirilNarration.autoNarrate = !lirilNarration.autoNarrate;
+      try { sessionStorage.setItem(AUTO_NARRATE_KEY, String(lirilNarration.autoNarrate)); } catch (e) {}
       showSubtitle('Auto-narrate: ' + (lirilNarration.autoNarrate ? 'ON' : 'OFF'));
+      updateNarrationBadge();
       setTimeout(function () {
         if (!lirilNarration.speaking) hideSubtitle();
       }, 1500);
@@ -2058,6 +2103,12 @@
       initTouchNav();
       observeContinueSlide(continueSlide);
       initNarrationControls(slides, pageIndicator, 0);
+      lirilNarration.badge = pageIndicator ? pageIndicator.querySelector('.pres-narration-badge') : null;
+      if (lirilNarration.badge) {
+        lirilNarration.badge.style.cssText = 'font-size:0.7rem;color:#c9a84c;opacity:0.8;' +
+          'white-space:nowrap;margin:0 0.3rem;display:none;';
+      }
+      updateNarrationBadge();
       prefetchAdjacentPages();
 
       // Mark dots that have narration (re-run after index loads)
