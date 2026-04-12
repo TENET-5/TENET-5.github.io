@@ -171,8 +171,21 @@
           btn.classList.remove('active');
       } else {
           // Start sequence
-          var slides = Array.from(document.querySelectorAll('.pres-slide')).filter(function(el) {
+          var slides = [];
+          
+          // First pass: locate `.pres-slide` containing `data-narrate`
+          var presSlides = Array.from(document.querySelectorAll('.pres-slide')).filter(function(el) {
               return el.hasAttribute('data-narrate') || el.querySelector('[data-narrate]');
+          });
+          
+          // Second pass: gather all `[data-narrate]` tags directly
+          document.querySelectorAll('[data-narrate]').forEach(function(narrEl) {
+              var parentSlide = presSlides.find(function(s) { return s.contains(narrEl) || s === narrEl; });
+              if (parentSlide) {
+                  if (slides.indexOf(parentSlide) === -1) slides.push(parentSlide);
+              } else {
+                  slides.push(narrEl);
+              }
           });
 
           if (slides.length === 0) {

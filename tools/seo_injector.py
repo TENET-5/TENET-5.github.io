@@ -4,11 +4,11 @@ import re
 
 SEO_TEMPLATE = """
 <!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by TENET5 automated pipeline -->
+  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
   <meta property="og:title" content="{page_title}">
   <meta property="og:url" content="https://tenet-5.github.io/{filename}">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5 Accountability">
+  <meta property="og:site_name" content="TENET5">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{page_title}">
   <link rel="canonical" href="https://tenet-5.github.io/{filename}">
@@ -20,7 +20,7 @@ SEO_TEMPLATE = """
   "url": "https://tenet-5.github.io/{filename}",
   "publisher": {{
     "@type": "Organization",
-    "name": "TENET5 Investigation",
+    "name": "TENET5",
     "logo": {{
       "@type": "ImageObject",
       "url": "https://tenet-5.github.io/img/tenet5_logo.png"
