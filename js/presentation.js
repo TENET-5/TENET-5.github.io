@@ -641,13 +641,33 @@
     try { sessionStorage.setItem(getResumeKey(), String(idx)); } catch (e) { /* quota */ }
   }
 
+  function updateSlideHash(idx) {
+    if (idx === 0) {
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      return;
+    }
+    var tag = '#slide-' + (idx + 1);
+    if (location.hash !== tag) history.replaceState(null, '', tag);
+  }
+
   function restoreSlidePosition(slides) {
+    // Hash fragment takes priority (e.g. #slide-3 = third slide)
+    var hashMatch = location.hash.match(/^#slide-(\d+)$/);
+    if (hashMatch) {
+      var hIdx = parseInt(hashMatch[1], 10) - 1;
+      if (hIdx >= 0 && hIdx < slides.length && hIdx !== 0) {
+        setTimeout(function () {
+          slides[hIdx].scrollIntoView({ behavior: 'auto', block: 'start' });
+        }, 80);
+        return;
+      }
+    }
+    // Fall back to sessionStorage resume
     try {
       var saved = sessionStorage.getItem(getResumeKey());
       if (saved === null) return;
       var idx = parseInt(saved, 10);
       if (isNaN(idx) || idx < 0 || idx >= slides.length || idx === 0) return;
-      // Delay to let layout settle, then jump without animation
       setTimeout(function () {
         slides[idx].scrollIntoView({ behavior: 'auto', block: 'start' });
       }, 80);
@@ -1798,6 +1818,7 @@
         if (lirilNarration.speaking) stopNarration();
         updateNarrationButton();
         saveSlidePosition(idx);
+        updateSlideHash(idx);
         if (lirilNarration.autoNarrate) {
           setTimeout(function () { narrateCurrentSlide(); }, 300);
         }
