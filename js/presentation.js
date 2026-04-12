@@ -2162,6 +2162,96 @@
     });
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     SECTION: EVIDENCE PERMALINKS — Deep links to evidence blocks
+     Auto-generates IDs, scroll+highlight on hash, copy-link on hover
+     ═══════════════════════════════════════════════════════════════════ */
+  var PERMALINK_SELECTORS = '.evidence-block, .card, .charge-card, ' +
+    '.timeline-entry, .stat-tile, [data-narrate], section, article';
+  var PERMALINK_HIGHLIGHT_CLASS = 'permalink-highlight';
+  var PERMALINK_DURATION = 3000;
+
+  function slugify(text) {
+    return text.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 60);
+  }
+
+  function generatePermalinkIds() {
+    var els = document.querySelectorAll(PERMALINK_SELECTORS);
+    var usedIds = {};
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].id) { usedIds[els[i].id] = true; continue; }
+      var heading = els[i].querySelector('h1, h2, h3, h4, .evidence-label, .card-title, strong');
+      var text = heading ? heading.textContent : (els[i].textContent || '');
+      var slug = slugify(text.substring(0, 80));
+      if (!slug) slug = 'ev-' + i;
+      // Ensure unique
+      var base = slug;
+      var n = 1;
+      while (usedIds[slug]) { slug = base + '-' + (++n); }
+      usedIds[slug] = true;
+      els[i].id = slug;
+    }
+  }
+
+  function highlightPermalink(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add(PERMALINK_HIGHLIGHT_CLASS);
+    setTimeout(function () {
+      el.classList.remove(PERMALINK_HIGHLIGHT_CLASS);
+    }, PERMALINK_DURATION);
+  }
+
+  function handlePermalinkHash() {
+    var hash = location.hash.replace('#', '');
+    if (hash) highlightPermalink(hash);
+  }
+
+  function addPermalinkCopyButtons() {
+    var els = document.querySelectorAll(PERMALINK_SELECTORS);
+    for (var i = 0; i < els.length; i++) {
+      if (!els[i].id) continue;
+      if (els[i].querySelector('.permalink-copy')) continue;
+      var btn = document.createElement('button');
+      btn.className = 'permalink-copy';
+      btn.setAttribute('aria-label', 'Copy permalink');
+      btn.setAttribute('title', 'Copy link to this section');
+      btn.textContent = '\uD83D\uDD17';
+      btn.dataset.targetId = els[i].id;
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var url = location.origin + location.pathname + '#' + this.dataset.targetId;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(url);
+        }
+        this.textContent = '\u2705';
+        var self = this;
+        setTimeout(function () { self.textContent = '\uD83D\uDD17'; }, 1500);
+      });
+      els[i].style.position = els[i].style.position || 'relative';
+      els[i].appendChild(btn);
+    }
+  }
+
+  function initPermalinks() {
+    generatePermalinkIds();
+    addPermalinkCopyButtons();
+    handlePermalinkHash();
+    window.addEventListener('hashchange', handlePermalinkHash);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPermalinks);
+  } else {
+    // Delay slightly to ensure DOM is fully rendered
+    setTimeout(initPermalinks, 500);
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
