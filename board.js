@@ -13,7 +13,6 @@
  * On sub-pages: Board available as FAB overlay (backwards compatible)
  *
  * Cognitive Science: Miller's Law, Gestalt, Zeigarnik, Fitts, Method of Loci
- * TENET5 OSINT/analysis: ART×TECHNOLOGY dual gate (AVIVA + KAYAK)
  */
 (function() {
   'use strict';
@@ -66,7 +65,7 @@
         { id: 'timeline', emoji: '📅', title: 'TIMELINE',           desc: 'Chronological evidence map.',        href: 'timeline.html',            dx: -60, dy: 720, rot: 2 },
         { id: 'cfnis',   emoji: '🎖',  title: 'CFNIS',              desc: 'Military police investigation.',     href: 'cfnis.html',               dx: 200, dy: 140, rot: -3 },
         { id: 'legal',   emoji: '⚖',  title: 'LEGAL PROCEEDINGS',  desc: 'Court filings and framework.',       href: 'legal.html',               dx: 280, dy: 320, rot: 1 },
-        { id: 'lawsuit',  emoji: '📜', title: 'PPCLI LAWSUIT',     desc: 'Statement of claim.',                href: 'lawsuit-ppcli.html',       dx: 340, dy: 500, rot: -2 },
+        { id: 'lawsuit',  emoji: '📜', title: 'PPCLI LAWSUIT',     desc: 'Statement of claim.',                href: 'ppcli-lawsuit.html',       dx: 340, dy: 500, rot: -2 },
       ]
     },
     {
