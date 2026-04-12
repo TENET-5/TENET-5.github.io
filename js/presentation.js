@@ -493,7 +493,7 @@
       var text = h.textContent.trim();
       return text.length > 30 ? text.substring(0, 30) + '\u2026' : text;
     }
-    var narr = el.getAttribute('data-narration');
+    var narr = el.getAttribute('data-narrate') || el.getAttribute('data-narration');
     if (narr) return narr.charAt(0).toUpperCase() + narr.slice(1);
     if (el.classList.contains('stat-hero-banner')) return 'Key Statistics';
     if (el.classList.contains('inv-stat-grid')) return 'Statistics';
