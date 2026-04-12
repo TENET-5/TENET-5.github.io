@@ -92,7 +92,7 @@ async function generateAI_Brief() {
 
   let headlinesText = globalHeadlines.map(h => `- [${h.source}] ${h.title}`).join('\\n');
   
-  const prompt = `You are the CAP autonomous intelligence engine. Analyze the following current Canadian headlines and write a structured "Intelligence Brief". Focus on major shifts, accountability issues, human rights, and governance anomalies.
+  const prompt = `You are the TENET5 autonomous intelligence engine. Analyze the following current Canadian headlines and write a structured "Intelligence Brief". Focus on major shifts, accountability issues, human rights, and governance anomalies.
   
 Headlines:
 ${headlinesText}

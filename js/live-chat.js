@@ -1,5 +1,5 @@
 /**
- * Live Chat — Canadian Accountability Project Community Discussion
+ * Live Chat — TENET5 Community Discussion
  *
  * Firestore-backed realtime chat. Requires Firebase Auth.
  * Works entirely client-side on GitHub Pages.

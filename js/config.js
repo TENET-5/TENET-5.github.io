@@ -1,5 +1,5 @@
 /**
- * Canadian Accountability Project Site Configuration
+ * TENET5 Site Configuration
  * 
  * Set your Supabase credentials here after creating a project at supabase.com
  * Or set them as window.SUPABASE_URL / window.SUPABASE_ANON before loading other scripts.

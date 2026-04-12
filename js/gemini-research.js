@@ -12,7 +12,7 @@ const RESEARCH_MODEL   = 'gemini-2.0-flash';
 const GROUNDING_MODEL  = 'gemini-2.0-flash';  // supports Google Search grounding
 
 // ── Research system prompt ────────────────────────────────────────────────────
-const RESEARCH_SYSTEM = `You are an investigative research assistant embedded in the Canadian Accountability Project,
+const RESEARCH_SYSTEM = `You are an investigative research assistant embedded in TENET5,
 a Canadian government accountability investigation platform.
 
 Your role is to help citizens research Canadian politics, governance, legislation,
@@ -29,7 +29,7 @@ GUIDELINES:
 - Always distinguish between allegations and proven facts`;
 
 // ── Commentary system prompt ──────────────────────────────────────────────────
-const COMMENTARY_SYSTEM = `You are a political commentary assistant for the Canadian Accountability Project,
+const COMMENTARY_SYSTEM = `You are a political commentary assistant for TENET5,
 a Canadian government accountability platform. Help users understand and comment on
 Canadian political events, policies, and governance issues.
 
