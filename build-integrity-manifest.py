@@ -99,23 +99,90 @@ def collect_pages() -> dict:
     return pages
 
 
+def load_existing_manifest() -> dict | None:
+    out = SITE_ROOT / "integrity-manifest.json"
+    if out.exists():
+        try:
+            return json.loads(out.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            pass
+    return None
+
+
+def merge_custody(old_section: dict, new_hashes: dict, now: str) -> dict:
+    """Merge new hashes into existing custody records, preserving first_seen."""
+    merged = {}
+    for path, new_hash in sorted(new_hashes.items()):
+        prev = old_section.get(path)
+        if isinstance(prev, dict):
+            # Existing custody record
+            if prev.get("hash") == new_hash:
+                # Unchanged — update last_verified only
+                merged[path] = {
+                    "hash": new_hash,
+                    "first_seen": prev["first_seen"],
+                    "last_verified": now,
+                    "revisions": prev.get("revisions", 1),
+                }
+            else:
+                # Hash changed — new revision
+                merged[path] = {
+                    "hash": new_hash,
+                    "first_seen": prev["first_seen"],
+                    "last_verified": now,
+                    "revisions": prev.get("revisions", 1) + 1,
+                }
+        elif isinstance(prev, str):
+            # Upgrading from flat hash format
+            if prev == new_hash:
+                merged[path] = {
+                    "hash": new_hash,
+                    "first_seen": now,
+                    "last_verified": now,
+                    "revisions": 1,
+                }
+            else:
+                merged[path] = {
+                    "hash": new_hash,
+                    "first_seen": now,
+                    "last_verified": now,
+                    "revisions": 2,
+                }
+        else:
+            # Brand new entry
+            merged[path] = {
+                "hash": new_hash,
+                "first_seen": now,
+                "last_verified": now,
+                "revisions": 1,
+            }
+    return merged
+
+
 def main():
     print("Building integrity manifest...")
+    now = datetime.now(timezone.utc).isoformat()
+    existing = load_existing_manifest() or {}
+    old_assets = existing.get("assets", {})
+    old_pages = existing.get("pages", {})
+
     assets = collect_assets()
     print(f"  Hashed {len(assets)} assets")
     pages = collect_pages()
     print(f"  Hashed {len(pages)} pages")
 
     manifest = {
-        "generated": datetime.now(timezone.utc).isoformat(),
+        "generated": now,
         "algorithm": "SHA-256",
-        "assets": dict(sorted(assets.items())),
-        "pages": dict(sorted(pages.items())),
+        "custody_format": "v2",
+        "assets": merge_custody(old_assets, assets, now),
+        "pages": merge_custody(old_pages, pages, now),
     }
 
     out = SITE_ROOT / "integrity-manifest.json"
     out.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    print(f"  Written to {out} ({len(assets) + len(pages)} entries)")
+    total = len(manifest["assets"]) + len(manifest["pages"])
+    print(f"  Written to {out} ({total} entries, custody v2)")
 
 
 if __name__ == "__main__":

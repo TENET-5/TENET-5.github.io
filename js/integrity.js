@@ -49,18 +49,29 @@
     return (clone.textContent || '').replace(/\s+/g, ' ').trim();
   }
 
+  /* ── Resolve manifest entry (supports v1 flat hash and v2 custody) */
+  function resolveEntry(entry) {
+    if (!entry) return null;
+    if (typeof entry === 'string') return { hash: entry };
+    return entry;
+  }
+
   /* ── Verify current page content ──────────────────────────── */
   function verifyPage() {
     var pagePath = location.pathname.replace(/^\//, '') || 'index.html';
     return loadManifest().then(function (m) {
-      var expected = m.pages[pagePath];
-      if (!expected) return { path: pagePath, status: 'not-in-manifest' };
+      var raw = m.pages[pagePath];
+      var entry = resolveEntry(raw);
+      if (!entry) return { path: pagePath, status: 'not-in-manifest' };
       return sha256Text(extractBodyText()).then(function (actual) {
         return {
           path: pagePath,
-          status: actual === expected ? 'verified' : 'modified',
-          expected: expected,
-          actual: actual
+          status: actual === entry.hash ? 'verified' : 'modified',
+          expected: entry.hash,
+          actual: actual,
+          firstSeen: entry.first_seen || null,
+          lastVerified: entry.last_verified || null,
+          revisions: entry.revisions || null
         };
       });
     });
@@ -70,8 +81,9 @@
   function verifyAsset(url) {
     var assetPath = url.replace(/^(https?:\/\/[^/]+)?\//, '');
     return loadManifest().then(function (m) {
-      var expected = m.assets[assetPath];
-      if (!expected) return { path: assetPath, status: 'not-in-manifest' };
+      var raw = m.assets[assetPath];
+      var entry = resolveEntry(raw);
+      if (!entry) return { path: assetPath, status: 'not-in-manifest' };
       return fetch(url).then(function (r) {
         if (!r.ok) throw new Error('Asset fetch failed: ' + url);
         return r.arrayBuffer();
@@ -80,9 +92,12 @@
       }).then(function (actual) {
         return {
           path: assetPath,
-          status: actual === expected ? 'verified' : 'modified',
-          expected: expected,
-          actual: actual
+          status: actual === entry.hash ? 'verified' : 'modified',
+          expected: entry.hash,
+          actual: actual,
+          firstSeen: entry.first_seen || null,
+          lastVerified: entry.last_verified || null,
+          revisions: entry.revisions || null
         };
       });
     });
@@ -106,6 +121,16 @@
         ? 'Content differs from signed manifest'
         : 'Page not in integrity manifest';
 
+    var custodyHtml = '';
+    if (result.firstSeen || result.lastVerified) {
+      custodyHtml = '<div class="integrity-custody">' +
+        '<div class="integrity-custody-title">\uD83D\uDD17 Chain of Custody</div>' +
+        (result.firstSeen ? '<div>First recorded: <time datetime="' + result.firstSeen + '">' + formatCustodyDate(result.firstSeen) + '</time></div>' : '') +
+        (result.lastVerified ? '<div>Last verified: <time datetime="' + result.lastVerified + '">' + formatCustodyDate(result.lastVerified) + '</time></div>' : '') +
+        (result.revisions ? '<div>Revisions: <strong>' + result.revisions + '</strong></div>' : '') +
+      '</div>';
+    }
+
     panel.innerHTML =
       '<div class="integrity-header">' +
         '<span class="integrity-icon">' + icon + '</span>' +
@@ -118,6 +143,7 @@
         (result.expected ? '<div>Expected: <code class="integrity-hash">' + result.expected.substring(0, 16) + '\u2026</code></div>' : '') +
         (result.actual ? '<div>Computed: <code class="integrity-hash">' + result.actual.substring(0, 16) + '\u2026</code></div>' : '') +
         '<div>Manifest: <code>' + (manifest ? manifest.generated : 'N/A') + '</code></div>' +
+        custodyHtml +
       '</div>';
 
     panel.style.display = 'block';
@@ -150,6 +176,40 @@
     document.body.appendChild(verifyBtn);
   }
 
+  /* ── Format custody date ──────────────────────────────────── */
+  function formatCustodyDate(iso) {
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' }) +
+        ' ' + d.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' UTC';
+    } catch (_) { return iso; }
+  }
+
+  /* ── Chain-of-custody badge (visible on every page) ───────── */
+  function initCustodyBadge() {
+    loadManifest().then(function (m) {
+      var pagePath = location.pathname.replace(/^\//, '') || 'index.html';
+      var raw = m.pages[pagePath];
+      var entry = resolveEntry(raw);
+      if (!entry || !entry.first_seen) return;
+
+      var badge = document.createElement('div');
+      badge.className = 'custody-badge';
+      badge.setAttribute('role', 'status');
+      badge.setAttribute('aria-label', 'Evidence custody record');
+      badge.innerHTML =
+        '<span class="custody-badge-icon">\uD83D\uDD17</span>' +
+        '<span class="custody-badge-text">' +
+          'Recorded ' + formatCustodyDate(entry.first_seen) +
+          (entry.revisions > 1 ? ' \u00B7 Rev ' + entry.revisions : '') +
+        '</span>';
+      badge.addEventListener('click', function () {
+        if (verifyBtn) verifyBtn.click();
+      });
+      document.body.appendChild(badge);
+    }).catch(function () { /* silent — badge is non-critical */ });
+  }
+
   /* ── Expose API for programmatic use ──────────────────────── */
   window.TENET5Integrity = {
     verifyPage: verifyPage,
@@ -158,9 +218,13 @@
   };
 
   /* ── Init ─────────────────────────────────────────────────── */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initIntegrityButton);
-  } else {
+  function init() {
     initIntegrityButton();
+    initCustodyBadge();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();
