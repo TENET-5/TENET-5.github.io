@@ -3,6 +3,11 @@
  */
 (function() {
   'use strict';
+
+  // Guard: prevent double execution
+  if (window.__TENET5_SHARE_LOADED) return;
+  window.__TENET5_SHARE_LOADED = true;
+
   const URL = window.location.href;
   const TITLE = document.title;
 

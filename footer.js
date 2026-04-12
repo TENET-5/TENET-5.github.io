@@ -1,16 +1,13 @@
 /**
- * TENET5 Shared Footer v5.0 — A+ Stanford Credibility Design
- *
- * Implements Stanford Web Credibility Guidelines #2, #4, #5, #8:
- *   #2 — Real organization/person behind the site
- *   #4 — Honest, trustworthy person stands behind it
- *   #5 — Easy to contact
- *   #8 — Shows when content was last updated
- *
- * Place <footer id="site-footer"></footer> in every page.
+ * TENET5 Shared Footer v5.1 — A+ Stanford Credibility Design
+ * Loaded by shell.js → injects into #site-footer-frame or #site-footer
  */
 (function() {
   'use strict';
+
+  // Guard: prevent double execution
+  if (window.__TENET5_FOOTER_LOADED) return;
+  window.__TENET5_FOOTER_LOADED = true;
 
   var FOOTER = {
     author: {
@@ -78,7 +75,8 @@
   };
 
   function buildFooter() {
-    var el = document.getElementById('site-footer');
+    var el = document.getElementById('site-footer-frame') ||
+             document.getElementById('site-footer');
     if (!el) return;
 
     var year = new Date().getFullYear();
@@ -117,7 +115,7 @@
     html += '<p style="font-size:0.8rem;color:#9ca3af;line-height:1.8;">';
     FOOTER.dataSources.forEach(function(src, i) {
       if (i > 0) html += ' &nbsp;&bull;&nbsp; ';
-      html += '<a href="' + src.href + '" target="_blank" rel="noopener" style="color:#93c5fd;text-decoration:none;">' + src.label + '</a>';
+      html += '<a href="' + src.href + '" target="_blank" rel="noopener" style="color:#c9a84c;text-decoration:none;">' + src.label + '</a>';
     });
     html += '</p>';
     html += '</div>';

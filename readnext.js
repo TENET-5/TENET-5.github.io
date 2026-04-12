@@ -13,6 +13,10 @@
 (function() {
   'use strict';
 
+  // Guard: prevent double execution
+  if (window.__TENET5_READNEXT_LOADED) return;
+  window.__TENET5_READNEXT_LOADED = true;
+
   // Investigation flow — each page knows what comes next
   var FLOW = {
     'index.html': {
@@ -99,23 +103,15 @@
       current: 'About & Methodology',
       next: [
         { href: 'index.html', label: 'The Evidence', desc: 'Start with the numbers' },
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 investigation panels' },
       ]
     },
-    'liril-analysis.html': {
-      current: 'Meet TENET5 OSINT',
-      next: [
-        { href: 'findings.html', label: 'What She Found', desc: '26+ panels from 7M records' },
-        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the data yourself' },
-        { href: 'about.html', label: 'About & Methodology', desc: 'How it all works' },
-      ]
-    },
+
     'cfnis.html': {
       current: 'CFNIS Investigation',
       next: [
         { href: 's504-covey-bae.html', label: 's.504 Prosecution: Covey & Bae', desc: 'Information filed against CFNIS under Criminal Code s.504' },
-        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
       ]
     },
@@ -123,7 +119,7 @@
       current: 's.504 Prosecution — Covey & Bae',
       next: [
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
       ]
     },
@@ -244,7 +240,7 @@
       next: [
         { href: 'acelephius-report.html', label: 'Acelephius Report', desc: 'The initial Acelephius investigation' },
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
       ]
     },
     'ag-findings.html': {
@@ -258,7 +254,6 @@
     'ai-research.html': {
       current: 'AI Research',
       next: [
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the analysis' },
         { href: 'search.html', label: 'Search', desc: 'Search across the full dataset' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
       ]
@@ -275,7 +270,6 @@
       current: 'Bloggins',
       next: [
         { href: 'red-duster-game.html', label: 'Red Duster Game', desc: 'The interactive investigation game' },
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -439,7 +433,7 @@
         { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
       ]
     },
-    'lawsuit-ppcli.html': {
+    'ppcli-lawsuit.html': {
       current: 'PPCLI Lawsuit',
       next: [
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
@@ -571,7 +565,6 @@
       current: 'Red Duster Game',
       next: [
         { href: 'bloggins.html', label: 'Bloggins', desc: 'The story behind the game' },
-        { href: 'liril-analysis.html', label: 'Meet TENET5 OSINT', desc: 'The AI behind the project' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -659,7 +652,7 @@
       current: 'Veterans',
       next: [
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-        { href: 'lawsuit-ppcli.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
         { href: 'whistleblower-guide.html', label: 'Whistleblower Guide', desc: 'How to safely report wrongdoing' },
       ]
     },

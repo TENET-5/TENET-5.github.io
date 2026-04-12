@@ -380,7 +380,7 @@ window.BOARD_DATA = {
       "label": "s.504 Charges",
       "subtitle": "Criminal Code",
       "detail": "Information filed by Daniel Perry against CFNIS officers",
-      "link": "cfnis.html",
+      "link": "s504-covey-bae.html",
       "categories": [
         "cfnis",
         "evidence"
@@ -1311,7 +1311,7 @@ window.BOARD_DATA = {
       "label": "PPCLI Lawsuit",
       "subtitle": "Federal Court of Canada",
       "detail": "Statement of Claim: Perry v. HMK. Charges breach of duty of care, whistleblower reprisal, Charter violations, systemic discrimination. The Kit Shop Paradox: CAF deployed a 'retard' to Afghanistan with Top Secret clearance and encrypted signals equipment, then discovered the impairment only after he reported foreign interference.",
-      "link": "lawsuit-ppcli.html",
+      "link": "ppcli-lawsuit.html",
       "categories": [
         "cfnis",
         "event"
@@ -1325,7 +1325,7 @@ window.BOARD_DATA = {
       "label": "Dr. Zoe Selhi",
       "subtitle": "CAF psychiatrist",
       "detail": "Produced psychiatric assessment labeling Cpl Perry as cognitively impaired \u2014 a diagnosis that appeared only after he blew the whistle on Israeli and Chinese foreign interference. Previously documented in genocide-evidence.html for labeling another veteran 'delusional' for reporting MAID targeting. Pattern: weaponized psychiatric evaluation to silence whistleblowers.",
-      "link": "lawsuit-ppcli.html",
+      "link": "ppcli-lawsuit.html",
       "categories": [
         "cfnis",
         "person"
@@ -1339,7 +1339,7 @@ window.BOARD_DATA = {
       "label": "Bob Paulson",
       "subtitle": "RCMP Commissioner (2011-2017)",
       "detail": "Commanded RCMP during Bill C-14 passage. Failed to intervene in authorization of lethal state protocols.",
-      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
+      "link": "maid-policy-evolution.html",
       "categories": [
         "cfnis",
         "person"
@@ -1353,7 +1353,7 @@ window.BOARD_DATA = {
       "label": "Brenda Lucki",
       "subtitle": "RCMP Commissioner (2018-2023)",
       "detail": "Commanded RCMP during Bill C-7 expansion. Failed to intervene when execution criteria expanded to non-terminal citizens.",
-      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
+      "link": "maid-policy-evolution.html",
       "categories": [
         "cfnis",
         "person"
@@ -1367,7 +1367,7 @@ window.BOARD_DATA = {
       "label": "Bill C-14 Passes",
       "subtitle": "June 2016",
       "detail": "Initial Medical Assistance in Dying legislation receives Royal Assent.",
-      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
+      "link": "maid-policy-evolution.html",
       "categories": [
         "evidence"
       ],
@@ -1380,12 +1380,121 @@ window.BOARD_DATA = {
       "label": "Bill C-7 Passes",
       "subtitle": "March 2021",
       "detail": "MAID expansion removes reasonably foreseeable death requirement.",
-      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
+      "link": "maid-policy-evolution.html",
       "categories": [
         "evidence"
       ],
       "x": 60,
       "y": 25
+    },
+    {
+      "id": "phac",
+      "type": "organization",
+      "label": "PHAC",
+      "subtitle": "Public Health Agency",
+      "detail": "Dr. Theresa Tam's mandate fraud audit and severe Charter Section 6 deviations logged via empirical knowledge graph compilation.",
+      "link": "scandals.html",
+      "categories": [
+        "evidence",
+        "scandals"
+      ],
+      "x": 20,
+      "y": 80
+    },
+    {
+      "id": "arrivecan_fraud",
+      "type": "event",
+      "label": "ArriveCAN Fraud",
+      "subtitle": "GC Strategies Scandal",
+      "detail": "Billion dollar fraud flagged by Auditor General resulting in active RCMP investigation into procurement integrity.",
+      "link": "arrivecan.html",
+      "categories": [
+        "event",
+        "scandals"
+      ],
+      "x": 25,
+      "y": 85
+    },
+    {
+      "id": "tam",
+      "type": "person",
+      "label": "Dr. Theresa Tam",
+      "subtitle": "Chief Public Health Officer",
+      "detail": "Implicated in Charter Section 6 Mobility Rights Violation Court audits per Heuristic Analytics.",
+      "link": "scandals.html",
+      "categories": [
+        "person"
+      ],
+      "x": 20,
+      "y": 75
+    },
+    {
+      "id": "charter",
+      "type": "evidence",
+      "label": "Charter of Rights",
+      "subtitle": "Mobility Violations",
+      "detail": "Systemic S.6 violations documented.",
+      "link": "scandals.html",
+      "categories": [
+        "evidence"
+      ],
+      "x": 30,
+      "y": 80
+    },
+    {
+      "id": "rcmp",
+      "type": "organization",
+      "label": "RCMP",
+      "subtitle": "Federal Police",
+      "detail": "Ostracized whistleblower officers while shielding political procurement networks.",
+      "link": "rcmp-commissioners.html",
+      "categories": [
+        "organization",
+        "cfnis"
+      ],
+      "x": 30,
+      "y": 85
+    },
+    {
+      "id": "cija_lobbying",
+      "type": "organization",
+      "label": "CIJA Lobbying Pipeline",
+      "subtitle": "579 Sponsored Trips/Interactions",
+      "detail": "Identified Matrix complexity NP-HARD pipeline of unaccounted sponsored political transit. Threat Score: 0.95",
+      "link": "foreign-influence.html",
+      "categories": [
+        "evidence",
+        "scandals"
+      ],
+      "x": 35,
+      "y": 70
+    },
+    {
+      "id": "cfnis_proxy",
+      "type": "event",
+      "label": "CFNIS Proxy Node",
+      "subtitle": "Internal Oversight Tampering",
+      "detail": "Telemetry isolated CFNIS shielding mechanisms altering oversight integrity. Threat Score: 0.88",
+      "link": "cfnis.html",
+      "categories": [
+        "event",
+        "cfnis"
+      ],
+      "x": 40,
+      "y": 75
+    },
+    {
+      "id": "foreign_alpha",
+      "type": "organization",
+      "label": "Foreign Influence Target Alpha",
+      "subtitle": "Registry Detection",
+      "detail": "Direct matrix intersection mapping severe lobbying anomalies. P-CLASS certainty. Threat Score: 0.98",
+      "link": "foreign-influence.html",
+      "categories": [
+        "evidence"
+      ],
+      "x": 45,
+      "y": 70
     }
   ],
   "threads": [
@@ -2426,6 +2535,36 @@ window.BOARD_DATA = {
       "to": "cfnis",
       "strength": 2,
       "label": "Command Chain"
+    },
+    {
+      "from": "phac",
+      "to": "charter",
+      "label": "IMPLICATED_IN_THREAT",
+      "strength": 4
+    },
+    {
+      "from": "rcmp",
+      "to": "arrivecan_fraud",
+      "label": "IMPLICATED_IN_THREAT",
+      "strength": 4
+    },
+    {
+      "from": "tam",
+      "to": "phac",
+      "label": "MANDATE_FRAUD",
+      "strength": 5
+    },
+    {
+      "from": "cija_lobbying",
+      "to": "foreign_alpha",
+      "label": "VECTOR_MATCH",
+      "strength": 5
+    },
+    {
+      "from": "cfnis_proxy",
+      "to": "cija_lobbying",
+      "label": "OVERSIGHT_TAMPERING",
+      "strength": 3
     }
   ]
 };
