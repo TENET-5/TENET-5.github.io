@@ -30,6 +30,10 @@
     { year: 2025, month: 6, title: 'ArriveCAN $64M Recovery Vote', desc: 'Parliament votes 172-165 to recover money. Every Liberal MP votes AGAINST.', link: 'arrivecan.html', cat: 'waste', color: '#f59e0b' },
     { year: 2020, month: 10, title: 'PBO: MAID Saves $149M/Year', desc: 'Parliamentary Budget Officer publishes cost estimate BEFORE C-7 expansion vote. Projected $1.273 TRILLION by 2047.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
     { year: 2025, month: 7, title: 'Carney Assets: 500+ Companies', desc: 'Ethics commissioner reveals PM holds 500+ companies in blind trust. $6.8M Brookfield options. Brookfield owns seniors housing globally.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
+    { year: 2025, month: 3, title: 'UN: Repeal Track 2', desc: 'UN Committee on Rights of Persons with Disabilities calls on Canada to repeal Track 2 entirely. "Extreme concern." Canada: no plans to act.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2026, month: 1, title: 'Charter Challenge: Religious Hospitals', desc: 'B.C. Supreme Court hears challenge to Catholic hospitals refusing MAID. Sam O\'Neill (34, terminal) forced to transfer from St. Paul\'s.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2026, month: 3, title: 'Alberta Bill 18: Block MAID Expansion', desc: 'Alberta legislates to prohibit MAID for mental illness. Limits eligibility to patients likely to die within 12 months.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2026, month: 3, title: 'Bill C-218: Permanent Block', desc: 'Conservative MP Ed Fast introduces bill to permanently block MAID expansion to mental illness. 10 provinces oppose expansion.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
