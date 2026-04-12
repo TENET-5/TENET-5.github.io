@@ -649,6 +649,7 @@
         '<p><kbd>←</kbd> <kbd>→</kbd> — Previous/Next page</p>' +
         '<p><kbd>Home</kbd> / <kbd>End</kbd> — First/Last slide</p>' +
         '<p><kbd>N</kbd> — Narrate current slide (LIRIL)</p>' +
+        '<p><kbd>S</kbd> — Cycle speech rate (slow/normal/fast)</p>' +
         '<p><kbd>Esc</kbd> — Stop narration</p>' +
         '<p><kbd>?</kbd> — Show this help</p>' +
         '</div>' +
@@ -695,6 +696,12 @@
       if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         if (window.__TENET5_LIRIL_NARRATE) window.__TENET5_LIRIL_NARRATE();
+        return;
+      }
+
+      if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        if (window.__TENET5_LIRIL_CYCLE_RATE) window.__TENET5_LIRIL_CYCLE_RATE();
         return;
       }
 
@@ -1085,13 +1092,20 @@
      SECTION 12: LIRIL narration controls
      ═══════════════════════════════════════════════════════════════════ */
 
+  var SPEECH_RATES = [
+    { label: 'Slow', value: 0.8 },
+    { label: 'Normal', value: 0.95 },
+    { label: 'Fast', value: 1.2 }
+  ];
+
   var lirilNarration = {
     button: null,
     speaking: false,
     activeSlide: null,
     keepaliveTimer: null,
     token: 0,
-    subtitle: null
+    subtitle: null,
+    rateIdx: 1
   };
   var narrationIndexByPage = null;
   var narrationIndexPromise = null;
@@ -1358,7 +1372,7 @@
     var chunk = chunks.shift();
     var u = new SpeechSynthesisUtterance(chunk);
     u.lang = 'en-GB';
-    u.rate = 0.95;
+    u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
     u.pitch = 1.0;
     if (voice) u.voice = voice;
 
@@ -1423,6 +1437,14 @@
 
     window.__TENET5_LIRIL_NARRATE = narrateCurrentSlide;
     window.__TENET5_LIRIL_STOP = stopNarration;
+    window.__TENET5_LIRIL_CYCLE_RATE = function () {
+      lirilNarration.rateIdx = (lirilNarration.rateIdx + 1) % SPEECH_RATES.length;
+      var preset = SPEECH_RATES[lirilNarration.rateIdx];
+      showSubtitle('Speed: ' + preset.label + ' (' + preset.value + '×)');
+      setTimeout(function () {
+        if (!lirilNarration.speaking) hideSubtitle();
+      }, 1500);
+    };
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stopNarration();
