@@ -563,7 +563,7 @@
 
     var hint = document.createElement('div');
     hint.className = 'pres-keyhint';
-    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 page \u00b7 N narrate \u00b7 ? help';
+    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 page \u00b7 N narrate \u00b7 T contents \u00b7 ? help';
     document.body.appendChild(hint);
     setTimeout(function () { hint.classList.add('pres-keyhint-fade'); }, 6000);
 
@@ -634,6 +634,65 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
+     SECTION 5b: Slide table-of-contents overlay
+     ═══════════════════════════════════════════════════════════════════ */
+
+  function getTocOverlay() {
+    return document.querySelector('.pres-toc-overlay');
+  }
+
+  function closeToc() {
+    var existing = getTocOverlay();
+    if (existing) existing.remove();
+  }
+
+  function toggleTOC(slides, tracker) {
+    if (getTocOverlay()) { closeToc(); return; }
+
+    var activeIdx = tracker.getActive();
+    var overlay = document.createElement('div');
+    overlay.className = 'pres-toc-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);' +
+      'display:flex;align-items:center;justify-content:center;z-index:9998;';
+
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#0a0e1a;color:#e8e4dc;padding:1.5rem 2rem;' +
+      'border-radius:8px;border:1px solid #333;max-width:480px;width:90vw;' +
+      'max-height:70vh;overflow-y:auto;';
+    panel.innerHTML = '<h3 style="margin:0 0 1rem;font-size:1.1rem;">Slide Overview</h3>';
+
+    var list = document.createElement('ol');
+    list.style.cssText = 'list-style:none;margin:0;padding:0;';
+
+    slides.forEach(function (sl, i) {
+      if (sl.classList.contains('pres-slide--compact')) return;
+      var label = getSlideLabel(sl);
+      var li = document.createElement('li');
+      li.style.cssText = 'padding:0.35rem 0.5rem;border-radius:4px;cursor:pointer;' +
+        'font-size:0.9rem;margin-bottom:2px;' +
+        (i === activeIdx ? 'background:rgba(201,168,76,0.2);color:#c9a84c;font-weight:bold;' : '');
+      li.textContent = (i + 1) + '. ' + label;
+      li.addEventListener('click', function () {
+        closeToc();
+        sl.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+      });
+      list.appendChild(li);
+    });
+
+    panel.appendChild(list);
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeToc();
+    });
+
+    // Scroll the active item into view within the panel
+    var activeLi = list.children[activeIdx];
+    if (activeLi) activeLi.scrollIntoView({ block: 'center' });
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
      SECTION 6: Keyboard + touch navigation
      ═══════════════════════════════════════════════════════════════════ */
 
@@ -663,7 +722,8 @@
         '<p><kbd>N</kbd> — Narrate current slide (LIRIL)</p>' +
         '<p><kbd>A</kbd> — Toggle auto-narrate on slide change</p>' +
         '<p><kbd>S</kbd> — Cycle speech rate (slow/normal/fast)</p>' +
-        '<p><kbd>Esc</kbd> — Stop narration</p>' +
+        '<p><kbd>T</kbd> — Slide table of contents</p>' +
+        '<p><kbd>Esc</kbd> — Stop narration / close panels</p>' +
         '<p><kbd>?</kbd> — Show this help</p>' +
         '</div>' +
         '<button onclick="this.closest(\'.pres-keyboard-help\').remove()">Close</button>' +
@@ -688,10 +748,16 @@
       if (isEditing) return;
 
       var helpOpen = !!getKeyboardHelpModal();
-      if (helpOpen) {
+      var tocOpen = !!getTocOverlay();
+      if (helpOpen || tocOpen) {
         if (e.key === 'Escape' || e.key === '?') {
           e.preventDefault();
-          if (e.key === 'Escape') closeKeyboardHelp();
+          if (e.key === 'Escape') { closeKeyboardHelp(); closeToc(); }
+          return;
+        }
+        if (tocOpen && e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          closeToc();
           return;
         }
         return;
@@ -721,6 +787,12 @@
       if ((e.key === 'a' || e.key === 'A') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         if (window.__TENET5_LIRIL_TOGGLE_AUTO) window.__TENET5_LIRIL_TOGGLE_AUTO();
+        return;
+      }
+
+      if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        toggleTOC(slides, tracker);
         return;
       }
 
