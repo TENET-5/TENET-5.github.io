@@ -1120,6 +1120,31 @@
     return chunks.length ? chunks : [text.substring(0, 180)];
   }
 
+  function tokenizeForMatch(text) {
+    if (!text) return [];
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(function (t) { return t.length > 2; });
+  }
+
+  function scoreNarrationMatch(slideText, candidateText) {
+    var slideTokens = tokenizeForMatch(slideText);
+    var candTokens = tokenizeForMatch(candidateText);
+    if (!slideTokens.length || !candTokens.length) return 0;
+
+    var candSet = {};
+    candTokens.forEach(function (t) { candSet[t] = true; });
+
+    var hit = 0;
+    slideTokens.forEach(function (t) {
+      if (candSet[t]) hit++;
+    });
+
+    return hit;
+  }
+
   function getIndexedNarration(slide) {
     if (!slide || !narrationIndexByPage) return '';
     var page = getCurrentPage();
@@ -1127,8 +1152,28 @@
     if (!pageList || !pageList.length) return '';
 
     var idx = parseInt(slide.getAttribute('data-slide-idx'), 10);
-    if (isNaN(idx) || idx < 0 || idx >= pageList.length) return '';
-    return cleanNarrationText(pageList[idx] || '');
+    if (!isNaN(idx) && idx >= 0 && idx < pageList.length) {
+      var indexed = cleanNarrationText(pageList[idx] || '');
+      if (indexed) return indexed;
+    }
+
+    // If slide indexing drifts from source narration order, match by heading text.
+    var heading = slide.querySelector('h1, h2, h3');
+    if (!heading) return '';
+    var headingText = cleanNarrationText(heading.textContent || '');
+    if (!headingText) return '';
+
+    var best = '';
+    var bestScore = 0;
+    pageList.forEach(function (candidate) {
+      var score = scoreNarrationMatch(headingText, candidate);
+      if (score > bestScore) {
+        bestScore = score;
+        best = candidate;
+      }
+    });
+
+    return bestScore >= 2 ? cleanNarrationText(best) : '';
   }
 
   function getNarrationText(slide) {
