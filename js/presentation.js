@@ -21,6 +21,9 @@
   if (window.__TENET5_PRESENTATION_LOADED) return;
   window.__TENET5_PRESENTATION_LOADED = true;
 
+  var prefersReducedMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   /* ═══════════════════════════════════════════════════════════════════
      SECTION 0: PAGE_SEQUENCE — Curated investigation reading order
      ═══════════════════════════════════════════════════════════════════ */
@@ -547,7 +550,7 @@
       dot.setAttribute('data-label', getSlideLabel(sl));
       dot.setAttribute('data-idx', i);
       dot.addEventListener('click', function () {
-        sl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        sl.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
       });
       rail.appendChild(dot);
     });
@@ -763,7 +766,7 @@
       }
 
       if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
       }
     });
   }
@@ -1521,6 +1524,7 @@
         if (entry.isIntersecting && !triggered) {
           triggered = true;
           continueSlide.classList.add('pres-visible');
+          if (prefersReducedMotion) return; // skip auto-advance for reduced-motion users
           startCountdown(continueSlide);
         }
         if (!entry.isIntersecting && triggered) {
