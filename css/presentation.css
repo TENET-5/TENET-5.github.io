@@ -355,5 +355,210 @@ body.pres-active::-webkit-scrollbar { width: 0; background: transparent; }
   .pres-indicator { right: 6px; gap: 4px; }
   .pres-dot { width: 6px; height: 6px; }
   .pres-dot::before { display: none; }
-  .pres-keyhint { display: none; }
+}
+
+/* ── Global Cinematic Overlay Styles ───────────────────────────────── */
+.cinematic-lock {
+  overflow: hidden !important; /* locks manual scrolling while talking */
+}
+
+.global-play-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+}
+.global-play-toggle button {
+  background: rgba(12, 18, 32, 0.85);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  color: #c9a84c;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+.global-play-toggle button:hover, .global-play-toggle button.active {
+  background: rgba(185, 28, 28, 0.9);
+  border-color: #dc2626;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(185, 28, 28, 0.6);
+}
+
+.cinematic-subs {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  width: 80%;
+  max-width: 900px;
+  text-align: center;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.9);
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.cinematic-subs.active {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+@media (max-width: 768px) {
+  .cinematic-subs { font-size: 1.2rem; bottom: 60px; }
+  .global-play-toggle { bottom: 12px; right: 12px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTINUE SLIDE — Cross-page transition at end of each page
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pres-continue-slide {
+  background: linear-gradient(180deg, rgba(10,10,14,0.95), rgba(15,12,8,0.98));
+  border-top: 2px solid rgba(201,168,76,0.25);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.pres-continue-inner {
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+.pres-continue-section-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  color: #dc2626;
+  background: rgba(220,38,38,0.08);
+  border: 1px solid rgba(220,38,38,0.2);
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+}
+.pres-continue-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.6);
+}
+.pres-continue-title {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+.pres-continue-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+}
+.pres-continue-progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.pres-continue-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #c9a84c, #dc2626);
+  border-radius: 2px;
+}
+.pres-continue-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0a0a0e;
+  background: #c9a84c;
+  border: none;
+  padding: 0.7rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.pres-continue-btn:hover {
+  background: #b8973d;
+  transform: scale(1.04);
+}
+.pres-continue-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE POSITION INDICATOR — Fixed pill at bottom of viewport
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pres-page-indicator {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(10,10,14,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 999px;
+  padding: 0.35rem 0.6rem;
+  z-index: 10001;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.6);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  transition: opacity 0.3s;
+}
+.pres-page-info {
+  white-space: nowrap;
+}
+.pres-page-info strong {
+  color: #c9a84c;
+  font-weight: 700;
+}
+.pres-page-nav {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.pres-page-nav:hover {
+  background: rgba(201,168,76,0.15);
+  border-color: rgba(201,168,76,0.3);
+  color: #c9a84c;
+}
+.pres-page-nav:disabled {
+  opacity: 0.25;
+  cursor: default;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .pres-continue-title { font-size: 1.2rem; }
+  .pres-continue-btn { padding: 0.6rem 1.5rem; font-size: 0.75rem; }
+  .pres-page-indicator { bottom: 10px; padding: 0.25rem 0.5rem; font-size: 0.6rem; }
+  .pres-page-nav { width: 22px; height: 22px; font-size: 0.65rem; }
 }

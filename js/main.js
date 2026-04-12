@@ -1,4 +1,4 @@
-﻿// ABCXYZ GitHub Pages — Interactive Enhancements
+// ABCXYZ GitHub Pages — Interactive Enhancements
 // Scroll progress, animated counters, reveal-on-scroll, mobile nav, back-to-top
 
 (function () {
@@ -56,33 +56,7 @@
   }, { passive: true });
 
   // ── Scroll Reveal ────────────────────────────────────────────────────────
-  const revealEls = document.querySelectorAll(
-    'section, .stat-callout, .formula-box, .cta-card, .chart-container, ' +
-    '.corruption-entry, .record, .verdict-box, .purchase-callout, ' +
-    '.meme-card, .hero-section, .section-title'
-  );
-  revealEls.forEach(function (el) {
-    if (!el.classList.contains('reveal')) el.classList.add('reveal');
-  });
-
-  if ('IntersectionObserver' in window) {
-    const revealObs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('revealed');
-          entry.target.classList.add('visible');
-          revealObs.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
-
-    revealEls.forEach(function (el) { revealObs.observe(el); });
-  } else {
-    revealEls.forEach(function (el) {
-      el.classList.add('revealed');
-      el.classList.add('visible');
-    });
-  }
+  // Extracted to standalone js/reveal.js to ensure it runs across all iframe screens
 
   // ── Animated Counters ────────────────────────────────────────────────────
   var counterEls = document.querySelectorAll('.big-number, [data-count]');
