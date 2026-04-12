@@ -46,7 +46,7 @@
       '<div class="nav-ensign-stripe"></div>' +
       '<div class="nav-identity">' +
         '<a href="/index.html" class="brand">' +
-          crestSVG +
+          '' +
           '<div class="brand-text">' +
             '<span class="brand-title">TENET<sup>5</sup></span>' +
             '<span class="brand-subtitle">Powered by LIRIL AI \u2022 OSINT Platform</span>' +
