@@ -559,7 +559,7 @@
 
     var hint = document.createElement('div');
     hint.className = 'pres-keyhint';
-    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 prev/next page';
+    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 prev/next page \u00b7 ? for help';
     document.body.appendChild(hint);
     setTimeout(function () { hint.classList.add('pres-keyhint-fade'); }, 6000);
 
@@ -624,9 +624,38 @@
      ═══════════════════════════════════════════════════════════════════ */
 
   function initKeyboardNav(slides, tracker) {
+    // Add keyboard help modal
+    function showKeyboardHelp() {
+      var modal = document.createElement('div');
+      modal.className = 'pres-keyboard-help';
+      modal.innerHTML = '<div class="pres-keyboard-help-inner">' +
+        '<h3>Navigation Shortcuts</h3>' +
+        '<div class="pres-keyboard-shortcuts">' +
+        '<p><kbd>↑</kbd> <kbd>↓</kbd> — Step through slides</p>' +
+        '<p><kbd>Space</kbd> — Next slide</p>' +
+        '<p><kbd>←</kbd> <kbd>→</kbd> — Previous/Next page</p>' +
+        '<p><kbd>Home</kbd> / <kbd>End</kbd> — First/Last slide</p>' +
+        '<p><kbd>?</kbd> — Show this help</p>' +
+        '</div>' +
+        '<button onclick="this.closest(\'.pres-keyboard-help\').remove()">Close</button>' +
+        '</div>';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      modal.querySelector('.pres-keyboard-help-inner').style.cssText = 'background:#0a0e1a;color:#e8e4dc;padding:2rem;border-radius:8px;border:1px solid #333;max-width:400px;';
+      document.body.appendChild(modal);
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) this.remove();
+      });
+    }
+
     document.addEventListener('keydown', function (e) {
       var cur = tracker.getActive();
       var target = null;
+
+      if (e.key === '?') {
+        e.preventDefault();
+        showKeyboardHelp();
+        return;
+      }
 
       if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
