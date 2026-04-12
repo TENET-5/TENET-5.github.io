@@ -745,6 +745,31 @@
     });
   }
 
+  function initTouchNav() {
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchStartTime = 0;
+
+    document.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+
+    document.addEventListener('touchend', function (e) {
+      if (e.changedTouches.length !== 1) return;
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      var dy = e.changedTouches[0].clientY - touchStartY;
+      var dt = Date.now() - touchStartTime;
+
+      // Only count quick, deliberate horizontal swipes
+      if (dt > 600 || Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+
+      navigatePage(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
   /* ═══════════════════════════════════════════════════════════════════
      SECTION 7: SPRITE ANIMATION ENGINE
      ═══════════════════════════════════════════════════════════════════ */
@@ -1446,6 +1471,7 @@
         updateNarrationButton();
       });
       initKeyboardNav(slides, tracker);
+      initTouchNav();
       observeContinueSlide(continueSlide);
       initNarrationControls(slides, pageIndicator, 0);
 
