@@ -2159,7 +2159,7 @@
 
       // Resume at last-viewed slide if returning to this page
       restoreSlidePosition(slides);
-    });
+         });
   }
 
   /* ═══════════════════════════════════════════════════════════════════

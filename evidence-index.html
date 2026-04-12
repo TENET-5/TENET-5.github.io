@@ -87,6 +87,226 @@
   </div>
 
 <div id="read-next"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MASTER EVIDENCE INDEX — All narrated evidence items site-wide
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="tnt-style-313" style="margin-top:3rem;">
+  <header class="page-header tnt-style-314">
+    <h2 class="tnt-style-132" data-narrate="Master Evidence Index. A searchable, sortable table of every narrated evidence item across all pages. Each item has a unique reference number for legal citation.">Master Evidence Index</h2>
+    <p class="page-subtitle tnt-style-315">Every narrated evidence item across all <span id="mei-pages">--</span> pages — <span id="mei-total">--</span> items with unique citation references.</p>
+  </header>
+
+  <div class="tnt-style-319" style="margin-bottom:1rem;">
+    <input type="text" id="mei-search" placeholder="Search evidence items..." class="tnt-style-320" style="flex:2;">
+    <select id="mei-type-filter" class="tnt-style-321">
+      <option value="">All Types</option>
+    </select>
+    <select id="mei-page-filter" class="tnt-style-321" style="max-width:200px;">
+      <option value="">All Pages</option>
+    </select>
+    <span id="mei-count" class="tnt-style-322"></span>
+    <button id="mei-print" style="padding:0.4rem 0.8rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#ccc;cursor:pointer;font-size:0.75rem;">&#x1F5A8; Print</button>
+  </div>
+
+  <div id="mei-table-wrap" style="overflow-x:auto;">
+    <table id="mei-table" class="mei-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+      <thead>
+        <tr style="border-bottom:2px solid rgba(255,255,255,0.1);text-align:left;">
+          <th style="padding:0.5rem;cursor:pointer;white-space:nowrap;" data-sort="ref">Ref &#x25B2;</th>
+          <th style="padding:0.5rem;cursor:pointer;" data-sort="type">Type</th>
+          <th style="padding:0.5rem;cursor:pointer;" data-sort="page_title">Page</th>
+          <th style="padding:0.5rem;">Evidence Summary</th>
+          <th style="padding:0.5rem;white-space:nowrap;">Link</th>
+        </tr>
+      </thead>
+      <tbody id="mei-body"></tbody>
+    </table>
+  </div>
+  <div id="mei-pagination" style="display:flex;justify-content:center;gap:0.5rem;margin-top:1rem;"></div>
+</div>
+
+<style>
+.mei-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+.mei-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.mei-table td { padding: 0.45rem 0.5rem; vertical-align: top; }
+.mei-type-badge {
+  display: inline-block; padding: 1px 6px; border-radius: 3px;
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.mei-type-item { background: rgba(100,130,160,0.15); color: #94a3b8; }
+.mei-type-section { background: rgba(58,134,255,0.15); color: #60a5fa; }
+.mei-type-finding { background: rgba(131,56,236,0.15); color: #a78bfa; }
+.mei-type-evidence { background: rgba(6,214,160,0.15); color: #4ade80; }
+.mei-type-charge { background: rgba(230,57,70,0.15); color: #f87171; }
+.mei-type-statistic { background: rgba(255,214,10,0.15); color: #fbbf24; }
+.mei-type-timeline { background: rgba(0,180,216,0.15); color: #22d3ee; }
+.mei-ref { font-family: 'Courier New', monospace; color: #c9a84c; font-weight: 700; white-space: nowrap; }
+.mei-page-link { color: #60a5fa; text-decoration: none; font-size: 0.72rem; }
+.mei-page-link:hover { text-decoration: underline; }
+.mei-pagination-btn {
+  padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  color: #ccc; font-size: 0.72rem;
+}
+.mei-pagination-btn.active { background: rgba(58,134,255,0.2); border-color: #3a86ff; color: #fff; }
+@media print {
+  .mei-table { font-size: 9pt !important; }
+  .mei-table th, .mei-table td { padding: 3pt 4pt !important; border: 0.5pt solid #999 !important; }
+  .mei-pagination-btn, #mei-print, .tnt-style-319 { display: none !important; }
+}
+</style>
+
+<script>
+(function() {
+  'use strict';
+  var PAGE_SIZE = 50;
+  var currentPage = 0;
+  var sortKey = 'ref';
+  var sortAsc = true;
+  var allItems = [];
+  var filteredItems = [];
+
+  fetch('data/evidence_master_index.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      allItems = data.items || [];
+      document.getElementById('mei-total').textContent = data.total_items;
+      document.getElementById('mei-pages').textContent = data.pages_scanned;
+
+      // Populate type filter
+      var types = Object.keys(data.type_counts || {});
+      var tf = document.getElementById('mei-type-filter');
+      types.forEach(function(t) {
+        var o = document.createElement('option');
+        o.value = t;
+        o.textContent = t.charAt(0).toUpperCase() + t.slice(1) + ' (' + data.type_counts[t] + ')';
+        tf.appendChild(o);
+      });
+
+      // Populate page filter
+      var pages = {};
+      allItems.forEach(function(it) { pages[it.page] = it.page_title; });
+      var pf = document.getElementById('mei-page-filter');
+      Object.keys(pages).sort().forEach(function(p) {
+        var o = document.createElement('option');
+        o.value = p;
+        o.textContent = pages[p] || p;
+        pf.appendChild(o);
+      });
+
+      applyFilters();
+    })
+    .catch(function(err) {
+      document.getElementById('mei-body').innerHTML = '<tr><td colspan="5">Failed to load evidence index.</td></tr>';
+    });
+
+  function applyFilters() {
+    var q = (document.getElementById('mei-search').value || '').toLowerCase();
+    var typeF = document.getElementById('mei-type-filter').value;
+    var pageF = document.getElementById('mei-page-filter').value;
+
+    filteredItems = allItems.filter(function(it) {
+      if (typeF && it.type !== typeF) return false;
+      if (pageF && it.page !== pageF) return false;
+      if (q) {
+        var hay = (it.ref + ' ' + it.summary + ' ' + it.page_title + ' ' + it.type).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+
+    // Sort
+    filteredItems.sort(function(a, b) {
+      var va = a[sortKey] || '', vb = b[sortKey] || '';
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return sortAsc ? -1 : 1;
+      if (va > vb) return sortAsc ? 1 : -1;
+      return 0;
+    });
+
+    currentPage = 0;
+    renderPage();
+  }
+
+  function renderPage() {
+    var start = currentPage * PAGE_SIZE;
+    var end = Math.min(start + PAGE_SIZE, filteredItems.length);
+    var slice = filteredItems.slice(start, end);
+
+    document.getElementById('mei-count').textContent =
+      (start + 1) + '–' + end + ' of ' + filteredItems.length;
+
+    var body = document.getElementById('mei-body');
+    body.innerHTML = slice.map(function(it) {
+      var link = it.page + (it.id ? '#' + it.id : '');
+      return '<tr>' +
+        '<td class="mei-ref">' + it.ref + '</td>' +
+        '<td><span class="mei-type-badge mei-type-' + it.type + '">' + it.type + '</span></td>' +
+        '<td style="max-width:160px;"><a href="' + it.page + '" class="mei-page-link">' + (it.page_title || it.page) + '</a></td>' +
+        '<td style="color:#d1d5db;line-height:1.4;">' + it.summary + '</td>' +
+        '<td><a href="' + link + '" class="mei-page-link" title="' + it.ref + '">&#x1F517;</a></td>' +
+      '</tr>';
+    }).join('');
+
+    // Pagination
+    var totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
+    var pag = document.getElementById('mei-pagination');
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    var html = '';
+    if (currentPage > 0) html += '<button class="mei-pagination-btn" data-p="' + (currentPage - 1) + '">&laquo;</button>';
+    for (var i = 0; i < totalPages; i++) {
+      if (totalPages > 10 && Math.abs(i - currentPage) > 2 && i > 1 && i < totalPages - 2) {
+        if (i === currentPage - 3 || i === currentPage + 3) html += '<span style="color:#666;">…</span>';
+        continue;
+      }
+      html += '<button class="mei-pagination-btn' + (i === currentPage ? ' active' : '') + '" data-p="' + i + '">' + (i + 1) + '</button>';
+    }
+    if (currentPage < totalPages - 1) html += '<button class="mei-pagination-btn" data-p="' + (currentPage + 1) + '">&raquo;</button>';
+    pag.innerHTML = html;
+  }
+
+  // Event listeners
+  var searchTimer;
+  document.getElementById('mei-search').addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(applyFilters, 200);
+  });
+  document.getElementById('mei-type-filter').addEventListener('change', applyFilters);
+  document.getElementById('mei-page-filter').addEventListener('change', applyFilters);
+  document.getElementById('mei-print').addEventListener('click', function() { window.print(); });
+
+  // Sort headers
+  document.getElementById('mei-table').querySelector('thead').addEventListener('click', function(e) {
+    var th = e.target.closest('th[data-sort]');
+    if (!th) return;
+    var key = th.dataset.sort;
+    if (sortKey === key) {
+      sortAsc = !sortAsc;
+    } else {
+      sortKey = key;
+      sortAsc = true;
+    }
+    // Update header arrows
+    document.querySelectorAll('#mei-table th[data-sort]').forEach(function(h) {
+      h.textContent = h.textContent.replace(/ [▲▼]$/, '');
+    });
+    th.textContent += sortAsc ? ' ▲' : ' ▼';
+    applyFilters();
+  });
+
+  // Pagination clicks
+  document.getElementById('mei-pagination').addEventListener('click', function(e) {
+    var btn = e.target.closest('.mei-pagination-btn');
+    if (!btn) return;
+    currentPage = parseInt(btn.dataset.p, 10);
+    renderPage();
+    document.getElementById('mei-table').scrollIntoView({ behavior: 'smooth' });
+  });
+})();
+</script>
 <script>
   (function() {
     'use strict';
