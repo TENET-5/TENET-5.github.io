@@ -330,13 +330,15 @@
         }
       } catch(e) {}
 
-      // P1: Known female + any English (catches Zira on Windows immediately)
-      cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v); });
-      // P2: Known female + en-GB specifically
-      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
-      // P3: Any English NOT male
+      // P1: Known female + en-GB (LIRIL is British first)
+      cachedVoice = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
+      // P2: Any en-GB that is NOT male
+      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEnGB(v) && !isMale(v); });
+      // P3: Known female + any English
+      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v); });
+      // P4: Any English NOT male
       if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && !isMale(v); });
-      // P4: Absolute last resort
+      // P5: Absolute last resort
       if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v); }) || null;
 
       if (cachedVoice) {
