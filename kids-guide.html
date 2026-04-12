@@ -1,224 +1,453 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- TENET5 SC_FRAME BUSTER -->
-  <script>
-    if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
-        window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
-    }
-  </script>
-
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A Simple Guide to Government Spending — TENET5 Kids</title>
-  <meta name="description" content="A simple, educational guide to government spending issues for younger audiences.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TENET5 Presents: A Story of Accountability</title>
+  <meta name="description" content="An interactive, cinematic guide to government spending issues for younger audiences.">
   <link rel="stylesheet" href="style.css?v=18">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    /* Playful but still fitting within the royal theme */
     :root {
-      --kids-bg: #1e2430;
-      --kids-card: #2a3141;
-      --kids-accent: #facc15;
+      --bg: #0b0f19;
+      --accent: #facc15;
     }
-    body { background: var(--kids-bg); }
-    .kids-hero { text-align: center; padding: 4rem 1rem 2rem; }
-    .kids-hero h1 { font-size: 2.8rem; color: #fff; margin-bottom: 1rem; line-height: 1.1; }
-    .kids-hero p { font-size: 1.2rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 2rem; }
-
-    .story-card {
-      background: var(--kids-card);
-      border-radius: 16px;
-      padding: 2rem;
-      margin: 2rem auto;
-      max-width: 800px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      border: 4px solid var(--border);
-      transition: transform 0.3s, border-color 0.3s;
-    }
-    .story-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--kids-accent);
-    }
-    .story-card h2 { 
-      font-size: 2rem; 
-      color: #fff; 
-      margin-top: 0; 
-      border-bottom: 2px dashed #475569;
-      padding-bottom: 0.8rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .story-content {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-    }
-    .story-content.reverse {
-      flex-direction: row-reverse;
-    }
-    .story-text { flex: 1; font-size: 1.15rem; line-height: 1.6; color: #e2e8f0; }
-    
-    .story-image-wrap { flex: 1; text-align: center; }
-    .story-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-      border: 3px solid #334155;
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg);
+      font-family: 'Playfair Display', serif;
+      color: #fff;
     }
 
-    .audio-player-simple {
-      margin-top: 1.5rem;
-      background: rgba(0,0,0,0.2);
-      padding: 1rem;
-      border-radius: 12px;
+    /* Cinematic Container */
+    #cinematic-engine {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
       display: flex;
-      align-items: center;
-      gap: 15px;
-      border: 1px solid rgba(255,255,255,0.1);
+      flex-direction: column;
     }
-    .audio-player-simple button {
-      background: var(--kids-accent);
-      color: #000;
-      border: none;
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      font-size: 1.2rem;
-      cursor: pointer;
+
+    /* Scene Management */
+    .scene {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.2s;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s;
+      overflow: hidden;
     }
-    .audio-player-simple button:hover { transform: scale(1.1); }
-    .audio-player-simple .label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      color: #cbd5e1;
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 10;
     }
 
+    /* Ken Burns Backgrounds */
+    .scene-bg {
+      position: absolute;
+      top: -5%; left: -5%;
+      width: 110%; height: 110%;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.4) saturate(1.2);
+      transform: scale(1);
+      transition: transform 15s linear;
+      z-index: -1;
+    }
+    .scene.active .scene-bg {
+      transform: scale(1.08);
+    }
+    /* Optional slight panning alternate for scenes */
+    .scene.active .scene-bg.pan-right {
+      transform: scale(1.08) translateX(2%);
+    }
+
+    /* Vignette Overlay for cinematic feel */
+    .vignette {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.85) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Scene Content */
+    .scene-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 900px;
+      padding: 2rem;
+      transform: translateY(20px);
+      transition: transform 1.2s ease, opacity 1.2s ease;
+      opacity: 0;
+    }
+    .scene.active .scene-content {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .title-text {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+      margin-bottom: 0.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      letter-spacing: -1px;
+    }
+    .subtitle-text {
+      font-size: 1.5rem;
+      color: var(--accent);
+      font-style: italic;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      margin-top: 0;
+    }
+
+    /* Audio / Narrative Subtitles */
+    #subtitles-container {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      max-width: 800px;
+      text-align: center;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .subtitle-cue {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0px 2px 6px rgba(0,0,0,0.9), 0px 4px 15px rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.4);
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .subtitle-cue.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Controls */
+    #hud-controls {
+      position: absolute;
+      bottom: 0; left: 0; width: 100%;
+      height: 90px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+      box-sizing: border-box;
+      z-index: 100;
+    }
+    .btn-cinematic {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #fff;
+      font-size: 1.1rem;
+      padding: 0.8rem 2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-cinematic:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+      transform: scale(1.05);
+    }
+    .btn-cinematic:disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+      font-size: 1.5rem;
+      padding: 1rem 3rem;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 30px rgba(250, 204, 21, 0.5);
+    }
+
+    /* Progress Indicators */
+    .scene-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      transition: all 0.5s ease;
+    }
+    .dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      transform: scale(1.3);
+    }
+
+    /* Audio tag containers (hidden) */
+    .audio-nodes { display: none; }
+
     @media (max-width: 768px) {
-      .story-content, .story-content.reverse { flex-direction: column; }
+      .title-text { font-size: 2.2rem; }
+      .subtitle-cue { font-size: 1.2rem; }
+      #hud-controls { padding: 0 1rem; }
+      .btn-cinematic { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
     }
   </style>
-  <meta name="theme-color" content="#1e2430">
 </head>
 <body>
 
-  <div id="site-header-frame"></div>
+  <div class="audio-nodes">
+    <audio id="audio-intro" preload="auto" crossorigin="anonymous">
+      <source src="audio/sections/kids-intro.mp3" type="audio/mpeg">
+      <track kind="subtitles" src="audio/sections/kids-intro.vtt" srclang="en" default>
+    </audio>
+    <audio id="audio-phoenix" preload="auto" crossorigin="anonymous">
+      <source src="audio/sections/kids-phoenix.mp3" type="audio/mpeg">
+      <track kind="subtitles" src="audio/sections/kids-phoenix.vtt" srclang="en" default>
+    </audio>
+    <audio id="audio-arrivecan" preload="auto" crossorigin="anonymous">
+      <source src="audio/sections/kids-arrivecan.mp3" type="audio/mpeg">
+      <track kind="subtitles" src="audio/sections/kids-arrivecan.vtt" srclang="en" default>
+    </audio>
+    <audio id="audio-sdtc" preload="auto" crossorigin="anonymous">
+      <source src="audio/sections/kids-sdtc.mp3" type="audio/mpeg">
+      <track kind="subtitles" src="audio/sections/kids-sdtc.vtt" srclang="en" default>
+    </audio>
+  </div>
 
-  <div class="content" id="main">
-    <section class="kids-hero">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">🏫</div>
-      <h1>A Simple Guide to Government Spending</h1>
-      <p>Sometimes, when people are in charge of a lot of money that belongs to everyone, things can get very messy. Let's learn about what went wrong and how we can do better.</p>
-      
-      <div class="audio-player-simple" style="display: inline-flex; text-align: left; background: rgba(0,0,0,0.4);">
-        <button onclick="playAudio('intro-audio', this)">▶</button>
-        <div class="label">Listen to the Introduction<br><small>Ready to learn?</small></div>
-        <audio id="intro-audio" src="audio/sections/kids-intro.mp3"></audio>
-      </div>
-    </section>
+  <div id="cinematic-engine">
+    
+    <!-- Subtitles Overlay -->
+    <div id="subtitles-container">
+      <div id="subtitle-text" class="subtitle-cue"></div>
+    </div>
 
-    <div class="story-card">
-      <h2>🤖 The Broken Piggy Bank (Phoenix Pay)</h2>
-      <div class="story-content">
-        <div class="story-text">
-          <p>Imagine you worked really hard all month, but when it was time to get your allowance, the piggy bank broke! That's what happened with the <strong>Phoenix Pay System</strong>.</p>
-          <p>The government bought a giant robot computer to pay all of its workers, but the robot was broken. It didn't give out the right amounts, and figuring out how to fix it has cost billions and billions of coins!</p>
-          <div class="audio-player-simple">
-            <button onclick="playAudio('phoenix-audio', this)">▶</button>
-            <div class="label">Listen to LIRIL explain<br><small>The Broken Piggy Bank</small></div>
-            <audio id="phoenix-audio" src="audio/sections/kids-phoenix.mp3"></audio>
-          </div>
-        </div>
-        <div class="story-image-wrap">
-          <img src="images/kids-guide/phoenix.png" alt="A confused robot breaking a piggy bank" class="story-image">
+    <!-- Scene 0: Title -->
+    <div class="scene active" id="scene-0">
+      <div class="scene-bg" style="background-image: url('images/kids-guide/phoenix.png'); filter: brightness(0.2) blur(8px);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🏫</div>
+        <h1 class="title-text">A Simple Guide to Accountability</h1>
+        <p class="subtitle-text">An interactive story by TENET5</p>
+        <div style="margin-top: 50px;">
+          <button class="btn-cinematic btn-primary" id="btn-start">Start Journey ▷</button>
         </div>
       </div>
     </div>
 
-    <div class="story-card">
-      <h2>📱 The App That Ate The Money (ArriveCAN)</h2>
-      <div class="story-content reverse">
-        <div class="story-text">
-          <p>Have you ever downloaded a game on a phone? They usually don't cost very much. But the government needed an app called <strong>ArriveCAN</strong>.</p>
-          <p>They ended up paying a tiny company of just two people over 50 million dollars to build it! That's like paying for a million video games, but you only got one small app. The police are now looking into where it all went.</p>
-          <div class="audio-player-simple">
-            <button onclick="playAudio('arrivecan-audio', this)">▶</button>
-            <div class="label">Listen to LIRIL explain<br><small>The Very Expensive App</small></div>
-            <audio id="arrivecan-audio" src="audio/sections/kids-arrivecan.mp3"></audio>
-          </div>
-        </div>
-        <div class="story-image-wrap">
-          <img src="images/kids-guide/arrivecan.png" alt="A smart phone character greedily eating money" class="story-image">
+    <!-- Scene 1: Intro -->
+    <div class="scene" id="scene-1" data-audio="audio-intro">
+      <div class="scene-bg pan-right" style="background-image: linear-gradient(45deg, #1e293b, #0f172a);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+        <h2 class="title-text" style="color:var(--accent);">The Messy Treasury</h2>
+      </div>
+    </div>
+
+    <!-- Scene 2: Phoenix -->
+    <div class="scene" id="scene-2" data-audio="audio-phoenix">
+      <div class="scene-bg" style="background-image: url('images/kids-guide/phoenix.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="position: absolute; top: 10%; right: 10%; text-align: right; max-width: 600px;">
+        <h2 class="title-text">The Broken Piggy Bank</h2>
+        <p class="subtitle-text">Phoenix Pay System</p>
+      </div>
+    </div>
+
+    <!-- Scene 3: ArriveCAN -->
+    <div class="scene" id="scene-3" data-audio="audio-arrivecan">
+      <div class="scene-bg pan-right" style="background-image: url('images/kids-guide/arrivecan.png'); background-position: left center;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="position: absolute; top: 10%; left: 5%; text-align: left; max-width: 600px;">
+        <h2 class="title-text">The Hungry App</h2>
+        <p class="subtitle-text">ArriveCAN</p>
+      </div>
+    </div>
+
+    <!-- Scene 4: SDTC -->
+    <div class="scene" id="scene-4" data-audio="audio-sdtc">
+      <div class="scene-bg" style="background-image: url('images/kids-guide/sdtc.png'); background-position: bottom center;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="position: absolute; top: 10%; right: 5%; text-align: right; max-width: 600px;">
+        <h2 class="title-text">The Kept Pot of Gold</h2>
+        <p class="subtitle-text">Green Slush Fund</p>
+      </div>
+    </div>
+
+    <!-- Scene 5: Outro -->
+    <div class="scene" id="scene-5">
+      <div class="scene-bg" style="background-image: linear-gradient(-45deg, #450a0a, #0f172a);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+        <h1 class="title-text" style="font-size:3rem;">The End</h1>
+        <p class="subtitle-text" style="color:#cbd5e1; font-style:normal;">When the people in charge don't follow the rules, it's our job to notice, ask questions, and hold them accountable.</p>
+        <div style="margin-top: 40px; display: flex; gap: 20px; justify-content: center;">
+          <a href="accountability.html" class="btn-cinematic" style="text-decoration: none;">Return to Database</a>
+          <button class="btn-cinematic" onclick="engine.goToScene(0)">Watch Again ⟲</button>
         </div>
       </div>
     </div>
 
-    <div class="story-card">
-      <h2>🍯 The Kept Pot of Gold (Green Slush Fund)</h2>
-      <div class="story-content">
-        <div class="story-text">
-          <p>Imagine your class had a huge pot of gold that was supposed to be spent on helping the planet. But the people put in charge of the gold decided to give lots of it to their own friends and businesses instead!</p>
-          <p>That's what happened with the <strong>Green Slush Fund</strong>. They gave away millions to themselves instead of playing by the fair rules.</p>
-          <div class="audio-player-simple">
-            <button onclick="playAudio('sdtc-audio', this)">▶</button>
-            <div class="label">Listen to LIRIL explain<br><small>The Kept Pot of Gold</small></div>
-            <audio id="sdtc-audio" src="audio/sections/kids-sdtc.mp3"></audio>
-          </div>
-        </div>
-        <div class="story-image-wrap">
-          <img src="images/kids-guide/sdtc.png" alt="Animals in suits keeping a pot of gold" class="story-image">
-        </div>
+    <!-- HUD Controls (Hidden on Title) -->
+    <div id="hud-controls" style="opacity: 0; pointer-events: none; transition: opacity 0.5s;">
+      <button class="btn-cinematic" id="btn-prev">◁ Back</button>
+      <div class="scene-dots" id="scene-dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
       </div>
-    </div>
-
-    <div style="text-align: center; margin-top: 4rem; margin-bottom: 2rem;">
-      <a href="accountability.html" style="font-family: 'JetBrains Mono', monospace; color: var(--accent); text-decoration: none; border: 1px solid var(--accent); padding: 10px 20px; border-radius: 6px;">← Back to Main Database</a>
+      <button class="btn-cinematic" id="btn-next">Next ▷</button>
     </div>
 
   </div>
 
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=2"></script>
   <script>
-    // Simple audio player logic
-    let currentAudio = null;
-    let currentBtn = null;
+    const engine = {
+      currentScene: 0,
+      totalScenes: 5, // 0 to 5
+      audioElements: [],
+      init() {
+        this.scenes = document.querySelectorAll('.scene');
+        this.dots = document.querySelectorAll('.dot');
+        this.subtitleBox = document.getElementById('subtitle-text');
+        this.hud = document.getElementById('hud-controls');
+        
+        document.getElementById('btn-start').addEventListener('click', () => this.startJourney());
+        document.getElementById('btn-next').addEventListener('click', () => this.nextScene());
+        document.getElementById('btn-prev').addEventListener('click', () => this.prevScene());
 
-    function playAudio(id, btn) {
-      const audio = document.getElementById(id);
-      
-      // If clicking the same button to pause
-      if (currentAudio === audio) {
-        if (!audio.paused) {
+        // Setup Audio Tracks
+        document.querySelectorAll('audio').forEach(audio => {
+          if (audio.textTracks && audio.textTracks.length > 0) {
+            const tt = audio.textTracks[0];
+            tt.mode = 'hidden';
+            // Listen for subtitle cue changes
+            tt.addEventListener('cuechange', () => {
+              const cues = tt.activeCues;
+              if (cues && cues.length > 0) {
+                this.subtitleBox.innerHTML = cues[0].text;
+                this.subtitleBox.classList.add('visible');
+              } else {
+                this.subtitleBox.classList.remove('visible');
+              }
+            });
+          }
+        });
+      },
+
+      startJourney() {
+        this.hud.style.opacity = '1';
+        this.hud.style.pointerEvents = 'auto';
+        this.goToScene(1);
+      },
+
+      stopAllAudio() {
+        document.querySelectorAll('audio').forEach(audio => {
           audio.pause();
-          btn.innerText = '▶';
-          return;
+          audio.currentTime = 0;
+        });
+        this.subtitleBox.classList.remove('visible');
+      },
+
+      playAudioForScene(sceneIndex) {
+        this.stopAllAudio();
+        const sceneEl = document.getElementById('scene-' + sceneIndex);
+        if(!sceneEl) return;
+        const audioId = sceneEl.getAttribute('data-audio');
+        if (audioId) {
+          const audio = document.getElementById(audioId);
+          if (audio) {
+            audio.play().catch(e => console.error("Audio playback prevented:", e));
+            // Auto advance when audio ends
+            audio.onended = () => {
+              // Wait 2 seconds, then go next
+              setTimeout(() => {
+                if (this.currentScene === sceneIndex) this.nextScene();
+              }, 2000);
+            };
+          }
         }
-      } else {
-        // Pause previous audio if exists
-        if (currentAudio) {
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
-          if (currentBtn) currentBtn.innerText = '▶';
+      },
+
+      goToScene(index) {
+        if (index < 0 || index > this.totalScenes) return;
+        
+        // Hide UI on scene 0
+        if (index === 0) {
+          this.hud.style.opacity = '0';
+          this.hud.style.pointerEvents = 'none';
+        } else {
+          this.hud.style.opacity = '1';
+          this.hud.style.pointerEvents = 'auto';
         }
+
+        this.scenes.forEach(s => s.classList.remove('active'));
+        document.getElementById('scene-' + index).classList.add('active');
+        
+        this.currentScene = index;
+
+        // Update dots
+        if (index > 0 && index <= this.dots.length) {
+          this.dots.forEach((d, i) => {
+            if (i === (index - 1)) d.classList.add('active');
+            else d.classList.remove('active');
+          });
+        }
+
+        // Control buttons
+        document.getElementById('btn-prev').disabled = (index <= 1);
+        if (index === this.totalScenes) {
+          document.getElementById('btn-next').disabled = true;
+        } else {
+          document.getElementById('btn-next').disabled = false;
+        }
+
+        this.playAudioForScene(index);
+      },
+
+      nextScene() {
+        this.goToScene(this.currentScene + 1);
+      },
+
+      prevScene() {
+        this.goToScene(this.currentScene - 1);
       }
+    };
 
-      currentAudio = audio;
-      currentBtn = btn;
-      
-      audio.play();
-      btn.innerText = '⏸';
-
-      audio.onended = function() {
-        btn.innerText = '▶';
-        currentAudio = null;
-        currentBtn = null;
-      };
-    }
+    document.addEventListener("DOMContentLoaded", () => engine.init());
   </script>
 </body>
 </html>
