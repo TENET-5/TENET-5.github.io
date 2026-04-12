@@ -3,10 +3,102 @@
    Auto-detects sections and provides sequential walk-through
    with subtitle display and section highlighting.
    TENET5 — Powered by LIRIL AI | SEED 118400
+   v2.1 — Fixes: Chrome speech cutoff, text sanitization,
+          sentence chunking, keepalive timer
    ═══════════════════════════════════════════════════════ */
 
 (function() {
   'use strict';
+
+  // ── Text sanitisation ────────────────────────────
+  // Strips HTML entities, gear/product lists, error messages,
+  // leading punctuation, and caps narration length.
+  var JUNK_PATTERNS = [
+    /Could not load \S+/gi,              // error messages from failed fetches
+    /\b[A-Z0-9]{2,}[\s\-]+[A-Z0-9]{2,}[\s\-]+[A-Z0-9]/g, // product model codes (3+ consecutive)
+    /&#\d+;/g,                           // numeric HTML entities
+    /&[a-z]+;/g,                         // named HTML entities
+    /\b(SRPE|AOR|MOE|RATH|SIG|MSAR|SYLI|LV119)\b[^.;]*/gi // specific gear model noise
+  ];
+
+  function sanitiseNarration(raw) {
+    if (!raw) return '';
+    var text = raw;
+
+    // Decode common HTML entities first
+    var entityMap = {'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'",'&mdash;':' — ','&ndash;':' – '};
+    Object.keys(entityMap).forEach(function(ent) {
+      text = text.split(ent).join(entityMap[ent]);
+    });
+
+    // Strip remaining HTML entities
+    JUNK_PATTERNS.forEach(function(rx) { text = text.replace(rx, ''); });
+
+    // Strip leading punctuation / whitespace
+    text = text.replace(/^[\s.,;:!?\-—–]+/, '');
+
+    // Collapse whitespace
+    text = text.replace(/\s{2,}/g, ' ').trim();
+
+    // If text looks like a product/gear list (>40% uppercase words), truncate to first sentence
+    var words = text.split(/\s+/);
+    var upperCount = words.filter(function(w) { return w === w.toUpperCase() && w.length > 2; }).length;
+    if (words.length > 5 && upperCount / words.length > 0.4) {
+      var firstSentence = text.match(/^[^.!?]+[.!?]/);
+      if (firstSentence) text = firstSentence[0];
+      else text = words.slice(0, 15).join(' ') + '.';
+    }
+
+    // Cap at 500 chars, ending at sentence boundary if possible
+    if (text.length > 500) {
+      var cut = text.substring(0, 500);
+      var lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('? '), cut.lastIndexOf('! '));
+      if (lastStop > 200) text = cut.substring(0, lastStop + 1);
+      else text = cut + '…';
+    }
+
+    return text;
+  }
+
+  // ── Sentence chunking for Chrome TTS ─────────────
+  // Chrome silently stops speaking after ~15 seconds.
+  // We split into ≤180-char chunks on sentence boundaries.
+  function chunkText(text) {
+    if (text.length <= 180) return [text];
+
+    var sentences = text.match(/[^.!?]+[.!?]+\s*/g) || [text];
+    var chunks = [];
+    var current = '';
+
+    sentences.forEach(function(s) {
+      s = s.trim();
+      if (!s) return;
+      if (current.length + s.length + 1 <= 180) {
+        current += (current ? ' ' : '') + s;
+      } else {
+        if (current) chunks.push(current);
+        // If a single sentence is over 180 chars, split on commas
+        if (s.length > 180) {
+          var parts = s.split(/,\s*/);
+          var sub = '';
+          parts.forEach(function(p) {
+            if (sub.length + p.length + 2 <= 180) {
+              sub += (sub ? ', ' : '') + p;
+            } else {
+              if (sub) chunks.push(sub);
+              sub = p;
+            }
+          });
+          if (sub) chunks.push(sub);
+          current = '';
+        } else {
+          current = s;
+        }
+      }
+    });
+    if (current) chunks.push(current);
+    return chunks.length ? chunks : [text.substring(0, 180)];
+  }
 
   function initWalkthrough() {
     var page = window.location.pathname.split('/').pop() || '';
@@ -15,40 +107,49 @@
     // ── Collect all narration points ──────────────────
     var points = [];
 
-    // 1. Find sections with data-narrate attribute
-    document.querySelectorAll('[data-narrate]').forEach(function(el) {
-      points.push({ el: el, text: el.getAttribute('data-narrate') });
-    });
+    function collectPoints() {
+      points.length = 0;
 
-    // 2. Auto-generate narration for sections without data-narrate
-    if (points.length < 3) {
-      var selectors = ['section', '.timeline-section', '[data-chapter]', '.glass-panel'];
-      selectors.forEach(function(sel) {
-        document.querySelectorAll(sel).forEach(function(el) {
-          if (el.getAttribute('data-narrate')) return;
-          if (el.closest('nav, header, footer, #hud-controls')) return;
-
-          // Extract heading text for auto-narration
-          var h = el.querySelector('h1, h2, h3');
-          var p = el.querySelector('p');
-          if (h) {
-            var text = h.textContent.trim();
-            if (p) text += '. ' + p.textContent.trim().substring(0, 150);
-            if (text.length > 20) {
-              points.push({ el: el, text: text, auto: true });
-            }
-          }
-        });
+      // 1. Sections with data-narrate
+      document.querySelectorAll('[data-narrate]').forEach(function(el) {
+        var clean = sanitiseNarration(el.getAttribute('data-narrate'));
+        if (clean.length > 15) points.push({ el: el, text: clean });
       });
+
+      // 2. Auto-generate for sparse pages
+      if (points.length < 3) {
+        var selectors = ['section', '.timeline-section', '[data-chapter]', '.glass-panel'];
+        selectors.forEach(function(sel) {
+          document.querySelectorAll(sel).forEach(function(el) {
+            if (el.getAttribute('data-narrate')) return;
+            if (el.closest('nav, header, footer, #hud-controls')) return;
+
+            var h = el.querySelector('h1, h2, h3');
+            var p = el.querySelector('p');
+            if (h) {
+              var raw = h.textContent.trim();
+              if (p) raw += '. ' + p.textContent.trim().substring(0, 200);
+              var clean = sanitiseNarration(raw);
+              if (clean.length > 20) {
+                points.push({ el: el, text: clean, auto: true });
+              }
+            }
+          });
+        });
+      }
     }
 
+    collectPoints();
     if (points.length < 2) return;
 
-    // ── Create walkthrough UI ────────────────────────
+    // ── State ────────────────────────────────────────
     var currentPoint = -1;
     var isActive = false;
+    var keepaliveTimer = null;
+    var chunkQueue = [];
+    var speakingChunks = false;
 
-    // Subtitle bar
+    // ── Create walkthrough UI ────────────────────────
     var subtitleBar = document.createElement('div');
     subtitleBar.id = 'liril-subtitle';
     subtitleBar.style.cssText = 'position:fixed;bottom:56px;left:50%;transform:translateX(-50%);' +
@@ -63,13 +164,11 @@
     subtitleBar.appendChild(subtitleText);
     document.body.appendChild(subtitleBar);
 
-    // LIRIL badge on subtitle
     var badge = document.createElement('span');
     badge.style.cssText = 'display:block;font-size:0.65rem;color:rgba(185,28,28,0.6);' +
       'margin-bottom:6px;font-family:JetBrains Mono,monospace;letter-spacing:1px;';
     badge.textContent = 'LIRIL NARRATION';
 
-    // Start walkthrough button
     var startBtn = document.createElement('button');
     startBtn.id = 'liril-start-walkthrough';
     startBtn.innerHTML = '&#9654; LIRIL Walkthrough';
@@ -80,17 +179,85 @@
       'box-shadow:0 2px 8px rgba(0,0,0,0.3);';
     document.body.appendChild(startBtn);
 
+    // ── Chrome keepalive ─────────────────────────────
+    // Chrome/Chromium bug: speechSynthesis silently stops after ~15s.
+    // Workaround: pause + resume every 10s keeps it alive.
+    function startKeepalive() {
+      stopKeepalive();
+      keepaliveTimer = setInterval(function() {
+        if (window.speechSynthesis && window.speechSynthesis.speaking) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }
+      }, 10000);
+    }
+
+    function stopKeepalive() {
+      if (keepaliveTimer) { clearInterval(keepaliveTimer); keepaliveTimer = null; }
+    }
+
+    // ── Chunked speech engine ────────────────────────
+    // Speaks an array of text chunks sequentially, then calls onDone.
+    function speakChunks(chunks, voice, onDone) {
+      chunkQueue = chunks.slice();
+      speakingChunks = true;
+      startKeepalive();
+
+      function next() {
+        if (!isActive || !speakingChunks) { stopKeepalive(); return; }
+        if (chunkQueue.length === 0) {
+          speakingChunks = false;
+          stopKeepalive();
+          if (onDone) onDone();
+          return;
+        }
+        var chunk = chunkQueue.shift();
+        var u = new SpeechSynthesisUtterance(chunk);
+        u.lang = 'en-GB';
+        u.rate = 0.9;
+        u.pitch = 1.1;
+        if (voice) u.voice = voice;
+        u.onend = function() { setTimeout(next, 150); };
+        u.onerror = function() { setTimeout(next, 150); };
+        window.speechSynthesis.speak(u);
+      }
+
+      next();
+    }
+
+    // ── Voice selection (cached) ─────────────────────
+    var cachedVoice = null;
+    var voiceResolved = false;
+
+    function resolveVoice() {
+      if (voiceResolved) return cachedVoice;
+      var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      cachedVoice = voices.find(function(v) {
+        return v.lang.startsWith('en-GB') && v.name.toLowerCase().includes('female');
+      }) || voices.find(function(v) {
+        return v.lang.startsWith('en-GB');
+      }) || voices.find(function(v) {
+        return v.lang.startsWith('en');
+      }) || null;
+      if (voices.length > 0) voiceResolved = true;
+      return cachedVoice;
+    }
+
     // ── Walkthrough controls ─────────────────────────
     function showPoint(idx) {
       if (idx < 0 || idx >= points.length) return;
 
+      // Cancel any in-flight speech
+      speakingChunks = false;
+      chunkQueue.length = 0;
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+
       currentPoint = idx;
       var point = points[idx];
 
-      // Scroll to section
       point.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Highlight section
+      // Highlight
       points.forEach(function(p) {
         p.el.style.transition = 'outline 0.3s, outline-offset 0.3s';
         p.el.style.outline = 'none';
@@ -99,7 +266,7 @@
       point.el.style.outline = '2px solid rgba(185,28,28,0.3)';
       point.el.style.outlineOffset = '8px';
 
-      // Show subtitle
+      // Subtitle
       subtitleText.innerHTML = '';
       subtitleText.appendChild(badge.cloneNode(true));
 
@@ -115,38 +282,21 @@
       subtitleBar.style.opacity = '1';
       subtitleBar.style.pointerEvents = 'auto';
 
-      // Update button
       startBtn.innerHTML = (idx + 1) + '/' + points.length + ' &#9654;';
 
-      // Use Web Speech API for voice narration if available
+      // Speak with chunking
       if ('speechSynthesis' in window && isActive) {
-        window.speechSynthesis.cancel();
-        var utterance = new SpeechSynthesisUtterance(point.text);
-        utterance.lang = 'en-GB';
-        utterance.rate = 0.9;
-        utterance.pitch = 1.1;
+        var chunks = chunkText(point.text);
+        var voice = resolveVoice();
 
-        // Try to find a British female voice
-        var voices = window.speechSynthesis.getVoices();
-        var britishFemale = voices.find(function(v) {
-          return v.lang.startsWith('en-GB') && v.name.toLowerCase().includes('female');
-        }) || voices.find(function(v) {
-          return v.lang.startsWith('en-GB');
-        }) || voices.find(function(v) {
-          return v.lang.startsWith('en');
-        });
-        if (britishFemale) utterance.voice = britishFemale;
-
-        utterance.onend = function() {
-          // Auto-advance after narration finishes
-          if (currentPoint < points.length - 1) {
+        speakChunks(chunks, voice, function() {
+          // Auto-advance after all chunks finish
+          if (isActive && currentPoint < points.length - 1) {
             setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
-          } else {
+          } else if (isActive) {
             endWalkthrough();
           }
-        };
-
-        window.speechSynthesis.speak(utterance);
+        });
       }
     }
 
@@ -159,36 +309,29 @@
 
     function endWalkthrough() {
       isActive = false;
-      window.speechSynthesis && window.speechSynthesis.cancel();
+      speakingChunks = false;
+      chunkQueue.length = 0;
+      stopKeepalive();
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
       subtitleBar.style.opacity = '0';
       subtitleBar.style.pointerEvents = 'none';
       startBtn.innerHTML = '&#9654; LIRIL Walkthrough';
       startBtn.style.background = 'rgba(185,28,28,0.9)';
-      points.forEach(function(p) {
-        p.el.style.outline = 'none';
-      });
+      points.forEach(function(p) { p.el.style.outline = 'none'; });
       currentPoint = -1;
     }
 
     // ── Event listeners ──────────────────────────────
     startBtn.addEventListener('click', function() {
-      if (isActive) {
-        endWalkthrough();
-      } else {
-        startWalkthrough();
-      }
+      if (isActive) endWalkthrough();
+      else startWalkthrough();
     });
 
-    // Click subtitle to advance
     subtitleBar.addEventListener('click', function() {
-      if (currentPoint < points.length - 1) {
-        showPoint(currentPoint + 1);
-      } else {
-        endWalkthrough();
-      }
+      if (currentPoint < points.length - 1) showPoint(currentPoint + 1);
+      else endWalkthrough();
     });
 
-    // Keyboard: right arrow to advance, escape to stop
     document.addEventListener('keydown', function(e) {
       if (!isActive) return;
       if (e.key === 'ArrowRight' || e.key === ' ') {
@@ -206,43 +349,17 @@
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
       window.speechSynthesis.onvoiceschanged = function() {
+        voiceResolved = false;
         window.speechSynthesis.getVoices();
       };
     }
 
     // ── Rescan hook for dynamic pages ────────────────
-    // Pages that render after DOMContentLoaded (e.g. mp-analysis.html)
-    // can call window.lirilRescan() to re-collect narration points.
     window.lirilRescan = function() {
       if (isActive) endWalkthrough();
-      points.length = 0;
-      document.querySelectorAll('[data-narrate]').forEach(function(el) {
-        points.push({ el: el, text: el.getAttribute('data-narrate') });
-      });
-      if (points.length < 3) {
-        var selectors = ['section', '.timeline-section', '[data-chapter]', '.glass-panel'];
-        selectors.forEach(function(sel) {
-          document.querySelectorAll(sel).forEach(function(el) {
-            if (el.getAttribute('data-narrate')) return;
-            if (el.closest('nav, header, footer, #hud-controls')) return;
-            var h = el.querySelector('h1, h2, h3');
-            var p = el.querySelector('p');
-            if (h) {
-              var text = h.textContent.trim();
-              if (p) text += '. ' + p.textContent.trim().substring(0, 150);
-              if (text.length > 20) {
-                points.push({ el: el, text: text, auto: true });
-              }
-            }
-          });
-        });
-      }
-      // Show/hide button based on available points
-      if (points.length >= 2) {
-        startBtn.style.display = '';
-      } else {
-        startBtn.style.display = 'none';
-      }
+      collectPoints();
+      if (points.length >= 2) startBtn.style.display = '';
+      else startBtn.style.display = 'none';
     };
   }
 
