@@ -34,8 +34,8 @@
         '<a href="/index.html" class="brand">' +
           crestSVG +
           '<div class="brand-text">' +
-            '<span class="brand-title">TENET5</span>' +
-            '<span class="brand-subtitle">Powered by LIRIL AI \u2022 Est. 2024</span>' +
+            '<span class="brand-title">TENET<sup>5</sup></span>' +
+            '<span class="brand-subtitle">Powered by LIRIL AI \u2022 OSINT Platform</span>' +
           '</div>' +
         '</a>' +
       '</div>' +
