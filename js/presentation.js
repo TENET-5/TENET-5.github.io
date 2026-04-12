@@ -1757,11 +1757,13 @@
     el.setAttribute('role', 'status');
     el.setAttribute('aria-live', 'polite');
     el.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);' +
-      'max-width:80vw;padding:0.6rem 1.2rem;background:rgba(10,14,26,0.88);' +
-      'color:#e8e4dc;font-size:0.95rem;line-height:1.4;border-radius:6px;' +
-      'border:1px solid rgba(14,165,233,0.2);z-index:9990;' +
-      'pointer-events:none;opacity:0;transition:opacity 0.25s ease;' +
-      'text-align:center;';
+      'max-width:80vw;padding:0.7rem 1.4rem;background:rgba(5,5,10,0.94);' +
+      'color:#e0ddd6;font-size:0.9rem;line-height:1.5;border-radius:4px;' +
+      'border:1px solid rgba(14,165,233,0.18);z-index:9990;' +
+      'backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);' +
+      'pointer-events:none;opacity:0;transition:opacity 0.3s ease;' +
+      'text-align:center;font-family:Inter,-apple-system,sans-serif;' +
+      'box-shadow:0 4px 20px rgba(0,0,0,0.4);letter-spacing:0.01em;';
     document.body.appendChild(el);
     lirilNarration.subtitle = el;
     return el;
