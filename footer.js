@@ -105,6 +105,7 @@
     html += '</div>';
     html += '<div style="display:flex;gap:1rem;flex-wrap:wrap;">';
     html += '<a href="whistleblower-guide.html" style="display:inline-block;padding:0.5rem 1.2rem;background:#c41e3a;color:#fff;border-radius:6px;font-size:0.82rem;font-weight:600;text-decoration:none;">Submit a Tip</a>';
+    html += '<a href="tenet5-evidence-archive.zip" download style="display:inline-block;padding:0.5rem 1.2rem;border:1px solid rgba(255,255,255,0.2);color:#d1d5db;border-radius:6px;font-size:0.82rem;text-decoration:none;" title="Download complete evidence archive (ZIP, ~127 MB)">&#x1F4E6; Download Archive</a>';
     html += '<a href="about.html" style="display:inline-block;padding:0.5rem 1.2rem;border:1px solid rgba(255,255,255,0.2);color:#d1d5db;border-radius:6px;font-size:0.82rem;text-decoration:none;">Contact</a>';
     html += '</div>';
     html += '</div>';
