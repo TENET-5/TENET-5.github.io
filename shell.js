@@ -74,7 +74,7 @@
     if (isFrameShell) {
       // INDEX.HTML — frame shell: only load nav for the top bar
       ensureFrame('site-header-frame', 'div', 'prepend');
-      loadScript(BASE + 'nav.js?v=11');
+      loadScript(BASE + 'nav.js?v=12');
 
     } else if (isInIframe) {
       // INSIDE IFRAME — content page: only load content-level components
@@ -88,7 +88,7 @@
       ensureFrame('site-header-frame', 'div', 'prepend');
       ensureFrame('site-footer-frame', 'div', null);
 
-      loadScript(BASE + 'nav.js?v=11')
+      loadScript(BASE + 'nav.js?v=12')
         .then(function() { return loadScript(BASE + 'js/main.js?v=3'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
