@@ -1495,6 +1495,35 @@ window.BOARD_DATA = {
       ],
       "x": 45,
       "y": 70
+    },
+    {
+      "id": "carignan",
+      "type": "person",
+      "label": "Gen. Jennie Carignan",
+      "subtitle": "Chief of Defence Staff",
+      "detail": "Eliminated CFAT IQ floors. Admitted to building 300,000-person parametric force for domestic civilian suppression.",
+      "link": "cds-carignan-charges.html",
+      "categories": [
+        "cfnis",
+        "person"
+      ],
+      "x": 60,
+      "y": 85
+    },
+    {
+      "id": "jef_integration",
+      "type": "org",
+      "label": "Joint Expeditionary Force",
+      "subtitle": "Foreign Military Network",
+      "detail": "Integration of foreign military elements on Canadian bases without public oversight (complicity in harbouring).",
+      "link": "cds-carignan-charges.html",
+      "categories": [
+        "israel",
+        "ccp",
+        "org"
+      ],
+      "x": 65,
+      "y": 80
     }
   ],
   "threads": [
@@ -2565,6 +2594,24 @@ window.BOARD_DATA = {
       "to": "cija_lobbying",
       "label": "OVERSIGHT_TAMPERING",
       "strength": 3
+    },
+    {
+      "from": "carignan",
+      "to": "jef_integration",
+      "label": "harbours on bases",
+      "strength": 5
+    },
+    {
+      "from": "carignan",
+      "to": "cfnis",
+      "label": "protects command",
+      "strength": 4
+    },
+    {
+      "from": "s504",
+      "to": "carignan",
+      "label": "formal charges filed",
+      "strength": 5
     }
   ]
 };
