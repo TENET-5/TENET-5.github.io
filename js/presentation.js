@@ -1564,15 +1564,66 @@
     return '';
   }
 
+  /* Preferred en-GB female voice names across browsers/OSes */
+  var PREFERRED_VOICES = [
+    'hazel', 'libby', 'sonia', 'amy', 'emma', 'kate',
+    'microsoft hazel', 'microsoft libby', 'google uk english female'
+  ];
+  var cachedVoice = null;
+
   function resolveNarrationVoice() {
+    if (cachedVoice) return cachedVoice;
     var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-    return voices.find(function (v) {
+    if (!voices.length) return null;
+
+    /* 1. Exact match on a known LIRIL-like female en-GB name */
+    var preferred = null;
+    PREFERRED_VOICES.some(function (pref) {
+      preferred = voices.find(function (v) {
+        return v.lang && v.lang.indexOf('en-GB') === 0 &&
+          (v.name || '').toLowerCase().indexOf(pref) !== -1;
+      });
+      return !!preferred;
+    });
+    if (preferred) { cachedVoice = preferred; return cachedVoice; }
+
+    /* 2. Any en-GB voice labelled female (or NOT labelled male) */
+    var enGBFemale = voices.find(function (v) {
       return v.lang && v.lang.indexOf('en-GB') === 0 && /female/i.test(v.name || '');
-    }) || voices.find(function (v) {
-      return v.lang && v.lang.indexOf('en-GB') === 0;
-    }) || voices.find(function (v) {
+    });
+    if (enGBFemale) { cachedVoice = enGBFemale; return cachedVoice; }
+
+    var enGBNonMale = voices.find(function (v) {
+      return v.lang && v.lang.indexOf('en-GB') === 0 && !/male/i.test(v.name || '');
+    });
+    if (enGBNonMale) { cachedVoice = enGBNonMale; return cachedVoice; }
+
+    /* 3. Any en female / non-male voice */
+    var enFemale = voices.find(function (v) {
+      return v.lang && v.lang.indexOf('en') === 0 && /female/i.test(v.name || '');
+    });
+    if (enFemale) { cachedVoice = enFemale; return cachedVoice; }
+
+    var enNonMale = voices.find(function (v) {
+      return v.lang && v.lang.indexOf('en') === 0 && !/male/i.test(v.name || '');
+    });
+    if (enNonMale) { cachedVoice = enNonMale; return cachedVoice; }
+
+    /* 4. Absolute fallback */
+    cachedVoice = voices.find(function (v) {
       return v.lang && v.lang.indexOf('en') === 0;
     }) || null;
+    return cachedVoice;
+  }
+
+  /* Re-resolve when browser finishes loading voice list (Chrome fires this async) */
+  if (window.speechSynthesis) {
+    window.speechSynthesis.addEventListener('voiceschanged', function () {
+      cachedVoice = null;
+      resolveNarrationVoice();
+    });
+    /* Prime the cache immediately if voices are already loaded */
+    resolveNarrationVoice();
   }
 
   function updateNarrationButton() {
