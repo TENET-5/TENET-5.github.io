@@ -879,6 +879,7 @@
         '<p><kbd>←</kbd> <kbd>→</kbd> — Previous/Next page</p>' +
         '<p><kbd>Home</kbd> / <kbd>End</kbd> — First/Last slide</p>' +
         '<p><kbd>N</kbd> — Narrate current slide (LIRIL)</p>' +
+        '<p><kbd>Shift+N</kbd> — Narrate all slides (hands-free)</p>' +
         '<p><kbd>A</kbd> — Toggle auto-narrate on slide change</p>' +
         '<p><kbd>S</kbd> — Cycle speech rate (slow/normal/fast)</p>' +
         '<p><kbd>T</kbd> — Slide table of contents</p>' +
@@ -934,7 +935,11 @@
 
       if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
-        if (window.__TENET5_LIRIL_NARRATE) window.__TENET5_LIRIL_NARRATE();
+        if (e.shiftKey) {
+          if (window.__TENET5_LIRIL_NARRATE_ALL) window.__TENET5_LIRIL_NARRATE_ALL();
+        } else {
+          if (window.__TENET5_LIRIL_NARRATE) window.__TENET5_LIRIL_NARRATE();
+        }
         return;
       }
 
@@ -1385,7 +1390,10 @@
     token: 0,
     subtitle: null,
     rateIdx: 1,
-    autoNarrate: false
+    autoNarrate: false,
+    narrateAllActive: false,
+    narrateAllSlides: null,
+    narrateAllTracker: null
   };
   var narrationIndexByPage = null;
   var narrationIndexPromise = null;
@@ -1703,6 +1711,7 @@
   function stopNarration() {
     lirilNarration.token++;
     stopNarrationKeepalive();
+    stopNarrateAll();
     hideSubtitle();
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
@@ -1787,6 +1796,130 @@
     speakNarrationChunks(chunks, voice, lirilNarration.token, 0, total);
   }
 
+  /* ── Narrate All: continuous narration through all remaining slides ── */
+
+  function stopNarrateAll() {
+    lirilNarration.narrateAllActive = false;
+    lirilNarration.narrateAllSlides = null;
+    lirilNarration.narrateAllTracker = null;
+  }
+
+  function narrateAllFrom(slides, tracker) {
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
+
+    if (lirilNarration.narrateAllActive) {
+      // Already running — stop it
+      stopNarrateAll();
+      stopNarration();
+      showSubtitle('Narrate All: OFF');
+      setTimeout(function () { if (!lirilNarration.speaking) hideSubtitle(); }, 1500);
+      return;
+    }
+
+    lirilNarration.narrateAllActive = true;
+    lirilNarration.narrateAllSlides = slides;
+    lirilNarration.narrateAllTracker = tracker;
+    showSubtitle('Narrate All: ON — Shift+N or Esc to stop');
+    setTimeout(function () { if (!lirilNarration.speaking) hideSubtitle(); }, 2000);
+    narrateAllStep(slides, tracker);
+  }
+
+  function narrateAllStep(slides, tracker) {
+    if (!lirilNarration.narrateAllActive) return;
+
+    var cur = tracker.getActive();
+    var slide = slides[cur];
+    if (!slide) { stopNarrateAll(); return; }
+
+    lirilNarration.activeSlide = slide;
+    var text = getNarrationText(slide);
+
+    if (!text) {
+      // No narration for this slide — skip to next
+      narrateAllAdvance(slides, tracker, cur);
+      return;
+    }
+
+    var voice = resolveNarrationVoice();
+    stopNarration(); // cancel any in-flight speech
+
+    var chunks = splitNarrationChunks(text);
+    var total = chunks.length;
+    lirilNarration.token++;
+    var myToken = lirilNarration.token;
+    startNarrationKeepalive();
+
+    speakNarrationAllChunks(chunks, voice, myToken, 0, total, function () {
+      // Called when all chunks for this slide are done
+      if (!lirilNarration.narrateAllActive || myToken !== lirilNarration.token) return;
+      narrateAllAdvance(slides, tracker, cur);
+    });
+  }
+
+  function narrateAllAdvance(slides, tracker, cur) {
+    if (!lirilNarration.narrateAllActive) return;
+
+    if (cur >= slides.length - 1) {
+      // Reached last slide — stop narrate-all
+      showSubtitle('Narrate All: complete');
+      setTimeout(function () { hideSubtitle(); }, 2000);
+      stopNarrateAll();
+      return;
+    }
+
+    // Scroll to next slide, then narrate after a brief pause
+    var next = slides[cur + 1];
+    if (next) {
+      next.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    }
+    setTimeout(function () {
+      narrateAllStep(slides, tracker);
+    }, 600);
+  }
+
+  function speakNarrationAllChunks(chunks, voice, token, chunkIdx, totalChunks, onAllDone) {
+    if (!chunks.length || token !== lirilNarration.token) {
+      lirilNarration.speaking = false;
+      stopNarrationKeepalive();
+      hideSubtitle();
+      updateNarrationButton();
+      if (typeof onAllDone === 'function') onAllDone();
+      return;
+    }
+
+    var chunk = chunks.shift();
+    var idx = chunkIdx || 0;
+    var total = totalChunks || (idx + 1 + chunks.length);
+    var u = new SpeechSynthesisUtterance(chunk);
+    u.lang = 'en-GB';
+    u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
+    u.pitch = 1.0;
+    if (voice) u.voice = voice;
+
+    u.onstart = function () {
+      lirilNarration.speaking = true;
+      var prefix = total > 1 ? '[' + (idx + 1) + '/' + total + '] ' : '';
+      showSubtitle(prefix + chunk);
+      updateNarrationButton();
+    };
+    u.onend = function () {
+      if (token !== lirilNarration.token) return;
+      setTimeout(function () {
+        speakNarrationAllChunks(chunks, voice, token, idx + 1, total, onAllDone);
+      }, 120);
+    };
+    u.onerror = function () {
+      if (token !== lirilNarration.token) return;
+      lirilNarration.speaking = false;
+      stopNarrationKeepalive();
+      hideSubtitle();
+      updateNarrationButton();
+      if (typeof onAllDone === 'function') onAllDone();
+    };
+
+    window.speechSynthesis.speak(u);
+  }
+
   function initNarrationControls(slides, pageIndicator, activeIdx) {
     if (!pageIndicator) return;
     lirilNarration.button = pageIndicator.querySelector('.pres-page-narrate');
@@ -1812,6 +1945,13 @@
 
     window.__TENET5_LIRIL_NARRATE = narrateCurrentSlide;
     window.__TENET5_LIRIL_STOP = stopNarration;
+    window.__TENET5_LIRIL_NARRATE_ALL = function () {
+      var fakeTracker = { getActive: function () {
+        var attr = lirilNarration.activeSlide && lirilNarration.activeSlide.getAttribute('data-slide-idx');
+        return parseInt(attr || '0', 10);
+      }};
+      narrateAllFrom(slides, fakeTracker);
+    };
     window.__TENET5_LIRIL_CYCLE_RATE = function () {
       lirilNarration.rateIdx = (lirilNarration.rateIdx + 1) % SPEECH_RATES.length;
       var preset = SPEECH_RATES[lirilNarration.rateIdx];
@@ -1906,11 +2046,11 @@
       var pageIndicator = buildPageIndicator();
       var tracker = observeSlides(slides, ui, function (idx) {
         lirilNarration.activeSlide = slides[idx] || null;
-        if (lirilNarration.speaking) stopNarration();
+        if (lirilNarration.speaking && !lirilNarration.narrateAllActive) stopNarration();
         updateNarrationButton();
         saveSlidePosition(idx);
         updateSlideHash(idx);
-        if (lirilNarration.autoNarrate) {
+        if (lirilNarration.autoNarrate && !lirilNarration.narrateAllActive) {
           setTimeout(function () { narrateCurrentSlide(); }, 300);
         }
       });
