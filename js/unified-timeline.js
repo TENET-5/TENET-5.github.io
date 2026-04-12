@@ -35,6 +35,10 @@
     { year: 2026, month: 3, title: 'Alberta Bill 18: Block MAID Expansion', desc: 'Alberta legislates to prohibit MAID for mental illness. Limits eligibility to patients likely to die within 12 months.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
     { year: 2026, month: 3, title: 'Bill C-218: Permanent Block', desc: 'Conservative MP Ed Fast introduces bill to permanently block MAID expansion to mental illness. 10 provinces oppose expansion.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
     { year: 2026, month: 4, title: '$51B Build Communities Strong', desc: 'PM Carney launches $51B infrastructure fund covering same sectors as Brookfield\'s Maple Fund pitch. No direct allocation to Brookfield identified.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
+    { year: 2025, month: 1, title: 'Hogue Final Report: 51 Recommendations', desc: 'Foreign Interference Commission: govt acted "too slowly", "insufficiently transparent". No traitors but "troubling" conduct. One-year progress report required.', link: 'foreign-interference.html', cat: 'foreign', color: '#60a5fa' },
+    { year: 2025, month: 9, title: 'RCMP Closes Chinese Police Stations Case', desc: 'Montreal investigation closed WITHOUT charges. Community orgs file $4.9M defamation lawsuit against RCMP. Lost 70% of funding.', link: 'foreign-interference.html', cat: 'foreign', color: '#60a5fa' },
+    { year: 2025, month: 4, title: 'Quebec: 7.9% MAID Rate — World Record', desc: 'Over 6,000 MAID deaths in one year. 7.9% of all Quebec deaths. Instructed prosecutors not to charge for advance requests — ahead of federal law.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2024, month: 1, title: '10 Provinces Demand MAID Pause', desc: 'BC, ON, AB, SK, NB, PEI, NS, NU, NT, YT sign joint letter. Quebec, Manitoba, NL refuse. Federal government sets March 2027 regardless.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
