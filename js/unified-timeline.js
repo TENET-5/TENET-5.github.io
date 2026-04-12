@@ -34,6 +34,7 @@
     { year: 2026, month: 1, title: 'Charter Challenge: Religious Hospitals', desc: 'B.C. Supreme Court hears challenge to Catholic hospitals refusing MAID. Sam O\'Neill (34, terminal) forced to transfer from St. Paul\'s.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
     { year: 2026, month: 3, title: 'Alberta Bill 18: Block MAID Expansion', desc: 'Alberta legislates to prohibit MAID for mental illness. Limits eligibility to patients likely to die within 12 months.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
     { year: 2026, month: 3, title: 'Bill C-218: Permanent Block', desc: 'Conservative MP Ed Fast introduces bill to permanently block MAID expansion to mental illness. 10 provinces oppose expansion.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2026, month: 4, title: '$51B Build Communities Strong', desc: 'PM Carney launches $51B infrastructure fund covering same sectors as Brookfield\'s Maple Fund pitch. No direct allocation to Brookfield identified.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
