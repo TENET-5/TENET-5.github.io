@@ -621,6 +621,15 @@
     ui.rail.classList.add('pres-indicator-visible');
   }
 
+  function markNarratableDots(ui, slides) {
+    ui.dots.forEach(function (dot) {
+      var dotIdx = parseInt(dot.getAttribute('data-idx'), 10);
+      var slide = slides[dotIdx];
+      var hasNarration = slide ? !!getNarrationText(slide) : false;
+      dot.classList.toggle('pres-dot-narratable', hasNarration);
+    });
+  }
+
   /* ═══════════════════════════════════════════════════════════════════
      SECTION 6: Keyboard + touch navigation
      ═══════════════════════════════════════════════════════════════════ */
@@ -1548,6 +1557,12 @@
       initTouchNav();
       observeContinueSlide(continueSlide);
       initNarrationControls(slides, pageIndicator, 0);
+
+      // Mark dots that have narration (re-run after index loads)
+      markNarratableDots(ui, slides);
+      loadNarrationIndex().then(function () {
+        markNarratableDots(ui, slides);
+      });
 
       if (slides[0]) {
         slides[0].classList.add('pres-visible');
