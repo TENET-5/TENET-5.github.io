@@ -79,8 +79,11 @@
     } else if (isInIframe) {
       // INSIDE IFRAME — content page: only load content-level components
       // (no header/footer — parent frame provides those)
-      loadScript(BASE + 'share.js?v=2')
-        .then(function() { return loadScript(BASE + 'readnext.js?v=3'); });
+      Promise.all([
+        loadScript(BASE + 'js/timeline.js?v=1'),
+        loadScript(BASE + 'js/liril-narrator.js?v=1'),
+        loadScript(BASE + 'share.js?v=2')
+      ]).then(function() { return loadScript(BASE + 'readnext.js?v=3'); });
 
     } else {
       // DIRECT ACCESS fallback — full standalone page
@@ -90,6 +93,8 @@
 
       loadScript(BASE + 'nav.js?v=12')
         .then(function() { return loadScript(BASE + 'js/main.js?v=3'); })
+        .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
+        .then(function() { return loadScript(BASE + 'js/liril-narrator.js?v=1'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
         .then(function() { return loadScript(BASE + 'footer.js?v=3'); });
