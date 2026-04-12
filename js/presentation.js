@@ -1183,15 +1183,18 @@
     return -1;
   }
 
-  function navigatePage(direction) {
-    var current = getCurrentPage();
-    var idx = getPageIndex(current);
-    if (idx === -1) return;
-
-    var nextIdx = idx + direction;
-    if (nextIdx < 0 || nextIdx >= PAGE_SEQUENCE.length) return;
-
-    var nextPage = PAGE_SEQUENCE[nextIdx];
+  function navigatePage(direction, targetPage) {
+    var nextPage;
+    if (targetPage) {
+      nextPage = targetPage;
+    } else {
+      var current = getCurrentPage();
+      var idx = getPageIndex(current);
+      if (idx === -1) return;
+      var nextIdx = idx + direction;
+      if (nextIdx < 0 || nextIdx >= PAGE_SEQUENCE.length) return;
+      nextPage = PAGE_SEQUENCE[nextIdx];
+    }
 
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({
