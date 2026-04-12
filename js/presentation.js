@@ -292,7 +292,7 @@
     'acelephius-report.html': 'ACELEPHIUS \u2014 Palantir OSINT Nexus',
     'acelephius-wardoll.html': 'ACELEPHIUS \u2014 War Doll Intelligence',
     'hansard-dashboard.html': 'Hansard Dashboard \u2014 Parliament 45-1',
-    'hansard-evidence.html': 'Hansard \u2014 Institutional Dismissal of 76,475 Deaths',
+    'hansard-evidence.html': 'Hansard \u2014 Institutional Dismissal of 76,707 Deaths',
     'network-analysis.html': 'Network Analysis',
     'osint-dashboard.html': 'OSINT Intelligence Dashboard',
     'entity-viewer.html': 'Entity Profiler & Document Viewer',
