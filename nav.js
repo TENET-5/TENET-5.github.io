@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════
      SHARED NAV — Two-Tier Royal Canadian Header
      Red Ensign stripe → Identity band → Navigation bar
-     Canadian Accountability Project
+     TENET5 — Powered by LIRIL AI
      ═══════════════════════════════════════════════════════ */
 (function() {
   if (window.__TENET5_NAV_LOADED) return;
@@ -34,8 +34,8 @@
         '<a href="/index.html" class="brand">' +
           crestSVG +
           '<div class="brand-text">' +
-            '<span class="brand-title">Canadian Accountability Project</span>' +
-            '<span class="brand-subtitle">Official Investigation Record \u2022 Est. 2024</span>' +
+            '<span class="brand-title">TENET5</span>' +
+            '<span class="brand-subtitle">Powered by LIRIL AI \u2022 Est. 2024</span>' +
           '</div>' +
         '</a>' +
       '</div>' +
