@@ -430,14 +430,34 @@
         var chunks = chunkText(point.text);
         var voice = resolveVoice();
 
-        speakChunks(chunks, voice, function() {
-          // Auto-advance after all chunks finish
-          if (isActive && currentPoint < points.length - 1) {
-            setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
-          } else if (isActive) {
-            endWalkthrough();
-          }
-        });
+        // If voices haven't loaded yet (Chrome async), wait up to 2s
+        if (!voice && !voiceResolved) {
+          var waited = 0;
+          var poll = setInterval(function() {
+            waited += 100;
+            voice = resolveVoice();
+            if (voice || waited >= 2000) {
+              clearInterval(poll);
+              if (!isActive) return;
+              speakChunks(chunks, voice, function() {
+                if (isActive && currentPoint < points.length - 1) {
+                  setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+                } else if (isActive) {
+                  endWalkthrough();
+                }
+              });
+            }
+          }, 100);
+        } else {
+          speakChunks(chunks, voice, function() {
+            // Auto-advance after all chunks finish
+            if (isActive && currentPoint < points.length - 1) {
+              setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+            } else if (isActive) {
+              endWalkthrough();
+            }
+          });
+        }
       }
     }
 
