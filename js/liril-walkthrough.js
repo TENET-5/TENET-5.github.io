@@ -353,13 +353,32 @@
     }
 
     // Re-resolve when Chrome finishes loading voices async
+    // CRITICAL: Chrome/Edge load voices LATE — we must retry until we get a female voice
+    var voiceRetryCount = 0;
+    function retryVoiceResolution() {
+      cachedVoice = null;
+      voiceResolved = false;
+      var v = resolveVoice();
+      if (v && !isMale(v)) {
+        console.log('[LIRIL] Voice locked:', v.name, '(' + v.lang + ') after', voiceRetryCount, 'retries');
+        return; // Got a good voice
+      }
+      voiceRetryCount++;
+      if (voiceRetryCount < 20) {
+        setTimeout(retryVoiceResolution, 250); // Retry every 250ms for up to 5 seconds
+      } else {
+        console.warn('[LIRIL] Could not find female voice after 20 retries. Using:', v ? v.name : 'none');
+      }
+    }
+
     if (window.speechSynthesis) {
       window.speechSynthesis.addEventListener('voiceschanged', function() {
         cachedVoice = null;
         voiceResolved = false;
         resolveVoice();
       });
-      resolveVoice(); // prime immediately
+      // Start retry loop immediately — don't wait for voiceschanged event
+      retryVoiceResolution();
     }
 
     // ── Walkthrough controls ─────────────────────────
