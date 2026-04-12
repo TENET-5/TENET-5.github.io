@@ -1,5 +1,5 @@
 /**
- * TENET5 Share Bar — Extracted from inline handlers
+ * Canadian Accountability Project Share Bar — Extracted from inline handlers
  */
 (function() {
   'use strict';

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   TENET5 Page Shell v1.0 — Single Entry Point for All Shared Components
+   CAP Page Shell v1.0 — Single Entry Point for All Shared Components
    ═══════════════════════════════════════════════════════════════════════
    Every page includes ONE script:  <script src="shell.js?v=1"></script>
    Shell detects context and loads appropriate components:

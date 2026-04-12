@@ -1,5 +1,5 @@
 /**
- * Auth UI — TENET5 Login/Logout Component
+ * Auth UI — Canadian Accountability Project Login/Logout Component
  * Renders login button or user avatar in nav. Google + Twitter/X via Firebase.
  */
 import { auth, db, googleProvider, twitterProvider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, isConfigured } from './firebase-config.js';
