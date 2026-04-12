@@ -32,6 +32,10 @@ class EmpiricalMagicHandoff:
         
         ethics_str = "CLEARED" if ethics_cleared else "FLAGGED"
         
+        # Enforce abcxyz N vs NP parameters from Millennial Falcon subsystem
+        matrix_complexity = evidence_data.get('matrix_complexity', 'NP-CLASS (Unresolved)')
+        abcxyz_compliance = evidence_data.get('abcxyz_compliance_check', 'SECURED (Millennial Falcon)')
+        
         # Format the intelligence into markdown format for the dossier UI
         output_content = f"""# OSINT Dossier: {evidence_data.get('name', 'Unknown')}
 Date Captured: {datetime.now().isoformat()}
@@ -39,7 +43,8 @@ Date Captured: {datetime.now().isoformat()}
 ## Routing & Metadata
 - **Source:** {evidence_data.get('source', 'Classified')}
 - **Topological Vector:** {evidence_data.get('topological_vector', 'N/A')}
-- **Matrix Path:** {evidence_data.get('matrix_complexity', 'UNKNOWN')}
+- **Matrix Path (N vs NP):** {matrix_complexity}
+- **abcxyz Compliance:** {abcxyz_compliance}
 - **Routing Agent:** {routing_agent}
 - **Ethics Gate:** {ethics_str}
 

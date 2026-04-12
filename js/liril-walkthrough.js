@@ -10,6 +10,20 @@
 (function() {
   'use strict';
 
+  // ── Internationalization (I18N) ──────────────────
+  window.LIRIL_I18N_LOCALE = document.documentElement.lang || 'en-GB';
+  window.LIRIL_I18N_STRINGS = {
+    'en': { 'badge': 'LIRIL NARRATION', 'start': '▶ LIRIL Walkthrough', 'stop': '■ Stop', 'advance': 'Click to advance' },
+    'fr': { 'badge': 'NARRATION LIRIL', 'start': '▶ Visite Guidée LIRIL', 'stop': '■ Arrêter', 'advance': 'Cliquez pour avancer' },
+    'es': { 'badge': 'NARRACIÓN LIRIL', 'start': '▶ Recorrido LIRIL', 'stop': '■ Detener', 'advance': 'Haz clic para avanzar' }
+  };
+
+  function getI18nStr(key) {
+    var langCode = window.LIRIL_I18N_LOCALE.split('-')[0];
+    var dict = window.LIRIL_I18N_STRINGS[langCode] || window.LIRIL_I18N_STRINGS['en'];
+    return dict[key] || window.LIRIL_I18N_STRINGS['en'][key];
+  }
+
   // ── Text sanitisation ────────────────────────────
   // Strips HTML entities, gear/product lists, error messages,
   // leading punctuation, and caps narration length.
@@ -150,33 +164,74 @@
     var speakingChunks = false;
 
     // ── Create walkthrough UI ────────────────────────
+
+    // Inject Responsive Subtitle CSS
+    if (!document.getElementById('liril-styles')) {
+      var styleEl = document.createElement('style');
+      styleEl.id = 'liril-styles';
+      styleEl.innerHTML = `
+        .liril-subtitle-bar {
+          position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%);
+          width: 90%; max-width: 800px; text-align: center;
+          z-index: 9997; pointer-events: none;
+          opacity: 0; transition: opacity 0.4s;
+        }
+        .liril-subtitle-text {
+          display: inline-block; background: rgba(9, 9, 11, 0.92);
+          color: #e8e4dc; padding: 12px 24px; border-radius: 6px;
+          font-size: 1rem; line-height: 1.6; border: 1px solid rgba(185, 28, 28, 0.2);
+          backdrop-filter: blur(8px); font-family: Inter, -apple-system, sans-serif;
+          max-width: 100%; text-align: left;
+        }
+        .liril-badge {
+          display: block; font-size: 0.65rem; color: rgba(185, 28, 28, 0.6);
+          margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;
+        }
+        .liril-start-btn {
+          position: fixed; bottom: 56px; right: 24px; z-index: 9998;
+          background: rgba(185, 28, 28, 0.9); color: white; border: none; border-radius: 6px;
+          padding: 8px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+          font-family: Inter, sans-serif; transition: all 0.2s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .liril-counter {
+          font-size: 0.65rem; color: rgba(255, 255, 255, 0.3);
+          margin-top: 8px; text-align: right;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+          .liril-subtitle-bar { bottom: 64px; width: 95%; }
+          .liril-subtitle-text { padding: 10px 16px; font-size: 0.85rem; line-height: 1.4; }
+          .liril-start-btn { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
+        }
+      `;
+      document.head.appendChild(styleEl);
+    }
+
     var subtitleBar = document.createElement('div');
     subtitleBar.id = 'liril-subtitle';
-    subtitleBar.style.cssText = 'position:fixed;bottom:56px;left:50%;transform:translateX(-50%);' +
-      'width:90%;max-width:800px;text-align:center;z-index:9997;pointer-events:none;' +
-      'opacity:0;transition:opacity 0.4s;';
+    subtitleBar.className = 'liril-subtitle-bar';
+    subtitleBar.setAttribute('aria-live', 'polite');
+    subtitleBar.setAttribute('aria-atomic', 'true');
+    subtitleBar.setAttribute('role', 'region');
+    subtitleBar.setAttribute('aria-label', 'LIRIL Walkthrough Subtitles');
 
     var subtitleText = document.createElement('div');
-    subtitleText.style.cssText = 'display:inline-block;background:rgba(9,9,11,0.92);' +
-      'color:#e8e4dc;padding:12px 24px;border-radius:6px;font-size:1rem;line-height:1.6;' +
-      'border:1px solid rgba(185,28,28,0.2);backdrop-filter:blur(8px);' +
-      'font-family:Inter,-apple-system,sans-serif;max-width:100%;text-align:left;';
+    subtitleText.className = 'liril-subtitle-text';
     subtitleBar.appendChild(subtitleText);
     document.body.appendChild(subtitleBar);
 
     var badge = document.createElement('span');
-    badge.style.cssText = 'display:block;font-size:0.65rem;color:rgba(185,28,28,0.6);' +
-      'margin-bottom:6px;font-family:JetBrains Mono,monospace;letter-spacing:1px;';
-    badge.textContent = 'LIRIL NARRATION';
+    badge.className = 'liril-badge';
+    badge.textContent = getI18nStr('badge');
 
     var startBtn = document.createElement('button');
     startBtn.id = 'liril-start-walkthrough';
-    startBtn.innerHTML = '&#9654; LIRIL Walkthrough';
-    startBtn.style.cssText = 'position:fixed;bottom:56px;right:24px;z-index:9998;' +
-      'background:rgba(185,28,28,0.9);color:white;border:none;border-radius:6px;' +
-      'padding:8px 16px;font-size:0.8rem;font-weight:600;cursor:pointer;' +
-      'font-family:Inter,sans-serif;transition:all 0.2s;' +
-      'box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    startBtn.className = 'liril-start-btn';
+    startBtn.innerHTML = getI18nStr('start');
+    startBtn.setAttribute('aria-label', 'Start LIRIL Walkthrough Presentation');
+    startBtn.setAttribute('aria-controls', 'liril-subtitle');
     document.body.appendChild(startBtn);
 
     // ── Chrome keepalive ─────────────────────────────
@@ -213,7 +268,7 @@
         }
         var chunk = chunkQueue.shift();
         var u = new SpeechSynthesisUtterance(chunk);
-        u.lang = 'en-GB';
+        u.lang = window.LIRIL_I18N_LOCALE;
         u.rate = 0.9;
         u.pitch = 1.1;
         if (voice) u.voice = voice;
@@ -232,13 +287,16 @@
     function resolveVoice() {
       if (voiceResolved) return cachedVoice;
       var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      var targetLang = window.LIRIL_I18N_LOCALE;
+      
       cachedVoice = voices.find(function(v) {
-        return v.lang.startsWith('en-GB') && v.name.toLowerCase().includes('female');
+        return v.lang.startsWith(targetLang) && v.name.toLowerCase().includes('female');
       }) || voices.find(function(v) {
-        return v.lang.startsWith('en-GB');
+        return v.lang.startsWith(targetLang);
       }) || voices.find(function(v) {
         return v.lang.startsWith('en');
       }) || null;
+      
       if (voices.length > 0) voiceResolved = true;
       return cachedVoice;
     }
@@ -275,8 +333,8 @@
       subtitleText.appendChild(textNode);
 
       var counter = document.createElement('div');
-      counter.style.cssText = 'font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:8px;text-align:right;';
-      counter.textContent = (idx + 1) + ' / ' + points.length + '  |  Click to advance';
+      counter.className = 'liril-counter';
+      counter.textContent = (idx + 1) + ' / ' + points.length + '  |  ' + getI18nStr('advance');
       subtitleText.appendChild(counter);
 
       subtitleBar.style.opacity = '1';
@@ -302,8 +360,9 @@
 
     function startWalkthrough() {
       isActive = true;
-      startBtn.innerHTML = '&#9632; Stop';
+      startBtn.innerHTML = getI18nStr('stop');
       startBtn.style.background = 'rgba(100,100,100,0.9)';
+      startBtn.setAttribute('aria-expanded', 'true');
       showPoint(0);
     }
 
@@ -315,8 +374,9 @@
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       subtitleBar.style.opacity = '0';
       subtitleBar.style.pointerEvents = 'none';
-      startBtn.innerHTML = '&#9654; LIRIL Walkthrough';
-      startBtn.style.background = 'rgba(185,28,28,0.9)';
+      startBtn.innerHTML = getI18nStr('start');
+      startBtn.style.background = '';
+      startBtn.setAttribute('aria-expanded', 'false');
       points.forEach(function(p) { p.el.style.outline = 'none'; });
       currentPoint = -1;
     }

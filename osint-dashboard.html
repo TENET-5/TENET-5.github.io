@@ -141,10 +141,52 @@
         <li>RCMP — public statements and investigation updates</li>
         <li>CBC, Globe and Mail, Global News — investigative journalism</li>
       </ul>
-      <div class="source-note">
-        <strong>Methodology:</strong> All data from public government sources. Cross-referencing increases confidence — entities appearing in 2+ independent datasets are flagged as multi-source. Correlation does not imply causation. All subjects are entitled to due process. Lobbying is legal and registered in Canada.
-      </div>
+  </div>
     </section>
+
+    <section id="liril-feed" style="display:none;">
+      <h2 data-narrate="LIRIL Live Intelligence Feed. Real-time data from the autonomous LIRIL kernel when running locally.">🔴 LIRIL Live Intelligence Feed</h2>
+      <p>Real-time intelligence data streamed from the DEIFIED inference cascade. Only visible when the LIRIL kernel is active locally.</p>
+      <div class="dash-grid" id="liril-stats-grid">
+        <div class="dash-card"><h3>Total Intelligence Records</h3><div class="dash-big red" id="li-total">--</div><div class="dash-sub">Across all OSINT tables</div></div>
+        <div class="dash-card"><h3>Threat Intelligence</h3><div class="dash-big yellow" id="li-threats">--</div><div class="dash-sub">Active threat reports</div></div>
+        <div class="dash-card"><h3>Anomalies Detected</h3><div class="dash-big red" id="li-anomalies">--</div><div class="dash-sub">Keyword cluster density events</div></div>
+        <div class="dash-card"><h3>Knowledge Graph Nodes</h3><div class="dash-big blue" id="li-graph">--</div><div class="dash-sub">Entity relationship mappings</div></div>
+      </div>
+      <ul class="cluster-list" id="liril-threat-list"></ul>
+      <div class="source-note" id="liril-status">⏳ Connecting to LIRIL kernel...</div>
+    </section>
+
+    <script>
+    (function() {
+      var DEIFIED_API = 'http://127.0.0.1:11433';
+      var feedSection = document.getElementById('liril-feed');
+      var statusEl = document.getElementById('liril-status');
+      fetch(DEIFIED_API + '/api/discoveries/stats', {mode: 'cors'})
+        .then(function(r) { return r.json(); })
+        .then(function(stats) {
+          feedSection.style.display = '';
+          document.getElementById('li-total').textContent = stats.total_records || 0;
+          document.getElementById('li-threats').textContent = stats.tables.threat_index || 0;
+          document.getElementById('li-anomalies').textContent = stats.tables.anomaly_index || 0;
+          document.getElementById('li-graph').textContent = stats.tables.knowledge_graph || 0;
+          statusEl.innerHTML = '✅ <strong>LIRIL KERNEL ONLINE</strong> — Connected to DEIFIED cascade | ' + stats.total_records + ' intelligence records indexed';
+          return fetch(DEIFIED_API + '/api/discoveries?table=threat_index&limit=5', {mode: 'cors'});
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var list = document.getElementById('liril-threat-list');
+          if (data.results && data.results.length) {
+            data.results.forEach(function(t) {
+              var li = document.createElement('li');
+              li.innerHTML = '<span>' + (t.title || 'Untitled') + '</span><span class="cluster-badge badge-critical">ACTIVE</span>';
+              list.appendChild(li);
+            });
+          }
+        })
+        .catch(function() { /* LIRIL offline — graceful degradation */ });
+    })();
+    </script>
 
     <section>
             <h2 data-narrate="Explore the data. This section provides access paths for deeper evidence navigation.">Explore the Data</h2>
@@ -160,6 +202,7 @@
         <a href="epstein-canadian-connections.html" class="dash-card tnt-style-690"><h3>Canadian Political Entanglement</h3><div class="tnt-style-269">SDNY-EX: Analysis of Canadian connections to the global trafficking network and political system entanglement.</div></a>
         <a href="s504-covey-bae.html" class="dash-card tnt-style-690"><h3>s.504 Private Prosecution</h3><div class="tnt-style-269">Information filed under Criminal Code s.504 against CFNIS investigators and prosecutors for obstruction of justice.</div></a>
         <a href="influence-target-alpha.html" class="dash-card tnt-style-690"> <h3 style="color:#BF616A;">Target Alpha Profile</h3> <div class="tnt-style-269">Isolated N-vs-NP vulnerability node tracking deep-layer lobbying routing and state proxies.</div> </a>
+        <a href="evidence-ns-oic.html" class="dash-card tnt-style-690"> <h3 style="color:#ef4444;">NS Casualties & OIC Ban</h3> <div class="tnt-style-269">Causal linkage between state suppression during the 2020 mass casualties and the simultaneous structural disarmament.</div> </a>
         <a href="data/millennial_falcon_discoveries.json" target="_blank" class="dash-card tnt-style-690"><h3>Matrix Discoveries Ledger</h3><div class="tnt-style-269">Cryptographically-signed Hydrogen registry documenting N vs NP convergence structures across OSINT operations.</div></a>
       </div>
     </section>

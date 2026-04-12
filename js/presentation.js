@@ -563,7 +563,7 @@
 
     var hint = document.createElement('div');
     hint.className = 'pres-keyhint';
-    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 page \u00b7 N narrate \u00b7 T contents \u00b7 ? help';
+    hint.textContent = '\u2191\u2193 arrows \u00b7 space \u00b7 \u2190\u2192 page \u00b7 N narrate \u00b7 G go to \u00b7 ? help';
     document.body.appendChild(hint);
     setTimeout(function () { hint.classList.add('pres-keyhint-fade'); }, 6000);
 
@@ -714,6 +714,124 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
+     SECTION 5c: "Go to page" quick-search overlay
+     ═══════════════════════════════════════════════════════════════════ */
+
+  function getGoToOverlay() {
+    return document.querySelector('.pres-goto-overlay');
+  }
+
+  function closeGoTo() {
+    var existing = getGoToOverlay();
+    if (existing) existing.remove();
+  }
+
+  function openGoToPage() {
+    if (getGoToOverlay()) { closeGoTo(); return; }
+
+    var currentPage = getCurrentPage();
+    var overlay = document.createElement('div');
+    overlay.className = 'pres-goto-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);' +
+      'display:flex;align-items:flex-start;justify-content:center;padding-top:12vh;z-index:9998;';
+
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#0a0e1a;color:#e8e4dc;padding:1.2rem 1.5rem;' +
+      'border-radius:8px;border:1px solid #444;max-width:520px;width:92vw;' +
+      'max-height:65vh;display:flex;flex-direction:column;';
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Search 136 investigation pages\u2026';
+    input.setAttribute('aria-label', 'Search pages');
+    input.style.cssText = 'width:100%;padding:0.6rem 0.8rem;font-size:1rem;' +
+      'background:#14181f;color:#e8e4dc;border:1px solid #555;border-radius:5px;' +
+      'outline:none;margin-bottom:0.8rem;box-sizing:border-box;';
+
+    var resultsDiv = document.createElement('div');
+    resultsDiv.style.cssText = 'overflow-y:auto;flex:1;';
+
+    panel.appendChild(input);
+    panel.appendChild(resultsDiv);
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    // Build page entries grouped by section
+    var entries = [];
+    PAGE_SEQUENCE.forEach(function (page, i) {
+      var title = PAGE_TITLES[page] || page.replace('.html', '').replace(/-/g, ' ');
+      var group = SECTION_GROUPS[page] || '';
+      entries.push({ page: page, title: title, group: group, idx: i });
+    });
+
+    function renderResults(filter) {
+      resultsDiv.innerHTML = '';
+      var lowerFilter = (filter || '').toLowerCase();
+      var lastGroup = '';
+      var count = 0;
+
+      entries.forEach(function (entry) {
+        if (lowerFilter) {
+          var haystack = (entry.title + ' ' + entry.group + ' ' + entry.page).toLowerCase();
+          if (haystack.indexOf(lowerFilter) === -1) return;
+        }
+
+        if (entry.group !== lastGroup) {
+          lastGroup = entry.group;
+          var groupEl = document.createElement('div');
+          groupEl.style.cssText = 'font-size:0.75rem;color:#c9a84c;padding:0.5rem 0.3rem 0.15rem;' +
+            'text-transform:uppercase;letter-spacing:0.05em;border-top:1px solid #222;margin-top:0.3rem;';
+          groupEl.textContent = entry.group;
+          resultsDiv.appendChild(groupEl);
+        }
+
+        var row = document.createElement('div');
+        var isCurrent = entry.page === currentPage;
+        row.style.cssText = 'padding:0.35rem 0.5rem;border-radius:4px;cursor:pointer;' +
+          'font-size:0.88rem;margin-bottom:1px;' +
+          (isCurrent ? 'background:rgba(201,168,76,0.15);color:#c9a84c;' : '');
+        row.textContent = (entry.idx + 1) + '. ' + entry.title;
+        row.addEventListener('click', function () {
+          closeGoTo();
+          navigatePage(0, entry.page);
+        });
+        row.addEventListener('mouseenter', function () {
+          if (!isCurrent) this.style.background = 'rgba(255,255,255,0.06)';
+        });
+        row.addEventListener('mouseleave', function () {
+          this.style.background = isCurrent ? 'rgba(201,168,76,0.15)' : '';
+        });
+        resultsDiv.appendChild(row);
+        count++;
+      });
+
+      if (count === 0) {
+        var empty = document.createElement('div');
+        empty.style.cssText = 'padding:1rem;color:#666;text-align:center;font-size:0.9rem;';
+        empty.textContent = 'No pages match \u201c' + filter + '\u201d';
+        resultsDiv.appendChild(empty);
+      }
+    }
+
+    renderResults('');
+
+    input.addEventListener('input', function () {
+      renderResults(input.value.trim());
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeGoTo(); }
+    });
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeGoTo();
+    });
+
+    // Focus the search box
+    setTimeout(function () { input.focus(); }, 50);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
      SECTION 6: Keyboard + touch navigation
      ═══════════════════════════════════════════════════════════════════ */
 
@@ -770,10 +888,11 @@
 
       var helpOpen = !!getKeyboardHelpModal();
       var tocOpen = !!getTocOverlay();
-      if (helpOpen || tocOpen) {
+      var gotoOpen = !!getGoToOverlay();
+      if (helpOpen || tocOpen || gotoOpen) {
         if (e.key === 'Escape' || e.key === '?') {
           e.preventDefault();
-          if (e.key === 'Escape') { closeKeyboardHelp(); closeToc(); }
+          if (e.key === 'Escape') { closeKeyboardHelp(); closeToc(); closeGoTo(); }
           return;
         }
         if (tocOpen && e.key === 't' || e.key === 'T') {
@@ -814,6 +933,12 @@
       if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         toggleTOC(slides, tracker);
+        return;
+      }
+
+      if ((e.key === 'g' || e.key === 'G') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        openGoToPage();
         return;
       }
 
