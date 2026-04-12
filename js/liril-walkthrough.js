@@ -158,6 +158,7 @@
     }
 
     collectPoints();
+    tryLoadAudio();
     if (points.length < 2) return;
 
     // ── State ────────────────────────────────────────
@@ -166,6 +167,87 @@
     var keepaliveTimer = null;
     var chunkQueue = [];
     var speakingChunks = false;
+
+    // ── MP3 Audio Support (AvaMultilingual neural voice) ──
+    var audioElement = null;
+    var audioCues = [];
+    var audioMode = false;
+    var _audioTimeHandler = null;
+    var _audioEndHandler = null;
+
+    function parseVTT(vttText) {
+      var cues = [];
+      var blocks = vttText.split(/\n\n+/);
+      blocks.forEach(function(block) {
+        var lines = block.trim().split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          var m = lines[i].match(/(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})/);
+          if (m) {
+            var start = +m[1]*3600 + +m[2]*60 + +m[3] + +m[4]/1000;
+            var end = +m[5]*3600 + +m[6]*60 + +m[7] + +m[8]/1000;
+            var text = lines.slice(i + 1).join(' ').trim();
+            if (text) cues.push({ start: start, end: end, text: text });
+            break;
+          }
+        }
+      });
+      return cues;
+    }
+
+    function normalizeForMatch(t) {
+      return (t || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function findCueIndexForPoint(text) {
+      var norm = normalizeForMatch(text).substring(0, 60);
+      if (!norm || !audioCues.length) return -1;
+      var bestIdx = -1, bestScore = 0;
+      for (var i = 0; i < audioCues.length; i++) {
+        var cn = normalizeForMatch(audioCues[i].text);
+        var overlap = 0;
+        var limit = Math.min(norm.length, cn.length);
+        for (var j = 0; j < limit; j++) {
+          if (norm[j] === cn[j]) overlap++; else break;
+        }
+        if (overlap > bestScore && overlap > 8) {
+          bestScore = overlap; bestIdx = i;
+        }
+      }
+      return bestIdx;
+    }
+
+    function tryLoadAudio() {
+      var slug = (window.location.pathname.split('/').pop() || '').replace(/\.html$/, '');
+      if (!slug) return;
+      var mp3 = 'audio/' + slug + '.mp3';
+      var vtt = 'audio/' + slug + '.vtt';
+
+      fetch(mp3, { method: 'HEAD' }).then(function(r) {
+        if (!r.ok) return;
+        return fetch(vtt).then(function(r2) { return r2.ok ? r2.text() : ''; });
+      }).then(function(vttText) {
+        if (!vttText) return;
+        audioCues = parseVTT(vttText);
+        audioElement = new Audio(mp3);
+        audioElement.preload = 'auto';
+
+        points.forEach(function(p) {
+          var ci = findCueIndexForPoint(p.text);
+          p.audioStart = ci >= 0 ? audioCues[ci].start : -1;
+        });
+        for (var i = 0; i < points.length; i++) {
+          if (points[i].audioStart < 0) continue;
+          var next = -1;
+          for (var j = i + 1; j < points.length; j++) {
+            if (points[j].audioStart >= 0) { next = points[j].audioStart; break; }
+          }
+          points[i].audioEnd = next > 0 ? next : -1;
+        }
+        audioMode = true;
+        console.log('[LIRIL] Audio mode:', mp3, audioCues.length, 'cues,',
+          points.filter(function(p) { return p.audioStart >= 0; }).length + '/' + points.length, 'mapped');
+      }).catch(function() { console.log('[LIRIL] No audio for page, using speech'); });
+    }
 
     // ── Create walkthrough UI ────────────────────────
 
@@ -454,10 +536,15 @@
     function showPoint(idx) {
       if (idx < 0 || idx >= points.length) return;
 
-      // Cancel any in-flight speech
+      // Cancel any in-flight speech/audio
       speakingChunks = false;
       chunkQueue.length = 0;
       if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (audioElement) {
+        if (_audioTimeHandler) audioElement.removeEventListener('timeupdate', _audioTimeHandler);
+        if (_audioEndHandler) audioElement.removeEventListener('ended', _audioEndHandler);
+        audioElement.pause();
+      }
 
       currentPoint = idx;
       var point = points[idx];
@@ -494,12 +581,45 @@
 
       startBtn.innerHTML = (idx + 1) + '/' + points.length + ' &#9654;';
 
-      // Speak with chunking
-      if ('speechSynthesis' in window && isActive) {
+      // ── Play audio or speak ──────────────────────
+      if (!isActive) return;
+
+      // Try MP3 audio first (AvaMultilingual neural voice)
+      if (audioMode && audioElement && point.audioStart >= 0) {
+        audioElement.currentTime = point.audioStart;
+
+        var endTime = point.audioEnd;
+        _audioTimeHandler = function() {
+          if (endTime > 0 && audioElement.currentTime >= endTime - 0.05) {
+            audioElement.removeEventListener('timeupdate', _audioTimeHandler);
+            audioElement.pause();
+            if (isActive && currentPoint < points.length - 1) {
+              setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+            } else if (isActive) {
+              endWalkthrough();
+            }
+          }
+        };
+        _audioEndHandler = function() {
+          audioElement.removeEventListener('timeupdate', _audioTimeHandler);
+          audioElement.removeEventListener('ended', _audioEndHandler);
+          if (isActive && currentPoint < points.length - 1) {
+            setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+          } else if (isActive) {
+            endWalkthrough();
+          }
+        };
+        audioElement.addEventListener('timeupdate', _audioTimeHandler);
+        audioElement.addEventListener('ended', _audioEndHandler);
+        audioElement.play().catch(function(e) { console.error('[LIRIL] Audio error:', e); });
+        return;
+      }
+
+      // Fallback: speechSynthesis with chunking
+      if ('speechSynthesis' in window) {
         var chunks = chunkText(point.text);
         var voice = resolveVoice();
 
-        // If voices haven't loaded yet (Chrome async), wait up to 2s
         if (!voice && !voiceResolved) {
           var waited = 0;
           var poll = setInterval(function() {
@@ -519,7 +639,6 @@
           }, 100);
         } else {
           speakChunks(chunks, voice, function() {
-            // Auto-advance after all chunks finish
             if (isActive && currentPoint < points.length - 1) {
               setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
             } else if (isActive) {
@@ -544,6 +663,11 @@
       chunkQueue.length = 0;
       stopKeepalive();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (audioElement) {
+        if (_audioTimeHandler) { audioElement.removeEventListener('timeupdate', _audioTimeHandler); _audioTimeHandler = null; }
+        if (_audioEndHandler) { audioElement.removeEventListener('ended', _audioEndHandler); _audioEndHandler = null; }
+        audioElement.pause(); audioElement.currentTime = 0;
+      }
       subtitleBar.style.opacity = '0';
       subtitleBar.style.pointerEvents = 'none';
       startBtn.innerHTML = getI18nStr('start');
