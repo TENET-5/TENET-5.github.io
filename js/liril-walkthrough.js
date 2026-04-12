@@ -10,6 +10,10 @@
 (function() {
   'use strict';
 
+  // ── Guard: prevent double-init when shell.js AND <script> both load this ──
+  if (window.__LIRIL_WALKTHROUGH_LOADED) return;
+  window.__LIRIL_WALKTHROUGH_LOADED = true;
+
   // ── Internationalization (I18N) ──────────────────
   window.LIRIL_I18N_LOCALE = document.documentElement.lang || 'en-GB';
   window.LIRIL_I18N_STRINGS = {
