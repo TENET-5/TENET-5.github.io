@@ -28,6 +28,8 @@
     { year: 2026, month: 4, title: 's.504 Filed: 28 Counts', desc: 'Covey + Bae. Murder, mutiny, hate crime, obstruction.', link: 's504-covey-bae.html', cat: 'cfnis', color: '#a855f7' },
     { year: 2025, month: 3, title: 'PM Carney Takes Office', desc: '500+ companies in blind trust. $6.8M Brookfield options. Democracy Watch: as many conflicts as Trump.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
     { year: 2025, month: 6, title: 'ArriveCAN $64M Recovery Vote', desc: 'Parliament votes 172-165 to recover money. Every Liberal MP votes AGAINST.', link: 'arrivecan.html', cat: 'waste', color: '#f59e0b' },
+    { year: 2020, month: 10, title: 'PBO: MAID Saves $149M/Year', desc: 'Parliamentary Budget Officer publishes cost estimate BEFORE C-7 expansion vote. Projected $1.273 TRILLION by 2047.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2025, month: 7, title: 'Carney Assets: 500+ Companies', desc: 'Ethics commissioner reveals PM holds 500+ companies in blind trust. $6.8M Brookfield options. Brookfield owns seniors housing globally.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
