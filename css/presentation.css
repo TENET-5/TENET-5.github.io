@@ -1,0 +1,304 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TENET⁵ Presentation Mode — Full-Viewport Slide System
+   Every section = one slide. Scroll-snap. Keyboard nav. Dot indicators.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Presentation-Active Body ──────────────────────────────────────── */
+body.pres-active {
+  scroll-snap-type: y proximity;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+body.pres-active::-webkit-scrollbar { width: 0; background: transparent; }
+
+/* ── Individual Slides ─────────────────────────────────────────────── */
+.pres-slide {
+  min-height: 100vh;
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+/* Short slides (sources, metadata) don't need full viewport */
+.pres-slide--compact {
+  min-height: auto;
+  scroll-snap-align: none;
+}
+
+/* ── Slide Entrance Animations ─────────────────────────────────────── */
+.pres-slide > * {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pres-slide.pres-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Stagger children */
+.pres-slide.pres-visible > *:nth-child(2) { transition-delay: 0.08s; }
+.pres-slide.pres-visible > *:nth-child(3) { transition-delay: 0.16s; }
+.pres-slide.pres-visible > *:nth-child(4) { transition-delay: 0.24s; }
+.pres-slide.pres-visible > *:nth-child(5) { transition-delay: 0.32s; }
+.pres-slide.pres-visible > *:nth-child(6) { transition-delay: 0.40s; }
+.pres-slide.pres-visible > *:nth-child(7) { transition-delay: 0.48s; }
+.pres-slide.pres-visible > *:nth-child(8) { transition-delay: 0.56s; }
+
+/* ── Slide Number Badge ────────────────────────────────────────────── */
+.pres-slide::after {
+  content: attr(data-slide-num);
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(185, 28, 28, 0.35);
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+/* ── Dot Indicator Rail ────────────────────────────────────────────── */
+.pres-indicator {
+  position: fixed;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9990;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.pres-indicator.pres-indicator-visible {
+  opacity: 1;
+}
+.pres-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.pres-dot:hover {
+  background: rgba(185, 28, 28, 0.4);
+  transform: scale(1.4);
+}
+.pres-dot.pres-dot-active {
+  background: #b91c1c;
+  border-color: rgba(185, 28, 28, 0.5);
+  box-shadow: 0 0 8px rgba(185, 28, 28, 0.4);
+  transform: scale(1.3);
+}
+/* Dot label on hover */
+.pres-dot::before {
+  content: attr(data-label);
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(12, 18, 32, 0.92);
+  border: 1px solid rgba(185, 28, 28, 0.2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.68rem;
+  color: #e8e4dc;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.pres-dot:hover::before {
+  opacity: 1;
+}
+
+/* ── Slide Progress Bar ────────────────────────────────────────────── */
+.pres-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  z-index: 9991;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(185, 28, 28, 0.3);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SPRITE ANIMATIONS — Data visualization overlays
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Sprite Container (positioned behind slide content) ──────────── */
+.pres-sprite {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.pres-slide > *:not(.pres-sprite) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── SPRITE: Death Rain — Red particles falling ──────────────────── */
+.sprite-death-rain .spr-drop {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #dc2626;
+  border-radius: 50%;
+  opacity: 0;
+  animation: sprDeathFall linear infinite;
+  box-shadow: 0 0 4px rgba(220, 38, 38, 0.3);
+}
+@keyframes sprDeathFall {
+  0%   { transform: translateY(-20px); opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.3; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* ── SPRITE: Money Flow — Gold particles drifting right ──────────── */
+.sprite-money-flow .spr-coin {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #c9a84c;
+  border-radius: 50%;
+  opacity: 0;
+  animation: sprMoneyDrift linear infinite;
+  box-shadow: 0 0 6px rgba(201, 168, 76, 0.3);
+}
+@keyframes sprMoneyDrift {
+  0%   { transform: translate(-20px, 0) scale(0.5); opacity: 0; }
+  15%  { opacity: 0.7; }
+  85%  { opacity: 0.4; }
+  100% { transform: translate(calc(100vw + 20px), -40px) scale(1.2); opacity: 0; }
+}
+
+/* ── SPRITE: Network Pulse — Expanding rings + connecting lines ──── */
+.sprite-network .spr-ring {
+  position: absolute;
+  border: 1px solid rgba(136, 192, 208, 0.3);
+  border-radius: 50%;
+  animation: sprRingExpand 3s ease-out infinite;
+}
+@keyframes sprRingExpand {
+  0%   { width: 0; height: 0; opacity: 0.8; }
+  100% { width: 200px; height: 200px; opacity: 0; margin: -100px 0 0 -100px; }
+}
+.sprite-network .spr-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(136, 192, 208, 0.3), transparent);
+  transform-origin: left center;
+  animation: sprLineDraw 2s ease-out forwards;
+}
+@keyframes sprLineDraw {
+  0%   { width: 0; opacity: 0; }
+  50%  { opacity: 0.5; }
+  100% { width: 100%; opacity: 0; }
+}
+
+/* ── SPRITE: Rising Bars — Animated chart growth ─────────────────── */
+.sprite-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  padding-bottom: 20px;
+}
+.sprite-bars .spr-bar {
+  width: 16px;
+  border-radius: 3px 3px 0 0;
+  animation: sprBarGrow 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transform-origin: bottom;
+}
+@keyframes sprBarGrow {
+  0%   { transform: scaleY(0); opacity: 0; }
+  100% { transform: scaleY(1); opacity: 0.6; }
+}
+
+/* ── SPRITE: Danger Pulse — Warning ripple ───────────────────────── */
+.sprite-danger .spr-pulse {
+  position: absolute;
+  border: 2px solid rgba(185, 28, 28, 0.3);
+  border-radius: 50%;
+  animation: sprDangerPulse 2.5s ease-out infinite;
+}
+@keyframes sprDangerPulse {
+  0%   { width: 20px; height: 20px; opacity: 0.8; margin: -10px 0 0 -10px; }
+  100% { width: 120px; height: 120px; opacity: 0; margin: -60px 0 0 -60px; }
+}
+
+/* ── SPRITE: Counter Explosion — particles bursting from a number ── */
+.sprite-counter-burst .spr-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #dc2626;
+  border-radius: 50%;
+  animation: sprBurst 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes sprBurst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--bx, 50px), var(--by, -50px)) scale(0); opacity: 0; }
+}
+
+/* ── SPRITE: Scan Line — data scanning effect ────────────────────── */
+.sprite-scan .spr-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(185, 28, 28, 0.15) 20%,
+    rgba(185, 28, 28, 0.4) 50%,
+    rgba(185, 28, 28, 0.15) 80%,
+    transparent 100%);
+  animation: sprScanDown 4s linear infinite;
+}
+@keyframes sprScanDown {
+  0%   { top: -2px; }
+  100% { top: 100%; }
+}
+
+/* ── Keyboard Hint ─────────────────────────────────────────────────── */
+.pres-keyhint {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.04em;
+  z-index: 9990;
+  pointer-events: none;
+  transition: opacity 3s ease;
+}
+.pres-keyhint-fade { opacity: 0; }
+
+/* ── Responsive — mobile adjustments ───────────────────────────────── */
+@media (max-width: 768px) {
+  .pres-slide { padding: 2rem 1rem; }
+  .pres-indicator { right: 6px; gap: 4px; }
+  .pres-dot { width: 6px; height: 6px; }
+  .pres-dot::before { display: none; }
+  .pres-keyhint { display: none; }
+}
