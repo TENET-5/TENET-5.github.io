@@ -13,22 +13,47 @@
      Maple Leaf = Canada
      Gold = truth / integrity */
   var crestSVG =
-    '<svg class="brand-crest" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<defs><linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1">' +
-    '<stop offset="0%" stop-color="#dcc175"/><stop offset="100%" stop-color="#a07c30"/>' +
-    '</linearGradient></defs>' +
-    /* Crown */
-    '<path d="M28 30 L33 8 L41 24 L50 2 L59 24 L67 8 L72 30Z" fill="url(#t5-gold)"/>' +
-    '<rect x="26" y="30" width="48" height="8" rx="2" fill="url(#t5-gold)"/>' +
-    '<circle cx="50" cy="10" r="2.5" fill="#c41e3a"/>' +
-    '<circle cx="37" cy="18" r="1.8" fill="#1a3a6b"/><circle cx="63" cy="18" r="1.8" fill="#1a3a6b"/>' +
-    /* Red shield */
-    '<path d="M18 42 L18 82 Q18 102 50 118 Q82 102 82 82 L82 42Z" fill="#c41e3a" stroke="url(#t5-gold)" stroke-width="3"/>' +
-    /* Gold maple leaf */
-    '<path d="M50 52 L53 60 L62 56 L57 64 L66 70 L57 69 L55 80 L50 73 L45 80 L43 69 L34 70 L43 64 L38 56 L47 60Z" fill="#c9a84c"/>' +
-    '<rect x="48.5" y="78" width="3" height="10" rx="1" fill="#c9a84c"/>' +
-    /* Inner shield trace */
-    '<path d="M23 46 L23 80 Q23 98 50 112 Q77 98 77 80 L77 46Z" fill="none" stroke="#c9a84c" stroke-width="0.7" opacity="0.35"/>' +
+    '<svg class="brand-crest" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<defs>' +
+    '<linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0d478"/><stop offset="50%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#8b6914"/></linearGradient>' +
+    '<linearGradient id="t5-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e82040"/><stop offset="100%" stop-color="#8b1225"/></linearGradient>' +
+    '<linearGradient id="t5-navy" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a3a6b"/><stop offset="100%" stop-color="#0d1f3c"/></linearGradient>' +
+    '<radialGradient id="t5-jewel" cx="50%" cy="30%" r="50%"><stop offset="0%" stop-color="#ff4060"/><stop offset="100%" stop-color="#8b1225"/></radialGradient>' +
+    '</defs>' +
+    /* Crown base band */
+    '<rect x="52" y="56" width="96" height="14" rx="3" fill="url(#t5-gold)" stroke="#8b6914" stroke-width="0.8"/>' +
+    '<rect x="56" y="58" width="88" height="10" rx="2" fill="none" stroke="rgba(240,212,120,0.3)" stroke-width="0.5"/>' +
+    /* Crown points */
+    '<path d="M56 56 L62 18 L76 44 L100 4 L124 44 L138 18 L144 56Z" fill="url(#t5-gold)" stroke="#8b6914" stroke-width="1"/>' +
+    /* Crown arches */
+    '<path d="M66 56 Q78 36 90 56" fill="none" stroke="rgba(139,105,20,0.5)" stroke-width="0.8"/>' +
+    '<path d="M90 56 Q100 32 110 56" fill="none" stroke="rgba(139,105,20,0.5)" stroke-width="0.8"/>' +
+    '<path d="M110 56 Q122 36 134 56" fill="none" stroke="rgba(139,105,20,0.5)" stroke-width="0.8"/>' +
+    /* Crown jewels */
+    '<circle cx="100" cy="14" r="5" fill="url(#t5-jewel)" stroke="#f0d478" stroke-width="1"/>' +
+    '<circle cx="100" cy="14" r="2" fill="rgba(255,255,255,0.3)"/>' +
+    '<circle cx="74" cy="32" r="3.5" fill="url(#t5-navy)" stroke="#f0d478" stroke-width="0.8"/>' +
+    '<circle cx="126" cy="32" r="3.5" fill="url(#t5-navy)" stroke="#f0d478" stroke-width="0.8"/>' +
+    '<circle cx="62" cy="24" r="2.5" fill="#c41e3a" stroke="#f0d478" stroke-width="0.6"/>' +
+    '<circle cx="138" cy="24" r="2.5" fill="#c41e3a" stroke="#f0d478" stroke-width="0.6"/>' +
+    /* Shield body */
+    '<path d="M36 78 L36 168 Q36 210 100 244 Q164 210 164 168 L164 78Z" fill="url(#t5-red)" stroke="url(#t5-gold)" stroke-width="4"/>' +
+    /* Shield inner border */
+    '<path d="M44 84 L44 166 Q44 204 100 234 Q156 204 156 166 L156 84Z" fill="none" stroke="rgba(201,168,76,0.25)" stroke-width="1.2"/>' +
+    /* Shield chief band */
+    '<path d="M44 84 L156 84 L156 104 L44 104Z" fill="rgba(0,0,0,0.12)"/>' +
+    /* Maple leaf */
+    '<g transform="translate(100,158) scale(1.1)">' +
+    '<path d="M0-42 L3.5-30 L14-34 L9.5-22 L22-18 L14-12 L18-2 L8-6 L5.5 8 L0 2 L-5.5 8 L-8-6 L-18-2 L-14-12 L-22-18 L-9.5-22 L-14-34 L-3.5-30Z" fill="#c9a84c" stroke="#a07c30" stroke-width="0.8"/>' +
+    '<line x1="0" y1="-38" x2="0" y2="8" stroke="rgba(139,105,20,0.5)" stroke-width="0.8"/>' +
+    '<rect x="-2" y="6" width="4" height="16" rx="1.5" fill="#c9a84c" stroke="#a07c30" stroke-width="0.5"/>' +
+    '</g>' +
+    /* VERITAS text */
+    '<text x="100" y="98" text-anchor="middle" fill="rgba(201,168,76,0.5)" font-family="Georgia,serif" font-size="11" font-weight="700" letter-spacing="4">VERITAS</text>' +
+    /* Motto scroll */
+    '<path d="M48 238 Q58 228 80 232 L100 230 L120 232 Q142 228 152 238 L148 244 Q130 236 120 238 L100 240 L80 238 Q70 236 52 244Z" fill="url(#t5-gold)" stroke="#8b6914" stroke-width="0.8"/>' +
+    '<path d="M52 244 L46 248 L52 246Z M148 244 L154 248 L148 246Z" fill="url(#t5-gold)" stroke="#8b6914" stroke-width="0.5"/>' +
+    '<text x="100" y="240" text-anchor="middle" fill="#1a1a2e" font-family="Georgia,serif" font-size="7.5" font-weight="700" letter-spacing="1.5">ACCOUNTABILITY</text>' +
     '</svg>';
 
   var headerHTML =
