@@ -51,7 +51,7 @@
     </nav>
     <div class="liril-status-pill" title="LIRIL NPU — Local inference, no external API">
       <div class="dot"></div>
-      LIRIL·NPU &nbsp;|&nbsp; SEED:118400 &nbsp;|&nbsp; NATS:4223
+      LIRIL·NPU &nbsp;|&nbsp; SEED:118400 &nbsp;|&nbsp; NATS:OK
     </div>
     <button class="menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
   </div>
@@ -93,7 +93,7 @@
       <ul>
         <li><span style="color:rgba(255,255,255,0.45)">LIRIL NPU — Local, no API</span></li>
         <li><span style="color:rgba(255,255,255,0.45)">NemoClaw GPU0/GPU1 RTX 5070 Ti</span></li>
-        <li><span style="color:rgba(255,255,255,0.45)">NATS mesh — 127.0.0.1:4223</span></li>
+        <li><span style="color:rgba(255,255,255,0.45)">NATS mesh — localhost</span></li>
         <li><span style="color:rgba(255,255,255,0.45)">SEED: 118400 | TICK: 118.4Hz</span></li>
       </ul>
     </div>
