@@ -186,12 +186,13 @@ body {
 /* ── NODE CARDS ── */
 .node {
   position: absolute; width: 170px;
-  background: rgba(17, 24, 32, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  background: rgba(17, 24, 32, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   border-radius: var(--radius); padding: 10px 12px;
   cursor: pointer; z-index: 2; user-select: none;
-  transition: border-color 0.25s, box-shadow 0.25s, opacity 0.3s, transform 0.3s;
+  transition: border-color 0.25s, box-shadow 0.25s, opacity 0.3s;
   -webkit-tap-highlight-color: transparent;
+  contain: layout style;
 }
 .node:hover {
   border-color: var(--border-active);
@@ -690,6 +691,8 @@ body {
   // We use percentage coords from JSON but spread them better
   let tickCount = 0;
   let animFrameId = null;
+  const MAX_TICKS = 180;
+  const ENERGY_THRESHOLD = 0.0001;
 
   function computePositions() {
     // Group nodes by primary category for clustering
@@ -731,12 +734,12 @@ body {
 
   function tick() {
     tickCount++;
-    if (tickCount > 180) {
+    if (tickCount > MAX_TICKS) {
       drawLines();
-      return; // Sleep safely after graph calms down
+      return;
     }
 
-    const cooling = Math.max(0.01, 1.0 - (tickCount / 180));
+    const cooling = Math.max(0.01, 1.0 - (tickCount / MAX_TICKS));
 
     // Force-directed repulsion to spread nodes out
     for (let i = 0; i < nodes.length; i++) {
@@ -759,15 +762,16 @@ body {
       }
     }
 
+    let totalEnergy = 0;
     nodes.forEach(n => {
       n._px += n.vx;
       n._py += n.vy;
-      n.vx *= 0.5; // Friction
+      totalEnergy += n.vx * n.vx + n.vy * n.vy;
+      n.vx *= 0.5;
       n.vy *= 0.5;
       n._px = Math.max(0.02, Math.min(0.97, n._px));
       n._py = Math.max(0.03, Math.min(0.96, n._py));
 
-      // Translate DOM nodes dynamically
       const el = nodeEls[n.id];
       if (el) {
         el.style.left = (n._px * BOARD_W) + 'px';
@@ -776,6 +780,7 @@ body {
     });
 
     drawLines();
+    if (totalEnergy < ENERGY_THRESHOLD) return; // settled
     animFrameId = requestAnimationFrame(tick);
   }
 
@@ -837,62 +842,85 @@ body {
     nodeEls[n.id] = el;
   });
 
-  // ── Draw lines (progressive: only for selected/hovered node) ──
+  // ── Draw lines (two-pass: batch non-highlighted, then highlighted) ──
+  const ctx = cvs.getContext('2d');
+  if (cvs.width !== BOARD_W) { cvs.width = BOARD_W; cvs.height = BOARD_H; }
+
+  let _drawDirty = true;
+  let _drawRafId = null;
+  function scheduleDrawLines() {
+    _drawDirty = true;
+    if (!_drawRafId) _drawRafId = requestAnimationFrame(_flushDraw);
+  }
+  function _flushDraw() {
+    _drawRafId = null;
+    if (_drawDirty) { _drawDirty = false; drawLines(); }
+  }
+
   function drawLines() {
-    if (cvs.tagName !== 'CANVAS') return;
-    const ctx = cvs.getContext('2d');
-
-    if (cvs.width !== BOARD_W) {
-      cvs.width = BOARD_W;
-      cvs.height = BOARD_H;
-    }
-
     ctx.clearRect(0, 0, BOARD_W, BOARD_H);
-    ctx.globalCompositeOperation = 'lighter';
 
-    threads.forEach(t => {
+    // Pass 1: non-highlighted lines (single style, no shadow)
+    const baseAlpha = selectedId ? 'rgba(90,106,122,0.06)' : 'rgba(90,106,122,0.15)';
+    ctx.strokeStyle = baseAlpha;
+    ctx.lineWidth = 1;
+    ctx.shadowBlur = 0;
+    ctx.globalCompositeOperation = 'lighter';
+    const highlighted = [];
+
+    for (let i = 0, len = threads.length; i < len; i++) {
+      const t = threads[i];
       const fromEl = nodeEls[t.from];
       const toEl = nodeEls[t.to];
-      if (!fromEl || !toEl) return;
-      if (fromEl.classList.contains('dim') || toEl.classList.contains('dim')) return;
+      if (!fromEl || !toEl) continue;
+      if (fromEl.classList.contains('dim') || toEl.classList.contains('dim')) continue;
 
-      const isHighlighted = selectedId && (t.from === selectedId || t.to === selectedId);
-      const str = t.strength || 1;
+      if (selectedId && (t.from === selectedId || t.to === selectedId)) {
+        highlighted.push(t);
+        continue;
+      }
 
       const x1 = parseFloat(fromEl.style.left) + 85;
       const y1 = parseFloat(fromEl.style.top) + 20;
       const x2 = parseFloat(toEl.style.left) + 85;
       const y2 = parseFloat(toEl.style.top) + 20;
-
       ctx.beginPath();
       ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo((x1+x2)/2+(y1-y2)*0.15, (y1+y2)/2+(x2-x1)*0.15, x2, y2);
+      ctx.stroke();
+    }
 
-      const cpX = (x1 + x2) / 2 + (y1 - y2) * 0.15;
-      const cpY = (y1 + y2) / 2 + (x2 - x1) * 0.15;
-      ctx.quadraticCurveTo(cpX, cpY, x2, y2);
+    // Pass 2: highlighted lines (with glow)
+    if (highlighted.length) {
+      const colors = { 3: 'rgba(230,57,70,0.7)', 2: 'rgba(58,134,255,0.6)', 1: 'rgba(200,214,229,0.45)' };
+      for (let i = 0; i < highlighted.length; i++) {
+        const t = highlighted[i];
+        const str = t.strength || 1;
+        const x1 = parseFloat(nodeEls[t.from].style.left) + 85;
+        const y1 = parseFloat(nodeEls[t.from].style.top) + 20;
+        const x2 = parseFloat(nodeEls[t.to].style.left) + 85;
+        const y2 = parseFloat(nodeEls[t.to].style.top) + 20;
+        const color = colors[str] || colors[1];
 
-      if (isHighlighted) {
-        const colors = { 3: 'rgba(230,57,70,0.7)', 2: 'rgba(58,134,255,0.6)', 1: 'rgba(200,214,229,0.45)' };
-        ctx.strokeStyle = colors[str] || colors[1];
+        ctx.strokeStyle = color;
         ctx.lineWidth = str * 2;
-        ctx.shadowColor = ctx.strokeStyle;
+        ctx.shadowColor = color;
         ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.quadraticCurveTo((x1+x2)/2+(y1-y2)*0.15, (y1+y2)/2+(x2-x1)*0.15, x2, y2);
         ctx.stroke();
-        ctx.shadowBlur = 0;
-      } else {
-        ctx.strokeStyle = selectedId ? 'rgba(90,106,122,0.06)' : 'rgba(90,106,122,0.15)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
 
-      // Labels only for highlighted connections
-      if (isHighlighted && t.label) {
-        ctx.font = '11px "JetBrains Mono", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(200,214,229,0.8)';
-        ctx.fillText(t.label, (x1 + x2) / 2, (y1 + y2) / 2 - 8);
+        if (t.label) {
+          ctx.shadowBlur = 0;
+          ctx.font = '11px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = 'rgba(200,214,229,0.8)';
+          ctx.fillText(t.label, (x1+x2)/2, (y1+y2)/2 - 8);
+        }
       }
-    });
+      ctx.shadowBlur = 0;
+    }
 
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -1117,8 +1145,10 @@ body {
   }, { passive: false });
   wrap.addEventListener('touchend', () => { touchStart = null; pinchDist = null; });
 
-  searchBox.addEventListener('input', e => {
-    applyFilter();
+  let _searchTimer = null;
+  searchBox.addEventListener('input', () => {
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(applyFilter, 150);
   });
 
   // ── Drag nodes ──
@@ -1140,7 +1170,7 @@ body {
       const bR = board.getBoundingClientRect();
       dragNode.style.left = ((e.clientX - bR.left - dox) / zoom) + 'px';
       dragNode.style.top = ((e.clientY - bR.top - doy) / zoom) + 'px';
-      drawLines();
+      scheduleDrawLines();
     });
     board.addEventListener('pointerup', () => {
       if (dragNode) dragNode.style.zIndex = 2;
@@ -1155,7 +1185,7 @@ body {
   });
 
   // ── Resize ──
-  window.addEventListener('resize', drawLines);
+  window.addEventListener('resize', scheduleDrawLines);
 })();
 </script>
 
