@@ -1031,6 +1031,36 @@
     keepaliveTimer: null,
     token: 0
   };
+  var narrationIndexByPage = null;
+  var narrationIndexPromise = null;
+
+  function loadNarrationIndex() {
+    if (narrationIndexByPage) return Promise.resolve(narrationIndexByPage);
+    if (narrationIndexPromise) return narrationIndexPromise;
+
+    narrationIndexPromise = fetch('data/narration_index.json', { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('narration index unavailable');
+        return r.json();
+      })
+      .then(function (payload) {
+        var map = {};
+        var list = payload && payload.narrations ? payload.narrations : [];
+        list.forEach(function (item) {
+          if (!item || !item.page) return;
+          if (!map[item.page]) map[item.page] = [];
+          map[item.page].push(cleanNarrationText(item.narration || ''));
+        });
+        narrationIndexByPage = map;
+        return map;
+      })
+      .catch(function () {
+        narrationIndexByPage = {};
+        return narrationIndexByPage;
+      });
+
+    return narrationIndexPromise;
+  }
 
   function cleanNarrationText(text) {
     if (!text) return '';
@@ -1090,6 +1120,17 @@
     return chunks.length ? chunks : [text.substring(0, 180)];
   }
 
+  function getIndexedNarration(slide) {
+    if (!slide || !narrationIndexByPage) return '';
+    var page = getCurrentPage();
+    var pageList = narrationIndexByPage[page];
+    if (!pageList || !pageList.length) return '';
+
+    var idx = parseInt(slide.getAttribute('data-slide-idx'), 10);
+    if (isNaN(idx) || idx < 0 || idx >= pageList.length) return '';
+    return cleanNarrationText(pageList[idx] || '');
+  }
+
   function getNarrationText(slide) {
     if (!slide) return '';
 
@@ -1107,6 +1148,9 @@
       );
       if (childText) return childText;
     }
+
+    var indexed = getIndexedNarration(slide);
+    if (indexed) return indexed;
 
     var heading = slide.querySelector('h1, h2, h3');
     if (heading) {
@@ -1238,6 +1282,9 @@
     });
 
     updateNarrationButton();
+    loadNarrationIndex().then(function () {
+      updateNarrationButton();
+    });
   }
 
   /* ═══════════════════════════════════════════════════════════════════
