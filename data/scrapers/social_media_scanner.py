@@ -17,7 +17,7 @@ try:
     sys.path.append(r'E:\S.L.A.T.E\tenet5\src')
     from tenet.discoveries.sator_memory_nexus_v2 import SATORMemoryNexus
     try:
-        from abcxyz.osint_nitter_bridge import NitterOSINTBridge
+        from ABCXYZ.osint_nitter_bridge import NitterOSINTBridge
         import asyncio
         HAS_NITTER = True
     except ImportError:

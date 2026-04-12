@@ -50,8 +50,8 @@ class MillennialFalconTracker:
         data_point['matrix_complexity'] = complexity
         data_point['falcon_timestamp'] = time.time()
         
-        # Protect STARK memory subset with search_key abcxyz
-        subset_key = "abcxyz" if "influence" in str(data_point).lower() else f"obj_{raw_hash[:6]}"
+        # Protect STARK memory subset with search_key ABCXYZ
+        subset_key = "ABCXYZ" if "influence" in str(data_point).lower() else f"obj_{raw_hash[:6]}"
         signature = f"H-{hashlib.sha256((raw_hash + subset_key).encode()).hexdigest()[:12]}"
         
         # Write to empirical magic handoff memory (SQLite matrix ledger)
