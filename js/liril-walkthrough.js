@@ -283,7 +283,7 @@
     // ── Voice selection (cached) ─────────────────────
     var cachedVoice = null;
     var voiceResolved = false;
-    var cachedVoice = null;
+    var VOICE_STORAGE_KEY = 'liril-voice-name';
 
     // LIRIL voice: British female ONLY. Hardcoded names for Windows 11 + Chrome + Edge.
     var FEMALE_VOICES = [
@@ -316,21 +316,32 @@
       var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
       if (voices.length === 0) return null;
 
-      // Log available voices for debugging
-      console.log('[LIRIL] Available voices:', voices.map(function(v) { return v.name + ' (' + v.lang + ')'; }));
+      // P0: Restore the exact voice persisted by presentation.js or a prior page
+      try {
+        var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
+        if (saved) {
+          var restored = voices.find(function(v) { return v.name === saved; });
+          if (restored && !isMale(restored)) {
+            cachedVoice = restored;
+            voiceResolved = true;
+            console.log('[LIRIL] Restored voice from session:', cachedVoice.name);
+            return cachedVoice;
+          }
+        }
+      } catch(e) {}
 
-      // P1: Known female + en-GB
-      cachedVoice = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
-      // P2: Any en-GB that is NOT male
-      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEnGB(v) && !isMale(v); });
-      // P3: Known female + any English
-      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v); });
-      // P4: Any English NOT male
+      // P1: Known female + any English (catches Zira on Windows immediately)
+      cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v); });
+      // P2: Known female + en-GB specifically
+      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
+      // P3: Any English NOT male
       if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && !isMale(v); });
-      // P5: Absolute last resort
+      // P4: Absolute last resort
       if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v); }) || null;
 
       if (cachedVoice) {
+        // Store so presentation.js and future pages get the same voice
+        try { sessionStorage.setItem(VOICE_STORAGE_KEY, cachedVoice.name); } catch(e) {}
         console.log('[LIRIL] Selected voice:', cachedVoice.name, '(' + cachedVoice.lang + ')');
       } else {
         console.warn('[LIRIL] No suitable voice found!');
