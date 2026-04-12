@@ -283,93 +283,58 @@
     // ── Voice selection (cached) ─────────────────────
     var cachedVoice = null;
     var voiceResolved = false;
-    var VOICE_STORAGE_KEY = 'liril-voice-name';
+    var cachedVoice = null;
 
-    // LIRIL voice priority: British female first, then any female English. NEVER male.
-    // en-GB voices must come FIRST — LIRIL speaks with a British accent.
-    var PREFERRED_FEMALE = [
-      'hazel', 'libby', 'sonia',                              // en-GB first
-      'microsoft hazel', 'microsoft libby', 'microsoft sonia', // MS en-GB
-      'google uk english female',                              // Chrome en-GB
-      'amy', 'emma', 'kate', 'fiona', 'serena', 'moira',     // other en-GB/en-IE
-      'microsoft zira', 'microsoft eva', 'microsoft jenny',   // en-US fallback
-      'microsoft aria', 'microsoft susan',
-      'samantha', 'karen', 'martha',
-      'google us english'
+    // LIRIL voice: British female ONLY. Hardcoded names for Windows 11 + Chrome + Edge.
+    var FEMALE_VOICES = [
+      'hazel', 'susan', 'libby', 'sonia', 'maisie', 'martha', 'kate',
+      'karen', 'moira', 'fiona', 'serena', 'samantha', 'victoria',
+      'zira', 'jenny', 'aria', 'sara', 'emily', 'emma',
+      'google uk english female', 'google us english female'
     ];
-    // Expanded ban list — catches all common male voices across platforms
-    var BANNED_MALE = [
-      'david', 'mark', 'james', 'george', 'daniel', 'ryan',
-      'guy', 'thomas', 'richard', 'rishi', 'sean', 'oliver',
-      'alex', 'fred', 'ralph', 'albert', 'bruce', 'carlos',
-      'diego', 'eric', 'liam', 'chris', 'andrew', 'male'
+    var MALE_VOICES = [
+      'david', 'mark', 'james', 'george', 'daniel', 'ryan', 'guy',
+      'thomas', 'richard', 'rishi', 'sean', 'oliver', 'liam',
+      'christopher', 'eric', 'andrew', 'brian', 'roger', 'malcolm',
+      'connor', 'freddie', 'alfie', 'ethan', 'noah'
     ];
 
-    function storeVoiceName(v) {
-      if (!v || !v.name) return;
-      try { sessionStorage.setItem(VOICE_STORAGE_KEY, v.name); } catch(e) {}
+    function isEnGB(v) {
+      var l = (v.lang || '').toLowerCase().replace('_', '-');
+      return l === 'en-gb' || l.indexOf('en-gb') === 0;
     }
+    function isEn(v) {
+      var l = (v.lang || '').toLowerCase().replace('_', '-');
+      return l.indexOf('en') === 0;
+    }
+    function nameOf(v) { return (v.name || '').toLowerCase(); }
+    function isFemale(v) { return FEMALE_VOICES.some(function(f) { return nameOf(v).indexOf(f) >= 0; }); }
+    function isMale(v) { return MALE_VOICES.some(function(m) { return nameOf(v).indexOf(m) >= 0; }); }
 
     function resolveVoice() {
       if (voiceResolved && cachedVoice) return cachedVoice;
       var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
       if (voices.length === 0) return null;
 
-      var vName = function(v) { return (v.name || '').toLowerCase(); };
-      var isMale = function(v) { return BANNED_MALE.some(function(m) { return vName(v).indexOf(m) !== -1; }); };
+      // Log available voices for debugging
+      console.log('[LIRIL] Available voices:', voices.map(function(v) { return v.name + ' (' + v.lang + ')'; }));
 
-      // Priority 0: Restore the exact voice persisted by presentation.js or a prior page
-      try {
-        var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
-        if (saved) {
-          var restored = voices.find(function(v) { return v.name === saved; });
-          if (restored && !isMale(restored)) {
-            cachedVoice = restored;
-            voiceResolved = true;
-            return cachedVoice;
-          }
-        }
-      } catch(e) {}
-
-      // Priority 1: Known female voices, en-GB first (order of PREFERRED_FEMALE matters)
-      for (var pi = 0; pi < PREFERRED_FEMALE.length; pi++) {
-        var pref = PREFERRED_FEMALE[pi];
-        var match = voices.find(function(v) {
-          return v.lang && v.lang.indexOf('en') === 0 && vName(v).indexOf(pref) !== -1;
-        });
-        if (match) { cachedVoice = match; break; }
-      }
-
-      // Priority 2: Any en-GB voice with 'female' in name
-      if (!cachedVoice) cachedVoice = voices.find(function(v) {
-        return v.lang && v.lang.indexOf('en-GB') === 0 && vName(v).indexOf('female') !== -1;
-      });
-
-      // Priority 3: Any en-GB voice that is NOT male
-      if (!cachedVoice) cachedVoice = voices.find(function(v) {
-        return v.lang && v.lang.indexOf('en-GB') === 0 && !isMale(v);
-      });
-
-      // Priority 4: Any English voice with 'female' in name
-      if (!cachedVoice) cachedVoice = voices.find(function(v) {
-        return v.lang && v.lang.indexOf('en') === 0 && vName(v).indexOf('female') !== -1;
-      });
-
-      // Priority 5: Any English voice that is NOT on the banned-male list
-      if (!cachedVoice) cachedVoice = voices.find(function(v) {
-        return v.lang && v.lang.indexOf('en') === 0 && !isMale(v);
-      });
-
-      // Last resort: any English voice
-      if (!cachedVoice) cachedVoice = voices.find(function(v) {
-        return v.lang && v.lang.indexOf('en') === 0;
-      }) || null;
+      // P1: Known female + en-GB
+      cachedVoice = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
+      // P2: Any en-GB that is NOT male
+      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEnGB(v) && !isMale(v); });
+      // P3: Known female + any English
+      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v); });
+      // P4: Any English NOT male
+      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && !isMale(v); });
+      // P5: Absolute last resort
+      if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v); }) || null;
 
       if (cachedVoice) {
-        storeVoiceName(cachedVoice);
-        console.log('[LIRIL] Voice locked:', cachedVoice.name, cachedVoice.lang);
+        console.log('[LIRIL] Selected voice:', cachedVoice.name, '(' + cachedVoice.lang + ')');
+      } else {
+        console.warn('[LIRIL] No suitable voice found!');
       }
-
       voiceResolved = true;
       return cachedVoice;
     }
@@ -508,13 +473,16 @@
       }
     });
 
-    // Load voices (Chrome needs this)
+    // Load voices — Chrome/Edge load asynchronously, MUST wait for onvoiceschanged
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = function() {
+      var initVoices = function() {
         voiceResolved = false;
-        window.speechSynthesis.getVoices();
+        cachedVoice = null;
+        resolveVoice(); // pre-resolve so first click is instant
       };
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      // Also try immediately (Firefox loads sync)
+      if (window.speechSynthesis.getVoices().length > 0) initVoices();
     }
 
     // ── Rescan hook for dynamic pages ────────────────
