@@ -663,7 +663,8 @@
       mps: [],
       officials: [],
       organizations: [],
-      donors: []
+      donors: [],
+      narrations: []
     };
     let loaded = false;
     let debounceTimer = null;
@@ -681,18 +682,20 @@
     // ── Data Loading ──
     async function loadData() {
       try {
-        const [analysisRes, mpsRes, lobbyingRes, contributionsRes] = await Promise.all([
+        const [analysisRes, mpsRes, lobbyingRes, contributionsRes, narrationsRes] = await Promise.all([
           fetch('data/analysis.json'),
           fetch('data/all_mps.json'),
           fetch('data/lobbying_analysis.json'),
-          fetch('data/contributions_analysis.json')
+          fetch('data/contributions_analysis.json'),
+          fetch('data/narration_index.json')
         ]);
 
-        const [analysis, mpsData, lobbying, contributions] = await Promise.all([
+        const [analysis, mpsData, lobbying, contributions, narrationsData] = await Promise.all([
           analysisRes.json(),
           mpsRes.json(),
           lobbyingRes.json(),
-          contributionsRes.json()
+          contributionsRes.json(),
+          narrationsRes.json()
         ]);
 
         // Bills
@@ -744,10 +747,13 @@
           };
         });
 
+        // Narrations
+        data.narrations = narrationsData.narrations || [];
+
         loaded = true;
 
         // Update stats
-        statsBar.innerHTML = 'Searching across <span>' + data.bills.length + '</span> bills, <span>' + data.mps.length + '</span> MPs, <span>' + data.officials.length + '</span> officials, <span>' + data.organizations.length + '</span> organizations, <span>' + data.donors.length + '</span> donors';
+        statsBar.innerHTML = 'Searching across <span>' + data.bills.length + '</span> bills, <span>' + data.mps.length + '</span> MPs, <span>' + data.officials.length + '</span> officials, <span>' + data.organizations.length + '</span> orgs, <span>' + data.donors.length + '</span> donors, and <span>' + data.narrations.length + '</span> findings';
 
         loadingState.style.display = 'none';
         showInitialState();
@@ -817,7 +823,8 @@
         mps: [],
         officials: [],
         organizations: [],
-        donors: []
+        donors: [],
+        narrations: []
       };
 
       // Search bills: title, number, category
@@ -855,13 +862,20 @@
         }
       });
 
+      // Search narrations: title, narration
+      data.narrations.forEach(function(n) {
+        if (matches(n.title + ' ' + n.narration, q)) {
+          results.narrations.push(n);
+        }
+      });
+
       renderResults(results, q);
       saveRecentSearch(q);
     }
 
     // ── Render Results ──
     function renderResults(results, query) {
-      var total = results.bills.length + results.mps.length + results.officials.length + results.organizations.length + results.donors.length;
+      var total = results.bills.length + results.mps.length + results.officials.length + results.organizations.length + results.donors.length + results.narrations.length;
 
       if (total === 0) {
         resultsContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128269;</div><h3>No matches found</h3><p>Try a different search term.</p></div>';
@@ -946,6 +960,21 @@
             '</div>' +
             '<div class="result-details">' +
               '<span class="result-detail"><strong>Total Donated:</strong> ' + formatMoney(d.total_amount) + '</span>' +
+            '</div>' +
+          '</a>';
+        }).join(''));
+      }
+
+      // Narrations
+      if (results.narrations.length > 0) {
+        html += renderGroup('OSINT Evidence & Findings', results.narrations.length, results.narrations.map(function(n) {
+          return '<a href="' + escapeHtml(n.page) + '" class="result-card">' +
+            '<div class="result-card-top">' +
+              '<span class="result-badge" style="background: rgba(185,28,28,0.15); color: #ef4444;">NARRATIVE</span>' +
+              '<div class="result-name">' + highlightMatch(n.title, query) + '</div>' +
+            '</div>' +
+            '<div class="result-details" style="flex-direction:column; align-items:flex-start;">' +
+              '<span class="result-detail" style="line-height:1.5; color: var(--text-primary); font-size: 0.85rem;">' + highlightMatch(n.narration, query) + '</span>' +
             '</div>' +
           '</a>';
         }).join(''));
