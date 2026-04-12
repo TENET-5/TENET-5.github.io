@@ -11,9 +11,9 @@ from pathlib import Path
 
 import edge_tts
 
-# ── Voice config — PROFESSIONAL OBJECTIVE ────────────────────────────────
-VOICE = "en-CA-LiamNeural" # Clear, professional, Canadian male broadcast voice
-RATE = "-2%"      
+# ── Voice config — PROFESSIONAL OBJECTIVE (LIRIL CANON) ─────────────────────
+VOICE = "en-US-AriaNeural" # LIRIL's formal, objective tone
+RATE = "+0%"      
 PITCH = "+0Hz"    
 PAGE_SLUG = "home"
 OUTPUT_DIR = Path(__file__).parent.parent / "audio" / "sections"
