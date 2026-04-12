@@ -673,6 +673,16 @@
       );
       if (isEditing) return;
 
+      var helpOpen = !!getKeyboardHelpModal();
+      if (helpOpen) {
+        if (e.key === 'Escape' || e.key === '?') {
+          e.preventDefault();
+          if (e.key === 'Escape') closeKeyboardHelp();
+          return;
+        }
+        return;
+      }
+
       var cur = tracker.getActive();
       var target = null;
 
