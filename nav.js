@@ -15,8 +15,8 @@
     '</linearGradient></defs>' +
     '<rect x="4" y="4" width="72" height="72" rx="14" ry="14" fill="none" stroke="url(#t5-gold)" stroke-width="3"/>' +
     '<rect x="16" y="4" width="48" height="3" rx="1.5" fill="#b91c1c"/>' +
-    '<text x="28" y="56" font-family="Playfair Display,Georgia,serif" font-size="38" font-weight="700" fill="url(#t5-gold)" letter-spacing="-1">T</text>' +
-    '<text x="54" y="38" font-family="JetBrains Mono,monospace" font-size="18" font-weight="700" fill="#b91c1c">5</text>' +
+    '<text x="28" y="56" font-family="Space Grotesk,Inter,system-ui,sans-serif" font-size="38" font-weight="700" fill="url(#t5-gold)" letter-spacing="-1">T</text>' +
+    '<text x="54" y="38" font-family="IBM Plex Mono,monospace" font-size="18" font-weight="700" fill="#b91c1c">5</text>' +
     '</svg>';
 
   var headerHTML =
