@@ -5520,6 +5520,132 @@ blockquote {
   position: relative;
   overflow: hidden;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT STYLESHEET — Court Filings & Press Packages
+   Preserves evidence chain formatting, removes interactive UI
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+  /* Reset dark theme to ink-friendly */
+  :root {
+    --bg-primary: #fff !important;
+    --bg-card: #fff !important;
+    --text-primary: #000 !important;
+    --text-secondary: #333 !important;
+    --border: #ccc !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  /* Hide interactive / non-printable elements */
+  #site-header-frame,
+  #site-footer-frame,
+  .pres-indicator,
+  .pres-progress,
+  .pres-keyhint,
+  .pres-page-indicator,
+  .pres-keyboard-help,
+  .pres-toc-overlay,
+  .pres-goto-overlay,
+  .pres-narration-badge,
+  .pres-subtitle,
+  .grain-overlay,
+  .nav-frame,
+  nav,
+  .search-overlay,
+  .back-to-top,
+  .audio-player,
+  audio,
+  video,
+  iframe,
+  .cookie-banner {
+    display: none !important;
+  }
+
+  /* De-snap slides for continuous flow */
+  .pres-slide {
+    scroll-snap-align: unset !important;
+    min-height: unset !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Cards and evidence blocks */
+  .card, .evidence-block, .charge-card, .timeline-entry {
+    background: #fff !important;
+    border: 1px solid #999;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Tables */
+  table { border-collapse: collapse; width: 100%; font-size: 9pt; }
+  th, td { border: 1px solid #666; padding: 4px 6px; text-align: left; }
+  th { background: #eee !important; font-weight: bold; }
+
+  /* Links: show URL */
+  a[href]:not([href^="#"])::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666;
+    word-break: break-all;
+  }
+
+  /* Headers */
+  h1, h2, h3, h4 {
+    color: #000 !important;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  h1 { font-size: 16pt; border-bottom: 2px solid #000; padding-bottom: 4px; }
+  h2 { font-size: 13pt; border-bottom: 1px solid #666; padding-bottom: 2px; }
+
+  /* Evidence source citations */
+  .source-list, .sources, .ref-list {
+    font-size: 8pt;
+    border-top: 1px solid #999;
+    padding-top: 4px;
+    margin-top: 8px;
+  }
+
+  /* Page margins for legal filings */
+  @page {
+    margin: 2cm 2.5cm;
+    size: letter;
+  }
+  @page :first { margin-top: 3cm; }
+
+  /* Ensure images don't break across pages */
+  img, svg, figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    max-width: 100%;
+  }
+
+  /* Timestamp / provenance footer */
+  body::after {
+    content: "Printed from TENET-5.github.io — " attr(data-page-url) " — Evidence preserved for legal proceedings";
+    display: block;
+    font-size: 7pt;
+    color: #999;
+    text-align: center;
+    border-top: 1px solid #ccc;
+    padding-top: 8px;
+    margin-top: 2rem;
+  }
+}
 .hero::before, .page-hero::before {
   content: '';
   position: absolute;

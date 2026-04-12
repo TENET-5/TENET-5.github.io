@@ -487,6 +487,8 @@
       if (compact) el.classList.add('pres-slide--compact');
       el.setAttribute('data-slide-num', 'SLIDE ' + (idx + 1) + ' / ' + elements.length);
       el.setAttribute('data-slide-idx', idx);
+      el.setAttribute('role', 'region');
+      el.setAttribute('aria-label', getSlideLabel(el) || ('Slide ' + (idx + 1)));
       slides.push(el);
     });
 
@@ -542,15 +544,24 @@
   function buildIndicator(slides) {
     var rail = document.createElement('div');
     rail.className = 'pres-indicator';
+    rail.setAttribute('role', 'tablist');
+    rail.setAttribute('aria-label', 'Slide navigation');
 
     slides.forEach(function (sl, i) {
       if (sl.classList.contains('pres-slide--compact')) return;
+      var label = getSlideLabel(sl);
       var dot = document.createElement('div');
       dot.className = 'pres-dot';
-      dot.setAttribute('data-label', getSlideLabel(sl));
+      dot.setAttribute('data-label', label);
       dot.setAttribute('data-idx', i);
+      dot.setAttribute('role', 'tab');
+      dot.setAttribute('tabindex', '0');
+      dot.setAttribute('aria-label', label || ('Slide ' + (i + 1)));
       dot.addEventListener('click', function () {
         sl.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+      });
+      dot.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
       });
       rail.appendChild(dot);
     });
@@ -693,6 +704,9 @@
     var activeIdx = tracker.getActive();
     var overlay = document.createElement('div');
     overlay.className = 'pres-toc-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Slide overview');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);' +
       'display:flex;align-items:center;justify-content:center;z-index:9998;';
 
@@ -752,6 +766,9 @@
     var currentPage = getCurrentPage();
     var overlay = document.createElement('div');
     overlay.className = 'pres-goto-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Go to page');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);' +
       'display:flex;align-items:flex-start;justify-content:center;padding-top:12vh;z-index:9998;';
 
@@ -871,22 +888,25 @@
 
       var modal = document.createElement('div');
       modal.className = 'pres-keyboard-help';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-label', 'Keyboard shortcuts');
       modal.innerHTML = '<div class="pres-keyboard-help-inner">' +
         '<h3>Navigation Shortcuts</h3>' +
         '<div class="pres-keyboard-shortcuts">' +
-        '<p><kbd>↑</kbd> <kbd>↓</kbd> — Step through slides</p>' +
-        '<p><kbd>Space</kbd> — Next slide</p>' +
-        '<p><kbd>←</kbd> <kbd>→</kbd> — Previous/Next page</p>' +
-        '<p><kbd>Home</kbd> / <kbd>End</kbd> — First/Last slide</p>' +
-        '<p><kbd>N</kbd> — Narrate current slide (LIRIL)</p>' +
-        '<p><kbd>Shift+N</kbd> — Narrate all slides (hands-free)</p>' +
-        '<p><kbd>A</kbd> — Toggle auto-narrate on slide change</p>' +
-        '<p><kbd>S</kbd> — Cycle speech rate (slow/normal/fast)</p>' +
-        '<p><kbd>T</kbd> — Slide table of contents</p>' +
-        '<p><kbd>Esc</kbd> — Stop narration / close panels</p>' +
-        '<p><kbd>?</kbd> — Show this help</p>' +
+        '<p><kbd>\u2191</kbd> <kbd>\u2193</kbd> \u2014 Step through slides</p>' +
+        '<p><kbd>Space</kbd> \u2014 Next slide</p>' +
+        '<p><kbd>\u2190</kbd> <kbd>\u2192</kbd> \u2014 Previous/Next page</p>' +
+        '<p><kbd>Home</kbd> / <kbd>End</kbd> \u2014 First/Last slide</p>' +
+        '<p><kbd>N</kbd> \u2014 Narrate current slide (LIRIL)</p>' +
+        '<p><kbd>Shift+N</kbd> \u2014 Narrate all slides (hands-free)</p>' +
+        '<p><kbd>A</kbd> \u2014 Toggle auto-narrate on slide change</p>' +
+        '<p><kbd>S</kbd> \u2014 Cycle speech rate (slow/normal/fast)</p>' +
+        '<p><kbd>T</kbd> \u2014 Slide table of contents</p>' +
+        '<p><kbd>Esc</kbd> \u2014 Stop narration / close panels</p>' +
+        '<p><kbd>?</kbd> \u2014 Show this help</p>' +
         '</div>' +
-        '<button onclick="this.closest(\'.pres-keyboard-help\').remove()">Close</button>' +
+        '<button aria-label="Close keyboard shortcuts" onclick="this.closest(\'.pres-keyboard-help\').remove()">Close</button>' +
         '</div>';
       modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
       modal.querySelector('.pres-keyboard-help-inner').style.cssText = 'background:#0a0e1a;color:#e8e4dc;padding:2rem;border-radius:8px;border:1px solid #333;max-width:400px;';
@@ -1348,15 +1368,17 @@
 
     var indicator = document.createElement('div');
     indicator.className = 'pres-page-indicator';
+    indicator.setAttribute('role', 'navigation');
+    indicator.setAttribute('aria-label', 'Page navigation');
     indicator.innerHTML =
-      '<button class="pres-page-nav pres-page-prev" title="Previous page">\u2190</button>' +
+      '<button class="pres-page-nav pres-page-prev" title="Previous page" aria-label="Previous page">\u2190</button>' +
       '<button class="pres-page-nav pres-page-narrate" title="Narrate current slide">N</button>' +
       '<span class="pres-page-info">' +
         '<strong>' + (idx + 1) + '/' + PAGE_SEQUENCE.length + '</strong>' +
         ' \u00b7 ' + escHTML(group) +
       '</span>' +
       '<span class="pres-narration-badge" aria-live="polite"></span>' +
-      '<button class="pres-page-nav pres-page-next" title="Next page">\u2192</button>';
+      '<button class="pres-page-nav pres-page-next" title="Next page" aria-label="Next page">\u2192</button>';
 
     document.body.appendChild(indicator);
 
@@ -1758,7 +1780,7 @@
     updateNarrationButton();
   }
 
-  function speakNarrationChunks(chunks, voice, token, chunkIdx, totalChunks) {
+  function speakNarrationChunks(chunks, voice, token, chunkIdx, totalChunks, retries) {
     if (!chunks.length || token !== lirilNarration.token) {
       lirilNarration.speaking = false;
       stopNarrationKeepalive();
@@ -1770,8 +1792,9 @@
     var chunk = chunks.shift();
     var idx = chunkIdx || 0;
     var total = totalChunks || (idx + 1 + chunks.length);
+    var retryCount = retries || 0;
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = 'en-GB';
+    u.lang = getPageLang();
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
     u.pitch = 1.0;
     if (voice) u.voice = voice;
@@ -1788,11 +1811,20 @@
         speakNarrationChunks(chunks, voice, token, idx + 1, total);
       }, 120);
     };
-    u.onerror = function () {
+    u.onerror = function (ev) {
       if (token !== lirilNarration.token) return;
+      // Retry once on transient errors (network TTS, interrupted)
+      if (retryCount < 1) {
+        chunks.unshift(chunk);
+        setTimeout(function () {
+          speakNarrationChunks(chunks, voice, token, idx, total, retryCount + 1);
+        }, 300);
+        return;
+      }
       lirilNarration.speaking = false;
       stopNarrationKeepalive();
-      hideSubtitle();
+      showSubtitle('Narration error — speech unavailable');
+      setTimeout(hideSubtitle, 3000);
       updateNarrationButton();
     };
 
@@ -1932,7 +1964,7 @@
     var idx = chunkIdx || 0;
     var total = totalChunks || (idx + 1 + chunks.length);
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = 'en-GB';
+    u.lang = getPageLang();
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
     u.pitch = 1.0;
     if (voice) u.voice = voice;
@@ -1953,7 +1985,8 @@
       if (token !== lirilNarration.token) return;
       lirilNarration.speaking = false;
       stopNarrationKeepalive();
-      hideSubtitle();
+      showSubtitle('Narration error \u2014 speech unavailable');
+      setTimeout(hideSubtitle, 3000);
       updateNarrationButton();
       if (typeof onAllDone === 'function') onAllDone();
     };
