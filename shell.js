@@ -86,7 +86,7 @@
       ]).then(function() {
         return loadScript(BASE + 'js/presentation.js?v=2');
       }).then(function() {
-        return loadScript(BASE + 'js/auto-presenter.js?v=1');
+        return loadScript(BASE + 'js/liril-walkthrough.js?v=1');
       }).then(function() { return loadScript(BASE + 'readnext.js?v=3'); });
 
     } else {
@@ -100,7 +100,7 @@
         .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/presentation.js?v=2'); })
-        .then(function() { return loadScript(BASE + 'js/auto-presenter.js?v=1'); })
+        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=1'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
         .then(function() { return loadScript(BASE + 'footer.js?v=3'); });
