@@ -1090,7 +1090,8 @@
     speaking: false,
     activeSlide: null,
     keepaliveTimer: null,
-    token: 0
+    token: 0,
+    subtitle: null
   };
   var narrationIndexByPage = null;
   var narrationIndexPromise = null;
@@ -1290,6 +1291,34 @@
     lirilNarration.button.title = text ? 'Narrate current slide' : 'No narration available for this slide';
   }
 
+  function getSubtitleEl() {
+    if (lirilNarration.subtitle) return lirilNarration.subtitle;
+    var el = document.createElement('div');
+    el.className = 'pres-narration-subtitle';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);' +
+      'max-width:80vw;padding:0.6rem 1.2rem;background:rgba(10,14,26,0.88);' +
+      'color:#e8e4dc;font-size:0.95rem;line-height:1.4;border-radius:6px;' +
+      'border:1px solid rgba(201,168,76,0.3);z-index:9990;' +
+      'pointer-events:none;opacity:0;transition:opacity 0.25s ease;' +
+      'text-align:center;';
+    document.body.appendChild(el);
+    lirilNarration.subtitle = el;
+    return el;
+  }
+
+  function showSubtitle(text) {
+    var el = getSubtitleEl();
+    el.textContent = text;
+    el.style.opacity = '1';
+  }
+
+  function hideSubtitle() {
+    if (!lirilNarration.subtitle) return;
+    lirilNarration.subtitle.style.opacity = '0';
+  }
+
   function startNarrationKeepalive() {
     stopNarrationKeepalive();
     lirilNarration.keepaliveTimer = setInterval(function () {
@@ -1310,6 +1339,7 @@
   function stopNarration() {
     lirilNarration.token++;
     stopNarrationKeepalive();
+    hideSubtitle();
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     lirilNarration.speaking = false;
@@ -1320,6 +1350,7 @@
     if (!chunks.length || token !== lirilNarration.token) {
       lirilNarration.speaking = false;
       stopNarrationKeepalive();
+      hideSubtitle();
       updateNarrationButton();
       return;
     }
@@ -1333,6 +1364,7 @@
 
     u.onstart = function () {
       lirilNarration.speaking = true;
+      showSubtitle(chunk);
       updateNarrationButton();
     };
     u.onend = function () {
@@ -1345,6 +1377,7 @@
       if (token !== lirilNarration.token) return;
       lirilNarration.speaking = false;
       stopNarrationKeepalive();
+      hideSubtitle();
       updateNarrationButton();
     };
 
