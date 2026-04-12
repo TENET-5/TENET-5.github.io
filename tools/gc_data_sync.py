@@ -11,7 +11,7 @@ Pulls live data from Government of Canada open data portals:
   - Fiscal Data: Federal budget & debt
 
 All outputs are signed via Empirical Magic Handoff (BLAKE2b)
-and registered in the abcxyz N-vs-NP discovery matrix.
+and registered in the ABCXYZ N-vs-NP discovery matrix.
 
 Sources:
   - open.canada.ca CKAN API
@@ -265,7 +265,7 @@ def save_sync_report(pd_results, fiscal, lobbying, elections):
     report = {
         "sync_timestamp": timestamp.isoformat(),
         "scanner": "TENET5-GCDataSync",
-        "abcxyz_system": "N vs NP Millennial Falcon — ACTIVE",
+        "ABCXYZ_system": "N vs NP Millennial Falcon — ACTIVE",
         "memory_handoff": "Empirical Magic Handoff — SECURED",
         "proactive_disclosure": pd_results,
         "fiscal_data": fiscal,
@@ -291,7 +291,7 @@ def save_sync_report(pd_results, fiscal, lobbying, elections):
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(f"# TENET5 Government of Canada Data Sync — {timestamp.strftime('%Y-%m-%d %H:%M:%S')} UTC\n\n")
         f.write(f"**Scanner:** TENET5-GCDataSync  \n")
-        f.write(f"**abcxyz System:** N vs NP Millennial Falcon — ACTIVE  \n")
+        f.write(f"**ABCXYZ System:** N vs NP Millennial Falcon — ACTIVE  \n")
         f.write(f"**Memory Handoff:** Empirical Magic Handoff — SECURED  \n\n")
 
         # Proactive Disclosure
@@ -449,7 +449,7 @@ def main():
     print("╔══════════════════════════════════════════════════════════╗")
     print("║  TENET5 — Government of Canada Data Synchronizer        ║")
     print("║  LIRIL Ethics Gate: FIRED                                ║")
-    print("║  abcxyz N-vs-NP Millennial Falcon: ACTIVE                ║")
+    print("║  ABCXYZ N-vs-NP Millennial Falcon: ACTIVE                ║")
     print("║  Empirical Magic Handoff: ARMED                          ║")
     print("╚══════════════════════════════════════════════════════════╝")
 

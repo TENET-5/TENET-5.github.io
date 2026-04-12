@@ -304,7 +304,7 @@ def save_results(anomalies, contracts_count):
     output = {
         "scan_timestamp": datetime.utcnow().isoformat() + "Z",
         "scanner": "TENET5-ProactiveDisclosureScanner",
-        "abcxyz_system": "N vs NP Millennial Falcon — ACTIVE",
+        "ABCXYZ_system": "N vs NP Millennial Falcon — ACTIVE",
         "memory_handoff": "Empirical Magic Handoff — SECURED",
         "total_contracts_scanned": contracts_count,
         "total_anomalies": len(anomalies),
