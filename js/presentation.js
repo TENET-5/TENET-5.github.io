@@ -173,6 +173,8 @@
     'take-action.html',
     'open-letter.html',
     'email-campaign.html',
+    'email-dispatch.html',
+    's504-court-filing.html',
     'campaign-generator.html',
     'campaign-tracker.html',
     'report-generator.html',
@@ -305,6 +307,8 @@
     'take-action.html': 'What You Can Do Right Now',
     'open-letter.html': 'Open Letter to Parliament',
     'email-campaign.html': 'MP Email Campaign',
+    'email-dispatch.html': 'Daily Evidence Dispatch',
+    's504-court-filing.html': 's.504 Court Filing Dispatch',
     'campaign-generator.html': 'Campaign Launch Dashboard',
     'campaign-tracker.html': 'Campaign Tracker',
     'report-generator.html': 'MP Report Generator',
@@ -339,7 +343,7 @@
       'Provincial & Municipal': ['provincial-analysis.html', 'municipal-accountability.html', 'municipal-intelligence.html', 'indigenous-accountability.html', 'belleville.html', 'quinte-west.html', 'ottawa.html', 'toronto.html', 'calgary.html', 'vancouver.html'],
       'AI & Research': ['ai-research.html', 'liril-analysis.html', 'acelephius-report.html', 'acelephius-wardoll.html'],
       'Tools & Reference': ['hansard-dashboard.html', 'hansard-evidence.html', 'network-analysis.html', 'osint-dashboard.html', 'entity-viewer.html', 'dossier-viewer.html', 'harm-index.html', 'cross-reference.html', 'ledger-book.html', 'infographics.html', 'canada-map.html', 'records.html', 'search.html'],
-      'Take Action': ['take-action.html', 'open-letter.html', 'email-campaign.html', 'campaign-generator.html', 'campaign-tracker.html', 'report-generator.html', 'kids-guide.html'],
+      'Take Action': ['take-action.html', 'open-letter.html', 'email-campaign.html', 'email-dispatch.html', 's504-court-filing.html', 'campaign-generator.html', 'campaign-tracker.html', 'report-generator.html', 'kids-guide.html'],
       'About & Context': ['my-story.html', 'history.html', 'about.html', 'faq.html', 'news.html', 'publications.html', 'resources.html', 'legal.html']
     };
     Object.keys(groups).forEach(function (g) {

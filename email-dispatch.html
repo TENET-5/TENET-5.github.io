@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + encodeURIComponent(window.location.pathname.split('/').pop()));
+      }
+    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Evidence Dispatch — All Canadian Officials | TENET5</title>
+  <meta name="description" content="Daily automated email dispatch to every elected official, police service, think tank, government agency, and court registry across Canada.">
+  <link rel="stylesheet" href="style.css?v=20">
+  <meta name="theme-color" content="#2E3440">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <style>
+    .dispatch-wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    .dispatch-header { text-align:center; padding:40px 0 20px; border-bottom:2px solid var(--border); margin-bottom:24px; }
+    .dispatch-header h1 { font-family:var(--font-headline); font-size:var(--text-4xl); color:var(--text-primary); margin-bottom:8px; }
+    .dispatch-header p { color:var(--text-secondary); font-size:var(--text-base); line-height:1.7; max-width:700px; margin:0 auto; }
+    .dispatch-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:24px; }
+    .ds-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; text-align:center; }
+    .ds-card .ds-num { font-size:var(--text-3xl); font-weight:800; color:var(--accent); font-family:var(--font-mono); }
+    .ds-card .ds-label { font-size:var(--text-xs); color:var(--text-tertiary); margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+    .tab-bar { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:20px; border-bottom:2px solid var(--border); padding-bottom:8px; }
+    .tab-btn { padding:8px 14px; border-radius:var(--r-md) var(--r-md) 0 0; font-size:var(--text-xs); font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg-card); color:var(--text-secondary); transition:all 0.2s; border-bottom:none; white-space:nowrap; }
+    .tab-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .tab-btn:hover:not(.active) { border-color:var(--accent); color:var(--accent); }
+    .tab-btn .badge { background:rgba(255,255,255,0.2); padding:1px 6px; border-radius:100px; font-size:0.7rem; margin-left:4px; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+    .recipient-list { display:grid; gap:8px; margin-bottom:16px; max-height:400px; overflow-y:auto; }
+    .r-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:10px 14px; display:flex; align-items:center; gap:10px; transition:border-color 0.2s; }
+    .r-card:hover { border-color:var(--accent); }
+    .r-card .r-name { font-weight:600; color:var(--text-primary); font-size:var(--text-sm); flex:1; }
+    .r-card .r-meta { font-size:var(--text-xs); color:var(--text-tertiary); }
+    .r-card .r-email { font-size:var(--text-xs); color:var(--accent); font-family:var(--font-mono); }
+    .r-card input[type="checkbox"] { flex-shrink:0; }
+    .action-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+    .btn { padding:8px 16px; border-radius:var(--r-md); font-size:var(--text-sm); font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg-card); color:var(--text-secondary); transition:all 0.2s; }
+    .btn:hover { border-color:var(--accent); color:var(--accent); }
+    .btn-accent { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .btn-accent:hover { opacity:0.85; }
+    .btn-red { background:rgba(185,28,28,0.9); color:#fff; border-color:rgba(185,28,28,0.9); }
+    .btn-red:hover { opacity:0.85; }
+    .email-preview { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-bottom:16px; font-size:var(--text-sm); line-height:1.8; color:var(--text-secondary); white-space:pre-wrap; max-height:500px; overflow-y:auto; }
+    .email-preview .ep-subject { font-weight:700; color:var(--text-primary); font-size:var(--text-base); margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+    .dispatch-log { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-top:20px; }
+    .dispatch-log h3 { color:var(--text-primary); font-size:var(--text-base); margin-bottom:12px; }
+    .log-entry { font-size:var(--text-xs); color:var(--text-tertiary); font-family:var(--font-mono); padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.03); }
+    .log-entry .log-ok { color:var(--color-green); }
+    .log-entry .log-fail { color:var(--color-critical); }
+    .select-all-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; padding:8px 0; }
+    .select-all-row label { font-size:var(--text-sm); color:var(--text-secondary); cursor:pointer; }
+    .filter-input { background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:8px 12px; border-radius:var(--r-md); font-size:var(--text-sm); width:100%; margin-bottom:8px; }
+    .filter-input:focus { outline:none; border-color:var(--accent); }
+  </style>
+  <link rel="stylesheet" href="css/inline_generated.css">
+</head>
+<body>
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+<nav id="site-nav"></nav>
+
+<div class="dispatch-wrap">
+  <div class="dispatch-header">
+    <h1 data-narrate="Daily Evidence Dispatch. Automated daily email to every elected official, police service, think tank, government agency, and court registry across Canada. 500 plus recipients across 9 categories.">&#x1F4E8; Daily Evidence Dispatch</h1>
+    <p>Automated daily email to every elected official, police service, think tank, government agency, and court registry across Canada.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="dispatch-stats" id="stats-bar"></div>
+
+  <!-- Category tabs -->
+  <div class="tab-bar" id="tab-bar"></div>
+
+  <!-- Tab panels rendered by JS -->
+  <div id="panels-container"></div>
+
+  <!-- Email preview -->
+  <h3 style="color:var(--text-primary); margin-bottom:8px;">&#x1F4E7; Email Preview</h3>
+  <div class="email-preview" id="email-preview">
+    <div class="ep-subject" id="ep-subject"></div>
+    <div id="ep-body"></div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-accent" onclick="copyEmail()">&#128203; Copy Email Body</button>
+    <button class="btn btn-accent" onclick="copyAllEmails()">&#128203; Copy All Selected Emails</button>
+    <button class="btn btn-red" onclick="openMailto()">&#x2709; Open Mailto (Selected)</button>
+    <button class="btn" onclick="downloadCSV()">&#x1F4BE; Download CSV</button>
+    <button class="btn" onclick="downloadEmailFile()">&#x1F4BE; Download .eml</button>
+  </div>
+
+  <!-- Dispatch log -->
+  <div class="dispatch-log" id="dispatch-log">
+    <h3>&#x1F4CB; Dispatch Log</h3>
+    <div id="log-entries">
+      <div class="log-entry" style="color:var(--text-tertiary);">No dispatches yet. Select recipients and click Copy or Mailto.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ── Category definitions ────────────────────── */
+  var CATEGORIES = [
+    { key:'mp',       label:'MPs',           icon:'🏛️', dataFile:'mp_email_directory.json', dataKey:null },
+    { key:'senator',  label:'Senators',      icon:'🏛️', registry:'senators' },
+    { key:'premier',  label:'Premiers',      icon:'👔', registry:'premiers' },
+    { key:'police',   label:'Police',        icon:'🚔', registry:['police_rcmp_divisions','police_provincial','police_municipal'] },
+    { key:'court',    label:'Courts (s.504)',  icon:'⚖️', registry:'courts_s504' },
+    { key:'agency',   label:'Federal Agencies', icon:'🏢', registry:'federal_agencies_expanded' },
+    { key:'think',    label:'Think Tanks',   icon:'🧠', registry:'think_tanks_expanded' },
+    { key:'media',    label:'Media',         icon:'📰', dataFile:'media_contacts.json', dataKey:null },
+    { key:'institution', label:'Institutions', icon:'🏫', dataFile:'institution_contacts.json', dataKey:'contacts' }
+  ];
+
+  var registryData = null;
+  var mpData = null;
+  var mediaData = null;
+  var institutionData = null;
+  var allRecipients = {};  // key -> [{name,email,meta,checked}]
+  var activeTab = 'mp';
+
+  /* ── Load data ───────────────────────────────── */
+  function loadJSON(url) {
+    return fetch('data/' + url).then(function(r) { return r.json(); });
+  }
+
+  Promise.all([
+    loadJSON('canada_dispatch_registry.json'),
+    loadJSON('mp_email_directory.json'),
+    loadJSON('media_contacts.json'),
+    loadJSON('institution_contacts.json')
+  ]).then(function(results) {
+    registryData = results[0];
+    mpData = results[1];
+    mediaData = results[2];
+    institutionData = results[3];
+    buildRecipients();
+    renderStats();
+    renderTabs();
+    renderPanel(activeTab);
+    generateEmail();
+  }).catch(function(err) {
+    document.getElementById('panels-container').innerHTML =
+      '<p style="color:var(--color-critical)">Failed to load data: ' + err.message + '</p>';
+  });
+
+  /* ── Build recipients map ────────────────────── */
+  function buildRecipients() {
+    // MPs
+    var mpList = Array.isArray(mpData) ? mpData : (mpData && mpData.directory ? mpData.directory : []);
+    allRecipients.mp = mpList.map(function(m) {
+      return { name:m.name, email:m.email, meta:m.party + ' — ' + m.riding + ', ' + m.province, checked:true, score:m.score };
+    });
+
+    // Senators
+    allRecipients.senator = (registryData.senators || []).map(function(s) {
+      return { name:s.name, email:s.email, meta:s.group + ' — ' + s.province + ' — ' + s.committee, checked:true };
+    });
+
+    // Premiers
+    allRecipients.premier = (registryData.premiers || []).map(function(p) {
+      return { name:p.name, email:p.email, meta:p.title + (p.province ? ' (' + p.province + ')' : ''), checked:true };
+    });
+
+    // Police (merge 3 arrays)
+    allRecipients.police = [];
+    ['police_rcmp_divisions','police_provincial','police_municipal'].forEach(function(k) {
+      (registryData[k] || []).forEach(function(p) {
+        allRecipients.police.push({ name:p.name, email:p.email, meta:p.purpose || p.province || '', checked:true });
+      });
+    });
+
+    // Courts
+    allRecipients.court = [];
+    if (registryData.courts_s504) {
+      (registryData.courts_s504.federal || []).forEach(function(c) {
+        allRecipients.court.push({ name:c.name, email:c.email, meta:c.purpose || '', checked:true });
+      });
+      (registryData.courts_s504.provincial_superior || []).forEach(function(c) {
+        allRecipients.court.push({ name:c.name, email:c.email, meta:c.province + ' — ' + c.purpose, checked:true });
+      });
+    }
+
+    // Federal agencies
+    allRecipients.agency = (registryData.federal_agencies_expanded || []).map(function(a) {
+      return { name:a.name, email:a.email, meta:a.purpose || a.type || '', checked:true };
+    });
+
+    // Think tanks
+    allRecipients.think = (registryData.think_tanks_expanded || []).map(function(t) {
+      return { name:t.name, email:t.email, meta:t.focus || '', checked:true };
+    });
+
+    // Media
+    var mediaList = Array.isArray(mediaData) ? mediaData : (mediaData && mediaData.contacts ? mediaData.contacts : []);
+    allRecipients.media = mediaList.map(function(m) {
+      return { name:m.name || m.outlet, email:m.email, meta:(m.outlet || '') + ' — ' + (m.beat || m.type || ''), checked:true };
+    });
+
+    // Institutions
+    var instContacts = institutionData && institutionData.contacts ? institutionData.contacts : (Array.isArray(institutionData) ? institutionData : []);
+    allRecipients.institution = instContacts.map(function(i) {
+      return { name:i.name, email:i.email, meta:i.type + ' — ' + (i.jurisdiction || ''), checked:true };
+    });
+  }
+
+  /* ── Render stats cards ──────────────────────── */
+  function renderStats() {
+    var total = 0;
+    var statsHTML = '';
+    CATEGORIES.forEach(function(cat) {
+      var count = (allRecipients[cat.key] || []).length;
+      total += count;
+      statsHTML += '<div class="ds-card"><div class="ds-num">' + count + '</div><div class="ds-label">' + cat.icon + ' ' + cat.label + '</div></div>';
+    });
+    statsHTML = '<div class="ds-card"><div class="ds-num">' + total + '</div><div class="ds-label">&#x1F4E8; TOTAL</div></div>' + statsHTML;
+    document.getElementById('stats-bar').innerHTML = statsHTML;
+  }
+
+  /* ── Render tabs ─────────────────────────────── */
+  function renderTabs() {
+    var bar = document.getElementById('tab-bar');
+    bar.innerHTML = '';
+    CATEGORIES.forEach(function(cat) {
+      var btn = document.createElement('button');
+      btn.className = 'tab-btn' + (cat.key === activeTab ? ' active' : '');
+      btn.innerHTML = cat.icon + ' ' + cat.label + ' <span class="badge">' + (allRecipients[cat.key] || []).length + '</span>';
+      btn.onclick = function() {
+        activeTab = cat.key;
+        bar.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        var panel = document.getElementById('panel-' + cat.key);
+        if (!panel) renderPanel(cat.key);
+        else panel.classList.add('active');
+      };
+      bar.appendChild(btn);
+    });
+  }
+
+  /* ── Render a panel ──────────────────────────── */
+  function renderPanel(key) {
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    var existing = document.getElementById('panel-' + key);
+    if (existing) { existing.classList.add('active'); return; }
+
+    var panel = document.createElement('div');
+    panel.className = 'tab-panel active';
+    panel.id = 'panel-' + key;
+
+    var recipients = allRecipients[key] || [];
+
+    // Select all + filter
+    var html = '<div class="select-all-row">' +
+      '<input type="checkbox" id="sel-all-' + key + '" checked onchange="window._toggleAll(\'' + key + '\', this.checked)">' +
+      '<label for="sel-all-' + key + '">Select all ' + recipients.length + '</label></div>' +
+      '<input type="text" class="filter-input" placeholder="Filter by name, email, or region…" oninput="window._filterPanel(\'' + key + '\', this.value)">' +
+      '<div class="recipient-list" id="list-' + key + '">';
+
+    recipients.forEach(function(r, i) {
+      html += '<div class="r-card" data-idx="' + i + '" data-search="' + (r.name + ' ' + r.email + ' ' + r.meta).toLowerCase() + '">' +
+        '<input type="checkbox" ' + (r.checked ? 'checked' : '') + ' onchange="window._toggleOne(\'' + key + '\',' + i + ',this.checked)">' +
+        '<div style="flex:1"><div class="r-name">' + escapeHTML(r.name) + '</div>' +
+        '<div class="r-meta">' + escapeHTML(r.meta) + '</div></div>' +
+        '<div class="r-email">' + escapeHTML(r.email) + '</div></div>';
+    });
+
+    html += '</div>';
+    panel.innerHTML = html;
+    document.getElementById('panels-container').appendChild(panel);
+  }
+
+  /* ── Toggle helpers ──────────────────────────── */
+  window._toggleAll = function(key, checked) {
+    (allRecipients[key] || []).forEach(function(r) { r.checked = checked; });
+    var list = document.getElementById('list-' + key);
+    if (list) list.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = checked; });
+    generateEmail();
+  };
+
+  window._toggleOne = function(key, idx, checked) {
+    if (allRecipients[key] && allRecipients[key][idx]) {
+      allRecipients[key][idx].checked = checked;
+    }
+    generateEmail();
+  };
+
+  window._filterPanel = function(key, query) {
+    var q = query.toLowerCase();
+    var list = document.getElementById('list-' + key);
+    if (!list) return;
+    list.querySelectorAll('.r-card').forEach(function(card) {
+      card.style.display = card.getAttribute('data-search').indexOf(q) !== -1 ? '' : 'none';
+    });
+  };
+
+  /* ── Escape HTML ─────────────────────────────── */
+  function escapeHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Get all selected emails ─────────────────── */
+  function getSelectedEmails() {
+    var emails = [];
+    Object.keys(allRecipients).forEach(function(key) {
+      allRecipients[key].forEach(function(r) {
+        if (r.checked && r.email) emails.push(r.email);
+      });
+    });
+    return emails;
+  }
+
+  function getSelectedCount() { return getSelectedEmails().length; }
+
+  /* ── Generate email content ──────────────────── */
+  function generateEmail() {
+    var today = new Date().toISOString().split('T')[0];
+    var count = getSelectedCount();
+
+    var subject = 'TENET5 Daily Evidence Update — ' + today + ' — 314 Criminal Code Charges Documented Against 271 Officials';
+    var body =
+      'To Whom It May Concern,\n\n' +
+      'This is an automated daily briefing from the TENET5 State Accountability Project.\n\n' +
+      'TENET5 is a public-interest investigation documenting government misconduct using exclusively\n' +
+      'official sources: Hansard transcripts, Auditor General reports, Elections Canada filings,\n' +
+      'the Commissioner of Lobbying registry, and court records.\n\n' +
+      '━━━ KEY FINDINGS ━━━\n\n' +
+      '■ 271 officials face 314 Criminal Code charges (documented from public records)\n' +
+      '■ 2,138 registered CIJA lobbying contacts across 56% of all MPs\n' +
+      '■ $59.5M ArriveCAN cost overrun (AG-confirmed, from $80K estimate)\n' +
+      '■ 60,167+ MAID deaths — UN has flagged Canada\'s program as discriminatory\n' +
+      '■ $1.2 trillion national debt — the highest in Canadian history\n' +
+      '■ s.504 Criminal Code private prosecutions filed against named officials\n\n' +
+      '━━━ EVIDENCE PORTAL ━━━\n\n' +
+      'Full investigation: https://tenet-5.github.io\n' +
+      'Charges sheet: https://tenet-5.github.io/charges-sheet.html\n' +
+      'MP Scorecard (340 MPs graded): https://tenet-5.github.io/mp-scorecard.html\n' +
+      'Email campaign tool: https://tenet-5.github.io/email-campaign.html\n' +
+      's.504 Private Prosecution: https://tenet-5.github.io/s504-covey-bae.html\n' +
+      'Criminal Code Analysis: https://tenet-5.github.io/criminal-code-analysis.html\n\n' +
+      '━━━ LEGAL BASIS ━━━\n\n' +
+      'Criminal Code of Canada, s.504: Any person who, on reasonable grounds,\n' +
+      'believes that a person has committed an indictable offence may lay an\n' +
+      'information in writing and under oath before a justice.\n\n' +
+      'Applicable sections: s.122 (Breach of Trust), s.139(2) (Obstructing Justice),\n' +
+      's.341 (Fraudulent Concealment), s.380 (Fraud over $5,000), s.423.1 (Intimidation\n' +
+      'of Justice System Participant).\n\n' +
+      '━━━ CALL TO ACTION ━━━\n\n' +
+      'Review the evidence. Use the tools provided to verify every claim.\n' +
+      'Every source is linked. Every finding is documented.\n\n' +
+      '━━━\n' +
+      'TENET5 State Accountability Project\n' +
+      'https://tenet-5.github.io\n' +
+      'This email was sent to ' + count + ' recipients across Canada.\n' +
+      'To stop receiving updates, reply UNSUBSCRIBE.\n';
+
+    document.getElementById('ep-subject').textContent = subject;
+    document.getElementById('ep-body').textContent = body;
+
+    window._currentSubject = subject;
+    window._currentBody = body;
+  }
+
+  /* ── Action buttons ──────────────────────────── */
+  window.copyEmail = function() {
+    var text = 'Subject: ' + window._currentSubject + '\n\n' + window._currentBody;
+    navigator.clipboard.writeText(text).then(function() {
+      logEntry('Copied email body to clipboard', 'ok');
+    });
+  };
+
+  window.copyAllEmails = function() {
+    var emails = getSelectedEmails();
+    navigator.clipboard.writeText(emails.join('; ')).then(function() {
+      logEntry('Copied ' + emails.length + ' email addresses to clipboard', 'ok');
+    });
+  };
+
+  window.openMailto = function() {
+    var emails = getSelectedEmails();
+    if (emails.length === 0) { logEntry('No recipients selected', 'fail'); return; }
+    // Mailto limit: use BCC for bulk, cap at 50 to avoid URL length issues
+    var batch = emails.slice(0, 50);
+    var mailto = 'mailto:?bcc=' + encodeURIComponent(batch.join(',')) +
+      '&subject=' + encodeURIComponent(window._currentSubject) +
+      '&body=' + encodeURIComponent(window._currentBody);
+    window.open(mailto, '_blank');
+    logEntry('Opened mailto for ' + batch.length + ' of ' + emails.length + ' recipients (BCC)', 'ok');
+    if (emails.length > 50) {
+      logEntry('Note: ' + (emails.length - 50) + ' remaining recipients — use CSV export for full list', 'fail');
+    }
+  };
+
+  window.downloadCSV = function() {
+    var rows = ['Name,Email,Category,Meta'];
+    Object.keys(allRecipients).forEach(function(key) {
+      allRecipients[key].forEach(function(r) {
+        if (r.checked) {
+          rows.push('"' + (r.name||'').replace(/"/g,'""') + '","' + r.email + '","' + key + '","' + (r.meta||'').replace(/"/g,'""') + '"');
+        }
+      });
+    });
+    var blob = new Blob([rows.join('\n')], { type:'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'tenet5_dispatch_recipients_' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+    logEntry('Downloaded CSV with ' + (rows.length - 1) + ' recipients', 'ok');
+  };
+
+  window.downloadEmailFile = function() {
+    var emails = getSelectedEmails();
+    var eml = 'From: TENET5 <noreply@tenet-5.github.io>\r\n' +
+      'To: undisclosed-recipients:;\r\n' +
+      'BCC: ' + emails.join(', ') + '\r\n' +
+      'Subject: ' + window._currentSubject + '\r\n' +
+      'MIME-Version: 1.0\r\n' +
+      'Content-Type: text/plain; charset=UTF-8\r\n' +
+      '\r\n' +
+      window._currentBody;
+    var blob = new Blob([eml], { type:'message/rfc822' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'tenet5_dispatch_' + new Date().toISOString().split('T')[0] + '.eml';
+    a.click();
+    logEntry('Downloaded .eml file with ' + emails.length + ' BCC recipients', 'ok');
+  };
+
+  /* ── Dispatch log ────────────────────────────── */
+  function logEntry(msg, status) {
+    var log = document.getElementById('log-entries');
+    var ts = new Date().toLocaleTimeString();
+    var entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = '<span class="log-' + (status || 'ok') + '">[' + ts + ']</span> ' + escapeHTML(msg);
+    log.insertBefore(entry, log.firstChild);
+
+    // Save to localStorage
+    var history = JSON.parse(localStorage.getItem('tenet5_dispatch_log') || '[]');
+    history.unshift({ time: new Date().toISOString(), msg: msg, status: status });
+    if (history.length > 200) history.length = 200;
+    localStorage.setItem('tenet5_dispatch_log', JSON.stringify(history));
+  }
+
+  // Load previous log on init
+  function loadLog() {
+    var history = JSON.parse(localStorage.getItem('tenet5_dispatch_log') || '[]');
+    if (history.length === 0) return;
+    var log = document.getElementById('log-entries');
+    log.innerHTML = '';
+    history.slice(0, 30).forEach(function(h) {
+      var entry = document.createElement('div');
+      entry.className = 'log-entry';
+      var d = new Date(h.time);
+      entry.innerHTML = '<span class="log-' + (h.status || 'ok') + '">[' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString() + ']</span> ' + escapeHTML(h.msg);
+      log.appendChild(entry);
+    });
+  }
+
+  // Run on next tick so DOM is ready
+  setTimeout(loadLog, 100);
+
+})();
+</script>
+
+<div id="site-footer-frame"></div>
+<script src="shell.js?v=20"></script>
+<script src="js/ux.js"></script>
+<script src="js/slate.js"></script>
+<script src="js/cinema.js"></script>
+<script src="js/flow.js"></script>
+<script src="js/presenter.js"></script>
+<script src="js/auto-present.js"></script>
+<script src="js/liril-walkthrough.js?v=2"></script>
+</body>
+</html>
