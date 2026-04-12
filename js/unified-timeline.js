@@ -45,6 +45,7 @@
     { year: 2024, month: 7, title: 'CDS Carignan Appointed', desc: 'Gen Jennie Carignan becomes first female CDS. CAF at lowest strength in decades. AG flags recruiting failures. DM Fox (COI breach) appointed Dec 2025.', link: 'cds-accountability.html', cat: 'cfnis', color: '#a855f7' },
     { year: 2026, month: 4, title: 'CDS Accountability Investigation Opened', desc: 'TENET5 investigation into CDS record: recruitment crisis, digital battle space surrender, foreign military access, compromised DND command chain. Criminal Code + NDA charges framework documented.', link: 'cds-accountability.html', cat: 'cfnis', color: '#a855f7' },
     { year: 2026, month: 4, title: 'Bill C-218 Second Reading Vote', desc: 'The Right to Recover Act — vote expected April 13-17, 2026. Needs 24 Liberal MPs to cross the floor. Liberals and Bloc signalled opposition. Would permanently block MAID for mental illness.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2026, month: 4, title: 'Carney Majority: 5 Floor-Crossings + 3 By-Elections', desc: '5 Conservative MPs crossed floor to Liberals. 3 by-elections April 13 — Liberals need 1 win for 172-seat majority. Critics: "authoritarian consolidation" bypassing voter intent for minority parliament.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
