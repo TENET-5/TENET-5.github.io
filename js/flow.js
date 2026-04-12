@@ -7,14 +7,18 @@
   'use strict';
 
   var INVESTIGATIONS = [
-    { href: 'maid-accountability.html', num: '76,475', label: 'MAID Deaths' },
-    { href: 'cfnis.html', num: 'CFNIS', label: 'Military Police' },
+    { href: 'maid-accountability.html', num: '76,707', label: 'MAID Deaths' },
     { href: 's504-covey-bae.html', num: '28', label: 's.504 Counts' },
+    { href: 'carney-conflicts.html', num: '$6.8M', label: 'Carney COI' },
     { href: 'foreign-interference.html', num: 'Hogue', label: 'Foreign Interference' },
+    { href: 'arrivecan.html', num: '$93M', label: 'ArriveCAN' },
+    { href: 'phoenix-pay.html', num: '$9.3B', label: 'Phoenix Pay' },
+    { href: 'disability-genocide.html', num: 'CRPD', label: 'UN Convention' },
+    { href: 'veterans-betrayal.html', num: 'VAC', label: 'Veterans' },
     { href: 'maid-voting-record.html', num: '173', label: 'MPs Who Voted' },
-    { href: 'cross-reference.html', num: '$1.2B', label: 'Follow the Money' },
-    { href: 'network-analysis.html', num: '394', label: 'Network Nodes' },
-    { href: 'conspiracy-board.html', num: 'Board', label: 'Investigation Board' },
+    { href: 'cfnis.html', num: 'CFNIS', label: 'Military Police' },
+    { href: 'rcmp-commissioners.html', num: '4', label: 'RCMP Chiefs' },
+    { href: 'scandals.html', num: '11', label: 'Scandals' },
   ];
 
   document.addEventListener('DOMContentLoaded', function() {
