@@ -633,6 +633,27 @@
     });
   }
 
+  function getResumeKey() {
+    return 'pres-resume:' + getCurrentPage();
+  }
+
+  function saveSlidePosition(idx) {
+    try { sessionStorage.setItem(getResumeKey(), String(idx)); } catch (e) { /* quota */ }
+  }
+
+  function restoreSlidePosition(slides) {
+    try {
+      var saved = sessionStorage.getItem(getResumeKey());
+      if (saved === null) return;
+      var idx = parseInt(saved, 10);
+      if (isNaN(idx) || idx < 0 || idx >= slides.length || idx === 0) return;
+      // Delay to let layout settle, then jump without animation
+      setTimeout(function () {
+        slides[idx].scrollIntoView({ behavior: 'auto', block: 'start' });
+      }, 80);
+    } catch (e) { /* private browsing */ }
+  }
+
   /* ═══════════════════════════════════════════════════════════════════
      SECTION 5b: Slide table-of-contents overlay
      ═══════════════════════════════════════════════════════════════════ */
@@ -1648,6 +1669,7 @@
         lirilNarration.activeSlide = slides[idx] || null;
         if (lirilNarration.speaking) stopNarration();
         updateNarrationButton();
+        saveSlidePosition(idx);
         if (lirilNarration.autoNarrate) {
           setTimeout(function () { narrateCurrentSlide(); }, 300);
         }
@@ -1670,6 +1692,9 @@
         lirilNarration.activeSlide = slides[0];
         updateNarrationButton();
       }
+
+      // Resume at last-viewed slide if returning to this page
+      restoreSlidePosition(slides);
     });
   }
 
