@@ -10,17 +10,17 @@ async def run():
         {
             'name': 'Foreign Influence Target Alpha',
             'threat_score': 0.98,
-            'notes': 'foreign_influence detected in lobbying registry (abcxyz)'
+            'notes': 'foreign_influence detected in lobbying registry (ABCXYZ)'
         },
         {
             'name': 'CFNIS Proxy Node',
             'threat_score': 0.88,
-            'notes': 'Internal oversight tampering (abcxyz correlation)'
+            'notes': 'Internal oversight tampering (ABCXYZ correlation)'
         },
         {
             'name': 'CIJA Lobbying Pipeline',
             'threat_score': 0.95,
-            'notes': '579 lobbying instances / Sponsored trips mapped (abcxyz tracking)'
+            'notes': '579 lobbying instances / Sponsored trips mapped (ABCXYZ tracking)'
         }
     ]
     
