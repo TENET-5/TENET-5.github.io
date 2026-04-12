@@ -18,9 +18,11 @@ from pathlib import Path
 
 import edge_tts
 
-VOICE = "en-CA-ClaraNeural"
-RATE = "-5%"       # Slightly slower for documentary feel
-PITCH = "+0Hz"
+# AvaMultilingual is Microsoft's flagship neural voice — natural breathing,
+# human prosody, emotional range. Dramatically less robotic than ClaraNeural.
+VOICE = "en-US-AvaMultilingualNeural"
+RATE = "-8%"       # Slower for documentary gravitas
+PITCH = "-2Hz"     # Slightly warmer tone
 OUTPUT_DIR = Path(__file__).parent.parent / "audio"
 
 # ── Narration scripts per page ──────────────────────────────────────────
@@ -31,54 +33,74 @@ NARRATIONS = {
     "home": {
         "title": "TENET⁵ — Welcome",
         "segments": [
-            "Welcome to TENET five. This is Canada's accountability record — built by LIRIL AI from public documents, Hansard transcripts, court filings, and government data.",
-            "Since 2016, over 76,000 Canadians have died through Medical Assistance in Dying. 1.2 trillion dollars in federal debt has accumulated. 504 exposed government contracts contain documented anomalies.",
-            "Every claim on this platform is sourced. Every number is traceable. This is not opinion — this is the public record, organized for the first time into a single searchable database.",
-            "Use the navigation above to explore investigations by topic. Or scroll through the timeline to follow Canada's accountability crisis from 2015 to present.",
-            "I am LIRIL — the AI system that built and maintains this record. I do not editorialize. I organize, source, and present. The conclusions are yours to draw.",
+            "This is LIRIL. And I need to walk you through something important.",
+            "Since 2016... seventy-six thousand, four hundred and seventy-five Canadians have been killed under their government's Medical Assistance in Dying program. That number comes from Health Canada's own annual reports. Not from us. From them.",
+            "A Canadian Forces combat veteran — a signals operator who served in Afghanistan — spent two years cross-referencing seven million government records. Across six public databases. What he found is what you're about to see.",
+            "One point two billion dollars in political money... tracked. Three hundred and fifty thousand lobbying contacts... decoded. Over one thousand database records compiled into what we call The 504 Dossier.",
+            "Every claim on this website is sourced. Every number is verifiable. This is not opinion — this is the government's own data, organized so you can finally see the pattern.",
+            "Scroll down. The evidence speaks for itself.",
         ],
     },
     "maid-accountability": {
-        "title": "MAID Investigation",
+        "title": "MAID — The Accountability Report",
         "segments": [
-            "Medical Assistance in Dying. Since legalization in 2016, over 60,000 Canadians have died through this program. That number has grown by 1,467 percent in seven years.",
-            "In 2023 alone, 15,343 Canadians received MAID — representing 4.7 percent of all deaths in the country. Canada now has the fastest-growing euthanasia program in the world.",
-            "The Netherlands pioneered legal euthanasia in 2002. After 20 years, they reached 4.8 percent of deaths. Canada matched that rate in just 7 years.",
-            "Veterans have testified to Parliament that Veterans Affairs caseworkers offered MAID during calls about wheelchair ramps and housing support. At least five separate veterans reported unsolicited MAID offers.",
-            "In 2022, a 51-year-old Ontario woman with Multiple Chemical Sensitivities received MAID after years of being unable to find affordable housing. She told media: the government sees me as expendable.",
-            "Bill C-7, passed in 2021, removed the requirement that natural death be reasonably foreseeable. It also eliminated the 10-day reflection period. MAID can now be provided the same day as the request.",
-            "Canada has no independent MAID oversight body. Doctors self-report. No real-time monitoring exists. The Auditor General has never audited the program. Three consecutive RCMP Commissioners — zero investigations.",
-            "The United Nations Special Rapporteur on the Rights of Persons with Disabilities has formally raised concerns about Canada's MAID regime. The UN Human Rights Committee flagged it in their 2023 review.",
+            "This is the MAID Accountability Report. What you're about to hear are facts — sourced entirely from Health Canada's own publications.",
+            "In 2016, one thousand and eighteen Canadians died under Medical Assistance in Dying. By 2024? That number had risen to sixteen thousand, two hundred and sixty-five. That is not a gradual increase. That is an acceleration.",
+            "Let me put that in perspective. The Netherlands — the country that pioneered legal euthanasia in 2002 — took twenty years to reach four point eight percent of all deaths. Canada matched that rate... in just seven years.",
+            "Five point zero five percent of all Canadian deaths in 2024 were MAID deaths. One in every nineteen point eight people who died in Canada... died by government-administered lethal injection.",
+            "Veterans have testified — under oath, before Parliamentary committee — that Veterans Affairs caseworkers offered them MAID. During calls about wheelchair ramps. During calls about housing support. At least five veterans. On the record.",
+            "A fifty-one year old Ontario woman with Multiple Chemical Sensitivities chose MAID after years of being unable to find affordable housing. She told journalists — and I quote — the government sees me as expendable.",
+            "There is no independent oversight body for MAID in Canada. Doctors self-report. The Auditor General has never audited the program. Three consecutive RCMP Commissioners have launched zero investigations.",
+            "The United Nations Special Rapporteur on the Rights of Persons with Disabilities has formally raised concerns. The UN Human Rights Committee flagged Canada's MAID regime in their 2023 Periodic Review. The world is watching.",
         ],
     },
     "maid-policy-evolution": {
-        "title": "MAID Legislative Timeline",
+        "title": "MAID — How They Legislated Death",
         "segments": [
-            "How they legislated death. This is the complete legislative record of Canada's MAID expansion, from 2015 to present.",
-            "February 2015. The Supreme Court of Canada rules unanimously in Carter v. Canada that the absolute prohibition on physician-assisted dying violates Charter rights. Parliament is given 12 months to legislate.",
-            "June 2016. Bill C-14 passes. MAID is legalized for adults with grievous and irremediable conditions where natural death is reasonably foreseeable. A 10-day reflection period is required. Two independent assessments are mandatory.",
-            "September 2019. The Quebec Superior Court strikes down the foreseeable death requirement in Truchon v. Canada. The government does not appeal. Instead, it uses the ruling to expand eligibility nationally.",
-            "March 2021. Bill C-7 passes. The foreseeable death requirement is removed for all Canadians. Track 2 is created — allowing MAID for chronic conditions, disabilities, and non-terminal illness. The 10-day reflection period is eliminated for Track 1.",
-            "Bill C-7 also includes a sunset clause to expand MAID to persons whose sole underlying condition is mental illness. Originally set for March 2023, this expansion has been delayed three times — to 2024, then 2025, then 2027.",
-            "The repeated delays tell a story: even the government that passed this legislation keeps flinching from implementing its most extreme provision.",
+            "How they legislated death. This is the complete legislative record — every step that brought us here.",
+            "February 2015. The Supreme Court of Canada rules unanimously in Carter v. Canada. The absolute prohibition on physician-assisted dying, they said, violates Charter rights. Parliament was given twelve months to write the law.",
+            "June 2016. Bill C-14 passes. MAID is legalized — but with safeguards. Natural death must be reasonably foreseeable. A ten-day reflection period is mandatory. Two independent medical assessments are required. Those safeguards... would not last.",
+            "September 2019. The Quebec Superior Court strikes down the foreseeable death requirement in Truchon v. Canada. The federal government does not appeal. Instead — and this is critical — they use the ruling to expand eligibility nationally.",
+            "March 2021. Bill C-7 passes. The foreseeable death requirement? Gone. For all Canadians. Track 2 is created — MAID for chronic conditions, disabilities, and non-terminal illness. The ten-day reflection period? Eliminated for Track 1. You can now receive a lethal injection the same day you request it.",
+            "Bill C-7 also included a sunset clause to expand MAID to people whose sole condition is mental illness. That expansion has been delayed three times. First to 2024. Then to 2025. Then to 2027.",
+            "The repeated delays are telling. Even the government that wrote this legislation... keeps flinching from implementing its most extreme provision. They know what they've done.",
         ],
     },
     "cija-maid-pipeline": {
-        "title": "The CIJA Pipeline",
+        "title": "The CIJA Lobbying Pipeline",
         "segments": [
-            "2,138 registered lobbying contacts. One organization. A direct legislative pipeline from lobbying to law.",
-            "The Centre for Israel and Jewish Affairs — CIJA — is one of the most active lobbying organizations in Canada's federal registry. Their lobbying contacts span the Prime Minister's Office, the Justice Department, and key committee members.",
-            "The documented pipeline follows a clear sequence: IHRA definition adoption, Criminal Code amendments, Human Rights Act civil remedies, and MAID expansion. Each stage built on the last.",
-            "Every data point in this analysis comes from Canada's own lobbying registry, Hansard records, and published committee testimony. These are not allegations — they are the government's own documented contacts.",
+            "Two thousand, one hundred and thirty-eight registered lobbying contacts. One organization. A direct documented pipeline — from lobbying... to law.",
+            "The Centre for Israel and Jewish Affairs is one of the most active lobbying organizations in Canada's federal registry. Their contacts span the Prime Minister's Office, the Department of Justice, and key Parliamentary committee members.",
+            "The documented sequence follows a clear pattern. First, IHRA definition adoption. Then, Criminal Code amendments. Then, Human Rights Act civil remedies. Then, MAID expansion. Each stage building on the last.",
+            "Every data point you see in this analysis comes directly from Canada's own Commissioner of Lobbying registry, Hansard committee records, and published Parliamentary testimony. These are not allegations. These are the government's own documented contacts — we just organized them.",
         ],
     },
     "mp-voting-records": {
-        "title": "MP Voting Records",
+        "title": "How Your MP Voted",
         "segments": [
-            "How they voted. This is the official Hansard division record for key bills that shaped Canada's accountability crisis.",
-            "Bill C-14, the Medical Assistance in Dying Act of 2016. Third reading vote: 186 Yea, 64 Nay. Bill C-7, the MAID Expansion Act of 2021. Third reading: 180 Yea, 149 Nay.",
-            "Bill C-11, the Online Streaming Act. Bill C-21, firearms restrictions. Bill C-63, the Online Harms Act. Every vote is on the public record.",
-            "Use the filters to search by MP name, riding, party, or specific bill. Every record links back to the official Parliament of Canada division records.",
+            "How they voted. Every vote you're about to see is from the official Hansard division record — the Parliament of Canada's own published record.",
+            "Bill C-14 — the Medical Assistance in Dying Act of 2016. Third reading vote: one hundred and eighty-six Yea. Sixty-four Nay. Bill C-7 — the MAID Expansion Act of 2021. One hundred and eighty Yea. One hundred and forty-nine Nay.",
+            "Bill C-11, the Online Streaming Act. Bill C-21, firearms restrictions. Bill C-63, the Online Harms Act. These are the bills that reshaped Canadian civil liberties — and every vote is on the record.",
+            "Forty-six currently sitting Members of Parliament voted in favour of both C-14 and C-7 — both aggressive expansions of state-administered death. Search for your MP. See how they voted. Hold them accountable.",
+        ],
+    },
+    "evidence": {
+        "title": "The Evidence Archive",
+        "segments": [
+            "Welcome to the Evidence Archive. Everything here is mathematical proof — derived from the government's own published data.",
+            "Seven million government records have been cross-referenced across six public databases. Fifty-seven megabytes of raw lobbying data, analyzed line by line. Three thousand, one hundred and eighty subject matter tags, decoded.",
+            "The compound annual growth rate of MAID deaths from 2016 to 2024 is forty-one point seven percent. At that trajectory, the cumulative toll will exceed one hundred thousand Canadians by the end of 2026.",
+            "The government valued each life eliminated at one thousand, nine hundred and fifty-four dollars in healthcare savings. A burial coffin costs more than what they saved by killing you.",
+            "Every formula on these pages can be verified with a calculator and the Government of Canada's own reports. The math does not lie.",
+        ],
+    },
+    "charges-sheet": {
+        "title": "Section 504 — The Charges Sheet",
+        "segments": [
+            "Under Section 504 of the Criminal Code of Canada, any citizen — any Canadian — has the legal right to lay criminal charges through private prosecution.",
+            "This page documents over one thousand sourced criminal charge incidents, mapped to specific government officials. Two hundred and seventy officials identified. Three hundred and seven charges mapped.",
+            "Each entry includes the relevant Criminal Code section, the evidence basis from public records, and the prosecution pathway available to any Canadian citizen.",
+            "This is your legal right. It has existed since Confederation. And it is the mechanism by which Canadians can hold their government accountable — without waiting for an RCMP that refuses to investigate.",
         ],
     },
 }
