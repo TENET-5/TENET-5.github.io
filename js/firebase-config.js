@@ -1,5 +1,5 @@
 /**
- * Firebase Configuration — TENET5 Accountability Platform
+ * Firebase Configuration — Canadian Accountability Project
  * Uses Firebase Auth (Google + Twitter/X) + Cloud Firestore for chat/comments.
  * All client-side — works on GitHub Pages with zero backend.
  */

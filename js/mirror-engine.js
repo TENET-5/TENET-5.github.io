@@ -1,5 +1,5 @@
 /**
- * Mirror Engine — TENET5 Per-Recipient Report Generator
+ * Mirror Engine — CAP Per-Recipient Report Generator
  *
  * Core omission algorithm: generates personalized intelligence briefs
  * where each recipient sees all data EXCEPT their own entries.

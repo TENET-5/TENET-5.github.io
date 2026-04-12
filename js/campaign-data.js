@@ -1,4 +1,4 @@
-// campaign-data.js — TENET5 Campaign Contact Database
+// campaign-data.js — CAP Campaign Contact Database
 // All contacts sourced from public Canadian government records
 const CAMPAIGN_CONTACTS = {
 
