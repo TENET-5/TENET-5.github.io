@@ -22,24 +22,54 @@ body.pres-active::-webkit-scrollbar { width: 0; background: transparent; }
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   padding: 3rem 2rem;
   box-sizing: border-box;
   overflow: hidden;
+  border-bottom: 1px solid rgba(201,168,76,0.06);
+}
+/* Content width constraint for readability */
+.pres-slide > * {
+  max-width: 960px;
+  width: 100%;
+}
+/* Hero slides — tighter padding so crest+headline+sub all fit */
+.pres-slide.tl-hero,
+.pres-slide.page-hero {
+  padding: 1rem 2rem;
+  gap: 0;
+}
+.pres-slide.tl-hero .tl-hero-content,
+.pres-slide.page-hero > * {
+  max-width: 720px;
+}
+/* Slide subtle vignette */
+.pres-slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 /* Short slides (sources, metadata) don't need full viewport */
 .pres-slide--compact {
   min-height: auto;
   scroll-snap-align: none;
+  border-bottom: none;
 }
+.pres-slide--compact::before { display: none; }
 
 /* ── Slide Entrance Animations ─────────────────────────────────────── */
-.pres-slide > * {
+.pres-slide > *:not(.pres-sprite):not(.tl-hero-overlay) {
   opacity: 0;
   transform: translateY(32px);
   transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 1;
 }
-.pres-slide.pres-visible > * {
+.pres-slide.pres-visible > *:not(.pres-sprite):not(.tl-hero-overlay) {
   opacity: 1;
   transform: translateY(0);
 }
@@ -148,10 +178,6 @@ body.pres-active::-webkit-scrollbar { width: 0; background: transparent; }
   pointer-events: none;
   overflow: hidden;
   z-index: 0;
-}
-.pres-slide > *:not(.pres-sprite) {
-  position: relative;
-  z-index: 1;
 }
 
 /* ── SPRITE: Death Rain — Red particles falling ──────────────────── */
@@ -294,9 +320,38 @@ body.pres-active::-webkit-scrollbar { width: 0; background: transparent; }
 }
 .pres-keyhint-fade { opacity: 0; }
 
+/* ── Slide counter animation — fade/pulse on transition ────────────── */
+.pres-slide[data-slide-num]::after {
+  transition: opacity 0.5s ease;
+}
+.pres-slide.pres-visible[data-slide-num]::after {
+  animation: presBadgePulse 0.6s ease-out;
+}
+@keyframes presBadgePulse {
+  0% { opacity: 0; transform: translateX(-8px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Slide title underline accent ──────────────────────────────────── */
+.pres-slide.pres-visible h2::after,
+.pres-slide.pres-visible h3::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, #b91c1c, transparent);
+  margin-top: 0.5rem;
+  animation: presLineGrow 0.8s ease-out forwards;
+}
+@keyframes presLineGrow {
+  0% { width: 0; }
+  100% { width: 60px; }
+}
+
 /* ── Responsive — mobile adjustments ───────────────────────────────── */
 @media (max-width: 768px) {
   .pres-slide { padding: 2rem 1rem; }
+  .pres-slide.tl-hero, .pres-slide.page-hero { padding: 0.5rem 1rem; }
   .pres-indicator { right: 6px; gap: 4px; }
   .pres-dot { width: 6px; height: 6px; }
   .pres-dot::before { display: none; }

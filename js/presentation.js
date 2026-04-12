@@ -23,7 +23,7 @@
     '.stat-hero-banner',    // stat banners
     '.narrative-intro',     // narrative sections
     '.credibility-card',    // author card
-    '.tl-node',             // timeline nodes (home)
+    '.tl-timeline',         // entire timeline block (not individual nodes)
     '.tl-quicknav',         // quick nav grid
     '.timeline-section',    // content page sections
     '.inv-stat-grid',       // stat grids
