@@ -39,6 +39,9 @@
     { year: 2025, month: 9, title: 'RCMP Closes Chinese Police Stations Case', desc: 'Montreal investigation closed WITHOUT charges. Community orgs file $4.9M defamation lawsuit against RCMP. Lost 70% of funding.', link: 'foreign-interference.html', cat: 'foreign', color: '#60a5fa' },
     { year: 2025, month: 4, title: 'Quebec: 7.9% MAID Rate — World Record', desc: 'Over 6,000 MAID deaths in one year. 7.9% of all Quebec deaths. Instructed prosecutors not to charge for advance requests — ahead of federal law.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
     { year: 2024, month: 1, title: '10 Provinces Demand MAID Pause', desc: 'BC, ON, AB, SK, NB, PEI, NS, NU, NT, YT sign joint letter. Quebec, Manitoba, NL refuse. Federal government sets March 2027 regardless.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2026, month: 4, title: 'Fox Ethics Breach — Then Promoted by Carney', desc: 'Ethics Commissioner finds DM Christiane Fox breached COI Act at IRCC. Carney already appointed her top DND civilian role in Dec 2025.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
+    { year: 2026, month: 3, title: 'Indigenous Procurement Fraud Exposed', desc: 'Procurement Ombudsman: non-Indigenous businesses using Indigenous shell companies to access set-aside contracts. Reform delayed to 2028.', link: 'scandals.html', cat: 'waste', color: '#f59e0b' },
+    { year: 2026, month: 3, title: 'Nijjar: Indian Consular Staff Assisted', desc: 'Globe and Mail: Indian consular staff in Vancouver supplied information assisting Nijjar assassination. Carney visits Modi, draws Sikh backlash.', link: 'foreign-interference.html', cat: 'foreign', color: '#60a5fa' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
