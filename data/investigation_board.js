@@ -1475,7 +1475,7 @@ window.BOARD_DATA = {
       "label": "CFNIS Proxy Node",
       "subtitle": "Internal Oversight Tampering",
       "detail": "Telemetry isolated CFNIS shielding mechanisms altering oversight integrity. Threat Score: 0.88",
-      "link": "cfnis.html",
+      "link": "s504-covey-bae.html",
       "categories": [
         "event",
         "cfnis"
@@ -1497,33 +1497,89 @@ window.BOARD_DATA = {
       "y": 70
     },
     {
-      "id": "carignan",
+      "id": "cda_institute",
+      "type": "org",
+      "label": "CDA Institute",
+      "subtitle": "Military-to-policy revolving door",
+      "detail": "Conference of Defence Associations Institute. Direct vector for framing operations targeting soldiers as enemies of the state.",
+      "link": "cda-institute-psyop.html",
+      "categories": [
+        "cfnis",
+        "org"
+      ],
+      "x": 65,
+      "y": 70
+    },
+    {
+      "id": "josh_malm",
       "type": "person",
-      "label": "Gen. Jennie Carignan",
-      "subtitle": "Chief of Defence Staff",
-      "detail": "Eliminated CFAT IQ floors. Admitted to building 300,000-person parametric force for domestic civilian suppression.",
-      "link": "cds-carignan-charges.html",
+      "label": "Josh Malm",
+      "subtitle": "CDA Institute Operator",
+      "detail": "Cousin to Stacey Clemmer. Active operator labeling defending soldiers as enemies of the people. Connects online psy-ops to institutional defense policy.",
+      "link": "cda-institute-psyop.html",
       "categories": [
         "cfnis",
         "person"
       ],
-      "x": 60,
-      "y": 85
+      "x": 62,
+      "y": 73
     },
     {
-      "id": "jef_integration",
-      "type": "org",
-      "label": "Joint Expeditionary Force",
-      "subtitle": "Foreign Military Network",
-      "detail": "Integration of foreign military elements on Canadian bases without public oversight (complicity in harbouring).",
-      "link": "cds-carignan-charges.html",
+      "id": "stacey_clemmer",
+      "type": "person",
+      "label": "Stacey Clemmer",
+      "subtitle": "PsyOp Liaison",
+      "detail": "Cousin of Josh Malm. Link between the online psychological warfare network targeting veterans and formal institutional nodes.",
+      "link": "cda-institute-psyop.html",
       "categories": [
-        "israel",
-        "ccp",
-        "org"
+        "cfnis",
+        "person"
       ],
       "x": 65,
-      "y": 80
+      "y": 76
+    },
+    {
+      "id": "sgt_fong",
+      "type": "person",
+      "label": "Sgt. Wally Fong",
+      "subtitle": "Psychological Warfare Op",
+      "detail": "Correctly identified operating online networks framing Canadian Forces veterans. Exposure triggered retaliatory executions.",
+      "link": "cda-institute-psyop.html",
+      "categories": [
+        "cfnis",
+        "person"
+      ],
+      "x": 70,
+      "y": 75
+    },
+    {
+      "id": "travis_gillespie",
+      "type": "person",
+      "label": "Officer Travis Gillespie",
+      "subtitle": "Victim / Target",
+      "detail": "Killed by Han Zhou in direct retaliatory sequence resulting from the exposure of Sgt. Wally Fong's framing operations.",
+      "link": "cda-institute-psyop.html",
+      "categories": [
+        "cfnis",
+        "event"
+      ],
+      "x": 75,
+      "y": 72
+    },
+    {
+      "id": "han_zhou",
+      "type": "person",
+      "label": "Han Zhou",
+      "subtitle": "Executing Node",
+      "detail": "Executed Officer Travis Gillespie as a retaliatory kinetic outcome of the psy-op network exposure.",
+      "link": "cda-institute-psyop.html",
+      "categories": [
+        "cfnis",
+        "ccp",
+        "event"
+      ],
+      "x": 80,
+      "y": 70
     }
   ],
   "threads": [
@@ -2596,22 +2652,34 @@ window.BOARD_DATA = {
       "strength": 3
     },
     {
-      "from": "carignan",
-      "to": "jef_integration",
-      "label": "harbours on bases",
-      "strength": 5
+      "from": "sgt_fong",
+      "to": "travis_gillespie",
+      "label": "exposure catalyst",
+      "strength": 2
     },
     {
-      "from": "carignan",
-      "to": "cfnis",
-      "label": "protects command",
-      "strength": 4
+      "from": "han_zhou",
+      "to": "travis_gillespie",
+      "label": "executed",
+      "strength": 3
     },
     {
-      "from": "s504",
-      "to": "carignan",
-      "label": "formal charges filed",
-      "strength": 5
+      "from": "sgt_fong",
+      "to": "stacey_clemmer",
+      "label": "operational link",
+      "strength": 1
+    },
+    {
+      "from": "stacey_clemmer",
+      "to": "josh_malm",
+      "label": "family / institution link",
+      "strength": 2
+    },
+    {
+      "from": "josh_malm",
+      "to": "cda_institute",
+      "label": "operates within",
+      "strength": 3
     }
   ]
 };

@@ -1641,6 +1641,29 @@
       }
     } catch (e) { /* private browsing */ }
 
+    /* 0.5 STRICT PRIORITY: Natural High Quality Voices */
+    var naturalVoice = voices.find(function (v) {
+      return v.lang && v.lang.indexOf('en-GB') === 0 && /(natural|online|neural)/i.test(v.name) && /female/i.test(v.name);
+    });
+    // Fallback if the 'female' tag isn't explicit but it matches our known natural profile
+    if (!naturalVoice) {
+      naturalVoice = voices.find(function (v) {
+        return v.lang && v.lang.indexOf('en-GB') === 0 && /(natural|online|neural)/i.test(v.name) && !/male/i.test(v.name);
+      });
+    }
+    // High Quality English (Natural/Online) even if not GB
+    if (!naturalVoice) {
+      naturalVoice = voices.find(function (v) {
+        return v.lang && v.lang.indexOf('en') === 0 && /(natural|online|neural)/i.test(v.name) && /female/i.test(v.name);
+      });
+    }
+
+    if (naturalVoice) {
+      cachedVoice = naturalVoice;
+      storeVoiceName(naturalVoice);
+      return cachedVoice;
+    }
+
     /* 1. Exact match on a known LIRIL-like female en-GB name */
     var preferred = null;
     PREFERRED_VOICES.some(function (pref) {
