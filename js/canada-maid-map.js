@@ -8,7 +8,7 @@
   'use strict';
 
   var PROVINCES = {
-    'QC': { name: 'Quebec', deaths: 5998, pct: 36.4, rate: 67, color: '#dc2626' },
+    'QC': { name: 'Quebec', deaths: 6000, pct: 36.4, rate: 67, color: '#dc2626', note: '7.9% of all Quebec deaths — highest rate in the world' },
     'ON': { name: 'Ontario', deaths: 4944, pct: 30.0, rate: 0, color: '#ef4444' },
     'BC': { name: 'British Columbia', deaths: 2997, pct: 18.2, rate: 53, color: '#f87171' },
     'AB': { name: 'Alberta', deaths: 1100, pct: 6.7, rate: 24, color: '#fca5a5' },
