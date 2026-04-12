@@ -90,8 +90,38 @@
       status.className = 'slate-status';
       status.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:999;';
       status.innerHTML = '<span class="dot"></span> SLATE ' +
-        state.pagesVisited.length + '/' + 129 + ' pages';
+        state.pagesVisited.length + '/143 pages';
       document.body.appendChild(status);
+    }
+
+    // ── HYDROGEN: Investigation-aware recommendations ──
+    // Suggest unvisited pages from the core investigation cluster
+    var CORE_INVESTIGATIONS = [
+      { href: 'follow-the-money.html', label: 'Follow the Money' },
+      { href: 'maid-accountability.html', label: 'MAID Investigation' },
+      { href: 'carney-conflicts.html', label: 'Carney COI' },
+      { href: 'cds-accountability.html', label: 'CDS Accountability' },
+      { href: 's504-covey-bae.html', label: 's.504 Charges' },
+      { href: 'foreign-interference.html', label: 'Foreign Interference' },
+      { href: 'disability-genocide.html', label: 'UN CRPD' },
+      { href: 'veterans-betrayal.html', label: 'Veterans' },
+      { href: 'arrivecan.html', label: 'ArriveCAN' },
+      { href: 'rcmp-commissioners.html', label: 'RCMP' },
+    ];
+
+    var unvisited = CORE_INVESTIGATIONS.filter(function(inv) {
+      return state.pagesVisited.indexOf(inv.href) === -1;
+    });
+
+    // Show recommendation after 2+ page visits if unvisited investigations exist
+    if (state.visitCount > 2 && unvisited.length > 0 && unvisited.length < CORE_INVESTIGATIONS.length) {
+      var rec = unvisited[Math.floor(Math.random() * unvisited.length)];
+      var recEl = document.createElement('div');
+      recEl.style.cssText = 'position:fixed;bottom:50px;left:8px;z-index:999;background:var(--bg-card,#1a1f36);border:1px solid var(--border,#333);border-left:3px solid var(--accent,#c41e3a);border-radius:8px;padding:8px 12px;max-width:220px;font-size:0.75rem;color:var(--text-secondary,#aaa);cursor:pointer;transition:opacity 0.3s;';
+      recEl.innerHTML = '<strong style="color:var(--accent,#c41e3a);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;">LIRIL suggests:</strong><br><a href="' + rec.href + '" style="color:var(--text-primary,#eee);text-decoration:none;font-weight:600;">' + rec.label + ' &rarr;</a>';
+      recEl.addEventListener('click', function() { recEl.style.display = 'none'; });
+      setTimeout(function() { document.body.appendChild(recEl); }, 3000);
+      setTimeout(function() { if (recEl.parentNode) recEl.style.opacity = '0'; }, 30000);
     }
   });
 
