@@ -364,13 +364,16 @@
     '.pdd-hero', '.prov-hero', '.records-hero', '.ta-hero', '.vr-hero',
 
     // ── Narrative / Content blocks ──
-    '.narrative-intro', '.credibility-card',
+    '.narrative-intro', '.credibility-card', '.case-card', '.person-card', '.country-card',
+
+    // ── Financial & accountability ──
+    '.purchase-callout', '.record', '.crpd-card', '.crpd-cards',
 
     // ── Timelines (all variants) ──
-    '.tl-timeline', '.timeline', '.timeline-v4',
+    '.tl-timeline', '.timeline', '.timeline-v4', '.timeline-entry', '.un-timeline',
     '.dnd-timeline', '.fi-timeline', '.ja-timeline',
     '.ph-timeline', '.se-timeline', '.vb-timeline',
-    '.un-timeline', '.law-timeline', '.layoff-timeline',
+    '.law-timeline', '.layoff-timeline',
     '.backlog-timeline', '.policy-timeline',
 
     // ── Named sections (all variants) ──
@@ -382,20 +385,23 @@
     '.pie-section', '.venn-section', '.section-block',
 
     // ── Stat grids & data panels ──
-    '.inv-stat-grid', '.tl-quicknav',
+    '.inv-stat-grid', '.tl-quicknav', '.mpa-stats',
     '.media-grid', '.cat-grid', '.category-grid',
     '.breakdown-grid', '.budget-grid', '.bill-cards',
     '.cc-cards', '.cc-grid',
 
     // ── Evidence & findings ──
-    '.evidence-box', '.finding-card', '.verdict-box',
+    '.evidence-box', '.finding-card', '.verdict-box', '.finding-box',
     '.alert-card', '.anomaly-card',
+
+    // ── Military & institutional analysis ──
+    '.institutional-timeline', '.policy-comparison',
 
     // ── Section headings (structural dividers) ──
     '.section-head',
 
     // ── Any narrated element ──
-    '[data-narration]',
+    '[data-narration]', '[data-narrate]',
 
     // ── Generic sections (fallback) ──
     'section'
@@ -488,21 +494,40 @@
      ═══════════════════════════════════════════════════════════════════ */
 
   function getSlideLabel(el) {
-    var h = el.querySelector('h1, h2, h3');
+    // Priority 1: Explicit data-narrate attribute (first 50 chars)
+    var narr = el.getAttribute('data-narrate');
+    if (narr) {
+      var text = narr.trim();
+      return text.length > 50 ? text.substring(0, 50) + '\u2026' : text;
+    }
+    
+    // Priority 2: Legacy data-narration attribute
+    narr = el.getAttribute('data-narration');
+    if (narr) return narr.charAt(0).toUpperCase() + narr.slice(1);
+    
+    // Priority 3: Heading text
+    var h = el.querySelector('h1, h2, h3, h4');
     if (h) {
       var text = h.textContent.trim();
-      return text.length > 30 ? text.substring(0, 30) + '\u2026' : text;
+      return text.length > 40 ? text.substring(0, 40) + '\u2026' : text;
     }
-    var narr = el.getAttribute('data-narrate') || el.getAttribute('data-narration');
-    if (narr) return narr.charAt(0).toUpperCase() + narr.slice(1);
+    
+    // Priority 4: data-chapter or class-based hints
+    var chapter = el.getAttribute('data-chapter');
+    if (chapter) return chapter;
+    
     if (el.classList.contains('stat-hero-banner')) return 'Key Statistics';
     if (el.classList.contains('inv-stat-grid')) return 'Statistics';
     if (el.classList.contains('media-grid')) return 'Evidence Grid';
     if (el.classList.contains('tl-quicknav')) return 'Navigation';
     if (el.classList.contains('credibility-card')) return 'Investigator';
+    if (el.classList.contains('purchase-callout')) return 'Financial Analysis';
+    if (el.classList.contains('crpd-cards')) return 'CRPD Framework';
     if (el.className && el.className.match && el.className.match(/hero/i)) return 'Overview';
     if (el.className && el.className.match && el.className.match(/timeline/i)) return 'Timeline';
     if (el.className && el.className.match && el.className.match(/stat/i)) return 'Statistics';
+    if (el.className && el.className.match && el.className.match(/card/i)) return 'Evidence';
+    
     return 'Slide ' + ((parseInt(el.getAttribute('data-slide-idx'), 10) || 0) + 1);
   }
 
