@@ -90,7 +90,7 @@
       status.className = 'slate-status';
       status.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:999;';
       status.innerHTML = '<span class="dot"></span> SLATE ' +
-        state.pagesVisited.length + '/' + 122 + ' pages';
+        state.pagesVisited.length + '/' + 129 + ' pages';
       document.body.appendChild(status);
     }
   });
