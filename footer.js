@@ -1,5 +1,5 @@
 /**
- * TENET5 Shared Footer v5.1 — A+ Stanford Credibility Design
+ * Canadian Accountability Project Shared Footer v5.1 — A+ Stanford Credibility Design
  * Loaded by shell.js → injects into #site-footer-frame or #site-footer
  */
 (function() {

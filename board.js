@@ -1,5 +1,5 @@
 /**
- * TENET5 — Investigation Board OS v3.0
+ * Canadian Accountability Project — Investigation Board OS v3.0
  * 
  * The board IS the operating system. Documents open inside it.
  * Familiar desktop metaphor:
@@ -183,7 +183,7 @@
 
     overlay.innerHTML = `
       <div class="board-header">
-        <div class="board-title"><span>TENET5 INVESTIGATION</span>The Board</div>
+        <div class="board-title"><span>CAP INVESTIGATION</span>The Board</div>
         <div class="board-header-right">
           <div class="board-search">
             <input type="text" class="board-search-input" placeholder="Search files..." id="board-search" autocomplete="off" />

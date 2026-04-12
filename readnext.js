@@ -1,5 +1,5 @@
 /**
- * TENET5 — "Read Next" Navigation v2.0
+ * Canadian Accountability Project — "Read Next" Navigation v2.0
  *
  * Adds a guided "What to read next" section at the bottom of investigation pages.
  * The investigation has a logical flow: understand the problem → see the evidence →
@@ -88,7 +88,7 @@
       next: [
         { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
         { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
-        { href: 'findings.html', label: 'All 26+ Findings', desc: 'What TENET5 OSINT found in the data' },
+        { href: 'findings.html', label: 'All 26+ Findings', desc: 'What CAP OSINT found in the data' },
       ]
     },
     'my-story.html': {
