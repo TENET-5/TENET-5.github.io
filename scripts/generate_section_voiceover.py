@@ -98,6 +98,48 @@ SECTIONS = {
             "the public structure of the Canadian apparatus can be critically reviewed and understood without intermediary interpretation."
         ),
     },
+    "s504": {
+        "text": (
+            "A core outcome of this investigation is the Section 504 Prosecution. "
+            "Twenty-eight counts of criminal liability have been leveled against a Military Police investigator "
+            "and a Crown Prosecutor. Under the Canadian Criminal Code, civilians hold the legal authority to lay charges "
+            "when the system refuses to police itself."
+        )
+    },
+    "scorecard": {
+        "text": (
+            "To measure legislative complicity, 340 Members of Parliament have been algorithmically scored. "
+            "This metric cross-references their voting records on major bills, such as C-7, against documented "
+            "lobbying contacts and political donations. 113 MPs demonstrated clean records, while the rest displayed significant conflicts."
+        )
+    },
+    "lobbying": {
+        "text": (
+            "The system ingested fifty-seven megabytes of raw data from the Commissioner of Lobbying. "
+            "Over 350,000 communications were decoded. The analysis reveals a direct, quantifiable pipeline "
+            "between specialized influence operations and immediate shifts in federal legislation."
+        )
+    },
+    "cfnis": {
+        "text": (
+            "Accountability failures within the Armed Forces are mapped through the military justice system. "
+            "Five severe cases of misconduct within the National Investigation Service are documented, "
+            "including evidence tampering condemned by the Ontario Superior Court. The internal oversight mechanisms are entirely compromised."
+        )
+    },
+    "municipal": {
+        "text": (
+            "The investigation scales from federal policy down to the civic level. The Municipal Intelligence Engine "
+            "tracks anomalies in local property taxation, police budgets, and unchecked administrative salaries "
+            "across regional governments, exposing systemic local waste."
+        )
+    },
+    "archive": {
+        "text": (
+            "This concludes the executive summary of the TENET5 findings. The timeline, the data, and the charges "
+            "are fully accessible. You may now step into the primary OSINT dashboard to explore the evidence yourself."
+        )
+    }
 }
 
 async def generate_section(section_id: str):

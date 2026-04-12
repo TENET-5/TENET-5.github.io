@@ -81,7 +81,6 @@
       // (no header/footer — parent frame provides those)
       Promise.all([
         loadScript(BASE + 'js/timeline.js?v=1'),
-        loadScript(BASE + 'js/liril-narrator.js?v=1'),
         loadScript(BASE + 'share.js?v=2')
       ]).then(function() {
         return loadScript(BASE + 'js/presentation.js?v=1');
@@ -96,7 +95,6 @@
       loadScript(BASE + 'nav.js?v=12')
         .then(function() { return loadScript(BASE + 'js/main.js?v=3'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/liril-narrator.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/presentation.js?v=1'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
