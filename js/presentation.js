@@ -125,9 +125,11 @@
     'lobbying-deepdive.html',
     'sector-lobbying.html',
     'cija-lobbying.html',
+    'bill-c63-online-harms.html',
     'contributions-tracker.html',
     'charity-pipeline.html',
     'carney-conflicts.html',
+    'brookfield-maid.html',
     'follow-the-money.html',
 
     // ── SOCIAL CRISIS ──
@@ -191,6 +193,7 @@
     'canada-map.html',
     'records.html',
     'search.html',
+    'omniverse-viewer.html',
     's504-tracker.html',
 
     // ── TAKE ACTION ──
@@ -282,9 +285,11 @@
     'lobbying-deepdive.html': '359,000 Calls \u2014 How Lobbyists Bought Policy',
     'sector-lobbying.html': 'Sector Lobbying Dashboard',
     'cija-lobbying.html': 'CIJA Lobbying Pipeline',
+    'bill-c63-online-harms.html': 'Bill C-63 \u2014 Online Harms Act',
     'contributions-tracker.html': 'Who\u2019s Funding Canadian Politics',
     'charity-pipeline.html': '$276M Charity Pipeline to Israel',
     'carney-conflicts.html': 'Carney\u2013Brookfield Conflicts',
+    'brookfield-maid.html': 'Brookfield\u2013MAID Financial Convergence',
     'healthcare-crisis.html': 'Healthcare Collapse \u2014 The Killing Fields',
     'housing-crisis.html': 'The Engineered Housing Crisis',
     'opioid-crisis.html': 'Opioid Crisis',
@@ -361,7 +366,7 @@
       'Government Corruption': ['accountability.html', 'scandals.html', 'corruption-map.html', 'crown-corporations.html', 'senate-expenses.html', 'procurement-analysis.html', 'procurement-deep-dive.html', 'procurement-registry.html', 'phoenix-pay.html', 'debt-fiscal.html', 'ag-findings.html'],
       'Democracy & Elections': ['elections-finance.html', 'voting-records.html', 'mp-voting-records.html', 'mp-scorecard.html', 'mp-analysis.html', 'appointments.html', 'judicial-appointments.html'],
       'Foreign Influence': ['foreign-interference.html', 'foreign-interference-deep.html', 'foreign-influence.html', 'influence-target-alpha.html', 'wef-davos.html', 'treason-trajectory.html', '5gw-subversion.html'],
-      'Lobbying & Special Interests': ['lobbying-tracker.html', 'lobbying-deepdive.html', 'sector-lobbying.html', 'cija-lobbying.html', 'contributions-tracker.html', 'charity-pipeline.html', 'carney-conflicts.html'],
+      'Lobbying & Special Interests': ['lobbying-tracker.html', 'lobbying-deepdive.html', 'sector-lobbying.html', 'cija-lobbying.html', 'bill-c63-online-harms.html', 'contributions-tracker.html', 'charity-pipeline.html', 'carney-conflicts.html', 'brookfield-maid.html'],
       'Social Crisis': ['healthcare-crisis.html', 'housing-crisis.html', 'opioid-crisis.html', 'immigration-policy.html', 'telecom-oligopoly.html', 'infrastructure-deficit.html', 'privacy-surveillance.html', 'tfw-abuse.html', 'media-concentration.html', 'environment-climate.html', 'cra-enforcement.html'],
       'International Connections': ['epstein-canadian-connections.html', 'epstein-maxwell.html'],
       'COVID & ArriveCan': ['covid-accountability.html', 'arrivecan.html'],
