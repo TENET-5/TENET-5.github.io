@@ -911,7 +911,13 @@
         utterance.pitch = 1.1;
         utterance.lang = 'en-GB';
 
-        // ── LIRIL voice lock — female British ONLY, block all male voices ──
+        // ── LIRIL voice lock — delegate to shared resolver when available ──
+        let preferredVoice = null;
+        if (window.LIRIL_VOICE) {
+          preferredVoice = window.LIRIL_VOICE.get();
+        }
+
+        if (!preferredVoice) {
         const MALE_BLOCK = /david|mark|james|george|daniel|ryan|guy|thomas|richard|rishi|sean|oliver|liam|christopher|eric|andrew|brian|roger|malcolm|connor|freddie|alfie|ethan|noah/i;
         const FEMALE_NAMES = /hazel|susan|libby|sonia|maisie|martha|kate|karen|moira|fiona|serena|samantha|victoria|zira|jenny|aria|sara|emily|emma|google.*female/i;
         const isGB = v => (v.lang || '').replace('_','-').toLowerCase().startsWith('en-gb');
@@ -922,7 +928,7 @@
         const voices = window.speechSynthesis.getVoices();
 
         // Use primed voice if available (Chrome/Edge async safe)
-        let preferredVoice = _homeCachedVoice || null;
+        preferredVoice = _homeCachedVoice || null;
 
         // Validate primed voice is still present and not male
         if (preferredVoice) {
@@ -955,9 +961,10 @@
             voices.find(v => isEN(v) && isFemale(v)) ||
             // P5: Any English NOT male
             voices.find(v => isEN(v) && !isMale(v)) ||
-            // P6: Absolute last resort — any English
-            voices.find(v => isEN(v)) || null;
+            // P6: null — silence is better than male voice
+            null;
         }
+        } /* end fallback block — LIRIL_VOICE not available */
 
         if (preferredVoice) {
           utterance.voice = preferredVoice;
@@ -981,11 +988,24 @@
       }
     };
 
-    // ── LIRIL voice priming — Chrome/Edge load voices ASYNC ──
-    // Must prime BEFORE user clicks, otherwise getVoices() returns []
+    // ── LIRIL voice priming — delegate to shared resolver when available ──
     var _homeCachedVoice = null;
     (function primeVoice() {
       if (!('speechSynthesis' in window)) return;
+      /* Use shared LIRIL_VOICE if loaded (liril-voice.js handles retry/voiceschanged) */
+      if (window.LIRIL_VOICE) {
+        var v = window.LIRIL_VOICE.get();
+        if (v) { _homeCachedVoice = v; return; }
+        /* Shared module retry will handle async voices — just poll it */
+        var _rr = 0;
+        (function poll() {
+          var vv = window.LIRIL_VOICE.get();
+          if (vv) { _homeCachedVoice = vv; return; }
+          if (++_rr < 20) setTimeout(poll, 250);
+        })();
+        return;
+      }
+      /* Fallback: own resolver if liril-voice.js failed to load */
       var MALE_BLOCK_P = /david|mark|james|george|daniel|ryan|guy|thomas|richard|rishi|sean|oliver|liam|christopher|eric|andrew|brian|roger|malcolm|connor|freddie|alfie|ethan|noah/i;
       function resolve() {
         var voices = window.speechSynthesis.getVoices();
@@ -1038,6 +1058,7 @@
       }
     });
   </script>
+<script src="js/liril-voice.js?v=1"></script>
 <script src="js/presenter.js"></script>
 <script src="js/impact.js"></script>
 <script src="js/auto-present.js"></script>
