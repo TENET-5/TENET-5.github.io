@@ -49,6 +49,8 @@
     'genocide-evidence.html',
     'cija-maid-pipeline.html',
     't4-comparison.html',
+    'maid-economics.html',
+    'maid-provincial.html',
 
     // ── MILITARY & VETERANS ──
     'veterans.html',
@@ -62,6 +64,8 @@
     's504-covey-bae.html',
     'the-boot.html',
     'bloggins.html',
+    'cds-accountability.html',
+    'cds-carignan-charges.html',
 
     // ── RCMP & LAW ENFORCEMENT ──
     'rcmp-commissioners.html',
@@ -73,6 +77,8 @@
     'charges-sheet.html',
     'criminal-code-analysis.html',
     'mp-brief.html',
+    'gillespie-murder.html',
+    'prosecution.html',
 
     // ── GOVERNMENT CORRUPTION ──
     'accountability.html',
@@ -86,6 +92,9 @@
     'phoenix-pay.html',
     'debt-fiscal.html',
     'ag-findings.html',
+    'emergencies-act.html',
+    'institutional-malice.html',
+    'rogue-state.html',
 
     // ── DEMOCRACY & ELECTIONS ──
     'elections-finance.html',
@@ -95,6 +104,9 @@
     'mp-analysis.html',
     'appointments.html',
     'judicial-appointments.html',
+    'election-2025.html',
+    'petitions.html',
+    'legislation.html',
 
     // ── FOREIGN INFLUENCE ──
     'foreign-interference.html',
@@ -104,6 +116,9 @@
     'wef-davos.html',
     'treason-trajectory.html',
     '5gw-subversion.html',
+    'bill-c70-registry.html',
+    'foreign-influence-alpha.html',
+    'cda-institute-psyop.html',
 
     // ── LOBBYING & SPECIAL INTERESTS ──
     'lobbying-tracker.html',
@@ -113,6 +128,7 @@
     'contributions-tracker.html',
     'charity-pipeline.html',
     'carney-conflicts.html',
+    'follow-the-money.html',
 
     // ── SOCIAL CRISIS ──
     'healthcare-crisis.html',
@@ -134,6 +150,7 @@
     // ── COVID & ARRIVECAN ──
     'covid-accountability.html',
     'arrivecan.html',
+    'phac-mandates-s6.html',
 
     // ── WHISTLEBLOWERS ──
     'whistleblower-failures.html',
@@ -150,12 +167,15 @@
     'toronto.html',
     'calgary.html',
     'vancouver.html',
+    'evidence-ns-oic.html',
+    'nova-scotia-oic.html',
 
     // ── AI & RESEARCH ──
     'ai-research.html',
     'liril-analysis.html',
     'acelephius-report.html',
     'acelephius-wardoll.html',
+    'architecture.html',
 
     // ── TOOLS & REFERENCE ──
     'hansard-dashboard.html',
@@ -171,6 +191,7 @@
     'canada-map.html',
     'records.html',
     'search.html',
+    's504-tracker.html',
 
     // ── TAKE ACTION ──
     'take-action.html',
@@ -191,7 +212,8 @@
     'news.html',
     'publications.html',
     'resources.html',
-    'legal.html'
+    'legal.html',
+    'community.html'
   ];
 
   /* Friendly titles for continue-slide display */
