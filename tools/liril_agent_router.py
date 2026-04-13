@@ -77,6 +77,11 @@ async def main():
         }
         await router.route_payload(test_payload)
         
+        logger.info("Aligning Godot SATOR Telemetry during Router Test...")
+        synced_files = await router.handoff.align_godot_telemetry()
+        if synced_files:
+            logger.info(f"Test Execution aligned {len(synced_files)} empirical magic handoff vectors.")
+        
 if __name__ == "__main__":
     if sys.platform != 'win32':
         import nest_asyncio
