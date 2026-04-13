@@ -600,7 +600,7 @@
             if (isActive && currentPoint < points.length - 1) {
               setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
             } else if (isActive) {
-              endWalkthrough();
+              advanceToNextPageWalkthrough();
             }
           }
         };
@@ -610,7 +610,7 @@
           if (isActive && currentPoint < points.length - 1) {
             setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
           } else if (isActive) {
-            endWalkthrough();
+            advanceToNextPageWalkthrough();
           }
         };
         audioElement.addEventListener('timeupdate', _audioTimeHandler);
@@ -636,7 +636,7 @@
                 if (isActive && currentPoint < points.length - 1) {
                   setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
                 } else if (isActive) {
-                  endWalkthrough();
+                  advanceToNextPageWalkthrough();
                 }
               });
             }
@@ -646,7 +646,7 @@
             if (isActive && currentPoint < points.length - 1) {
               setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
             } else if (isActive) {
-              endWalkthrough();
+              advanceToNextPageWalkthrough();
             }
           });
         }
@@ -781,6 +781,14 @@
       }, 2000); // Wait 2s for page to render
     }
 
+    function advanceToNextPageWalkthrough() {
+      if (window.__TENET5_NEXT_PAGE) {
+        window.__TENET5_NEXT_PAGE();
+      } else {
+        endWalkthrough();
+      }
+    }
+
     // ── Event listeners ──────────────────────────────
     startBtn.addEventListener('click', function() {
       if (isActive) {
@@ -805,6 +813,7 @@
         e.preventDefault();
         if (currentPoint > 0) showPoint(currentPoint - 1);
       } else if (e.key === 'Escape') {
+        try { sessionStorage.removeItem('liril-autowalk'); } catch(e) {}
         endWalkthrough();
       }
     });
@@ -828,6 +837,15 @@
       if (points.length >= 2) startBtn.style.display = '';
       else startBtn.style.display = 'none';
     };
+
+    // Auto-start if cross-page flow is active
+    try {
+      if (sessionStorage.getItem('liril-autowalk') === 'true') {
+        setTimeout(function() {
+          if (!isActive) startWalkthrough();
+        }, 1200);
+      }
+    } catch(e) {}
   }
 
   if (document.readyState === 'loading') {
