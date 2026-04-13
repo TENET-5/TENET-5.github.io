@@ -679,6 +679,147 @@ NARRATIONS = {
             "The Administrative Harvesters framework describes a lethality model that surpasses twentieth-century fascism through covert institutional violence: economic starvation, MAID, judicial psychological warfare. The zero-to-one resistance node dynamic means covert violence triggers no defensive friction — because the population does not recognize it as violence. The repatriation mandate calls for immediate withdrawal of the Latvian deployment to train civilian defense. A state that deploys its military abroad while harvesting its citizens at home is not a democracy in crisis. It is a rogue state by definition.",
         ],
     },
+    # ── Batch 5 ──────────────────────────────────────────────────────
+    "5gw-subversion": {
+        "title": "The War On You — A Veteran's Warning",
+        "segments": [
+            "Sixty-six thousand dead in World War I. Forty-five thousand four hundred in World War II. Five hundred and sixteen in Korea. One hundred and sixty-five in Afghanistan. Seventy-seven thousand and counting from MAID — medical assistance in dying — since 2016. Canada's state-administered death program has now killed more Canadians than the Kaiser, Hitler, and the Taliban combined.",
+            "This is fifth-generation warfare. No tanks. No bombs. No declarations. The weapons are institutional capture, identity erosion, and the normalization of state violence through policy. The Truth and Reconciliation Commission collected seven thousand testimonies and issued ninety-four Calls to Action. Two hundred and fifteen unmarked graves were announced at Kamloops. The pattern is consistent — the state inflicts harm, acknowledges it decades later, and then builds new systems to inflict new harm. This is not incompetence. This is a war on the population — waged from within.",
+        ],
+    },
+    "acelephius-report": {
+        "title": "ACELEPHIUS — TENET-5 LIRIL OSINT Engine",
+        "segments": [
+            "ACELEPHIUS is an automated open-source intelligence engine built into the TENET-5 platform. Sixty nodes collected. Fifteen AI synthesis assessments completed. Four CanLII case law hits. Nine Hansard parliamentary hits. Zero high-threat classifications — because the system documents institutional patterns, not individual targets.",
+            "The engine sweeps government records, parliamentary transcripts, and legal databases to identify convergence patterns. Each sweep is timestamped and logged. The latest collection cycle completed on April 6th, 2026. ACELEPHIUS does not speculate. It collects, cross-references, and presents — the analysis is left to the reader.",
+        ],
+    },
+    "arms-pipeline": {
+        "title": "The Arms Pipeline — Canada to Israel",
+        "segments": [
+            "Two hundred and twenty-nine million dollars. That is the documented value of the Canadian arms pipeline to Israel. Eighteen point nine million exported in 2024. Thirty-seven point two million in new permits issued in 2025. Seventy-eight point eight million in a single General Dynamics artillery contract signed September 26th, 2024. Ninety-four point five million in remaining active permits. The government announced a pause. The pipeline never stopped.",
+            "Two thousand one hundred and fifty-six lobbying communications from CIJA — the Centre for Israel and Jewish Affairs. One thousand and seventy-nine from David Pratt alone — four hundred and eight to the Department of National Defence, one hundred and thirty-nine to the PMO. Post-October 7th, lobbying surged two hundred and thirty-nine percent to three hundred and ninety communications. Seventy-three Members of Parliament accepted paid trips to Israel costing eight hundred and ninety-four thousand dollars. Bill C-233 — the arms embargo bill — was defeated twenty-two to two hundred and ninety-five. The pipeline is not a secret. It is a policy.",
+        ],
+    },
+    "caf-recruitment": {
+        "title": "CAF Recruitment Degradation — Institutional Analysis",
+        "segments": [
+            "In October 2024, the Canadian Forces Aptitude Test was eliminated. The quantitative cognitive baseline — the minimum standard that ensured military personnel could process complex orders under stress — was reduced to zero. The replacement: the Scored Employment Application Form, a subjective biography-based assessment with no measurable cognitive floor.",
+            "The degradation timeline is systematic. In 2020, permanent resident recruitment was opened. In 2022, dress instructions were updated and medical restrictions relaxed. By October 2024, the cognitive test was gone entirely. Each step individually appears as modernization. Taken together, they describe the deliberate construction of a force incapable of questioning unlawful orders. The baseline was not lowered by accident. It was removed by design.",
+        ],
+    },
+    "cda-institute-psyop": {
+        "title": "Psychological Warfare Matrix",
+        "segments": [
+            "Officer Travis Gillespie is dead. The network that targeted him has been identified. Sergeant Wally Fong — identified through TV-PressPass as a psychological operations operator. Stacey Clemmer — military police with a direct family connection to the CDA Institute network. Josh Malm — a CDA Institute operator who labeled Canadian veterans as enemies of the state.",
+            "Five individuals have been named under section 21 of the Criminal Code as party to murder. This is not a conspiracy theory. This is a documented psychological warfare operation targeting Canadian Forces veterans — conducted by personnel with military police access, defence think tank affiliations, and OSINT capabilities. The network is mapped. The charges are filed.",
+        ],
+    },
+    "cds-carignan-charges": {
+        "title": "CDS General Jennie Carignan — Charge Assessment Dossier",
+        "segments": [
+            "General Jennie Carignan was appointed Chief of the Defence Staff on July 18th, 2024. By October 2024, the Canadian Forces Aptitude Test was eliminated under her command. On February 19th, 2026, a foreign military recruit program was launched. By February 28th, 2026, Canadian Armed Forces strength stood at sixty-six thousand seven hundred and twenty-six against a target of seventy-one thousand five hundred — a shortfall of four thousand seven hundred and seventy-four.",
+            "On April 12th, 2026, Sky News broadcast General Carignan stating she was building an armed public service force for anti-government civil unrest. The clip accumulated over two hundred and twenty-two thousand five hundred views. Three hundred thousand strategic reserve civilians were announced. Seven to eight domestic deployments occurred in under twelve months. The Chief of the Defence Staff publicly admitted to constructing a domestic military force to suppress Canadian citizens. This is not interpretation. It is her own words, on camera, broadcast internationally.",
+        ],
+    },
+    "charity-pipeline": {
+        "title": "Canadian Charity Pipeline to Israel",
+        "segments": [
+            "Two hundred and seventy-six million dollars. That is how much Canadian charities sent to Israel in 2024. The five-year total exceeds one point three billion dollars. Twelve organizations have had their charitable status revoked by the Canada Revenue Agency for improper use of funds. The pipeline includes organizations directly connected to the Israeli Defence Forces.",
+            "These donations are tax-deductible. Canadian taxpayers subsidize the transfer through charitable tax credits. Military recruitment through Canadian charitable organizations has been documented. The money flows through registered charities, arrives in Israel, and funds activities that would be illegal if conducted by the Canadian government directly. The charity pipeline is the policy the government cannot publicly defend — so it outsources it to the non-profit sector.",
+        ],
+    },
+    "convergence-matrix": {
+        "title": "Triple Threat Convergence — MAID, Emergencies Act, and Lobbying",
+        "segments": [
+            "Forty-six Members of Parliament voted for both MAID expansion and the Emergencies Act. That is one hundred percent overlap. The same legislators who authorized state-administered death also authorized the suspension of civil liberties under the Emergencies Act. Of those forty-six, five also appear on the Top 50 Most Lobbied Officials list: Maloney, Sgro, Dabrusin, Sarai, and Duguid.",
+            "Three hundred and thirty-eight Members of Parliament voted on the Emergencies Act. The convergence matrix maps every MP who authorized both lethal state policy and emergency state control. This is not correlation. This is the same people making the same category of decision — expanding state power over life and liberty — across multiple legislative instruments. The pattern is consistent. The names are documented.",
+        ],
+    },
+    "crown-corporations": {
+        "title": "The Crown's Rotten Jewels — How State Corporations Burned Billions",
+        "segments": [
+            "Canada Post, CBC, Via Rail, CMHC, Export Development Canada — Crown corporations collectively represent billions in taxpayer exposure with minimal accountability. The CBC receives one point four billion dollars annually in public funding while commanding approximately five percent of the audience. Procurement mismanagement across Crown corporations follows the same pattern as federal departments: sole-source contracts, amendment chains, and vendor concentration.",
+            "Crown corporations operate at arm's length from Parliament — close enough to receive public money, far enough to avoid public scrutiny. When they fail, the taxpayer absorbs the loss. When they succeed, the benefits are privatized through partnerships and outsourcing. The model is not broken. It is functioning exactly as designed — to insulate institutional rot from democratic accountability.",
+        ],
+    },
+    "debt-fiscal": {
+        "title": "National Debt and Fiscal Crisis — 1.2 Trillion and Counting",
+        "segments": [
+            "One point two three two trillion dollars. That is Canada's federal market debt for 2024-25. Annual debt servicing: fifty-four point one billion dollars — approximately one hundred and fifty million dollars per day. That single line item exceeds the entire Canada Health Transfer of fifty-two point one billion. The government spends more on interest payments than it transfers to provinces for healthcare.",
+            "Debt per capita exceeds thirty-one thousand four hundred dollars. Debt-to-GDP: forty-two point seven percent federal, one hundred and seven percent total government including provinces per the IMF. Fifty-four billion dollars could build two hundred and seventy hospitals or fund one point eight million affordable housing units. Instead, it services debt accumulated through decades of structural deficits that persisted even through periods of economic expansion. The debt is not a crisis that happened to Canada. It is a crisis Canada chose.",
+        ],
+    },
+    "dnd-procurement": {
+        "title": "The Hundred Billion Dollar Betrayal — How Canada Broke Its Military",
+        "segments": [
+            "During World War II, Canada built over four hundred warships in under five years. In the modern era, Canada has failed to deliver a single combat ship in thirty years. The Canadian Surface Combatant program was baselined at twenty-six point two billion dollars. Current estimates exceed eighty-four billion. The F-35 lifecycle cost: twenty-seven point seven billion dollars. The Auditor General has flagged over ten billion in understatements across procurement programs.",
+            "Over one hundred billion dollars in failed military procurement. The pattern is consistent across every major program: unrealistic timelines, ballooning costs, sole-source contracts, and zero accountability. The Canadian Armed Forces cannot field the equipment it needs because the procurement system is designed to distribute contracts, not deliver capability. The troops pay the price. The contractors collect the cheques.",
+        ],
+    },
+    "environment-climate": {
+        "title": "Environment and Climate Accountability",
+        "segments": [
+            "Zero out of four. That is Canada's record on international climate targets: Kyoto, Copenhagen, Paris, Net Zero — every single one missed. Over one hundred billion dollars in climate spending since 2015. Emissions in 2022: approximately six hundred and seventy megatonnes of CO2 equivalent, down from a 2005 baseline of seven hundred and thirty. The Paris target requires reaching four hundred and one to four hundred and thirty-eight megatonnes by 2030 — a reduction of two hundred and thirty-two to two hundred and sixty-nine megatonnes in approximately six years.",
+            "The Trans Mountain pipeline: original estimate seven point four billion dollars. Purchase price in 2018: four point five billion. Final cost: thirty-four billion dollars — a three hundred and sixty percent cost overrun. The carbon tax generates eight to ten billion dollars per year in revenue. The government simultaneously subsidizes fossil fuel infrastructure and taxes its consumption. The policy is not contradictory — it is extractive. Both sides of the equation generate revenue for the state while emissions continue to rise.",
+        ],
+    },
+    "epstein-canadian-connections": {
+        "title": "Canadian Political Entanglement — Project SDNY-EX",
+        "segments": [
+            "Unsealed Southern District of New York documents map Canadian political infrastructure connections to the Epstein-Maxwell global trafficking network. Peter Nygard — a Canadian fashion mogul — operated a parallel trafficking operation from his Bahamas compound. The MC2 modeling agency connected to Jean-Luc Brunel provided a recruitment pipeline. The TerraMar Project functioned as a financial transit vehicle.",
+            "The Canadian connections are not incidental. They represent documented intersections between political access, financial infrastructure, and the trafficking network's operational requirements. The SDNY files are public. The Canadian political entanglement is verified. The question that remains is not whether the connections exist — it is why no Canadian law enforcement agency has acted on them.",
+        ],
+    },
+    "gillespie-murder": {
+        "title": "The Murder of Officer Travis Gillespie",
+        "segments": [
+            "September 14th, 2022. Officer Travis Gillespie was killed in a vehicle collision. The driver, Han Zhou, had a blood alcohol level of ninety-three milligrams per hundred millilitres. Zhou received a sentence of six years. But the collision was not the beginning of this story — it was the culmination of a psychological operations campaign targeting Canadian Forces veterans.",
+            "Sergeant Wally Fong was identified through TV-PressPass as a psyops operator. Stacey Clemmer — military police and cousin to the CDA Institute network — produced wardoll targeting content. Josh Malm operated through the CDA Institute to label Canadian soldiers as enemies. Twenty-eight total counts have been filed under section 504 of the Criminal Code. Five individuals are named under section 21 as party to murder. Forty-four documented child deaths at Thunderchild Residential School connect the broader institutional pattern. The network is identified. The charges are filed. The names are on the record.",
+        ],
+    },
+    "harm-index": {
+        "title": "Policy Harm Index — Legislative Changes That Increased Death Rates",
+        "segments": [
+            "Seventy-six thousand seven hundred and seven MAID deaths between 2016 and 2024 — rising from one thousand and eighteen in 2016 to sixteen thousand four hundred and ninety-nine in 2024. A fifteen hundred and twenty percent increase. MAID now accounts for five point one percent of all Canadian deaths. Seven hundred and thirty-two Track 2 non-terminal MAID deaths were recorded in 2024 alone.",
+            "Forty-seven thousand opioid overdose deaths between 2016 and 2023. Approximately ten thousand estimated excess deaths from housing and homelessness. Four thousand five hundred veteran suicides since 2000. Over five thousand long-term care COVID deaths attributable to policy failures. This is the Policy Harm Index — a comprehensive registry of Canadian legislative changes with measurable, preventable death tolls. Every number is sourced. Every policy is named. Every death was counted by the government that caused it.",
+        ],
+    },
+    "indigenous-accountability": {
+        "title": "Broken Promises, Broken Treaties",
+        "segments": [
+            "Ninety-four Truth and Reconciliation Calls to Action. By 2024, approximately thirteen have been fully implemented. Two hundred and thirty-one MMIWG Calls for Justice — implementation stalled. Twenty-eight long-term drinking water advisories remain active according to Indigenous Services Canada in 2024. The department spent eighteen point nine billion dollars in 2022-23. The spending goes up. The outcomes do not.",
+            "One thousand one hundred and eighty-one RCMP-documented missing or murdered Indigenous women and girls. The national inquiry cost ninety-two million dollars between 2016 and 2019. Indigenous women represent four percent of the female population and twenty-four percent of female homicide victims — a homicide rate four times the national average. Highway 16 — the Highway of Tears — stretches seven hundred and twenty-four kilometres with over forty women and girls missing or murdered since 1970. Reconciliation is not a slogan. It is a measurable commitment — and by every measure, Canada is failing.",
+        ],
+    },
+    "infrastructure-deficit": {
+        "title": "Crumbling Canada — The 357 Billion Dollar Infrastructure Betrayal",
+        "segments": [
+            "Three hundred and fifty-seven billion dollars. That is Canada's total infrastructure deficit. Thirty percent of municipal assets are in fair, poor, or very poor condition. Forty percent of roads are in fair or poor condition. Twenty-six percent of bridges need major repair. The Ottawa LRT alone has cost over two point one billion dollars including remediation. Thirty-three long-term drinking water advisories remained active in 2024.",
+            "The breakdown: one hundred and fifteen billion for roads and highways. Eighty billion for water and wastewater. Sixty billion for transit systems. Fifty billion for bridges and overpasses. Fifty-two billion for public buildings. Five point nine billion dollars in infrastructure funding lapses annually — money allocated but never spent. The generation that won World War II built infrastructure designed to last eighty years. Modern Canada cannot maintain what they built, let alone replace it.",
+        ],
+    },
+    "judicial-appointments": {
+        "title": "The Bench Is Broken",
+        "segments": [
+            "Approximately twelve hundred federally appointed judges serve in Canada. Eighty-eight federal judicial vacancies were recorded in October 2024. The average time to fill a vacancy: eighteen months. In October 2016, Judicial Advisory Committee reforms gave the government a majority on every committee — four of seven federal appointees. A 2013 University of Toronto study found that political donations correlate to judicial appointments.",
+            "Carter v. Canada in 2015 legalized MAID — forty-four thousand nine hundred and fifty-eight deaths reported by 2022. Bedford v. Attorney General in 2013 struck down prostitution laws. R v. Jordan in 2016 imposed trial delay ceilings — eighteen months for provincial courts, thirty months for superior courts — collapsing thousands of cases. Bill C-75 reformed bail in 2019. The Violent Crime Severity Index increased thirty-two percent between 2015 and 2023. The Supreme Court legislates from the bench. Parliament fills the bench with political allies. The judiciary is not independent. It is captured.",
+        ],
+    },
+    "media-concentration": {
+        "title": "The Ministry of Truth — Canada's Media Concentration Crisis",
+        "segments": [
+            "Three corporate conglomerates control approximately eighty percent of Canadian television revenue: Bell, Rogers, and Corus-Shaw. Postmedia owns approximately one hundred and thirty newspaper brands. Two hundred and fifty-one local media outlets have closed since 2008. The Rogers-Shaw merger — valued at twenty-six billion dollars — was approved in 2023, further consolidating control over content and distribution.",
+            "The CBC receives one point four billion dollars in annual public funding and commands approximately five percent of the audience. An additional five hundred and ninety-five million dollars flows through media subsidies. These same conglomerates own the television networks, the radio stations, the newspapers, and the internet service providers. They control the content and the delivery mechanism. When three companies own the news and the pipes it travels through, the Ministry of Truth is not a metaphor. It is a business model.",
+        ],
+    },
+    "privacy-surveillance": {
+        "title": "The Watchers — Canada's Quiet March Toward a Surveillance State",
+        "segments": [
+            "In 2014, Canadian law enforcement made over one point two million requests to telecommunications companies for subscriber data — without warrants. Four major surveillance bills were tabled between 2022 and 2024: Bill C-11 the Online Streaming Act, Bill C-18, Bill C-26 the Critical Cyber Systems Protection Act, and Bill C-63 the Online Harms Act. Bill C-63 increased the maximum sentence for advocating genocide from five years to life imprisonment — while simultaneously creating pre-crime bail provisions.",
+            "The Privacy Act has not been meaningfully updated in over thirty years. CSIS was created in 1984. Bill C-51 in 2015 expanded its mandate. Bill C-26 allows secret government orders to internet service providers with no public disclosure. Canada is a founding member of the Five Eyes intelligence alliance. The border agency conducts warrantless device searches. The legislative program is not protecting Canadians from harm. It is constructing a comprehensive surveillance and content-control architecture — one bill at a time.",
+        ],
+    },
 }
 
 
