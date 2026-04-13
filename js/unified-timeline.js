@@ -48,6 +48,7 @@
     { year: 2026, month: 4, title: 'Carney Majority: 5 Floor-Crossings + 3 By-Elections', desc: '5 Conservative MPs crossed floor to Liberals. 3 by-elections April 13 — Liberals need 1 win for 172-seat majority. Critics: "authoritarian consolidation" bypassing voter intent for minority parliament.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
     { year: 2026, month: 1, title: 'Carney Reduces China EV Tariffs to 6.1%', desc: '49,000 Chinese EVs allowed in. Global Affairs drops forced labour from goals. Human rights report "submitted in error." Hogue Commission already identified China as primary interference actor.', link: 'carney-conflicts.html', cat: 'foreign', color: '#60a5fa' },
     { year: 2026, month: 4, title: 'Carney: End US Military Procurement Dependence', desc: '"The days of our military sending 70 cents of every dollar to the United States are over." Announced at Liberal convention while CAF 12,785 short and can only train 6,400/year.', link: 'cds-accountability.html', cat: 'cfnis', color: '#a855f7' },
+    { year: 2026, month: 4, title: 'Gladu Floor-Crossing — 4th Defection', desc: 'CPC MP Marilyn Gladu crosses to Liberals (~April 9). 4th floor-crossing (3 CPC + 1 NDP). Liberals at 170 seats. Need 1 by-election win for majority.', link: 'carney-conflicts.html', cat: 'waste', color: '#f59e0b' },
   ];
 
   var CAT_LABELS = { maid: 'MAID', waste: 'Gov. Waste', foreign: 'Foreign Int.', cfnis: 'CFNIS / 504' };
