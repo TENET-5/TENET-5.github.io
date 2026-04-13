@@ -820,6 +820,302 @@ NARRATIONS = {
             "The Privacy Act has not been meaningfully updated in over thirty years. CSIS was created in 1984. Bill C-51 in 2015 expanded its mandate. Bill C-26 allows secret government orders to internet service providers with no public disclosure. Canada is a founding member of the Five Eyes intelligence alliance. The border agency conducts warrantless device searches. The legislative program is not protecting Canadians from harm. It is constructing a comprehensive surveillance and content-control architecture — one bill at a time.",
         ],
     },
+    # ── Batch 6 ──────────────────────────────────────────────────────────
+    "evidence-index": {
+        "title": "Evidence Index — The Full Archive",
+        "segments": [
+            "This is the Evidence Index — ninety-four data files, one hundred and fifty investigation pages, twenty-eight verified government sources, and zero hallucinations. Every claim on this site traces directly to a government database: Health Canada, Elections Canada, the Commissioner of Lobbying, or the Auditor General.",
+            "No data is fabricated, estimated, or assumed. If a number appears, it has a verifiable source — and that is what makes this archive so dangerous to the people named in it.",
+        ],
+    },
+    "conspiracy-board": {
+        "title": "Investigation Board — Foreign Influence Mapping",
+        "segments": [
+            "The Investigation Board maps foreign influence operations inside Canadian politics using exclusively public government records — Hansard transcripts, Lobbying Commissioner filings, Elections Canada data, RCMP reports, and Auditor General findings.",
+            "Entities are clustered by frequency of interaction and weighted by co-occurrence in official records. Every node, every connection, every line on this board traces to a document the government itself published. Zero speculation — all sourced.",
+        ],
+    },
+    "timeline": {
+        "title": "Timeline — Eighty Years of Federal Actions",
+        "segments": [
+            "Eighty years of Canadian federal actions — from the Veterans Charter of 1945 to the debt crisis of 2025 — searchable, filterable, and scored for impact.",
+            "This timeline documents the arc: from post-war promise through the Somalia Affair, the Sponsorship Scandal, one hundred and fifty-eight soldiers killed in Afghanistan, the invocation of the Emergencies Act, MAID deaths exceeding fifteen thousand per year, and a national debt that doubled in a single decade. The pattern is not incompetence. It is institutional decay.",
+        ],
+    },
+    "ppcli-lawsuit": {
+        "title": "PPCLI Lawsuit — First Battalion Kit Shop",
+        "segments": [
+            "First Battalion Princess Patricia's Canadian Light Infantry Kit Shop sold tactical combat gear to a certified mentally challenged signals operator, made him carry the LAV Blank Firing Attachment, and then deployed him to Afghanistan.",
+            "Dr. Selhi of Providence Care confirmed the diagnosis. The Canadian Forces took a vulnerable person, armed him, deployed him to a war zone, and when he complained — they turned the investigation against him.",
+        ],
+    },
+    "s504-covey-bae": {
+        "title": "Section 504 — Covey and Bae Criminal Charges",
+        "segments": [
+            "Twenty-eight criminal charges have been filed under Section 504 of the Criminal Code against Captain Rebecca Covey of CFNIS and Crown Prosecutor Vicky Jahye Bae — including party to murder, mutiny under the National Defence Act, institutional hate crime, and conspiracy to obstruct justice.",
+            "Covey faces sixteen counts as the investigating officer who turned the investigation against the whistleblower. Bae faces four counts including evidence sanitisation — and she is a documented Confucius Institute member.",
+        ],
+    },
+    "bloggins": {
+        "title": "The Bloggins Files — Classified Military Memes",
+        "segments": [
+            "The Bloggins Files — one hundred and eighty classified military memes from Bloggins Enterprises. Battle plans, unhinged maps, rubber duck intelligence operations, and the Avro Arrow recovery mission.",
+            "This is the lighter side of the investigation — because sometimes the absurdity of the institution is best captured in satire rather than statistics.",
+        ],
+    },
+    "cfnis-proxy": {
+        "title": "CFNIS — Proxy Buffer Node Analysis",
+        "segments": [
+            "The Canadian Forces National Investigation Service — CFNIS — has been identified as a proxy buffer node with an NP-HARD threat classification and a threat score of zero point eight-eight.",
+            "Data convergence across military whistleblower complaints reveals CFNIS functioning not as an investigative body, but as a mechanism to stall, obfuscate, and artificially terminate investigations into high-ranking officers involved in procurement fraud and doctrinal subversion. The jurisdiction boundaries deliberately overlap civilian, military, and international corporate oversight — preventing linear legal accountability.",
+        ],
+    },
+    "mp-brief": {
+        "title": "Notice to Military Police — Section 504 Filing",
+        "segments": [
+            "Notice to Military Police: a formal Section 504 Criminal Code filing containing twenty-eight criminal counts is active against personnel within your chain of command.",
+            "Under the National Defence Act, Section 83 obligates military police to investigate reported offences — failure to do so is itself an offence under Section 124. Receipt of this notification creates a documented legal obligation. Non-investigation after notification constitutes dereliction of duty and may constitute obstruction of justice.",
+        ],
+    },
+    "procurement-registry": {
+        "title": "Procurement Registry — Two Hundred and Sixty Billion",
+        "segments": [
+            "Two hundred and sixty billion dollars in documented federal procurement failures — every entry confirmed by the Auditor General, the Parliamentary Budget Officer, or criminal court. ArriveCAN: fifty-four million for a PDF questionnaire. Phoenix Pay System: nine point three billion. Canadian Surface Combatants: seventy-seven billion.",
+            "And not one federal minister served prison time. The only failure that produced criminal convictions was the Sponsorship Scandal — and that required a full public Commission of Inquiry.",
+        ],
+    },
+    "mp-scorecard": {
+        "title": "MP Scorecard — Three Hundred and Forty MPs Scored",
+        "segments": [
+            "All three hundred and forty sitting Members of Parliament, scored against four databases: the Commissioner of Lobbying with five hundred and forty-seven thousand contacts, the CIJA raw CSV with two thousand one hundred and fifty-six communications to nine hundred and ninety-three officials, the investigation board with ninety-four nodes, and the treason roster matrix with eight hundred and seventy-seven entities.",
+            "The result: one hundred and thirteen clean. The rest — flagged. Every Canadian can now look up their MP and see exactly who is lobbying them.",
+        ],
+    },
+    "mp-analysis": {
+        "title": "MP Analysis — Individual Intelligence Reports",
+        "segments": [
+            "LIRIL intelligence reports on individual Members of Parliament — lobbying data, voting records, ethics flags, and accountability scoring generated from cross-referencing the Commissioner of Lobbying registry, Elections Canada filings, and parliamentary vote records.",
+            "Each MP receives a score, a verdict, and a detailed breakdown of every flag. This is not opinion. This is their own public record, organised and scored.",
+        ],
+    },
+    "influence-target-alpha": {
+        "title": "Target Alpha — Highest Threat Classification",
+        "segments": [
+            "Target Alpha has been isolated as a primary mechanism of foreign influence operating inside Canadian infrastructure, with a threat score of zero point nine-eight — the highest classification in the matrix.",
+            "Multiple unregistered lobbying interventions have been detected, correlated directly with CCP-linked proxies targeting federal mandates through non-profit shells and state-owned commercial enterprise routing. The Hogue Commission confirmed China as the most active foreign interference actor in Canadian elections. This node exploits direct linear access points within municipal frameworks including Vancouver and Toronto.",
+        ],
+    },
+    "wef-davos": {
+        "title": "WEF Davos — We Penetrate the Cabinets",
+        "segments": [
+            "Klaus Schwab said it on camera, at Harvard, on the record: 'We penetrate the cabinets.' This report documents forty-seven confirmed Canadian Young Global Leader alumni, over seven Trudeau visits to Davos as Prime Minister, and Chrystia Freeland sitting on the WEF Board of Trustees.",
+            "Our grandfathers did not storm Juno Beach so that eighty years later, unelected foreign billionaires could dictate Canadian policy at Swiss ski resorts. The policy alignment between WEF white papers and Canadian legislation is documented and sourced.",
+        ],
+    },
+    "telecom-oligopoly": {
+        "title": "Telecom Oligopoly — Three Companies, Eighty-Seven Percent",
+        "segments": [
+            "Three companies — Rogers, Bell, and TELUS — control eighty-seven percent of Canadian wireless revenue, charging among the highest prices in the developed world. The CRTC, the regulator meant to protect Canadians, has been captured by the industry it oversees.",
+            "And when a fourth competitor proved that twenty-five dollar plans were commercially viable, the Big Three simply matched them — revealing the profit margin was always there. Canadians have been paying oligopoly prices for decades, and the regulator did nothing.",
+        ],
+    },
+    "tfw-abuse": {
+        "title": "TFW Abuse — Wage Suppression at Scale",
+        "segments": [
+            "Two hundred and thirty-nine thousand Temporary Foreign Worker positions approved in 2022 alone — up from ninety thousand in 2015, a one hundred and sixty-five percent increase in seven years. Eighty-five percent in low-wage categories where Canadian workers were available but employers refused to pay market rates.",
+            "This is not immigration policy — this is a wage-suppression subsidy. Workers tied to a single employer, housed in squalor, paid poverty wages, while corporations post record profits and call it a labour shortage.",
+        ],
+    },
+    "cra-enforcement": {
+        "title": "CRA Enforcement — Twenty Billion Uncollected",
+        "segments": [
+            "The Parliamentary Budget Officer estimates between twenty and twenty-six billion dollars in federal taxes go uncollected every year — roughly equivalent to the entire annual federal health transfer. CRA recovers just two point two billion. The offshore prosecution rate is less than zero point one percent.",
+            "Meanwhile, CRA audits small businesses at three times the rate of major corporations. Our grandfathers paid their taxes and built this country. Now the ultra-wealthy hide billions offshore while CRA audits working families for five hundred dollar home-office deductions.",
+        ],
+    },
+    "provincial-analysis": {
+        "title": "Provincial Analysis — All Ten Provinces",
+        "segments": [
+            "All ten Canadian provinces — accountability data drawn from Auditor General reports, integrity commissioner findings, and public legislative records. Premiers, governing parties, key scandals, criminal code applicability, and federal cross-references.",
+            "Provincial ministers and senior officials are public officers under the Criminal Code. The documented failures are not confined to Ottawa — they cascade through every provincial legislature in the country.",
+        ],
+    },
+    "municipal-intelligence": {
+        "title": "Municipal Intelligence Hub — Five Thousand Municipalities",
+        "segments": [
+            "The Municipal Intelligence Hub extends the investigation to every province, territory, and municipality in Canada — over five thousand municipalities, thirteen provinces and territories, all sourced from public records.",
+            "Every municipal budget is public. Every council vote is a matter of record. Every procurement contract is subject to transparency requirements. Thirty-plus cities now have documented findings including Ottawa's two point one billion dollar LRT fiasco, Toronto's five hundred million per year in untended shelter contracts, and Vancouver's developer donation scandal.",
+        ],
+    },
+    "quinte-west": {
+        "title": "Quinte West — Small Town, Same Pattern",
+        "segments": [
+            "Quinte West, Ontario — population forty-six thousand, encompassing Trenton, Frankford, Batawa, Murray, and Sidney. The Integrity Commissioner investigated Mayor Jim Harrison and found a Code of Conduct violation following a 2023 altercation with a councillor.",
+            "A twelve-member council, four wards, two integrity investigations — even in a small Ontario municipality, the pattern of governance failure repeats. No community is too small for accountability.",
+        ],
+    },
+    "ottawa": {
+        "title": "Ottawa — The Capital Cannot Run a Train",
+        "segments": [
+            "Ottawa — Canada's capital, population one million, operating budget four point four billion dollars. The Confederation Line LRT cost two point one billion, opened two and a half years late, and the public inquiry found city officials provided 'incomplete and inadequate oversight.'",
+            "Lansdowne 2.0: a three hundred and thirty-two million dollar sole-source subsidy. An infrastructure deficit of two point five billion. The city that houses Parliament cannot even run a train on time.",
+        ],
+    },
+    "toronto": {
+        "title": "Toronto — Institutional Failure at Scale",
+        "segments": [
+            "Toronto — Canada's largest city, population two point nine million, budget sixteen point three billion dollars. Five hundred million per year spent housing homeless residents in hotels with no competitive tender — per-diem rates up to one hundred and eighty dollars per night.",
+            "The Eglinton Crosstown LRT has ballooned from eight point four billion to twelve point five billion, an eleven-year delay and the largest transit cost overrun in Canadian history. Meanwhile, Toronto Community Housing carries a four point eight billion dollar repair backlog. This is not governance. This is institutional failure at scale.",
+        ],
+    },
+    # ── Batch 7 ──────────────────────────────────────────────────────────
+    "calgary": {
+        "title": "Calgary — Oil Capital, Green Line Failure",
+        "segments": [
+            "The City of Calgary operates on a five-point-seven billion dollar annual budget, yet its flagship Green Line LRT project has been cut three times while ballooning to four-point-nine billion dollars — with not a single metre of track laid after a decade of planning.",
+            "Mayor Gondek's campaign received significant development industry funding while presiding over cumulative property tax increases exceeding thirty percent, and the Chief Administrative Officer draws four hundred and fifty-four thousand dollars annually. When the oil capital of Canada can't build a train line but can pay its executives half a million dollars, the question isn't competence — it's priorities.",
+        ],
+    },
+    "vancouver": {
+        "title": "Vancouver — Developer Money In, Oversight Out",
+        "segments": [
+            "Vancouver — a city of six hundred and sixty-two thousand people with a two billion dollar budget — handed nineteen percent of it to a police department that hasn't solved the Downtown Eastside crisis despite being the most expensive force per capita in Canada.",
+            "Mayor Ken Sim's ABC party received approximately one-point-three million dollars from the real estate and development industry, while forty percent of city contracts bypassed competitive procurement entirely. The math is straightforward: developer money flows in, competitive oversight flows out, and three hundred and eighty-two million dollars funds a police service that patrols the consequences.",
+        ],
+    },
+    "ai-research": {
+        "title": "AI Research Methodology — Three-Tier Source Hierarchy",
+        "segments": [
+            "This investigation is built on three hundred and seventy documented entities, six thousand four hundred sourced connections, and ninety-five investigation pages — every claim traced to a strict three-tier source hierarchy beginning with the Auditor General, Health Canada, and Hansard.",
+            "No algorithms decide truth here; human researchers cross-reference public government records against lobbying registries, Elections Canada data, and court filings. When a claim appears in two or more independent datasets, it earns a multi-source flag — and correlation is never presented as causation.",
+        ],
+    },
+    "liril-analysis": {
+        "title": "LIRIL Analysis — The Ethics Gate",
+        "segments": [
+            "LIRIL is the neural processing unit at the core of TENET5 — the ethics gate that classifies every record in The 504 Database before any other system touches it.",
+            "Operating at seed value one hundred and eighteen thousand four hundred, LIRIL has classified one thousand one hundred and five government accountability records across six categories using deterministic keyword analysis, source verification, and severity assessment. Every classification is baked at build time, not generated dynamically — ensuring that when LIRIL flags a record as critical, that judgment is reproducible, auditable, and permanent.",
+        ],
+    },
+    "acelephius-wardoll": {
+        "title": "ACELEPHIUS WARDOLL — OSINT Engine",
+        "segments": [
+            "The ACELEPHIUS open-source intelligence engine has indexed ninety-four pages, catalogued nine hundred and seventy-seven digital assets, and mapped thirty-eight platform accounts linked to the target profile — demonstrating the scale of digital footprint analysis possible from publicly available information alone.",
+            "This is not surveillance; this is what any person leaves exposed across the open internet, assembled in minutes by automated OSINT collection. When forty-eight products and a six-hundred-and-ninety-seven-kilobyte exposed members page are visible to anyone with a web crawler, the question of digital operational security answers itself.",
+        ],
+    },
+    "hansard-dashboard": {
+        "title": "Hansard Dashboard — Parliamentary Receipts",
+        "segments": [
+            "This dashboard tracks one hundred and fifty-one bills, ninety-four recorded votes, and three hundred and forty Members of Parliament in the forty-fifth Canadian Parliament — every data point sourced from the official Hansard record and LEGISinfo.",
+            "Bills are filterable by category, status, and party breakdown; every vote is mapped to the MP who cast it. When parliamentarians claim they didn't know what they were voting for, this dashboard is the receipts.",
+        ],
+    },
+    "osint-dashboard": {
+        "title": "OSINT Dashboard — Six Hundred Billion in Exposure",
+        "segments": [
+            "The OSINT Intelligence Dashboard maps over three hundred and seventy network entities, seventy-plus scandal clusters, and six hundred and thirteen billion dollars in documented financial exposure spanning waste, fraud, and liabilities.",
+            "The death toll documented across MAID, the opioid crisis, and Canadian-armed exports exceeds three hundred and sixty-one thousand — a figure sourced entirely from Health Canada annual reports, coroner data, and arms export records. One hundred and seven years of institutional failure, six Rome Statute charges, and fourteen active critical-severity investigation clusters — this is the scale of what the public record reveals when someone actually reads it.",
+        ],
+    },
+    "entity-viewer": {
+        "title": "Entity Profiler — Risk-Coded Actor Mapping",
+        "segments": [
+            "The Entity Profiler maps documented actors to their actions, financial vectors, and institutional connections — each card colour-coded by risk level and clickable to reveal a full timeline of sourced events.",
+            "This is not speculation; it's a programmable profiling dashboard built from lobbying registries, campaign finance disclosures, and Ethics Commissioner findings. Every entity displayed here earned their place through the public record, and every connection is documented with primary sources.",
+        ],
+    },
+    "ledger-book": {
+        "title": "The Accountability Ledger — Volume One",
+        "segments": [
+            "Volume One of The Accountability Ledger represents a comprehensive synthesis of over seven million public records — lobbying registries, financial disclosures, voting histories, and Auditor General reports — cross-referenced with mathematical rigidity into seven chapters documenting the architecture of state failure.",
+            "Chapter One alone isolates forty-six currently sitting Members of Parliament who voted yes on both the initial MAID legalisation and its aggressive expansion, with zero abstentions and zero dissents. When a state turns its sovereign power against its most vulnerable citizens, this ledger is the algorithmic response to the bureaucracy's instinct for obfuscation.",
+        ],
+    },
+    "infographics": {
+        "title": "Infographics — The Government's Own Numbers",
+        "segments": [
+            "Every chart on this page draws its data from a single source: Health Canada's own annual reports on Medical Assistance in Dying. The bar charts, donut breakdowns, and daily death projections are not editorialised — they are the government's published numbers rendered in visual form.",
+            "When forty-five Canadians are being killed per day by state-administered euthanasia and the growth trajectory shows no sign of flattening, a picture isn't worth a thousand words — it's worth seventy-six thousand lives.",
+        ],
+    },
+    "canada-map": {
+        "title": "National Corruption Map — Province by Province",
+        "segments": [
+            "The National Corruption Map is an interactive investigation hub covering every municipality in Canada — searchable, filterable, and scored by severity from monitored to critical.",
+            "Each municipality card links to a dedicated investigation page documenting procurement failures, campaign finance irregularities, and governance overlap, sourced from municipal budgets, provincial auditors, and Elections Canada filings. This is the geography of institutional failure: province by province, city by city, dollar by dollar.",
+        ],
+    },
+    "records": {
+        "title": "The 504 Database — One Thousand Records of Misconduct",
+        "segments": [
+            "The 504 Database contains one thousand one hundred and five documented records of government misconduct spanning one hundred and forty-one years — sixty convictions, ninety-three criminal charges, twenty-four ethics violations, and over two hundred billion dollars in documented waste.",
+            "Named after Criminal Code section 504, the constitutional right every Canadian has to lay a private prosecution, this database exists because when the Crown refuses to prosecute and the RCMP declines to investigate, the citizen's backstop is the sworn information before a Justice of the Peace. Every record is sourced from Ethics Commissioner findings, Auditor General reports, court judgments, and Hansard transcripts.",
+        ],
+    },
+    "search": {
+        "title": "OSINT Search — Cross-Referenced Intelligence",
+        "segments": [
+            "The OSINT Search tool queries across one hundred and fifty-one bills, three hundred and forty MPs, lobbying records, and political donation databases — all from public Canadian government data.",
+            "Type a name, a riding, a bill number, or a keyword, and the system returns cross-referenced results linking parliamentary activity to lobbying contacts and campaign finance. This is the tool that turns a sprawling public record into an answer in under a second.",
+        ],
+    },
+    "take-action": {
+        "title": "Take Action — Legal Tools for Citizens",
+        "segments": [
+            "This is not a reading list — these are the concrete legal tools available to every Canadian citizen right now. Section 504 of the Criminal Code allows any person to lay a private prosecution before a Justice of the Peace.",
+            "The Lobbying Act, the Public Servants Disclosure Protection Act, Ethics Commissioner complaint procedures, and Parliamentary petition mechanisms are all documented here with step-by-step instructions. When every institutional safeguard has failed, these are the tools the system gave you and hoped you'd never learn to use.",
+        ],
+    },
+    "open-letter": {
+        "title": "Open Letter — To Every Member of Parliament",
+        "segments": [
+            "This open letter to every Member of Parliament is written by Daniel Perry — a Canadian citizen, a veteran's family member, and a whistleblower who has been under prosecution for six years for reporting foreign interference inside the Canadian Armed Forces.",
+            "It cites the government's own numbers: seventy-six thousand seven hundred and seven MAID deaths since 2016, forty-five per day in 2024, forty-seven percent of Track 2 recipients reporting loneliness, and forty-eight-point-three percent coming from the poorest housing quintile. The Public Servants Disclosure Protection Act review has been legally overdue since 2012, and Canadian Forces members have zero statutory whistleblower protection — fourteen years of silence enforced by design.",
+        ],
+    },
+    "email-campaign": {
+        "title": "MP Email Campaign — Targeted Evidence Packages",
+        "segments": [
+            "The MP Email Campaign generates individualised evidence packages for every Member of Parliament based on their lobbying score, CIJA contact history, and investigation flags.",
+            "Clean MPs with a score of zero receive the full evidence report and legal tools — section 122 breach of trust, section 504 private prosecution, the Lobbying Act — and become recruited allies. Flagged MPs receive their peers' criminal and ethics records but not their own, triggering horizontal accountability across the system simultaneously. Every email is sourced from official Government of Canada publications.",
+        ],
+    },
+    "email-dispatch": {
+        "title": "Daily Evidence Dispatch — Five Hundred Recipients",
+        "segments": [
+            "The Daily Evidence Dispatch is an automated correspondence system targeting over five hundred recipients across nine categories: MPs, Senators, Premiers, police services, courts, federal agencies, think tanks, media outlets, and academic institutions.",
+            "Each recipient receives evidence tailored to their jurisdiction and role — RCMP divisions get criminal referral data, section 504 courts get sworn information templates, and media contacts get investigation summaries. This is not spam; it is the systematic delivery of the public record to every person with the authority to act on it.",
+        ],
+    },
+    "campaign-generator": {
+        "title": "Campaign Launch Dashboard — Operational Command",
+        "segments": [
+            "The Campaign Launch Dashboard is the operational command centre for coordinating accountability campaigns across every jurisdiction in Canada.",
+            "It generates targeted campaign materials, tracks dispatch progress, and coordinates timing across MPs, Senators, police services, courts, and media — all from a single interface. When the scale of documented misconduct spans one thousand one hundred and five records across one hundred and forty-one years, the response must be equally systematic.",
+        ],
+    },
+    "report-generator": {
+        "title": "MP Report Generator — Every MP Gets a Mirror",
+        "segments": [
+            "The MP Report Generator creates personalised investigation links for each of Canada's three hundred and forty Members of Parliament. Clean MPs see the full investigation picture and become potential allies for structural reform.",
+            "Flagged MPs receive scorecards showing their peers' criminal convictions and ethics violations — they think they have ammunition, but the data catches everyone. This is game theory applied to parliamentary accountability: every MP gets a mirror, and the reflection is sourced from their own public record.",
+        ],
+    },
+    "news": {
+        "title": "News and Intelligence — Live Cross-Referenced Feeds",
+        "segments": [
+            "The News and Intelligence page is an autonomous Canadian news aggregator delivering real-time headlines alongside AI-generated threat and accountability briefs.",
+            "Live feeds from major Canadian outlets are cross-referenced against the TENET5 investigation database, surfacing connections between breaking news and the documented patterns of institutional failure. When a story breaks about lobbying, procurement, or policy failure, this system already knows the names, the numbers, and the history.",
+        ],
+    },
+    "publications": {
+        "title": "Publications — The Permanent Record",
+        "segments": [
+            "The Publications section houses the official TENET5 intelligence reports, led by Volume One: The Accountability Ledger — a data-driven synthesis compiled from over seven million government records exposing the one-point-two billion dollar lobbying pipeline, the forty-six legislative exterminators, and the Track 2 expansion trajectory.",
+            "Published to academic and investigative journalism standards and automatically maintained by the LIRIL classification engine, these reports transform raw public data into the permanent, citable record that institutional memory was designed to erase.",
+        ],
+    },
 }
 
 
