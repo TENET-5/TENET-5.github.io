@@ -7,7 +7,7 @@
   'use strict';
 
   // ── Live death counter ──────────────────────────────
-  // MAID started June 17, 2016. 76,707 deaths through Dec 31, 2024.
+  // MAID started June 17, 2016. 76,475 deaths through Dec 31, 2024.
   // 2024 had 16,499 deaths in 365 days = 45.2 deaths per day.
   // Using 2024 rate for projection (most recent, most accurate).
   // 45.2 / 24 = 1.88 per hour. One death every 31.9 minutes.
