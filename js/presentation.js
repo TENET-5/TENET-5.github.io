@@ -1628,6 +1628,10 @@
     try { sessionStorage.setItem(VOICE_STORAGE_KEY, v.name); } catch (e) { /* quota */ }
   }
 
+  /* isMaleP — must be declared before resolveNarrationVoice AND accessible to voiceschanged guard */
+  var BANNED_MALE_LIST = ['david','mark','james','george','daniel','ryan','guy','thomas','richard','rishi','sean','oliver','liam','christopher','eric','andrew','brian','roger','malcolm','connor','freddie','alfie','ethan','noah'];
+  function isMaleP(v) { var n = (v.name||'').toLowerCase(); return BANNED_MALE_LIST.some(function(m){ return n.indexOf(m)>=0; }); }
+
   function resolveNarrationVoice() {
     if (cachedVoice) return cachedVoice;
     var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
@@ -1637,8 +1641,6 @@
 
     /* 0. Restore the exact voice used on the previous page (sessionStorage) */
     /* FIXED: validate restored voice is NOT male before trusting it */
-    var BANNED_MALE_P = ['david','mark','james','george','daniel','ryan','guy','thomas','richard','rishi','sean','oliver','liam','christopher','eric','andrew','brian','roger','malcolm','connor','freddie','alfie','ethan','noah'];
-    function isMaleP(v) { var n = (v.name||'').toLowerCase(); return BANNED_MALE_P.some(function(m){ return n.indexOf(m)>=0; }); }
     try {
       var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
       if (saved) {
@@ -1736,10 +1738,6 @@
 
   /* getPageLang — returns en-GB (LIRIL is always British) */
   function getPageLang() { return 'en-GB'; }
-
-  /* isMaleP must be accessible outside resolveNarrationVoice for voiceschanged guard */
-  var BANNED_MALE_LIST = ['david','mark','james','george','daniel','ryan','guy','thomas','richard','rishi','sean','oliver','liam','christopher','eric','andrew','brian','roger','malcolm','connor','freddie','alfie','ethan','noah'];
-  function isMaleP(v) { var n = (v.name||'').toLowerCase(); return BANNED_MALE_LIST.some(function(m){ return n.indexOf(m)>=0; }); }
 
   function updateNarrationButton() {
     if (!lirilNarration.button) return;
