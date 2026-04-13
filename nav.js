@@ -54,6 +54,7 @@
             '<a href="/kids-guide.html" id="nav-kids" style="color: #facc15;">Simple Guide</a>' +
             '<a href="/cds-accountability.html" id="nav-cds">CDS</a>' +
             '<a href="/follow-the-money.html" id="nav-money" style="color: #facc15;">Follow $</a>' +
+            '<a href="/omniverse-viewer.html" id="nav-omniverse" style="color: #76b900;">Omniverse</a>' +
             '<a href="/sitemap.html" id="nav-sitemap">All Pages</a>' +
           '</div>' +
           '<div class="nav-group nav-lang" style="margin-left: auto;">' +
