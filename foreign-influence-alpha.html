@@ -1,46 +1,293 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TENET5 — Foreign Influence Target Alpha</title>
+  <title>Foreign Influence — Hogue Commission & NSICOP Findings | TENET5</title>
+  <meta name="description" content="OSINT analysis of foreign interference in Canadian democratic institutions. Hogue Commission findings, NSICOP reports, documented interference vectors, and the institutional response (or lack thereof).">
+  <meta property="og:title" content="Foreign Influence — Hogue Commission & NSICOP Findings">
+  <meta property="og:description" content="Documented foreign interference in Canadian elections and institutions. From the public inquiry to the intelligence committee reports — what was found and what was ignored.">
+  <meta property="og:url" content="https://tenet-5.github.io/foreign-influence-alpha.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="theme-color" content="#2E3440">
   <link rel="stylesheet" href="style.css?v=20">
-  <link rel="stylesheet" href="css/metaverse.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap">
+
   <style>
-    :root { --bg: #09090b; --text: #f3f4f6; --accent: #0ea5e9; --secondary: #8b949e; }
-    html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-    .content-area { padding: 4rem; max-width: 900px; margin: 0 auto; }
-    .title-text { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: #facc15; }
-    .vector-text { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #dc2626; margin-bottom: 2rem; }
-    .card { background: rgba(6, 8, 16, 0.85); border: 1px solid rgba(34, 211, 238, 0.06); border-left: 3px solid #0ea5e9; padding: 2rem; margin-bottom: 2rem; }
-    .btn-cinematic { display: inline-block; padding: 0.8rem 2rem; background: transparent; border: 1px solid rgba(34, 211, 238, 0.12); color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 0.1em; transition: 0.3s; font-size: 0.9rem; margin-top: 2rem; }
-    .btn-cinematic:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); }
+    :root {
+      --crimson: #c41e3a;
+      --ink: #1a1f36;
+      --card-bg: #fff;
+      --border: #e5e5e3;
+      --muted: #6b7280;
+      --gold: #facc15;
+      --blue: #2563eb;
+      --orange: #ea580c;
+    }
+    .hero-intel {
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #fff;
+      text-align: center;
+      position: relative;
+    }
+    .hero-intel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50vw 40vh at 50% 50%, rgba(234,88,12,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-intel h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; position: relative; }
+    .hero-intel .subtitle { color: #b0b4c0; max-width: 800px; margin: 0.8rem auto 0; line-height: 1.7; position: relative; }
+
+    .content { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h2 { color: var(--ink); font-size: 1.5rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--orange);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .stat-box { background: var(--card-bg); border: 1px solid var(--border); border-left: 4px solid var(--orange); border-radius: 10px; padding: 1rem 1.2rem; text-align: center; }
+    .stat-box .stat-num { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 900; color: var(--ink); line-height: 1; }
+    .stat-box .stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    .finding-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 4px solid var(--orange); border-radius: 10px; padding: 1.4rem; margin: 1rem 0; }
+    .finding-card h3 { margin-top: 0; color: var(--ink); font-size: 1rem; }
+    .finding-card .source-tag { font-size: 0.72rem; color: var(--orange); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; }
+    .finding-card p { font-size: 0.9rem; color: #3d4355; line-height: 1.65; }
+
+    .vector-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+    .vector-table th { background: var(--ink); color: #fff; padding: 0.8rem; text-align: left; font-weight: 700; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
+    .vector-table td { padding: 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+    .vector-table tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+    .vector-table .severity { color: var(--crimson); font-weight: 700; }
+
+    .alert-box { background: rgba(234,88,12,0.06); border-left: 5px solid var(--orange); padding: 1.5rem; margin: 2rem 0; border-radius: 4px; }
+    .alert-box h3 { color: var(--orange); margin-top: 0; }
+
+    .cross-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .cross-link { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-decoration: none; color: var(--ink); transition: border-color 0.2s; }
+    .cross-link:hover { border-color: var(--orange); }
+    .cross-link .link-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .cross-link .link-title { font-weight: 700; margin-top: 0.2rem; font-size: 0.92rem; }
+
+    .source-note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 2rem; }
+    .source-note a { color: var(--blue); }
   </style>
 </head>
 <body>
-  <div class="grain-overlay"></div>
-  <div class="vignette"></div>
-  <div class="content-area">
-    <h1 class="title-text">Foreign Influence Target Alpha</h1>
-    <div class="vector-text">Vector: MF-87E633DCF77C09E3 | P-CLASS</div>
-    
-    <div class="card">
-      <h2 style="color:#0ea5e9; margin-bottom:1rem; font-size:1.4rem;">Empirical Magic Handoff Intel</h2>
-      <p style="color:#8b949e; font-size:1rem; line-height:1.6; margin-bottom:1rem;">
-        <strong>Threat Score:</strong> 0.98<br>
-        <strong>Matrix Complexity:</strong> P-CLASS<br>
-        <strong>Registry Flag:</strong> foreign_influence detected in lobbying registry (abcxyz)
-      </p>
-      <p style="color:#f3f4f6; font-size:1rem; line-height:1.6;">
-        This target was autonomously swept by the TENET5 Millennial Falcon subsystem. Evidence suggests persistent foreign lobbying intrusion affecting state institutional behavior. The dossier node is preserved via cryptographic signature <span style="font-family:'JetBrains Mono', monospace; font-size:0.9rem; color:#dc2626;">H-1823721e3241</span>.
-      </p>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero-intel">
+    <h1>Foreign Influence in Canadian Democracy</h1>
+    <p class="subtitle">
+      Documented foreign interference in Canadian elections and institutions.
+      Hogue Commission findings, NSICOP intelligence reports, and the institutional
+      response to confirmed threats against democratic sovereignty.
+    </p>
+  </section>
+
+  <div class="content">
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Election Cycles Affected</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">11</div>
+        <div class="stat-label">Ridings Targeted</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">3</div>
+        <div class="stat-label">State Actors Identified</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">0</div>
+        <div class="stat-label">Prosecutions Launched</div>
+      </div>
     </div>
-    
-    <a href="home.html" class="btn-cinematic">&larr; Return to Investigation</a>
+
+
+    <p class="section-label">Public Inquiry</p>
+    <h2>Hogue Commission — Key Findings</h2>
+
+    <p style="color:#3d4355;line-height:1.7;margin-bottom:1rem;">
+      The Public Inquiry into Foreign Interference in Federal Electoral Processes and Democratic
+      Institutions (the Hogue Commission), led by Justice Marie-Jos&eacute;e Hogue, examined foreign
+      interference in the 2019 and 2021 federal elections. The inquiry heard from CSIS officials,
+      cabinet ministers, and intelligence analysts. Key findings from the public record:
+    </p>
+
+    <div class="finding-card">
+      <div class="source-tag">Hogue Commission — Initial Report (May 2024)</div>
+      <h3>Foreign Interference Occurred in Both Elections</h3>
+      <p>The Commission found that foreign interference occurred in both the 2019 and 2021 federal
+      elections. While it did not find that the interference changed the overall election results,
+      it found that interference may have affected results in specific ridings. The Commission
+      identified at least 11 ridings where foreign activities were directed at influencing outcomes.</p>
+    </div>
+
+    <div class="finding-card">
+      <div class="source-tag">Hogue Commission — Intelligence Flow</div>
+      <h3>Intelligence Reached Senior Government but Action Was Insufficient</h3>
+      <p>Intelligence about foreign interference was communicated to senior government officials,
+      including through the Critical Election Incident Public Protocol (CEIPP) panel and direct
+      CSIS briefings. The Commission found that the government's response to confirmed intelligence
+      was insufficient and that the existing institutional framework was inadequate to counter
+      the threat effectively.</p>
+    </div>
+
+    <div class="finding-card">
+      <div class="source-tag">Hogue Commission — Institutional Gaps</div>
+      <h3>No Mechanism to Act on Intelligence</h3>
+      <p>Canada lacks a dedicated mechanism to act on foreign interference intelligence in real-time
+      during election periods. The CEIPP panel was designed to issue public warnings only in cases of
+      interference that threatened the integrity of the overall election — not individual ridings.
+      This structural gap meant that confirmed interference in specific ridings went unaddressed.</p>
+    </div>
+
+
+    <p class="section-label">Intelligence Committee</p>
+    <h2>NSICOP Reports — Parliamentary Findings</h2>
+
+    <div class="finding-card">
+      <div class="source-tag">NSICOP Special Report (June 2024)</div>
+      <h3>Members of Parliament Wittingly Assisting Foreign States</h3>
+      <p>The National Security and Intelligence Committee of Parliamentarians (NSICOP) reported
+      that some current and former members of Parliament were identified in intelligence as
+      wittingly or semi-wittingly assisting foreign state actors. The names were not publicly
+      released due to national security classification. The report was tabled in Parliament
+      with redactions.</p>
+    </div>
+
+    <div class="finding-card">
+      <div class="source-tag">NSICOP — Institutional Response</div>
+      <h3>Government Inaction Despite Confirmed Intelligence</h3>
+      <p>NSICOP found that despite confirmed intelligence about foreign interference, the government
+      did not take adequate steps to counter the threat, warn affected candidates, or strengthen
+      institutional defences. The committee recommended creating a foreign agent registry (which
+      eventually became Bill C-70, the Countering Foreign Interference Act, receiving Royal Assent
+      in June 2024 — years after the interference was first documented).</p>
+    </div>
+
+
+    <p class="section-label">Interference Vectors</p>
+    <h2>Documented Methods of Foreign Interference</h2>
+
+    <table class="vector-table">
+      <thead>
+        <tr>
+          <th>Vector</th>
+          <th>Method</th>
+          <th>Evidence Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nomination Manipulation</strong></td>
+          <td>Busing supporters to nomination contests to install preferred candidates within parties</td>
+          <td>CSIS intelligence, Hogue Commission testimony</td>
+        </tr>
+        <tr>
+          <td><strong>Campaign Financing</strong></td>
+          <td>Indirect financial support to preferred candidates through intermediaries and community organizations</td>
+          <td>NSICOP report, Elections Canada referrals</td>
+        </tr>
+        <tr>
+          <td><strong>Diaspora Coercion</strong></td>
+          <td>Intimidation of diaspora communities to influence voting patterns and discourage dissent</td>
+          <td>CSIS, Hogue Commission, community testimony</td>
+        </tr>
+        <tr>
+          <td><strong>Information Operations</strong></td>
+          <td>Social media campaigns, state-affiliated media, and coordinated messaging to shape public opinion</td>
+          <td>Communications Security Establishment (CSE) reports</td>
+        </tr>
+        <tr>
+          <td><strong>Elite Capture</strong></td>
+          <td>Building relationships with elected officials and candidates through sponsored travel, events, and ongoing engagement</td>
+          <td>NSICOP report, CSIS briefings to CEIPP</td>
+        </tr>
+        <tr>
+          <td><strong>Institutional Lobbying</strong></td>
+          <td>Registered and unregistered lobbying targeting government policy on trade, defence, and immigration</td>
+          <td>Office of the Commissioner of Lobbying, Hogue Commission</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <div class="alert-box">
+      <h3>The Accountability Gap</h3>
+      <p>Despite two public inquiries, an NSICOP report identifying MPs wittingly assisting foreign
+      states, confirmed CSIS intelligence on election interference, and a legislative response
+      (Bill C-70) that arrived years late — <strong>zero prosecutions have been launched</strong>.
+      No MP identified in the NSICOP report has been publicly named or charged. The foreign
+      agent registry created by Bill C-70 is not retroactive. The institutional pattern is
+      consistent: intelligence confirms the threat, inquiries document it, legislation arrives
+      too late, and no one is held accountable.</p>
+    </div>
+
+
+    <p class="section-label">Related Intelligence</p>
+    <h2>Connected Dossiers</h2>
+
+    <div class="cross-links">
+      <a class="cross-link" href="foreign-influence.html">
+        <div class="link-label">Full Analysis</div>
+        <div class="link-title">Foreign Influence Deep Dive</div>
+      </a>
+      <a class="cross-link" href="cija-lobbying.html">
+        <div class="link-label">Lobbying Pipeline</div>
+        <div class="link-title">CIJA & Federal Lobbying</div>
+      </a>
+      <a class="cross-link" href="elections-finance.html">
+        <div class="link-label">Election Money</div>
+        <div class="link-title">Elections Finance</div>
+      </a>
+      <a class="cross-link" href="prosecution.html">
+        <div class="link-label">Legal Framework</div>
+        <div class="link-title">Prosecution Framework</div>
+      </a>
+      <a class="cross-link" href="nova-scotia-oic.html">
+        <div class="link-label">Policy Exploitation</div>
+        <div class="link-title">NS Mass Casualty &amp; OIC</div>
+      </a>
+    </div>
+
+    <div class="source-note">
+      <strong>Sources:</strong> Public Inquiry into Foreign Interference in Federal Electoral Processes
+      and Democratic Institutions (Hogue Commission) — Initial Report (May 2024) and ongoing proceedings;
+      National Security and Intelligence Committee of Parliamentarians (NSICOP) — Special Report on
+      Foreign Interference (June 2024);
+      Communications Security Establishment (CSE) — Cyber Threats to Canada's Democratic Process reports;
+      Bill C-70, Countering Foreign Interference Act (Royal Assent June 2024);
+      CSIS public testimony before the Hogue Commission.
+      All data sourced from official government records, parliamentary documents, and public inquiry transcripts.
+    </div>
+
   </div>
+
 <div style="max-width:900px;margin:2rem auto;padding:1.3rem 1.5rem;background:rgba(220,38,38,0.08);border:2px solid rgba(220,38,38,0.3);border-radius:10px;text-align:center;">
   <p style="font-size:1.1rem;font-weight:700;color:#dc2626;margin:0;">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges →</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money →</a></p>
+  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges &rarr;</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money &rarr;</a></p>
 </div>
+<script src="js/metaverse.js?v=1"></script>
 </body>
 </html>
