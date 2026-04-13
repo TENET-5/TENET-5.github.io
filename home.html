@@ -890,7 +890,7 @@
           }
         }
 
-        // Fallback: speechSynthesis with best available voice
+        // Fallback: speechSynthesis — LIRIL voice (British female, no drift)
         const narEl = scene.querySelector('[data-narrate]');
         if (!narEl) return;
         const text = narEl.getAttribute('data-narrate');
@@ -898,18 +898,52 @@
 
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.95;
-        utterance.pitch = 1.0;
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
         utterance.lang = 'en-GB';
 
+        // ── LIRIL voice lock — female British ONLY, block all male voices ──
+        const MALE_BLOCK = /david|mark|james|george|daniel|ryan|guy|thomas|richard|rishi|sean|oliver|liam|christopher|eric|andrew|brian|roger|malcolm|connor|freddie|alfie|ethan|noah/i;
+        const FEMALE_NAMES = /hazel|susan|libby|sonia|maisie|martha|kate|karen|moira|fiona|serena|samantha|victoria|zira|jenny|aria|sara|emily|emma|google.*female/i;
+        const isGB = v => (v.lang || '').replace('_','-').toLowerCase().startsWith('en-gb');
+        const isEN = v => (v.lang || '').replace('_','-').toLowerCase().startsWith('en');
+        const isFemale = v => FEMALE_NAMES.test(v.name);
+        const isMale = v => MALE_BLOCK.test(v.name);
+
         const voices = window.speechSynthesis.getVoices();
-        const preferredVoice =
-          voices.find(v => /hazel|susan|libby/i.test(v.name) && v.lang.startsWith('en-GB')) ||
-          voices.find(v => v.lang.startsWith('en-GB') && /neural|natural/i.test(v.name)) ||
-          voices.find(v => v.lang.startsWith('en-GB')) ||
-          voices.find(v => v.lang.startsWith('en') && !/david|mark|james/i.test(v.name)) ||
-          voices[0];
-        if (preferredVoice) utterance.voice = preferredVoice;
+
+        // Restore pinned voice from session (prevents cross-scene drift)
+        let preferredVoice = null;
+        try {
+          const saved = sessionStorage.getItem('liril-voice-name');
+          if (saved) {
+            const restored = voices.find(v => v.name === saved);
+            if (restored && !isMale(restored)) preferredVoice = restored;
+          }
+        } catch(e) {}
+
+        if (!preferredVoice) {
+          preferredVoice =
+            // P0: Natural/Neural female en-GB (highest quality)
+            voices.find(v => isGB(v) && isFemale(v) && /natural|online|neural/i.test(v.name)) ||
+            // P1: Known female en-GB
+            voices.find(v => isGB(v) && isFemale(v)) ||
+            // P2: Any en-GB that is NOT male
+            voices.find(v => isGB(v) && !isMale(v)) ||
+            // P3: High-quality English female (any region)
+            voices.find(v => isEN(v) && isFemale(v) && /natural|online|neural/i.test(v.name)) ||
+            // P4: Known female any English
+            voices.find(v => isEN(v) && isFemale(v)) ||
+            // P5: Any English NOT male
+            voices.find(v => isEN(v) && !isMale(v)) ||
+            // P6: Absolute last resort — any English
+            voices.find(v => isEN(v)) || null;
+        }
+
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+          try { sessionStorage.setItem('liril-voice-name', preferredVoice.name); } catch(e) {}
+        }
 
         utterance.onstart = () => {
           btn.style.borderColor = 'var(--accent)';
