@@ -47,6 +47,11 @@ class GovOSINTGatherer:
             if isinstance(r, Exception):
                 logger.error(f"Pipeline error: {r}")
                 
+        logger.info("Aligning Godot SATOR Telemetry via Empirical Magic Handoff...")
+        telemetry_files = await self.handoff.align_godot_telemetry()
+        if telemetry_files:
+            logger.info(f"Successfully integrated {len(telemetry_files)} empirical magic handoff dossiers from WebXR events.")
+                
         logger.info("Pipeline Execution Completed. All discoveries protected.")
 
     async def process_target(self, target_data, index):
