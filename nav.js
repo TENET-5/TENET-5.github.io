@@ -41,6 +41,7 @@
           '</div>' +
           '<div class="nav-group">' +
             '<a href="/arrivecan.html" id="nav-arrivecan">ArriveCAN</a>' +
+            '<a href="/phac-mandates-s6.html" id="nav-phac">PHAC S.6</a>' +
             '<a href="/senate-expenses.html" id="nav-senate">Senate</a>' +
             '<a href="/ag-findings.html" id="nav-ag">AG Findings</a>' +
             '<a href="/phoenix-pay.html" id="nav-phoenix">Phoenix Pay</a>' +
