@@ -1,0 +1,407 @@
+/* ═══════════════════════════════════════════════════════════════
+   TENET⁵ Omniverse Viewer — CSS
+   NVIDIA Omniverse-style dark viewport with TENET⁵ red accents
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Viewport Container ───────────────────────────────────── */
+.ov-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background: #0a0a0a;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid rgba(118, 185, 0, 0.15);
+}
+.ov-viewport .ov-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+.ov-viewport .ov-canvas:active {
+  cursor: grabbing;
+}
+
+/* ── HUD Overlay ─────────────────────────────────────────── */
+.ov-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Top Bar ─────────────────────────────────────────────── */
+.ov-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(10,10,10,0.9) 0%, transparent 100%);
+}
+.ov-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ov-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 600 11px/1 'JetBrains Mono', 'Fira Code', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #76b900;
+  background: rgba(118, 185, 0, 0.08);
+  border: 1px solid rgba(118, 185, 0, 0.25);
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+.ov-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #76b900;
+  animation: ov-pulse 2s infinite;
+}
+@keyframes ov-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+.ov-model-name {
+  font: 500 13px/1 'Inter', system-ui, sans-serif;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+.ov-toolbar {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: auto;
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 4px;
+  backdrop-filter: blur(8px);
+}
+.ov-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #888;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.15s, color 0.15s;
+}
+.ov-toolbar button:hover {
+  background: rgba(118, 185, 0, 0.12);
+  color: #76b900;
+}
+.ov-toolbar button.active {
+  background: rgba(118, 185, 0, 0.18);
+  color: #76b900;
+}
+.ov-toolbar button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* ── Stats Panel (bottom-left) ═══════════════════════════── */
+.ov-stats {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 16px;
+  font: 500 11px/1 'JetBrains Mono', monospace;
+  color: #666;
+}
+.ov-stat-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 9px;
+  color: #444;
+  margin-bottom: 2px;
+}
+.ov-stat-value {
+  color: #aaa;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── NVIDIA Tag (bottom-right) ═══════════════════════════── */
+.ov-nvidia-tag {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 10px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.12em;
+  color: rgba(118, 185, 0, 0.4);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.ov-nvidia-tag svg {
+  width: 14px;
+  height: 14px;
+  fill: rgba(118, 185, 0, 0.4);
+}
+
+/* ── Loading State ═══════════════════════════════════════── */
+.ov-loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.92);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.ov-loader.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ov-loader-ring {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(118, 185, 0, 0.15);
+  border-top-color: #76b900;
+  border-radius: 50%;
+  animation: ov-spin 0.8s linear infinite;
+}
+@keyframes ov-spin {
+  to { transform: rotate(360deg); }
+}
+.ov-loader-text {
+  margin-top: 16px;
+  font: 500 12px/1 'JetBrains Mono', monospace;
+  color: #76b900;
+  letter-spacing: 0.05em;
+}
+.ov-loader-progress {
+  margin-top: 8px;
+  width: 160px;
+  height: 2px;
+  background: rgba(118, 185, 0, 0.1);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.ov-loader-bar {
+  height: 100%;
+  background: #76b900;
+  width: 0%;
+  transition: width 0.2s;
+}
+
+/* ── Drop Zone ═══════════════════════════════════════════── */
+.ov-dropzone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(118, 185, 0, 0.06);
+  border: 2px dashed rgba(118, 185, 0, 0.4);
+  border-radius: 4px;
+}
+.ov-dropzone.active {
+  display: flex;
+}
+.ov-dropzone-text {
+  font: 600 14px/1 'Inter', system-ui, sans-serif;
+  color: #76b900;
+  pointer-events: none;
+}
+
+/* ── Empty State ═════════════════════════════════════════── */
+.ov-empty {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 5;
+  pointer-events: none;
+}
+.ov-empty-icon {
+  width: 64px;
+  height: 64px;
+  opacity: 0.15;
+}
+.ov-empty-text {
+  font: 400 14px/1.4 'Inter', system-ui, sans-serif;
+  color: #444;
+  text-align: center;
+}
+.ov-empty-text strong {
+  color: #76b900;
+  font-weight: 600;
+}
+
+/* ── Mobile Adjustments ══════════════════════════════════── */
+@media (max-width: 768px) {
+  .ov-stats {
+    grid-template-columns: repeat(2, auto);
+    gap: 8px 16px;
+  }
+  .ov-toolbar {
+    right: 6px;
+    flex-direction: row;
+    top: auto;
+    bottom: 52px;
+    transform: none;
+  }
+  .ov-model-name {
+    max-width: 160px;
+    font-size: 11px;
+  }
+}
+
+/* ── Full-Page Layout ════════════════════════════════════── */
+.ov-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: #050508;
+  color: #ccc;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.ov-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(10, 10, 10, 0.95);
+  border-bottom: 1px solid rgba(118, 185, 0, 0.1);
+  flex-shrink: 0;
+}
+.ov-page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ov-page-title h1 {
+  font: 700 16px/1 'Inter', system-ui, sans-serif;
+  color: #eee;
+  margin: 0;
+}
+.ov-page-title .ov-sys {
+  font: 600 10px/1 'JetBrains Mono', monospace;
+  color: #dc2626;
+  letter-spacing: 0.1em;
+}
+.ov-page-actions {
+  display: flex;
+  gap: 8px;
+}
+.ov-page-actions button {
+  padding: 6px 14px;
+  font: 500 12px/1 'JetBrains Mono', monospace;
+  background: rgba(118, 185, 0, 0.08);
+  border: 1px solid rgba(118, 185, 0, 0.2);
+  border-radius: 4px;
+  color: #76b900;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ov-page-actions button:hover {
+  background: rgba(118, 185, 0, 0.18);
+}
+.ov-page-body {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 8px;
+}
+.ov-page-body .ov-viewport {
+  height: 100%;
+  border-radius: 6px;
+}
+
+/* ── Model Gallery ═══════════════════════════════════════── */
+.ov-gallery {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 6px;
+  backdrop-filter: blur(8px);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.ov-gallery-item {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+  overflow: hidden;
+}
+.ov-gallery-item:hover {
+  border-color: rgba(118, 185, 0, 0.4);
+}
+.ov-gallery-item.active {
+  border-color: #76b900;
+  box-shadow: 0 0 8px rgba(118, 185, 0, 0.2);
+}
+.ov-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ov-gallery-item .ov-gallery-icon {
+  font-size: 20px;
+  color: #555;
+}
