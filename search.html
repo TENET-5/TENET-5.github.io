@@ -330,6 +330,7 @@
     .badge-official { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
     .badge-org { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
     .badge-donor { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .badge-page { background: rgba(220, 38, 38, 0.15); color: #f87171; }
 
     .result-name {
       font-size: 0.95rem;
@@ -670,7 +671,8 @@
       officials: [],
       organizations: [],
       donors: [],
-      narrations: []
+      narrations: [],
+      pages: []
     };
     let loaded = false;
     let debounceTimer = null;
@@ -688,20 +690,22 @@
     // ── Data Loading ──
     async function loadData() {
       try {
-        const [analysisRes, mpsRes, lobbyingRes, contributionsRes, narrationsRes] = await Promise.all([
+        const [analysisRes, mpsRes, lobbyingRes, contributionsRes, narrationsRes, pagesRes] = await Promise.all([
           fetch('data/analysis.json'),
           fetch('data/all_mps.json'),
           fetch('data/lobbying_analysis.json'),
           fetch('data/contributions_analysis.json'),
-          fetch('data/narration_index.json')
+          fetch('data/narration_index.json'),
+          fetch('data/pages.json')
         ]);
 
-        const [analysis, mpsData, lobbying, contributions, narrationsData] = await Promise.all([
+        const [analysis, mpsData, lobbying, contributions, narrationsData, pagesData] = await Promise.all([
           analysisRes.json(),
           mpsRes.json(),
           lobbyingRes.json(),
           contributionsRes.json(),
-          narrationsRes.json()
+          narrationsRes.json(),
+          pagesRes.json()
         ]);
 
         // Bills
@@ -756,10 +760,21 @@
         // Narrations
         data.narrations = narrationsData.narrations || [];
 
+        // Pages
+        data.pages = (pagesData.pages || []).map(function(p) {
+          return {
+            title: p.title || '',
+            url: p.url || '',
+            file: p.file || '',
+            description: p.description || '',
+            category: p.category || ''
+          };
+        });
+
         loaded = true;
 
         // Update stats
-        statsBar.innerHTML = 'Searching across <span>' + data.bills.length + '</span> bills, <span>' + data.mps.length + '</span> MPs, <span>' + data.officials.length + '</span> officials, <span>' + data.organizations.length + '</span> orgs, <span>' + data.donors.length + '</span> donors, and <span>' + data.narrations.length + '</span> findings';
+        statsBar.innerHTML = 'Searching across <span>' + data.pages.length + '</span> pages, <span>' + data.bills.length + '</span> bills, <span>' + data.mps.length + '</span> MPs, <span>' + data.officials.length + '</span> officials, <span>' + data.organizations.length + '</span> orgs, <span>' + data.donors.length + '</span> donors, and <span>' + data.narrations.length + '</span> findings';
 
         loadingState.style.display = 'none';
         showInitialState();
@@ -830,7 +845,8 @@
         officials: [],
         organizations: [],
         donors: [],
-        narrations: []
+        narrations: [],
+        pages: []
       };
 
       // Search bills: title, number, category
@@ -875,13 +891,20 @@
         }
       });
 
+      // Search pages: title, description, category
+      data.pages.forEach(function(p) {
+        if (matches(p.title + ' ' + p.description + ' ' + p.category, q)) {
+          results.pages.push(p);
+        }
+      });
+
       renderResults(results, q);
       saveRecentSearch(q);
     }
 
     // ── Render Results ──
     function renderResults(results, query) {
-      var total = results.bills.length + results.mps.length + results.officials.length + results.organizations.length + results.donors.length + results.narrations.length;
+      var total = results.pages.length + results.bills.length + results.mps.length + results.officials.length + results.organizations.length + results.donors.length + results.narrations.length;
 
       if (total === 0) {
         resultsContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128269;</div><h3>No matches found</h3><p>Try a different search term.</p></div>';
@@ -889,6 +912,22 @@
       }
 
       var html = '<div class="result-count">Found <strong>' + total + '</strong> result' + (total !== 1 ? 's' : '') + '</div>';
+
+      // Pages
+      if (results.pages.length > 0) {
+        html += renderGroup('Investigation Pages', results.pages.length, results.pages.map(function(p) {
+          return '<a href="' + escapeHtml(p.file) + '" class="result-card">' +
+            '<div class="result-card-top">' +
+              '<span class="result-badge badge-page">PAGE</span>' +
+              '<div class="result-name">' + highlightMatch(p.title, query) + '</div>' +
+            '</div>' +
+            '<div class="result-details">' +
+              '<span class="result-detail"><strong>Category:</strong> ' + escapeHtml(p.category) + '</span>' +
+              (p.description ? '<span class="result-detail" style="flex-basis:100%;">' + highlightMatch(p.description.substring(0, 160), query) + '</span>' : '') +
+            '</div>' +
+          '</a>';
+        }).join(''));
+      }
 
       // Bills
       if (results.bills.length > 0) {
