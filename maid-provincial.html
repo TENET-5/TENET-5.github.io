@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAID by Province — Per-Capita Death Rates Across Canada | TENET5</title>
+  <meta name="description" content="Provincial breakdown of Medical Assistance in Dying death rates per 100,000 population. Which provinces administer the most MAID deaths? All data from Health Canada annual reports.">
+  <meta property="og:title" content="MAID by Province — Per-Capita Death Rates | TENET5">
+  <meta property="og:description" content="Provincial MAID death rates compared. Quebec and British Columbia lead. Data from Health Canada's own annual reports.">
+  <meta property="og:url" content="https://tenet-5.github.io/maid-provincial.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#2E3440">
+  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "MAID by Province — Per-Capita Death Rates Across Canada",
+    "description": "Provincial comparison of MAID death rates from Health Canada annual reports.",
+    "datePublished": "2026-04-13",
+    "author": {"@type": "Organization", "name": "TENET5"},
+    "publisher": {"@type": "Organization", "name": "TENET5", "logo": {"@type": "ImageObject", "url": "https://tenet-5.github.io/img/tenet5_logo.png"}},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://tenet-5.github.io/maid-provincial.html"}
+  }
+  </script>
+
+  <style>
+    :root { --crimson: #c41e3a; --ink: #1a1f36; --card-bg: #fff; --border: #e5e5e3; --muted: #6b7280; --blue: #2563eb; }
+    .hero-prov { padding: 4rem 2rem; background: linear-gradient(135deg, #1a0505 0%, #2d0a0a 50%, #1a0505 100%); color: #fff; text-align: center; }
+    .hero-prov h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; }
+    .hero-prov .subtitle { color: #b0b4c0; max-width: 800px; margin: 0.8rem auto 0; line-height: 1.7; }
+    .content { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h2 { color: var(--ink); font-size: 1.5rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+    .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--crimson); font-weight: 700; margin-bottom: 0.5rem; }
+
+    .prov-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.7rem; }
+    .prov-name { font-weight: 700; font-size: 0.85rem; min-width: 50px; text-align: right; }
+    .prov-track { flex: 1; height: 28px; background: rgba(0,0,0,0.04); border-radius: 4px; overflow: hidden; }
+    .prov-fill { height: 100%; background: linear-gradient(90deg, #991b1b, #dc2626); border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem; }
+    .prov-fill span { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: #fff; white-space: nowrap; }
+
+    .data-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
+    .data-table th { background: var(--ink); color: #fff; padding: 0.7rem; text-align: left; font-weight: 700; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; }
+    .data-table td { padding: 0.7rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .data-table tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+    .data-table .highlight { color: var(--crimson); font-weight: 700; }
+
+    .insight-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 4px solid var(--crimson); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; }
+    .insight-card h4 { margin-top: 0; color: var(--ink); font-size: 0.95rem; }
+    .insight-card p { font-size: 0.88rem; color: #3d4355; line-height: 1.65; }
+
+    .cross-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin: 2rem 0; }
+    .cross-link { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 0.88rem; transition: border-color 0.2s; }
+    .cross-link:hover { border-color: var(--crimson); }
+    .source-note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero-prov">
+    <h1>MAID by Province</h1>
+    <p class="subtitle">
+      Per-capita death rates across all 10 provinces. Which regions of Canada administer
+      the most state-facilitated deaths? All data from Health Canada's annual reports.
+    </p>
+  </section>
+
+  <div class="content">
+
+    <p class="section-label">Per-Capita Rates (2024)</p>
+    <h2>MAID Deaths per 100,000 Population by Province</h2>
+
+    <p style="color:#3d4355;line-height:1.7;margin-bottom:1rem;">
+      Health Canada's annual reports provide provincial breakdowns of MAID deaths. When adjusted for
+      population, significant disparities emerge. Quebec consistently leads in per-capita MAID
+      administration, followed by British Columbia. The prairie provinces and Atlantic Canada
+      have lower rates.
+    </p>
+
+    <div style="margin:1.5rem 0;">
+      <div class="prov-bar">
+        <span class="prov-name">QC</span>
+        <div class="prov-track"><div class="prov-fill" style="width:100%;"><span>63.2 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">BC</span>
+        <div class="prov-track"><div class="prov-fill" style="width:82%;"><span>51.8 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">ON</span>
+        <div class="prov-track"><div class="prov-fill" style="width:62%;"><span>39.1 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">MB</span>
+        <div class="prov-track"><div class="prov-fill" style="width:55%;"><span>34.7 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">AB</span>
+        <div class="prov-track"><div class="prov-fill" style="width:50%;"><span>31.6 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">NS</span>
+        <div class="prov-track"><div class="prov-fill" style="width:48%;"><span>30.3 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">NB</span>
+        <div class="prov-track"><div class="prov-fill" style="width:42%;"><span>26.5 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">SK</span>
+        <div class="prov-track"><div class="prov-fill" style="width:38%;"><span>24.0 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">NL</span>
+        <div class="prov-track"><div class="prov-fill" style="width:30%;"><span>18.9 / 100K</span></div></div>
+      </div>
+      <div class="prov-bar">
+        <span class="prov-name">PE</span>
+        <div class="prov-track"><div class="prov-fill" style="width:22%;"><span>13.9 / 100K</span></div></div>
+      </div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);">Rates calculated from Health Canada MAID death counts divided by Statistics Canada population estimates. Territories excluded due to small sample sizes.</p>
+
+
+    <p class="section-label">Analysis</p>
+    <h2>What the Provincial Data Reveals</h2>
+
+    <div class="insight-card">
+      <h4>Quebec: 2x the National Average</h4>
+      <p>Quebec consistently leads all provinces in per-capita MAID administration. Quebec was the first
+      province to legalize assisted dying (2014, before the federal framework) and has the most
+      established institutional infrastructure for MAID delivery. Quebec's Act Respecting End-of-Life
+      Care operates alongside the federal Criminal Code framework, creating a dual regulatory
+      environment with broader eligibility criteria in practice.</p>
+    </div>
+
+    <div class="insight-card">
+      <h4>British Columbia: Second Highest and Climbing</h4>
+      <p>BC's MAID rate has grown faster than any other province year-over-year. BC Health authorities
+      have been proactive in integrating MAID into hospital and hospice care pathways. The province
+      has the second-highest proportion of Track 2 (non-terminal) MAID deaths, suggesting broader
+      institutional adoption of expanded eligibility criteria.</p>
+    </div>
+
+    <div class="insight-card">
+      <h4>Prairie Provinces: Below Average but Rising</h4>
+      <p>Alberta, Saskatchewan, and Manitoba have below-average MAID rates but are trending upward.
+      Rural access barriers and cultural attitudes account for some of the gap. As MAID delivery
+      infrastructure expands into rural health networks, prairie rates are expected to converge
+      toward the national average over the next 3-5 years.</p>
+    </div>
+
+    <div class="insight-card">
+      <h4>Atlantic Canada: Lowest Rates, Oldest Populations</h4>
+      <p>The Atlantic provinces have the lowest MAID rates despite having Canada's oldest populations
+      (highest median age). This suggests that MAID uptake is driven more by institutional
+      infrastructure and cultural acceptance than by demographic need. PEI's rate is less than
+      one-quarter of Quebec's — a 4.5x difference between provinces under the same federal law.</p>
+    </div>
+
+
+    <p class="section-label">Growth Trajectory</p>
+    <h2>Year-Over-Year Provincial Growth</h2>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Province</th>
+          <th>2019</th>
+          <th>2022</th>
+          <th>2024</th>
+          <th>Growth (5yr)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Quebec</strong></td>
+          <td>1,632</td>
+          <td>4,156</td>
+          <td>5,431</td>
+          <td class="highlight">+233%</td>
+        </tr>
+        <tr>
+          <td><strong>Ontario</strong></td>
+          <td>1,789</td>
+          <td>4,261</td>
+          <td>5,872</td>
+          <td class="highlight">+228%</td>
+        </tr>
+        <tr>
+          <td><strong>British Columbia</strong></td>
+          <td>922</td>
+          <td>2,421</td>
+          <td>2,739</td>
+          <td class="highlight">+197%</td>
+        </tr>
+        <tr>
+          <td><strong>Alberta</strong></td>
+          <td>527</td>
+          <td>1,036</td>
+          <td>1,456</td>
+          <td class="highlight">+176%</td>
+        </tr>
+        <tr>
+          <td><strong>All Other</strong></td>
+          <td>761</td>
+          <td>1,367</td>
+          <td>1,001</td>
+          <td>+32%</td>
+        </tr>
+        <tr style="font-weight:700;border-top:2px solid var(--crimson);">
+          <td><strong>CANADA</strong></td>
+          <td>5,631</td>
+          <td>13,241</td>
+          <td>16,499</td>
+          <td class="highlight">+193%</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.82rem;color:var(--muted);">Source: Health Canada Annual Reports on MAID (1st-6th editions). 2024 from Sixth Annual Report.</p>
+
+
+    <p class="section-label">Connected Intelligence</p>
+    <h2>Investigation Dossiers</h2>
+
+    <div class="cross-links">
+      <a class="cross-link" href="maid-policy-evolution.html">MAID Policy Evolution &rarr;</a>
+      <a class="cross-link" href="carney-conflicts.html">Carney-Brookfield &rarr;</a>
+      <a class="cross-link" href="healthcare-crisis.html">Healthcare Crisis &rarr;</a>
+      <a class="cross-link" href="prosecution.html">Prosecution Framework &rarr;</a>
+      <a class="cross-link" href="disability-genocide.html">UN CRPD Violations &rarr;</a>
+      <a class="cross-link" href="election-2025.html">2025 Election Analysis &rarr;</a>
+    </div>
+
+    <div class="source-note">
+      <strong>Sources:</strong> Health Canada, Annual Reports on Medical Assistance in Dying in Canada (1st-6th editions, 2019-2024);
+      Statistics Canada, Population Estimates by Province and Territory (Table 17-10-0009-01);
+      Quebec Act Respecting End-of-Life Care (RLRQ, c. S-32.0001);
+      Canadian Institute for Health Information (CIHI), Provincial Health Expenditure Data.
+      All per-capita calculations use Statistics Canada mid-year population estimates.
+    </div>
+
+  </div>
+
+<div style="max-width:900px;margin:2rem auto;padding:1.3rem 1.5rem;background:rgba(220,38,38,0.08);border:2px solid rgba(220,38,38,0.3);border-radius:10px;text-align:center;">
+  <p style="font-size:1.1rem;font-weight:700;color:#dc2626;margin:0;">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges &rarr;</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money &rarr;</a></p>
+</div>
+<script src="js/liril-voice.js"></script>
+<script src="js/liril-walkthrough.js?v=2"></script>
+<script src="js/metaverse.js?v=1"></script>
+</body>
+</html>
