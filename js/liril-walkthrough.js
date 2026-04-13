@@ -658,7 +658,74 @@
       startBtn.innerHTML = getI18nStr('stop');
       startBtn.style.background = 'rgba(100,100,100,0.9)';
       startBtn.setAttribute('aria-expanded', 'true');
+
+      // Activate autopilot on first manual start
+      var current = (window.location.pathname.split('/').pop() || '').toLowerCase();
+      var routeIdx = AUTOPILOT_ROUTE.indexOf(current);
+      if (routeIdx >= 0 && !getAutopilotState()) {
+        setAutopilotState({ page: current, index: routeIdx, autostart: true });
+        console.log('[LIRIL] Autopilot activated — will navigate through', AUTOPILOT_ROUTE.length, 'pages');
+      }
+
       showPoint(0);
+    }
+
+    // ── Cross-page autopilot route ─────────────────
+    // When LIRIL finishes narrating a page, she automatically navigates
+    // to the next investigation page and continues the walkthrough.
+    var AUTOPILOT_ROUTE = [
+      'home.html',
+      'follow-the-money.html',
+      'maid-accountability.html',
+      'carney-conflicts.html',
+      'cds-accountability.html',
+      's504-covey-bae.html',
+      'disability-genocide.html',
+      'veterans-betrayal.html',
+      'foreign-interference.html',
+      'arrivecan.html',
+      'phoenix-pay.html',
+      'rcmp-commissioners.html',
+      'whistleblower-failures.html',
+      'scandals.html',
+      'acelephius-wardoll.html',
+      't4-comparison.html',
+      'kids-guide.html'
+    ];
+    var AUTOPILOT_KEY = 'liril_autopilot';
+
+    function getAutopilotState() {
+      try { return JSON.parse(sessionStorage.getItem(AUTOPILOT_KEY) || 'null'); } catch(e) { return null; }
+    }
+    function setAutopilotState(state) {
+      try { sessionStorage.setItem(AUTOPILOT_KEY, JSON.stringify(state)); } catch(e) {}
+    }
+    function clearAutopilot() {
+      try { sessionStorage.removeItem(AUTOPILOT_KEY); } catch(e) {}
+    }
+
+    function navigateToNextPage() {
+      var current = (window.location.pathname.split('/').pop() || '').toLowerCase();
+      var idx = AUTOPILOT_ROUTE.indexOf(current);
+      if (idx < 0) idx = AUTOPILOT_ROUTE.indexOf(current.replace(/^\//, ''));
+      var nextIdx = idx + 1;
+
+      if (nextIdx < AUTOPILOT_ROUTE.length) {
+        var nextPage = AUTOPILOT_ROUTE[nextIdx];
+        console.log('[LIRIL] Autopilot: navigating to', nextPage, '(' + (nextIdx + 1) + '/' + AUTOPILOT_ROUTE.length + ')');
+        setAutopilotState({ page: nextPage, index: nextIdx, autostart: true });
+
+        // Navigate via shell iframe or direct
+        if (window.parent !== window && window.parent.loadPage) {
+          window.parent.loadPage(nextPage);
+        } else if (window.location.pathname.indexOf('index.html') >= 0) {
+          window.location.href = 'index.html?load=' + nextPage;
+        } else {
+          window.location.href = nextPage;
+        }
+        return true;
+      }
+      return false; // End of route
     }
 
     function endWalkthrough() {
@@ -679,12 +746,37 @@
       startBtn.setAttribute('aria-expanded', 'false');
       points.forEach(function(p) { p.el.classList.remove('liril-narrating-point'); });
       currentPoint = -1;
+
+      // ── AUTOPILOT: navigate to next page if active ──
+      var state = getAutopilotState();
+      if (state && state.autostart) {
+        if (!navigateToNextPage()) {
+          // End of route — clear autopilot
+          clearAutopilot();
+          console.log('[LIRIL] Autopilot complete — full site walkthrough finished');
+        }
+      }
+    }
+
+    // ── Auto-start walkthrough if arriving via autopilot ──
+    var autopilotState = getAutopilotState();
+    if (autopilotState && autopilotState.autostart) {
+      setTimeout(function() {
+        if (points.length >= 2) {
+          console.log('[LIRIL] Autopilot auto-starting walkthrough on', autopilotState.page);
+          startWalkthrough();
+        }
+      }, 2000); // Wait 2s for page to render
     }
 
     // ── Event listeners ──────────────────────────────
     startBtn.addEventListener('click', function() {
-      if (isActive) endWalkthrough();
-      else startWalkthrough();
+      if (isActive) {
+        clearAutopilot(); // User manually stopped — disable cross-page nav
+        endWalkthrough();
+      } else {
+        startWalkthrough();
+      }
     });
 
     subtitleBar.addEventListener('click', function() {
