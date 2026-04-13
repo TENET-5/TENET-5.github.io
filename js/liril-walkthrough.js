@@ -716,12 +716,24 @@
         setAutopilotState({ page: nextPage, index: nextIdx, autostart: true });
 
         // Navigate via shell iframe or direct
-        if (window.parent !== window && window.parent.loadPage) {
-          window.parent.loadPage(nextPage);
-        } else if (window.location.pathname.indexOf('index.html') >= 0) {
-          window.location.href = 'index.html?load=' + nextPage;
+        if (window.parent !== window && window.parent !== window.self) {
+          // Inside iframe shell — set iframe src directly
+          try {
+            var iframe = window.parent.document.getElementById('content_frame');
+            if (iframe) {
+              iframe.src = nextPage;
+              // Update parent URL bar
+              var newUrl = window.parent.location.pathname + '?load=' + encodeURIComponent(nextPage);
+              window.parent.history.replaceState(null, '', newUrl);
+            } else {
+              window.location.href = nextPage;
+            }
+          } catch(e) {
+            window.location.href = nextPage;
+          }
         } else {
-          window.location.href = nextPage;
+          // Direct access — redirect with shell wrapper
+          window.location.href = 'index.html?load=' + nextPage;
         }
         return true;
       }
