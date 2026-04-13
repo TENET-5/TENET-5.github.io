@@ -105,6 +105,7 @@
 
     /* Highlight active nav link + set target for frame shell */
     var isFrameShell = !!document.getElementById('content_frame');
+    var isInIframe = window !== window.top;
     var path = window.location.pathname.split('/').pop() || 'index.html';
     var activePage = path;
     if (isFrameShell) {
@@ -119,6 +120,9 @@
     document.querySelectorAll('.site-nav a:not(.brand)').forEach(function(a) {
       if (isFrameShell) {
         a.setAttribute('target', 'content_frame');
+      }
+      /* Convert /index.html → home.html in ANY frame context (shell OR iframe child) */
+      if (isFrameShell || isInIframe) {
         if (a.getAttribute('href').replace(/^\//, '') === 'index.html') {
           a.setAttribute('href', 'home.html');
         }
@@ -127,10 +131,10 @@
       if (linkPage === activePage) a.classList.add('active');
     });
 
-    /* Brand link: in frame shell, load home.html into iframe */
+    /* Brand link: in frame context, point to home.html (prevents iframe inception) */
     var brandLink = document.querySelector('.site-nav .brand');
-    if (brandLink && isFrameShell) {
-      brandLink.setAttribute('target', 'content_frame');
+    if (brandLink && (isFrameShell || isInIframe)) {
+      if (isFrameShell) brandLink.setAttribute('target', 'content_frame');
       brandLink.setAttribute('href', 'home.html');
     }
   }

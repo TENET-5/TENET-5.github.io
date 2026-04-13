@@ -553,6 +553,13 @@
     function isMale(v) { return MALE_VOICES.some(function(m) { return nameOf(v).indexOf(m) >= 0; }); }
 
     function resolveVoice() {
+      /* Delegate to shared LIRIL_VOICE module (single source of truth) */
+      if (window.LIRIL_VOICE) {
+        var v = window.LIRIL_VOICE.get();
+        if (v) { cachedVoice = v; voiceResolved = true; }
+        return v;
+      }
+      /* Fallback: own resolver if liril-voice.js failed to load */
       if (voiceResolved && cachedVoice) return cachedVoice;
       var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
       if (voices.length === 0) return null;

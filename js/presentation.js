@@ -1633,6 +1633,13 @@
   function isMaleP(v) { var n = (v.name||'').toLowerCase(); return BANNED_MALE_LIST.some(function(m){ return n.indexOf(m)>=0; }); }
 
   function resolveNarrationVoice() {
+    /* Delegate to shared LIRIL_VOICE module (single source of truth) */
+    if (window.LIRIL_VOICE) {
+      var v = window.LIRIL_VOICE.get();
+      if (v) { cachedVoice = v; }
+      return v;
+    }
+    /* Fallback: own resolver if liril-voice.js failed to load */
     if (cachedVoice) return cachedVoice;
     var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
     if (!voices.length) return null;
@@ -1656,7 +1663,7 @@
     // Fallback if the 'female' tag isn't explicit but it matches our known natural profile
     if (!naturalVoice) {
       naturalVoice = voices.find(function (v) {
-        return v.lang && v.lang.indexOf('en-GB') === 0 && /(natural|online|neural)/i.test(v.name) && !/male/i.test(v.name);
+        return v.lang && v.lang.indexOf('en-GB') === 0 && /(natural|online|neural)/i.test(v.name) && !isMaleP(v);
       });
     }
     // High Quality English (Natural/Online) even if not GB
@@ -1701,15 +1708,12 @@
     if (enFemale) { cachedVoice = enFemale; storeVoiceName(enFemale); return cachedVoice; }
 
     var enNonMale = voices.find(function (v) {
-      return v.lang && v.lang.indexOf('en') === 0 && !/male/i.test(v.name || '');
+      return v.lang && v.lang.indexOf('en') === 0 && !isMaleP(v);
     });
     if (enNonMale) { cachedVoice = enNonMale; storeVoiceName(enNonMale); return cachedVoice; }
 
-    /* 4. Absolute fallback — still block male */
-    cachedVoice = voices.find(function (v) {
-      return v.lang && v.lang.indexOf('en') === 0 && !isMaleP(v);
-    }) || null;
-    if (cachedVoice) storeVoiceName(cachedVoice);
+    /* 4. Absolute fallback — null; silence is better than male voice */
+    cachedVoice = null;
     return cachedVoice;
   }
 
