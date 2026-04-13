@@ -120,7 +120,8 @@
 
   function initWalkthrough() {
     var page = window.location.pathname.split('/').pop() || '';
-    if (page === 'index.html' || page === 'home.html' || page === '') return;
+    // Pages with their own inline scene engines — walkthrough must not clash
+    if (page === 'index.html' || page === 'home.html' || page === 'kids-guide.html' || page === '') return;
 
     // ── Collect all narration points ──────────────────
     var points = [];
