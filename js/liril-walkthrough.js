@@ -163,7 +163,16 @@
 
     collectPoints();
     tryLoadAudio();
-    if (points.length < 2) return;
+    if (points.length < 2) {
+      // In auto-walk mode, skip to next page if this page has no walkthrough points
+      try {
+        var _ap = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
+        if (_ap && _ap.autostart && window.__TENET5_NEXT_PAGE) {
+          setTimeout(function() { window.__TENET5_NEXT_PAGE(); }, 2000);
+        }
+      } catch(e) {}
+      return;
+    }
 
     // ── State ────────────────────────────────────────
     var currentPoint = -1;
@@ -350,6 +359,48 @@
           .liril-subtitle-text { padding: 10px 16px; font-size: 0.85rem; line-height: 1.4; }
           .liril-start-btn { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
         }
+
+        /* Auto-tour progress bar */
+        .liril-tour-progress {
+          position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+          background: rgba(5, 5, 10, 0.92);
+          padding: 6px 20px; display: flex; align-items: center; gap: 12px;
+          border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+          backdrop-filter: blur(12px);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+          font-family: 'IBM Plex Mono', monospace;
+        }
+        .liril-tour-label {
+          font-size: 0.6rem; color: #8b5cf6;
+          letter-spacing: 2px; text-transform: uppercase;
+          white-space: nowrap;
+        }
+        .liril-tour-track {
+          flex: 1; height: 3px; background: rgba(139, 92, 246, 0.12);
+          border-radius: 2px; overflow: hidden;
+        }
+        .liril-tour-fill {
+          height: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+          border-radius: 2px; transition: width 0.8s ease;
+        }
+        .liril-tour-count {
+          font-size: 0.6rem; color: rgba(139, 92, 246, 0.6);
+          letter-spacing: 1px; white-space: nowrap;
+        }
+        .liril-tour-stop {
+          background: none; border: 1px solid rgba(139, 92, 246, 0.3);
+          color: #a78bfa; padding: 2px 10px; border-radius: 3px;
+          font-size: 0.55rem; cursor: pointer; font-family: inherit;
+          letter-spacing: 1px; text-transform: uppercase;
+          transition: all 0.2s;
+        }
+        .liril-tour-stop:hover {
+          background: rgba(139, 92, 246, 0.15); border-color: #8b5cf6;
+        }
+        @media (max-width: 768px) {
+          .liril-tour-progress { padding: 4px 12px; gap: 8px; }
+          .liril-tour-label { font-size: 0.5rem; }
+        }
       `;
       document.head.appendChild(styleEl);
     }
@@ -378,6 +429,50 @@
     startBtn.setAttribute('aria-label', 'Start LIRIL Walkthrough Presentation');
     startBtn.setAttribute('aria-controls', 'liril-subtitle');
     document.body.appendChild(startBtn);
+
+    // ── Auto-tour progress bar ───────────────────────
+    var tourProgressEl = null;
+    var tourFillEl = null;
+    var tourCountEl = null;
+
+    function showTourProgress() {
+      if (tourProgressEl) return; // already showing
+      var prog = window.__TENET5_PAGE_PROGRESS ? window.__TENET5_PAGE_PROGRESS() : null;
+      if (!prog) return;
+
+      tourProgressEl = document.createElement('div');
+      tourProgressEl.className = 'liril-tour-progress';
+      tourProgressEl.innerHTML =
+        '<span class="liril-tour-label">LIRIL FULL SITE TOUR</span>' +
+        '<div class="liril-tour-track"><div class="liril-tour-fill"></div></div>' +
+        '<span class="liril-tour-count"></span>' +
+        '<button class="liril-tour-stop">STOP TOUR</button>';
+      document.body.appendChild(tourProgressEl);
+
+      tourFillEl = tourProgressEl.querySelector('.liril-tour-fill');
+      tourCountEl = tourProgressEl.querySelector('.liril-tour-count');
+
+      var stopBtn = tourProgressEl.querySelector('.liril-tour-stop');
+      stopBtn.addEventListener('click', function() {
+        clearAutopilot();
+        hideTourProgress();
+        endWalkthrough();
+      });
+
+      updateTourProgress();
+    }
+
+    function updateTourProgress() {
+      var prog = window.__TENET5_PAGE_PROGRESS ? window.__TENET5_PAGE_PROGRESS() : null;
+      if (!prog || !tourFillEl) return;
+      var pct = Math.round((prog.current / prog.total) * 100);
+      tourFillEl.style.width = pct + '%';
+      tourCountEl.textContent = 'PAGE ' + prog.current + ' / ' + prog.total;
+    }
+
+    function hideTourProgress() {
+      if (tourProgressEl) { tourProgressEl.remove(); tourProgressEl = null; tourFillEl = null; tourCountEl = null; }
+    }
 
     // ── Chrome keepalive ─────────────────────────────
     // Chrome/Chromium bug: speechSynthesis silently stops after ~15s.
@@ -577,7 +672,16 @@
 
       var counter = document.createElement('div');
       counter.className = 'liril-counter';
-      counter.textContent = (idx + 1) + ' / ' + points.length + '  \u2502  ' + getI18nStr('advance');
+      var counterText = (idx + 1) + ' / ' + points.length;
+      try {
+        var _ap = getAutopilotState();
+        if (_ap && _ap.autostart) {
+          var prog = window.__TENET5_PAGE_PROGRESS ? window.__TENET5_PAGE_PROGRESS() : null;
+          if (prog) counterText += '  \u2502  PAGE ' + prog.current + ' / ' + prog.total;
+        }
+      } catch(e) {}
+      counterText += '  \u2502  ' + getI18nStr('advance');
+      counter.textContent = counterText;
       subtitleText.appendChild(counter);
 
       subtitleBar.style.opacity = '1';
@@ -660,38 +764,19 @@
       startBtn.setAttribute('aria-expanded', 'true');
 
       // Activate autopilot on first manual start
-      var current = (window.location.pathname.split('/').pop() || '').toLowerCase();
-      var routeIdx = AUTOPILOT_ROUTE.indexOf(current);
-      if (routeIdx >= 0 && !getAutopilotState()) {
-        setAutopilotState({ page: current, index: routeIdx, autostart: true });
-        console.log('[LIRIL] Autopilot activated — will navigate through', AUTOPILOT_ROUTE.length, 'pages');
+      if (!getAutopilotState()) {
+        setAutopilotState({ autostart: true });
+        console.log('[LIRIL] Autopilot activated — full site walkthrough via PAGE_SEQUENCE');
       }
+      showTourProgress();
 
       showPoint(0);
     }
 
-    // ── Cross-page autopilot route ─────────────────
+    // ── Cross-page autopilot state ──────────────────
+    // Uses PAGE_SEQUENCE from presentation.js via __TENET5_NEXT_PAGE.
     // When LIRIL finishes narrating a page, she automatically navigates
     // to the next investigation page and continues the walkthrough.
-    var AUTOPILOT_ROUTE = [
-      'home.html',
-      'follow-the-money.html',
-      'maid-accountability.html',
-      'carney-conflicts.html',
-      'cds-accountability.html',
-      's504-covey-bae.html',
-      'disability-genocide.html',
-      'veterans-betrayal.html',
-      'foreign-interference.html',
-      'arrivecan.html',
-      'phoenix-pay.html',
-      'rcmp-commissioners.html',
-      'whistleblower-failures.html',
-      'scandals.html',
-      'acelephius-wardoll.html',
-      't4-comparison.html',
-      'kids-guide.html'
-    ];
     var AUTOPILOT_KEY = 'liril_autopilot';
 
     function getAutopilotState() {
@@ -702,42 +787,6 @@
     }
     function clearAutopilot() {
       try { sessionStorage.removeItem(AUTOPILOT_KEY); } catch(e) {}
-    }
-
-    function navigateToNextPage() {
-      var current = (window.location.pathname.split('/').pop() || '').toLowerCase();
-      var idx = AUTOPILOT_ROUTE.indexOf(current);
-      if (idx < 0) idx = AUTOPILOT_ROUTE.indexOf(current.replace(/^\//, ''));
-      var nextIdx = idx + 1;
-
-      if (nextIdx < AUTOPILOT_ROUTE.length) {
-        var nextPage = AUTOPILOT_ROUTE[nextIdx];
-        console.log('[LIRIL] Autopilot: navigating to', nextPage, '(' + (nextIdx + 1) + '/' + AUTOPILOT_ROUTE.length + ')');
-        setAutopilotState({ page: nextPage, index: nextIdx, autostart: true });
-
-        // Navigate via shell iframe or direct
-        if (window.parent !== window && window.parent !== window.self) {
-          // Inside iframe shell — set iframe src directly
-          try {
-            var iframe = window.parent.document.getElementById('content_frame');
-            if (iframe) {
-              iframe.src = nextPage;
-              // Update parent URL bar
-              var newUrl = window.parent.location.pathname + '?load=' + encodeURIComponent(nextPage);
-              window.parent.history.replaceState(null, '', newUrl);
-            } else {
-              window.location.href = nextPage;
-            }
-          } catch(e) {
-            window.location.href = nextPage;
-          }
-        } else {
-          // Direct access — redirect with shell wrapper
-          window.location.href = 'index.html?load=' + nextPage;
-        }
-        return true;
-      }
-      return false; // End of route
     }
 
     function endWalkthrough() {
@@ -758,35 +807,38 @@
       startBtn.setAttribute('aria-expanded', 'false');
       points.forEach(function(p) { p.el.classList.remove('liril-narrating-point'); });
       currentPoint = -1;
-
-      // ── AUTOPILOT: navigate to next page if active ──
-      var state = getAutopilotState();
-      if (state && state.autostart) {
-        if (!navigateToNextPage()) {
-          // End of route — clear autopilot
-          clearAutopilot();
-          console.log('[LIRIL] Autopilot complete — full site walkthrough finished');
-        }
-      }
-    }
-
-    // ── Auto-start walkthrough if arriving via autopilot ──
-    var autopilotState = getAutopilotState();
-    if (autopilotState && autopilotState.autostart) {
-      setTimeout(function() {
-        if (points.length >= 2) {
-          console.log('[LIRIL] Autopilot auto-starting walkthrough on', autopilotState.page);
-          startWalkthrough();
-        }
-      }, 2000); // Wait 2s for page to render
+      hideTourProgress();
     }
 
     function advanceToNextPageWalkthrough() {
-      if (window.__TENET5_NEXT_PAGE) {
-        window.__TENET5_NEXT_PAGE();
-      } else {
-        endWalkthrough();
+      // Clean up current page walkthrough state
+      endWalkthrough();
+      // Navigate to next page if autopilot is active
+      var state = getAutopilotState();
+      if (state && state.autostart && window.__TENET5_NEXT_PAGE) {
+        var prog = window.__TENET5_PAGE_PROGRESS ? window.__TENET5_PAGE_PROGRESS() : null;
+        if (prog && prog.current >= prog.total) {
+          // Last page — tour complete
+          clearAutopilot();
+          showTourComplete();
+          console.log('[LIRIL] Autopilot complete — full site walkthrough finished');
+        } else {
+          console.log('[LIRIL] Autopilot: advancing to next page', prog ? (prog.current + 1) + '/' + prog.total : '');
+          setTimeout(function() { window.__TENET5_NEXT_PAGE(); }, 2000);
+        }
+        return;
       }
+    }
+
+    function showTourComplete() {
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(5,5,10,0.95);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;';
+      overlay.innerHTML =
+        '<div style="color:#8b5cf6;font-size:1.8rem;font-family:Rajdhani,sans-serif;letter-spacing:4px;margin-bottom:12px;text-transform:uppercase;">TOUR COMPLETE</div>' +
+        '<div style="color:#a1a1aa;font-size:0.85rem;font-family:Inter,sans-serif;max-width:400px;text-align:center;line-height:1.6;">LIRIL has guided you through the entire investigation. Click anywhere to dismiss.</div>';
+      overlay.addEventListener('click', function() { overlay.remove(); });
+      document.body.appendChild(overlay);
+      setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 12000);
     }
 
     // ── Event listeners ──────────────────────────────
@@ -813,7 +865,7 @@
         e.preventDefault();
         if (currentPoint > 0) showPoint(currentPoint - 1);
       } else if (e.key === 'Escape') {
-        try { sessionStorage.removeItem('liril-autowalk'); } catch(e) {}
+        clearAutopilot();
         endWalkthrough();
       }
     });
@@ -838,14 +890,16 @@
       else startBtn.style.display = 'none';
     };
 
-    // Auto-start if cross-page flow is active
-    try {
-      if (sessionStorage.getItem('liril-autowalk') === 'true') {
-        setTimeout(function() {
-          if (!isActive) startWalkthrough();
-        }, 1200);
-      }
-    } catch(e) {}
+    // Auto-start if arriving via autopilot cross-page flow
+    var autopilotState = getAutopilotState();
+    if (autopilotState && autopilotState.autostart) {
+      setTimeout(function() {
+        if (!isActive && points.length >= 2) {
+          console.log('[LIRIL] Autopilot auto-starting walkthrough');
+          startWalkthrough();
+        }
+      }, 1500);
+    }
   }
 
   if (document.readyState === 'loading') {

@@ -2277,6 +2277,14 @@
     window.addEventListener('hashchange', handlePermalinkHash);
   }
 
+  // ── Expose navigation API for LIRIL auto-tour ─────────────────────
+  window.__TENET5_NEXT_PAGE = function () { navigatePage(1); };
+  window.__TENET5_PAGE_PROGRESS = function () {
+    var current = getCurrentPage();
+    var idx = getPageIndex(current);
+    return { current: idx + 1, total: PAGE_SEQUENCE.length, page: current };
+  };
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPermalinks);
   } else {
