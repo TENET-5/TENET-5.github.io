@@ -1619,6 +1619,82 @@
     return window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
   }
 
+  /* ── MP3 Audio Support (Azure Neural TTS — highest quality) ──────────
+     Pre-generated MP3+VTT assets in audio/ are AvaMultilingual neural voice.
+     presentation.js tries these FIRST for every narration, falling back to
+     browser speechSynthesis only when no MP3 exists for this page.
+     ──────────────────────────────────────────────────────────────────── */
+  var _presAudio = {
+    element: null,
+    cues: [],
+    ready: false,
+    playing: false,
+    token: 0
+  };
+
+  function _presParseVTT(vttText) {
+    var cues = [];
+    var blocks = vttText.split(/\n\n+/);
+    blocks.forEach(function(block) {
+      var lines = block.trim().split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        var m = lines[i].match(/(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})/);
+        if (m) {
+          var start = +m[1]*3600 + +m[2]*60 + +m[3] + +m[4]/1000;
+          var end = +m[5]*3600 + +m[6]*60 + +m[7] + +m[8]/1000;
+          var text = lines.slice(i + 1).join(' ').trim();
+          if (text) cues.push({ start: start, end: end, text: text });
+          break;
+        }
+      }
+    });
+    return cues;
+  }
+
+  function _presNormalize(t) {
+    return (t || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  /* Find the best matching cue for a narration text snippet */
+  function _presFindCue(text) {
+    if (!_presAudio.cues.length || !text) return null;
+    var norm = _presNormalize(text).substring(0, 80);
+    if (!norm) return null;
+    var words = norm.split(' ');
+    var bestCue = null, bestScore = 0;
+    for (var i = 0; i < _presAudio.cues.length; i++) {
+      var cn = _presNormalize(_presAudio.cues[i].text);
+      var score = 0;
+      for (var w = 0; w < words.length; w++) {
+        if (cn.indexOf(words[w]) >= 0) score++;
+      }
+      if (score > bestScore && score >= Math.min(3, words.length)) {
+        bestScore = score;
+        bestCue = _presAudio.cues[i];
+      }
+    }
+    return bestCue;
+  }
+
+  /* Try to load audio/<slug>.mp3 + .vtt for the current page */
+  (function _presLoadAudio() {
+    var slug = (window.location.pathname.split('/').pop() || '').replace(/\.html$/, '');
+    if (!slug) return;
+    var mp3 = 'audio/' + slug + '.mp3';
+    var vtt = 'audio/' + slug + '.vtt';
+    fetch(mp3, { method: 'HEAD' }).then(function(r) {
+      if (!r.ok) return;
+      return fetch(vtt).then(function(r2) { return r2.ok ? r2.text() : ''; });
+    }).then(function(vttText) {
+      if (!vttText) return;
+      _presAudio.cues = _presParseVTT(vttText);
+      _presAudio.element = new Audio(mp3);
+      _presAudio.element.preload = 'auto';
+      _presAudio.ready = true;
+      console.log('[LIRIL-PRES] Audio loaded:', mp3, _presAudio.cues.length, 'cues');
+    }).catch(function() { /* no audio for this page — speechSynthesis fallback */ });
+  })();
+
   /* getPageLang — returns en-GB (LIRIL is always British) */
   function getPageLang() { return 'en-GB'; }
 
@@ -1637,12 +1713,16 @@
     if (!lirilNarration.badge) return;
     var parts = [];
 
-    // Voice name (short)
-    var v = resolveNarrationVoice();
-    if (v && v.name) {
-      var short = v.name.replace(/Microsoft\s+/i, '').replace(/Online\s*\(Natural\)/i, '').trim();
-      if (short.length > 18) short = short.substring(0, 16) + '\u2026';
-      parts.push(short);
+    // Voice source
+    if (_presAudio.ready) {
+      parts.push('\u2726 Neural');
+    } else {
+      var v = resolveNarrationVoice();
+      if (v && v.name) {
+        var short = v.name.replace(/Microsoft\s+/i, '').replace(/Online\s*\(Natural\)/i, '').trim();
+        if (short.length > 18) short = short.substring(0, 16) + '\u2026';
+        parts.push(short);
+      }
     }
 
     // Rate
@@ -1706,6 +1786,9 @@
 
   function stopNarration() {
     lirilNarration.token++;
+    _presAudio.token++;
+    _presAudio.playing = false;
+    if (_presAudio.element) { _presAudio.element.pause(); }
     stopNarrationKeepalive();
     stopNarrateAll();
     hideSubtitle();
@@ -1767,7 +1850,8 @@
   }
 
   function narrateCurrentSlide() {
-    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
+    var hasSpeech = window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined';
+    if (!hasSpeech && !_presAudio.ready) return;
 
     var text = getNarrationText(lirilNarration.activeSlide);
     if (!text) return;
@@ -1795,9 +1879,60 @@
 
   function doNarrate(text, voice) {
     stopNarration();
+    lirilNarration.token++;
+
+    /* Try MP3 audio first (Azure Neural TTS — highest quality) */
+    if (_presAudio.ready && _presAudio.element) {
+      var cue = _presFindCue(text);
+      if (cue) {
+        var myToken = ++_presAudio.token;
+        _presAudio.playing = true;
+        _presAudio.element.currentTime = cue.start;
+        lirilNarration.speaking = true;
+        showSubtitle(text);
+        updateNarrationButton();
+
+        var _timeHandler = function() {
+          if (myToken !== _presAudio.token) return;
+          if (_presAudio.element.currentTime >= cue.end - 0.05) {
+            _presAudio.element.removeEventListener('timeupdate', _timeHandler);
+            _presAudio.element.removeEventListener('ended', _endHandler);
+            _presAudio.element.pause();
+            _presAudio.playing = false;
+            lirilNarration.speaking = false;
+            hideSubtitle();
+            updateNarrationButton();
+          }
+        };
+        var _endHandler = function() {
+          if (myToken !== _presAudio.token) return;
+          _presAudio.element.removeEventListener('timeupdate', _timeHandler);
+          _presAudio.element.removeEventListener('ended', _endHandler);
+          _presAudio.playing = false;
+          lirilNarration.speaking = false;
+          hideSubtitle();
+          updateNarrationButton();
+        };
+        _presAudio.element.addEventListener('timeupdate', _timeHandler);
+        _presAudio.element.addEventListener('ended', _endHandler);
+        _presAudio.element.play().catch(function() {
+          /* Audio play failed (autoplay policy) — fall back to speech */
+          _presAudio.element.removeEventListener('timeupdate', _timeHandler);
+          _presAudio.element.removeEventListener('ended', _endHandler);
+          _presAudio.playing = false;
+          _doNarrateSpeech(text, voice);
+        });
+        return;
+      }
+    }
+
+    /* Fallback: browser speechSynthesis */
+    _doNarrateSpeech(text, voice);
+  }
+
+  function _doNarrateSpeech(text, voice) {
     var chunks = splitNarrationChunks(text);
     var total = chunks.length;
-    lirilNarration.token++;
     startNarrationKeepalive();
     speakNarrationChunks(chunks, voice, lirilNarration.token, 0, total);
   }
@@ -1812,7 +1947,8 @@
   }
 
   function narrateAllFrom(slides, tracker) {
-    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
+    var hasSpeech = window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined';
+    if (!hasSpeech && !_presAudio.ready) return;
 
     if (lirilNarration.narrateAllActive) {
       // Already running — stop it
@@ -1851,10 +1987,65 @@
     var voice = resolveNarrationVoice();
     stopNarration(); // cancel any in-flight speech
 
-    var chunks = splitNarrationChunks(text);
-    var total = chunks.length;
     lirilNarration.token++;
     var myToken = lirilNarration.token;
+
+    /* Try MP3 cue for this slide first */
+    if (_presAudio.ready && _presAudio.element) {
+      var cue = _presFindCue(text);
+      if (cue) {
+        var audioTok = ++_presAudio.token;
+        _presAudio.playing = true;
+        _presAudio.element.currentTime = cue.start;
+        lirilNarration.speaking = true;
+        showSubtitle(text);
+        updateNarrationButton();
+
+        var _naTimeHandler = function() {
+          if (audioTok !== _presAudio.token) return;
+          if (_presAudio.element.currentTime >= cue.end - 0.05) {
+            _presAudio.element.removeEventListener('timeupdate', _naTimeHandler);
+            _presAudio.element.removeEventListener('ended', _naEndHandler);
+            _presAudio.element.pause();
+            _presAudio.playing = false;
+            lirilNarration.speaking = false;
+            hideSubtitle();
+            updateNarrationButton();
+            if (!lirilNarration.narrateAllActive || myToken !== lirilNarration.token) return;
+            narrateAllAdvance(slides, tracker, cur);
+          }
+        };
+        var _naEndHandler = function() {
+          if (audioTok !== _presAudio.token) return;
+          _presAudio.element.removeEventListener('timeupdate', _naTimeHandler);
+          _presAudio.element.removeEventListener('ended', _naEndHandler);
+          _presAudio.playing = false;
+          lirilNarration.speaking = false;
+          hideSubtitle();
+          updateNarrationButton();
+          if (!lirilNarration.narrateAllActive || myToken !== lirilNarration.token) return;
+          narrateAllAdvance(slides, tracker, cur);
+        };
+        _presAudio.element.addEventListener('timeupdate', _naTimeHandler);
+        _presAudio.element.addEventListener('ended', _naEndHandler);
+        _presAudio.element.play().catch(function() {
+          _presAudio.element.removeEventListener('timeupdate', _naTimeHandler);
+          _presAudio.element.removeEventListener('ended', _naEndHandler);
+          _presAudio.playing = false;
+          /* Fall back to speech chunks */
+          _narrateAllStepSpeech(text, voice, myToken, slides, tracker, cur);
+        });
+        return;
+      }
+    }
+
+    /* Fallback: speechSynthesis */
+    _narrateAllStepSpeech(text, voice, myToken, slides, tracker, cur);
+  }
+
+  function _narrateAllStepSpeech(text, voice, myToken, slides, tracker, cur) {
+    var chunks = splitNarrationChunks(text);
+    var total = chunks.length;
     startNarrationKeepalive();
 
     speakNarrationAllChunks(chunks, voice, myToken, 0, total, function () {
