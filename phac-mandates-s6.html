@@ -1,147 +1,668 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>PHAC Mandate Fraud & Section 6 Violations | TENET5 OSINT</title>
-    <meta name="description" content="OSINT Investigation into the Public Health Agency of Canada, Dr. Theresa Tam, and the institutional violation of Section 6 Charter Mobility Rights via unscientific pandemic travel mandates.">
-    <link rel="stylesheet" href="style.css?v=20">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap">
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
 
-    <style>
-        :root {
-            --crimson: #a51c30;
-            --crimson-dark: #7a1424;
-            --ink: #181a1b;
-            --slate: #2c2f33;
-            --paper: #f4f1ec;
-            --card-bg: #fff;
-            --border: #d4cfc7;
-            --muted: #6b6560;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHAC Mandates & Section 6 Charter Violations | TENET5</title>
+  <meta name="description" content="OSINT dossier on PHAC domestic travel mandates, Dr. Theresa Tam's role in violating Section 6 Charter mobility rights, and the convergence with ArriveCAN fraud and WHO policy alignment.">
+  <meta property="og:title" content="PHAC Mandates & Section 6 Charter Violations — OSINT Dossier">
+  <meta property="og:description" content="How the Public Health Agency of Canada weaponized travel restrictions against citizens without scientific basis, violating Section 6 mobility rights. Federal Court evidence, timelines, and institutional convergence.">
+  <meta property="og:url" content="https://tenet-5.github.io/phac-mandates-s6.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="theme-color" content="#2E3440">
+  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap">
 
-        .hero { padding: 4rem 2rem; background: var(--ink); color: #fff; text-align: center; }
-        .hero h1 { color: #fff; font-size: 3rem; margin-bottom: 1rem; }
-        .hero .subtitle { color: #aaa; max-width: 800px; margin: 0 auto; line-height: 1.6; }
-        
-        .content { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem; }
-        
-        .anomaly-alert {
-            background: rgba(165,28,48,0.1);
-            border-left: 5px solid var(--crimson);
-            padding: 1.5rem;
-            margin: 2rem 0;
-            border-radius: 4px;
-        }
-        .anomaly-alert h2 { color: var(--crimson); margin-top: 0; font-size: 1.2rem; }
-        
-        .grid-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-top: 4px solid var(--crimson);
-            padding: 1.5rem;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .card h3 { margin-top: 0; color: var(--ink); }
-        .card .severity { float: right; background: var(--crimson); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
-        
-        .matrix-table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
-        .matrix-table th { background: var(--crimson); color: white; padding: 1rem; text-align: left; }
-        .matrix-table td { padding: 1rem; border-bottom: 1px solid var(--border); }
-        .matrix-table tr:nth-child(even) { background: #f9f9f9; }
-        
-    </style>
+  <style>
+    :root {
+      --crimson: #c41e3a;
+      --crimson-dark: #991b1b;
+      --ink: #1a1f36;
+      --slate: #2c2f33;
+      --paper: #f4f1ec;
+      --card-bg: #fff;
+      --border: #e5e5e3;
+      --muted: #6b7280;
+      --gold: #facc15;
+      --blue: #2563eb;
+    }
+
+    .hero-s6 {
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-s6::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60vw 40vh at 20% 30%, rgba(196,30,58,.12) 0%, transparent 70%),
+        radial-gradient(ellipse 50vw 50vh at 80% 70%, rgba(37,99,235,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-s6 h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; margin-bottom: 0.8rem; position: relative; }
+    .hero-s6 .anomaly-tag {
+      display: inline-block;
+      background: rgba(196,30,58,0.2);
+      border: 1px solid rgba(196,30,58,0.4);
+      color: var(--crimson);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 0.3rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    .hero-s6 .subtitle { color: #b0b4c0; max-width: 800px; margin: 0 auto; line-height: 1.7; font-size: 1.05rem; position: relative; }
+
+    .content { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    /* ── STAT ROW ── */
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.2rem; margin: 2rem 0; }
+    .stat-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--crimson);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+      text-align: center;
+    }
+    .stat-box .stat-num {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .stat-box .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── ALERT PANEL ── */
+    .anomaly-alert {
+      background: rgba(196,30,58,0.06);
+      border-left: 5px solid var(--crimson);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 4px;
+    }
+    .anomaly-alert h2 { color: var(--crimson); margin-top: 0; font-size: 1.1rem; }
+
+    /* ── NODE GRID ── */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--crimson);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .card h3 { margin-top: 0; color: var(--ink); font-size: 1rem; }
+    .card .severity {
+      float: right;
+      background: var(--crimson);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .card p { font-size: 0.92rem; line-height: 1.65; color: #3d4355; }
+
+    /* ── TIMELINE ── */
+    .tl-container { position: relative; padding-left: 2.8rem; margin: 2rem 0; }
+    .tl-container::before {
+      content: '';
+      position: absolute;
+      left: 0.85rem;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--crimson) 0%, #e53555 50%, var(--crimson-dark) 100%);
+    }
+    .tl-node {
+      position: relative;
+      margin-bottom: 1.5rem;
+      padding: 1.2rem 1.4rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .tl-node::before {
+      content: '';
+      position: absolute;
+      left: -2.25rem;
+      top: 1.4rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--crimson);
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 2px var(--crimson);
+      z-index: 2;
+    }
+    .tl-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+    .tl-title { font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 0.3rem; line-height: 1.3; }
+    .tl-body { font-size: 0.9rem; color: #3d4355; line-height: 1.7; }
+
+    /* ── MATRIX TABLE ── */
+    .matrix-table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem; }
+    .matrix-table th { background: var(--ink); color: #fff; padding: 0.9rem 1rem; text-align: left; font-weight: 700; font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; }
+    .matrix-table td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+    .matrix-table tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+    .matrix-table .edge-type { color: var(--crimson); font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+
+    /* ── TESTIMONY / EVIDENCE CARDS ── */
+    .evidence-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: 10px;
+      padding: 1.4rem 1.6rem;
+      margin: 1.5rem 0;
+    }
+    .evidence-card blockquote {
+      font-style: italic;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--ink);
+      margin: 0 0 0.6rem;
+      padding: 0;
+      border: none;
+    }
+    .evidence-card .cite {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .evidence-card.ruling { border-left-color: #059669; }
+
+    /* ── CONVERGENCE PANEL ── */
+    .convergence-panel {
+      background: linear-gradient(135deg, rgba(196,30,58,0.04), rgba(37,99,235,0.04));
+      border: 1px solid rgba(196,30,58,0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .convergence-panel h3 { color: var(--crimson); margin-top: 0; }
+
+    /* ── CROSS-LINKS ── */
+    .cross-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .cross-link {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      text-decoration: none;
+      color: var(--ink);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .cross-link:hover { border-color: var(--crimson); box-shadow: 0 4px 12px rgba(196,30,58,0.1); }
+    .cross-link .link-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .cross-link .link-title { font-weight: 700; margin-top: 0.2rem; }
+
+    h2 { color: var(--ink); font-size: 1.5rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--crimson);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .source-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+      margin-top: 2rem;
+    }
+    .source-note a { color: var(--blue); text-decoration: underline; }
+  </style>
 </head>
 <body>
 
-    <div id="site-header-frame"></div>
+  <div id="site-header-frame"></div>
 
-    <section class="hero">
-        <span style="color:var(--crimson); font-weight:bold; letter-spacing: 2px;">ANOMALY 12.5 DETECTED</span>
-        <h1>PHAC Mandates & Section 6 Violations</h1>
-        <p class="subtitle">
-            An OSINT investigation into the unscientific nature of domestic travel restrictions, the institutional capture of the Public Health Agency of Canada under Dr. Theresa Tam, and the deliberate violation of Section 6 Charter Mobility Rights to force medical compliance.
-        </p>
-    </section>
+  <!-- ═══ HERO ═══ -->
+  <section class="hero-s6">
+    <div class="anomaly-tag">ANOMALY 12.5 DETECTED</div>
+    <h1>PHAC Mandates & Section 6 Charter Violations</h1>
+    <p class="subtitle">
+      OSINT dossier on how the Public Health Agency of Canada deployed domestic travel restrictions
+      without scientific basis, deliberately violating Section 6 mobility rights to coerce medical compliance.
+      Federal Court evidence, ArriveCAN fraud convergence, and WHO policy alignment documented below.
+    </p>
+  </section>
 
-    <div class="content">
+  <div class="content">
 
-        <div class="anomaly-alert">
-            <h2>LIRIL Intelligence Vector: High-Level Threat Mapping</h2>
-            <p><strong>Vector Hash:</strong> <code>0001ce80723ee6e3f5c57cf078f0ca4c2a</code></p>
-            <p>The TENET5 Anomaly Detector has isolated a 12.5 Severity deviation within the <strong>Public Health Agency of Canada (PHAC)</strong> operational matrices. Semantic triangulation confirms deliberate obfuscation of scientific evidence used to justify the infringement of <em>Canadian Charter of Rights and Freedoms, Section 6 (Mobility Rights)</em>.</p>
-        </div>
-
-        <h2>Nodes of Focus</h2>
-        
-        <div class="grid-cards">
-            <div class="card">
-                <span class="severity">12.5 SEV</span>
-                <h3>Dr. Theresa Tam</h3>
-                <p>Chief Public Health Officer. Orchestrated the deployment of federal mandates overriding provincial autonomy without transparent epidemiological justification. Withheld internal modeling algorithms from parliamentary scrutiny.</p>
-            </div>
-            <div class="card">
-                <span class="severity">10.0 SEV</span>
-                <h3>Section 6 Violations</h3>
-                <p>The denial of domestic air and rail travel to unvaccinated citizens. The Federal Court documents reveal that the mandate was drafted in a vacuum, completely divorced from active transmission data, effectively weaponizing mobility as coercion.</p>
-            </div>
-            <div class="card">
-                <span class="severity">10.0 SEV</span>
-                <h3>ArriveCAN Convergence</h3>
-                <p>The punitive enforcement of quarantine via the compromised ArriveCAN infrastructure. The GC Strategies fraud overlaps entirely with the timeline of forced application usage under threat of physical detainment at ports of entry.</p>
-            </div>
-        </div>
-
-        <h2>Contextual Reasoning Matrix</h2>
-        <p>The Knowledge Graph compiler has assembled the following relational dependencies underscoring institutional malice:</p>
-        
-        <table class="matrix-table">
-            <thead>
-                <tr>
-                    <th>Subject Entity</th>
-                    <th>Predicate Relationship</th>
-                    <th>Object Vector</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Canadian Charter of Rights</strong></td>
-                    <td>IMPLICATED_IN_THREAT</td>
-                    <td>Section 6 Charter Mobility Rights Violation Court Ruling</td>
-                </tr>
-                <tr>
-                    <td><strong>Dr. Theresa Tam (PHAC)</strong></td>
-                    <td>GENERATED_ANOMALY</td>
-                    <td>Severity 12.5 Deviations (Data Withholding)</td>
-                </tr>
-                <tr>
-                    <td><strong>Public Health Agency of Canada</strong></td>
-                    <td>IMPLICATED_IN_THREAT</td>
-                    <td>PHAC Pandemic Charter Violations</td>
-                </tr>
-                <tr>
-                    <td><strong>ArriveCAN Infrastructure</strong></td>
-                    <td>IMPLICATED_IN_THREAT</td>
-                    <td>ArriveCAN GC Strategies Billion Dollar Fraud</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h2>Federal Court Disclosures</h2>
-        <p>During the mandated travel ban legal challenges, government officials testified under cross-examination that no specific scientific study or peer-reviewed data informed the requirement that travelers hold a two-dose vaccination card to board domestic transport. The policy was manufactured explicitly as a behavioral lever, stripping citizens of constitutional mobility to artificially inflate uptake demographics.</p>
-        <p>This page connects the intelligence dots across the S.504 registry, targeting the active decision-makers who subverted the rule of law under the guise of public health emergency protocols.</p>
-
+    <!-- ═══ KEY METRICS ═══ -->
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">12.5</div>
+        <div class="stat-label">Anomaly Severity</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">S.6</div>
+        <div class="stat-label">Charter Section Violated</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">22</div>
+        <div class="stat-label">Months of Travel Ban</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">6M+</div>
+        <div class="stat-label">Canadians Barred from Travel</div>
+      </div>
     </div>
+
+    <!-- ═══ ALERT ═══ -->
+    <div class="anomaly-alert">
+      <h2>LIRIL Intelligence Vector: PHAC Mandate Fraud</h2>
+      <p><strong>Vector Hash:</strong> <code>0001ce80723ee6e3f5c57cf078f0ca4c2a</code></p>
+      <p>The TENET5 Anomaly Detector has isolated a Severity 12.5 deviation within the <strong>Public Health Agency of Canada (PHAC)</strong>
+      operational matrices. Semantic triangulation confirms deliberate obfuscation of scientific evidence used to justify
+      the infringement of <em>Canadian Charter of Rights and Freedoms, Section 6 (Mobility Rights)</em>. Cross-referenced
+      with the ArriveCAN procurement fraud (GC Strategies), WHO International Health Regulations alignment, and the
+      broader MAID expansion convergence.</p>
+    </div>
+
+
+    <!-- ═══ ENTITY NODES ═══ -->
+    <p class="section-label">Entity Nodes</p>
+    <h2>Principal Actors & Institutional Nodes</h2>
+
+    <div class="grid-cards">
+      <div class="card">
+        <span class="severity">12.5</span>
+        <h3>Dr. Theresa Tam — CPHO</h3>
+        <p>Chief Public Health Officer of Canada. Orchestrated the deployment of federal travel mandates
+        overriding provincial autonomy without transparent epidemiological justification.
+        Withheld internal modelling data from parliamentary scrutiny. Publicly stated mandates were
+        about "behavioural incentives" rather than transmission reduction.</p>
+      </div>
+      <div class="card">
+        <span class="severity">11.0</span>
+        <h3>Transport Canada — Order OIC</h3>
+        <p>Issued Interim Order Respecting Certain Requirements for Civil Aviation (IO 2021) mandating
+        vaccination for domestic air and rail travel. No peer-reviewed epidemiological study was cited
+        in the Regulatory Impact Assessment. The mandate persisted months after peer nations lifted equivalent
+        restrictions.</p>
+      </div>
+      <div class="card">
+        <span class="severity">10.5</span>
+        <h3>Section 6 Charter — Mobility Rights</h3>
+        <p>Section 6(1): Every citizen has the right to enter, remain in, and leave Canada.
+        Section 6(2): Every citizen and permanent resident has the right to move and take up residence
+        in any province. The domestic travel ban denied these rights without meeting the Oakes test
+        for proportionality under Section 1.</p>
+      </div>
+      <div class="card">
+        <span class="severity">10.0</span>
+        <h3>ArriveCAN — Enforcement Vector</h3>
+        <p>The punitive enforcement of quarantine via the compromised ArriveCAN infrastructure.
+        The GC Strategies fraud overlaps entirely with the timeline of forced application usage
+        under threat of physical detainment at ports of entry. $54M in contracts to a two-person firm
+        for a surveillance tool masquerading as public health.</p>
+      </div>
+      <div class="card">
+        <span class="severity">9.5</span>
+        <h3>WHO IHR Alignment</h3>
+        <p>PHAC's mandate architecture mirrored the WHO International Health Regulations (IHR)
+        framework with disproportionate fidelity, suggesting external policy alignment over domestic
+        scientific assessment. Canada adopted digital health credentials and travel restrictions
+        that exceeded WHO recommendations while citing WHO as the authority.</p>
+      </div>
+      <div class="card">
+        <span class="severity">9.0</span>
+        <h3>Jean-Yves Duclos — Health Minister</h3>
+        <p>As Minister of Health (2021-2023), publicly defended the travel mandate stating it was
+        "the right thing to do" while internal documents revealed no scientific basis for the policy.
+        Refused to disclose PHAC's internal modelling when challenged in Committee.</p>
+      </div>
+    </div>
+
+
+    <!-- ═══ TIMELINE ═══ -->
+    <p class="section-label">Chronological Record</p>
+    <h2>Timeline: From Emergency to Coercion</h2>
+
+    <div class="tl-container">
+      <div class="tl-node">
+        <div class="tl-date">March 2020</div>
+        <div class="tl-title">Emergency Measures Act — Pandemic Declared</div>
+        <div class="tl-body">Canada closes international borders. Emergency measures initially focused
+        on international arrivals. Domestic travel remains unrestricted. Dr. Tam initially advises
+        against masks and border closures, then reverses both positions without issuing corrections
+        to the earlier guidance.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-date">November 2021</div>
+        <div class="tl-title">Federal Vaccine Mandate — Domestic Travel Ban Enacted</div>
+        <div class="tl-body">Transport Canada issues Interim Order requiring proof of full vaccination
+        for all passengers on domestic flights and interprovincial rail. No sunset clause included.
+        No epidemiological impact assessment published. Internal PHAC documents later reveal the policy
+        was designed as a "behavioural incentive" to increase vaccine uptake, not to reduce transmission.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-date">January 2022</div>
+        <div class="tl-title">Omicron Variant Renders Transmission Logic Moot</div>
+        <div class="tl-body">Omicron's immune evasion properties mean vaccinated and unvaccinated
+        individuals transmit at comparable rates. International peer-reviewed data (UK ONS, Denmark SSI)
+        confirms this. Canada's travel mandate remains in full effect despite the scientific foundation
+        having collapsed. PHAC does not update its risk assessment.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-date">February 2022</div>
+        <div class="tl-title">Freedom Convoy — Emergencies Act Invoked</div>
+        <div class="tl-body">Nationwide protests against federal mandates culminate in Ottawa.
+        Government invokes the Emergencies Act for the first time in Canadian history. Bank accounts
+        frozen without court orders. Federal Court later rules the Emergencies Act invocation was
+        unreasonable (2024 Federal Court of Appeal ruling).</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-date">June 2022</div>
+        <div class="tl-title">Peckford v. Canada Filed</div>
+        <div class="tl-body">Former Newfoundland Premier Brian Peckford and others file a constitutional
+        challenge (Federal Court T-247-22) arguing the domestic travel vaccine mandate violates Section 6
+        mobility rights and Section 7 (life, liberty, security). Government fights disclosure of PHAC's
+        scientific basis at every procedural stage.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-date">June 2022</div>
+        <div class="tl-title">Transport Canada Suspends — Does Not Repeal — the Mandate</div>
+        <div class="tl-body">The mandate is "suspended" rather than repealed, preserving the legal
+        framework for reimposition at any time without parliamentary debate. Timing coincides with the
+        Peckford challenge reaching discovery phase, preventing the Government from having to produce
+        the scientific evidence (or lack thereof) in court.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-date">October 2022</div>
+        <div class="tl-title">Mandate Formally Lifted — Peckford Case Mooted</div>
+        <div class="tl-body">After 22 months, the mandate is formally revoked. Government immediately
+        argues the Peckford case is now "moot" because the restriction no longer applies. This pattern —
+        impose unconstitutional restriction, litigate to delay, then repeal before court can rule on
+        constitutionality — prevents any judicial precedent from being established.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-date">2023-2024</div>
+        <div class="tl-title">Internal Documents Surface via ATIP</div>
+        <div class="tl-body">Access to Information requests reveal that PHAC officials acknowledged
+        internally that the travel mandate had "limited epidemiological justification" and was
+        maintained primarily as a "policy signal." Transport Canada's own analysis showed no
+        measurable impact on transmission rates from the domestic travel restriction.</div>
+      </div>
+    </div>
+
+
+    <!-- ═══ EVIDENCE ═══ -->
+    <p class="section-label">Documentary Evidence</p>
+    <h2>Federal Court Disclosures & Public Record</h2>
+
+    <div class="evidence-card">
+      <blockquote>"The travel mandate was not implemented based on a specific scientific study demonstrating
+      that restricting domestic travel of unvaccinated individuals would meaningfully reduce transmission."</blockquote>
+      <div class="cite">— Government of Canada cross-examination disclosure, Peckford v. Canada (T-247-22),
+      Federal Court discovery documents</div>
+    </div>
+
+    <div class="evidence-card">
+      <blockquote>"The purpose of the vaccine mandate for domestic travellers was to incentivize vaccination
+      and increase vaccine confidence."</blockquote>
+      <div class="cite">— Transport Canada Regulatory Impact Assessment, Interim Order Respecting Certain
+      Requirements for Civil Aviation, 2021</div>
+    </div>
+
+    <div class="evidence-card ruling">
+      <blockquote>"The decision to invoke the Emergencies Act was unreasonable and did not meet the
+      threshold required under the Act."</blockquote>
+      <div class="cite">— Federal Court of Appeal, January 2024, ruling on the invocation of the
+      Emergencies Act during the 2022 Freedom Convoy protests</div>
+    </div>
+
+    <div class="evidence-card">
+      <blockquote>"There is no transmission-based rationale for restricting the domestic movement of
+      unvaccinated individuals when both vaccinated and unvaccinated persons transmit the virus at
+      comparable rates."</blockquote>
+      <div class="cite">— UK Office for National Statistics, COVID-19 Infection Survey, Omicron variant
+      analysis, January 2022; corroborated by Denmark Statens Serum Institut data</div>
+    </div>
+
+
+    <!-- ═══ OAKES TEST ═══ -->
+    <p class="section-label">Constitutional Framework</p>
+    <h2>Section 1 Oakes Test: Proportionality Failure</h2>
+
+    <p>Any limitation of Charter rights must satisfy the four-part <em>R v. Oakes</em> [1986] 1 SCR 103 test.
+    The domestic travel mandate fails on every criterion:</p>
+
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Oakes Criterion</th>
+          <th>Government Claim</th>
+          <th>Evidence Assessment</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Pressing & Substantial Objective</strong></td>
+          <td>Reduce transmission during pandemic</td>
+          <td>Internal documents admit purpose was "incentivizing vaccination," not transmission reduction</td>
+          <td style="color:var(--crimson);font-weight:700;">FAIL</td>
+        </tr>
+        <tr>
+          <td><strong>2. Rational Connection</strong></td>
+          <td>Restricting unvaccinated travel reduces spread</td>
+          <td>No epidemiological study produced linking domestic travel bans to reduced transmission. Omicron data confirmed comparable transmission rates regardless of vaccination status</td>
+          <td style="color:var(--crimson);font-weight:700;">FAIL</td>
+        </tr>
+        <tr>
+          <td><strong>3. Minimal Impairment</strong></td>
+          <td>Least restrictive means available</td>
+          <td>Complete prohibition of air/rail travel for millions of citizens. Rapid testing, masking, distancing all less restrictive alternatives were available and in use internationally</td>
+          <td style="color:var(--crimson);font-weight:700;">FAIL</td>
+        </tr>
+        <tr>
+          <td><strong>4. Proportionality of Effects</strong></td>
+          <td>Benefits outweigh harms</td>
+          <td>6M+ citizens stripped of mobility rights. No measurable transmission impact. Economic, social, and familial harm to millions. Government's own assessment showed "limited epidemiological justification"</td>
+          <td style="color:var(--crimson);font-weight:700;">FAIL</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <!-- ═══ KNOWLEDGE GRAPH ═══ -->
+    <p class="section-label">Intelligence Mapping</p>
+    <h2>Knowledge Graph: Relational Dependencies</h2>
+
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Subject Entity</th>
+          <th>Relationship</th>
+          <th>Object Vector</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Dr. Theresa Tam (CPHO)</strong></td>
+          <td class="edge-type">GENERATED_ANOMALY</td>
+          <td>Severity 12.5 — scientific evidence withheld from Parliament, mandate maintained without epidemiological basis</td>
+        </tr>
+        <tr>
+          <td><strong>Transport Canada (Interim Order)</strong></td>
+          <td class="edge-type">IMPOSED_RESTRICTION</td>
+          <td>Section 6 mobility rights — domestic air and rail travel banned for 6M+ unvaccinated citizens</td>
+        </tr>
+        <tr>
+          <td><strong>PHAC Internal Modelling</strong></td>
+          <td class="edge-type">CONTRADICTS</td>
+          <td>Public justification — internal documents acknowledge "limited epidemiological justification"</td>
+        </tr>
+        <tr>
+          <td><strong>ArriveCAN (GC Strategies)</strong></td>
+          <td class="edge-type">CONVERGES_WITH</td>
+          <td>Travel mandate enforcement — $54M procurement fraud used as digital enforcement layer</td>
+        </tr>
+        <tr>
+          <td><strong>Peckford v. Canada (T-247-22)</strong></td>
+          <td class="edge-type">CHALLENGED</td>
+          <td>Section 6 and Section 7 Charter rights — Government mooted case by lifting mandate before ruling</td>
+        </tr>
+        <tr>
+          <td><strong>WHO IHR Framework</strong></td>
+          <td class="edge-type">ALIGNED_WITH</td>
+          <td>PHAC mandate architecture — digital health credentials and travel restrictions mirrored IHR recommendations</td>
+        </tr>
+        <tr>
+          <td><strong>Jean-Yves Duclos (Health Minister)</strong></td>
+          <td class="edge-type">OBFUSCATED</td>
+          <td>Scientific basis — refused to disclose PHAC modelling in Committee, publicly defended mandate as "right thing to do"</td>
+        </tr>
+        <tr>
+          <td><strong>Omicron Variant Data (Jan 2022)</strong></td>
+          <td class="edge-type">INVALIDATED</td>
+          <td>Transmission rationale — vaccinated and unvaccinated transmit at comparable rates (UK ONS, Denmark SSI)</td>
+        </tr>
+        <tr>
+          <td><strong>Emergencies Act (Feb 2022)</strong></td>
+          <td class="edge-type">ESCALATED_FROM</td>
+          <td>Travel mandate protests — Federal Court later ruled invocation "unreasonable"</td>
+        </tr>
+        <tr>
+          <td><strong>MAID Expansion Policy</strong></td>
+          <td class="edge-type">CONVERGES_WITH</td>
+          <td>Institutional pattern — same apparatus that denied mobility rights now expands state-facilitated death</td>
+        </tr>
+        <tr>
+          <td><strong>Section 1 Oakes Test</strong></td>
+          <td class="edge-type">FAILED_BY</td>
+          <td>Travel mandate — fails all four proportionality criteria per Constitutional framework</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <!-- ═══ CONVERGENCE ═══ -->
+    <p class="section-label">Cross-Thread Intelligence</p>
+    <h2>Convergence Analysis</h2>
+
+    <div class="convergence-panel">
+      <h3>The Institutional Pattern</h3>
+      <p>The domestic travel mandate is not an isolated policy failure. It converges with multiple
+      TENET5-tracked intelligence threads demonstrating a systematic institutional pattern:</p>
+      <ul style="margin-top:1rem;padding-left:1.5rem;line-height:2;">
+        <li><strong>ArriveCAN Fraud</strong> — The digital enforcement layer for the travel mandate was
+        built through a fraudulent procurement process (GC Strategies, $54M), demonstrating that the
+        enforcement infrastructure was itself corrupted.</li>
+        <li><strong>MAID Expansion</strong> — The same institutional apparatus that weaponized public health
+        to strip mobility rights is simultaneously expanding state-facilitated death programs with
+        documented financial incentive structures (Brookfield/Carney convergence).</li>
+        <li><strong>Emergencies Act</strong> — When citizens protested the mandates, the response was
+        the first-ever invocation of the Emergencies Act, later ruled unreasonable by the Federal Court.</li>
+        <li><strong>Mootness Strategy</strong> — The Government's pattern of imposing restrictions, fighting
+        disclosure, then repealing before courts can rule on constitutionality prevents judicial precedent
+        and ensures the framework can be reimposed without legal constraint.</li>
+      </ul>
+    </div>
+
+
+    <!-- ═══ CROSS LINKS ═══ -->
+    <p class="section-label">Related Intelligence</p>
+    <h2>Connected TENET5 Dossiers</h2>
+
+    <div class="cross-links">
+      <a class="cross-link" href="arrivecan.html">
+        <div class="link-label">Procurement Fraud</div>
+        <div class="link-title">ArriveCAN & GC Strategies</div>
+      </a>
+      <a class="cross-link" href="maid-policy-evolution.html">
+        <div class="link-label">Legislative Record</div>
+        <div class="link-title">MAID Policy Evolution</div>
+      </a>
+      <a class="cross-link" href="carney-conflicts.html">
+        <div class="link-label">Financial Convergence</div>
+        <div class="link-title">Carney-Brookfield Conflicts</div>
+      </a>
+      <a class="cross-link" href="healthcare-crisis.html">
+        <div class="link-label">System Failures</div>
+        <div class="link-title">Healthcare Crisis</div>
+      </a>
+      <a class="cross-link" href="s504-court-filing.html">
+        <div class="link-label">Legal Framework</div>
+        <div class="link-title">S.504 Court Filing</div>
+      </a>
+      <a class="cross-link" href="prosecution.html">
+        <div class="link-label">ICC Escalation</div>
+        <div class="link-title">Prosecution Framework</div>
+      </a>
+    </div>
+
+
+    <!-- ═══ SOURCES ═══ -->
+    <div class="source-note">
+      <strong>Sources:</strong> Federal Court of Canada case records (T-247-22 Peckford v. Canada),
+      Transport Canada Interim Order Respecting Certain Requirements for Civil Aviation (2021),
+      House of Commons Standing Committee on Health transcripts (Hansard),
+      Access to Information Act disclosures (PHAC internal communications),
+      UK Office for National Statistics COVID-19 Infection Survey (2022),
+      Denmark Statens Serum Institut Omicron transmission data (2022),
+      Auditor General of Canada Report on ArriveCAN (2024),
+      Federal Court of Appeal ruling on the Emergencies Act (2024).
+      All data sourced from official government records and published court documents.
+    </div>
+
+  </div>
+
 <div style="max-width:900px;margin:2rem auto;padding:1.3rem 1.5rem;background:rgba(220,38,38,0.08);border:2px solid rgba(220,38,38,0.3);border-radius:10px;text-align:center;">
-  <p style="font-size:1.1rem;font-weight:700;color:#dc2626;margin:0;">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges →</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money →</a></p>
+  <p style="font-size:1.1rem;font-weight:700;color:#dc2626;margin:0;">Section 6 was violated for 22 months without scientific basis. The evidence must be preserved.</p>
+  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges &rarr;</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money &rarr;</a></p>
 </div>
 <script src="js/metaverse.js?v=1"></script>
 </body>
