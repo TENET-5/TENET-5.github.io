@@ -84,6 +84,20 @@
       hamburger.addEventListener('click', function() {
         hamburger.classList.toggle('open');
         navContent.classList.toggle('nav-open');
+        /* Position dropdown right below the nav bar */
+        if (navContent.classList.contains('nav-open')) {
+          var siteNav = document.getElementById('site-nav');
+          if (siteNav) {
+            navContent.style.top = siteNav.getBoundingClientRect().bottom + 'px';
+          }
+        }
+      });
+      /* Close mobile nav when any link is tapped */
+      navContent.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A') {
+          hamburger.classList.remove('open');
+          navContent.classList.remove('nav-open');
+        }
       });
     }
 
