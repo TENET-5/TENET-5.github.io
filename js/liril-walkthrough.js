@@ -892,6 +892,14 @@
 
     // Auto-start if arriving via autopilot cross-page flow
     var autopilotState = getAutopilotState();
+    var path = window.location.pathname;
+    
+    // Auto-initialize autopilot if on the first page and it hasn't been set
+    if (!autopilotState && (path === '/' || path.endsWith('index.html') || path.endsWith('home.html'))) {
+      autopilotState = { autostart: true };
+      setAutopilotState(autopilotState);
+    }
+
     if (autopilotState && autopilotState.autostart) {
       setTimeout(function() {
         if (!isActive && points.length >= 2) {

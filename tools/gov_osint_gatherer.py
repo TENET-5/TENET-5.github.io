@@ -54,6 +54,15 @@ class GovOSINTGatherer:
                 
         logger.info("Pipeline Execution Completed. All discoveries protected.")
 
+    async def gather_continuous_telemetry(self, interval=5):
+        logger.info(f"Initiating OSINT Telemetry Gathering Daemon Loop (Interval: {interval}s)...")
+        while True:
+            try:
+                await self.execute_pipeline()
+            except Exception as e:
+                logger.error(f"Continuous Gathering Error Caught: {e}")
+            await asyncio.sleep(interval)
+
     async def process_target(self, target_data, index):
         # 1. N vs NP Topological Tracking
         tracked_data = await self.tracker.track_entity(target_data)
@@ -65,7 +74,7 @@ class GovOSINTGatherer:
 if __name__ == "__main__":
     gatherer = GovOSINTGatherer()
     try:
-        asyncio.run(gatherer.execute_pipeline())
+        asyncio.run(gatherer.gather_continuous_telemetry(interval=5))
     except KeyboardInterrupt:
         logger.warning("Gatherer manually terminated.")
     except Exception as e:

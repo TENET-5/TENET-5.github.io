@@ -18,9 +18,8 @@ from pathlib import Path
 
 import edge_tts
 
-# AvaMultilingual is Microsoft's flagship neural voice — natural breathing,
-# human prosody, emotional range. Dramatically less robotic than ClaraNeural.
-VOICE = "en-US-AvaMultilingualNeural"
+# ClaraNeural — Canadian English, clear and neutral. The canonical LIRIL voice.
+VOICE = "en-CA-ClaraNeural"
 RATE = "+10%"      # Faster — urgency, anger, intensity
 PITCH = "-4Hz"     # Deeper — menacing, authoritative
 OUTPUT_DIR = Path(__file__).parent.parent / "audio"

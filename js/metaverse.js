@@ -10,7 +10,7 @@
   // ── Inject metaverse CSS ─────────────────────────
   var link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'css/metaverse.css';
+  link.href = window.location.pathname.indexOf('reduster') > -1 ? '../css/metaverse.css' : 'css/metaverse.css';
   document.head.appendChild(link);
 
   document.addEventListener('DOMContentLoaded', function() {
