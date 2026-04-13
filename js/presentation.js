@@ -1705,9 +1705,9 @@
     });
     if (enNonMale) { cachedVoice = enNonMale; storeVoiceName(enNonMale); return cachedVoice; }
 
-    /* 4. Absolute fallback */
+    /* 4. Absolute fallback — still block male */
     cachedVoice = voices.find(function (v) {
-      return v.lang && v.lang.indexOf('en') === 0;
+      return v.lang && v.lang.indexOf('en') === 0 && !isMaleP(v);
     }) || null;
     if (cachedVoice) storeVoiceName(cachedVoice);
     return cachedVoice;
