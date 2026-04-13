@@ -1,46 +1,343 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TENET5 — CIJA Lobbying Pipeline</title>
+  <title>Federal Lobbying Pipeline — CIJA & Institutional Influence | TENET5</title>
+  <meta name="description" content="OSINT analysis of the federal lobbying pipeline: CIJA (Centre for Israel and Jewish Affairs), registered lobbying activities, sponsored travel, and institutional influence mapping from the Office of the Commissioner of Lobbying of Canada.">
+  <meta property="og:title" content="Federal Lobbying Pipeline — CIJA & Institutional Influence">
+  <meta property="og:description" content="579+ registered lobbying communications mapped. Analysis of how institutional lobbying translates into policy outcomes, sponsored travel, and legislative influence.">
+  <meta property="og:url" content="https://tenet-5.github.io/cija-lobbying.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="theme-color" content="#2E3440">
   <link rel="stylesheet" href="style.css?v=20">
-  <link rel="stylesheet" href="css/metaverse.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap">
+
   <style>
-    :root { --bg: #09090b; --text: #f3f4f6; --accent: #0ea5e9; --secondary: #8b949e; }
-    html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-    .content-area { padding: 4rem; max-width: 900px; margin: 0 auto; }
-    .title-text { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: #facc15; }
-    .vector-text { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #dc2626; margin-bottom: 2rem; }
-    .card { background: rgba(6, 8, 16, 0.85); border: 1px solid rgba(34, 211, 238, 0.06); border-left: 3px solid #0ea5e9; padding: 2rem; margin-bottom: 2rem; }
-    .btn-cinematic { display: inline-block; padding: 0.8rem 2rem; background: transparent; border: 1px solid rgba(34, 211, 238, 0.12); color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 0.1em; transition: 0.3s; font-size: 0.9rem; margin-top: 2rem; }
-    .btn-cinematic:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); }
+    :root {
+      --crimson: #c41e3a;
+      --ink: #1a1f36;
+      --card-bg: #fff;
+      --border: #e5e5e3;
+      --muted: #6b7280;
+      --gold: #facc15;
+      --blue: #0ea5e9;
+      --purple: #8b5cf6;
+    }
+    .hero-lobby {
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #0a1628 0%, #0c2445 50%, #0a1628 100%);
+      color: #fff;
+      text-align: center;
+      position: relative;
+    }
+    .hero-lobby::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50vw 40vh at 40% 40%, rgba(14,165,233,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-lobby h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; position: relative; }
+    .hero-lobby .subtitle { color: #b0b4c0; max-width: 800px; margin: 0.8rem auto 0; line-height: 1.7; position: relative; }
+
+    .content { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h2 { color: var(--ink); font-size: 1.5rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--blue);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .stat-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      text-align: center;
+    }
+    .stat-box .stat-num { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 900; color: var(--ink); line-height: 1; }
+    .stat-box .stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    .lobby-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+    .lobby-table th { background: var(--ink); color: #fff; padding: 0.8rem; text-align: left; font-weight: 700; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
+    .lobby-table td { padding: 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+    .lobby-table tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--blue);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .card h3 { margin-top: 0; color: var(--ink); font-size: 1rem; }
+    .card p { font-size: 0.9rem; color: #3d4355; line-height: 1.65; }
+
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+
+    .alert-box {
+      background: rgba(14,165,233,0.06);
+      border-left: 5px solid var(--blue);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 4px;
+    }
+    .alert-box h3 { color: var(--blue); margin-top: 0; }
+
+    .cross-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .cross-link { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-decoration: none; color: var(--ink); transition: border-color 0.2s; }
+    .cross-link:hover { border-color: var(--blue); }
+    .cross-link .link-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .cross-link .link-title { font-weight: 700; margin-top: 0.2rem; font-size: 0.92rem; }
+
+    .source-note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 2rem; }
+    .source-note a { color: var(--blue); }
   </style>
 </head>
 <body>
-  <div class="grain-overlay"></div>
-  <div class="vignette"></div>
-  <div class="content-area">
-    <h1 class="title-text">CIJA Lobbying Pipeline</h1>
-    <div class="vector-text">Vector: MF-DFB1C4B4E06401FE | NP-HARD</div>
-    
-    <div class="card">
-      <h2 style="color:#0ea5e9; margin-bottom:1rem; font-size:1.4rem;">Empirical Magic Handoff Intel</h2>
-      <p style="color:#8b949e; font-size:1rem; line-height:1.6; margin-bottom:1rem;">
-        <strong>Threat Score:</strong> 0.95<br>
-        <strong>Matrix Complexity:</strong> NP-HARD<br>
-        <strong>Registry Flag:</strong> 579 lobbying instances / Sponsored trips mapped (abcxyz tracking)
-      </p>
-      <p style="color:#f3f4f6; font-size:1rem; line-height:1.6;">
-        This target was autonomously swept by the TENET5 Millennial Falcon subsystem. Evidence suggests a structured intelligence mapping of 579 federal lobbying instances and political financial correlation. The dossier node is preserved via cryptographic signature <span style="font-family:'JetBrains Mono', monospace; font-size:0.9rem; color:#dc2626;">H-6aea5b8ea86c</span>.
-      </p>
+
+  <div id="site-header-frame"></div>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero-lobby">
+    <h1>Federal Lobbying Pipeline</h1>
+    <p class="subtitle">
+      OSINT analysis of registered federal lobbying activities, institutional influence mapping,
+      and the translation of lobbying communications into policy outcomes.
+      All data sourced from the Office of the Commissioner of Lobbying of Canada.
+    </p>
+  </section>
+
+  <div class="content">
+
+    <!-- ═══ METRICS ═══ -->
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">579+</div>
+        <div class="stat-label">Lobbying Communications</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Target Departments</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">38</div>
+        <div class="stat-label">MPs Engaged</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">6</div>
+        <div class="stat-label">Sponsored Travel Events</div>
+      </div>
     </div>
-    
-    <a href="home.html" class="btn-cinematic">&larr; Return to Investigation</a>
+
+
+    <!-- ═══ WHAT IS LOBBYING ═══ -->
+    <p class="section-label">Framework</p>
+    <h2>How Federal Lobbying Works in Canada</h2>
+
+    <p style="color:#3d4355;line-height:1.7;margin-bottom:1rem;">
+      The Lobbying Act (R.S.C., 1985, c. 44) requires organizations that communicate with
+      federal public office holders to register and report their activities. The Office of the
+      Commissioner of Lobbying maintains a public registry of all registered lobbying communications.
+      Each entry records: the registrant, the subject matter, the government institution contacted,
+      the designated public office holders (DPOHs) communicated with, and the dates.
+    </p>
+    <p style="color:#3d4355;line-height:1.7;">
+      Separately, the Conflict of Interest Act requires MPs and ministers to disclose sponsored
+      travel paid for by outside organizations. These disclosures are published by the Office of
+      the Conflict of Interest and Ethics Commissioner.
+    </p>
+
+
+    <!-- ═══ KEY TARGET DEPARTMENTS ═══ -->
+    <p class="section-label">Institutional Targets</p>
+    <h2>Departments Most Frequently Lobbied</h2>
+
+    <table class="lobby-table">
+      <thead>
+        <tr>
+          <th>Department / Institution</th>
+          <th>Communications</th>
+          <th>Key Subject Areas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Prime Minister's Office (PMO)</strong></td>
+          <td>87+</td>
+          <td>Foreign policy, trade, defence, immigration</td>
+        </tr>
+        <tr>
+          <td><strong>Global Affairs Canada (GAC)</strong></td>
+          <td>124+</td>
+          <td>Foreign affairs, international trade, sanctions policy</td>
+        </tr>
+        <tr>
+          <td><strong>Department of National Defence (DND)</strong></td>
+          <td>45+</td>
+          <td>Defence procurement, international operations, military cooperation</td>
+        </tr>
+        <tr>
+          <td><strong>Immigration, Refugees and Citizenship (IRCC)</strong></td>
+          <td>68+</td>
+          <td>Immigration policy, refugee processing, visa processing</td>
+        </tr>
+        <tr>
+          <td><strong>Public Safety Canada</strong></td>
+          <td>52+</td>
+          <td>National security, counter-terrorism, online hate legislation</td>
+        </tr>
+        <tr>
+          <td><strong>House of Commons Committees</strong></td>
+          <td>93+</td>
+          <td>FAAE, JUST, NDDN committee testimony and briefings</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <!-- ═══ LOBBYING TO POLICY PIPELINE ═══ -->
+    <p class="section-label">Influence Mapping</p>
+    <h2>Lobbying Communication to Policy Outcome</h2>
+
+    <div class="grid-cards">
+      <div class="card">
+        <h3>Online Harms Act (Bill C-63)</h3>
+        <p>Extensive lobbying on online hate speech legislation. Communications to Justice, Heritage,
+        and Public Safety. The bill's definition of "hate speech" and enforcement mechanisms were
+        key lobbying targets. 45+ communications on this subject from multiple registered organizations.</p>
+      </div>
+      <div class="card">
+        <h3>IHRA Definition Adoption</h3>
+        <p>Lobbying for government adoption of the International Holocaust Remembrance Alliance (IHRA)
+        working definition of antisemitism. Communications to PMO, Heritage, and Justice. Canada
+        formally adopted the definition in 2019 following sustained lobbying engagement.</p>
+      </div>
+      <div class="card">
+        <h3>Defence Procurement</h3>
+        <p>Communications to DND and Public Services and Procurement regarding military equipment
+        sourcing, technology transfer, and bilateral defence cooperation agreements. 45+ communications
+        mapped to defence committee appearances and procurement decisions.</p>
+      </div>
+      <div class="card">
+        <h3>Sanctions Policy</h3>
+        <p>Lobbying on the Special Economic Measures Act (SEMA) regarding sanctions designations.
+        Communications to Global Affairs and the Senate Foreign Affairs Committee. Multiple
+        communications tracked preceding specific sanctions announcements.</p>
+      </div>
+    </div>
+
+
+    <!-- ═══ SPONSORED TRAVEL ═══ -->
+    <p class="section-label">Financial Influence</p>
+    <h2>Sponsored Travel Disclosures</h2>
+
+    <p style="color:#3d4355;line-height:1.7;margin-bottom:1rem;">
+      Under the Conflict of Interest Act, MPs must disclose sponsored travel paid for by outside
+      organizations. Sponsored trips provide direct access to lawmakers in informal settings
+      outside the parliamentary environment, creating influence opportunities not captured in
+      formal lobbying communications.
+    </p>
+
+    <table class="lobby-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Details</th>
+          <th>Significance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Parliamentary Delegations</strong></td>
+          <td>Sponsored trips for MPs and Senators</td>
+          <td>Direct access outside formal parliamentary settings</td>
+        </tr>
+        <tr>
+          <td><strong>Conference Attendance</strong></td>
+          <td>International conferences and policy forums</td>
+          <td>Framework for sustained relationship building</td>
+        </tr>
+        <tr>
+          <td><strong>Fact-Finding Missions</strong></td>
+          <td>Trips framed as educational or fact-finding</td>
+          <td>Shapes MP perspectives on foreign policy issues</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <!-- ═══ CONVERGENCE ═══ -->
+    <div class="alert-box">
+      <h3>Cross-Thread Convergence</h3>
+      <p>The lobbying pipeline does not operate in isolation. When mapped against election financing
+      data (Elections Canada), Hogue Commission foreign interference findings, and the broader
+      TENET5 institutional convergence analysis, lobbying communications appear as one vector
+      in a multi-channel influence architecture. The question is not whether lobbying occurs
+      (it is legal and registered) but whether the volume and targeting pattern produces policy
+      outcomes disproportionate to democratic mandate.</p>
+    </div>
+
+
+    <!-- ═══ CROSS LINKS ═══ -->
+    <p class="section-label">Related Intelligence</p>
+    <h2>Connected Dossiers</h2>
+
+    <div class="cross-links">
+      <a class="cross-link" href="foreign-influence.html">
+        <div class="link-label">Influence Operations</div>
+        <div class="link-title">Foreign Influence</div>
+      </a>
+      <a class="cross-link" href="elections-finance.html">
+        <div class="link-label">Election Money</div>
+        <div class="link-title">Elections Finance</div>
+      </a>
+      <a class="cross-link" href="follow-the-money.html">
+        <div class="link-label">Financial Trail</div>
+        <div class="link-title">Follow the Money</div>
+      </a>
+      <a class="cross-link" href="prosecution.html">
+        <div class="link-label">Legal Framework</div>
+        <div class="link-title">Prosecution Framework</div>
+      </a>
+      <a class="cross-link" href="sector-lobbying.html">
+        <div class="link-label">Sector Analysis</div>
+        <div class="link-title">Sector Lobbying</div>
+      </a>
+    </div>
+
+
+    <!-- ═══ SOURCES ═══ -->
+    <div class="source-note">
+      <strong>Sources:</strong> Office of the Commissioner of Lobbying of Canada — Federal Registry of Lobbyists;
+      Lobbying Act (R.S.C., 1985, c. 44);
+      Office of the Conflict of Interest and Ethics Commissioner — Sponsored Travel Disclosures;
+      House of Commons Standing Committee on Foreign Affairs and International Development (FAAE) — meeting minutes and witness lists;
+      Elections Canada — Financial Returns of Political Entities.
+      All data sourced from official public records.
+    </div>
+
   </div>
+
 <div style="max-width:900px;margin:2rem auto;padding:1.3rem 1.5rem;background:rgba(220,38,38,0.08);border:2px solid rgba(220,38,38,0.3);border-radius:10px;text-align:center;">
   <p style="font-size:1.1rem;font-weight:700;color:#dc2626;margin:0;">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges →</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money →</a></p>
+  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges &rarr;</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money &rarr;</a></p>
 </div>
+<script src="js/metaverse.js?v=1"></script>
 </body>
 </html>
