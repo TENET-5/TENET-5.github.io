@@ -521,135 +521,11 @@
       next();
     }
 
-    // ── Voice selection (cached) ─────────────────────
-    var cachedVoice = null;
-    var voiceResolved = false;
-    var VOICE_STORAGE_KEY = 'liril-voice-name';
-
-    // LIRIL voice: British female ONLY. Hardcoded names for Windows 11 + Chrome + Edge.
-    var FEMALE_VOICES = [
-      'hazel', 'susan', 'libby', 'sonia', 'maisie', 'martha', 'kate',
-      'karen', 'moira', 'fiona', 'serena', 'samantha', 'victoria',
-      'zira', 'jenny', 'aria', 'sara', 'emily', 'emma',
-      'google uk english female', 'google us english female'
-    ];
-    var MALE_VOICES = [
-      'david', 'mark', 'james', 'george', 'daniel', 'ryan', 'guy',
-      'thomas', 'richard', 'rishi', 'sean', 'oliver', 'liam',
-      'christopher', 'eric', 'andrew', 'brian', 'roger', 'malcolm',
-      'connor', 'freddie', 'alfie', 'ethan', 'noah'
-    ];
-
-    function isEnGB(v) {
-      var l = (v.lang || '').toLowerCase().replace('_', '-');
-      return l === 'en-gb' || l.indexOf('en-gb') === 0;
-    }
-    function isEn(v) {
-      var l = (v.lang || '').toLowerCase().replace('_', '-');
-      return l.indexOf('en') === 0;
-    }
-    function nameOf(v) { return (v.name || '').toLowerCase(); }
-    function isFemale(v) { return FEMALE_VOICES.some(function(f) { return nameOf(v).indexOf(f) >= 0; }); }
-    function isMale(v) { return MALE_VOICES.some(function(m) { return nameOf(v).indexOf(m) >= 0; }); }
-
+    // ── Voice selection — delegates to LIRIL_VOICE (single source of truth) ──
+    // All voice resolution, caching, retry, and voiceschanged handling lives
+    // in liril-voice.js. DO NOT duplicate logic here — that causes drift.
     function resolveVoice() {
-      /* Delegate to shared LIRIL_VOICE module (single source of truth) */
-      if (window.LIRIL_VOICE) {
-        var v = window.LIRIL_VOICE.get();
-        if (v) { cachedVoice = v; voiceResolved = true; }
-        return v;
-      }
-      /* Fallback: own resolver if liril-voice.js failed to load */
-      if (voiceResolved && cachedVoice) return cachedVoice;
-      var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-      if (voices.length === 0) return null;
-
-      // P0: Restore the exact voice persisted by presentation.js or a prior page
-      try {
-        var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
-        if (saved) {
-          var restored = voices.find(function(v) { return v.name === saved; });
-          if (restored && !isMale(restored)) {
-            cachedVoice = restored;
-            voiceResolved = true;
-            console.log('[LIRIL] Restored voice from session:', cachedVoice.name);
-            return cachedVoice;
-          }
-        }
-      } catch(e) {}
-
-      // P0.5: STRICT PRIORITY for High-Quality 'Natural' / 'Online' Neural Voices (Matches Simple Guide MP3 Profile)
-      var naturalVoice = voices.find(function(v) {
-        return isEnGB(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name);
-      });
-      if (naturalVoice) {
-        cachedVoice = naturalVoice;
-      } else {
-        // P1: Known female + en-GB (LIRIL is British first)
-        cachedVoice = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
-        // P2: Any en-GB that is NOT male
-        if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEnGB(v) && !isMale(v); });
-        // P3: High Quality English (Natural/Online) even if not GB
-        if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
-        // P4: Known female + any English
-        if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v); });
-        // P5: Any English NOT male
-        if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && !isMale(v); });
-        // P6: Absolute last resort — still block male
-        if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && !isMale(v); }) || null;
-      }
-
-      if (cachedVoice) {
-        // Store so presentation.js and future pages get the same voice
-        try { sessionStorage.setItem(VOICE_STORAGE_KEY, cachedVoice.name); } catch(e) {}
-        console.log('[LIRIL] Selected High-Quality voice:', cachedVoice.name, '(' + cachedVoice.lang + ')');
-      } else {
-        console.warn('[LIRIL] No suitable voice found!');
-      }
-      voiceResolved = true;
-      return cachedVoice;
-    }
-
-    // Re-resolve when Chrome finishes loading voices async
-    // CRITICAL: Chrome/Edge load voices LATE — we must retry until we get a female voice
-    var voiceRetryCount = 0;
-    function retryVoiceResolution() {
-      cachedVoice = null;
-      voiceResolved = false;
-      var v = resolveVoice();
-      if (v && !isMale(v)) {
-        console.log('[LIRIL] Voice locked:', v.name, '(' + v.lang + ') after', voiceRetryCount, 'retries');
-        return; // Got a good voice
-      }
-      voiceRetryCount++;
-      if (voiceRetryCount < 20) {
-        setTimeout(retryVoiceResolution, 250); // Retry every 250ms for up to 5 seconds
-      } else {
-        /* If still male after 20 retries, clear it — silence is better than wrong voice */
-        if (cachedVoice && isMale(cachedVoice)) {
-          console.warn('[LIRIL] Rejecting male voice after 20 retries:', cachedVoice.name);
-          cachedVoice = null;
-          voiceResolved = false;
-        } else {
-          console.warn('[LIRIL] Voice after 20 retries:', v ? v.name : 'none');
-        }
-      }
-    }
-
-    if (window.speechSynthesis) {
-      window.speechSynthesis.addEventListener('voiceschanged', function() {
-        /* Only re-resolve if current voice is gone or male */
-        if (cachedVoice) {
-          var voices = window.speechSynthesis.getVoices();
-          var still = voices.find(function(v) { return v.name === cachedVoice.name; });
-          if (still && !isMale(still)) return; /* voice still valid — keep it */
-        }
-        cachedVoice = null;
-        voiceResolved = false;
-        resolveVoice();
-      });
-      // Start retry loop immediately — don't wait for voiceschanged event
-      retryVoiceResolution();
+      return window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
     }
 
     // ── Walkthrough controls ─────────────────────────
@@ -749,7 +625,8 @@
         var chunks = chunkText(point.text);
         var voice = resolveVoice();
 
-        if (!voice && !voiceResolved) {
+        if (!voice) {
+          // LIRIL_VOICE may not have resolved yet (Chrome async) — poll briefly
           var waited = 0;
           var poll = setInterval(function() {
             waited += 100;
@@ -891,23 +768,7 @@
       }
     });
 
-    // Load voices — Chrome/Edge load asynchronously, MUST wait for onvoiceschanged
-    if ('speechSynthesis' in window) {
-      var initVoices = function() {
-        /* Only re-resolve if current voice is missing or male — prevents drift */
-        if (cachedVoice) {
-          var voices = window.speechSynthesis.getVoices();
-          var still = voices.find(function(v) { return v.name === cachedVoice.name; });
-          if (still && !isMale(still)) return; /* voice still available and valid — keep it */
-        }
-        voiceResolved = false;
-        cachedVoice = null;
-        resolveVoice(); // pre-resolve so first click is instant
-      };
-      window.speechSynthesis.onvoiceschanged = initVoices;
-      // Also try immediately (Firefox loads sync)
-      if (window.speechSynthesis.getVoices().length > 0) initVoices();
-    }
+    // Voice pre-warm handled by liril-voice.js — no duplicate listeners needed
 
     // ── Rescan hook for dynamic pages ────────────────
     window.lirilRescan = function() {
