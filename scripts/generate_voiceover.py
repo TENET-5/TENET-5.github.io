@@ -534,6 +534,151 @@ NARRATIONS = {
             "In 2008, Alex Acosta negotiated a plea deal that shielded Epstein from federal prosecution. Thirty victims were not notified. Palm Beach police investigated in 2005 and 2006. The investigation was transferred to the FBI — then closed via a non-prosecution agreement. The system did not fail. The system worked exactly as designed — for the people it was designed to protect.",
         ],
     },
+    # ── Batch 4 ──────────────────────────────────────────────────────
+    "accountability": {
+        "title": "The 504 — Government Accountability Database",
+        "segments": [
+            "One thousand one hundred and five confirmed records. Ethics violations, criminal charges, and documented scandals involving Canadian public officials — compiled into a single searchable database. This is the accountability ledger the government never wanted you to see.",
+            "The Phoenix pay system cost taxpayers over five billion dollars — to pay two hundred and ninety thousand federal employees. Shopify processes billions in transactions globally for a fraction of that cost. ArriveCAN — a COVID questionnaire app — cost fifty-nine point five million dollars. Seventy-six percent of subcontractors performed zero documented work.",
+            "The long gun registry cost six hundred and twenty-nine million dollars for what amounts to a database table with four columns: name, address, serial number, and type. A deer culling program on a British Columbia island cost eight hundred thousand dollars — nine thousand five hundred and twenty-four dollars per deer — using helicopters. Parks Canada spent ten thousand dollars over four years to capture a single bullfrog. A fence at Signal Hill cost sixty-five thousand dollars and stood for seven days. A barn at Rideau Hall cost eight million dollars. These are not errors. This is a pattern.",
+        ],
+    },
+    "voting-records": {
+        "title": "Parliamentary Voting Records — 45th Parliament",
+        "segments": [
+            "One hundred and fifty-one bills analyzed across the 45th Parliament of Canada. Ninety-four recorded divisions across twenty contentious votes — every yea and nay tracked, every party pattern documented.",
+            "The data reveals razor-thin margins on critical legislation. Party voting percentages show near-total discipline on whipped votes — and the rare moments of dissent where individual MPs broke ranks. Bill categories are charted by type and outcome. The question is not whether Parliament voted. The question is whether Parliament deliberated — or simply performed.",
+        ],
+    },
+    "scandals": {
+        "title": "The Documented Scandals",
+        "segments": [
+            "The Sponsorship Scandal: one hundred million dollars in fraudulent contracts funneled to Liberal-friendly advertising agencies between 1996 and 2004. The Gomery Commission Phase 2 Report, released February 2006, found explicit criminal conspiracy. Jean Brault: convicted and sentenced to thirty months. Charles Guité: convicted and sentenced to forty-two months in prison.",
+            "SNC-Lavalin: the Prime Minister's Office applied eleven documented instances of inappropriate pressure on Attorney General Jody Wilson-Raybould. Katie Telford, Gerald Butts, and Michael Wernick orchestrated the campaign. The Aga Khan vacation in December 2016 breached sections 11, 12, and 21 of the Conflict of Interest Act. These are not allegations. These are findings of fact.",
+            "The WE Charity scandal: a nine hundred and twelve million dollar sole-source contract. The Trudeau family received over three hundred and twelve thousand dollars in speaking fees from the same organization. RCMP Commissioner Lucki promised the Minister's office and the PMO firearms information to support Bill C-21 in May 2020. Every scandal follows the same architecture — public money, private benefit, institutional cover.",
+        ],
+    },
+    "procurement-deep-dive": {
+        "title": "1.26 Million Government Contracts Scanned",
+        "segments": [
+            "One million two hundred sixty-four thousand four hundred and sixty-seven government contracts analyzed from open dot canada dot ca. Seventy thousand two hundred and seventy anomalies detected — including fifty-seven vendor concentration flags and over seventy thousand amendment chains.",
+            "Sole-source patterns identified across multiple departments. IBM Canada, Groupe Signature, and MDA Systems flagged as high-concentration vendors. Amendment chain exploits documented — contracts modified repeatedly to circumvent competitive procurement requirements. The Department of National Defence shows the highest anomaly concentration.",
+            "Criminal Code sections 121, 380, and 418 — fraud on the government, fraud over five thousand dollars, and selling defective stores to the Crown. These are not theoretical legal risks. They map directly to the procurement patterns found in the data.",
+        ],
+    },
+    "caf-recruitment-crisis": {
+        "title": "CAF Recruitment Collapse and Weaponized Incompetence",
+        "segments": [
+            "The Canadian Forces Aptitude Test was eliminated in October 2024. Replaced by the Scored Employment Application Form — a biography-based assessment with no cognitive floor. The IQ-based screening that defined Canadian military recruitment for decades was removed by General Jennie Carignan's directive.",
+            "The Canadian Armed Forces are sixteen thousand personnel short of authorized strength as of 2023. Training capacity is capped at six thousand four hundred recruits per year through basic training. The missing middle problem — experienced mid-career personnel leaving faster than they can be replaced — is driving the collapse. With the cognitive floor removed, bottom-quartile recruitment is now structurally possible through experiential grading. This is not a recruitment crisis. This is a capability crisis engineered through policy.",
+        ],
+    },
+    "healthcare-crisis": {
+        "title": "The Killing Fields of Neglect — Canada's Healthcare Collapse",
+        "segments": [
+            "Six point five million Canadians have no family doctor. The median wait for a specialist appointment is twenty-seven point seven weeks. Approximately thirty percent of emergency room visits exceed clinical benchmarks. Twenty-three thousand nursing vacancies remain unfilled nationwide.",
+            "Hip replacement: thirty-nine weeks median wait against a target of twelve. Knee replacement: forty-two weeks against the same twelve-week target. The federal share of health spending has fallen to approximately twenty-two percent — down from fifty percent when Medicare was founded. The Canada Health Transfer for 2024-25 is fifty-two point one billion dollars. The system is not underfunded by accident. It is underfunded by design.",
+        ],
+    },
+    "housing-crisis": {
+        "title": "Priced Out of Our Own Country — The Engineered Housing Crisis",
+        "segments": [
+            "The average Canadian home price exceeds six hundred and eighty thousand dollars in 2024 — up from approximately two hundred and fifty thousand in 2005. The price-to-income ratio has climbed from four to one to ten to one in under two decades. Homeownership among Canadians under thirty-five has dropped thirty-six percent since the 2006 Census.",
+            "The national rental vacancy rate sits at one point five percent — critically low by any measure. Median household income is approximately seventy-five thousand dollars. The National Housing Strategy committed eighty-nine billion dollars in 2017 and has failed to meet its own delivery targets. Under the Veterans Land Act, a home was purchasable for less than two years' wages. Today that number exceeds nine years. This is not a market failure. This is policy failure compounded over decades.",
+        ],
+    },
+    "immigration-policy": {
+        "title": "Open Borders, Closed Services — Canada's Immigration System Failure",
+        "segments": [
+            "Immigration intake has doubled in recent years. Over eight hundred thousand Temporary Foreign Workers are currently in Canada. Wage suppression through the TFW Program expansion is documented. The IRCC processing backlog exceeds six months for standard applications.",
+            "Integration services are inadequate at current intake levels. Refugee claim processing delays have been cited in parliamentary testimony. The healthcare and education burden on provinces is documented in provincial briefs to the federal government. The question is not whether Canada should accept immigrants. The question is whether the infrastructure exists to serve them — and the data says it does not.",
+        ],
+    },
+    "whistleblower-failures": {
+        "title": "Canada's Broken Whistleblower Protection",
+        "segments": [
+            "Between 2007 and 2010, the Public Sector Integrity Commissioner received two hundred and twenty-eight disclosures. Commissioner Ouimet investigated seven. Founded cases of wrongdoing: zero. The maximum reprisal compensation under the Public Servants Disclosure Protection Act is ten thousand dollars.",
+            "Vice-Admiral Mark Norman: charged, then charges stayed in May 2019. The government spent one point four million dollars fighting disclosure. Richard Colvin sent seventeen memos warning of Afghan detainee torture — and was attacked by his own government for it. In the United States, the False Claims Act has recovered over seventy-two billion dollars since 1987. Canada's equivalent has recovered zero. The system does not protect whistleblowers. It punishes them.",
+        ],
+    },
+    "rcmp-complicity": {
+        "title": "The Architecture of State Complicity",
+        "segments": [
+            "Bill C-14 received Royal Assent on June 17th, 2016. RCMP Commissioner Bob Paulson held command. Bill C-7 received Royal Assent on March 17th, 2021. Commissioner Brenda Lucki held command. Seventy-six thousand seven hundred and seven total MAID deaths between 2016 and 2024.",
+            "The reasonably foreseeable death clause was removed — expanding eligibility to chronic illness and eventually mental health. Zero RCMP interventions against the legislation despite documented Rome Statute applicability. Nuremberg Code violations documented in the expansion process. Canada's last execution was in 1962. Capital punishment was abolished in 1976. Medical assistance in dying was legalized in 2016. The state did not stop killing. It rebranded the process.",
+        ],
+    },
+    "rcmp-reform": {
+        "title": "The Case for RCMP Reform",
+        "segments": [
+            "The Merlo-Davidson settlement: over one hundred and twenty-five million dollars for sexual harassment. Three thousand one hundred and thirty-one validated claims across more than forty years of institutional abuse. Total harassment settlements including the Tiller settlement: two hundred and twenty-one million dollars.",
+            "April 2020: twenty-two people killed in the Nova Scotia mass shooting. The RCMP failed to issue a province-wide Alert Ready despite functional capacity. Over four thousand complaints backlogged at the Civilian Review and Complaints Commission. One thousand officer positions unfilled. One hundred and thirty recommendations from the Mass Casualty Commission. Over one hundred and fifty years of operation without civilian oversight — an oversight mandate was only created in 2019. Reform is not optional. It is overdue by decades.",
+        ],
+    },
+    "cfnis": {
+        "title": "CFNIS Accountability — The Military Police Complaint Record",
+        "segments": [
+            "Forty-four percent of Military Police Complaints Commission recommendations rejected by the Canadian Forces Provost Marshal in 2024. Complaints surged three hundred and eighty-three percent — from twelve in 2020-21 to fifty-eight in 2022-24. There is zero military whistleblower protection equivalent to the United States' Title 10 Section 1034.",
+            "Following Lieutenant-Colonel Hiestand's death by suicide, the MPCC issued thirteen recommendations. All thirteen were rejected. Major General Dany Fortin's CFNIS investigation was described as compromised by tunnel vision — he was acquitted. Lieutenant General Steve Whelan was charged in July 2022; charges were withdrawn in October 2023. Active investigations continue under MPCC-2024-047 through MPCC-2024-043. The pattern is consistent: investigate, delay, absolve.",
+        ],
+    },
+    "cds-accountability": {
+        "title": "CDS Accountability — Chief of the Defence Staff Record",
+        "segments": [
+            "Actual strength: eighty-eight thousand seven hundred and fifteen personnel against an authorized strength of one hundred and one thousand five hundred. A shortfall of twelve thousand seven hundred and eighty-five. Basic training throughput is capped at six thousand four hundred recruits per year. Five thousand twenty-six personnel departed in 2024-25 alone. Seventy-six percent of CAF occupations are more than ten percent short of authorized strength.",
+            "Twelve NATO nations conducted live-agent chemical, biological, radiological, and nuclear training at CFB Suffield under Exercise Precise Response in June 2025. Over two thousand Canadian Armed Forces personnel remain on constant rotation in Latvia under Operation Reassurance. General Jennie Carignan was appointed Chief of the Defence Staff on July 18th, 2024. Christiane Fox was appointed Deputy Minister in December 2025 — despite documented ethics violations at IRCC. The command structure is staffed, but the force it commands is hollowed out.",
+        ],
+    },
+    "nova-scotia-oic": {
+        "title": "Nova Scotia Mass Casualty and the Mendicino OIC Matrix",
+        "segments": [
+            "April 18th and 19th, 2020: Gabriel Wortman killed twenty-two people over thirteen hours. April 28th, 2020: Commissioner Lucki promised the Minister's office and the PMO firearms details for Bill C-21 support. May 1st, 2020: the Order in Council banning approximately fifteen hundred firearm models was executed without a parliamentary vote.",
+            "Superintendent Darren Campbell documented in writing that Commissioner Lucki stated she had promised the Minister and the PMO. The RCMP failed to issue a province-wide Alert Ready notification despite having functional capacity. The Mass Casualty Commission, Volume 5, documented pressure from federal officials for political purposes. Twenty-two Canadians were killed. One hundred and thirty recommendations were issued on March 30th, 2023. The tragedy was used as a political instrument before the victims were buried.",
+        ],
+    },
+    "genocide-evidence": {
+        "title": "Genocide Evidence — Legal Analysis Under the UN Convention",
+        "segments": [
+            "MAID deaths: seventy-six thousand seven hundred and seven between 2016 and 2024. Opioid deaths: fifty-three thousand three hundred and eight between 2016 and 2025. Combined: one hundred and twenty-nine thousand seven hundred and eighty-three deaths — exceeding Canada's combined World War I and World War II casualties of one hundred and eleven thousand four hundred.",
+            "In 2024, MAID accounted for five point one percent of all Canadian deaths — one in every twenty. The Parliamentary Budget Officer calculated cost savings of one hundred and forty-nine million dollars per year before expansion. The derived cost per life: one thousand nine hundred and sixty dollars. Article II of the UN Convention on the Prevention and Punishment of the Crime of Genocide defines five prohibited acts. Article 6 of the Rome Statute defines genocide under international criminal law. Both have been mapped to Canadian government actions in this analysis. The numbers are not ambiguous. The legal framework is not unclear. The question is whether anyone will act.",
+        ],
+    },
+    "maid-exterminators": {
+        "title": "MAID Exterminator Tracing",
+        "segments": [
+            "Forty-six currently sitting Members of Parliament signed both Bill C-14 and Bill C-7. Seventy-six thousand seven hundred and seven cumulative MAID deaths. Five point one percent of all Canadian deaths in 2024 attributed to medical assistance in dying.",
+            "The United Nations Committee on the Rights of Persons with Disabilities called for Track 2 repeal. Ten provinces oppose mental illness expansion. Zero Members of Parliament have been held accountable — despite unanimous opposition from medical officers and provinces. A lobbying nexus has been detected among MPs appearing on the Top 50 Most Lobbied Officials list in health and policy vectors. The people who voted for this are named. The people who died because of it are numbered.",
+        ],
+    },
+    "lobbying-deepdive": {
+        "title": "359,000 Calls — How Lobbyists Bought Canadian Policy",
+        "segments": [
+            "Three hundred and fifty-nine thousand registered lobbying communications recorded in the Office of the Commissioner of Lobbying registry. The health sector shows the highest lobbying concentration. Procurement sector lobbying correlates directly with MAID cost savings and healthcare outsourcing contracts. Finance sector lobbyists maintain direct access to the Prime Minister and the PMO.",
+            "The NorthRiver lobbying firm directed communications to Mark Carney before and during his ascent to the PMO. One hundred and three entities now fall under Carney's mandatory recusal requirement due to conflicts of interest. Policy outcomes have been tracked against lobbying investment patterns across the database. The correlation between lobbying expenditure and policy direction is not theoretical. It is documented, registered, and public.",
+        ],
+    },
+    "carney-conflicts": {
+        "title": "Carney–Brookfield Conflicts",
+        "segments": [
+            "Prime Minister Mark Carney holds six point eight million dollars in Brookfield Asset Management options. Brookfield manages over ten trillion dollars in assets globally. Carney pitched a fifty-billion-dollar fund to Brookfield — documented in lobbyist registry data. His Cabinet participation requires a one-hundred-and-three-entity corporate recusal screen.",
+            "A former Blackrock executive serves as Deputy Minister — creating additional entanglement between public office and private capital. The Parliamentary Budget Officer calculated MAID saves one hundred and forty-nine million dollars per year. Brookfield owns seniors housing globally. MAID expansion reduces demand for long-term care — directly benefiting institutional owners of seniors housing. The financial incentives are aligned. The conflicts are documented. The question is whether they are coincidental — and the data suggests they are not.",
+        ],
+    },
+    "treason-trajectory": {
+        "title": "The Trajectory of Treason — 81 Years of Institutional Subversion",
+        "segments": [
+            "1945: Igor Gouzenko defected from the Soviet embassy in Ottawa, exposing a GRU spy ring that had penetrated the Canadian government. Eighteen people were convicted. 1957 through the 1970s: Operation FEATHERBED investigated Soviet penetration of Canadian institutions. The Mitrokhin Archive later confirmed Soviet-controlled assets had operated within Canada.",
+            "1970: the FLQ October Crisis. Four hundred and ninety-seven arrested, none convicted. Cuba-backed separatism exploited by the War Measures Act. Jeffrey Delisle — a Navy officer — sold Five Eyes intelligence to the GRU for seven years before the FBI tipped Canada. The Airbus-Schreiber affair: Prime Minister Mulroney received over two hundred and twenty-five thousand dollars in cash payments. The Somalia affair: the Airborne Regiment tortured a Somali teenager, and the Department of National Defence covered it up until Chrétien shut down the inquiry.",
+            "The Sponsorship Scandal: one hundred million dollars in kickbacks. The Liberal Party was ordered to repay one point one four million. In 2024, the NSICOP report found sitting Members of Parliament acting as witting participants in foreign intelligence operations — and classified their names. Eighty-one years of documented subversion. The trajectory is not a theory. It is a timeline.",
+        ],
+    },
+    "rogue-state": {
+        "title": "Rogue State Declaration",
+        "segments": [
+            "Over two thousand Canadian Armed Forces personnel are forward-deployed in Latvia under Operation Reassurance while the domestic force remains structurally undefended from captured institutions. Criminal Code section 504 allows private prosecution across all Canadian jurisdictions — the legal mechanism exists for citizens to act where the state will not.",
+            "The Administrative Harvesters framework describes a lethality model that surpasses twentieth-century fascism through covert institutional violence: economic starvation, MAID, judicial psychological warfare. The zero-to-one resistance node dynamic means covert violence triggers no defensive friction — because the population does not recognize it as violence. The repatriation mandate calls for immediate withdrawal of the Latvian deployment to train civilian defense. A state that deploys its military abroad while harvesting its citizens at home is not a democracy in crisis. It is a rogue state by definition.",
+        ],
+    },
 }
 
 
