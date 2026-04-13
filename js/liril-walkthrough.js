@@ -120,7 +120,7 @@
 
   function initWalkthrough() {
     var page = window.location.pathname.split('/').pop() || '';
-    if (page === 'index.html' || page === '') return;
+    if (page === 'index.html' || page === 'home.html' || page === '') return;
 
     // ── Collect all narration points ──────────────────
     var points = [];
