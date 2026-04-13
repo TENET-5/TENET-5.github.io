@@ -94,7 +94,7 @@
     'my-story.html': {
       current: 'My Story',
       next: [
-        { href: 'index.html', label: 'The Evidence', desc: '76,707 deaths — the numbers that prove it' },
+        { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
@@ -478,7 +478,7 @@
       next: [
         { href: 'community.html', label: 'Community', desc: 'Join the investigation community' },
         { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
-        { href: 'index.html', label: 'The Evidence', desc: '76,707 deaths — the numbers that prove it' },
+        { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
       ]
     },
     'open-letter.html': {
@@ -621,7 +621,7 @@
       next: [
         { href: 'history.html', label: 'History', desc: 'Historical context and background' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M records' },
-        { href: 'index.html', label: 'The Evidence', desc: '76,707 deaths — the numbers that prove it' },
+        { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
       ]
     },
     'toronto.html': {

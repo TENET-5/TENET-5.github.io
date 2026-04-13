@@ -20,7 +20,7 @@
     { year: 2025, month: 1, title: 'Hogue Final Report', desc: 'PRC most active perpetrator. 51 recommendations. CIJA lobbied 56% of MPs.', link: 'foreign-interference.html', cat: 'foreign', color: '#3b82f6' },
     { year: 2025, month: 1, title: 'CFNIS Evidence Tampering', desc: 'Ontario Superior Court: "misconduct so egregious it shocks the conscience"', link: 'cfnis.html', cat: 'cfnis', color: '#a855f7' },
     { year: 2025, month: 9, title: 'RCMP Closes Police Stations Probe', desc: 'Chinese police stations investigation closed without charges', link: 'foreign-interference.html', cat: 'foreign', color: '#3b82f6' },
-    { year: 2025, month: 11, title: '76,707 MAID Deaths', desc: 'Health Canada 6th Report. 16,499 in 2024. 5% of all deaths.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
+    { year: 2025, month: 11, title: '76,475 MAID Deaths', desc: 'Health Canada 6th Report. 16,499 in 2024. 5% of all deaths.', link: 'maid-accountability.html', cat: 'maid', color: '#dc2626' },
     { year: 2025, month: 12, title: 'MWO Robar Arrested', desc: '7 charges. CAF intel member leaked to foreign entity.', link: 'cfnis.html', cat: 'cfnis', color: '#a855f7' },
     { year: 2026, month: 3, title: 'Col Smith Charged', desc: 'Commander Task Force Latvia removed from NATO command', link: 'cfnis.html', cat: 'cfnis', color: '#a855f7' },
     { year: 2026, month: 3, title: 'Bill C-25 Introduced', desc: 'Strong and Free Elections Act. Does NOT address military whistleblower protection.', link: 'foreign-interference.html', cat: 'foreign', color: '#3b82f6' },

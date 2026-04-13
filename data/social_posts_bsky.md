@@ -1,7 +1,7 @@
 # TENET5 Bluesky Posts — Ready to Copy & Share
 
 ## Main Investigation Post
-76,707 confirmed dead by MAID. Government saves $20,685 per death. PM holds $6.8M in Brookfield options. 102 doctors killed 373 Canadians each. 428 legal violations — zero referred to police. The government stopped publishing the numbers. We didn't.
+76,475 confirmed dead by MAID. Government saves $20,685 per death. PM holds $6.8M in Brookfield options. 102 doctors killed 373 Canadians each. 428 legal violations — zero referred to police. The government stopped publishing the numbers. We didn't.
 
 https://tenet-5.github.io
 
@@ -21,7 +21,7 @@ BlackRock owns $308M in Brookfield shares — a 1,373% increase. Fink & Carney s
 https://tenet-5.github.io/?load=carney-conflicts.html
 
 ## Zero Accountability
-Zero arrests. Zero Ethics Commissioner investigations. Zero RCMP charges. 428 legal violations — zero referred to police. 76,707 dead and not one person held accountable. The state won't prosecute itself. Criminal Code s.504 exists for exactly this reason.
+Zero arrests. Zero Ethics Commissioner investigations. Zero RCMP charges. 428 legal violations — zero referred to police. 76,475 dead and not one person held accountable. The state won't prosecute itself. Criminal Code s.504 exists for exactly this reason.
 
 https://tenet-5.github.io/?load=follow-the-money.html
 

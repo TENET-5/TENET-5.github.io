@@ -62,7 +62,7 @@
   var counterEls = document.querySelectorAll('.big-number, [data-count]');
   function animateCounter(el) {
     var text = el.textContent.trim();
-    // Match numbers like 76,707 or 1 in 20 or 6
+    // Match numbers like 76,475 or 1 in 20 or 6
     var match = text.match(/^([\d,]+)/);
     if (!match) return;
     var target = parseInt(match[1].replace(/,/g, ''), 10);
@@ -167,7 +167,7 @@
 // ── Share Functions ───────────────────────────────────────────────────────
 function shareTwitter() {
   var url = encodeURIComponent(window.location.href);
-  var text = encodeURIComponent('76,707 Canadians killed under MAID since 2016. Every number comes from Health Canada\'s own reports. Read it yourself.');
+  var text = encodeURIComponent('76,475 Canadians killed under MAID since 2016. Every number comes from Health Canada\'s own reports. Read it yourself.');
   window.open('https://twitter.com/intent/tweet?text=' + text + '&url=' + url, '_blank');
 }
 function shareFacebook() {
@@ -176,7 +176,7 @@ function shareFacebook() {
 }
 function shareReddit() {
   var url = encodeURIComponent(window.location.href);
-  var title = encodeURIComponent('76,707 Canadians killed under MAID — government\'s own numbers');
+  var title = encodeURIComponent('76,475 Canadians killed under MAID — government\'s own numbers');
   window.open('https://www.reddit.com/submit?url=' + url + '&title=' + title, '_blank');
 }
 function copyLink() {

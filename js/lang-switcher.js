@@ -49,7 +49,7 @@
     'What Accountability Requires': "Lock 'Em Up or Trow 'Em in Da Harbour",
 
     // Investigations
-    'MAID Deaths': "76,707 Dead — Lard Tunderin' Jesus",
+    'MAID Deaths': "76,475 Dead — Lard Tunderin' Jesus",
     'ArriveCAN': "ArriveCAN — $93 Million for Frig All",
     'Phoenix Pay': "Phoenix Pay — She's Right Shagged, b'y",
     'Foreign Interference': "Crowd From Away Messin' Wit Our Democracy",
