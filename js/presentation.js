@@ -1615,7 +1615,9 @@
   /* Voice persistence + preferred en-GB female voice names across browsers/OSes */
   var VOICE_STORAGE_KEY = 'liril-voice-name';
   var PREFERRED_VOICES = [
-    'hazel', 'libby', 'sonia', 'amy', 'emma', 'kate',
+    'hazel', 'susan', 'libby', 'sonia', 'maisie', 'martha', 'kate',
+    'karen', 'moira', 'fiona', 'serena', 'samantha', 'victoria',
+    'zira', 'jenny', 'aria', 'sara', 'emily', 'emma', 'amy',
     'microsoft hazel', 'microsoft libby', 'google uk english female'
   ];
   var cachedVoice = null;
@@ -1635,7 +1637,7 @@
 
     /* 0. Restore the exact voice used on the previous page (sessionStorage) */
     /* FIXED: validate restored voice is NOT male before trusting it */
-    var BANNED_MALE_P = ['david','mark','james','george','daniel','ryan','guy','thomas','richard','rishi','sean','oliver','liam','christopher','eric','andrew','brian','roger','malcolm','connor'];
+    var BANNED_MALE_P = ['david','mark','james','george','daniel','ryan','guy','thomas','richard','rishi','sean','oliver','liam','christopher','eric','andrew','brian','roger','malcolm','connor','freddie','alfie','ethan','noah'];
     function isMaleP(v) { var n = (v.name||'').toLowerCase(); return BANNED_MALE_P.some(function(m){ return n.indexOf(m)>=0; }); }
     try {
       var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
@@ -1712,12 +1714,32 @@
   /* Re-resolve when browser finishes loading voice list (Chrome fires this async) */
   if (window.speechSynthesis) {
     window.speechSynthesis.addEventListener('voiceschanged', function () {
+      /* Only re-resolve if current voice is missing or male — prevents drift */
+      if (cachedVoice) {
+        var voices = window.speechSynthesis.getVoices();
+        var still = voices.find(function(v) { return v.name === cachedVoice.name; });
+        if (still && !isMaleP(still)) return; /* voice still available and valid — keep it */
+      }
       cachedVoice = null;
       resolveNarrationVoice();
     });
     /* Prime the cache immediately if voices are already loaded */
     resolveNarrationVoice();
+    /* Chrome/Edge load voices LATE — retry until we get a female voice */
+    var _vrRetry = 0;
+    (function retryVoice() {
+      if (cachedVoice && !isMaleP(cachedVoice)) return;
+      _vrRetry++;
+      if (_vrRetry < 20) { cachedVoice = null; voicesReady = false; resolveNarrationVoice(); setTimeout(retryVoice, 250); }
+    })();
   }
+
+  /* getPageLang — returns en-GB (LIRIL is always British) */
+  function getPageLang() { return 'en-GB'; }
+
+  /* isMaleP must be accessible outside resolveNarrationVoice for voiceschanged guard */
+  var BANNED_MALE_LIST = ['david','mark','james','george','daniel','ryan','guy','thomas','richard','rishi','sean','oliver','liam','christopher','eric','andrew','brian','roger','malcolm','connor','freddie','alfie','ethan','noah'];
+  function isMaleP(v) { var n = (v.name||'').toLowerCase(); return BANNED_MALE_LIST.some(function(m){ return n.indexOf(m)>=0; }); }
 
   function updateNarrationButton() {
     if (!lirilNarration.button) return;
@@ -1826,9 +1848,9 @@
     var total = totalChunks || (idx + 1 + chunks.length);
     var retryCount = retries || 0;
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = getPageLang();
+    u.lang = 'en-GB';
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
-    u.pitch = 1.0;
+    u.pitch = 1.1;
     if (voice) u.voice = voice;
 
     u.onstart = function () {
@@ -1996,9 +2018,9 @@
     var idx = chunkIdx || 0;
     var total = totalChunks || (idx + 1 + chunks.length);
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = getPageLang();
+    u.lang = 'en-GB';
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
-    u.pitch = 1.0;
+    u.pitch = 1.1;
     if (voice) u.voice = voice;
 
     u.onstart = function () {
