@@ -1400,6 +1400,9 @@
      SECTION 12: LIRIL narration controls
      ═══════════════════════════════════════════════════════════════════ */
 
+  window.__TENET5_NEXT_PAGE = function() { navigatePage(1); };
+  window.__TENET5_STOP_AUTOWALK = function() { try { sessionStorage.removeItem('liril-autowalk'); } catch(e){} };
+
   var SPEECH_RATES = [
     { label: 'Slow', value: 0.8 },
     { label: 'Normal', value: 0.95 },
