@@ -371,6 +371,169 @@ NARRATIONS = {
             "Ben Bleecker property. Forty Yeomans Street. Sold for two point three seven five million in 2021 with zero conditions — no development timeline, no anti-flipping clause, no binding end-use requirement. The city invested three million dollars in surrounding infrastructure. The property remains vacant. Mayor Neil Ellis is a former Liberal MP. The cross-reference investigation continues.",
         ],
     },
+    "rcmp-commissioners": {
+        "title": "Four Commissioners. Systemic Failure.",
+        "segments": [
+            "Four RCMP Commissioners since the year 2000. Zero have ever been criminally charged. The highest law enforcement office in Canada — occupied by four consecutive leaders — with zero accountability for systemic institutional failure.",
+            "Twenty-two people killed in the Nova Scotia mass shooting. The RCMP failed to issue a public alert for over twelve hours. One hundred and thirty recommendations from the Mass Casualty Commission. Most remain unimplemented.",
+            "Ten point five million dollars paid to Maher Arar after the RCMP provided false intelligence that led to his torture in Syria. One hundred million dollars in the Merlo-Davidson class action settlement — covering twenty thousand female RCMP members who experienced harassment within the force.",
+            "Three undeclared Beijing police stations operated on Canadian soil — in Toronto — for diaspora intimidation. The RCMP closed the investigation with zero charges. Political interference allegations: a Commissioner allegedly pressured staff to release firearms data to support government gun legislation.",
+            "Four leaders. Zero accountability. One hundred and thirty ignored recommendations. The pattern is not failure. The pattern is design.",
+        ],
+    },
+    "arrivecan": {
+        "title": "$93 Million for a COVID Questionnaire",
+        "segments": [
+            "ArriveCAN. Original estimate: eighty thousand dollars. Final cost: ninety-three million. That is a one hundred and sixteen thousand percent overrun. For a COVID border questionnaire.",
+            "One hundred and seventy-seven documented bugs. Ten thousand wrongful quarantines. Seventy-six percent of subcontractors hired performed zero work on the project. GCStrategies — a two-person firm — billed nineteen point one million dollars without writing a single line of code.",
+            "Forty contract amendments approved without scrutiny during COVID emergency procurement. The Auditor General found that the Canada Border Services Agency could not document the exact cost or prove that work was completed before payment was issued.",
+            "June 2025: Parliament voted one hundred and seventy-two to one hundred and sixty-five to recover sixty-four million dollars. Every single Liberal MP voted against returning the money. Every one. The vote is on the record. The money is not.",
+        ],
+    },
+    "phoenix-pay": {
+        "title": "Phoenix Pay System — $2.2 Billion Federal Payroll Disaster",
+        "segments": [
+            "The Phoenix Pay System. Original budget: three hundred and nine million dollars. Final cost: two point two billion and climbing. One hundred and fifty thousand federal workers affected by pay errors. Some went months without a paycheque. Nine years in and a full replacement is not expected until 2031.",
+            "Two hundred and sixteen thousand backlogged transactions. Recurring payroll glitches affecting pension calculations. Pay errors ranged from massive overpayments to complete non-payment. The Auditor General called the procurement a cautionary tale of failed government IT.",
+            "Zero contractor accountability. No firm has been penalized. No executive has been charged. The system that was supposed to save money has cost seven times its original estimate — and it still does not work.",
+        ],
+    },
+    "senate-expenses": {
+        "title": "The Senate Expense Scandal — Unelected, Unaccountable",
+        "segments": [
+            "Mike Duffy. Pamela Wallin. Patrick Brazeau. Three senators. Ninety thousand dollars in inappropriate housing expense claims from Duffy alone. The Prime Minister's Chief of Staff — Nigel Wright — wrote a personal cheque for over ninety thousand dollars to cover it up.",
+            "Deloitte conducted the audit in 2013. Four senators implicated. Multiple acquittals despite audit findings — jurisdictional and procedural loopholes. Zero criminal convictions for expense abuse. The Senate investigated itself... and found nothing wrong.",
+            "Unelected. Unaccountable. Unapologetic. The expense scandal revealed a chamber where public money flows without public consent — and where the mechanisms of accountability are controlled by those being held accountable.",
+        ],
+    },
+    "ag-findings": {
+        "title": "Auditor General Findings — 2015 to 2024",
+        "segments": [
+            "A decade of Auditor General findings. Over nine point three billion dollars wasted on the Phoenix Pay System alone. Ninety-three million on ArriveCAN. Six point nine billion in confirmed CERB fraud during 2020 and 2021.",
+            "Billions in lapsed spending every year — departments unable to spend their allocated funds by fiscal year end. No meaningful recovery mechanisms for identified waste. The same procurement failures documented year after year after year.",
+            "The Auditor General's office writes the reports. Parliament receives the reports. Nothing changes. The cycle repeats. The findings accumulate. The money disappears. And the next audit finds the same problems the last one did.",
+        ],
+    },
+    "foreign-interference": {
+        "title": "Foreign Interference in Canadian Democracy",
+        "segments": [
+            "CSIS warned every Prime Minister since 2004. Twenty years of documented intelligence briefings. Politicians received the intelligence. Politicians took minimal action. Three undeclared Beijing police stations operated on Canadian soil for diaspora intimidation.",
+            "Eleven ridings identified by CSIS where PRC-linked actors attempted election interference. The Hogue Commission confirmed interference in the 2019 and 2021 federal elections. Hardeep Singh Nijjar — a Canadian citizen and Sikh activist — was assassinated on Canadian soil on June 18th, 2023. The Prime Minister attributed it to Indian government agents.",
+            "The Foreign Influence Transparency Registry became law in June 2024. After six hundred and fifty-eight days: zero registrations. The mechanism that would force transparency remains dormant. Twenty years of warnings. Zero meaningful consequences.",
+        ],
+    },
+    "maid-voting-record": {
+        "title": "MAID Voting Record — 173 MPs",
+        "segments": [
+            "One hundred and seventy-three Members of Parliament voted to legalize or expand Medical Assistance in Dying. One hundred and nine voted for both Bill C-14 — which legalized it — and Bill C-7 — which expanded it to people who are not dying.",
+            "Seventy-six thousand, seven hundred and seven Canadians killed through MAID between 2016 and 2024. MAID deaths grew one thousand, four hundred and sixty-seven percent — from one thousand and eighteen in 2016 to sixteen thousand, two hundred and sixty-seven in 2024.",
+            "Forty-six MPs who voted for both bills are still serving in the 45th Parliament. The Parliamentary Budget Officer estimated MAID saves one hundred and forty-nine million dollars per year. Projected savings by 2047: one point two seven three trillion dollars. That is what a human life is worth to the government's own accountants.",
+        ],
+    },
+    "cija-lobbying": {
+        "title": "CIJA Lobbying Pipeline",
+        "segments": [
+            "Five hundred and seventy-nine unique lobbying instances mapped to the Centre for Israel and Jewish Affairs. CIJA lobbied fifty-six percent of all sitting Members of Parliament. One hundred and seven lobbying sessions in six months — October 2023 to April 2024.",
+            "Anthony Housefather: sixty-seven CIJA lobbying contacts — the most-lobbied MP in Parliament. Marco Mendicino: sixty-three contacts while serving as Public Safety Minister. The lobbying pipeline spans sponsored travel, military procurement alignments, and intelligence sharing exceptions.",
+            "The network complexity is classified as an NP-HARD graph problem requiring computational analysis. Five hundred and seventy-nine instances. Fifty-six percent of Parliament touched. This is not influence. This is infrastructure.",
+        ],
+    },
+    "disability-genocide": {
+        "title": "Violating the Convention — Canada's War on the Disabled",
+        "segments": [
+            "The United Nations Committee on the Rights of Persons with Disabilities declared Canada's MAID program a matter of extreme concern in March 2025. Seventy-six thousand, seven hundred and seven disabled and vulnerable people killed through MAID since 2016.",
+            "Canada ratified the UN Convention on the Rights of Persons with Disabilities in 2014. Then built a death program that violates eleven articles of that same convention. Track 2 expansion — MAID for mental illness as a sole condition — was approved despite UN objections and provincial opposition.",
+            "The UN Committee demanded the immediate repeal of Track 2. The government's response: no implementation plan. Canada signed the treaty. Canada broke the treaty. The international community noticed. Canada does not care.",
+        ],
+    },
+    "t4-comparison": {
+        "title": "The Pattern — How State-Sanctioned Killing Programs Expand",
+        "segments": [
+            "Aktion T4. Nazi Germany. 1939 to 1945. Framed as mercy. Started with terminal illness. Expanded to disability. Then eliminated the program's critics. The pattern is documented. The pattern is repeating.",
+            "Canada. MAID. 2016 to present. Framed as compassion. Started with terminal illness. Expanded to non-terminal conditions. Mental illness approved for 2027. Both programs preceded by propaganda framing vulnerable populations as burdens. Both featured government cost-benefit analyses supporting the elimination of specific demographics.",
+            "MAID deaths: one thousand and eighteen in 2016. Sixteen thousand, two hundred and sixty-seven in 2024. Fifteen hundred percent growth. The comparison is not rhetorical. The trajectory is mathematical. The government's own numbers make the case.",
+        ],
+    },
+    "veterans": {
+        "title": "How Canada Treats Its Veterans — The Data",
+        "segments": [
+            "Male veterans: one point four times the civilian suicide rate. Female veterans: one point nine times. Forty-two years of elevated suicide risk documented with zero meaningful improvement. Three thousand to five thousand Canadian veterans are homeless on any given night.",
+            "Forty-seven percent of disability applications now miss the sixteen-week processing standard. The backlog doubled — from five thousand six hundred to over eleven thousand. Twenty-four percent of mental health claims denied. One in four veterans told their suffering does not qualify.",
+            "A wheelchair ramp costs three to eight thousand dollars. MAID costs twenty-five hundred. It is cheaper to kill a veteran than to install a ramp. Four to five confirmed cases of Veterans Affairs employees offering MAID to veterans who called asking for help. They called for a wheelchair. They were offered death.",
+        ],
+    },
+    "veterans-betrayal": {
+        "title": "Lest We Forget — How Canada Betrayed Its Veterans",
+        "segments": [
+            "The VAC disability benefits backlog doubled in a single year — from five thousand six hundred to over eleven thousand. Only forty-seven percent of applications meet the sixteen-week standard. Thirty-one percent of newly released members access zero VAC services in the critical first year after leaving the military.",
+            "Seven hundred and fifty dollars per month — that is the VAC Housing Benefit. It is below market rent in every major Canadian city. A ninety-two percent increase in disability benefit applications between 2015 and 2025, but the system was never scaled to match.",
+            "Six-month-plus delays at seven of eleven Operational Stress Injury clinics. Billions in unspent VAC funding lapsed annually — the money was allocated by Parliament, then not delivered to veterans. The government does not lack resources. It lacks the will to spend them on the people who served.",
+        ],
+    },
+    "follow-the-money": {
+        "title": "Follow the Money — The Fiscal Pipeline",
+        "segments": [
+            "One point two seven three trillion dollars. That is the projected MAID savings by 2047 — from the Parliamentary Budget Officer's own report, October 2020. One hundred and forty-nine million in annual healthcare savings. Every MAID death saves the government money. That is not a theory. That is the government's own math.",
+            "Prime Minister Carney holds six point eight million dollars in Brookfield Asset Management options. Brookfield pitched a fifty-billion-dollar Maple Fund in September 2024. Carney became Prime Minister. In April 2026, the government launched a fifty-one-billion-dollar infrastructure fund. BlackRock holds three hundred and eight million in Brookfield shares — a thirteen hundred and seventy-three percent increase since 2023.",
+            "Nine point three nine three billion dollars wasted in just two projects — Phoenix Pay and ArriveCAN. Fifty-six percent of MPs lobbied by CIJA across five hundred and seventy-nine instances. The fiscal pipeline has a source, a route, and a destination. This page shows you all three.",
+        ],
+    },
+    "criminal-code-analysis": {
+        "title": "Criminal Code Analysis — 50 Findings from Public Records",
+        "segments": [
+            "Fifty distinct findings mapped to the Criminal Code of Canada and the Rome Statute of the International Criminal Court. Breach of trust: Section 122. Fraud on government: Section 121. Conflict of interest: Section 121, subsection 1-c. Foreign interference: Section 76 — treason.",
+            "Crimes against humanity allegations mapped to Article 7 of the Rome Statute. Individual criminal responsibility documented for more than twelve named individuals. Total potential liability: life imprisonment for conspiracy, twenty years for breach of trust.",
+            "Every finding is sourced from public records. Hansard transcripts. Lobbying registrations. Court filings. Auditor General reports. The evidence was always there. It was in fifty different places. This page puts it in one.",
+        ],
+    },
+    "institutional-malice": {
+        "title": "The Institutional Malice Doctrine",
+        "segments": [
+            "Incompetence is an alibi. The Institutional Malice Doctrine is the thesis that Canada's political failures are not accidental — they are willful. Every pattern, once examined, reveals a choice. Not a mistake. A decision.",
+            "Evidence block one: ArriveCAN. Ninety-three million dollars wasted. Every Liberal MP voted against recovering the funds. Evidence block two: MAID. One point two seven three trillion dollars in projected savings. Evidence block three: the Canadian Armed Forces — twelve thousand, seven hundred and eighty-five troop shortfall. Evidence block four: foreign interference — zero registrations under the transparency registry.",
+            "The UN Committee on the Rights of Persons with Disabilities demanded MAID repeal — the government ignored it. The RCMP closed the Chinese police station investigation with zero charges. CFNIS whistleblowers were prosecuted with twenty-eight charges while abusers were protected. At what point does a pattern of inaction become a policy of harm?",
+        ],
+    },
+    "covid-accountability": {
+        "title": "The Pandemic Profiteers — $500 Billion Spent, Zero Accountability",
+        "segments": [
+            "Over five hundred billion dollars in federal COVID-19 spending between 2020 and 2023. Two hundred and thirty-four point five billion in emergency measures — the Canada Emergency Response Benefit as the primary component. Six point nine billion in confirmed CERB fraud.",
+            "Four point three million dollars paid to inmates. One point four billion dollars sent to people outside Canada. Less than one percent of fraudulent claims have been recovered. The government created the largest emergency spending program in Canadian history — then failed to audit it.",
+            "Contracts awarded without competitive bidding during the emergency. Department-to-department coordination failures throughout the response. Zero accountability for fraud perpetrators. Five hundred billion spent. The money is gone. The accounting is incomplete. And no one is asking where it went.",
+        ],
+    },
+    "arms-exports": {
+        "title": "Arms Exports — The Saudi Deal and the Yemen Accountability Gap",
+        "segments": [
+            "Canada is the sixteenth-largest arms exporter in the world. Three point eight billion dollars in annual military exports. The Saudi Arabia LAV 6.0 deal — fifteen billion dollars — is the largest arms export contract in Canadian history. Nine hundred and twenty-eight armoured vehicles.",
+            "Three hundred and seventy-seven thousand deaths in Yemen — the United Nations' 2022 estimate, including indirect deaths from starvation and disease. Twenty-three point four million Yemenis in need of humanitarian assistance. Four point five million internally displaced. Canadian-made vehicles deployed in that conflict.",
+            "Stephen Harper signed the deal in 2014. Justin Trudeau refused to cancel it, citing ten billion dollars in estimated penalties. Canada ratified the Arms Trade Treaty in 2019, which requires a substantial risk test before export. Saudi deliveries continued. The treaty was signed. The treaty was broken. The weapons were shipped.",
+        ],
+    },
+    "corruption-map": {
+        "title": "Corruption and Influence Map — Network Graph",
+        "segments": [
+            "Three hundred and eighty-two entities. Six thousand, eight hundred and two documented connections. Five investigative data vectors: lobbying records, the treason roster, the OSINT vault, financial analysis, and court records. Every connection sourced from public records.",
+            "The network analysis spans political actors, financial donors, foreign agents, and Canadian officials. The complexity requires computational analysis — no human could manually trace six thousand, eight hundred connections across three hundred and eighty-two nodes.",
+            "This is not a conspiracy board. It is a graph database. Every edge is a documented interaction. Every node is a named entity. The government publishes the data in separate silos. We connected the silos. The map drew itself.",
+        ],
+    },
+    "opioid-crisis": {
+        "title": "The Opioid Crisis — 47,000 Canadians Dead",
+        "segments": [
+            "Forty-seven thousand Canadians dead from opioid toxicity since 2016. In 2023 alone: thirteen thousand, seven hundred and forty-one deaths. Fentanyl emergence in 2014 accelerated the death rate by over eight hundred percent in the hardest-hit regions.",
+            "British Columbia: over seventeen hundred deaths per year — the highest per capita in Canada. Pharmaceutical companies manufactured and advertised opioids for minor pain conditions throughout the 1990s and 2000s. Criminal charges were filed against Purdue Pharma in 2020 for misleading marketing.",
+            "Canada's opioid crisis began after American litigation forced recognition of the addiction risk. The same drugs. The same companies. The same denial. The only difference: forty-seven thousand Canadian families who will never get an answer.",
+        ],
+    },
+    "epstein-maxwell": {
+        "title": "Epstein and Maxwell — Elite Trafficking and Institutional Failure",
+        "segments": [
+            "Ghislaine Maxwell: convicted June 2021 on five federal counts. Sentenced to twenty years in June 2022. Jeffrey Epstein: died in federal custody on August 10th, 2019. Ruled suicide by the New York City Medical Examiner. Three point five million pages released by the Department of Justice on January 30th, 2026, under the Epstein Files Transparency Act.",
+            "Peter Nygard — the Canadian parallel. Convicted September 2024 on four sexual assault counts. Sentenced to eleven years. Nygard made documented Liberal Party donations and received a key to the City of Winnipeg in 2008. The connection between political access and institutional protection is not unique to the United States.",
+            "In 2008, Alex Acosta negotiated a plea deal that shielded Epstein from federal prosecution. Thirty victims were not notified. Palm Beach police investigated in 2005 and 2006. The investigation was transferred to the FBI — then closed via a non-prosecution agreement. The system did not fail. The system worked exactly as designed — for the people it was designed to protect.",
+        ],
+    },
 }
 
 
