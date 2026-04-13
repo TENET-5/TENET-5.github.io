@@ -136,7 +136,11 @@
 
       // 2. Auto-generate for sparse pages
       if (points.length < 3) {
-        var selectors = ['section', '.timeline-section', '[data-chapter]', '.glass-panel'];
+        var selectors = [
+          'section', '.timeline-section', '[data-chapter]', '.glass-panel',
+          '.evidence-block', '.timeline-node', '.thesis-statement',
+          '.card', '.report-block', '.panel', 'article'
+        ];
         selectors.forEach(function(sel) {
           document.querySelectorAll(sel).forEach(function(el) {
             if (el.getAttribute('data-narrate')) return;
