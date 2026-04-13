@@ -206,6 +206,171 @@ NARRATIONS = {
             "Keep asking questions. When someone says the government spent your money, ask where it went. When someone says the system works, ask who it works for. You have the right to know. And now you know where to look.",
         ],
     },
+    "foreign-influence": {
+        "title": "Who's Lobbying Canadian Politicians — Foreign Influence Focus",
+        "segments": [
+            "Who is lobbying Canadian politicians. Two thousand, one hundred and thirty-eight lobbying contacts from a single foreign policy community. Ninety-four board nodes. One hundred and sixty-nine connections. Fifty-eight percent of Canadian MPs lobbied by organized foreign policy interests.",
+            "Six hundred and seventy-eight thousand dollars in sponsored travel to Israel — paid trips for sitting Members of Parliament. Anthony Housefather: sixty-seven lobbying contacts. Marco Mendicino: sixty-three. These are not allegations. These are registered communications from the Commissioner of Lobbying's own database.",
+            "Kevin Vuong — the only independent MP to vote no on Vote 658, the foreign power alignment vote. Sixty-seven CIJA lobbying contacts directed at one independent member. The lobbying machine does not tolerate dissent.",
+            "The foreign agent registry — required by law — remains unproclaimed for over six hundred and fifty-eight days. A statutory obligation, breached. The mechanism that would force transparency... deliberately left dormant.",
+            "The pipeline is documented. CIJA lobbying contacts map directly to parliamentary votes on IHRA definition adoption, Criminal Code amendments, Human Rights Act civil remedies, arms export permits, and MAID expansion. From lobby... to law. The data shows the path.",
+            "Three states compete for influence over Canadian policy: the United States, Israel, and China. Each uses different mechanisms — lobbying, intelligence, economic leverage. All three have documented operations inside Canadian institutions. This page shows you who met whom, when, and how they voted afterward.",
+        ],
+    },
+    "elections-finance": {
+        "title": "Elections Canada Campaign Finance Dashboard",
+        "segments": [
+            "One point two five billion dollars. That is the total in political contributions tracked from Elections Canada's own open data. Every dollar. Every donor. Every party. From 2004 to the present.",
+            "One hundred and thirty-four registered third parties spending money to influence Canadian elections. Six thousand active lobbyists working across all parties simultaneously. The money flows in from every direction — and this dashboard shows you where it goes.",
+            "Party-by-party fundraising. Year-over-year trends going back two decades. The data is unambiguous: political money in Canada does not flow randomly. It follows patterns. It concentrates in specific parties, specific ridings, and specific election cycles.",
+            "Every chart, every table, every number on this page comes directly from Elections Canada's published records. The government collected this data. We organized it so you could see the pattern they hoped you wouldn't notice.",
+        ],
+    },
+    "rcmp-maid-accountability": {
+        "title": "RCMP Dereliction of Duty — MAID Program",
+        "segments": [
+            "The RCMP's dereliction of duty. Ninety-eight thousand Canadian citizens dead under a state-sanctioned program. Three consecutive RCMP Commissioners since 2016. Zero investigations. Zero interventions. Zero accountability.",
+            "The numbers. 2016: one thousand and eighteen deaths. 2017: two thousand, eight hundred and thirty-eight. 2018: four thousand, four hundred and eighty. 2019: five thousand, six hundred and thirty-one. 2020: seven thousand, five hundred and ninety-five. Each year the number climbs. Each year the RCMP does nothing.",
+            "Aktion T4 — the Nazi program to eliminate disabled people — killed between seventy thousand and one hundred thousand people between 1939 and 1941. Canada's MAID program has now reached ninety-eight thousand deaths since 2016. We have matched the lower bound of a program that was prosecuted at Nuremberg.",
+            "Commissioner liability is established under Criminal Code Section 504. Any person — any Canadian — can lay an information before a Justice of the Peace. No lawyer is required. The mechanism exists. The question is whether Canadians will use it.",
+            "Bill C-14 received Royal Assent on June 17th, 2016. The original safeguard — reasonably foreseeable death — was supposed to prevent this. Bill C-7 removed that safeguard in 2021. The RCMP watched. The RCMP did nothing. The RCMP is complicit.",
+        ],
+    },
+    "hansard-evidence": {
+        "title": "Parliamentary Records — Institutional Dismissal",
+        "segments": [
+            "The parliamentary record. What Parliament said — and what Parliament chose to ignore — while seventy-six thousand, seven hundred and seven Canadians were killed under Medical Assistance in Dying.",
+            "Bill C-14, 2016: the original framework. Reasonably foreseeable death required. A ten-day reflection period. Two independent medical assessments. These were the safeguards. They were designed to be temporary. They were designed to be removed.",
+            "Bill C-7, 2021: the expansion. The foreseeable death requirement — gone. Track 2 created — MAID for chronic conditions, disabilities, non-terminal illness. Seven hundred and thirty-two Track 2 recipients in 2023 alone. People who were not dying. Killed by the state.",
+            "The United Nations Special Rapporteur on the Rights of Persons with Disabilities raised formal concerns. The UN Human Rights Committee flagged Canada in their 2023 Periodic Review. Parliament's response: Bill C-39, delaying the mental illness expansion to March 2027. Not cancelling it. Delaying it.",
+            "The Parliamentary Budget Officer estimated one hundred and forty-nine point five million dollars in economic savings from MAID deaths. That is the government's own number. They calculated how much money they save by killing people. And they published it.",
+            "Veterans were offered MAID during calls about wheelchair ramps and housing support. Canadian Forces members tracked as priority expansion targets. The parliamentary record documents all of this. Every committee hearing. Every vote. Every silence. Hansard remembers what Parliament wishes you would forget.",
+        ],
+    },
+    "procurement-analysis": {
+        "title": "Automated Analysis of 1.13M Government Contracts",
+        "segments": [
+            "One million, one hundred and thirty thousand, nine hundred and eighty-five government contracts. Eighty departments. Seventeen years of data. Algorithmically scanned for six anomaly flags: sole-source, amendment, concentration, revolving door, urgency, and split contracts.",
+            "The Phoenix Pay System. Original budget: three hundred and nine million. Final cost: seven point five billion. That is a two thousand, three hundred and twenty-seven percent overrun. ArriveCAN: two point five million budgeted, fifty-four million spent — two thousand and sixty percent over. Trans Mountain Pipeline: five point four billion to thirty-four point two billion. Canadian Surface Combatant frigates: twenty-six point two billion to eighty billion and climbing.",
+            "Combined overruns across the top ten contracts: one hundred and forty billion dollars. Average contract overrun: nine hundred and eighty-seven percent. Zero criminal convictions. Not one person has gone to prison for losing one hundred and forty billion dollars of public money.",
+            "Every contract on this page is from the Government of Canada's own procurement database. The anomaly flags are algorithmic — pattern detection, not opinion. When a contract is sole-sourced, then amended twelve times, then awarded to a firm whose board member just left the department that issued it... that is a pattern. And it has a name.",
+        ],
+    },
+    "whistleblower-guide": {
+        "title": "Legal Tools for Canadian Military Whistleblowers",
+        "segments": [
+            "There is no Military Whistleblower Protection Act in Canada. The United States has had one since 1988 — thirty-eight years. Canada has nothing. The Public Servants Disclosure Protection Act explicitly excludes Canadian Forces members by statute. CSIS and CSE are also exempt. The people most likely to witness government misconduct... have the least legal protection.",
+            "Criminal Code Section 504. Any person who, on reasonable grounds, believes that a person has committed an indictable offence may lay an information in writing and under oath before a Justice of the Peace. No lawyer required. This is a constitutional right. It has existed since Confederation. And it is the most powerful legal tool available to any Canadian whistleblower.",
+            "Three oversight bodies are available simultaneously. The Military Police Complaints Commission — one-year filing window, no lawyer needed. The DND and CF Ombudsman — independent from the chain of command. And the Public Sector Integrity Commissioner — for federal institutions.",
+            "The strategy is simple. Document everything. Preserve everything. Publish everything. The institution's power comes from controlling the narrative. Your power comes from making the evidence public before they can suppress it.",
+            "If you are in crisis, call the Veterans Affairs Crisis Line at 1-800-268-7708. Twenty-four hours a day, seven days a week. Canada Suicide Prevention: 9-8-8. Crisis Services Canada: 1-833-456-4566. You are not alone. And the law is on your side.",
+        ],
+    },
+    "history": {
+        "title": "Historical Patterns of Institutional Harm",
+        "segments": [
+            "Every state program that kills its own citizens follows the same five stages. Program. Witnesses. Retaliation. Exposure. Reckoning. Residential schools followed this pattern over one hundred years. Alberta's eugenics program sterilized two thousand, eight hundred and thirty-four people between 1928 and 1972. The Tuskegee experiment left three hundred and ninety-nine Black men untreated for syphilis across forty years.",
+            "Nazi Germany's Aktion T4 program killed between seventy thousand and two hundred and seventy-five thousand people with disabilities between 1939 and 1941. Canada's MAID program has now killed seventy-six thousand seven hundred and seven people since 2016. We have exceeded the lower bound of the program that was prosecuted at Nuremberg. The comparison is not rhetorical. The numbers are the government's own.",
+            "The cost of speaking up. Vice-Admiral Mark Norman — charged, prosecution failed. Daniel Ellsberg — Espionage Act, charges dismissed. In every case, the whistleblower paid the price. In every case, the institution was eventually proven wrong. The question is how many people die before the reckoning arrives.",
+            "MAID is currently in Stage Three to Four — Retaliation and Exposure. The witnesses have come forward. The retaliation has begun. The data is now public. The only question remaining is whether Stage Five — Reckoning — will come in time.",
+        ],
+    },
+    "campaign-tracker": {
+        "title": "6-Phase Political Accountability Campaign",
+        "segments": [
+            "Six phases. Three hundred and forty emails tracked. One hundred and thirteen clean MPs with an accountability score of zero. Nine priority targets identified. This is the political accountability campaign — and every phase is documented.",
+            "Phase One — Seed. Four media targets: CJPME, the Western Standard, Read the Maple, and Esprit de Corps. Get the story into outlets that will actually publish it. Phase Two — Recruit. Nine priority MPs plus one hundred and thirteen clean MPs across all parties. Cross-party alignment. This is not partisan.",
+            "Phase Three — Arm. Party-specific accountability preparation. Phase Four — Pressure. Trigger committee studies at ETHI — the Ethics Committee — and NDDN — the National Defence Committee. Force the evidence onto the parliamentary record.",
+            "Phase Five — Trap. Five Private Members' Bills queued. Legislation drafted. Ready to file. Phase Six — Close. Five-wall strategic closure. Parliamentary. Legal. Media. Public. International. Every exit blocked. Every escape route documented.",
+            "Three Bloc Québécois kingmakers hold the balance of power. Yves-François Blanchet, Claude Thériault, and Kristina Michaud. In a minority parliament, three votes can bring down a government. This campaign knows where those votes are.",
+        ],
+    },
+    "faq": {
+        "title": "Objections Answered with Government Data",
+        "segments": [
+            "Every objection to the evidence on this site has been answered — not with opinion, but with the government's own data. Ten objections. Ten rebuttals. Every number sourced.",
+            "They chose MAID voluntarily. Sixty-three percent of Track 1 recipients have cancer. But Track 2 — the non-dying track — killed seven hundred and thirty-two people in 2024 alone. Forty-seven percent cited loneliness as a source of suffering. Forty-nine percent felt they were a burden on their families. One hundred and forty-nine people who could have received disability support... chose death instead.",
+            "Poverty coercion. People from the poorest income quintile are two point four two times overrepresented in MAID deaths. The correlation between poverty and state-administered death is not a coincidence. It is a policy outcome.",
+            "The institutional channels work. Five hundred and seventeen confirmed public outcomes in the 504 Documentary prove they do not. Zero remedies ordered under the PSDPA in eighteen years. CFNIS independence disputed by the Military Police Complaints Commission in formal findings. The channels exist to absorb complaints — not to resolve them.",
+            "Every objection on this page links to its government source. Read the objection. Read the rebuttal. Verify the data yourself. The government's own records are the most damning evidence against them.",
+        ],
+    },
+    "resources": {
+        "title": "Contact Resources — Oversight Bodies and Legal Mechanisms",
+        "segments": [
+            "This page lists every legal mechanism, oversight body, and crisis resource available to Canadians seeking accountability. Military. Federal. International. Legal. Media. Crisis support. All in one place.",
+            "Military complaints: the Military Police Complaints Commission — one year filing window, no lawyer required. The DND and CF Ombudsman — independent from the chain of command. CFNIS complaints can be filed directly.",
+            "Federal oversight: NSICOP reviews national security matters. NSIRA provides intelligence review. The Foreign Interference Commission is a special investigative body. The Public Sector Integrity Commissioner handles whistleblower complaints — though in eighteen years, only seven cases were referred to tribunal.",
+            "International mechanisms: the United Nations Special Rapporteur on Disability has already raised concerns about MAID. The International Criminal Court has jurisdiction — Canada is a Rome Statute signatory. The Magnitsky Act enables sanctions against officials who commit human rights abuses.",
+            "Crisis support. Veterans Affairs Crisis Line: 1-800-268-7708 — twenty-four hours a day, seven days a week. Canada Suicide Prevention: 9-8-8. Crisis Services Canada: 1-833-456-4566. You are not alone.",
+        ],
+    },
+    "network-analysis": {
+        "title": "Cross-Referenced Influence Network Topology",
+        "segments": [
+            "Three hundred and ninety-four unique entities. One hundred and sixty-nine connection vectors. Five data dimensions: lobbying, voting, boards, funding, and procurement. This is the influence network topology — every relationship algorithmically mapped.",
+            "Threat level scoring, normalized from zero to one. The MAID-Emergencies Nexus: threat score one point zero zero — the highest in the system. Foreign Influence Target Alpha: zero point nine eight. Queen's University Judicial Linkage: zero point nine nine. CIJA Lobbying Pipeline: zero point nine five. CFNIS Proxy: zero point eight eight.",
+            "The network is not a theory. It is a graph — built from five public datasets, cross-referenced algorithmically. When the same person appears on a corporate board, in a lobbying registration, and in a procurement contract with the department they used to run... that is a connection. And the algorithm found three hundred and ninety-four of them.",
+        ],
+    },
+    "municipal-accountability": {
+        "title": "Municipal Intelligence — Belleville and Quinte West",
+        "segments": [
+            "Municipal intelligence. Two Ontario municipalities tracked: Belleville and Quinte West. Council composition. Sunshine List salaries. Court cases. Budget trends. Cross-references to provincial lobbying registries. Property tax increases quantified by ward.",
+            "This is where federal accountability meets local governance. The same patterns documented at the national level — patronage, procurement anomalies, budget opacity — appear at the municipal level. Smaller budgets. Same mechanics.",
+            "Council member cards, compensation data, court case tracking, and multi-year budget analysis. Every data point sourced from public municipal records. The transparency scorecard shows what each municipality publishes — and what it hides.",
+        ],
+    },
+    "cross-reference": {
+        "title": "Cross-Link Analysis — Lobbying, Donations, Votes, Procurement",
+        "segments": [
+            "One point two billion dollars in political money. Six point two million donation records. Three hundred and fifty thousand lobbying contacts. Three thousand, one hundred and thirty-three government contracts. Six datasets, cross-linked. This is the machine.",
+            "The cross-reference engine matches timelines. Who met whom. When they met. How they voted. Who donated. Who got the contract. The revolving door — corporate board to Parliament to lobbying firm and back to the board — is not a metaphor. It is a documented pattern with names and dates.",
+            "MP spotlight cards show individual members with their party affiliation, voting history, lobbying contacts received, and donations accepted. The methodology is simple: take the government's own data from six different databases and put it on the same page. The pattern reveals itself.",
+        ],
+    },
+    "contributions-tracker": {
+        "title": "Political Contributions Tracker — $1.25B",
+        "segments": [
+            "One point two five billion dollars in total political contributions, tracked from 2004 to the present. Every dollar from Elections Canada's open data. Ten major parties. Party-by-party allocation. Year-over-year trends.",
+            "The dashboard breaks down who gave how much to whom, and when. Liberal red. Conservative blue. NDP orange. Green. Every colour on the chart represents real money from real donors — and the patterns show which parties benefit from which economic conditions.",
+            "This is not analysis. This is arithmetic. The government published the data. We added it up. The pie charts show allocation. The bar charts show trends. The tables show details. Draw your own conclusions.",
+        ],
+    },
+    "dossier-viewer": {
+        "title": "OSINT Intelligence Dossier Repository",
+        "segments": [
+            "Eighteen OSINT intelligence dossiers. Twenty-plus individual profiles: Lantsman, Housefather, Vuong, Mendicino, CFNIS, Han Dong, Cotler, Chong, Poilievre, Senator Woo, and more. Each dossier cross-referenced against lobbying records, voting histories, and procurement data.",
+            "MAID voting analysis: thirteen MPs with documented ethics breaches. Two hundred and fifty MPs tracked across forty-four thousand, nine hundred and fifty-eight deaths. MAID votes — Bill C-14: one hundred and eighty-six yes. Bill C-7: one hundred and eighty yes. Health and medical lobbying: eight thousand, eight hundred and eighty-one contacts from MAID-adjacent organizations.",
+            "Entity disambiguation. Related dossier linking. Knowledge graph navigation. Every dossier is sourced from public records — Hansard, lobbying registrations, Elections Canada filings, court documents. The system connects what the government keeps in separate silos.",
+        ],
+    },
+    "lobbying-tracker": {
+        "title": "Who's Lobbying Canadian Politicians",
+        "segments": [
+            "Five hundred and forty-seven thousand, eight hundred and eighty-nine registered lobbying contacts. Every one from the Office of the Commissioner of Lobbying's own published records. This dashboard shows you who is lobbying, who is being lobbied, and how often.",
+            "The top twenty most-lobbied officials — Designated Public Office Holders — ranked by meeting count. The top twenty lobbying organizations ranked by total communications. Institutional breakdown: which government bodies receive the most lobbying pressure.",
+            "All data is from registered communications only. The actual number of contacts is higher — not all lobbying is registered, and enforcement is minimal. What you see here is what they were willing to put on the record. Imagine what they weren't.",
+        ],
+    },
+    "sector-lobbying": {
+        "title": "Sector Lobbying Dashboard — 359,251 Communications",
+        "segments": [
+            "Three hundred and fifty-nine thousand, two hundred and fifty-one registered lobbying communications across twelve industry sectors. Oil and gas. Banking. Pharma. Big tech. Each sector card shows communications breakdown, top organizations, and target government bodies.",
+            "The pattern is universal: every sector's number one lobbying target is the government body that regulates it. Oil and gas lobby Natural Resources. Banks lobby Finance. Pharma lobbies Health Canada. The regulator and the regulated are in constant private communication. That is not oversight. That is capture.",
+            "Concentration index analysis — the Herfindahl measure of sector dominance — shows which industries have consolidated lobbying power into the fewest firms. Criminal Code sections are cited for relevant conflict-of-interest statutes. The data speaks. The law exists. Enforcement does not.",
+        ],
+    },
+    "belleville": {
+        "title": "City of Belleville — Municipal Intelligence Report",
+        "segments": [
+            "City of Belleville. Population fifty-six thousand. Bay of Quinte, Hastings County, Ontario. Municipal Intelligence Report. Council composition. Budget analysis. Sunshine List. Police spending. Homelessness crisis. Land deals. Every data point from public municipal records.",
+            "The 2026 budget: two hundred and thirty million dollars operating. Seven point one percent tax increase. A property valued at two hundred and fifty thousand adds two hundred and fifty-seven dollars per year. The police budget: thirty-three point five million — a fifteen point six percent increase. Over five years, police spending grew from twenty-six million to thirty-three point five million. Sixty percent growth while calls for service dropped three percent.",
+            "The state of emergency. Active since February 2024 — more than two years. Homelessness, mental health, and the opioid crisis. Three hundred unhoused residents. Twenty-one to fifty shelter beds. The Welcoming Streets Program — which avoided one hundred and ninety-five unnecessary police calls in a single year — was defunded in March 2025. The only non-police alternative... eliminated.",
+            "Sunshine List: two hundred and twenty-nine municipal employees earning over one hundred thousand. Thirty-two million in total compensation. Highest earner: a Fire Platoon Chief at three hundred and forty thousand, seven hundred and nineteen dollars — exceeding the CAO, the Police Chief, and the Deputy Fire Chief.",
+            "Ben Bleecker property. Forty Yeomans Street. Sold for two point three seven five million in 2021 with zero conditions — no development timeline, no anti-flipping clause, no binding end-use requirement. The city invested three million dollars in surrounding infrastructure. The property remains vacant. Mayor Neil Ellis is a former Liberal MP. The cross-reference investigation continues.",
+        ],
+    },
 }
 
 
