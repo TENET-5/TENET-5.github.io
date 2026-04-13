@@ -292,7 +292,7 @@
     'vancouver.html': 'Vancouver \u2014 Municipal Intelligence',
     'ai-research.html': 'Research Methodology',
     'liril-analysis.html': 'LIRIL Analysis',
-    'acelephius-report.html': 'ACELEPHIUS \u2014 Palantir OSINT Nexus',
+    'acelephius-report.html': 'ACELEPHIUS \u2014 LIRIL OSINT Engine',
     'acelephius-wardoll.html': 'ACELEPHIUS \u2014 War Doll Intelligence',
     'hansard-dashboard.html': 'Hansard Dashboard \u2014 Parliament 45-1',
     'hansard-evidence.html': 'Hansard \u2014 Institutional Dismissal of 76,707 Deaths',
