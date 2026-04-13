@@ -60,6 +60,28 @@ Date Captured: {datetime.now().isoformat()}
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(output_content)
         
+        # Broadcast the Godot OSINT Godot Telemetry to TENET-5 AI Loop natively
+        try:
+            import nats
+            nc = await nats.connect("nats://127.0.0.1:4222", connect_timeout=2)
+            telemetry_payload = {
+                "source": "LIRIL_EMPIRICAL_HANDOFF",
+                "evidence_id": signature,
+                "target": target_name,
+                "matrix_complexity": matrix_complexity,
+                "abcxyz_compliance": abcxyz_compliance,
+                "routing_agent": routing_agent,
+                "ethics": ethics_str,
+                "filepath": filepath
+            }
+            await nc.publish("tenet.liril.broadcast", json.dumps(telemetry_payload).encode('utf-8'))
+            await nc.drain()
+            self.logger.info(f"Broadcasted OSINT Handoff telemetry to native TENET-5 AI system loop via NATS.")
+        except ImportError:
+            self.logger.debug("python-nats not available, deferring native AI trigger broadcast.")
+        except Exception as e:
+            self.logger.warning(f"TENET-5 NATS Event Loop offline. Autonomous AI response deferred: {e}")
+        
         self.logger.info(f"Handoff Success: Data secured symmetrically with sig {signature[:8]} at {filepath}")
         return filepath
 
