@@ -588,8 +588,8 @@
         if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && isFemale(v); });
         // P5: Any English NOT male
         if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && !isMale(v); });
-        // P6: Absolute last resort
-        if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v); }) || null;
+        // P6: Absolute last resort — still block male
+        if (!cachedVoice) cachedVoice = voices.find(function(v) { return isEn(v) && !isMale(v); }) || null;
       }
 
       if (cachedVoice) {
@@ -618,12 +618,25 @@
       if (voiceRetryCount < 20) {
         setTimeout(retryVoiceResolution, 250); // Retry every 250ms for up to 5 seconds
       } else {
-        console.warn('[LIRIL] Could not find female voice after 20 retries. Using:', v ? v.name : 'none');
+        /* If still male after 20 retries, clear it — silence is better than wrong voice */
+        if (cachedVoice && isMale(cachedVoice)) {
+          console.warn('[LIRIL] Rejecting male voice after 20 retries:', cachedVoice.name);
+          cachedVoice = null;
+          voiceResolved = false;
+        } else {
+          console.warn('[LIRIL] Voice after 20 retries:', v ? v.name : 'none');
+        }
       }
     }
 
     if (window.speechSynthesis) {
       window.speechSynthesis.addEventListener('voiceschanged', function() {
+        /* Only re-resolve if current voice is gone or male */
+        if (cachedVoice) {
+          var voices = window.speechSynthesis.getVoices();
+          var still = voices.find(function(v) { return v.name === cachedVoice.name; });
+          if (still && !isMale(still)) return; /* voice still valid — keep it */
+        }
         cachedVoice = null;
         voiceResolved = false;
         resolveVoice();
