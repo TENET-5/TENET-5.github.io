@@ -914,15 +914,25 @@
 
         const voices = window.speechSynthesis.getVoices();
 
-        // Restore pinned voice from session (prevents cross-scene drift)
-        let preferredVoice = null;
-        try {
-          const saved = sessionStorage.getItem('liril-voice-name');
-          if (saved) {
-            const restored = voices.find(v => v.name === saved);
-            if (restored && !isMale(restored)) preferredVoice = restored;
-          }
-        } catch(e) {}
+        // Use primed voice if available (Chrome/Edge async safe)
+        let preferredVoice = _homeCachedVoice || null;
+
+        // Validate primed voice is still present and not male
+        if (preferredVoice) {
+          const still = voices.find(v => v.name === preferredVoice.name);
+          if (!still || isMale(still)) preferredVoice = null;
+        }
+
+        // If no primed voice, try session restore
+        if (!preferredVoice) {
+          try {
+            const saved = sessionStorage.getItem('liril-voice-name');
+            if (saved) {
+              const restored = voices.find(v => v.name === saved);
+              if (restored && !isMale(restored)) preferredVoice = restored;
+            }
+          } catch(e) {}
+        }
 
         if (!preferredVoice) {
           preferredVoice =
@@ -963,6 +973,53 @@
         window.speechSynthesis.speak(utterance);
       }
     };
+
+    // ── LIRIL voice priming — Chrome/Edge load voices ASYNC ──
+    // Must prime BEFORE user clicks, otherwise getVoices() returns []
+    var _homeCachedVoice = null;
+    (function primeVoice() {
+      if (!('speechSynthesis' in window)) return;
+      var MALE_BLOCK_P = /david|mark|james|george|daniel|ryan|guy|thomas|richard|rishi|sean|oliver|liam|christopher|eric|andrew|brian|roger|malcolm|connor|freddie|alfie|ethan|noah/i;
+      function resolve() {
+        var voices = window.speechSynthesis.getVoices();
+        if (!voices.length) return;
+        // Skip if already resolved and still valid
+        if (_homeCachedVoice) {
+          var still = voices.find(function(v) { return v.name === _homeCachedVoice.name; });
+          if (still && !MALE_BLOCK_P.test(still.name)) return;
+        }
+        var FEMALE_P = /hazel|susan|libby|sonia|maisie|martha|kate|karen|moira|fiona|serena|samantha|victoria|zira|jenny|aria|sara|emily|emma|google.*female/i;
+        var isGB = function(v) { return (v.lang || '').replace('_','-').toLowerCase().startsWith('en-gb'); };
+        var isEN = function(v) { return (v.lang || '').replace('_','-').toLowerCase().startsWith('en'); };
+        // Restore from session first
+        try {
+          var saved = sessionStorage.getItem('liril-voice-name');
+          if (saved) {
+            var restored = voices.find(function(v) { return v.name === saved; });
+            if (restored && !MALE_BLOCK_P.test(restored.name)) { _homeCachedVoice = restored; return; }
+          }
+        } catch(e) {}
+        _homeCachedVoice =
+          voices.find(function(v) { return isGB(v) && FEMALE_P.test(v.name) && /natural|online|neural/i.test(v.name); }) ||
+          voices.find(function(v) { return isGB(v) && FEMALE_P.test(v.name); }) ||
+          voices.find(function(v) { return isGB(v) && !MALE_BLOCK_P.test(v.name); }) ||
+          voices.find(function(v) { return isEN(v) && FEMALE_P.test(v.name) && /natural|online|neural/i.test(v.name); }) ||
+          voices.find(function(v) { return isEN(v) && FEMALE_P.test(v.name); }) ||
+          voices.find(function(v) { return isEN(v) && !MALE_BLOCK_P.test(v.name); }) ||
+          null;
+        if (_homeCachedVoice) {
+          try { sessionStorage.setItem('liril-voice-name', _homeCachedVoice.name); } catch(e) {}
+        }
+      }
+      window.speechSynthesis.addEventListener('voiceschanged', resolve);
+      resolve(); // Firefox loads sync
+      // Chrome/Edge retry loop — 20× 250ms = 5s max
+      var _r = 0;
+      (function retry() {
+        if (_homeCachedVoice) return;
+        if (++_r < 20) { resolve(); setTimeout(retry, 250); }
+      })();
+    })();
 
     document.addEventListener("DOMContentLoaded", () => {
       engine.init();

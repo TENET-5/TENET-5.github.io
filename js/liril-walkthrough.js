@@ -874,6 +874,12 @@
     // Load voices — Chrome/Edge load asynchronously, MUST wait for onvoiceschanged
     if ('speechSynthesis' in window) {
       var initVoices = function() {
+        /* Only re-resolve if current voice is missing or male — prevents drift */
+        if (cachedVoice) {
+          var voices = window.speechSynthesis.getVoices();
+          var still = voices.find(function(v) { return v.name === cachedVoice.name; });
+          if (still && !isMale(still)) return; /* voice still available and valid — keep it */
+        }
         voiceResolved = false;
         cachedVoice = null;
         resolveVoice(); // pre-resolve so first click is instant
