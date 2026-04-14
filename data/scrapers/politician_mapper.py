@@ -25,7 +25,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timezone
 
 BASE_URL = "https://api.openparliament.ca"
 SCRAPERS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -215,7 +215,7 @@ def collect_all_mps():
     ensure_dirs()
     path = os.path.join(DATA_DIR, "all_mps.json")
     save_json({
-        "collected_at": datetime.utcnow().isoformat() + "Z",
+        "collected_at": datetime.now(timezone.utc).isoformat(),
         "total_mps": len(enriched),
         "mps": enriched,
     }, path)
@@ -275,7 +275,7 @@ def build_mp_profile(mp_slug, mps_data=None, lobbying_data=None, hansard_data=No
         "party": party,
         "riding": riding,
         "province": province,
-        "collected_at": datetime.utcnow().isoformat() + "Z",
+        "collected_at": datetime.now(timezone.utc).isoformat(),
         "memberships": mp_detail.get("memberships", []),
         "other_info": mp_detail.get("other_info", {}),
     }
@@ -537,7 +537,7 @@ def detect_patterns(profiles=None):
 
     path = os.path.join(DATA_DIR, "detected_patterns.json")
     save_json({
-        "analyzed_at": datetime.utcnow().isoformat() + "Z",
+        "analyzed_at": datetime.now(timezone.utc).isoformat(),
         "profiles_analyzed": len(profiles),
         "total_findings": len(findings),
         "findings_by_severity": {
@@ -766,7 +766,7 @@ def generate_connection_graph(profiles=None):
                 })
 
     graph = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "total_nodes": len(nodes),
         "total_edges": len(edges),
         "node_types": dict(collections.Counter(n["type"] for n in nodes.values())),

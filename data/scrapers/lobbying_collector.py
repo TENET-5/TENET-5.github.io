@@ -25,7 +25,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timezone
 from html.parser import HTMLParser
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lobbying")
@@ -219,9 +219,9 @@ def download_lobbying_registrations():
         all_rows.extend(rows)
 
     if all_rows:
-        filename = f"registrations_{datetime.utcnow().strftime('%Y%m%d')}.json"
+        filename = f"registrations_{datetime.now(timezone.utc).strftime('%Y%m%d')}.json"
         save_json({
-            "collected_at": datetime.utcnow().isoformat() + "Z",
+            "collected_at": datetime.now(timezone.utc).isoformat(),
             "source": DATASET_REGISTRATIONS,
             "total_records": len(all_rows),
             "records": all_rows,
@@ -243,9 +243,9 @@ def download_communication_reports():
         all_rows.extend(rows)
 
     if all_rows:
-        filename = f"communications_{datetime.utcnow().strftime('%Y%m%d')}.json"
+        filename = f"communications_{datetime.now(timezone.utc).strftime('%Y%m%d')}.json"
         save_json({
-            "collected_at": datetime.utcnow().isoformat() + "Z",
+            "collected_at": datetime.now(timezone.utc).isoformat(),
             "source": DATASET_COMMUNICATIONS,
             "total_records": len(all_rows),
             "records": all_rows,
@@ -267,9 +267,9 @@ def download_contracts():
         all_rows.extend(rows)
 
     if all_rows:
-        filename = f"contracts_{datetime.utcnow().strftime('%Y%m%d')}.json"
+        filename = f"contracts_{datetime.now(timezone.utc).strftime('%Y%m%d')}.json"
         save_json({
-            "collected_at": datetime.utcnow().isoformat() + "Z",
+            "collected_at": datetime.now(timezone.utc).isoformat(),
             "source": DATASET_CONTRACTS,
             "total_records": len(all_rows),
             "records": all_rows,
@@ -412,9 +412,9 @@ def find_foreign_connections(data):
     log.info("Flagged %d records with potential foreign connections", len(flagged))
 
     if flagged:
-        filename = f"foreign_connections_{datetime.utcnow().strftime('%Y%m%d')}.json"
+        filename = f"foreign_connections_{datetime.now(timezone.utc).strftime('%Y%m%d')}.json"
         save_json({
-            "collected_at": datetime.utcnow().isoformat() + "Z",
+            "collected_at": datetime.now(timezone.utc).isoformat(),
             "total_flagged": len(flagged),
             "total_scanned": len(data),
             "records": flagged,

@@ -30,7 +30,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 # ── Paths ──
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -297,12 +297,12 @@ def detect_amendment_chains(contracts):
 def save_results(anomalies, contracts_count):
     """Save anomaly results to JSON."""
     os.makedirs(DATA_DIR, exist_ok=True)
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     filename = f"anomaly_scan_{timestamp}.json"
     filepath = os.path.join(DATA_DIR, filename)
 
     output = {
-        "scan_timestamp": datetime.utcnow().isoformat() + "Z",
+        "scan_timestamp": datetime.now(timezone.utc).isoformat(),
         "scanner": "TENET5-ProactiveDisclosureScanner",
         "ABCXYZ_system": "N vs NP Millennial Falcon — ACTIVE",
         "memory_handoff": "Empirical Magic Handoff — SECURED",
@@ -322,7 +322,7 @@ def save_results(anomalies, contracts_count):
     os.makedirs(EVIDENCE_DIR, exist_ok=True)
     dossier_path = os.path.join(EVIDENCE_DIR, f"contract_anomalies_{timestamp}.md")
     with open(dossier_path, "w", encoding="utf-8") as f:
-        f.write(f"# TENET5 Contract Anomaly Scan — {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n\n")
+        f.write(f"# TENET5 Contract Anomaly Scan — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC\n\n")
         f.write(f"**Contracts Scanned:** {contracts_count:,}\n")
         f.write(f"**Anomalies Detected:** {len(anomalies)}\n")
         f.write(f"**High Severity:** {output['high_severity_count']}\n\n")

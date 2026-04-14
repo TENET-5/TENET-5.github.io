@@ -22,7 +22,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 BASE_URL = "https://api.openparliament.ca"
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "hansard")
@@ -139,13 +139,13 @@ def save_json(data, filename):
 def collect_recent_debates(days=30):
     """Fetch recent House of Commons debates from the last N days."""
     log.info("Collecting debates from the last %d days", days)
-    cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
     url = f"{BASE_URL}/debates/?format=json&date__gte={cutoff}"
     items = fetch_all_pages(url)
     if not items:
         log.warning("No debates found for the last %d days", days)
         return []
-    filename = f"debates_last_{days}d_{datetime.utcnow().strftime('%Y%m%d')}.jsonl"
+    filename = f"debates_last_{days}d_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl"
     save_jsonl(items, filename)
     return items
 
@@ -158,7 +158,7 @@ def collect_mp_statements(mp_slug):
     if not items:
         log.warning("No statements found for %s", mp_slug)
         return []
-    filename = f"statements_{mp_slug}_{datetime.utcnow().strftime('%Y%m%d')}.jsonl"
+    filename = f"statements_{mp_slug}_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl"
     save_jsonl(items, filename)
     return items
 
@@ -193,7 +193,7 @@ def collect_votes(session="45-1"):
         if (i + 1) % 50 == 0:
             log.info("  Enriched %d/%d votes", i + 1, len(votes))
 
-    filename = f"votes_{session}_{datetime.utcnow().strftime('%Y%m%d')}.jsonl"
+    filename = f"votes_{session}_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl"
     save_jsonl(enriched, filename)
     return enriched
 
@@ -208,7 +208,7 @@ def search_debates(query):
         log.warning("No search results for '%s'", query)
         return []
     safe_query = query.replace(" ", "_").replace("/", "-")[:50]
-    filename = f"search_{safe_query}_{datetime.utcnow().strftime('%Y%m%d')}.jsonl"
+    filename = f"search_{safe_query}_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl"
     save_jsonl(items, filename)
     return items
 
@@ -221,7 +221,7 @@ def collect_bills(session="45-1"):
     if not items:
         log.warning("No bills found for session %s", session)
         return []
-    filename = f"bills_{session}_{datetime.utcnow().strftime('%Y%m%d')}.jsonl"
+    filename = f"bills_{session}_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl"
     save_jsonl(items, filename)
     return items
 
