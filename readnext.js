@@ -269,7 +269,7 @@
     'bloggins.html': {
       current: 'Bloggins',
       next: [
-        { href: 'red-duster-game.html', label: 'Red Duster Game', desc: 'The interactive investigation game' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Look at the data and take action' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
       ]
     },
@@ -561,13 +561,7 @@
         { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How 25 key MPs voted on MAID bills' },
       ]
     },
-    'red-duster-game.html': {
-      current: 'Red Duster Game',
-      next: [
-        { href: 'bloggins.html', label: 'Bloggins', desc: 'The story behind the game' },
-        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
-      ]
-    },
+
     'report-generator.html': {
       current: 'Report Generator',
       next: [
