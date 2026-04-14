@@ -148,9 +148,10 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="copyEmail()">Copy Email to Clipboard</button>
-      <button class="btn" onclick="downloadEmail()">Download as .txt</button>
+      <button class="btn btn-primary" id="btn-copy" onclick="copyEmail()">Copy Email to Clipboard</button>
+      <button class="btn" onclick="downloadEML()" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#059669;">Download .eml File</button>
       <a id="mailto-link" href="#" class="btn tnt-style-1205">Open in Email Client</a>
+      <button class="btn" onclick="downloadEmail()" style="font-size:0.7rem;opacity:0.6;">Download .txt</button>
     </div>
 
     <div id="email-container" class="tnt-style-88">
@@ -469,11 +470,38 @@
       if (!window._currentEmail) return;
       var text = 'Subject: ' + window._currentEmail.subject + '\n\n' + window._currentEmail.body;
       navigator.clipboard.writeText(text).then(function() {
-        document.querySelector('.btn-primary').textContent = 'Copied!';
-        setTimeout(function() { document.querySelector('.btn-primary').textContent = 'Copy Email to Clipboard'; }, 2000);
+        var btn = document.getElementById('btn-copy') || document.querySelector('.btn-primary');
+        if (btn) { btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = 'Copy Email to Clipboard'; }, 2000); }
       });
     };
 
+    // Generate RFC 2822 .eml file — opens directly in Outlook/Thunderbird/Apple Mail
+    window.downloadEML = function() {
+      if (!window._currentEmail) return;
+      var mp = ALL[document.getElementById('mp-select').value];
+      var mpEmail = mp ? getMPEmail(mp) : '';
+      var mpName = mp ? mp.name : 'mp';
+      var date = new Date().toUTCString();
+
+      var eml = 'MIME-Version: 1.0\r\n' +
+        'Date: ' + date + '\r\n' +
+        'Subject: ' + window._currentEmail.subject + '\r\n' +
+        (mpEmail ? 'To: ' + mpEmail + '\r\n' : '') +
+        'From: \r\n' +
+        'Content-Type: text/plain; charset=UTF-8\r\n' +
+        'Content-Transfer-Encoding: quoted-printable\r\n' +
+        '\r\n' +
+        window._currentEmail.body.replace(/([^\r])\n/g, '$1\r\n');
+
+      var blob = new Blob([eml], { type: 'message/rfc822' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'tenet5-' + mpName.toLowerCase().replace(/\s+/g, '-') + '.eml';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    // Legacy .txt download fallback
     window.downloadEmail = function() {
       if (!window._currentEmail) return;
       var text = 'Subject: ' + window._currentEmail.subject + '\n\n' + window._currentEmail.body;
@@ -482,6 +510,38 @@
       a.href = URL.createObjectURL(blob);
       a.download = 'email-' + document.getElementById('mp-name').textContent.toLowerCase().replace(/\s+/g, '-') + '.txt';
       a.click();
+    };
+
+    // Batch .eml generation — downloads a zip-like set of individual .eml files
+    window.downloadAllEML = function() {
+      if (!ALL.length) { alert('MP data not loaded'); return; }
+      var count = 0;
+      ALL.forEach(function(mp, i) {
+        var mpEmail = getMPEmail(mp);
+        if (!mpEmail) return;
+        var email = generateEmail(mp);
+        var date = new Date().toUTCString();
+        var eml = 'MIME-Version: 1.0\r\n' +
+          'Date: ' + date + '\r\n' +
+          'Subject: ' + email.subject + '\r\n' +
+          'To: ' + mpEmail + '\r\n' +
+          'From: \r\n' +
+          'Content-Type: text/plain; charset=UTF-8\r\n' +
+          'Content-Transfer-Encoding: quoted-printable\r\n' +
+          '\r\n' +
+          email.body.replace(/([^\r])\n/g, '$1\r\n');
+
+        setTimeout(function() {
+          var blob = new Blob([eml], { type: 'message/rfc822' });
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'tenet5-' + mp.name.toLowerCase().replace(/\s+/g, '-') + '.eml';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }, i * 200); // Stagger downloads to avoid browser blocking
+        count++;
+      });
+      alert('Generating ' + count + ' .eml files. Check your downloads folder. Open each in your email client to send.');
     };
 
     var BOARD = null;
