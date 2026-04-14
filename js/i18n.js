@@ -225,8 +225,18 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        // Run DOM Walk
-        walkDOM(document.body);
+        if (currentLang === 'fr') {
+            // French: ONLY translate nav/UI elements — never body content
+            // Target nav links, buttons, and UI chrome — NOT investigation text
+            const navEl = document.querySelector('nav, .site-nav, #site-header-frame');
+            if (navEl) walkDOM(navEl);
+            // Also translate footer if present
+            const footerEl = document.querySelector('footer, .site-footer, #site-footer-frame');
+            if (footerEl) walkDOM(footerEl);
+        } else if (currentLang === 'nf') {
+            // Newfie: apply to full body (entertainment feature)
+            walkDOM(document.body);
+        }
 
         // Update Language Selector UI Selection if exists
         const langSelect = document.getElementById('lang-selector');
