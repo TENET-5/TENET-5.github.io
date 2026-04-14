@@ -1424,6 +1424,156 @@ window.BOARD_DATA = {
         "matrix_complexity": "CHRONOS-P",
         "falcon_timestamp": 1776132493.0022185
       }
+    },
+    {
+      "id": "immigration_policy",
+      "type": "event",
+      "label": "Immigration Policy",
+      "subtitle": "Unregulated Expansion",
+      "detail": "Expansion of TFW programs and uncapped student visas leading to system strain and migrant exploitation.",
+      "link": "evidence.html",
+      "categories": ["event"],
+      "x": 80, "y": 80
+    },
+    {
+      "id": "tfw_migrants",
+      "type": "person",
+      "label": "TFW & Migrants",
+      "subtitle": "Exploited Labour Class",
+      "detail": "Vulnerable population facing abusive conditions, suppressed wages, and forced destitution leading to severe mental/physical health decline.",
+      "link": "evidence.html",
+      "categories": ["person"],
+      "x": 85, "y": 80
+    },
+    {
+      "id": "maid_pipeline",
+      "type": "org",
+      "label": "MAiD System",
+      "subtitle": "State-Sanctioned Protocol",
+      "detail": "Medical Assistance in Dying applied to individuals suffering from state-induced poverty and lack of social support.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 90, "y": 80
+    },
+    {
+      "id": "coffin_stocks",
+      "type": "org",
+      "label": "Coffin/Death Care",
+      "subtitle": "Monetized Mortality",
+      "detail": "Corporations profiting directly from increased mortality rates and institutional death pipelines.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 95, "y": 75
+    },
+    {
+      "id": "healthcare_cost_avoidance",
+      "type": "event",
+      "label": "Healthcare Cost Avoidance",
+      "subtitle": "Institutional Savings",
+      "detail": "Systemic cost-saving mechanism by avoiding long-term physical/mental healthcare and social housing investments.",
+      "link": "evidence.html",
+      "categories": ["event"],
+      "x": 95, "y": 85
+    },
+    {
+      "id": "fiscal_deficit_offset",
+      "type": "event",
+      "label": "Fiscal Deficit",
+      "subtitle": "Economic Indicator Mgt",
+      "detail": "Using cost avoidance to artificially balance provincial/federal budgets without structural reform.",
+      "link": "evidence.html",
+      "categories": ["event"],
+      "x": 100, "y": 85
+    },
+    {
+      "id": "brookfield",
+      "type": "org",
+      "label": "Brookfield",
+      "subtitle": "Global Investment Firm",
+      "detail": "Key nodal beneficiary in the N vs NP matrix, connected to various privatization and extraction pipelines.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 100, "y": 70
+    },
+    {
+      "id": "birch_hill",
+      "type": "org",
+      "label": "Birch Hill Equity",
+      "subtitle": "Private Equity",
+      "detail": "Connected to death-care and related utility/infrastructure investments.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 105, "y": 65
+    },
+    {
+      "id": "park_lawn_corp",
+      "type": "org",
+      "label": "Park Lawn Corp",
+      "subtitle": "Death Care Provider",
+      "detail": "North American funeral, cremation and cemetery provider. Acquired/privatized, driving 'coffin stock' yields.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 110, "y": 65
+    },
+    {
+      "id": "maple_fund",
+      "type": "org",
+      "label": "Maple Fund",
+      "subtitle": "Investment Vehicle",
+      "detail": "Channeling institutional and private capital into public infrastructure buyouts.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 105, "y": 70
+    },
+    {
+      "id": "infrastructure_privatization",
+      "type": "event",
+      "label": "Infra Privatization",
+      "subtitle": "Asset Transfer",
+      "detail": "Transfer of public assets to private equity control with guaranteed yields.",
+      "link": "evidence.html",
+      "categories": ["event"],
+      "x": 110, "y": 70
+    },
+    {
+      "id": "watermark",
+      "type": "org",
+      "label": "Watermark",
+      "subtitle": "Senior Housing",
+      "detail": "Real estate investment focused on senior living extraction.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 105, "y": 75
+    },
+    {
+      "id": "senior_housing_extraction",
+      "type": "event",
+      "label": "Elder Extraction",
+      "subtitle": "Elder Care Monetization",
+      "detail": "Maximizing profit yields from aging demographics in controlled housing facilities.",
+      "link": "evidence.html",
+      "categories": ["event"],
+      "x": 110, "y": 75
+    },
+    {
+      "id": "brookfield_annuity",
+      "type": "org",
+      "label": "Brookfield Annuity",
+      "subtitle": "Pension Insurance",
+      "detail": "Absorbs corporate pension liabilities, leveraging mortality credits and death pipelines.",
+      "link": "evidence.html",
+      "categories": ["org"],
+      "x": 105, "y": 80
+    },
+    {
+      "id": "pension_annuitization",
+      "type": "event",
+      "label": "Pension Annuitization",
+      "subtitle": "Risk Transfer",
+      "detail": "Capitalizing on pension risk transfers via structured annuity products.",
+      "link": "evidence.html",
+      "categories": ["event"],
+      "x": 110, "y": 80
     }
   ],
   "threads": [
@@ -2482,6 +2632,20 @@ window.BOARD_DATA = {
       "to": "falcon_h-ade3dd",
       "label": "MF_CONVERGENCE",
       "strength": 4
-    }
+    },
+    { "from": "immigration_policy", "to": "tfw_migrants", "label": "Creates", "strength": 3 },
+    { "from": "tfw_migrants", "to": "maid_pipeline", "label": "Vulnerability Pipeline", "strength": 3 },
+    { "from": "maid_pipeline", "to": "coffin_stocks", "label": "Mortality Yields", "strength": 3 },
+    { "from": "maid_pipeline", "to": "healthcare_cost_avoidance", "label": "Generates", "strength": 3 },
+    { "from": "healthcare_cost_avoidance", "to": "fiscal_deficit_offset", "label": "Reduces", "strength": 2 },
+    { "from": "coffin_stocks", "to": "brookfield", "label": "Capital Flows", "strength": 3 },
+    { "from": "brookfield", "to": "birch_hill", "label": "Controls/Partners", "strength": 2 },
+    { "from": "birch_hill", "to": "park_lawn_corp", "label": "Owns", "strength": 3 },
+    { "from": "brookfield", "to": "maple_fund", "label": "Manages", "strength": 2 },
+    { "from": "maple_fund", "to": "infrastructure_privatization", "label": "Executes", "strength": 3 },
+    { "from": "brookfield", "to": "watermark", "label": "Invests In", "strength": 2 },
+    { "from": "watermark", "to": "senior_housing_extraction", "label": "Profits From", "strength": 3 },
+    { "from": "brookfield", "to": "brookfield_annuity", "label": "Parent Entity", "strength": 3 },
+    { "from": "brookfield_annuity", "to": "pension_annuitization", "label": "Engine", "strength": 3 }
   ]
 };
