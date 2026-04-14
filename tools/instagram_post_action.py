@@ -1,4 +1,4 @@
-﻿"""
+"""
 ABCXYZ Instagram Campaign — GitHub Actions Auto-Poster
 Runs daily via .github/workflows/instagram-campaign.yml
 Tracks posted items in tools/instagram_progress.json (committed to repo)
@@ -269,7 +269,7 @@ def main():
             "post_number": post["number"],
             "title":       post["title"],
             "post_id":     post_id,
-            "timestamp":   __import__("datetime").datetime.utcnow().isoformat() + "Z",
+            "timestamp":   __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
         })
         save_progress(progress)
 
