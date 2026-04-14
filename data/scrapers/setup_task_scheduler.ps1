@@ -104,6 +104,6 @@ Write-Host "    Name:     $TaskPath$TaskName"
 Write-Host "    Schedule: Daily at ${Hour}:00"
 Write-Host "    Action:   python run_all_scrapers.py --force"
 Write-Host ""
-Write-Host "  To run manually:  schtasks /run /tn `"$TaskPath$TaskName`"" -ForegroundColor Cyan
-Write-Host "  To uninstall:     .\setup_task_scheduler.ps1 -Uninstall" -ForegroundColor Cyan
+    Write-Host "  To run manually:  schtasks /run /tn '$TaskPath$TaskName'" -ForegroundColor Cyan
+    Write-Host "  To uninstall:     .\setup_task_scheduler.ps1 -Uninstall" -ForegroundColor Cyan
 Write-Host ""
