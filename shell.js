@@ -74,7 +74,7 @@
     if (isFrameShell) {
       // INDEX.HTML — frame shell: only load nav for the top bar
       ensureFrame('site-header-frame', 'div', 'prepend');
-      loadScript(BASE + 'nav.js?v=13')
+      loadScript(BASE + 'nav.js?v=14')
         .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
         .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/auth-nav.js?v=1'); });
@@ -104,7 +104,7 @@
       ensureFrame('site-header-frame', 'div', 'prepend');
       ensureFrame('site-footer-frame', 'div', null);
 
-      loadScript(BASE + 'nav.js?v=13')
+      loadScript(BASE + 'nav.js?v=14')
         .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
         .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/auth-nav.js?v=1'); })
