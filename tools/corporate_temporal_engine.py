@@ -58,11 +58,23 @@ class OSINTDashboardIntegration:
             
             anomaly_score = intel.get("metrics", {}).get("loss", 0.0)
             
+            # Generate Millennial Falcon topological vector
+            import hashlib
+            vector_input = f"{node.name}:{','.join(node.temporal_edges)}".encode('utf-8')
+            vector_hash = hashlib.blake2b(vector_input, digest_size=8).hexdigest().upper()
+            topo_vector = f"MF-{vector_hash}-PATH{len(node.temporal_edges)}"
+            
+            # Risk classification based on anomaly score
+            risk_level = "HIGH" if anomaly_score > 0.05 else "MEDIUM" if anomaly_score > 0.01 else "LOW"
+            
             results.append({
                 "id": node.id,
                 "name": node.name,
                 "edges": node.temporal_edges,
+                "corporation": node.temporal_edges[0] if node.temporal_edges else "UNKNOWN",
                 "anomaly_score": anomaly_score,
+                "topological_vector": topo_vector,
+                "risk_level": risk_level,
                 "metrics": intel.get("metrics", {}),
                 "status": intel.get("status")
             })
