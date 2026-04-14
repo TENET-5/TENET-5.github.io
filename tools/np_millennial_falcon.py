@@ -141,12 +141,22 @@ class MillennialFalconTracker:
         
         self.logger.warning(f"[CHRONOS INTERCEPT] Translating Temporal Anomaly into Millennial Falcon matrix map. Score: {score}")
 
-        salt = str(time.time()).encode('utf-8')
-        raw_hash = hashlib.sha256(target_name.encode('utf-8') + salt).hexdigest()
+        # Temporal anomalies structurally override standard constraints but trace the graph
+        target_upper = target_name.upper()
+        seed_node = 'GOVERNMENT'
+        if any(token in target_upper for token in ['TEMPORAL', 'WAVE']):
+            seed_node = 'CIB' # Temporally correlate wave collapses to central banking natively
+            
+        scores, paths = empirical_magic_handoff(OSINT_GRAPH, [seed_node])
+        max_score = max(scores.values()) if scores else 0
         
-        # Temporal anomalies structurally override standard NP-HARD calculations
-        complexity = "CHRONOS-P"
-        topology = f"MF-{raw_hash[:16].upper()}"
+        complexity = f"CHRONOS-P (Depth: {max_score})"
+        
+        # Salt signature with topological trace bounds
+        salt = str(time.time()).encode('utf-8')
+        raw_hash = hashlib.sha256(target_name.encode('utf-8') + str(scores).encode('utf-8') + salt).hexdigest()
+        
+        topology = f"MF-{raw_hash[:12].upper()}-PATH{len(paths.get(seed_node, []))}"
         
         # Preserve telemetry for dashboard rendering
         data_point = {
