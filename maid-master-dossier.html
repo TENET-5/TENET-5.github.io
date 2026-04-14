@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAID Still-Sitting MP Dossier | TENET5</title>
+  <meta name="description" content="97 still-sitting MPs who voted for MAID, cross-referenced with lobbying contacts, Hansard vote records, and open parliament profiles.">
+  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="css/inline_generated.css">
+  <style>
+    .dossier-hero { max-width: 980px; margin: 0 auto; padding: 42px 20px 18px; text-align: center; }
+    .dossier-hero h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--text-primary); margin-bottom: 10px; }
+    .dossier-hero p { font-size: 0.95rem; color: var(--text-tertiary); max-width: 760px; margin: 0 auto; }
+    .dossier-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 14px; margin: 28px auto 32px; max-width: 980px; }
+    .dossier-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .dossier-card strong { display: block; font-size: 2rem; line-height: 1; color: var(--accent); margin-bottom: 6px; }
+    .dossier-card span { display: block; font-size: 0.78rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; }
+    .dossier-controls { max-width: 980px; margin: 0 auto 24px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+    .dossier-controls input { flex: 1 1 280px; min-width: 220px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); font-size: 0.95rem; }
+    .dossier-note { font-size: 0.83rem; color: var(--text-secondary); max-width: 980px; margin: 0 auto 20px; }
+    .table-wrap { max-width: 980px; margin: 0 auto; overflow-x:auto; }
+    table.data-table { width: 100%; border-collapse: collapse; min-width: 930px; }
+    table.data-table th, table.data-table td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; font-size: 0.88rem; }
+    table.data-table th { color: var(--text-primary); font-weight: 700; cursor: pointer; }
+    table.data-table td a { color: var(--accent); text-decoration: none; }
+    table.data-table td a:hover { text-decoration: underline; }
+    .table-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; color: var(--text-secondary); background: rgba(227, 231, 235, 0.08); }
+    .table-row-critical { background: rgba(220,38,38,0.04); }
+    .summary-box { max-width: 980px; margin: 30px auto 0; padding: 22px; background: rgba(57,255,20,0.04); border: 1px solid rgba(57,255,20,0.16); border-radius: 12px; color: var(--text-secondary); font-size: 0.9rem; }
+    .source-list { max-width: 980px; margin: 28px auto 60px; padding: 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; }
+    .source-list h3 { margin-top: 0; color: var(--text-primary); }
+    .source-list a { color: var(--accent); }
+    @media (max-width: 840px) {
+      .dossier-cards { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
+      .dossier-controls { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div id="site-header-frame"></div>
+  <main id="main" class="container" style="padding: 20px;">
+    <section class="dossier-hero">
+      <h1>MAID Still-Sitting MP Dossier</h1>
+      <p>Cross-referenced evidence for 97 currently serving MPs who voted for MAID. Includes vote records, lobbying contact counts, Hansard vote links, open parliament search, and public profile references.</p>
+    </section>
+    <section class="dossier-cards">
+      <div class="dossier-card">
+        <strong id="mp-count">97</strong>
+        <span>Still-sitting MPs</span>
+      </div>
+      <div class="dossier-card">
+        <strong id="both-count">46</strong>
+        <span>Voted both C-14 + C-7</span>
+      </div>
+      <div class="dossier-card">
+        <strong id="c14-only">12</strong>
+        <span>C-14 only</span>
+      </div>
+      <div class="dossier-card">
+        <strong id="c7-only">39</strong>
+        <span>C-7 only</span>
+      </div>
+      <div class="dossier-card">
+        <strong id="speech-count">0</strong>
+        <span>Speech evidence MPs</span>
+      </div>
+    </section>
+    <section class="dossier-controls">
+      <input type="search" id="mp-search" placeholder="Search by MP name, party, riding or province" oninput="filterTable()">
+      <div style="font-size:0.82rem;color:var(--text-tertiary);">Data source: <strong>data/maid_mp_evidence_index.json</strong></div>
+    </section>
+    <section class="dossier-note">
+      <p><strong>Note:</strong> This page is generated from the MAID evidence index built from still-serving MP status, official vote records, Hansard speech evidence, and lobbying cross-reference data. The lobbying counts reflect contact volume recorded in the Office of the Commissioner of Lobbying dataset.</p>
+    </section>
+    <section class="table-wrap">
+      <table class="data-table" id="mp-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">MP</th>
+            <th onclick="sortTable(1)">Party</th>
+            <th onclick="sortTable(2)">Riding</th>
+            <th onclick="sortTable(3)">Vote</th>
+            <th onclick="sortTable(4)">Lobbying</th>
+            <th onclick="sortTable(5)">Speeches</th>
+            <th>Evidence</th>
+          </tr>
+        </thead>
+        <tbody id="mp-body">
+          <tr><td colspan="6" style="padding: 22px 10px; color: var(--text-tertiary);">Loading dossier...</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="summary-box" id="summary-box">
+      <strong>Top 5 most lobbied still-sitting MAID MPs</strong>
+      <ul id="top-lobbying" style="margin: 12px 0 0 18px; padding-left: 0;"></ul>
+    </section>
+    <section class="source-list">
+      <h3>Sources</h3>
+      <ul>
+        <li><a href="https://openparliament.ca/votes/42-1/76/" target="_blank">House of Commons Vote 76 (C-14)</a></li>
+        <li><a href="https://openparliament.ca/votes/43-2/72/" target="_blank">House of Commons Vote 72 (C-7)</a></li>
+        <li><a href="https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/cmmLgPblcVw" target="_blank">Office of the Commissioner of Lobbying</a></li>
+      </ul>
+    </section>
+  </main>
+  <div id="site-footer-frame"></div>
+  <script>
+    function esc(text) {
+      return String(text || '').replace(/[&<>"']/g, function(c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c];
+      });
+    }
+    function buildLink(url, label) {
+      return '<a href="' + esc(url) + '" target="_blank" rel="noreferrer">' + esc(label) + '</a>';
+    }
+    function loadDossier() {
+      fetch('data/maid_mp_evidence_index.json').then(function(r) {
+        if (!r.ok) throw new Error(r.statusText);
+        return r.json();
+      }).then(function(data) {
+        document.getElementById('mp-count').textContent = data.total_mps;
+        var body = document.getElementById('mp-body');
+        var html = '';
+        var speechCount = 0;
+        var bothCount = 0;
+        var c14OnlyCount = 0;
+        var c7OnlyCount = 0;
+        data.rows.forEach(function(mp) {
+          if (mp.voted_both) bothCount += 1;
+          if (mp.maid_bills.length === 1 && mp.maid_bills[0] === 'C-14') c14OnlyCount += 1;
+          if (mp.maid_bills.length === 1 && mp.maid_bills[0] === 'C-7') c7OnlyCount += 1;
+          if (mp.hansard_speech_count > 0) speechCount += 1;
+          var voteLabel = mp.maid_bills.join(' + ');
+          var rowClass = mp.voted_both ? 'table-row-critical' : '';
+          var hansard = [];
+          if (mp.hansard_c14_vote) hansard.push(buildLink(mp.hansard_c14_vote, 'C-14'));
+          if (mp.hansard_c7_vote) hansard.push(buildLink(mp.hansard_c7_vote, 'C-7'));
+          var speechLinks = [];
+          (mp.hansard_speeches || []).forEach(function(s, idx) {
+            if (s.hansard_url) {
+              speechLinks.push(buildLink(s.hansard_url, 'speech ' + (idx + 1)));
+            }
+          });
+          var evidenceLinks = [buildLink(mp.openparliament_search, 'search')];
+          if (mp.ourcommons_profile) evidenceLinks.push(buildLink(mp.ourcommons_profile, 'profile'));
+          if (mp.lobbying_registry) evidenceLinks.push(buildLink(mp.lobbying_registry, 'registry'));
+          html += '<tr class="' + rowClass + '">';
+          html += '<td>' + esc(mp.name) + '</td>';
+          html += '<td>' + esc(mp.party) + '</td>';
+          html += '<td>' + esc(mp.riding) + '</td>';
+          html += '<td><span class="table-badge">' + esc(voteLabel) + '</span></td>';
+          html += '<td>' + esc(mp.lobbying_contacts.toString()) + '</td>';
+          html += '<td>' + esc(mp.hansard_speech_count.toString()) + '</td>';
+          html += '<td>' + hansard.join(' | ') + '<br>' + speechLinks.join(' | ') + '<br>' + evidenceLinks.join(' | ') + '</td>';
+          html += '</tr>';
+        });
+        document.getElementById('both-count').textContent = bothCount;
+        document.getElementById('c14-only').textContent = c14OnlyCount;
+        document.getElementById('c7-only').textContent = c7OnlyCount;
+        document.getElementById('speech-count').textContent = speechCount;
+        body.innerHTML = html;
+        var topList = document.getElementById('top-lobbying');
+        topList.innerHTML = '';
+        data.rows.slice(0, 5).forEach(function(mp) {
+          var item = document.createElement('li');
+          item.style.marginBottom = '0.5rem';
+          item.innerHTML = esc(mp.name) + ' — ' + esc(mp.lobbying_contacts.toString()) + ' contacts';
+          topList.appendChild(item);
+        });
+      }).catch(function(err) {
+        document.getElementById('mp-body').innerHTML = '<tr><td colspan="6" style="padding:22px 10px;color:var(--text-tertiary);">Failed to load dossier: ' + esc(err.message) + '</td></tr>';
+      });
+    }
+    function filterTable() {
+      var input = document.getElementById('mp-search').value.toLowerCase();
+      var rows = document.querySelectorAll('#mp-table tbody tr');
+      rows.forEach(function(row) {
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.indexOf(input) !== -1 ? '' : 'none';
+      });
+    }
+    function sortTable(col) {
+      var table = document.getElementById('mp-table');
+      var rows = Array.from(table.tBodies[0].rows);
+      var asc = table.dataset.sortDir !== 'asc';
+      table.dataset.sortDir = asc ? 'asc' : 'desc';
+      rows.sort(function(a, b) {
+        var aText = a.cells[col].textContent.trim();
+        var bText = b.cells[col].textContent.trim();
+        if (col === 4 || col === 5) {
+          return asc ? parseInt(aText, 10) - parseInt(bText, 10) : parseInt(bText, 10) - parseInt(aText, 10);
+        }
+        return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+      });
+      rows.forEach(function(row) { table.tBodies[0].appendChild(row); });
+    }
+    loadDossier();
+  </script>
+  <script src="shell.js?v=20"></script>
+  <script src="js/ux.js"></script>
+  <script src="js/integrity.js"></script>
+</body>
+</html>
