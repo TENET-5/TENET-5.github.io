@@ -16,6 +16,7 @@ try:
     import sys
     sys.path.append(r'E:\S.L.A.T.E\tenet5\src')
     from tenet.discoveries.sator_memory_nexus_v2 import SATORMemoryNexus
+    from tenet.discoveries.sator_memory_nexus import SATORGrid
     try:
         from ABCXYZ.osint_nitter_bridge import NitterOSINTBridge
         import asyncio
@@ -31,7 +32,7 @@ class SocialMediaMonitor:
     def __init__(self):
         self.nexus = None
         if HAS_SATOR:
-            self.nexus = SATORMemoryNexus()
+            self.nexus = SATORMemoryNexus(grid=SATORGrid())
 
     def scrape_targets(self):
         targets = ["CIJAinfo", "markcarney", "JustinTrudeau", "Puglaas"]
@@ -40,11 +41,10 @@ class SocialMediaMonitor:
         if HAS_NITTER:
             print("[OSINT] Nitter bridge available. Fetching real targeted timelines...")
             bridge = NitterOSINTBridge()
-            loop = asyncio.get_event_loop()
             for t in targets:
                 print(f" -> Fetching @{t}")
                 try:
-                    tweets = loop.run_until_complete(bridge.fetch_target_timeline(t))
+                    tweets = asyncio.run(bridge.fetch_target_timeline(t))
                     analysis = bridge.analyze_timeline_for_vectors(t, tweets)
                     results[t] = analysis
                 except Exception as e:
