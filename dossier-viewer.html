@@ -615,9 +615,10 @@
 
     function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-    // Minimal markdown renderer
+    // Minimal markdown renderer securing against rogue entity injection (XSS)
     function renderMarkdown(md) {
-      var html = md
+      var safeMd = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      var html = safeMd
         // Headers
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
         .replace(/^## (.+)$/gm, '<h2 data-narrate="Document section. This heading marks a source-provided subsection in the dossier narrative.">$1</h2>')
