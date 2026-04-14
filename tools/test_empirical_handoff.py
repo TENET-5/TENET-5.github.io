@@ -48,7 +48,7 @@ class TestEmpiricalMagicHandoffIntegration(unittest.IsolatedAsyncioTestCase):
     @patch('gov_osint_gatherer.EmpiricalMagicHandoff')
     @patch('gov_osint_gatherer.MillennialFalconTracker')
     async def test_daemon_loop_exception_resilience(self, MockTracker, MockHandoff):
-        """Phase 68/69 loop resilience test to ensure WebXR failures don't crash LIRIL ingestion."""
+        """Phase 68/69 loop resilience test to ensure Telemetry Network failures don't crash LIRIL ingestion."""
         gatherer = GovOSINTGatherer()
         
         # Force a failure inside the pipeline to test the try/except loop

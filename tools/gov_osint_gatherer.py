@@ -50,7 +50,7 @@ class GovOSINTGatherer:
         logger.info("Aligning OSINT SATOR Telemetry via Empirical Magic Handoff...")
         telemetry_files = await self.handoff.align_osint_telemetry()
         if telemetry_files:
-            logger.info(f"Successfully integrated {len(telemetry_files)} empirical magic handoff dossiers from WebXR events.")
+            logger.info(f"Successfully integrated {len(telemetry_files)} empirical magic handoff dossiers from OSINT telemetry streams.")
                 
         logger.info("Pipeline Execution Completed. All discoveries protected.")
 
