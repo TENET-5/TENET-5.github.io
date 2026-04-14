@@ -25,9 +25,10 @@ class EmpiricalMagicHandoff:
         filename = f"{target_name}_dossier_{timestamp}.md"
         filepath = os.path.join(self.output_dir, filename)
         
-        # Determine signature
+        # Determine signature logically coupled with the topological vector
         payload_str = json.dumps(evidence_data.get('payload', {}))
-        sig_base = f"{target_name}{timestamp}{payload_str}{routing_agent}".encode('utf-8')
+        topological_vector = evidence_data.get('topological_vector', 'N/A')
+        sig_base = f"{target_name}{timestamp}{topological_vector}{payload_str}{routing_agent}".encode('utf-8')
         signature = hashlib.blake2b(sig_base, digest_size=16).hexdigest()
         
         ethics_str = "CLEARED" if ethics_cleared else "FLAGGED"
@@ -95,7 +96,14 @@ Date Captured: {datetime.now().isoformat()}
         import urllib.error
         
         self.logger.info(f"Polling Godot Telemetry Sync at: {godot_telemetry_url}")
-        target_events = ["OPERATIVE_DEPLOYED", "PARADOX_STORM_TRIGGERED", "SURVIVAL_HARVEST"]
+        target_events = [
+            "OPERATIVE_DEPLOYED", 
+            "PARADOX_STORM_TRIGGERED", 
+            "SURVIVAL_HARVEST",
+            "SATOR_CODE_ACTIVE",
+            "STARK_CONTAINMENT_BREACH",
+            "TEMPORAL_RIFT_DETECTED"
+        ]
         
         try:
             req = urllib.request.Request(godot_telemetry_url, headers={'User-Agent': 'Tenet5-Empirical/1.0'})
