@@ -99,7 +99,7 @@ Date Captured: {datetime.now().isoformat()}
         target_events = [
             "OPERATIVE_DEPLOYED", 
             "PARADOX_STORM_TRIGGERED", 
-            "SURVIVAL_HARVEST",
+            "OSINT_INTEL_ACQUIRED",
             "SATOR_CODE_ACTIVE",
             "STARK_CONTAINMENT_BREACH",
             "TEMPORAL_RIFT_DETECTED"

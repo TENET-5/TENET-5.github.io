@@ -4,6 +4,57 @@ import hashlib
 import time
 import sqlite3
 import json
+from typing import Dict, List, Tuple
+from collections import defaultdict
+
+# --- LIRIL OSINT TOPOLOGY ADJACENCY MATRIX ---
+OSINT_GRAPH = {
+    'GOVERNMENT': ['CABINET', 'CROWN_CORPORATION'],
+    'CABINET': ['PMO', 'DEPUTY_MINISTER'],
+    'CROWN_CORPORATION': ['CIB', 'BCIC'],
+    'PMO': ['WEF', 'LOBBYING_FIRM'],
+    'DEPUTY_MINISTER': ['LOBBYING_FIRM'],
+    'CIB': ['BLACKROCK', 'BROOKFIELD'],
+    'BCIC': [],
+    'WEF': ['BLACKROCK'],
+    'LOBBYING_FIRM': ['MCKINSEY', 'PWC'],
+    'BLACKROCK': [],
+    'BROOKFIELD': [],
+    'MCKINSEY': [],
+    'PWC': []
+}
+
+def empirical_magic_handoff(
+    graph: Dict[str, List[str]], 
+    seed_nodes: List[str], 
+    max_iterations: int = 15
+) -> Tuple[Dict[str, int], Dict[str, List[str]]]:
+    """
+    Perform Empirical Magic Handoff for topological OSINT mapping.
+    Calculates dynamic node pathing convergence scores via iterative adjacencies.
+    """
+    node_scores = defaultdict(int)
+    node_paths = defaultdict(list)
+
+    for seed_node in seed_nodes:
+        if seed_node in graph:
+            node_scores[seed_node] = 1
+            node_paths[seed_node] = [seed_node]
+
+    for _ in range(max_iterations):
+        new_node_scores = node_scores.copy()
+        new_node_paths = node_paths.copy()
+
+        for node, neighbors in graph.items():
+            for neighbor in neighbors:
+                if node_scores[node] > 0:
+                    new_node_scores[neighbor] += node_scores[node]
+                    new_node_paths[neighbor] = node_paths[node] + [neighbor]
+
+        node_scores = new_node_scores
+        node_paths = new_node_paths
+
+    return dict(node_scores), dict(node_paths)
 
 class MillennialFalconTracker:
     def __init__(self, db_path='E:/S.L.A.T.E/tenet5/.liril_discoveries.db'):
@@ -39,14 +90,27 @@ class MillennialFalconTracker:
         # Simulate advanced topological processing delay
         await asyncio.sleep(0.5) 
         
-        # Generate a cryptographic topological vector
+        # Dynamically calculate topological traversal state through LIRIL's mathematical graph
+        seed_node = 'GOVERNMENT'
+        target_upper = target_name.upper()
+        if any(token in target_upper for token in ['WEF', 'GLOBAL', 'FUND', 'ECONOMIC']):
+            seed_node = 'WEF'
+        elif any(token in target_upper for token in ['LOBBY', 'FIRM', 'CONSULT', 'STRATEGY']):
+            seed_node = 'LOBBYING_FIRM'
+        elif any(token in target_upper for token in ['CIB', 'BANK', 'FINANCE', 'TREASURY']):
+            seed_node = 'CIB'
+        
+        scores, paths = empirical_magic_handoff(OSINT_GRAPH, [seed_node])
+        max_score = max(scores.values()) if scores else 0
+        
+        # Calculate dynamic N vs NP tracking sequence mathematically bound by trajectory logic
+        complexity = f"NP-HARD (Depth: {max_score})" if max_score > 5 else "P-CLASS (Linear)"
+        
+        # Salt signature with topological trace bounds
         salt = str(time.time()).encode('utf-8')
-        raw_hash = hashlib.sha256(target_name.encode('utf-8') + salt).hexdigest()
+        raw_hash = hashlib.sha256(target_name.encode('utf-8') + str(scores).encode('utf-8') + salt).hexdigest()
         
-        # Determine pseudo-N vs NP pathing
-        complexity = "NP-HARD" if sum(c.isalpha() for c in target_name) % 2 == 0 else "P-CLASS"
-        
-        data_point['topological_vector'] = f"MF-{raw_hash[:16].upper()}"
+        data_point['topological_vector'] = f"MF-{raw_hash[:12].upper()}-PATH{len(paths.get(seed_node, []))}"
         data_point['matrix_complexity'] = complexity
         data_point['falcon_timestamp'] = time.time()
         
