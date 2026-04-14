@@ -213,18 +213,28 @@
     }
 
     function findCueIndexForPoint(text) {
-      var norm = normalizeForMatch(text).substring(0, 60);
+      var norm = normalizeForMatch(text).substring(0, 120);
       if (!norm || !audioCues.length) return -1;
+      var normWords = norm.split(' ').filter(function(w) { return w.length > 2; });
       var bestIdx = -1, bestScore = 0;
       for (var i = 0; i < audioCues.length; i++) {
         var cn = normalizeForMatch(audioCues[i].text);
-        var overlap = 0;
+        // 1. Prefix char overlap (original method)
+        var prefixOverlap = 0;
         var limit = Math.min(norm.length, cn.length);
         for (var j = 0; j < limit; j++) {
-          if (norm[j] === cn[j]) overlap++; else break;
+          if (norm[j] === cn[j]) prefixOverlap++; else break;
         }
-        if (overlap > bestScore && overlap > 8) {
-          bestScore = overlap; bestIdx = i;
+        // 2. Word overlap — count shared significant words
+        var cueWords = cn.split(' ').filter(function(w) { return w.length > 2; });
+        var wordHits = 0;
+        normWords.forEach(function(w) {
+          if (cueWords.indexOf(w) >= 0) wordHits++;
+        });
+        // Combined score: prefix chars + word matches * 5
+        var score = prefixOverlap + (wordHits * 5);
+        if (score > bestScore && (prefixOverlap > 8 || wordHits >= 3)) {
+          bestScore = score; bestIdx = i;
         }
       }
       return bestIdx;
@@ -248,12 +258,19 @@
         points.forEach(function(p) {
           var ci = findCueIndexForPoint(p.text);
           p.audioStart = ci >= 0 ? audioCues[ci].start : -1;
+          p.audioCueIdx = ci;
         });
+        // Sort mapped cue starts to find the next chronological audio point
+        var mappedStarts = points
+          .filter(function(p) { return p.audioStart >= 0; })
+          .map(function(p) { return p.audioStart; })
+          .sort(function(a, b) { return a - b; });
         for (var i = 0; i < points.length; i++) {
           if (points[i].audioStart < 0) continue;
+          // Find next chronologically-later audio start
           var next = -1;
-          for (var j = i + 1; j < points.length; j++) {
-            if (points[j].audioStart >= 0) { next = points[j].audioStart; break; }
+          for (var k = 0; k < mappedStarts.length; k++) {
+            if (mappedStarts[k] > points[i].audioStart + 0.1) { next = mappedStarts[k]; break; }
           }
           points[i].audioEnd = next > 0 ? next : -1;
         }
