@@ -24,7 +24,7 @@ for h in html_files:
                     
                 base = l.split('#')[0].split('?')[0]
                 if base and base not in all_files:
-                    if not any(base.startswith(d) for d in ['css/', 'js/', 'img/', 'assets/', 'reduster/', 'data/']):
+                    if not any(base.startswith(d) for d in ['css/', 'js/', 'img/', 'assets/', 'data/']):
                         broken.append((h, base))
     except Exception as e:
         print(f"Error parsing {h}: {e}")

@@ -91,7 +91,6 @@
         { id: 'whistle',   emoji: '🛡',  title: 'WHISTLEBLOWER',     desc: 'Protection guide.',             href: 'whistleblower-guide.html',  dx: -60, dy: 180, rot: 3 },
         { id: 'wardoll',   emoji: '🔗', title: 'WARDOLL',            desc: 'The investigation.',            href: 'acelephius-wardoll.html',   dx: -280, dy: 100, rot: -1 },
         { id: 'bloggins',  emoji: '🦝', title: 'CPL BLOGGINS',       desc: 'Military humour & truth.',      href: 'bloggins.html',             dx: 420, dy: 60,  rot: 2 },
-        { id: 'reduster',  emoji: '🩸', title: 'RED DUSTER FPS',     desc: 'Play the tactical simulator.',  href: 'red-duster-game.html',      dx: 560, dy: -40, rot: -4, hot: true },
         { id: 'resources', emoji: '📚', title: 'RESOURCES',           desc: 'Further reading.',              href: 'resources.html',            dx: 380, dy: 200, rot: 1 },
         { id: 'osint',     emoji: '📡', title: 'OSINT DASHBOARD',     desc: 'Live intelligence.',            href: 'osint-dashboard.html',      dx: 640, dy: 120, rot: -3 },
       ]
