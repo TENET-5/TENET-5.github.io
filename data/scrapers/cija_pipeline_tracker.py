@@ -28,7 +28,7 @@ import os
 import re
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "..")
@@ -227,7 +227,7 @@ def run_pipeline_analysis():
 
     # Build output
     analysis = {
-        "analyzed_at": datetime.utcnow().isoformat() + "Z",
+        "analyzed_at": datetime.now(timezone.utc).isoformat(),
         "system": "TENET5 ABCXYZ N vs NP Millennial Falcon",
         "handoff": "Empirical Magic Handoff — SECURED",
         "pipeline_summary": {
@@ -258,11 +258,11 @@ def run_pipeline_analysis():
 
     # Generate dossier
     os.makedirs(EVIDENCE_DIR, exist_ok=True)
-    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     dossier_path = os.path.join(EVIDENCE_DIR, f"cija_pipeline_dossier_{ts}.md")
     with open(dossier_path, "w", encoding="utf-8") as f:
         f.write(f"# TENET5 CIJA Lobby-to-Vote Pipeline Analysis\n\n")
-        f.write(f"**Generated:** {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n")
+        f.write(f"**Generated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC\n")
         f.write(f"**System:** ABCXYZ N vs NP Millennial Falcon\n")
         f.write(f"**Memory:** Empirical Magic Handoff — SECURED\n\n")
 
