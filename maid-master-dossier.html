@@ -73,10 +73,10 @@
     </section>
     <section class="dossier-controls">
       <input type="search" id="mp-search" placeholder="Search by MP name, party, riding or province" oninput="filterTable()">
-      <div style="font-size:0.82rem;color:var(--text-tertiary);">Data source: <strong>data/maid_mp_evidence_index.json</strong></div>
+      <div style="font-size:0.82rem;color:var(--text-tertiary);">Data source: <strong>data/maid_evidence_master.json</strong></div>
     </section>
     <section class="dossier-note">
-      <p><strong>Note:</strong> This page is generated from the MAID evidence index built from still-serving MP status, official vote records, Hansard speech evidence, and lobbying cross-reference data. The lobbying counts reflect contact volume recorded in the Office of the Commissioner of Lobbying dataset.</p>
+      <p><strong>Note:</strong> This page is generated from the canonical MAID evidence catalog built from still-serving MP status, official vote records, Hansard speech evidence, and lobbying cross-reference data. The lobbying counts reflect contact volume recorded in the Office of the Commissioner of Lobbying dataset.</p>
     </section>
     <section class="table-wrap">
       <table class="data-table" id="mp-table">
@@ -120,18 +120,19 @@
       return '<a href="' + esc(url) + '" target="_blank" rel="noreferrer">' + esc(label) + '</a>';
     }
     function loadDossier() {
-      fetch('data/maid_mp_evidence_index.json').then(function(r) {
+      fetch('data/maid_evidence_master.json').then(function(r) {
         if (!r.ok) throw new Error(r.statusText);
         return r.json();
       }).then(function(data) {
-        document.getElementById('mp-count').textContent = data.total_mps;
+        var rows = data.mp_evidence || [];
+        document.getElementById('mp-count').textContent = rows.length;
         var body = document.getElementById('mp-body');
         var html = '';
         var speechCount = 0;
         var bothCount = 0;
         var c14OnlyCount = 0;
         var c7OnlyCount = 0;
-        data.rows.forEach(function(mp) {
+        rows.forEach(function(mp) {
           if (mp.voted_both) bothCount += 1;
           if (mp.maid_bills.length === 1 && mp.maid_bills[0] === 'C-14') c14OnlyCount += 1;
           if (mp.maid_bills.length === 1 && mp.maid_bills[0] === 'C-7') c7OnlyCount += 1;
@@ -167,7 +168,7 @@
         body.innerHTML = html;
         var topList = document.getElementById('top-lobbying');
         topList.innerHTML = '';
-        data.rows.slice(0, 5).forEach(function(mp) {
+        rows.slice(0, 5).forEach(function(mp) {
           var item = document.createElement('li');
           item.style.marginBottom = '0.5rem';
           item.innerHTML = esc(mp.name) + ' — ' + esc(mp.lobbying_contacts.toString()) + ' contacts';
