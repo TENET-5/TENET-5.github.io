@@ -99,11 +99,8 @@ Register-ScheduledTask `
     -Principal $principal `
     -Description "TENET5 OSINT data collection - runs all scrapers daily. Empirical Magic Handoff secured."
 
-Write-Host "`n  ✓ Scheduled task registered successfully!" -ForegroundColor Green
-Write-Host "    Name:     $TaskPath$TaskName"
-Write-Host "    Schedule: Daily at ${Hour}:00"
-Write-Host "    Action:   python run_all_scrapers.py --force"
-Write-Host ""
-    Write-Host "  To run manually:  schtasks /run /tn '$TaskPath$TaskName'" -ForegroundColor Cyan
-    Write-Host "  To uninstall:     .\setup_task_scheduler.ps1 -Uninstall" -ForegroundColor Cyan
-Write-Host ""
+Write-Host "Scheduled task registered successfully!"
+Write-Host "Name: $TaskName"
+Write-Host "Schedule: Daily at $Hour"
+Write-Host "To run manually: schtasks /run /tn $TaskPath$TaskName"
+Write-Host "To uninstall run with -Uninstall"
