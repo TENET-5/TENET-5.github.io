@@ -28,7 +28,7 @@ import os
 import re
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "..")
@@ -374,7 +374,7 @@ def generate_graph_json(entities, overlaps):
                 })
 
     graph = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "system": "TENET5 ABCXYZ N vs NP Millennial Falcon",
         "handoff": "Empirical Magic Handoff — SECURED",
         "total_nodes": len(nodes),
@@ -410,8 +410,8 @@ def _classify_entity_type(entity):
 def generate_dossier(entities, overlaps):
     """Generate a human-readable analysis dossier."""
     os.makedirs(EVIDENCE_DIR, exist_ok=True)
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    ts_file = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    ts_file = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
     path = os.path.join(EVIDENCE_DIR, f"network_analysis_{ts_file}.md")
     with open(path, "w", encoding="utf-8") as f:
