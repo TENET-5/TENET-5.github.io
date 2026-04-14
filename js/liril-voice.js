@@ -34,8 +34,11 @@
     'ethan','noah','william','henry','charlie','oscar','jack',
     'harry','arthur','leo','jacob','lucas','mason','logan',
     'alexander','benjamin','samuel','joseph','matthew','caleb',
+    'steffan','elliot','alistair','angus','finley','hamish','neil',
+    'darren','duncan','tim','tony','peter','john','paul','ian',
+    'gordon','lewis','aiden','prabhat','bob','ken','raj','wayne',
     'microsoft david','microsoft mark','microsoft george','microsoft james',
-    'microsoft ryan','microsoft guy','microsoft rishi',
+    'microsoft ryan','microsoft guy','microsoft rishi','microsoft steffan',
     'google uk english male','google us english male'
   ];
   var FEMALE_NAMES = [
@@ -101,14 +104,14 @@
     if (!cached) cached = voices.find(function(v) { return isEnGB(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
     /* P1: Known female en-GB */
     if (!cached) cached = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
-    /* P2: Any en-GB NOT male */
-    if (!cached) cached = voices.find(function(v) { return isEnGB(v) && !isMale(v); });
+    /* P2: Any en-GB with 'female' in name (whitelist-only — never guess) */
+    if (!cached) cached = voices.find(function(v) { return isEnGB(v) && /female/i.test(v.name); });
     /* P3: Natural/Neural any-English female */
     if (!cached) cached = voices.find(function(v) { return isEn(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
     /* P4: Known female any-English */
     if (!cached) cached = voices.find(function(v) { return isEn(v) && isFemale(v); });
-    /* P5: Any English NOT male */
-    if (!cached) cached = voices.find(function(v) { return isEn(v) && !isMale(v); });
+    /* P5: Any English with 'female' in name (whitelist-only — never guess) */
+    if (!cached) cached = voices.find(function(v) { return isEn(v) && /female/i.test(v.name); });
     /* P6: null — silence is better than a male voice */
 
     if (cached) {
