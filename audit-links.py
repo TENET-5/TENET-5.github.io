@@ -42,9 +42,9 @@ KNOWN_DYNAMIC = {"feed.xml", "sitemap.xml", "robots.txt"}
 
 # Known missing assets (require separate build pipeline)
 KNOWN_MISSING = {
-    "assets/index-okLQV7Oe.js",       # Vite build artifact — Red Duster game
-    "assets/babylon-core-BWpK-1k_.js", # Babylon.js chunk — Red Duster game
-    "assets/babylon-loaders-B756oZYW.js",  # Babylon.js chunk — Red Duster game
+    "assets/index-okLQV7Oe.js",       # Vite build artifact
+    "assets/babylon-core-BWpK-1k_.js", # Babylon.js chunk
+    "assets/babylon-loaders-B756oZYW.js",  # Babylon.js chunk
 }
 
 
