@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <!-- NO frame buster — this is the external entry point for evidence permalinks -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evidence Permalink — TENET5</title>
+  <meta name="description" content="Stable citation permalink for TENET5 evidence items. SHA-256 integrity verified.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="style.css?v=20">
+  <meta name="theme-color" content="#2E3440">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <style>
+    body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 3rem 1rem; }
+    .permalink-card {
+      max-width: 640px; width: 100%;
+      background: var(--bg-card, #2e3440); border: 1px solid var(--border, #434c5e);
+      border-radius: 12px; padding: 2rem; position: relative;
+    }
+    .permalink-card h1 { font-size: 1.1rem; color: var(--accent, #88c0d0); margin: 0 0 0.25rem; }
+    .permalink-ref {
+      font-family: monospace; font-size: 1.4rem; font-weight: 700;
+      color: var(--text, #eceff4); margin: 0.75rem 0;
+    }
+    .permalink-summary {
+      color: var(--text-secondary, #d8dee9); font-size: 0.95rem;
+      line-height: 1.6; border-left: 3px solid var(--accent, #88c0d0);
+      padding-left: 1rem; margin: 1rem 0;
+    }
+    .permalink-meta { font-size: 0.8rem; color: var(--text-muted, #7b88a1); margin: 0.5rem 0; }
+    .permalink-meta code {
+      background: rgba(136,192,208,0.1); padding: 0.1rem 0.4rem;
+      border-radius: 3px; font-size: 0.75rem; word-break: break-all;
+    }
+    .permalink-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .permalink-actions a, .permalink-actions button {
+      display: inline-block; padding: 0.6rem 1.2rem; border-radius: 6px;
+      font-size: 0.85rem; font-weight: 600; text-decoration: none; cursor: pointer;
+      border: 1px solid var(--border, #434c5e); transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent, #88c0d0); color: #000; border-color: transparent; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary { background: transparent; color: var(--accent, #88c0d0); }
+    .btn-secondary:hover { background: rgba(136,192,208,0.1); }
+    .permalink-status { font-size: 0.8rem; color: var(--text-muted, #7b88a1); margin-top: 1rem; }
+    .permalink-error { color: #ef4444; }
+    .permalink-badge {
+      display: inline-block; background: rgba(136,192,208,0.15);
+      color: var(--accent, #88c0d0); font-size: 0.7rem; font-weight: 600;
+      padding: 0.15rem 0.5rem; border-radius: 3px; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .sha-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .sha-label { white-space: nowrap; }
+    .grain-overlay, .vignette { pointer-events: none; }
+    @media (max-width: 480px) { .permalink-card { padding: 1.25rem; } }
+  </style>
+</head>
+<body>
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+
+<div class="permalink-card" id="card">
+  <h1>🔗 TENET5 Evidence Permalink</h1>
+  <div id="content">
+    <p class="permalink-status">Resolving reference…</p>
+  </div>
+</div>
+
+<noscript>
+  <div style="max-width:640px;margin:2rem auto;padding:1.5rem;color:#ef4444;text-align:center;">
+    JavaScript is required to resolve evidence permalinks.<br>
+    Visit <a href="evidence-index.html" style="color:#88c0d0;">the evidence index</a> to browse all data.
+  </div>
+</noscript>
+
+<script>
+(function() {
+  'use strict';
+
+  var PERMALINK_DATA = 'data/evidence_permalinks.json';
+  var SITE = 'https://tenet-5.github.io';
+
+  /* ── Read ref from hash or query param ─── */
+  function getRef() {
+    var h = location.hash.substring(1);
+    if (h) return decodeURIComponent(h);
+    var p = new URLSearchParams(location.search);
+    return p.get('ref') || '';
+  }
+
+  /* ── Escape HTML ─── */
+  function esc(s) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  /* ── Build target URL for the frame shell ─── */
+  function buildTarget(entry) {
+    var target = entry.page;
+    if (entry.anchor) target += '#' + entry.anchor;
+    return 'index.html?load=' + encodeURIComponent(target);
+  }
+
+  /* ── Build citation text ─── */
+  function buildCitation(ref, entry) {
+    var lines = [
+      'TENET5 Evidence Citation',
+      'Ref: ' + ref,
+      'Summary: "' + (entry.summary || '') + '"',
+    ];
+    if (entry.individual) lines.push('Individual: ' + entry.individual);
+    if (entry.section) lines.push('Section: ' + entry.section);
+    if (entry.label) lines.push('Label: ' + entry.label);
+    lines.push('Page: ' + entry.page);
+    lines.push('Type: ' + (entry.type || 'item'));
+    lines.push('SHA-256: ' + entry.sha256);
+    lines.push('Permalink: ' + SITE + '/permalink.html#' + encodeURIComponent(ref));
+    lines.push('Site: ' + SITE);
+    return lines.join('\n');
+  }
+
+  /* ── Render the citation card ─── */
+  function render(ref, entry) {
+    var target = buildTarget(entry);
+    var typeLabel = (entry.type || 'item').toUpperCase();
+    var html = '';
+
+    html += '<div class="permalink-ref">' + esc(ref) + ' <span class="permalink-badge">' + esc(typeLabel) + '</span></div>';
+    html += '<div class="permalink-summary">' + esc(entry.summary || '') + '</div>';
+
+    if (entry.individual) {
+      html += '<div class="permalink-meta">Individual: <strong>' + esc(entry.individual) + '</strong></div>';
+    }
+    if (entry.section) {
+      html += '<div class="permalink-meta">Section: ' + esc(entry.section) + '</div>';
+    }
+    if (entry.label) {
+      html += '<div class="permalink-meta">Label: <strong>' + esc(entry.label) + '</strong></div>';
+    }
+
+    html += '<div class="permalink-meta">Source page: <code>' + esc(entry.page) + '</code></div>';
+    html += '<div class="permalink-meta sha-row"><span class="sha-label">SHA-256:</span> <code>' + esc(entry.sha256) + '</code></div>';
+
+    html += '<div class="permalink-actions">';
+    html += '<a href="' + esc(target) + '" class="btn-primary" id="go-btn">Go to Source →</a>';
+    html += '<button class="btn-secondary" id="copy-btn">📋 Copy Citation</button>';
+    html += '</div>';
+
+    html += '<div class="permalink-status" id="status">Redirecting in <span id="countdown">3</span>s…</div>';
+
+    document.getElementById('content').innerHTML = html;
+
+    /* Copy citation */
+    document.getElementById('copy-btn').addEventListener('click', function() {
+      var text = buildCitation(ref, entry);
+      navigator.clipboard.writeText(text).then(function() {
+        document.getElementById('copy-btn').textContent = '✓ Copied';
+      }).catch(function() {
+        /* Fallback: select a temporary textarea */
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        document.getElementById('copy-btn').textContent = '✓ Copied';
+      });
+    });
+
+    /* Countdown redirect */
+    var remain = 3;
+    var timer = setInterval(function() {
+      remain--;
+      var el = document.getElementById('countdown');
+      if (el) el.textContent = remain;
+      if (remain <= 0) {
+        clearInterval(timer);
+        location.replace(target);
+      }
+    }, 1000);
+  }
+
+  /* ── Not found ─── */
+  function renderNotFound(ref) {
+    var html = '<div class="permalink-ref permalink-error">' + esc(ref || '(empty)') + '</div>';
+    html += '<p class="permalink-status permalink-error">Reference not found in the evidence index.</p>';
+    html += '<div class="permalink-actions">';
+    html += '<a href="index.html?load=evidence-index.html" class="btn-primary">Browse Evidence Index</a>';
+    html += '<a href="index.html?load=charges-sheet.html" class="btn-secondary">Charges Sheet</a>';
+    html += '<a href="index.html?load=conspiracy-board.html" class="btn-secondary">Investigation Board</a>';
+    html += '</div>';
+    document.getElementById('content').innerHTML = html;
+  }
+
+  /* ── Init ─── */
+  var ref = getRef();
+  if (!ref) {
+    renderNotFound('');
+    return;
+  }
+
+  fetch(PERMALINK_DATA)
+    .then(function(r) {
+      if (!r.ok) throw new Error('Permalink index not found');
+      return r.json();
+    })
+    .then(function(data) {
+      var entry = data.refs[ref];
+      if (!entry) {
+        renderNotFound(ref);
+        return;
+      }
+      render(ref, entry);
+    })
+    .catch(function(err) {
+      document.getElementById('content').innerHTML =
+        '<p class="permalink-status permalink-error">Failed to load permalink index: ' + esc(err.message) + '</p>' +
+        '<div class="permalink-actions"><a href="index.html" class="btn-primary">Go to Home</a></div>';
+    });
+})();
+</script>
+</body>
+</html>

@@ -96,8 +96,10 @@ def build_refs() -> dict:
         refs[ref] = entry
 
     # ── Charges (F-####) ──
+    # Charge IDs can repeat across individuals. Use F-####-<surname> for dupes.
     charges = load_charges_sheet()
     print(f"  Charges: {len(charges)}")
+    seen_cids: dict[str, int] = {}
     for charge in charges:
         cid = charge.get("charge_id", "")
         if not cid:
@@ -106,15 +108,23 @@ def build_refs() -> dict:
         individual = charge.get("_individual", "")
         section = charge.get("section", "")
         section_title = charge.get("section_title", "")
+
+        # Disambiguate duplicate charge IDs across individuals
+        key = cid
+        if cid in seen_cids:
+            surname = individual.split()[-1].lower() if individual else str(seen_cids[cid])
+            key = f"{cid}-{surname}"
+        seen_cids[cid] = seen_cids.get(cid, 0) + 1
+
         entry = {
             "page": "charges-sheet.html",
             "type": "charge",
             "individual": individual,
             "section": f"{section} — {section_title}" if section_title else section,
             "summary": desc[:200] + "..." if len(desc) > 200 else desc,
-            "sha256": sha256(desc),
+            "sha256": sha256(f"{individual}:{desc}"),
         }
-        refs[cid] = entry
+        refs[key] = entry
 
     # ── Board nodes (BOARD-<id>) ──
     nodes = load_board_nodes()
