@@ -877,7 +877,16 @@
           audio.pause();
           audio.currentTime = 0;
         });
+        window.speechSynthesis.cancel();
+        if (this._autoTimer) { clearTimeout(this._autoTimer); this._autoTimer = null; }
         this.subtitleBox.classList.remove('visible');
+      },
+      _autoAdvance(index, delay) {
+        // Schedule auto-advance after delay, guarded by scene still being current
+        this._autoTimer = setTimeout(() => {
+          this._autoTimer = null;
+          if (this.currentScene === index && this.currentLogical < this.sceneOrder.length - 1) this.nextScene();
+        }, delay);
       },
       playAudioForScene(index) {
         this.stopAllAudio();
@@ -889,10 +898,37 @@
           if (audio) {
             audio.play().catch(e => console.error(e));
             // Automatically sequence ALL slides
-            audio.onended = () => {
-              setTimeout(() => { if (this.currentScene === index && index < this.totalScenes - 1) this.nextScene(); }, 1500);
-            };
+            audio.onended = () => { this._autoAdvance(index, 1500); };
+            return;
           }
+        }
+        // No pre-generated audio — use speechSynthesis for data-narrate text (LIRIL voice)
+        const narEl = sceneEl.querySelector('[data-narrate]');
+        if (narEl) {
+          const text = narEl.getAttribute('data-narrate');
+          if (text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            utterance.lang = 'en-GB';
+            if (window.LIRIL_VOICE) { const v = window.LIRIL_VOICE.get(); if (v) utterance.voice = v; }
+            const btn = document.getElementById('btn-liril-narrate');
+            utterance.onstart = () => { if (btn) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; } };
+            utterance.onend = () => {
+              if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; }
+              this._autoAdvance(index, 1500);
+            };
+            utterance.onerror = () => {
+              if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; }
+              this._autoAdvance(index, 8000);
+            };
+            window.speechSynthesis.speak(utterance);
+            return;
+          }
+        }
+        // No audio and no narrate text — advance after 8 seconds
+        if (this.currentLogical < this.sceneOrder.length - 1) {
+          this._autoAdvance(index, 8000);
         }
       },
       goToScene(logicalIndex) {
@@ -972,9 +1008,11 @@
             audio.play().catch(e => console.error(e));
             btn.style.borderColor = 'var(--accent)';
             btn.style.background = 'rgba(14, 165, 233, 0.1)';
+            const idx = this.currentScene;
             audio.onended = () => {
               btn.style.borderColor = '#27272a';
               btn.style.background = 'transparent';
+              this._autoAdvance(idx, 1500);
             };
             return;
           }
@@ -999,6 +1037,7 @@
           utterance.voice = preferredVoice;
         }
 
+        const nIdx = this.currentScene;
         utterance.onstart = () => {
           btn.style.borderColor = 'var(--accent)';
           btn.style.background = 'rgba(14, 165, 233, 0.1)';
@@ -1006,6 +1045,7 @@
         utterance.onend = () => {
           btn.style.borderColor = '#27272a';
           btn.style.background = 'transparent';
+          this._autoAdvance(nIdx, 1500);
         };
         utterance.onerror = () => {
           btn.style.borderColor = '#27272a';
