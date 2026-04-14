@@ -151,7 +151,8 @@
   <div class="action-bar">
     <button class="btn btn-accent" onclick="copyEmail()">&#128203; Copy Email Body</button>
     <button class="btn btn-accent" onclick="copyAllEmails()">&#128203; Copy All Selected Emails</button>
-    <button class="btn btn-red" onclick="openMailto()">&#x2709; Open Mailto (Selected)</button>
+    <button class="btn" onclick="downloadBatchEML()" style="background:rgba(5,150,105,0.9);color:#fff;border-color:rgba(5,150,105,0.9);">&#x1F4E7; Download .eml Files (Selected)</button>
+    <button class="btn btn-red" onclick="openMailto()">&#x2709; Open Mailto (max 20)</button>
     <button class="btn" onclick="downloadCSV()">&#x1F4BE; Download CSV</button>
     <button class="btn" onclick="downloadEmailFile()">&#x1F4BE; Download .eml</button>
   </div>
@@ -450,16 +451,47 @@
   window.openMailto = function() {
     var emails = getSelectedEmails();
     if (emails.length === 0) { logEntry('No recipients selected', 'fail'); return; }
-    // Mailto limit: use BCC for bulk, cap at 50 to avoid URL length issues
-    var batch = emails.slice(0, 50);
+    // Mailto limit: cap at 20 to avoid URL length issues
+    var batch = emails.slice(0, 20);
+    var bodyTrunc = (window._currentBody || '').substring(0, 1500);
+    if (bodyTrunc.length < (window._currentBody || '').length) bodyTrunc += '\n\n[Full message truncated — use .eml download for complete email]';
     var mailto = 'mailto:?bcc=' + encodeURIComponent(batch.join(',')) +
       '&subject=' + encodeURIComponent(window._currentSubject) +
-      '&body=' + encodeURIComponent(window._currentBody);
+      '&body=' + encodeURIComponent(bodyTrunc);
     window.open(mailto, '_blank');
     logEntry('Opened mailto for ' + batch.length + ' of ' + emails.length + ' recipients (BCC)', 'ok');
-    if (emails.length > 50) {
-      logEntry('Note: ' + (emails.length - 50) + ' remaining recipients — use CSV export for full list', 'fail');
+    if (emails.length > 20) {
+      logEntry('Note: ' + (emails.length - 20) + ' remaining — use .eml batch download or CSV export', 'fail');
     }
+  };
+
+  // Generate batch .eml files — one per selected recipient
+  window.downloadBatchEML = function() {
+    var emails = getSelectedEmails();
+    if (emails.length === 0) { logEntry('No recipients selected', 'fail'); return; }
+    var date = new Date().toUTCString();
+    var count = 0;
+    emails.forEach(function(email, i) {
+      setTimeout(function() {
+        var eml = 'MIME-Version: 1.0\r\n' +
+          'Date: ' + date + '\r\n' +
+          'Subject: ' + (window._currentSubject || 'TENET5 Evidence Dispatch') + '\r\n' +
+          'To: ' + email + '\r\n' +
+          'From: \r\n' +
+          'Content-Type: text/plain; charset=UTF-8\r\n' +
+          'Content-Transfer-Encoding: quoted-printable\r\n' +
+          '\r\n' +
+          (window._currentBody || '').replace(/([^\r])\n/g, '$1\r\n');
+        var blob = new Blob([eml], { type: 'message/rfc822' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'tenet5-dispatch-' + email.split('@')[0].replace(/[^a-z0-9]/gi, '-') + '.eml';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }, i * 150);
+      count++;
+    });
+    logEntry('Generating ' + count + ' .eml files — open each in your email client to send', 'ok');
   };
 
   window.downloadCSV = function() {
