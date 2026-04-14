@@ -36,6 +36,16 @@ class EmpiricalMagicHandoff:
         # Enforce abcxyz N vs NP parameters from Millennial Falcon subsystem
         matrix_complexity = evidence_data.get('matrix_complexity', 'NP-CLASS (Unresolved)')
         abcxyz_compliance = evidence_data.get('abcxyz_compliance_check', 'SECURED (Millennial Falcon)')
+
+        # Demographics-to-Death Pipeline Topology (27 nodes, 29 edges, acyclic)
+        # Registered nodes for abcxyz handoff integrity:
+        #   BROOKFIELD -> BIRCH_HILL -> PARK_LAWN_CORP
+        #   BROOKFIELD -> MAPLE_FUND -> INFRASTRUCTURE_PRIVATIZATION
+        #   BROOKFIELD -> WATERMARK -> SENIOR_HOUSING_EXTRACTION
+        #   BROOKFIELD -> BROOKFIELD_ANNUITY -> PENSION_ANNUITIZATION
+        #   MAID_PIPELINE -> HEALTHCARE_COST_AVOIDANCE -> FISCAL_DEFICIT_OFFSET
+        registered_topology_nodes = 27
+        registered_topology_edges = 29
         
         # Format the intelligence into markdown format for the dossier UI
         output_content = f"""# OSINT Dossier: {evidence_data.get('name', 'Unknown')}
@@ -97,12 +107,12 @@ Date Captured: {datetime.now().isoformat()}
         
         self.logger.info(f"Polling OSINT Telemetry Sync at: {osint_telemetry_url}")
         target_events = [
-            "OPERATIVE_DEPLOYED", 
-            "PARADOX_STORM_TRIGGERED", 
-            "OSINT_INTEL_ACQUIRED",
-            "SATOR_CODE_ACTIVE",
-            "STARK_CONTAINMENT_BREACH",
-            "TEMPORAL_RIFT_DETECTED"
+            "OSINT_INTEL_ACQUIRED", 
+            "DEMOGRAPHICS_TO_DEATH_NODE_UPDATED",
+            "MAID_FISCAL_LEDGER_SYNCED",
+            "BROOKFIELD_EXTRACTION_VERIFIED",
+            "AG_FINDING_INGESTED",
+            "S504_DISPATCH_CONFIRMED"
         ]
         
         try:
