@@ -9,7 +9,7 @@ from collections import defaultdict
 
 # --- LIRIL OSINT TOPOLOGY ADJACENCY MATRIX ---
 OSINT_GRAPH = {
-    'GOVERNMENT': ['CABINET', 'CROWN_CORPORATION'],
+    'GOVERNMENT': ['CABINET', 'CROWN_CORPORATION', 'IMMIGRATION_POLICY'],
     'CABINET': ['PMO', 'DEPUTY_MINISTER'],
     'CROWN_CORPORATION': ['CIB', 'BCIC'],
     'PMO': ['WEF', 'LOBBYING_FIRM'],
@@ -21,8 +21,43 @@ OSINT_GRAPH = {
     'BLACKROCK': [],
     'BROOKFIELD': [],
     'MCKINSEY': [],
-    'PWC': []
+    'PWC': [],
+    'IMMIGRATION_POLICY': ['TFW_MIGRANTS'],
+    'TFW_MIGRANTS': ['MAID_PIPELINE'],
+    'MAID_PIPELINE': ['COFFIN_STOCKS'],
+    'COFFIN_STOCKS': ['BROOKFIELD']
 }
+
+def validate_topological_graph(graph: Dict[str, List[str]]) -> bool:
+    """Validate the integrity of the topological graph."""
+    visited = set()
+    recursion_stack = set()
+
+    def is_cyclic(node: str) -> bool:
+        visited.add(node)
+        recursion_stack.add(node)
+
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                if is_cyclic(neighbor):
+                    return True
+            elif neighbor in recursion_stack:
+                return True
+
+        recursion_stack.remove(node)
+        return False
+
+    for node in graph:
+        if node not in visited:
+            if is_cyclic(node):
+                return False
+
+    return True
+
+def ensure_graph_integrity(graph: Dict[str, List[str]]) -> None:
+    """Ensure the integrity of the topological graph."""
+    if not validate_topological_graph(graph):
+        raise ValueError("LIRIL MATRIX PROTECT: OSINT Topological Graph contains cycles! Cannot proceed with empirical magic handoff.")
 
 def empirical_magic_handoff(
     graph: Dict[str, List[str]], 
@@ -33,6 +68,9 @@ def empirical_magic_handoff(
     Perform Empirical Magic Handoff for topological OSINT mapping.
     Calculates dynamic node pathing convergence scores via iterative adjacencies.
     """
+    # LIRIL Mandate: Uphold OSINT matrix acyclic constraint
+    ensure_graph_integrity(graph)
+    
     node_scores = defaultdict(int)
     node_paths = defaultdict(list)
 

@@ -9,7 +9,7 @@ for f in os.listdir(ROOT):
     if f.endswith('.html'):
         existing_html.add(f)
 # Include subdirs
-for subdir in ['reduster', 'reduster/dist']:
+for subdir in []:
     d = os.path.join(ROOT, subdir)
     if os.path.isdir(d):
         for f in os.listdir(d):
