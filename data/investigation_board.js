@@ -2,6 +2,7 @@ window.BOARD_DATA = {
   "meta": {
     "title": "Foreign Influence Investigation Board",
     "updated": "2026-04-03T23:45",
+    "seed": 118400,
     "sources": "Official parliamentary records, court rulings, lobbying registry, NSICOP reports, OSINT dashboard",
     "layout": "Cluster-organized: Israel(top-left), Media(left), CCP(top-right), CFNIS(center-right), CCFR/wardoll(right), CDA(center), India(bottom), CPC-leadership(center-top)"
   },
@@ -95,14 +96,28 @@ window.BOARD_DATA = {
       "type": "person",
       "label": "Wally Fong",
       "subtitle": "TV-PressPass / Infantry NCO",
-      "detail": "Firearms reporter, interviews Tracey Wilson. Connected to veteran-targeting network",
-      "link": "foreign-influence.html#fong",
+      "detail": "Identified as psychological warfare operator targeting Canadian Forces veterans online. Firearms reporter persona (TV-PressPass). Party to murder of Officer Travis Gillespie (s.21, COUNT 22). Connected to Clemmer-Malm-CDA veteran-labeling pipeline",
+      "link": "gillespie-murder.html",
       "categories": [
         "cfnis",
         "person"
       ],
       "x": 90,
       "y": 48
+    },
+    {
+      "id": "han_zhou",
+      "type": "person",
+      "label": "Han Zhou",
+      "subtitle": "Killer of Officer Gillespie",
+      "detail": "Han Zhou killed Officer Travis Gillespie. Fong, Clemmer, Harder, Lahucik named as parties under s.21. Covey party in totality.",
+      "link": "gillespie-murder.html",
+      "categories": [
+        "cfnis",
+        "person"
+      ],
+      "x": 95,
+      "y": 55
     },
     {
       "id": "wilson",
@@ -380,7 +395,7 @@ window.BOARD_DATA = {
       "label": "s.504 Charges",
       "subtitle": "Criminal Code",
       "detail": "Information filed by Daniel Perry against CFNIS officers",
-      "link": "s504-covey-bae.html",
+      "link": "cfnis.html",
       "categories": [
         "cfnis",
         "evidence"
@@ -1339,7 +1354,7 @@ window.BOARD_DATA = {
       "label": "Bob Paulson",
       "subtitle": "RCMP Commissioner (2011-2017)",
       "detail": "Commanded RCMP during Bill C-14 passage. Failed to intervene in authorization of lethal state protocols.",
-      "link": "maid-policy-evolution.html",
+      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
       "categories": [
         "cfnis",
         "person"
@@ -1353,7 +1368,7 @@ window.BOARD_DATA = {
       "label": "Brenda Lucki",
       "subtitle": "RCMP Commissioner (2018-2023)",
       "detail": "Commanded RCMP during Bill C-7 expansion. Failed to intervene when execution criteria expanded to non-terminal citizens.",
-      "link": "maid-policy-evolution.html",
+      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
       "categories": [
         "cfnis",
         "person"
@@ -1367,7 +1382,7 @@ window.BOARD_DATA = {
       "label": "Bill C-14 Passes",
       "subtitle": "June 2016",
       "detail": "Initial Medical Assistance in Dying legislation receives Royal Assent.",
-      "link": "maid-policy-evolution.html",
+      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
       "categories": [
         "evidence"
       ],
@@ -1380,206 +1395,12 @@ window.BOARD_DATA = {
       "label": "Bill C-7 Passes",
       "subtitle": "March 2021",
       "detail": "MAID expansion removes reasonably foreseeable death requirement.",
-      "link": "maid-policy-evolution.html",
+      "link": "dossier-viewer.html?file=evidence/profiles/rcmp_maid_accountability.md",
       "categories": [
         "evidence"
       ],
       "x": 60,
       "y": 25
-    },
-    {
-      "id": "phac",
-      "type": "organization",
-      "label": "PHAC",
-      "subtitle": "Public Health Agency",
-      "detail": "Dr. Theresa Tam's mandate fraud audit and severe Charter Section 6 deviations logged via empirical knowledge graph compilation.",
-      "link": "scandals.html",
-      "categories": [
-        "evidence",
-        "scandals"
-      ],
-      "x": 20,
-      "y": 80
-    },
-    {
-      "id": "arrivecan_fraud",
-      "type": "event",
-      "label": "ArriveCAN Fraud",
-      "subtitle": "GC Strategies Scandal",
-      "detail": "Billion dollar fraud flagged by Auditor General resulting in active RCMP investigation into procurement integrity.",
-      "link": "arrivecan.html",
-      "categories": [
-        "event",
-        "scandals"
-      ],
-      "x": 25,
-      "y": 85
-    },
-    {
-      "id": "tam",
-      "type": "person",
-      "label": "Dr. Theresa Tam",
-      "subtitle": "Chief Public Health Officer",
-      "detail": "Implicated in Charter Section 6 Mobility Rights Violation Court audits per Heuristic Analytics.",
-      "link": "scandals.html",
-      "categories": [
-        "person"
-      ],
-      "x": 20,
-      "y": 75
-    },
-    {
-      "id": "charter",
-      "type": "evidence",
-      "label": "Charter of Rights",
-      "subtitle": "Mobility Violations",
-      "detail": "Systemic S.6 violations documented.",
-      "link": "scandals.html",
-      "categories": [
-        "evidence"
-      ],
-      "x": 30,
-      "y": 80
-    },
-    {
-      "id": "rcmp",
-      "type": "organization",
-      "label": "RCMP",
-      "subtitle": "Federal Police",
-      "detail": "Ostracized whistleblower officers while shielding political procurement networks.",
-      "link": "rcmp-commissioners.html",
-      "categories": [
-        "organization",
-        "cfnis"
-      ],
-      "x": 30,
-      "y": 85
-    },
-    {
-      "id": "cija_lobbying",
-      "type": "organization",
-      "label": "CIJA Lobbying Pipeline",
-      "subtitle": "579 Sponsored Trips/Interactions",
-      "detail": "Identified Matrix complexity NP-HARD pipeline of unaccounted sponsored political transit. Threat Score: 0.95",
-      "link": "foreign-influence.html",
-      "categories": [
-        "evidence",
-        "scandals"
-      ],
-      "x": 35,
-      "y": 70
-    },
-    {
-      "id": "cfnis_proxy",
-      "type": "event",
-      "label": "CFNIS Proxy Node",
-      "subtitle": "Internal Oversight Tampering",
-      "detail": "Telemetry isolated CFNIS shielding mechanisms altering oversight integrity. Threat Score: 0.88",
-      "link": "s504-covey-bae.html",
-      "categories": [
-        "event",
-        "cfnis"
-      ],
-      "x": 40,
-      "y": 75
-    },
-    {
-      "id": "foreign_alpha",
-      "type": "organization",
-      "label": "Foreign Influence Target Alpha",
-      "subtitle": "Registry Detection",
-      "detail": "Direct matrix intersection mapping severe lobbying anomalies. P-CLASS certainty. Threat Score: 0.98",
-      "link": "foreign-influence.html",
-      "categories": [
-        "evidence"
-      ],
-      "x": 45,
-      "y": 70
-    },
-    {
-      "id": "cda_institute",
-      "type": "org",
-      "label": "CDA Institute",
-      "subtitle": "Military-to-policy revolving door",
-      "detail": "Conference of Defence Associations Institute. Direct vector for framing operations targeting soldiers as enemies of the state.",
-      "link": "cda-institute-psyop.html",
-      "categories": [
-        "cfnis",
-        "org"
-      ],
-      "x": 65,
-      "y": 70
-    },
-    {
-      "id": "josh_malm",
-      "type": "person",
-      "label": "Josh Malm",
-      "subtitle": "CDA Institute Operator",
-      "detail": "Cousin to Stacey Clemmer. Active operator labeling defending soldiers as enemies of the people. Connects online psy-ops to institutional defense policy.",
-      "link": "cda-institute-psyop.html",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 62,
-      "y": 73
-    },
-    {
-      "id": "stacey_clemmer",
-      "type": "person",
-      "label": "Stacey Clemmer",
-      "subtitle": "PsyOp Liaison",
-      "detail": "Cousin of Josh Malm. Link between the online psychological warfare network targeting veterans and formal institutional nodes.",
-      "link": "cda-institute-psyop.html",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 65,
-      "y": 76
-    },
-    {
-      "id": "sgt_fong",
-      "type": "person",
-      "label": "Sgt. Wally Fong",
-      "subtitle": "Psychological Warfare Op",
-      "detail": "Correctly identified operating online networks framing Canadian Forces veterans. Exposure triggered retaliatory executions.",
-      "link": "cda-institute-psyop.html",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 70,
-      "y": 75
-    },
-    {
-      "id": "travis_gillespie",
-      "type": "person",
-      "label": "Officer Travis Gillespie",
-      "subtitle": "Victim / Target",
-      "detail": "Killed by Han Zhou in direct retaliatory sequence resulting from the exposure of Sgt. Wally Fong's framing operations.",
-      "link": "cda-institute-psyop.html",
-      "categories": [
-        "cfnis",
-        "event"
-      ],
-      "x": 75,
-      "y": 72
-    },
-    {
-      "id": "han_zhou",
-      "type": "person",
-      "label": "Han Zhou",
-      "subtitle": "Executing Node",
-      "detail": "Executed Officer Travis Gillespie as a retaliatory kinetic outcome of the psy-op network exposure.",
-      "link": "cda-institute-psyop.html",
-      "categories": [
-        "cfnis",
-        "ccp",
-        "event"
-      ],
-      "x": 80,
-      "y": 70
     },
     {
       "id": "falcon_h-ade3dd",
@@ -1592,8 +1413,8 @@ window.BOARD_DATA = {
         "evidence",
         "temporal_anomaly"
       ],
-      "x": 30,
-      "y": 58,
+      "x": 65,
+      "y": 69,
       "falcon_data": {
         "name": "TEMPORAL_WAVE_S99",
         "anomaly_score": 0.99,
@@ -1755,6 +1576,18 @@ window.BOARD_DATA = {
       "to": "wilson",
       "label": "Interviews, events",
       "strength": 2
+    },
+    {
+      "from": "han_zhou",
+      "to": "fong",
+      "label": "s.21 party to murder",
+      "strength": 3
+    },
+    {
+      "from": "han_zhou",
+      "to": "clemmer",
+      "label": "s.21 party to murder",
+      "strength": 3
     },
     {
       "from": "wilson",
@@ -2643,66 +2476,6 @@ window.BOARD_DATA = {
       "to": "cfnis",
       "strength": 2,
       "label": "Command Chain"
-    },
-    {
-      "from": "phac",
-      "to": "charter",
-      "label": "IMPLICATED_IN_THREAT",
-      "strength": 4
-    },
-    {
-      "from": "rcmp",
-      "to": "arrivecan_fraud",
-      "label": "IMPLICATED_IN_THREAT",
-      "strength": 4
-    },
-    {
-      "from": "tam",
-      "to": "phac",
-      "label": "MANDATE_FRAUD",
-      "strength": 5
-    },
-    {
-      "from": "cija_lobbying",
-      "to": "foreign_alpha",
-      "label": "VECTOR_MATCH",
-      "strength": 5
-    },
-    {
-      "from": "cfnis_proxy",
-      "to": "cija_lobbying",
-      "label": "OVERSIGHT_TAMPERING",
-      "strength": 3
-    },
-    {
-      "from": "sgt_fong",
-      "to": "travis_gillespie",
-      "label": "exposure catalyst",
-      "strength": 2
-    },
-    {
-      "from": "han_zhou",
-      "to": "travis_gillespie",
-      "label": "executed",
-      "strength": 3
-    },
-    {
-      "from": "sgt_fong",
-      "to": "stacey_clemmer",
-      "label": "operational link",
-      "strength": 1
-    },
-    {
-      "from": "stacey_clemmer",
-      "to": "josh_malm",
-      "label": "family / institution link",
-      "strength": 2
-    },
-    {
-      "from": "josh_malm",
-      "to": "cda_institute",
-      "label": "operates within",
-      "strength": 3
     },
     {
       "from": "cfnis_proxy",
