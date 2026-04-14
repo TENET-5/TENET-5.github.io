@@ -7,7 +7,7 @@ Following LIRIL architectural specifications (N vs NP Millennial Falcon Structur
 import os
 import json
 import time
-import requests
+
 import sys
 
 # TENET5 OSINT Standard paths
@@ -67,7 +67,7 @@ class EMHFinancialTransactionAnalysis:
     def save_results(self, results):
         print(f"[OSINT] Saving financial intelligence to {OUTPUT_FILE}")
         with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-            json.json(results, f, indent=2)
+            json.dump(results, f, indent=2)
 
 def main():
     print("=" * 50)
