@@ -10,18 +10,41 @@
 
   var VOICE_STORAGE_KEY = 'liril-voice-name';
 
+  /* ── TARGET VOICE — Hazel is LIRIL's canonical voice ────── */
+  var TARGET_VOICES = [
+    'microsoft hazel online (natural)',
+    'microsoft hazel online',
+    'microsoft hazel desktop',
+    'microsoft hazel',
+    'hazel',
+    'microsoft libby online (natural)',
+    'microsoft libby online',
+    'microsoft libby',
+    'microsoft sonia online (natural)',
+    'microsoft sonia online',
+    'microsoft sonia',
+    'google uk english female'
+  ];
+
   /* ── CANONICAL BLOCKLIST — maintain here ONLY ────── */
   var MALE_NAMES = [
     'david','mark','james','george','daniel','ryan','guy','thomas',
     'richard','rishi','sean','oliver','liam','christopher','eric',
     'andrew','brian','roger','malcolm','connor','freddie','alfie',
-    'ethan','noah'
+    'ethan','noah','william','henry','charlie','oscar','jack',
+    'harry','arthur','leo','jacob','lucas','mason','logan',
+    'alexander','benjamin','samuel','joseph','matthew','caleb',
+    'microsoft david','microsoft mark','microsoft george','microsoft james',
+    'microsoft ryan','microsoft guy','microsoft rishi',
+    'google uk english male','google us english male'
   ];
   var FEMALE_NAMES = [
     'hazel','susan','libby','sonia','maisie','martha','kate','karen',
     'moira','fiona','serena','samantha','victoria','zira','jenny',
-    'aria','sara','emily','emma','amy',
-    'microsoft hazel','microsoft libby',
+    'aria','sara','emily','emma','amy','natasha','linda','catherine',
+    'microsoft hazel','microsoft libby','microsoft sonia','microsoft susan',
+    'microsoft jenny','microsoft aria','microsoft sara','microsoft emily',
+    'microsoft zira','microsoft catherine','microsoft linda','microsoft natasha',
     'google uk english female','google us english female'
   ];
 
@@ -45,21 +68,37 @@
     var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
     if (!voices.length) return null;
 
-    /* P0: Restore from sessionStorage */
+    /* P0: Restore from sessionStorage — but ONLY if it's a known female voice */
     try {
       var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
       if (saved) {
         var restored = voices.find(function(v) { return v.name === saved; });
-        if (restored && !isMale(restored)) {
+        if (restored && isFemale(restored) && !isMale(restored)) {
           cached = restored; resolved = true;
           console.log('[LIRIL-VOICE] Restored:', cached.name);
           return cached;
+        } else {
+          /* Cached voice is male or unknown — clear and re-resolve */
+          sessionStorage.removeItem(VOICE_STORAGE_KEY);
+          console.log('[LIRIL-VOICE] Cleared stale cache:', saved);
         }
       }
     } catch(e) {}
 
+    /* P0: Explicit target voice list — Hazel is LIRIL's canonical voice */
+    for (var t = 0; t < TARGET_VOICES.length && !cached; t++) {
+      var target = TARGET_VOICES[t];
+      cached = voices.find(function(v) { return nameOf(v) === target; });
+    }
+    /* P0.3: Partial match on target names */
+    if (!cached) {
+      for (var t2 = 0; t2 < TARGET_VOICES.length && !cached; t2++) {
+        var partial = TARGET_VOICES[t2];
+        cached = voices.find(function(v) { return nameOf(v).indexOf(partial) >= 0; });
+      }
+    }
     /* P0.5: Natural/Neural en-GB female (highest quality) */
-    cached = voices.find(function(v) { return isEnGB(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
+    if (!cached) cached = voices.find(function(v) { return isEnGB(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
     /* P1: Known female en-GB */
     if (!cached) cached = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
     /* P2: Any en-GB NOT male */
