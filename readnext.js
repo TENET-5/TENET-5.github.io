@@ -594,6 +594,22 @@
         { href: 'harm-index.html', label: 'Harm Index', desc: 'Quantified harm across populations' },
       ]
     },
+    'tfw-abuse.html': {
+      current: 'TFW Abuse',
+      next: [
+        { href: 'demographics-to-death.html', label: 'Demographics-to-Death', desc: 'How immigration feeds the MAID pipeline' },
+        { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'Connecting the exploitation nodes' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'Explore the full corruption graph' },
+      ]
+    },
+    'demographics-to-death.html': {
+      current: 'Demographics-to-Death Pipeline',
+      next: [
+        { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'Understanding the overarching system' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'Tracking the financial incentives' },
+        { href: 's504-court-filing.html', label: 's.504 Legal Filing', desc: 'Execute criminal complaints directly' },
+      ]
+    },
     'take-action.html': {
       current: 'Take Action',
       next: [
