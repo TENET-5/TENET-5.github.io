@@ -77,8 +77,8 @@ async def main():
         }
         await router.route_payload(test_payload)
         
-        logger.info("Aligning Godot SATOR Telemetry during Router Test...")
-        synced_files = await router.handoff.align_godot_telemetry()
+        logger.info("Aligning OSINT SATOR Telemetry during Router Test...")
+        synced_files = await router.handoff.align_osint_telemetry()
         if synced_files:
             logger.info(f"Test Execution aligned {len(synced_files)} empirical magic handoff vectors.")
         

@@ -61,7 +61,7 @@ Date Captured: {datetime.now().isoformat()}
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(output_content)
         
-        # Broadcast the Godot OSINT Godot Telemetry to TENET-5 AI Loop natively
+        # Broadcast the OSINT Telemetry to TENET-5 AI Loop natively
         try:
             import nats
             nc = await nats.connect("nats://127.0.0.1:4222", connect_timeout=2)
@@ -86,16 +86,16 @@ Date Captured: {datetime.now().isoformat()}
         self.logger.info(f"Handoff Success: Data secured symmetrically with sig {signature[:8]} at {filepath}")
         return filepath
 
-    async def align_godot_telemetry(self, godot_telemetry_url="http://127.0.0.1:8092/api/telemetry"):
+    async def align_osint_telemetry(self, osint_telemetry_url="http://127.0.0.1:8092/api/osint_telemetry"):
         """
-        Polls the local Godot Tenet5/SATOR telemetry hub and integrates 
+        Polls the local OSINT Tenet5/SATOR telemetry hub and integrates 
         'OPERATIVE_DEPLOYED' and 'PARADOX_STORM_TRIGGERED' states cleanly 
         into the OSINT GitHub pages matrix.
         """
         import urllib.request
         import urllib.error
         
-        self.logger.info(f"Polling Godot Telemetry Sync at: {godot_telemetry_url}")
+        self.logger.info(f"Polling OSINT Telemetry Sync at: {osint_telemetry_url}")
         target_events = [
             "OPERATIVE_DEPLOYED", 
             "PARADOX_STORM_TRIGGERED", 
@@ -106,7 +106,7 @@ Date Captured: {datetime.now().isoformat()}
         ]
         
         try:
-            req = urllib.request.Request(godot_telemetry_url, headers={'User-Agent': 'Tenet5-Empirical/1.0'})
+            req = urllib.request.Request(osint_telemetry_url, headers={'User-Agent': 'Tenet5-Empirical/1.0'})
             with urllib.request.urlopen(req, timeout=3.0) as response:
                 if response.status == 200:
                     data = json.loads(response.read().decode('utf-8'))
@@ -120,7 +120,7 @@ Date Captured: {datetime.now().isoformat()}
                             
                             # Construct an OSINT empirical dossier payload
                             evidence_data = {
-                                'name': f"Godot_Simulation_Log_{ev_name}",
+                                'name': f"OSINT_Simulation_Log_{ev_name}",
                                 'source': "TENET5 Vector: SATOR Network Port 8092",
                                 'topological_vector': "MF-87E633DCF77C09E3",
                                 'matrix_complexity': "N_VS_NP_CONVERGED",
@@ -128,13 +128,13 @@ Date Captured: {datetime.now().isoformat()}
                                 'payload': payload_data
                             }
                             
-                            filepath = await self.secure_handoff(evidence_data, routing_agent="LIRIL/GODOT_TELEMETRY")
+                            filepath = await self.secure_handoff(evidence_data, routing_agent="LIRIL/OSINT_TELEMETRY")
                             synced_files.append(filepath)
                             
                     self.logger.info(f"Aligned {len(synced_files)} SATOR tracking events into OSINT dossiers.")
                     return synced_files
         except urllib.error.URLError as e:
-            self.logger.warning(f"Godot telemetry hub offline or unreachable. Skipping matrix alignment: {e}")
+            self.logger.warning(f"OSINT telemetry hub offline or unreachable. Skipping matrix alignment: {e}")
             return []
         except Exception as e:
             self.logger.error(f"Failed to align telemetry: {e}")
