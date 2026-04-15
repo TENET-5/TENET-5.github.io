@@ -1,0 +1,228 @@
+/* ═══════════════════════════════════════════════════════
+   TENET5 Visual Polish — Awwwards-tier presentation
+   Scroll reveals, glassmorphism, kinetic type, micro-interactions
+   No JS required — pure CSS with scroll-timeline API
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Scroll-Triggered Reveals ─────────────────────────── */
+/* Elements with .reveal fade+slide in when they enter the viewport */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Stagger children for cascading reveal */
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 0.08s; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 0.16s; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 0.24s; }
+.reveal-stagger > .reveal:nth-child(5) { transition-delay: 0.32s; }
+.reveal-stagger > .reveal:nth-child(6) { transition-delay: 0.40s; }
+
+/* ── Kinetic Headlines ────────────────────────────────── */
+/* Headlines clip-reveal from left to right */
+.kinetic-headline {
+  overflow: hidden;
+}
+.kinetic-headline > * {
+  animation: clipReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes clipReveal {
+  from { clip-path: inset(0 100% 0 0); opacity: 0; }
+  to   { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+/* ── Dark Glassmorphism Cards ─────────────────────────── */
+/* Frosted-glass surface with ambient glow behind */
+.glass-card {
+  background: rgba(14, 18, 28, 0.72);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+.glass-card:hover {
+  border-color: rgba(196, 30, 58, 0.2);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(196, 30, 58, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Ambient gradient orbs behind glass cards */
+.glass-ambient {
+  position: relative;
+}
+.glass-ambient::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -20%;
+  width: 60%;
+  height: 120%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(196, 30, 58, 0.06) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+.glass-ambient::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  right: -15%;
+  width: 50%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(201, 168, 76, 0.04) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ── Enhanced Typography ──────────────────────────────── */
+/* Editorial headline treatment */
+.headline-editorial {
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  background: linear-gradient(
+    135deg,
+    var(--text-primary, #e8e4dc) 0%,
+    rgba(232, 228, 220, 0.75) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Monospace accent text (dates, stats, codes) */
+.mono-accent {
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stat counter with large number + small label */
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.stat-block .stat-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 800;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  color: var(--text-primary, #e8e4dc);
+  line-height: 1;
+}
+.stat-block .stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary, #666);
+}
+
+/* ── Micro-Interactions ───────────────────────────────── */
+/* Button press effect */
+.btn-press {
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+.btn-press:active {
+  transform: scale(0.97);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Link underline animation */
+.link-reveal {
+  position: relative;
+  text-decoration: none;
+}
+.link-reveal::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent, #c41e3a);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.link-reveal:hover::after {
+  width: 100%;
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid rgba(196, 30, 58, 0.6);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Smooth Scroll ────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Evidence box glow on hover ───────────────────────── */
+.evidence-box,
+.bg-card,
+.editorial-surface {
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.evidence-box:hover,
+.bg-card:hover {
+  border-color: rgba(196, 30, 58, 0.15);
+  box-shadow: 0 0 24px rgba(196, 30, 58, 0.05);
+}
+
+/* ── Responsive refinements ───────────────────────────── */
+@media (max-width: 768px) {
+  .glass-card {
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+  }
+  .glass-ambient::before,
+  .glass-ambient::after {
+    display: none;
+  }
+  .headline-editorial {
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ── Reduce motion for accessibility ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .kinetic-headline > * {
+    animation: none;
+    clip-path: none;
+    opacity: 1;
+  }
+  .glass-card:hover {
+    transform: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
