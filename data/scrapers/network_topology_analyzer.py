@@ -459,41 +459,26 @@ def generate_graph_json(entities, overlaps):
                     "weight": len(shared),
                 })
 
-    # LIRIL Task 2: BFS Component Clustering & Centrality Optimization
-    from collections import defaultdict
-    adjacency_list = defaultdict(list)
-    for edge in edges:
-        adjacency_list[edge["source"]].append(edge["target"])
-        adjacency_list[edge["target"]].append(edge["source"])
-        
-    cluster_map = {}
-    cluster_id_counter = 1
-    visited = set()
-    
-    node_scores = {node["id"]: node["influence_score"] for node in nodes}
-    
+    # LIRIL Phase 18: NetworkX Greedy Modularity Institutional Detection
+    import networkx as nx
+    from networkx.algorithms import community
+
+    G = nx.Graph()
     for node in nodes:
-        node_id = node["id"]
-        if node_id not in visited:
-            # LIRIL Task 2: Predictive BFS Traversal Optimization
-            queue = [node_id]
-            visited.add(node_id)
-            current_cluster = []
-            
-            while queue:
-                curr = queue.pop(0)
-                current_cluster.append(curr)
-                cluster_map[curr] = cluster_id_counter
-                
-                # Predictive Clustering: Prioritize branching through highest influence density first
-                neighbors = adjacency_list[curr]
-                neighbors.sort(key=lambda n: node_scores.get(n, 0), reverse=True)
-                
-                for neighbor in neighbors:
-                    if neighbor not in visited:
-                        visited.add(neighbor)
-                        queue.append(neighbor)
-            cluster_id_counter += 1
+        G.add_node(node["id"])
+    for edge in edges:
+        G.add_edge(edge["source"], edge["target"], weight=edge.get("weight", 1))
+
+    cluster_map = {}
+    try:
+        communities = community.greedy_modularity_communities(G)
+        for idx, comm in enumerate(communities, 1):
+            for node_id in comm:
+                cluster_map[node_id] = idx
+    except Exception as e:
+        log.error(f"NetworkX Community Detection Failed: {e}")
+        for node in nodes:
+            cluster_map[node["id"]] = 0
 
     degrees = {node["id"]: 0.0 for node in nodes}
     for edge in edges:
