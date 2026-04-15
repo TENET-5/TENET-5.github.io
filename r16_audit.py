@@ -74,7 +74,8 @@ for f in htmls:
     if has_ci:
         ci_pages.append(f)
     elif f not in ["404.html", "auth-callback.html", "home.html", "index.html",
-                    "sitemap.html", "test-narration-validation.html"]:
+                    "sitemap.html", "test-narration-validation.html",
+                    "master-index.html", "permalink.html", "submarine-timeline.html"]:
         non_ci.append(f)
 
     if issues:

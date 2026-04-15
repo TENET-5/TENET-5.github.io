@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SITE_ROOT = Path(__file__).parent
-SITE_URL = "https://tenet-5.github.io"
+SITE_URL = "https://tenet5.github.io"
 
 
 def sha256(text: str) -> str:
