@@ -57,10 +57,14 @@
     if (SKIP.indexOf(page) !== -1) return;
 
     // Don't duplicate
-    if (document.querySelector('.t5-video-bg')) return;
+    if (document.querySelector('.t5-video-wrap, .t5-video-bg')) return;
 
     var videoFile = PAGE_VIDEOS[page] || DEFAULT_VIDEO;
     var videoUrl = BASE_PATH + videoFile;
+
+    var wrap = document.createElement('div');
+    wrap.className = 't5-video-wrap';
+    wrap.setAttribute('aria-hidden', 'true');
 
     // Create video element
     var video = document.createElement('video');
@@ -69,30 +73,47 @@
     video.loop = true;
     video.muted = true;
     video.playsInline = true;
+    video.poster = '/media/retro-warroom-poster.jpg';
     video.setAttribute('playsinline', '');
     video.setAttribute('aria-hidden', 'true');
     video.preload = 'auto';
+
+    video.addEventListener('loadeddata', function() {
+      document.body.classList.add('t5-video-ready');
+    });
+
+    video.addEventListener('error', function() {
+      document.body.classList.add('t5-video-error');
+      console.warn('[video-bg] Failed to load background video:', videoUrl);
+    });
 
     var source = document.createElement('source');
     source.src = videoUrl;
     source.type = 'video/mp4';
     video.appendChild(source);
+    wrap.appendChild(video);
+
+    document.body.classList.add('has-t5-video-bg');
 
     // Insert at the start of body
-    document.body.insertBefore(video, document.body.firstChild);
+    document.body.insertBefore(wrap, document.body.firstChild);
 
     // Start playback (handle autoplay policy)
     video.play().catch(function() {
-      // Autoplay blocked — that's fine, stays as a dark background
+      // Autoplay blocked — poster/fallback remains visible
     });
   }
 
   // CSS for video background
   var style = document.createElement('style');
   style.textContent =
-    '.t5-video-bg{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:0;opacity:0.35;pointer-events:none;filter:brightness(0.5) saturate(0.8)}' +
-    '@media(prefers-reduced-motion:reduce){.t5-video-bg{display:none}}' +
-    '@media(max-width:768px){.t5-video-bg{opacity:0.2}}';
+    'body.has-t5-video-bg{isolation:isolate}' +
+    '.t5-video-wrap{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;background:radial-gradient(circle at center, rgba(15,23,42,0.18), rgba(2,6,23,0.72))}' +
+    '.t5-video-bg{position:absolute;top:0;left:0;width:100vw;height:100vh;object-fit:cover;opacity:0.52;pointer-events:none;filter:brightness(0.72) saturate(0.95) contrast(1.05)}' +
+    'body.has-t5-video-bg > :not(.t5-video-wrap):not(script):not(style):not(link){position:relative;z-index:1}' +
+    'body.has-t5-video-bg .grain-overlay,body.has-t5-video-bg .vignette,body.has-t5-video-bg .retro-film-bg{z-index:1}' +
+    '@media(prefers-reduced-motion:reduce){.t5-video-wrap{display:none}}' +
+    '@media(max-width:768px){.t5-video-bg{opacity:0.34;filter:brightness(0.78) saturate(0.9)}}';
   document.head.appendChild(style);
 
   // Init
