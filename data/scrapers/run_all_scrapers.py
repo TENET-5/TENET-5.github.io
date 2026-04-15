@@ -220,7 +220,23 @@ def run_scraper(scraper, dry_run=False):
         duration = time.time() - start
         result['exit_code'] = proc.returncode
         result['duration_s'] = round(duration, 2)
+        
+        # LIRIL Task 1: Real-Time Data Integrity Validation System
         result['status'] = 'OK' if proc.returncode == 0 else 'ERROR'
+        if result['status'] == 'OK':
+            for fname in os.listdir(DATA_DIR):
+                if fname.endswith('.json'):
+                    fpath = os.path.join(DATA_DIR, fname)
+                    # Check files modified during this scraper's execution window
+                    if os.path.getmtime(fpath) >= start:
+                        try:
+                            with open(fpath, 'r', encoding='utf-8') as jf:
+                                json.load(jf)
+                        except Exception as e:
+                            print(f"[INTEGRITY] Scraper {scraper['name']} produced corrupted JSON in {fname}: {e}")
+                            result['status'] = 'DATA_ERROR'
+                            result['error'] = f'JSON Payload parsing failure: {fname}'
+                            break
         result['stdout_tail'] = proc.stdout[-500:] if proc.stdout else ''
         result['stderr_tail'] = proc.stderr[-300:] if proc.stderr else ''
         result['emh_hash'] = hash_run(scraper['name'], result['started_at'], proc.returncode, proc.stdout or '')
