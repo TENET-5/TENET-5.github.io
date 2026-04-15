@@ -132,8 +132,59 @@
     chapters.forEach(function(ch) { chapterObserver.observe(ch); });
   }
 
+  // ── Text split reveal (Locomotive-style) ─────────────
+  // Splits heading into words/chars that animate in with stagger
+  function splitReveal(el) {
+    var text = el.textContent;
+    var words = text.split(/\s+/);
+    el.innerHTML = '';
+    el.style.overflow = 'hidden';
+    words.forEach(function(word, i) {
+      var span = document.createElement('span');
+      span.textContent = word + ' ';
+      span.style.cssText = 'display:inline-block;opacity:0;transform:translateY(100%);' +
+        'transition:opacity 0.5s cubic-bezier(0.215,0.61,0.355,1) ' + (i * 0.06) + 's,' +
+        'transform 0.6s cubic-bezier(0.215,0.61,0.355,1) ' + (i * 0.06) + 's;';
+      el.appendChild(span);
+    });
+  }
+
+  var splitObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !entry.target.dataset.split) {
+        entry.target.dataset.split = 'true';
+        var spans = entry.target.querySelectorAll('span');
+        spans.forEach(function(s) {
+          s.style.opacity = '1';
+          s.style.transform = 'translateY(0)';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  // ── Smooth parallax with lerp (Locomotive-inspired) ──
+  var smoothY = 0;
+  var targetY = 0;
+  var rafId = null;
+
+  function lerpParallax() {
+    targetY = window.scrollY;
+    smoothY += (targetY - smoothY) * 0.08; // lerp factor — lower = smoother
+    parallaxElements.forEach(function(item) {
+      var speed = parseFloat(item.el.dataset.parallax || '0.3');
+      var offset = smoothY * speed;
+      item.el.style.transform = 'translate3d(0,' + offset.toFixed(1) + 'px,0)';
+    });
+    if (Math.abs(targetY - smoothY) > 0.5 || parallaxElements.length) {
+      rafId = requestAnimationFrame(lerpParallax);
+    }
+  }
+
   // ── Init ─────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
+    var page = window.location.pathname.split('/').pop() || '';
+    if (page === 'index.html' || page === '') return;
+
     // Reveal animations
     document.querySelectorAll('.reveal, [data-reveal]').forEach(function(el) {
       revealObserver.observe(el);
@@ -144,18 +195,31 @@
       counterObserver.observe(el);
     });
 
-    // Parallax elements
+    // Parallax elements — use lerped smooth scrolling
     document.querySelectorAll('[data-parallax]').forEach(function(el) {
       parallaxElements.push({ el: el });
     });
     if (parallaxElements.length) {
-      window.addEventListener('scroll', updateParallax, { passive: true });
+      lerpParallax(); // Start smooth parallax loop
     }
 
     // Typewriter elements
     document.querySelectorAll('[data-typewriter], .typewriter').forEach(function(el) {
       typewriterObserver.observe(el);
     });
+
+    // Text split reveal — hero headings + section headings
+    document.querySelectorAll('[data-split], .split-reveal').forEach(function(el) {
+      splitReveal(el);
+      splitObserver.observe(el);
+    });
+
+    // Auto-split: first h1 in hero sections
+    var heroH1 = document.querySelector('.page-hero h1, .hero-vc h1, .hero-nc h1, .dossier-hero h1');
+    if (heroH1 && !heroH1.dataset.split) {
+      splitReveal(heroH1);
+      splitObserver.observe(heroH1);
+    }
 
     // Chapter navigation
     createChapterNav();
