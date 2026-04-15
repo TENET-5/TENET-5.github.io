@@ -23,6 +23,7 @@ import csv
 import io
 import json
 import logging
+import math
 import os
 import sys
 import time
@@ -301,6 +302,78 @@ def detect_amendment_chains(contracts):
     return flagged
 
 
+def detect_benfords_law_anomalies(contracts):
+    """Phase 24: Benford's Law first-digit analysis for fraud detection.
+    
+    Naturally occurring financial data follows Benford's distribution:
+    P(d) = log10(1 + 1/d) for d = 1..9
+    Significant deviation (chi-squared test) flags potential fabrication.
+    """
+    log.info("Running Benford's Law first-digit analysis...")
+    
+    # Expected Benford distribution
+    benford_expected = {d: math.log10(1 + 1/d) for d in range(1, 10)}
+    
+    # Collect first digits from all contract amounts
+    first_digits = []
+    for c in contracts:
+        amount = _parse_amount(_find_field(c, [
+            "contract_value", "original_value", "Contract Value",
+            "Original Value",
+        ]))
+        if amount >= 10:  # Benford's only meaningful for multi-digit values
+            first_digit = int(str(abs(amount)).lstrip('0').lstrip('.')[0])
+            if 1 <= first_digit <= 9:
+                first_digits.append(first_digit)
+    
+    if len(first_digits) < 50:
+        log.info("Insufficient data for Benford's analysis (%d values, need 50+)", len(first_digits))
+        return []
+    
+    # Compute observed distribution
+    n = len(first_digits)
+    observed_counts = Counter(first_digits)
+    
+    # Chi-squared goodness-of-fit
+    chi_squared = 0.0
+    digit_deviations = {}
+    for d in range(1, 10):
+        observed = observed_counts.get(d, 0)
+        expected = benford_expected[d] * n
+        chi_sq_component = ((observed - expected) ** 2) / expected if expected > 0 else 0
+        chi_squared += chi_sq_component
+        deviation_pct = ((observed / n) - benford_expected[d]) * 100
+        digit_deviations[d] = {
+            "observed_pct": round((observed / n) * 100, 2),
+            "expected_pct": round(benford_expected[d] * 100, 2),
+            "deviation_pct": round(deviation_pct, 2),
+            "chi_sq_component": round(chi_sq_component, 4),
+        }
+    
+    # Critical value for chi-squared with 8 degrees of freedom at p=0.05 is 15.507
+    CHI_SQ_CRITICAL = 15.507
+    is_anomalous = chi_squared > CHI_SQ_CRITICAL
+    
+    log.info("Benford's chi-squared: %.4f (critical: %.3f) -> %s",
+             chi_squared, CHI_SQ_CRITICAL, "ANOMALOUS" if is_anomalous else "NORMAL")
+    
+    if is_anomalous:
+        return [{
+            "type": "BENFORDS_LAW_VIOLATION",
+            "chi_squared": round(chi_squared, 4),
+            "critical_value": CHI_SQ_CRITICAL,
+            "degrees_of_freedom": 8,
+            "sample_size": n,
+            "severity": "HIGH" if chi_squared > CHI_SQ_CRITICAL * 2 else "MEDIUM",
+            "digit_analysis": digit_deviations,
+            "interpretation": (
+                "Contract amounts deviate significantly from Benford's Law distribution. "
+                "This may indicate fabricated amounts, contract splitting, or systematic rounding."
+            ),
+        }]
+    return []
+
+
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
@@ -408,6 +481,7 @@ def main():
     all_anomalies.extend(detect_sole_source_anomalies(contracts))
     all_anomalies.extend(detect_vendor_concentration(contracts))
     all_anomalies.extend(detect_amendment_chains(contracts))
+    all_anomalies.extend(detect_benfords_law_anomalies(contracts))
 
     log.info("=== SCAN COMPLETE ===")
     log.info("Total contracts: %d", len(contracts))

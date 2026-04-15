@@ -299,7 +299,7 @@ def extract_all_entities(sources):
         entities[key]["categories"].add("political_donor")
         entities[key]["sources"].add("contributions_analysis")
 
-    # 6. From Financial Transactions
+    # 6. From Financial Transactions (Phase 23: includes anomaly z-scores)
     financial_data = sources.get("financial_analysis", {}).get("transactions", {})
     for tid, t in financial_data.items():
         name = t.get("entity", "")
@@ -309,12 +309,14 @@ def extract_all_entities(sources):
             entities[key]["appearances"].append({
                 "source": "financial_analysis",
                 "risk_factor": t.get("risk_factor", 0),
-                "flow": t.get("flow", "")
+                "flow": t.get("flow", ""),
+                "anomaly_z_score": t.get("anomaly_z_score", 0),
+                "anomaly_flag": t.get("anomaly_flag", False),
             })
             entities[key]["categories"].add("financial_vector")
             entities[key]["sources"].add("financial_analysis")
 
-    # 7. From Social Media
+    # 7. From Social Media (Phase 23: includes temporal decay scores)
     social_data = sources.get("social_media", {}).get("targets", {})
     for target, s in social_data.items():
         if target:
@@ -322,7 +324,8 @@ def extract_all_entities(sources):
             entities[key]["name"] = target
             entities[key]["appearances"].append({
                 "source": "social_media_analysis",
-                "primary_vector": s.get("primary_vector", "")
+                "primary_vector": s.get("primary_vector", ""),
+                "temporal_decay_score": s.get("temporal_decay_score", 0),
             })
             entities[key]["categories"].add("social_media")
             entities[key]["sources"].add("social_media_analysis")
@@ -368,8 +371,14 @@ def compute_influence_scores(entities):
             elif src == "financial_analysis":
                 risk = appearance.get("risk_factor", 0)
                 score += 10 + (risk * 2)
+                # Phase 24: Anomaly-flagged entities get a significant boost
+                if appearance.get("anomaly_flag", False):
+                    z = abs(appearance.get("anomaly_z_score", 0))
+                    score += 15 + (z * 5)  # Higher z-score = more anomalous = higher priority
             elif src == "social_media_analysis":
-                score += 7
+                # Phase 24: Weight by temporal decay — fresh intel scores higher
+                decay = appearance.get("temporal_decay_score", 0)
+                score += 7 + (decay * 2)
 
         # Cross-source overlap bonus
         unique_sources = len(entity["sources"])
