@@ -445,6 +445,7 @@
         <div class="hero-meta-ribbon">
           <span class="hero-meta-pill">TENET5 edition desk</span>
           <span class="hero-meta-pill">LIRIL narration</span>
+          <span class="hero-meta-pill">Autopilot enabled</span>
           <span class="hero-meta-pill">7M public records</span>
           <span class="hero-meta-pill">NVIDIA • Intel</span>
         </div>
@@ -1007,6 +1008,11 @@
       startJourney() {
         this.hud.style.opacity = '1';
         this.hud.style.pointerEvents = 'auto';
+        const startBtn = document.getElementById('btn-start');
+        if (startBtn) {
+          startBtn.textContent = 'Autopilot Running';
+          startBtn.style.opacity = '0.75';
+        }
         this.goToScene(1);
       },
       stopAllAudio() {
@@ -1019,10 +1025,9 @@
         this.subtitleBox.classList.remove('visible');
       },
       _autoAdvance(index, delay) {
-        // Schedule auto-advance after delay, guarded by scene still being current
         this._autoTimer = setTimeout(() => {
           this._autoTimer = null;
-          if (this.currentScene === index && this.currentLogical < this.sceneOrder.length - 1) this.nextScene();
+          if (this.currentScene === index) this.nextScene();
         }, delay);
       },
       playAudioForScene(index) {
@@ -1121,7 +1126,13 @@
           requestAnimationFrame(step);
         });
       },
-      nextScene() { this.goToScene(this.currentLogical + 1); },
+      nextScene() {
+        if (this.currentLogical >= this.sceneOrder.length - 1) {
+          this.goToScene(1);
+          return;
+        }
+        this.goToScene(this.currentLogical + 1);
+      },
       prevScene() { this.goToScene(this.currentLogical - 1); },
       
       // ── LIRIL Integration ───────────────────────
@@ -1182,10 +1193,16 @@
     document.addEventListener("DOMContentLoaded", () => {
       engine.init();
       
-      // Setup LIRIL button
       const lirilBtn = document.getElementById('btn-liril-narrate');
       if (lirilBtn) {
         lirilBtn.addEventListener('click', () => engine.narrate());
+      }
+
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduceMotion) {
+        setTimeout(() => {
+          if (engine.currentLogical === 0) engine.startJourney();
+        }, 1800);
       }
     });
   </script>
