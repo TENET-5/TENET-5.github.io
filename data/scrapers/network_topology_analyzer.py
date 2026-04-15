@@ -373,6 +373,19 @@ def generate_graph_json(entities, overlaps):
                     "weight": len(shared),
                 })
 
+    # LIRIL Mandated: Empirical NetworkX Centrality Fallback (Math Simulation without Dependencies)
+    degrees = {node["id"]: 0.0 for node in nodes}
+    for edge in edges:
+        degrees[edge["source"]] += edge["weight"]
+        degrees[edge["target"]] += edge["weight"]
+    
+    max_d = max(degrees.values()) if degrees else 1.0
+    if max_d == 0: max_d = 1.0
+
+    for node in nodes:
+        node["centrality"] = round(degrees[node["id"]] / max_d, 4)
+        node["influence_score"] = round(node["influence_score"] * (1.0 + node["centrality"]), 2)
+
     graph = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "system": "TENET5 ABCXYZ N vs NP Millennial Falcon",
