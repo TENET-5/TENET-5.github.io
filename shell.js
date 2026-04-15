@@ -73,6 +73,16 @@
     return;
   }
 
+  // Inject polish.css on all pages (shell + content)
+  function injectPolishCSS() {
+    if (document.querySelector('link[href*="polish"]')) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    // Use root-relative path so it works in both shell and iframe contexts
+    link.href = '/css/polish.css?v=1';
+    (document.head || document.documentElement).appendChild(link);
+  }
+
   function injectBackdrop() {
     if (!document.body || isFrameShell) return;
     document.body.classList.add('theme-1950s');
@@ -108,6 +118,7 @@
   // ── Init ────────────────────────────────────────────────────────────────
   function init() {
     injectBackdrop();
+    injectPolishCSS();
     if (isFrameShell) {
       // INDEX.HTML — frame shell: only load nav for the top bar
       ensureFrame('site-header-frame', 'div', 'prepend');
