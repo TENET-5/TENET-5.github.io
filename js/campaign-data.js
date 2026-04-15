@@ -118,6 +118,17 @@ const CAMPAIGN_CONTACTS = {
     { name: 'Department of Justice Canada', org: 'Department of Justice', email: 'webadmin@justice.gc.ca', role: 'Federal Justice', category: 'court', province: 'National', flagScore: 0, flags: [], notes: "Attorney General's department. s.504 private prosecution submissions." },
     { name: 'Law Society of Ontario', org: 'Law Society of Ontario', email: 'lawsociety@lso.ca', role: 'Lawyer Regulator', category: 'court', province: 'Ontario', flagScore: 0, flags: [], notes: 'Regulates Ontario lawyers and paralegals. For complaints about legal misconduct.' },
     { name: 'RCMP National Division', org: 'Royal Canadian Mounted Police', email: 'rcmpnationaldivision@rcmp-grc.gc.ca', role: 'Federal Police', category: 'court', province: 'National', flagScore: 0, flags: [], notes: 's.504 Criminal Code complaints can be filed with RCMP. Tip line: 1-800-420-5805.' }
+  ],
+
+  lawEnforcement: [
+    { name: 'RCMP Commissioner', org: 'Royal Canadian Mounted Police', email: 'rcmp.commissioner-commissaire.grc@rcmp-grc.gc.ca', role: 'Commissioner', category: 'lawEnforcement', province: 'National', institution: 'RCMP National HQ', flagScore: 0, flags: [], notes: 'Head of RCMP. Federal policing mandate. s.504 complaints, breach of trust investigations.' },
+    { name: 'RCMP National Division', org: 'RCMP', email: 'rcmpnationaldivision@rcmp-grc.gc.ca', role: 'National Division', category: 'lawEnforcement', province: 'National', institution: 'RCMP National Division', flagScore: 0, flags: [], notes: 'Handles federal-level criminal investigations.' },
+    { name: 'RCMP Sensitive and International Investigations', org: 'RCMP', email: '', role: 'Federal Policing', category: 'lawEnforcement', province: 'National', institution: 'RCMP Federal Policing', flagScore: 0, flags: [], notes: 'Investigates government corruption, foreign interference.' },
+    { name: 'Public Prosecution Service of Canada', org: 'PPSC', email: 'info@ppsc-sppc.gc.ca', role: 'Federal Crown Prosecutor', category: 'lawEnforcement', province: 'National', institution: 'PPSC', flagScore: 0, flags: [], notes: 'Independent federal prosecution service. Prosecutes Criminal Code offences referred by RCMP.' },
+    { name: 'Ontario Provincial Police', org: 'OPP', email: 'opp.general.inquiries@ontario.ca', role: 'Provincial Police', category: 'lawEnforcement', province: 'Ontario', institution: 'Ontario Provincial Police', flagScore: 0, flags: [], notes: 'Provincial police for Ontario. Handles investigations outside municipal jurisdictions.' },
+    { name: 'Sûreté du Québec', org: 'SQ', email: 'information@surete.qc.ca', role: 'Provincial Police', category: 'lawEnforcement', province: 'Quebec', institution: 'Sûreté du Québec', flagScore: 0, flags: [], notes: 'Provincial police for Quebec. Handles province-wide investigations.' },
+    { name: 'Military Police Complaints Commission', org: 'MPCC', email: 'mpcc@mpcc-cppm.gc.ca', role: 'Military Police Oversight', category: 'lawEnforcement', province: 'National', institution: 'MPCC', flagScore: 0, flags: [], notes: 'Civilian oversight of military police. Can order investigations into CFNIS misconduct.' },
+    { name: 'Canada Revenue Agency Criminal Investigations', org: 'CRA', email: '', role: 'Tax/Charity Fraud', category: 'lawEnforcement', province: 'National', institution: 'CRA Criminal Investigations', flagScore: 0, flags: [], notes: 'Investigates tax fraud and charity diversion. 12 CRA charity revocations documented in arms pipeline investigation.' }
   ]
 
 };
@@ -129,7 +140,8 @@ CAMPAIGN_CONTACTS.all = [
   ...CAMPAIGN_CONTACTS.thinkTanks,
   ...CAMPAIGN_CONTACTS.premiers,
   ...CAMPAIGN_CONTACTS.military,
-  ...CAMPAIGN_CONTACTS.courts
+  ...CAMPAIGN_CONTACTS.courts,
+  ...CAMPAIGN_CONTACTS.lawEnforcement
 ];
 
 // Stats
@@ -140,5 +152,6 @@ CAMPAIGN_CONTACTS.stats = {
   premiers: CAMPAIGN_CONTACTS.premiers.length,
   military: CAMPAIGN_CONTACTS.military.length,
   courts: CAMPAIGN_CONTACTS.courts.length,
+  lawEnforcement: CAMPAIGN_CONTACTS.lawEnforcement.length,
   total: CAMPAIGN_CONTACTS.all.length
 };
