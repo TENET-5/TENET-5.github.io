@@ -751,8 +751,9 @@
       startBtn.style.background = 'rgba(100,100,100,0.9)';
       startBtn.setAttribute('aria-expanded', 'true');
 
-      // Manual user click explicitly enables cross-page walkthrough.
-      setAutopilotState({ autostart: true });
+      // Autopilot PERMANENTLY DISABLED — causes voice hallucinations + memory errors
+      // Do NOT re-enable. Cross-page auto-start is BANNED.
+      clearAutopilot();
       showTourProgress();
 
       showPoint(0);
