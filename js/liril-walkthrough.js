@@ -654,8 +654,10 @@
       // ── Play audio or speak ──────────────────────
       if (!isActive) return;
 
-      // Try MP3 audio first (AvaMultilingual neural voice)
-      if (audioMode && audioElement && point.audioStart >= 0) {
+      // CEO Directive: Hazel speechSynthesis ALWAYS preferred over pre-recorded MP3
+      // Only use MP3 audio if Hazel is completely unavailable (silence > wrong voice)
+      var _hazelAvail = window.LIRIL_VOICE && window.LIRIL_VOICE.get() && window.LIRIL_VOICE.isTargetVoice(window.LIRIL_VOICE.get());
+      if (!_hazelAvail && audioMode && audioElement && point.audioStart >= 0) {
         audioElement.currentTime = point.audioStart;
 
         var endTime = point.audioEnd;
