@@ -93,9 +93,16 @@
       const iframe = document.getElementById('content_frame');
       const urlParams = new URLSearchParams(window.location.search);
       const loadPage = urlParams.get('load');
+      const shellBust = '20260415walkfix';
+
+      function withShellBust(url) {
+          if (!url) return url;
+          const joiner = url.includes('?') ? '&' : '?';
+          return url + joiner + 'cb=' + encodeURIComponent(shellBust);
+      }
       
       if (loadPage) {
-          iframe.src = loadPage;
+          iframe.src = withShellBust(loadPage);
       }
       
       iframe.addEventListener('load', () => {
@@ -114,13 +121,13 @@
       // Cross-page presentation navigation via postMessage from iframe
       window.addEventListener('message', function(e) {
           if (e.data && e.data.type === 'pres-navigate' && e.data.page) {
-              iframe.src = e.data.page;
+              iframe.src = withShellBust(e.data.page);
           }
       });
     </script>
 
   <div id="site-footer-frame"></div>
-  <script src="shell.js?v=21"></script>
+  <script src="shell.js?v=22"></script>
   <script src="js/site-chalk.js?v=2"></script>
 <script src="js/ux.js"></script>
 <!-- cinema/flow/presenter/auto-present/integrity/i18n load INSIDE iframe pages via their own script tags -->
