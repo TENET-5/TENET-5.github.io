@@ -10,13 +10,17 @@
 
   var VOICE_STORAGE_KEY = 'liril-voice-name';
 
-  /* ── TARGET VOICE — Hazel is LIRIL's canonical voice ────── */
+  /* ── TARGET VOICE — Hazel is LIRIL's ONLY voice ────── */
+  /* CEO directive: Hazel English ONLY. No fallbacks. Silence > wrong voice. */
   var TARGET_VOICES = [
     'microsoft hazel online (natural)',
     'microsoft hazel online',
     'microsoft hazel desktop',
     'microsoft hazel',
-    'hazel',
+    'hazel'
+  ];
+  /* Secondary fallbacks ONLY if Hazel is completely unavailable on the system */
+  var FALLBACK_VOICES = [
     'microsoft libby online (natural)',
     'microsoft libby online',
     'microsoft libby',
@@ -88,29 +92,33 @@
       }
     } catch(e) {}
 
-    /* P0: Explicit target voice list — Hazel is LIRIL's canonical voice */
+    /* P0: HAZEL ONLY — exact match on target voice names */
     for (var t = 0; t < TARGET_VOICES.length && !cached; t++) {
       var target = TARGET_VOICES[t];
       cached = voices.find(function(v) { return nameOf(v) === target; });
     }
-    /* P0.3: Partial match on target names */
+    /* P0.3: Partial match on Hazel target names */
     if (!cached) {
       for (var t2 = 0; t2 < TARGET_VOICES.length && !cached; t2++) {
         var partial = TARGET_VOICES[t2];
         cached = voices.find(function(v) { return nameOf(v).indexOf(partial) >= 0; });
       }
     }
-    /* P0.5: Natural/Neural en-GB female (highest quality) */
+    /* P0.5: Any voice with 'hazel' in name (catch all Hazel variants) */
+    if (!cached) cached = voices.find(function(v) { return nameOf(v).indexOf('hazel') >= 0 && !isMale(v); });
+
+    /* P1-P5: ONLY if Hazel is completely unavailable — use secondary fallbacks */
+    if (!cached) {
+      for (var f = 0; f < FALLBACK_VOICES.length && !cached; f++) {
+        cached = voices.find(function(v) { return nameOf(v) === FALLBACK_VOICES[f]; });
+      }
+      for (var f2 = 0; f2 < FALLBACK_VOICES.length && !cached; f2++) {
+        cached = voices.find(function(v) { return nameOf(v).indexOf(FALLBACK_VOICES[f2]) >= 0; });
+      }
+    }
+    /* P6: Natural/Neural en-GB female (last resort) */
     if (!cached) cached = voices.find(function(v) { return isEnGB(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
-    /* P1: Known female en-GB */
-    if (!cached) cached = voices.find(function(v) { return isEnGB(v) && isFemale(v); });
-    /* P2: Any en-GB with 'female' in name (whitelist-only — never guess) */
-    if (!cached) cached = voices.find(function(v) { return isEnGB(v) && /female/i.test(v.name); });
-    /* P3: Natural/Neural any-English female */
-    if (!cached) cached = voices.find(function(v) { return isEn(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
-    /* P4: Known female any-English */
-    if (!cached) cached = voices.find(function(v) { return isEn(v) && isFemale(v); });
-    /* P5: Any English with 'female' in name (whitelist-only — never guess) */
+    /* P7: null — silence is better than the wrong voice */
     if (!cached) cached = voices.find(function(v) { return isEn(v) && /female/i.test(v.name); });
     /* P6: null — silence is better than a male voice */
 
