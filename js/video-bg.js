@@ -42,7 +42,7 @@
   };
 
   var DEFAULT_VIDEO = 'dark_atmosphere_bg.mp4';
-  var BASE_PATH = 'media/backgrounds/';
+  var BASE_PATH = '/media/backgrounds/';
 
   // Skip on pages where video bg doesn't make sense
   var SKIP = ['index.html', 'search.html', 'sitemap.html', 'auth-callback.html',
@@ -90,9 +90,9 @@
   // CSS for video background
   var style = document.createElement('style');
   style.textContent =
-    '.t5-video-bg{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;opacity:0.25;pointer-events:none;filter:brightness(0.4) saturate(0.7)}' +
+    '.t5-video-bg{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:0;opacity:0.35;pointer-events:none;filter:brightness(0.5) saturate(0.8)}' +
     '@media(prefers-reduced-motion:reduce){.t5-video-bg{display:none}}' +
-    '@media(max-width:768px){.t5-video-bg{opacity:0.15}}';
+    '@media(max-width:768px){.t5-video-bg{opacity:0.2}}';
   document.head.appendChild(style);
 
   // Init
