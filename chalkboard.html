@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <!-- TENET5 SC_FRAME BUSTER -->
+  <script>
+    if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+      window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+    }
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Chalkboard — TENET5</title>
+  <meta name="description" content="A collaborative TENET5 public chalkboard. Canadian Google accounts can draw, erase, and leave marks that persist for one hour.">
+  <meta property="og:title" content="Public Chalkboard — TENET5">
+  <meta property="og:description" content="Collaborative one-hour chalkboard for Canadian Google-authenticated users.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:url" content="https://tenet5.github.io/chalkboard.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Public Chalkboard — TENET5">
+  <meta name="twitter:description" content="A one-hour collaborative chalkboard for Canadian Google-authenticated users.">
+  <link rel="canonical" href="https://tenet5.github.io/chalkboard.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Public Chalkboard — TENET5",
+    "url": "https://tenet5.github.io/chalkboard.html",
+    "publisher": {
+      "@type": "Organization",
+      "name": "TENET5",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://tenet5.github.io/img/tenet5_logo.png"
+      }
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="css/inline_generated.css">
+  <style>
+    .chalk-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 2rem 1rem 3rem;
+    }
+    .chalk-hero {
+      margin-bottom: 1rem;
+      padding: 1.25rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: linear-gradient(180deg, rgba(14, 18, 28, 0.96), rgba(9, 13, 20, 0.98));
+      box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+    }
+    .chalk-kicker {
+      display: inline-flex;
+      gap: 0.45rem;
+      align-items: center;
+      padding: 0.32rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196, 30, 58, 0.2);
+      background: rgba(196, 30, 58, 0.08);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+    .chalk-hero h1 {
+      margin-top: 0.8rem;
+      margin-bottom: 0.5rem;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+    }
+    .chalk-hero p {
+      max-width: 760px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0;
+    }
+    .chalk-note {
+      margin-top: 0.85rem;
+      color: var(--text-tertiary);
+      font-size: 0.86rem;
+    }
+    .chalk-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 1rem;
+      align-items: start;
+    }
+    .chalk-panel,
+    .chalk-side {
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: linear-gradient(180deg, rgba(14, 18, 28, 0.96), rgba(9, 13, 20, 0.98));
+      box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+    }
+    .chalk-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      padding: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      align-items: center;
+    }
+    .chalk-tool-btn,
+    .chalk-auth-btn {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-primary);
+      border-radius: 999px;
+      padding: 0.52rem 0.8rem;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+    .chalk-tool-btn.active {
+      border-color: rgba(14,165,233,0.4);
+      background: rgba(14,165,233,0.12);
+      color: #bdeeff;
+    }
+    .chalk-auth-btn.primary {
+      border-color: rgba(196,30,58,0.35);
+      background: rgba(196,30,58,0.12);
+    }
+    .chalk-toolbar label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .chalk-toolbar input[type="range"] { width: 110px; }
+    .chalk-toolbar input[type="color"] {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      padding: 0;
+    }
+    .chalk-board-wrap {
+      position: relative;
+      padding: 0.9rem;
+    }
+    .chalk-surface {
+      position: relative;
+      width: 100%;
+      min-height: 480px;
+      height: min(68vh, 760px);
+      border-radius: 12px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.05), transparent 18%),
+        radial-gradient(circle at 90% 80%, rgba(255,255,255,0.04), transparent 16%),
+        linear-gradient(180deg, #1c3429 0%, #182e24 100%);
+      border: 1px solid rgba(201,168,76,0.18);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.28);
+    }
+    .chalk-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    #chalkboard-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .chalk-lock {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(5, 8, 12, 0.58);
+      backdrop-filter: blur(4px);
+      text-align: center;
+      transition: opacity 0.2s ease;
+    }
+    .chalk-lock.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .chalk-lock-card {
+      max-width: 460px;
+      padding: 1rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(10, 15, 22, 0.9);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    }
+    .chalk-lock-card h2 { margin-bottom: 0.45rem; font-size: 1.1rem; }
+    .chalk-lock-card p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      margin-bottom: 0.8rem;
+    }
+    .chalk-status {
+      margin: 0.4rem 0 0;
+      color: var(--text-tertiary);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+    }
+    .chalk-status[data-tone="good"] { color: #86efac; }
+    .chalk-status[data-tone="warn"] { color: #fbbf24; }
+    .chalk-status[data-tone="bad"] { color: #fca5a5; }
+    .chalk-meta {
+      display: grid;
+      gap: 0.85rem;
+      padding: 1rem;
+    }
+    .chalk-meta-card {
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 0.85rem;
+    }
+    .chalk-meta-card h3 {
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+    .chalk-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+    .chalk-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+    }
+    .chalk-pill strong { color: var(--text-primary); }
+    .chalk-legend {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .chalk-legend li {
+      color: var(--text-secondary);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+    @media (max-width: 920px) {
+      .chalk-layout { grid-template-columns: 1fr; }
+      .chalk-side { order: -1; }
+      .chalk-surface { min-height: 360px; height: 58vh; }
+    }
+    @media (max-width: 600px) {
+      .chalk-shell { padding: 1rem 0.75rem 2rem; }
+      .chalk-toolbar { padding: 0.75rem; }
+      .chalk-tool-btn,
+      .chalk-auth-btn { min-height: 42px; }
+      .chalk-surface { height: 52vh; }
+    }
+  </style>
+</head>
+<body class="theme-1950s">
+  <div id="site-header-frame"></div>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <main id="main" role="main" class="chalk-shell">
+    <section class="chalk-hero editorial-surface">
+      <div class="chalk-kicker" data-narrate="Public chalkboard. One hour memory window. Shared public writing with accountable identities.">Public chalkboard • one-hour memory</div>
+      <h1 data-narrate="This public chalkboard lets Canadian visitors sign in with Google, write directly on the board, and erase marks with a shared wipe brush. Every stroke is linked to the account that made it and expires automatically after one hour.">Public Chalkboard</h1>
+      <p>Canadian visitors can sign in with Google, write or draw directly on the board, and use the wipe brush to clear any mark. Every stroke is tied to the signed-in account and automatically expires after one hour.</p>
+      <div class="chalk-note" data-narrate="The board is designed for touch and mouse input on mobile and desktop.">Designed for touch and mouse input on mobile and desktop.</div>
+    </section>
+
+    <section class="chalk-layout">
+      <div class="chalk-panel">
+        <div class="chalk-toolbar">
+          <button class="chalk-tool-btn active" id="tool-draw" type="button">Chalk</button>
+          <button class="chalk-tool-btn" id="tool-erase" type="button">Wipe Brush</button>
+          <label>Size <input id="brush-size" type="range" min="2" max="24" value="5"></label>
+          <label>Colour <input id="brush-color" type="color" value="#f5f2ec"></label>
+          <button class="chalk-auth-btn primary" id="chalk-signin" type="button">Sign in with Google</button>
+          <button class="chalk-auth-btn" id="chalk-signout" type="button">Sign out</button>
+        </div>
+        <div class="chalk-board-wrap">
+          <div class="chalk-surface">
+            <div class="chalk-grid" aria-hidden="true"></div>
+            <canvas id="chalkboard-canvas" aria-label="Collaborative chalkboard canvas"></canvas>
+            <div class="chalk-lock" id="chalkboard-lock">
+              <div class="chalk-lock-card">
+                <h2>Google sign-in required</h2>
+                <p>To write on the board, users must sign in with Google and appear to be using a Canadian account context or Canadian device locale.</p>
+                <button class="chalk-auth-btn primary" id="chalk-signin-overlay" type="button">Continue with Google</button>
+                <div class="chalk-status" id="chalkboard-status">Board is view-only until sign-in is complete.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="chalk-side">
+        <div class="chalk-meta">
+          <div class="chalk-meta-card">
+            <h3>Board rules</h3>
+            <ul class="chalk-legend">
+              <li>Marks last for one hour.</li>
+              <li>Only signed-in Canadian Google users can draw.</li>
+              <li>The wipe brush can clear anyone’s marks.</li>
+            </ul>
+          </div>
+          <div class="chalk-meta-card">
+            <h3>Linked accounts</h3>
+            <div class="chalk-pills" id="chalkboard-contributors">
+              <span class="chalk-pill">No marks yet</span>
+            </div>
+          </div>
+          <div class="chalk-meta-card">
+            <h3>Live status</h3>
+            <div class="chalk-status" id="chalk-sync-status">Waiting for board data…</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="source-note" style="max-width:900px;margin:1.5rem auto 0;padding:0 0.25rem;">
+      <strong>Sources and controls:</strong> Google-authenticated session identity, Supabase row-level storage, one-hour expiry timestamps, and local device locale checks for Canadian context. No permanent wall retention is intended beyond the rolling one-hour window.
+    </div>
+  </main>
+
+  <div id="site-footer-frame"></div>
+  <script src="js/unified-timeline.js?v=2"></script>
+  <script src="shell.js?v=22"></script>
+  <script src="js/chalkboard.js?v=1"></script>
+</body>
+</html>
