@@ -11,41 +11,6 @@ const RSS_FEEDS = [
 
 let globalHeadlines = [];
 
-async function fetchNews() {
-  const container = document.getElementById('news-feed');
-  container.innerHTML = '<div style="text-align:center; padding: 2rem; color: #9ca3af;">Scanning networks...</div>';
-  
-  let allItems = [];
-  
-  for (const feed of RSS_FEEDS) {
-    try {
-      // Using rss2json proxy to bypass CORS
-      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`);
-      const data = await res.json();
-      
-      if (data.status === 'ok') {
-        const items = data.items.slice(0, 8).map(item => ({
-          title: item.title,
-          link: item.link,
-          date: new Date(item.pubDate),
-          source: feed.name
-        }));
-        allItems = allItems.concat(items);
-      }
-    } catch (err) {
-      console.error(`Failed to fetch ${feed.name}:`, err);
-    }
-  }
-
-  // Sort chronologically (newest first)
-  allItems.sort((a, b) => b.date - a.date);
-  
-  // Keep top 20
-  globalHeadlines = allItems.slice(0, 20);
-  
-  renderNews();
-}
-
 function renderNews() {
   const container = document.getElementById('news-feed');
   if (globalHeadlines.length === 0) {
@@ -55,16 +20,94 @@ function renderNews() {
   
   let html = '';
   globalHeadlines.forEach(item => {
+    const stamp = item.when
+      ? new Date(item.when * 1000).toLocaleString()
+      : (item.date ? new Date(item.date).toLocaleString() : 'Recent');
     html += `
       <div class="news-item">
         <div class="news-item-source">${item.source}</div>
         <h3 class="news-item-title"><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
-        <div class="news-item-date">${item.date.toLocaleString()}</div>
+        <div class="news-item-date">${stamp}</div>
       </div>
     `;
   });
   
   container.innerHTML = html;
+}
+
+async function loadCachedNews() {
+  try {
+    const res = await fetch('data/news/headlines.json', { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`Status ${res.status}`);
+    }
+    const data = await res.json();
+    if (Array.isArray(data.headlines) && data.headlines.length) {
+      globalHeadlines = data.headlines;
+      renderNews();
+      return true;
+    }
+  } catch (err) {
+    console.warn('Cached NemoClaw headlines unavailable:', err);
+  }
+  return false;
+}
+
+async function loadCachedBrief() {
+  const contentDiv = document.getElementById('ai-brief-content');
+  const statusBadge = document.getElementById('brief-status');
+
+  try {
+    const res = await fetch('data/news/brief.json', { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`Status ${res.status}`);
+    }
+    const data = await res.json();
+    if (data.brief) {
+      if (window.marked) {
+        contentDiv.innerHTML = window.marked.parse(data.brief);
+      } else {
+        contentDiv.innerHTML = `<pre style="white-space:pre-wrap; font-family:inherit;">${data.brief}</pre>`;
+      }
+      statusBadge.className = 'status-badge status-live';
+      statusBadge.textContent = 'AUTO BRIEF READY';
+      return true;
+    }
+  } catch (err) {
+    console.warn('Cached NemoClaw brief unavailable:', err);
+  }
+  return false;
+}
+
+async function fetchNews() {
+  const container = document.getElementById('news-feed');
+  container.innerHTML = '<div style="text-align:center; padding: 2rem; color: #9ca3af;">Scanning networks...</div>';
+  
+  let allItems = [];
+  
+  for (const feed of RSS_FEEDS) {
+    try {
+      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`);
+      const data = await res.json();
+      
+      if (data.status === 'ok') {
+        const items = data.items.slice(0, 8).map(item => ({
+          title: item.title,
+          link: item.link,
+          date: item.pubDate,
+          when: Math.floor(new Date(item.pubDate).getTime() / 1000),
+          source: feed.name
+        }));
+        allItems = allItems.concat(items);
+      }
+    } catch (err) {
+      console.error(`Failed to fetch ${feed.name}:`, err);
+    }
+  }
+
+  allItems.sort((a, b) => (b.when || 0) - (a.when || 0));
+  globalHeadlines = allItems.slice(0, 20);
+  renderNews();
 }
 
 async function generateAI_Brief() {
@@ -135,10 +178,15 @@ Do not hallucinate. Only use the provided headlines. Make it professional and an
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchNews();
+document.addEventListener('DOMContentLoaded', async () => {
   const btn = document.getElementById('btn-generate-brief');
   if (btn) {
     btn.addEventListener('click', generateAI_Brief);
+  }
+
+  const cached = await loadCachedNews();
+  await loadCachedBrief();
+  if (!cached) {
+    await fetchNews();
   }
 });

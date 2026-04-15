@@ -19,7 +19,20 @@ from pathlib import Path
 import edge_tts
 
 # ClaraNeural — Canadian English, clear and neutral. The canonical LIRIL voice.
-VOICE = "en-CA-ClaraNeural"
+# Upgraded to AvalMultilingualAudio supporting AvaMultilingualNeural with Clara fallback.
+class AvalMultilingualAudio:
+    def __init__(self, languages: list[str] = None):
+        self.languages = languages or ["en"]
+        self.primary_voice = "en-US-AvaMultilingualNeural"
+        self.fallback_voice = "en-CA-ClaraNeural"
+
+    def get_voice(self, language: str = "en") -> str:
+        if language.lower() in ["en", "fr"]:
+            return self.primary_voice
+        return self.fallback_voice
+
+audio_manager = AvalMultilingualAudio()
+VOICE = audio_manager.get_voice("en")
 RATE = "+10%"      # Faster — urgency, anger, intensity
 PITCH = "-4Hz"     # Deeper — menacing, authoritative
 OUTPUT_DIR = Path(__file__).parent.parent / "audio"

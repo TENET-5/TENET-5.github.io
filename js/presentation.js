@@ -1706,7 +1706,8 @@
   /* Try to load audio/<slug>.mp3 + .vtt for the current page */
   (function _presLoadAudio() {
     var slug = (window.location.pathname.split('/').pop() || '').replace(/\.html$/, '');
-    if (!slug) return;
+    if (!slug || slug === 'index') slug = 'home';
+    
     var mp3 = 'audio/' + slug + '.mp3';
     var vtt = 'audio/' + slug + '.vtt';
     fetch(mp3, { method: 'HEAD' }).then(function(r) {

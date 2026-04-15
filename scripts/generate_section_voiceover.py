@@ -13,10 +13,10 @@ from html.parser import HTMLParser
 
 import edge_tts
 
-# ── Voice config — LIRIL CANON (must match generate_voiceover.py) ────────────
-# AvaMultilingual is LIRIL's canonical voice. DO NOT change without updating
-# generate_voiceover.py simultaneously — voice drift causes male/female mismatch.
-VOICE = "en-US-AvaMultilingualNeural"
+# ── Voice config — LIRIL CANON (matches generate_voiceover.py) ────────────
+# en-CA-ClaraNeural is the canonical human-quality voice for TENET5 narration.
+# This keeps all site audio consistent and reduces voice drift.
+VOICE = "en-CA-ClaraNeural"
 RATE = "+10%"      # Match page narration pacing
 PITCH = "-4Hz"     # Match page narration depth
 OUTPUT_DIR = Path(__file__).parent.parent / "audio" / "dossiers"

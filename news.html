@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en-CA">
 <head>
     <!-- TENET5 SC_FRAME BUSTER -->
     <script>
@@ -7,294 +7,571 @@
           window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
       }
     </script>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>News & Intelligence — TENET5</title>
-  <meta name="description" content="Autonomous Canadian news intelligence aggregator. Real-time headlines and AI-generated threat & accountability briefs.">
-  <meta property="og:title" content="News & Intelligence — TENET5">
-  <meta property="og:description" content="Live Canadian news aggregation and autonomous AI intelligence briefs.">
+  <title>News — OSINT Intelligence Feed | TENET5</title>
+  <meta name="description" content="Real-time OSINT intelligence feed monitoring Canadian politics, MAID legislation, procurement, and government accountability.">
+  <meta property="og:title" content="News — OSINT Intelligence Feed | TENET5">
+  <meta property="og:description" content="Real-time intelligence feed from TENET5 OSINT pipeline.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://tenet5.github.io/news.html">
-  <meta name="theme-color" content="#2E3440">
-  <link rel="stylesheet" href="style.css?v=20">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta property="og:site_name" content="TENET5">
+  <link rel="canonical" href="https://tenet5.github.io/news.html">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="css/inline_generated.css">
   <style>
     .news-hero {
-      background: linear-gradient(135deg, #1e2337 0%, #161a2b 100%);
-      padding: var(--s-xl, 4rem) var(--s-md, 1rem);
-      text-align: center;
-      border-bottom: 1px solid var(--border, #2a2f45);
+      max-width: 960px; margin: 0 auto; padding: 3rem 2rem 1.5rem;
+      text-align: center; position: relative;
     }
     .news-hero h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      background: -webkit-linear-gradient(0deg, #e2e8f0, #c41e3a);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-family: var(--font-typewriter, 'Special Elite', monospace);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--text-primary);
+      letter-spacing: 2px;
     }
-    .news-hero p {
-      color: var(--text-tertiary, #9ca3af);
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
+    .news-hero .subtitle {
+      font-family: var(--font-archival, 'Courier Prime', monospace);
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      letter-spacing: 1px;
+    }
+    .news-hero .live-dot {
+      display: inline-block; width: 8px; height: 8px;
+      background: #dc2626; border-radius: 50%;
+      animation: livePulse 2s ease-in-out infinite;
+      margin-right: 6px; vertical-align: middle;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 4px rgba(220,38,38,0.6); }
+      50% { opacity: 0.4; box-shadow: none; }
     }
 
     .news-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--s-lg, 2rem);
-      max-width: 1400px;
-      margin: var(--s-lg, 2rem) auto;
-      padding: 0 var(--s-md, 1rem);
+      max-width: 960px; margin: 0 auto; padding: 0 2rem 3rem;
+      display: flex; flex-direction: column; gap: 1rem;
     }
-    @media (max-width: 900px) {
-      .news-grid { grid-template-columns: 1fr; }
-    }
-
-    .news-panel {
-      background: var(--bg-card, #1e2337);
-      border: 1px solid var(--border, #2a2f45);
+    .news-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid rgba(196, 30, 58, 0.5);
       border-radius: 8px;
-      padding: var(--s-lg, 2rem);
-      display: flex;
-      flex-direction: column;
-    }
-    .news-panel h2 {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 0;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border, #2a2f45);
-      font-size: 1.4rem;
-    }
-
-    /* Live Feed */
-    .feed-container {
-      max-height: 800px;
-      overflow-y: auto;
-      padding-right: 10px;
-      margin-top: 1rem;
-    }
-    .feed-container::-webkit-scrollbar { width: 6px; }
-    .feed-container::-webkit-scrollbar-track { background: transparent; }
-    .feed-container::-webkit-scrollbar-thumb { background: var(--border, #2a2f45); border-radius: 3px; }
-
-    .news-item {
-      padding: 1rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .news-item:last-child { border-bottom: none; }
-    .news-item-source {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      color: #1da1f2;
-      font-weight: 600;
-      margin-bottom: 0.3rem;
-    }
-    .news-item-title {
-      font-size: 1rem;
-      color: var(--text-primary, #e2e8f0);
-      margin: 0 0 0.5rem 0;
-      line-height: 1.4;
-    }
-    .news-item-title a { color: inherit; text-decoration: none; transition: color 0.2s; }
-    .news-item-title a:hover { color: var(--accent, #c41e3a); }
-    .news-item-date {
-      font-size: 0.75rem;
-      color: var(--text-tertiary, #9ca3af);
-    }
-
-    /* Intelligence Brief */
-    .ai-brief-container {
-      margin-top: 1rem;
-      flex: 1;
-      background: var(--bg-surface, #161a2b);
-      border: 1px solid var(--border, #2a2f45);
-      border-radius: 6px;
-      padding: 1.5rem;
+      padding: 1.2rem 1.5rem;
       position: relative;
     }
-    .ai-brief-content {
-      color: var(--text-primary, #e2e8f0);
-      line-height: 1.6;
-      font-size: 0.95rem;
+    .news-card h3 {
+      font-size: 1rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 0.4rem 0 0.3rem;
     }
-    .ai-brief-content h3 { font-size: 1.1rem; color: var(--accent, #c41e3a); margin-top: 1.5rem; margin-bottom: 0.5rem; }
-    .ai-brief-content h3:first-child { margin-top: 0; }
-    .ai-brief-content ul { padding-left: 1.2rem; margin-bottom: 1.5rem; }
-    .ai-brief-content li { margin-bottom: 0.5rem; color: var(--text-secondary, #cbd5e1); }
-
-    .status-badge {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 600;
+    .news-card h3 a {
+      color: var(--text-primary);
+      text-decoration: none;
     }
-    .status-live { background: rgba(0, 255, 128, 0.1); color: #00ff80; border: 1px solid rgba(0, 255, 128, 0.2); }
-    .status-analyzing { background: rgba(245, 166, 35, 0.1); color: #f5a623; border: 1px solid rgba(245, 166, 35, 0.2); }
-
-    .brief-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border, #2a2f45);
+    .news-card h3 a:hover {
+      color: var(--accent-bright);
+      text-decoration: underline;
     }
-    .btn-analyze {
-      background: var(--accent, #c41e3a);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: opacity 0.2s;
+    .news-card p {
+      font-size: 0.85rem; color: var(--text-secondary);
+      line-height: 1.6; margin: 0;
     }
-    .btn-analyze:hover { opacity: 0.9; }
-    .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
+    .news-meta {
+      display: flex; gap: 1rem; align-items: center;
+      font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-tertiary);
+    }
+    .news-source {
+      background: rgba(196, 30, 58, 0.1);
+      color: var(--accent);
+      padding: 1px 6px; border-radius: 3px;
+      font-weight: 700;
+    }
+    .news-score {
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    .news-keywords {
+      font-size: 0.7rem; color: var(--text-tertiary);
+      margin-top: 0.5rem; font-style: italic;
+    }
+    .news-empty {
+      text-align: center; padding: 3rem;
+      color: var(--text-tertiary);
+      font-family: var(--font-archival, monospace);
+    }
+    .news-footer {
+      max-width: 960px; margin: 0 auto; padding: 1rem 2rem 3rem;
+      text-align: center; font-size: 0.75rem;
+      color: var(--text-tertiary);
+      font-family: var(--font-archival, monospace);
+    }
   </style>
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="News & Intelligence — TENET5">
-  <meta property="og:url" content="https://tenet5.github.io/news.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="News & Intelligence — TENET5">
-  <link rel="canonical" href="https://tenet5.github.io/news.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "News & Intelligence \u2014 TENET5",
-  "url": "https://tenet5.github.io/news.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet5.github.io/img/tenet5_logo.png"
-    }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-    <link rel="stylesheet" href="css/inline_generated.css">
-  <meta property="og:image" content="https://tenet5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
 </head>
 <body>
-  <a href="#main" class="skip-link">Skip to main content</a>
-<div class="grain-overlay"></div>
-<div class="vignette"></div>
-
-
   <div id="site-header-frame"></div>
-<header class="news-hero">
-    <h1 id="n-02153b36" data-narrate="News & Intelligence — TENET5. Live aggregation of Canadian civic, political, and accountability news cross-referenced with TENET5 AI intelligence." >Autonomous Intelligence Engine</h1>
-    <p>Live aggregation of Canadian civic, political, and accountability news cross-referenced with TENET5 AI intelligence.</p>
-  </header>
+  <a href="#main" class="skip-link">Skip to main content</a>
 
-  <main id="main" role="main" class="news-grid">
-    <!-- Left: Live Feed -->
-    <div class="news-panel">
-      <h2>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg>
-        Live Wire 
-        <span class="status-badge status-live tnt-style-176">LIVE SYNC</span>
-      </h2>
-      <div class="feed-container" id="news-feed">
-        <div class="tnt-style-177">Initializing news protocols...</div>
+  <main id="main" role="main">
+    <section class="news-hero" data-narrate="TENET5 OSINT Intelligence Feed. This page is automatically updated by the NemoClaw news scanner daemon. It monitors Canadian political RSS feeds for stories related to MAID, Brookfield, procurement waste, foreign interference, and government accountability. Every article is scored for relevance to TENET5 investigations. The scanner runs every two hours, twenty-four seven.">
+      <div class="film-countdown" aria-hidden="true">7</div>
+      <h1><span class="live-dot"></span>OSINT INTELLIGENCE FEED</h1>
+      <p class="subtitle">NemoClaw Scanner &bull; Last updated: 2026-04-15 04:34 UTC</p>
+    </section>
+
+    <div class="news-grid">
+
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">National Post</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 14</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
       </div>
+      <h3><a href="https://nationalpost.com/news/politics/no-election-no-imminent-shuffle-and-no-more-talk-of-cats-and-dogs-in-committee-carney-says" target="_blank" rel="noopener">No election, no imminent shuffle, and no more talk of ‘cats and dogs’ in committee, Carney says</a></h3>
+      <p>The prime minister reserved his strongest comments and plans for House of Commons committees</p>
+      <div class="news-keywords">carney, committee</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">National Post</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://nationalpost.com/opinion/john-ivison-mark-carneys-stunning-ambition-on-titanic-anniversary" target="_blank" rel="noopener">John Ivison: Reflections on Mark Carney’s ambitions on the Titanic’s anniversary</a></h3>
+      <p>At the moment, Carney and his Liberal party appear unsinkable, but there are still plenty of political icebergs bobbing about</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">National Post</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://nationalpost.com/editors/afternoon-front-page-7" target="_blank" rel="noopener">Afternoon front page: Carney reveals plans for new majority government; a battle for free speech in Alberta; and more</a></h3>
+      <p>Catch up on the stories we’re following today</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 31 Mar 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-carney-avoids-describing-chinas-treatment-of-uyghurs-as-genocide/" target="_blank" rel="noopener">Carney avoids describing China’s treatment of Uyghurs as genocide</a></h3>
+      <p>Prime Minister is still navigating fallout from Liberal MP casting doubt on forced labour in China</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 31 Mar 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/canada/article-carney-israel-invasion-lebanon/" target="_blank" rel="noopener">Carney condemns Israel’s ‘illegal’ invasion of Lebanon</a></h3>
+      <p>Prime Minister’s call for a ceasefire marks a strengthening of government’s language as armed conflict worsens</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 13</span>
+        <span class="news-date">Tue, 31 Mar 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-carney-prorogue-parliament-april-13-byelections/" target="_blank" rel="noopener">Carney commits to not proroguing Parliament after April 13 by-elections</a></h3>
+      <p>Prime Minister denies Globe report that government was considering prorogation if Liberals win in all three ridings</p>
+      <div class="news-keywords">carney, parliament</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 17</span>
+        <span class="news-date">Tue, 31 Mar 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-politics-insider-carney-commits-to-not-proroguing-parliament/" target="_blank" rel="noopener">Politics Insider: Carney commits to not proroguing Parliament</a></h3>
+      <p>The Prime Minister told reporters he will leave the committee system as is</p>
+      <div class="news-keywords">carney, committee, parliament</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 31 Mar 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-will-10-a-day-child-care-ever-be-nationwide-carney-wont-say/" target="_blank" rel="noopener">Will $10-a-day child care ever be nationwide? Carney won’t say</a></h3>
+      <p>Prime Minister says the government continues to work with the provinces on the initiative as the original deadline to achieve the goal passes</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 07 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-carney-breaks-down-plans-to-spend-51-billion-to-address-infrastructure/" target="_blank" rel="noopener">Carney breaks down plans to spend $51-billion to address infrastructure gaps across Canada</a></h3>
+      <p>Includes $27.8-billion over the next 10 years for infrastructure including roads, bridges, water and sewer systems and $6-billion for other major local projects</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 07 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-politics-insider-carney-tries-to-show-his-work-in-brampton/" target="_blank" rel="noopener">Politics Insider: Carney tries to show his work in Brampton</a></h3>
+      <p>The PM visited the city to officially launch the Build Communities Strong Fund that his government announced in the fall budget</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Wed, 08 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/video-ontario-mp-marilyn-gladu-crosses-floor-to-join-carneys-liberal-party/" target="_blank" rel="noopener">Ontario MP Marilyn Gladu crosses floor to join Carney's Liberal Party</a></h3>
+      <p>Ontario MP Marilyn Gladu is welcomed into the Liberal caucus by Prime Minister Mark Carney and Artificial Intelligence Minister Evan Solomon after crossing the floor from the Conservatives. She is the</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Thu, 09 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-christiane-chris-fox-ethics-breach-ircc/" target="_blank" rel="noopener">Deputy minister breached conflict of interest rules by intervening in hiring decision, says ethics watchdog</a></h3>
+      <p>Senior public servant Christiane Fox influenced the hiring of a man she knew from when they were both student athletes, reports says</p>
+      <div class="news-keywords">conflict of interest</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Thu, 09 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/canada/article-with-carney-riding-high-liberals-meet-ahead-of-crucial-by-elections/" target="_blank" rel="noopener">With Carney riding high, Liberals meet ahead of crucial by-elections</a></h3>
+      <p>After floor-crossing by Conservative MP Gladu, Liberals appear poised to win a majority of seats in the House</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Thu, 09 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-politics-insider-pierre-poilievre-has-big-feelings-about-floor/" target="_blank" rel="noopener">Politics Insider: Pierre Poilievre has big feelings about floor crossers</a></h3>
+      <p>Plus, first ‘nation-building’ project begins construction and Carney takes a call from space</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Fri, 10 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/opinion/article-liberal-party-accept-conflicting-values-mark-carney/" target="_blank" rel="noopener">A Liberal Party in a triumphal mood finds it easier to accept conflicting values</a></h3>
+      <p>The values to be highlighted at Carney’s convention are noticeably different from the ones seen at Trudeau’s event in 2023</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Thu, 09 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-marilyn-gladu-mark-carney-floor-crossing-liberals-majority-government/" target="_blank" rel="noopener">Carney says Liberal values are unchanged after socially conservative MP joins party</a></h3>
+      <p>Former Conservative Marilyn Gladu has criticized COVID-19 restrictions and supported bills that would curtail access to abortion</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Wed, 08 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-marilyn-gladu-floor-crossing-conservatives-liberals-mark-carney/" target="_blank" rel="noopener">Conservative MP Marilyn Gladu crosses floor to Liberals</a></h3>
+      <p>Ontario legislator is the latest MP to join the Liberals, bringing Mark Carney’s government one seat shy of a majority</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Fri, 10 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-carney-says-next-governor-general-will-speak-french-and-english/" target="_blank" rel="noopener">Carney says next governor general will speak French and English</a></h3>
+      <p>Gov. Gen. Mary Simon speaks English and Inuktitut but has failed to become fluent in French despite taking lessons</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Fri, 10 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/sports/hockey/article-pm-mark-carney-visited-canadiens-dressing-room-after-a-big-win-over/" target="_blank" rel="noopener">PM Mark Carney visited Canadiens’ dressing room after a big win over Lightning</a></h3>
+      <p>PM was on hand to see Cole Caufield score his 50th goal of the season, spoke with coach Martin St. Louis about leadership</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Sat, 11 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-christiane-fox-deputy-minister-conflict-of-interest-rules/" target="_blank" rel="noopener">Deputy minister who broke conflict of interest rules defends intervening in hiring decision</a></h3>
+      <p>Christiane Fox says she was aiming to promote diversity when she helped a man land a job at Immigration, Refugees and Citizenship Canada in 2023</p>
+      <div class="news-keywords">conflict of interest</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Sat, 11 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-carney-preaches-national-unity-in-campaign-style-speech-at-liberal/" target="_blank" rel="noopener">Carney preaches national unity in campaign-style speech at Liberal convention</a></h3>
+      <p>Prime Minister’s remarks come with his party on cusp of securing majority government through by-elections</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Sat, 11 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-liberals-courting-as-many-as-eight-more-potential-floor-crossers/" target="_blank" rel="noopener">Liberals courting as many as eight more potential floor-crossers, sources say</a></h3>
+      <p>Marilyn Gladu’s move this week put Mark Carney on the verge of House of Commons majority</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Sun, 12 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-carney-finland-president-alexander-stubb/" target="_blank" rel="noopener">Carney to meet Finnish President Alexander Stubb in Ottawa this week</a></h3>
+      <p>Leaders will work to deepen trade and defence ties in first official bilateral meeting, Carney’s office says</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Mon, 13 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-liberals-carney-byelections-toronto-terrebonne/" target="_blank" rel="noopener">Carney’s government shifts into new gear with hopes of reaching majority</a></h3>
+      <p>By-elections taking place in Toronto and Quebec follow five floor-crossings to the Liberals, most recently Marilyn Gladu last Wednesday</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Mon, 13 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-politics-insider-by-elections-expected-to-push-carney-liberals-into/" target="_blank" rel="noopener">Politics Insider: By-elections expected to push Carney Liberals into majority territory</a></h3>
+      <p>Voters are casting ballots in Toronto and Montreal in a trio of by-elections today</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/opinion/article-byelection-results-liberal-majority-government-carney-phase-2/" target="_blank" rel="noopener">By-elections start Phase 2 of the Carney government</a></h3>
+      <p>It has a majority in the House of Commons and that allows it to look further ahead</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 13</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-by-election-results-terrebonne-toronto-university-rosedale-scarborough/" target="_blank" rel="noopener">Liberals secure majority government with sweep of three by-elections</a></h3>
+      <p>Carney vows to work collaboratively in reshaped Parliament, with focus on getting big projects built quickly</p>
+      <div class="news-keywords">carney, parliament</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Mon, 13 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/canada/article-carney-magyar-hungary-election-orban/" target="_blank" rel="noopener">Carney welcomes Magyar’s Hungarian election win that shifts stance on Ukraine, democracy</a></h3>
+      <p>Peter Magyar led his Tisza party to a supermajority on a platform promising to restore ties with allies and root out corruption</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/canada/article-liberals-majority-reader-questions/" target="_blank" rel="noopener">What changes now that Carney’s Liberals have a majority? Ask us your questions</a></h3>
+      <p>The majority government could bring big changes to Canada’s political landscape. To help make sense of the shift, our reporters will answer any questions you have</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-politics-insider-carney-says-majority-government-will-move-quicker-on/" target="_blank" rel="noopener">Politics Insider: Carney says majority government will move quicker on economic priorities</a></h3>
+      <p>The Prime Minister also announced a tax break on gas and diesel today</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-finance-minister-will-release-spring-economic-update-on-april-28/" target="_blank" rel="noopener">Finance Minister will release spring economic update on April 28</a></h3>
+      <p>Prime Minister Mark Carney said the update will include additional policy measures to support Canadians</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-carney-gas-diesel-tax-break/" target="_blank" rel="noopener">Buoyed by majority, Carney predicts more ‘substance’ from MPs, unveils temporary gas tax break</a></h3>
+      <p>The measure, framed as a response to rising energy prices, is expected to remain in place until Sept. 7</p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">Globe Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Wed, 15 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.theglobeandmail.com/politics/article-nato-defence-arctic-finnish-president-stubb/" target="_blank" rel="noopener">Canada, Nordic countries can work together to defend the Arctic, Finnish President says</a></h3>
+      <p>Alexander Stubb spoke to The Globe and Mail during a visit to Ottawa to meet with Mark Carney and his cabinet ministers</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Sat, 11 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/floor-crosser-liberal-carney-poilievre-majority-government-9.7160473?cmp=rss" target="_blank" rel="noopener">Liberals share new details of how they attracted first floor-crosser, Chris d'Entremont</a></h3>
+      <p>In the wake of another Conservative breaking ranks to join Prime Minister Mark Carney, Liberal MPs are sharing new details about how they successfully convinced the first floor-crosser — Nova Scotia M</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Sat, 11 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/carney-liberal-convention-9.7160547?cmp=rss" target="_blank" rel="noopener">Carney rallies Liberal supporters ahead of crucial byelections that could solidify his power</a></h3>
+      <p>Prime Minister Mark Carney relied on a message of national unity to rally a crowd of thousands of supporters ahead of three closely watched byelections that could secure his Liberals a majority govern</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Sun, 12 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/carney-liberal-convention-speech-analysis-9.7160770?cmp=rss" target="_blank" rel="noopener">On verge of a majority, Carney offers reassurance and a measure of caution</a></h3>
+      <p>On Monday, Mark Carney's Liberals may gain the seats necessary to ensure they will have another three years ahead of them. That would be a lot of time to do a lot of things — but there are a lot of th</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#f59e0b;">RELEVANCE 10</span>
+        <span class="news-date">Mon, 13 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/livestory/byelections-terrebonne-university-rosedale-scarborough-southwest-9.7162168?cmp=rss" target="_blank" rel="noopener">Carney secures majority government with sweep of 3 byelections</a></h3>
+      <p></p>
+      <div class="news-keywords">carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Mon, 13 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/byelection-liberal-conservatives-carney-majority-government-9.7161054?cmp=rss" target="_blank" rel="noopener">Carney clinches a majority government with 3 Liberal byelection wins</a></h3>
+      <p>Prime Minister Mark Carney clinched a majority government Monday after three byelection wins in central Canada, a significant result that will give the governing party full control of the House of Com</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Mon, 13 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/carney-majority-byelections-analysis-9.7162517?cmp=rss" target="_blank" rel="noopener">Mark Carney enters his majority era</a></h3>
+      <p>There have been a total of 24 prime ministers in Canada's history, but before Monday night only 13 could claim to have led their party to a majority of seats in the House of Commons. Mark Carney is no</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/carney-fuel-excise-tax-affordability-9.7162911?cmp=rss" target="_blank" rel="noopener">Carney temporarily suspending federal fuel excise tax on gas, diesel and aviation fuel</a></h3>
+      <p>A day after sweeping three byelections in Ontario and Quebec that gave him a majority in the House of Commons, Prime Minister Mark Carney says he is temporarily removing the federal excise tax on gas </p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/time-to-get-serious-carney-byelection-sweep-9.7163409?cmp=rss" target="_blank" rel="noopener">'It's time to get serious,' Carney says after byelection sweep delivers him a majority government</a></h3>
+      <p>Prime Minister Mark Carney says he will use his newly won majority to push through legislation that the opposition parties have stymied in recent years, saying his immediate focus will be quickly pass</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
+    <article class="news-card evidence-stamp">
+      <div class="news-meta">
+        <span class="news-source">CBC Politics</span>
+        <span class="news-score" style="color:#dc2626;">RELEVANCE 25</span>
+        <span class="news-date">Tue, 14 Apr 2026</span>
+      </div>
+      <h3><a href="https://www.cbc.ca/news/politics/opposition-parties-majority-government-9.7163603?cmp=rss" target="_blank" rel="noopener">Opposition parties grapple with new reality of Liberal majority government</a></h3>
+      <p>The morning after the Liberals secured a thin majority government, Conservative Leader Pierre Poilievre said Prime Minister Mark Carney has no more excuses if he doesn't deliver for Canadians.</p>
+      <div class="news-keywords">carney, mark carney</div>
+    </article>
     </div>
 
-    <!-- Right: Intelligence Brief -->
-    <div class="news-panel">
-      <h2>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-        AI Intelligence Brief
-        <span class="status-badge status-analyzing tnt-style-176" id="brief-status">AWAITING TRIGGER</span>
-      </h2>
-      <p class="tnt-style-178">Auth required: Sign in via Google to use Vertex AI for generation.</p>
-
-      <div class="ai-brief-container">
-        <div id="ai-brief-content" class="ai-brief-content">
-          <p class="tnt-style-179">
-            Click 'Generate Brief' to analyze the current live wire headlines for accountability indicators.
-          </p>
-        </div>
-      </div>
-
-      <div class="brief-actions">
-        <button id="btn-generate-brief" class="btn-analyze">Generate Intelligence Brief</button>
-      </div>
+    <div class="news-footer">
+      <p>Automatically generated by NemoClaw OSINT Pipeline</p>
+      <p>Sources: CBC, CTV, Globe and Mail, National Post, Parliament of Canada</p>
+      <p>Scan interval: 2 hours &bull; Minimum relevance: 8 &bull; SEED 118400</p>
     </div>
   </main>
 
-<div style="max-width:900px;margin:2rem auto;padding:1.5rem;">
-  <h3 style="font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-tertiary,#6b7280);margin-bottom:1rem;">Investigation Dossiers</h3>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;">
-    <a href="institutional-malice.html" style="padding:0.8rem;background:var(--bg-card,rgba(255,255,255,0.04));border:1px solid var(--border,#2a2f45);border-radius:8px;text-decoration:none;color:var(--text-primary,#e2e8f0);font-weight:600;font-size:0.88rem;">Institutional Malice &rarr;</a>
-    <a href="prosecution.html" style="padding:0.8rem;background:var(--bg-card,rgba(255,255,255,0.04));border:1px solid var(--border,#2a2f45);border-radius:8px;text-decoration:none;color:var(--text-primary,#e2e8f0);font-weight:600;font-size:0.88rem;">Prosecution Framework &rarr;</a>
-    <a href="phac-mandates-s6.html" style="padding:0.8rem;background:var(--bg-card,rgba(255,255,255,0.04));border:1px solid var(--border,#2a2f45);border-radius:8px;text-decoration:none;color:var(--text-primary,#e2e8f0);font-weight:600;font-size:0.88rem;">PHAC S.6 Violations &rarr;</a>
-    <a href="foreign-influence-alpha.html" style="padding:0.8rem;background:var(--bg-card,rgba(255,255,255,0.04));border:1px solid var(--border,#2a2f45);border-radius:8px;text-decoration:none;color:var(--text-primary,#e2e8f0);font-weight:600;font-size:0.88rem;">Foreign Influence &rarr;</a>
+  <div style="max-width:900px;margin:2rem auto;">
+    <h2 style="color:var(--accent);font-family:monospace;font-size:1.2rem;">[CONNECTED INTELLIGENCE]</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem;">
+      <a href="follow-the-money.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid rgba(220,38,38,0.4);padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
+        <div style="font-size:0.7rem;color:#dc2626;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Financial</div>
+        <div style="font-weight:700;margin-top:0.2rem;">Follow the Money</div>
+      </a>
+      <a href="maid-accountability.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid rgba(220,38,38,0.4);padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
+        <div style="font-size:0.7rem;color:#dc2626;text-transform:uppercase;letter-spacing:1px;font-weight:600;">MAID</div>
+        <div style="font-weight:700;margin-top:0.2rem;">MAID Investigation</div>
+      </a>
+      <a href="carney-conflicts.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid var(--gold,#facc15);padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
+        <div style="font-size:0.7rem;color:var(--gold,#facc15);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Carney</div>
+        <div style="font-weight:700;margin-top:0.2rem;">Carney-Brookfield</div>
+      </a>
+      <a href="system-architecture.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid #333;padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
+        <div style="font-size:0.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Architecture</div>
+        <div style="font-weight:700;margin-top:0.2rem;">System Map</div>
+      </a>
+    </div>
   </div>
-</div>
-
-<div style="max-width:900px;margin:2rem auto;padding:1.3rem 1.5rem;background:rgba(220,38,38,0.08);border:2px solid rgba(220,38,38,0.3);border-radius:10px;text-align:center;">
-  <p style="font-size:1.1rem;font-weight:700;color:#dc2626;margin:0;">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="s504-court-filing.html" style="color:var(--accent);font-weight:600;">File charges →</a> | <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money →</a></p>
-</div>
-
-<div style="max-width:900px;margin:2rem auto;">
-  <h2 style="color:var(--accent);font-family:monospace;font-size:1.2rem;">[CONNECTED INTELLIGENCE]</h2>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem;">
-    <a href="investigation-matrix.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid #333;padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
-      <div style="font-size:0.7rem;color:#dc2626;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Investigation</div>
-      <div style="font-weight:700;margin-top:0.2rem;">Investigation Matrix</div>
-    </a>
-    <a href="findings.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid var(--gold,#facc15);padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
-      <div style="font-size:0.7rem;color:var(--gold,#facc15);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Analysis</div>
-      <div style="font-weight:700;margin-top:0.2rem;">Key Findings</div>
-    </a>
-    <a href="accountability.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid #333;padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
-      <div style="font-size:0.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Accountability</div>
-      <div style="font-weight:700;margin-top:0.2rem;">Accountability Database</div>
-    </a>
-    <a href="institutional-capture.html" style="background:var(--glass-bg,rgba(255,255,255,0.03));border:1px solid rgba(220,38,38,0.4);padding:1rem;border-radius:6px;text-decoration:none;color:#fff;display:block;">
-      <div style="font-size:0.7rem;color:#dc2626;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Synthesis</div>
-      <div style="font-weight:700;margin-top:0.2rem;">Institutional Capture</div>
-    </a>
-  </div>
-</div>
-
-  <div id="read-next"></div>
-<!-- Provide fallback marked for AI formatting -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script type="module" src="js/news-engine.js?v=1"></script>
 
   <div id="site-footer-frame"></div>
-  <script src="shell.js?v=20"></script>
-<script src="js/ux.js"></script>
-<script src="js/slate.js"></script>
-<script src="js/cinema.js"></script>
-<script src="js/flow.js"></script>
-<script src="js/presenter.js"></script>
-<script src="js/auto-present.js"></script>
-<script src="js/liril-voice.js?v=5"></script>
-<script src="js/liril-walkthrough.js?v=5"></script>
-<script src="js/integrity.js"></script>
-<script src="js/i18n.js"></script>
 </body>
 </html>

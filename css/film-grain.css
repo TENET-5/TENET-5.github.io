@@ -1,0 +1,327 @@
+/* ═══════════════════════════════════════════════════════════════
+   TENET5 — 1950s Archival Film Theme
+   8mm film grain, wartime documentary aesthetic, Nuremberg gravity.
+   Every number is a body. Every page is evidence. This is the record.
+
+   TENET5 — Powered by LIRIL AI | SEED 118400
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Archival Typewriter Fonts ─────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --film-parchment:   #d4c5a9;
+  --film-dark:        #1a1610;
+  --film-sepia:       #8b7355;
+  --film-blood:       #8b1a1a;
+  --film-stamp-red:   #c41e3a;
+  --film-ink:         #2a2218;
+  --film-scratch:     rgba(255, 248, 230, 0.03);
+  --font-typewriter:  'Special Elite', 'Courier Prime', 'Courier New', monospace;
+  --font-archival:    'Courier Prime', 'IBM Plex Mono', monospace;
+}
+
+/* ── 8mm Film Grain Overlay ───────────────────────────────────── */
+/* SVG noise filter for authentic film grain texture               */
+.film-grain-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9990;
+  mix-blend-mode: overlay;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  animation: filmGrainShift 0.15s steps(3) infinite;
+}
+
+@keyframes filmGrainShift {
+  0%   { transform: translate(0, 0); }
+  33%  { transform: translate(-2px, 1px); }
+  66%  { transform: translate(1px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ── Scan Lines (CRT / old projector) ─────────────────────────── */
+.film-scanlines {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9989;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  opacity: 0.4;
+}
+
+/* ── Vignette (burned film edges) ─────────────────────────────── */
+.film-vignette {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9988;
+  background: radial-gradient(
+    ellipse 75% 65% at 50% 50%,
+    transparent 50%,
+    rgba(10, 8, 4, 0.45) 85%,
+    rgba(5, 3, 1, 0.7) 100%
+  );
+}
+
+/* ── Film Scratches (vertical lines, random position) ─────────── */
+.film-scratches {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9991;
+  opacity: 0.06;
+  background:
+    linear-gradient(90deg, transparent 23%, rgba(255,250,240,0.15) 23.2%, transparent 23.4%),
+    linear-gradient(90deg, transparent 67%, rgba(255,250,240,0.08) 67.1%, transparent 67.3%),
+    linear-gradient(90deg, transparent 41%, rgba(255,250,240,0.12) 41.15%, transparent 41.3%),
+    linear-gradient(90deg, transparent 89%, rgba(255,250,240,0.1) 89.1%, transparent 89.25%);
+  animation: filmScratchDrift 4s linear infinite;
+}
+
+@keyframes filmScratchDrift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-20px); }
+}
+
+/* ── EVIDENCE / CLASSIFIED Stamps ─────────────────────────────── */
+.evidence-stamp {
+  position: relative;
+}
+.evidence-stamp::before {
+  content: 'EVIDENCE';
+  position: absolute;
+  top: -8px; right: 12px;
+  font-family: var(--font-typewriter);
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  color: var(--film-stamp-red);
+  border: 2px solid var(--film-stamp-red);
+  padding: 2px 8px;
+  transform: rotate(-3deg);
+  opacity: 0.7;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.classified-stamp::before {
+  content: 'CLASSIFIED';
+  color: var(--film-blood);
+  border-color: var(--film-blood);
+}
+
+.exhibit-stamp::before {
+  content: 'EXHIBIT';
+}
+
+/* ── Typewriter Text Effect ───────────────────────────────────── */
+.typewriter-text {
+  font-family: var(--font-typewriter);
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+}
+
+/* Typewriter cursor blink */
+.typewriter-cursor::after {
+  content: '|';
+  animation: cursorBlink 0.8s step-end infinite;
+  color: var(--film-stamp-red);
+  font-weight: 400;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Film Countdown Leader (3... 2... 1...) ───────────────────── */
+.film-countdown {
+  font-family: var(--font-typewriter);
+  font-size: 6rem;
+  font-weight: 700;
+  color: var(--film-parchment);
+  text-shadow: 0 0 20px rgba(212, 197, 169, 0.3);
+  opacity: 0.15;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  pointer-events: none;
+  transform: rotate(-2deg);
+}
+
+/* ── Flickering Statistics (old CRT / film projector) ─────────── */
+.flicker-stat {
+  animation: crtFlicker 3s ease-in-out infinite;
+}
+
+@keyframes crtFlicker {
+  0%, 94%, 100% { opacity: 1; }
+  95% { opacity: 0.7; }
+  96% { opacity: 1; }
+  97% { opacity: 0.85; }
+  98% { opacity: 1; }
+}
+
+/* ── Aged Paper Texture (for quote blocks) ────────────────────── */
+.aged-paper {
+  background:
+    linear-gradient(135deg, rgba(212,197,169,0.04) 0%, transparent 60%),
+    linear-gradient(225deg, rgba(139,115,85,0.03) 0%, transparent 40%);
+  border: 1px solid rgba(212, 197, 169, 0.12);
+  border-radius: 2px;
+  position: relative;
+}
+.aged-paper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23p)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Manila Folder Tab (for cross-link grids) ─────────────────── */
+.manila-tab {
+  background: rgba(212, 197, 169, 0.06) !important;
+  border: 1px solid rgba(212, 197, 169, 0.15) !important;
+  border-top: 3px solid rgba(196, 30, 58, 0.5) !important;
+  font-family: var(--font-archival) !important;
+  position: relative;
+}
+.manila-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,197,169,0.2), transparent);
+}
+
+/* ── Film Sprocket Holes (decorative side borders) ────────────── */
+.sprocket-border {
+  position: relative;
+}
+.sprocket-border::before,
+.sprocket-border::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 20px;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 12px,
+    rgba(255,255,255,0.03) 12px,
+    rgba(255,255,255,0.03) 16px,
+    transparent 16px,
+    transparent 28px
+  );
+  pointer-events: none;
+}
+.sprocket-border::before { left: 0; }
+.sprocket-border::after { right: 0; }
+
+/* ── Archival Section Divider ─────────────────────────────────── */
+.archival-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    rgba(212, 197, 169, 0.2) 20%,
+    rgba(196, 30, 58, 0.3) 50%,
+    rgba(212, 197, 169, 0.2) 80%,
+    transparent 95%
+  );
+  margin: 2rem 0;
+  position: relative;
+}
+.archival-divider::after {
+  content: '\2022  \2022  \2022';
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: rgba(212, 197, 169, 0.3);
+  background: var(--bg, #0c1220);
+  padding: 0 12px;
+  letter-spacing: 4px;
+}
+
+/* ── Film Gate Flicker (page transition) ──────────────────────── */
+.film-gate-flash {
+  animation: gateFlash 0.3s ease-out;
+}
+
+@keyframes gateFlash {
+  0%   { filter: brightness(3) contrast(0.5); }
+  30%  { filter: brightness(1.5) contrast(0.8); }
+  100% { filter: brightness(1) contrast(1); }
+}
+
+/* ── Sepia Tint for Images ────────────────────────────────────── */
+img.archival-photo {
+  filter: sepia(0.3) contrast(1.1) brightness(0.95);
+  border: 3px solid rgba(212, 197, 169, 0.15);
+  border-radius: 1px;
+}
+
+/* ── Override Headings to Typewriter ───────────────────────────── */
+.section-heading,
+.page-hero h1,
+.hero-vc h1,
+.hero-nc h1,
+h1.typewriter {
+  font-family: var(--font-typewriter) !important;
+  letter-spacing: 1px;
+}
+
+/* ── Evidence Card Film Treatment ─────────────────────────────── */
+.pipeline-card,
+.evidence-cinematic,
+.glass-card {
+  border-left: 3px solid rgba(196, 30, 58, 0.4);
+}
+
+/* ── Page Hero Film Overlay ───────────────────────────────────── */
+.page-hero,
+.hero-vc,
+.hero-nc,
+[class*="hero-"] {
+  position: relative;
+}
+.page-hero::after,
+.hero-vc::after,
+.hero-nc::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    linear-gradient(180deg, rgba(26,22,16,0.3) 0%, transparent 30%, transparent 70%, rgba(26,22,16,0.4) 100%),
+    radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(10,8,4,0.3) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Mobile: reduce effects for performance ───────────────────── */
+@media (max-width: 768px) {
+  .film-grain-overlay { opacity: 0.06; }
+  .film-scanlines { opacity: 0.2; }
+  .film-scratches { display: none; }
+  .film-countdown { font-size: 3rem; }
+}
+
+/* ── Reduced Motion: disable grain animation ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .film-grain-overlay { animation: none; }
+  .film-scratches { animation: none; }
+  .flicker-stat { animation: none; }
+  .typewriter-cursor::after { animation: none; }
+}
