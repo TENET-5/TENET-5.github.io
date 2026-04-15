@@ -20,12 +20,14 @@ import hashlib
 import re
 import asyncio
 import sys
+import sqlite3
 from datetime import datetime, timezone
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.dirname(SCRIPT_DIR)
 OUTPUT_DIR = os.path.join(DATA_DIR, 'corporate_registry')
 OUTPUT_FILE = os.path.join(DATA_DIR, 'corporate_registry_analysis.json')
+DB_FILE = os.path.join(DATA_DIR, 'corporate_registry.db')
 
 sys.path.append(os.path.join(DATA_DIR, '..', 'tools'))
 try:
@@ -271,10 +273,81 @@ def build_corporate_registry():
     print(f"    {results['statistics']['total_flags']} cross-reference flags")
     print(f"    {results['statistics']['triple_vector_entities']} triple-vector entities")
 
+    # Store in persistent SQLite DB
+    store_results_in_db(results, DB_FILE)
+
     # Hook analysis
     analyze_registry_data(results)
 
     return results
+
+def store_results_in_db(results, db_path):
+    """
+    Constructs the TENET5 structural data model for long-term queries.
+    UPSERTS into corporate_registry.db to maintain parity with static JSON.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Create schemas
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS corporate_connections (
+            person TEXT,
+            corporation TEXT,
+            role TEXT,
+            status TEXT,
+            source TEXT,
+            is_politician BOOLEAN,
+            entity_matched BOOLEAN,
+            emh_hash TEXT UNIQUE
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS org_registry_matches (
+            organization TEXT,
+            corporate_registration TEXT,
+            lobbying_registered BOOLEAN,
+            donation_linked BOOLEAN,
+            notes TEXT,
+            emh_hash TEXT UNIQUE
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cross_reference_flags (
+            flag_type TEXT,
+            entity TEXT,
+            description TEXT,
+            risk_note TEXT,
+            legal_status TEXT,
+            emh_hash TEXT UNIQUE
+        )
+    ''')
+
+    # Insert connections
+    for c in results.get('corporate_connections', []):
+        cursor.execute('''
+            INSERT OR REPLACE INTO corporate_connections 
+            (person, corporation, role, status, source, is_politician, entity_matched, emh_hash) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (c.get('person'), c.get('corporation'), c.get('role'), c.get('status'), c.get('source'), c.get('is_politician'), c.get('entity_matched'), c.get('emh_hash')))
+        
+    for o in results.get('org_registry_matches', []):
+        cursor.execute('''
+            INSERT OR REPLACE INTO org_registry_matches 
+            (organization, corporate_registration, lobbying_registered, donation_linked, notes, emh_hash) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (o.get('organization'), o.get('corporate_registration'), o.get('lobbying_registered'), o.get('donation_linked'), o.get('notes'), o.get('emh_hash')))
+        
+    for f in results.get('cross_reference_flags', []):
+        cursor.execute('''
+            INSERT OR REPLACE INTO cross_reference_flags 
+            (flag_type, entity, description, risk_note, legal_status, emh_hash) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (f.get('flag_type'), f.get('entity'), f.get('description'), f.get('risk_note'), f.get('legal_status'), f.get('emh_hash')))
+
+    conn.commit()
+    conn.close()
+    print(f"  ✓ Database synchronized: {db_path}")
 
 
 if __name__ == '__main__':
