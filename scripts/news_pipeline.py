@@ -21,11 +21,15 @@ NEWS_DIR = ROOT / "data" / "news"
 NEWS_DIR.mkdir(parents=True, exist_ok=True)
 HEADLINES_FILE = NEWS_DIR / "headlines.json"
 BRIEF_FILE = NEWS_DIR / "brief.json"
+ANALYSIS_FILE = NEWS_DIR / "analysis.json"
 
 FEEDS = [
     {"name": "CBC Politics", "url": "https://www.cbc.ca/cmlink/rss-politics"},
     {"name": "CBC Canada", "url": "https://www.cbc.ca/cmlink/rss-canada"},
+    {"name": "CTV Canada", "url": "https://www.ctvnews.ca/rss/ctvnews-ca-canada-public-rss-1.822284"},
     {"name": "Global News CA", "url": "https://globalnews.ca/canada/feed/"},
+    {"name": "National Post", "url": "https://nationalpost.com/category/news/feed/"},
+    {"name": "Globe Politics", "url": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/?outputType=xml"},
 ]
 
 USER_AGENT = "TENET5 News Pipeline/1.0 (+https://tenet5.github.io)"
@@ -124,6 +128,90 @@ def write_brief(brief_text, source="NemoClaw"):
     print(f"  [OK] Saved brief to {BRIEF_FILE}")
 
 
+def pick_topic(title: str):
+    text = (title or "").lower()
+    topic_rules = [
+        ("Government Power & Majority Control", ["carney", "majority", "byelection", "floor", "liberal", "parliament"]),
+        ("Ethics & Oversight", ["ethics", "conflict", "watchdog", "hiring", "oversight", "breach"]),
+        ("Affordability & Tax Messaging", ["tax", "gas", "diesel", "affordability", "cost", "fuel"]),
+        ("Security & Foreign Policy", ["arctic", "defend", "ukraine", "china", "lebanon", "nato", "foreign"]),
+    ]
+    for label, keywords in topic_rules:
+        if any(keyword in text for keyword in keywords):
+            return label
+    return "Institutional Accountability"
+
+
+FRAMING_PATTERNS = [
+    ("Mandate language", ["majority", "sweep", "clinches", "solidify", "phase"], "The same event is framed as momentum or inevitability rather than as a decision that still warrants scrutiny."),
+    ("Softened policy language", ["temporarily", "affordability", "support", "reassurance", "unity"], "Consumer-friendly wording can soften the hard trade-offs or governance implications of a policy move."),
+    ("Direct ethics scrutiny", ["ethics", "conflict", "watchdog", "breach"], "When outlets use direct oversight language, the accountability stakes are made explicit instead of implied."),
+]
+
+
+def analyze_headlines(headlines):
+    grouped = {}
+    source_counts = {}
+    for item in headlines:
+        title = item.get("title", "")
+        topic = pick_topic(title)
+        grouped.setdefault(topic, []).append(item)
+        source = item.get("source", "Unknown")
+        source_counts[source] = source_counts.get(source, 0) + 1
+
+    clusters = []
+    for topic, items in sorted(grouped.items(), key=lambda kv: len(kv[1]), reverse=True):
+        sources = sorted({entry.get("source", "Unknown") for entry in items})
+        angle = "Cross-outlet convergence" if len(sources) > 1 else "Single-outlet emphasis"
+        summary = (
+            f"{len(items)} sourced items are clustering around {topic.lower()}. "
+            f"Coverage currently emphasizes {angle.lower()} across {', '.join(sources[:4])}."
+        )
+        clusters.append({
+            "topic": topic,
+            "count": len(items),
+            "angle": angle,
+            "summary": summary,
+            "items": items[:4],
+        })
+
+    signals = []
+    joined_titles = " \n".join(item.get("title", "") for item in headlines).lower()
+    for label, keywords, note in FRAMING_PATTERNS:
+        hits = sum(1 for keyword in keywords if keyword in joined_titles)
+        if hits:
+            signals.append({"label": label, "strength": hits, "note": note})
+
+    return {
+        "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "clusters": clusters[:4],
+        "signals": sorted(signals, key=lambda item: item["strength"], reverse=True),
+        "sources": [{"name": name, "count": count} for name, count in sorted(source_counts.items(), key=lambda kv: kv[1], reverse=True)],
+    }
+
+
+def store_analysis(analysis):
+    with open(ANALYSIS_FILE, "w", encoding="utf-8") as f:
+        json.dump(analysis, f, indent=2, ensure_ascii=False)
+    print(f"  [OK] Saved narrative analysis to {ANALYSIS_FILE}")
+
+
+def build_local_brief(analysis):
+    clusters = analysis.get("clusters", [])
+    signals = analysis.get("signals", [])
+    lead = clusters[0]["topic"] if clusters else "institutional accountability"
+    watch = signals[0]["label"] if signals else "Narrative shifts"
+    next_up = clusters[1]["topic"] if len(clusters) > 1 else "Public-cost consequences"
+    return (
+        "### MACRO THEMES\n"
+        f"Coverage is presently converging around **{lead}**, with repeated emphasis on power, continuity, and executive control.\\n\\n"
+        "### ACCOUNTABILITY WATCH\n"
+        f"The strongest editorial signal in the current source set is **{watch}**. Readers should compare how different outlets soften or sharpen responsibility language.\\n\\n"
+        "### FORWARD IMPACT\n"
+        f"Expect the next cycle of coverage to expand around **{next_up}**, especially where public spending, oversight, or institutional legitimacy intersect."
+    )
+
+
 def generate_brief(headlines):
     url = os.environ.get("NEMOCLAW_OPENAI_URL")
     if not url:
@@ -184,14 +272,14 @@ def main():
     ]
 
     store_headlines(headlines)
+    analysis = analyze_headlines(headlines)
+    store_analysis(analysis)
+
     brief_text = generate_brief(headlines)
     if brief_text:
         write_brief(brief_text)
     else:
-        if BRIEF_FILE.exists():
-            print(f"  [INFO] Keeping existing brief at {BRIEF_FILE}")
-        else:
-            write_brief("NemoClaw intelligence brief unavailable. Configure NEMOCLAW_OPENAI_URL to enable local briefing.")
+        write_brief(build_local_brief(analysis), source="TENET5 Desk")
 
     if headlines:
         print(f"\nFinished news pipeline: {len(headlines)} headlines cached.")

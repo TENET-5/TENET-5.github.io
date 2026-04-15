@@ -180,6 +180,42 @@
     }
   }
 
+  // ── Cursor glow — subtle red light follows mouse ─────
+  function initCursorGlow() {
+    if (window.matchMedia('(hover: none)').matches) return; // No glow on touch
+    var glow = document.createElement('div');
+    glow.className = 'cursor-glow';
+    document.body.appendChild(glow);
+    var mx = 0, my = 0, gx = 0, gy = 0;
+
+    document.addEventListener('mousemove', function(e) {
+      mx = e.clientX; my = e.clientY;
+    }, { passive: true });
+
+    function updateGlow() {
+      gx += (mx - gx) * 0.06;
+      gy += (my - gy) * 0.06;
+      glow.style.transform = 'translate(' + gx.toFixed(0) + 'px,' + gy.toFixed(0) + 'px) translate(-50%,-50%)';
+      requestAnimationFrame(updateGlow);
+    }
+    updateGlow();
+  }
+
+  // ── Scroll-linked hero fade — hero fades as you scroll past ──
+  function initHeroFade() {
+    var hero = document.querySelector('.page-hero, .hero-vc, .hero-nc, .dossier-hero');
+    if (!hero) return;
+    window.addEventListener('scroll', function() {
+      var rect = hero.getBoundingClientRect();
+      var h = hero.offsetHeight;
+      if (rect.bottom > 0 && rect.top < window.innerHeight) {
+        var scrolled = Math.max(0, -rect.top / h);
+        hero.style.opacity = Math.max(0.15, 1 - scrolled * 1.2);
+        hero.style.transform = 'translateY(' + (scrolled * 30).toFixed(1) + 'px)';
+      }
+    }, { passive: true });
+  }
+
   // ── Init ─────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
     var page = window.location.pathname.split('/').pop() || '';
@@ -223,6 +259,12 @@
 
     // Chapter navigation
     createChapterNav();
+
+    // Cursor glow (Awwwards-tier ambient light)
+    initCursorGlow();
+
+    // Hero fade on scroll (Locomotive-inspired depth)
+    initHeroFade();
   });
 
 })();
