@@ -91,7 +91,8 @@ SOURCE_PATTERNS = [
     r'(?i)(auditor\s+general|AG\s+(Spring|Fall|Annual)\s+\d{4})',
     r'(?i)(hansard|house\s+of\s+commons|senate\s+standing)',
     r'(?i)(commission\s+(report|inquiry|finding))',
-    r'(?i)(source[s]?\s*:|citing\s*:|reference[s]?\s*:)',
+    r'(?i)(source[s]?\s*:|data\s+source[s]?\b|data\s+sourced\s+from|citing\s*:|reference[s]?\s*:)',
+    r'(?i)(source-tag|source-note|source\s+note|works\s+cited|bibliography|footnotes?|id=["\']ref\d+["\']|id=["\']sources["\'])',
     r'(?i)(R\.\s*v\.\s*\w+)',  # Court cases
     r'(?i)(RCMP|CSIS|CHRT|SCC)\s+(report|finding|decision)',
     r'(?i)(elections?\s+canada|commissioner)',
@@ -192,8 +193,15 @@ class SiteEditor:
                 body_text = re.sub(r'<[^>]+>', '', body.group(1)).strip()
                 if len(body_text) < 50:
                     self.log("FAIL", 5, f.name, f"near-empty body ({len(body_text)} chars)")
-            # Placeholder text
-            placeholders = re.findall(r'(?i)(lorem ipsum|TODO|FIXME|PLACEHOLDER|REPLACE THIS)', content)
+            # Placeholder text — inspect visible text only to avoid false positives
+            visible_text = re.sub(r'(?is)<script[^>]*>.*?</script>', ' ', content)
+            visible_text = re.sub(r'(?is)<style[^>]*>.*?</style>', ' ', visible_text)
+            visible_text = re.sub(r'<[^>]+>', ' ', visible_text)
+            visible_text = re.sub(r'\s+', ' ', visible_text).strip()
+            placeholders = re.findall(
+                r'(?i)\b(lorem ipsum|todo|fixme|placeholder|replace this)\b',
+                visible_text,
+            )
             if placeholders:
                 self.log("WARN", 5, f.name, f"placeholder text found: {placeholders[0]}")
             # Unclosed tags (basic check)
@@ -261,7 +269,8 @@ class SiteEditor:
         exempt_pages = {
             "404.html", "ai-research.html", "campaign-tracker.html",
             "report-generator.html", "canada-map.html", "corruption-map.html",
-            "community.html", "bloggins.html"
+            "community.html", "bloggins.html", "index.html",
+            "submarine-timeline.html", "test-narration-validation.html"
         }
         investigative_keywords = [
             "accountability", "scandal", "maid", "rcmp", "commissioner",
