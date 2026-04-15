@@ -1,1 +1,1 @@
-/* Legacy chat script removed */
+/* Chat widget removed */
