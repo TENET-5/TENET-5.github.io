@@ -9,7 +9,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-SITE = "https://tenet-5.github.io"
+SITE = "https://tenet5.github.io"
 SITE_NAME = "TENET5 — Canadian Government Accountability Investigation"
 AUTHOR = "Daniel Perry"
 FEED_ID = f"{SITE}/feed.xml"
