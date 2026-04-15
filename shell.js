@@ -82,35 +82,27 @@
     wrap.className = 'retro-film-bg';
     wrap.setAttribute('aria-hidden', 'true');
 
-    var video = document.createElement('video');
-    video.autoplay = true;
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.preload = 'auto';
-    video.poster = BASE + 'media/evidence-cinematic-poster.jpg';
+    var spriteStrip = document.createElement('div');
+    spriteStrip.className = 'sprite-strip sprite-strip--evidence';
 
-    var mp4 = document.createElement('source');
-    mp4.src = BASE + 'media/evidence-cinematic-loop.mp4';
-    mp4.type = 'video/mp4';
-    video.appendChild(mp4);
+    var courtLayer = document.createElement('div');
+    courtLayer.className = 'sprite-layer sprite-layer--court';
+
+    var parliamentLayer = document.createElement('div');
+    parliamentLayer.className = 'sprite-layer sprite-layer--parliament';
+
+    var networkLayer = document.createElement('div');
+    networkLayer.className = 'sprite-layer sprite-layer--network';
 
     var overlay = document.createElement('div');
     overlay.className = 'retro-film-overlay';
 
-    wrap.appendChild(video);
+    wrap.appendChild(spriteStrip);
+    wrap.appendChild(courtLayer);
+    wrap.appendChild(parliamentLayer);
+    wrap.appendChild(networkLayer);
     wrap.appendChild(overlay);
     document.body.insertBefore(wrap, document.body.firstChild);
-
-    var motionQuery = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (motionQuery && motionQuery.matches) {
-      video.pause();
-    } else {
-      var playPromise = video.play();
-      if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(function() {});
-      }
-    }
   }
 
   // ── Init ────────────────────────────────────────────────────────────────
