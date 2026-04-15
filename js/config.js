@@ -7,7 +7,7 @@
  * For the live chat: create a Supabase project, run the SQL in js/chat.js header,
  * and enable Google + Twitter OAuth providers in the Supabase dashboard.
  * 
- * Redirect URL for OAuth: https://tenet-5.github.io/auth-callback.html
+ * Redirect URL for OAuth: https://tenet5.github.io/auth-callback.html
  */
 
 // ── Supabase (for auth + live chat widget) ────────────────────────────────────
