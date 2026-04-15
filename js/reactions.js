@@ -9,11 +9,11 @@
   window.__TENET5_REACTIONS_LOADED = true;
 
   var EMOJIS = [
-    { key: 'thumbsup', icon: '\ud83d\udc4d' },
-    { key: 'heart',    icon: '\u2764\ufe0f' },
-    { key: 'fire',     icon: '\ud83d\udd25' },
-    { key: 'angry',    icon: '\ud83d\ude21' },
-    { key: 'skull',    icon: '\ud83d\udc80' }
+    { key: 'thumbsup', icon: 'Support' },
+    { key: 'heart',    icon: 'Important' },
+    { key: 'fire',     icon: 'Urgent' },
+    { key: 'angry',    icon: 'Needs source' },
+    { key: 'skull',    icon: 'Witnessed' }
   ];
 
   var _sb = null;

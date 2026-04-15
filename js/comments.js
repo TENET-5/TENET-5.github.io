@@ -12,6 +12,7 @@
   var _pagePath = window.location.pathname.split('/').pop() || 'index.html';
   var _container = null;
   var _user = null;
+  var _commentsCache = [];
 
   function getClient() {
     if (_sb) return _sb;
@@ -53,7 +54,10 @@
 
   function renderCommentList(comments) {
     var list = _container.querySelector('#t5-comment-list');
+    var count = _container.querySelector('#t5-comment-count');
     if (!list) return;
+    _commentsCache = comments || [];
+    if (count) count.textContent = String(_commentsCache.length);
     if (!comments || comments.length === 0) {
       list.innerHTML = '<p style="color:#6b7280;font-size:0.82rem;font-style:italic;">No comments yet. Be the first to share your thoughts.</p>';
       return;
@@ -74,6 +78,13 @@
       if (submit) submit.disabled = true;
       if (hint) hint.textContent = 'Sign in with Google to leave a comment';
     }
+  }
+
+  function setPrompt(text) {
+    var textarea = _container && _container.querySelector('#t5-comment-text');
+    if (!textarea) return;
+    textarea.value = text;
+    textarea.focus();
   }
 
   function submitComment() {
@@ -132,7 +143,19 @@
     _container.id = 't5-comments';
     _container.className = 't5-comments-section';
     _container.innerHTML =
-      '<h3>Comments</h3>' +
+      '<div class="t5-comment-topbar">' +
+        '<div>' +
+          '<h3 style="margin:0;">Public Discussion</h3>' +
+          '<div class="t5-comment-subtitle">Evidence-based discussion, witness notes, and source flags for this page.</div>' +
+        '</div>' +
+        '<span id="t5-comment-count" class="t5-comment-count-badge">0</span>' +
+      '</div>' +
+      '<div class="t5-comment-action-row">' +
+        '<button type="button" class="t5-comment-prompt" data-prompt="What public evidence best supports this page?">Ask a question</button>' +
+        '<button type="button" class="t5-comment-prompt" data-prompt="I have a source that may strengthen this page:">Share a lead</button>' +
+        '<button type="button" class="t5-comment-prompt" data-prompt="This claim should be cross-checked against:">Flag a source</button>' +
+        '<button type="button" class="t5-comment-prompt t5-comment-openhub" data-openhub="true">Open community hub</button>' +
+      '</div>' +
       '<div id="t5-comment-list"></div>' +
       '<div class="t5-comment-form">' +
         '<textarea id="t5-comment-text" maxlength="2000" disabled placeholder="Sign in to comment"></textarea>' +
@@ -158,6 +181,17 @@
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submitComment();
       });
     }
+
+    _container.querySelectorAll('.t5-comment-prompt').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (btn.getAttribute('data-openhub')) {
+          var hubButton = document.querySelector('.t5-site-chalk-fab');
+          if (hubButton) hubButton.click();
+          return;
+        }
+        setPrompt(btn.getAttribute('data-prompt') || '');
+      });
+    });
 
     // Check auth
     var sb = getClient();

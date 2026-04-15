@@ -136,12 +136,12 @@
       .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
       .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
       .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
-      .then(function() { return Promise.all([loadScript(BASE + 'js/comments.js?v=2'), loadScript(BASE + 'js/reactions.js?v=1')]); })
+      .then(function() { return Promise.all([loadScript(BASE + 'js/comments.js?v=3'), loadScript(BASE + 'js/reactions.js?v=2')]); })
       .then(function() { return loadScript(BASE + 'js/hypothesis.js?v=1'); })
       .then(function() { return loadScript(BASE + 'js/my-mp.js?v=1'); })
       .then(function() { return loadScript(BASE + 'js/mp-scorecard.js?v=1'); })
       .then(function() { return loadScript(BASE + 'js/impact-tracker.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=3'); });
+      .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=4'); });
 
     } else {
       // DIRECT ACCESS fallback — full standalone page
@@ -164,7 +164,7 @@
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/share-actions.js?v=1'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
-        .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=3'); })
+        .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=4'); })
         .then(function() { return loadScript(BASE + 'footer.js?v=3'); });
     }
   }
