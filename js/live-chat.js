@@ -1,1 +1,1 @@
-/* Legacy chat script removed */
+/* Live chat removed */
