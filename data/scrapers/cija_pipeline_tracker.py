@@ -138,11 +138,18 @@ def extract_cija_from_osint():
                     if isinstance(query_results, list):
                         for r in query_results:
                             if isinstance(r, dict):
+                                # LIRIL Task 1: Algorithmic Email Extraction Vector
+                                body_content = r.get("body", "")
+                                import re
+                                email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                                extracted_emails = re.findall(email_regex, body_content)
+                                
                                 results[entity_name].append({
                                     "query": query,
                                     "title": r.get("title", ""),
                                     "href": r.get("href", ""),
-                                    "body": r.get("body", "")[:300],
+                                    "emails_discovered": extracted_emails,
+                                    "body": body_content[:300],
                                 })
 
     log.info("CIJA OSINT results: %d entities", len(results))

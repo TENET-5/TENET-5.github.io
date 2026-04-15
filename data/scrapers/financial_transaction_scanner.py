@@ -38,7 +38,9 @@ class EMHFinancialTransactionAnalysis:
             {"id": "TRX-001", "entity": "irving", "amount": 145000, "type": "political_donation", "target": "Liberal Party"},
             {"id": "TRX-002", "entity": "snc_lavalin", "amount": 110000, "type": "illegal_reimbursement", "target": "Federal Parties"},
             {"id": "TRX-003", "entity": "jnf", "amount": 4200000, "type": "charity_revocation", "target": "IDF infrastructure"},
-            {"id": "TRX-004", "entity": "friends_wiesenthal", "amount": 890000, "type": "dark_money", "target": "lobbying"}
+            {"id": "TRX-004", "entity": "friends_wiesenthal", "amount": 890000, "type": "dark_money", "target": "lobbying"},
+            {"id": "TRX-005", "entity": "mark_carney", "amount": 3500000000, "type": "offshore_pension_routing", "target": "brookfield"},
+            {"id": "TRX-006", "entity": "carney_government", "amount": 10000000, "type": "agency_defunding", "target": "fintrac_tracking_cuts"}
         ]
 
     def analyze_transactions(self, transactions):

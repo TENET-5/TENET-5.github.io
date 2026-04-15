@@ -459,7 +459,42 @@ def generate_graph_json(entities, overlaps):
                     "weight": len(shared),
                 })
 
-    # LIRIL Mandated: Empirical NetworkX Centrality Fallback (Math Simulation without Dependencies)
+    # LIRIL Task 2: BFS Component Clustering & Centrality Optimization
+    from collections import defaultdict
+    adjacency_list = defaultdict(list)
+    for edge in edges:
+        adjacency_list[edge["source"]].append(edge["target"])
+        adjacency_list[edge["target"]].append(edge["source"])
+        
+    cluster_map = {}
+    cluster_id_counter = 1
+    visited = set()
+    
+    node_scores = {node["id"]: node["influence_score"] for node in nodes}
+    
+    for node in nodes:
+        node_id = node["id"]
+        if node_id not in visited:
+            # LIRIL Task 2: Predictive BFS Traversal Optimization
+            queue = [node_id]
+            visited.add(node_id)
+            current_cluster = []
+            
+            while queue:
+                curr = queue.pop(0)
+                current_cluster.append(curr)
+                cluster_map[curr] = cluster_id_counter
+                
+                # Predictive Clustering: Prioritize branching through highest influence density first
+                neighbors = adjacency_list[curr]
+                neighbors.sort(key=lambda n: node_scores.get(n, 0), reverse=True)
+                
+                for neighbor in neighbors:
+                    if neighbor not in visited:
+                        visited.add(neighbor)
+                        queue.append(neighbor)
+            cluster_id_counter += 1
+
     degrees = {node["id"]: 0.0 for node in nodes}
     for edge in edges:
         degrees[edge["source"]] += edge["weight"]
@@ -474,10 +509,12 @@ def generate_graph_json(entities, overlaps):
     for node in nodes:
         node["centrality"] = round(degrees[node["id"]] / max_d, 4)
         node["influence_score"] = round(node["influence_score"] * (1.0 + node["centrality"]), 2)
+        node["cluster_id"] = cluster_map.get(node["id"], 0)
         
         # Hydrate the Local Knowledge Graph simultaneously
         liril_kg.add_entity(node["label"], {
             "influence_score": str(node["influence_score"]),
+            "cluster_id": str(node["cluster_id"]),
             "source_count": str(node["source_count"]),
             "categories": ", ".join(node["categories"])
         })

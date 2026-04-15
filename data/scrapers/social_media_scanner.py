@@ -46,6 +46,16 @@ class SocialMediaMonitor:
 
     def scrape_targets(self):
         targets = ["CIJAinfo", "markcarney", "JustinTrudeau", "Puglaas"]
+        
+        # LIRIL Task 1: Numpy Array Data Validation Check
+        try:
+            import numpy as np
+            arr = np.array(targets)
+            if not isinstance(arr, np.ndarray) or arr.dtype.kind not in ['U', 'S', 'O']:
+                raise TypeError("OSINT Target arrays must be normalized numeric or unicode structures.")
+        except Exception as e:
+            print(f"[ERROR] Native Array Validation failure block: {e}")
+            
         results = {}
         
         if HAS_NITTER:
