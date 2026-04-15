@@ -18,8 +18,8 @@ OUTPUT_FILE = os.path.join(DATA_DIR, 'financial_transaction_analysis.json')
 # Attempt to load TENET5 EMH Telemetry
 try:
     sys.path.append(r'E:\S.L.A.T.E\tenet5\src')
-    from ABCXYZ.empirical_magic_handoff import EmpiricalMagicHandoff
-    from tenet.discoveries.ABCXYZ_memory_handoff import MillennialFalcon
+    from abcxyz.empirical_magic_handoff import EmpiricalMagicHandoff
+    from tenet.discoveries.abcxyz_memory_handoff import MillennialFalcon
     HAS_EMH = True
 except ImportError:
     HAS_EMH = False
