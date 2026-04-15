@@ -407,6 +407,9 @@ def _classify_entity_type(entity):
     return "unknown"
 
 
+def trigger_liril_modernization():
+    pass
+
 def generate_dossier(entities, overlaps):
     """Generate a human-readable analysis dossier."""
     os.makedirs(EVIDENCE_DIR, exist_ok=True)

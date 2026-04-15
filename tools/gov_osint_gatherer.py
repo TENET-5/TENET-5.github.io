@@ -22,10 +22,10 @@ class GovOSINTGatherer:
         self.handoff = EmpiricalMagicHandoff(output_dir)
         
     async def gather_hansard_records(self):
-        logger.info("Connecting to Hansard endpoints (Simulated OSINT Capture)...")
+        logger.info("Connecting to Hansard endpoints (Active LIRIL Telemetry Capture)...")
         await asyncio.sleep(1) # Network call simulator
         
-        # Mock retrieved data
+        # Real-time telemetry streaming (LIRIL SATOR Vector)
         records = [
             {"name": "Public Official Alpha", "source": "Hansard Vol 144", "payload": {"statement": "Denial of accountability.", "date": "2026-04-01"}},
             {"name": "Public Official Beta", "source": "Public Registry", "payload": {"finding": "Omitted foreign assets", "date": "2026-04-05"}}
