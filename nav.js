@@ -56,6 +56,7 @@
             '<a href="/s504-covey-bae.html" id="nav-504">s.504</a>' +
             '<a href="/institutional-malice.html" id="nav-malice" style="color: #dc2626;">Malice Doctrine</a>' +
             '<a href="/publications.html" id="nav-publications">Publications</a>' +
+            '<a href="/ai-research.html" id="nav-research" style="color:#c9a84c;">Research</a>' +
             '<a href="/ppcli-lawsuit.html" id="nav-kitshop">Kit Shop</a>' +
             '<a href="/kids-guide.html" id="nav-kids" style="color: #facc15;">Simple Guide</a>' +
             '<a href="/cds-accountability.html" id="nav-cds">CDS</a>' +
