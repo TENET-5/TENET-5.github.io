@@ -103,6 +103,35 @@
         '}' +
         'blockquote.ap-animated.ap-visible, .testimony-card.ap-animated.ap-visible, .hansard-quote.ap-animated.ap-visible {' +
         '  transform: scale(1);' +
+        '}' +
+        /* Pipeline cards: slide from bottom with red border flash */
+        '.pipeline-card.ap-animated, .case-card.ap-animated, .crisis-card.ap-animated {' +
+        '  transform: translateY(30px);' +
+        '  border-left-color: transparent;' +
+        '  transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1), border-left-color 0.5s ease 0.4s;' +
+        '}' +
+        '.pipeline-card.ap-animated.ap-visible, .case-card.ap-animated.ap-visible, .crisis-card.ap-animated.ap-visible {' +
+        '  border-left-color: rgba(196, 30, 58, 0.5);' +
+        '}' +
+        /* Film projector brightness pulse on reveal */
+        '.ap-animated.ap-visible {' +
+        '  animation: apRevealPulse 0.6s ease-out;' +
+        '}' +
+        '@keyframes apRevealPulse {' +
+        '  0% { filter: brightness(1.3) contrast(0.85); }' +
+        '  40% { filter: brightness(1.05); }' +
+        '  100% { filter: brightness(1) contrast(1); }' +
+        '}' +
+        /* Evidence label on glass cards */
+        '.glass-card.ap-visible::before, .glass-panel.ap-visible::before {' +
+        '  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;' +
+        '  background: linear-gradient(90deg, transparent, rgba(196,30,58,0.3), transparent);' +
+        '  animation: evidenceScanLine 3s ease-in-out;' +
+        '}' +
+        '@keyframes evidenceScanLine {' +
+        '  0% { opacity: 0; transform: scaleX(0); }' +
+        '  50% { opacity: 1; transform: scaleX(1); }' +
+        '  100% { opacity: 0; transform: scaleX(0); }' +
         '}';
       document.head.appendChild(style);
     }
