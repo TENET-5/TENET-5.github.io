@@ -2,6 +2,7 @@
   'use strict';
   if (window.__TENET5_SITE_CHALK_LOADED) return;
   window.__TENET5_SITE_CHALK_LOADED = true;
+  return;
 
   var pagePath = (window.location.pathname.split('/').pop() || 'home.html').toLowerCase();
   if (pagePath === 'auth-callback.html' || pagePath === 'chalkboard.html') return;
