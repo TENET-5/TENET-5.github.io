@@ -29,6 +29,20 @@ import re
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+from typing import Dict
+
+class CIJAPipelineTracker:
+    def __init__(self):
+        self.pipeline_status: Dict[str, str] = {}
+        self.logger = logging.getLogger(__name__)
+
+    def update_status(self, scraper_name: str, status: str):
+        self.pipeline_status[scraper_name] = status
+        self.logger.info(f"Updated status for {scraper_name}: {status}")
+
+    def get_status(self, scraper_name: str) -> str:
+        return self.pipeline_status.get(scraper_name, "Unknown")
+
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "..")

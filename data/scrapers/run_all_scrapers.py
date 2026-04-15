@@ -22,6 +22,11 @@ import subprocess
 import argparse
 from datetime import datetime, timezone
 
+try:
+    from cija_pipeline_tracker import CIJAPipelineTracker
+except ImportError:
+    CIJAPipelineTracker = None
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.dirname(SCRIPT_DIR)
 LOG_DIR = os.path.join(DATA_DIR, 'scraper_logs')
@@ -275,7 +280,11 @@ def main():
     # Execute
     results = []
     total_start = time.time()
+    tracker = CIJAPipelineTracker() if CIJAPipelineTracker else None
+
     for i, scraper in enumerate(scrapers):
+        if tracker:
+            tracker.update_status(scraper['name'], 'Running')
         print(f"  [{i+1}/{len(scrapers)}] {scraper['name']}")
         print(f"      {scraper['description']}")
         result = run_scraper(scraper, dry_run=args.dry_run)
@@ -283,6 +292,8 @@ def main():
 
         status_icon = {'OK': '✓', 'ERROR': '✗', 'TIMEOUT': '⏱', 'SKIP': '⊘', 'DRY_RUN': '◉', 'CRASH': '☠'}
         icon = status_icon.get(result['status'], '?')
+        if tracker:
+            tracker.update_status(scraper['name'], result['status'])
         print(f"      {icon} {result['status']} ({result['duration_s']}s)")
         if result.get('emh_hash'):
             print(f"      EMH: {result['emh_hash']}")
