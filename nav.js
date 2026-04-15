@@ -30,6 +30,11 @@
             '<span class="brand-subtitle">Powered by LIRIL AI \u2022 NVIDIA \u2022 Intel</span>' +
           '</div>' +
         '</a>' +
+        '<div class="nav-status-stack" aria-label="Platform status">' +
+          '<span class="nav-status-pill nav-status-live">Live OSINT</span>' +
+          '<span class="nav-status-pill">LIRIL narration</span>' +
+          '<span class="nav-status-pill">Evidence chain</span>' +
+        '</div>' +
       '</div>' +
       '<div class="nav-bar">' +
         '<div class="nav-content">' +
