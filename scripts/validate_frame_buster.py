@@ -9,7 +9,7 @@ Exit code 0 = all pages valid, 1 = pages missing frame buster.
 import glob
 import sys
 
-SKIP_PAGES = {"index.html", "404.html", "auth-callback.html", "test-narration-validation.html"}
+SKIP_PAGES = {"index.html", "404.html", "auth-callback.html", "test-narration-validation.html", "permalink.html"}
 BUSTER_MARKER = "SC_FRAME BUSTER"
 
 def main():

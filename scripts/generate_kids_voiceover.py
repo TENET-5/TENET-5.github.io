@@ -11,8 +11,8 @@ from pathlib import Path
 
 import edge_tts
 
-# ── Voice config — FRIENDLY EDUCATIONAL ────────────────────────────────
-VOICE = "en-US-AriaNeural"  # Friendly, clear female voice
+# ── Voice config — canonical TENET5 narration voice ─────────────────────
+VOICE = "en-CA-ClaraNeural"  # Human-quality TENET5 voice across the site
 RATE = "-5%"      # Slower for clarity
 PITCH = "+2Hz"    # Slightly higher, more engaging
 PAGE_SLUG = "kids"

@@ -12,8 +12,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(name)s] %(levelna
 logger = logging.getLogger("LIRIL_Router")
 
 class LirilAgentRouter:
-    def __init__(self, output_dir):
+    def __init__(self, output_dir, osint_data_sources: list[str] = None):
         self.output_dir = output_dir
+        self.osint_data_sources = osint_data_sources or []
         self.falcon = MillennialFalconTracker()
         self.handoff = EmpiricalMagicHandoff(self.output_dir)
         
@@ -29,7 +30,11 @@ class LirilAgentRouter:
     def _simulate_liril_classification(self, payload):
         """Simulates MCP LIRIL ARTSTEM domain classification."""
         text = str(payload).lower()
-        if 'code' in text or 'algorithm' in text or 'cyber' in text:
+        if 'abcxyz' in text or 'alpha' in text:
+            return "TECHNOLOGY"  # Special routing for Foreign Influence Target Alpha (P-CLASS)
+        elif 'ABCXYZ' in text or 'temporal' in text or 'chronos' in text:
+            return "ART"  # Temporal waves map to ART STEM domains
+        elif 'code' in text or 'algorithm' in text or 'cyber' in text:
             return "TECHNOLOGY"
         elif 'vote' in text or 'parliament' in text or 'lobby' in text:
             return "REASONING"
@@ -37,8 +42,9 @@ class LirilAgentRouter:
             return "MATHEMATICS"
         return "SCIENCE"
 
-    async def route_payload(self, raw_data):
-        logger.info(f"Received raw data payload for entity: {raw_data.get('name')}")
+    async def route_payload(self, raw_data, data_source: str = None):
+        source_label = data_source or raw_data.get('source', 'UNKNOWN')
+        logger.info(f"Received raw data payload for entity: {raw_data.get('name')} from {source_label}")
         
         # 1. Classify payload
         domain = self._simulate_liril_classification(raw_data)
@@ -72,10 +78,11 @@ async def main():
             "payload": {
                 "lobbying_count": 45,
                 "alerts": ["Foreign Interference Inquiry (Hogue)"],
-                "notes": "Cleared by inquiry but still tracked in the parliamentary network."
+                "notes": "Cleared by inquiry but still tracked in the parliamentary network.",
+                "target_flag": "abcxyz"  # Tests the new abcxyz logic
             }
         }
-        await router.route_payload(test_payload)
+        await router.route_payload(test_payload, data_source="OpenParliament_OSINT")
         
         logger.info("Aligning OSINT SATOR Telemetry during Router Test...")
         synced_files = await router.handoff.align_osint_telemetry()

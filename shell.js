@@ -69,8 +69,67 @@
     });
   }
 
+  function injectFilmEffects() {
+    if (!document.body || document.querySelector('.film-grain-overlay')) return;
+    /* Inject film grain, scanlines, vignette, scratches */
+    var effects = [
+      { cls: 'film-vignette' },
+      { cls: 'film-scanlines' },
+      { cls: 'film-grain-overlay' },
+      { cls: 'film-scratches' }
+    ];
+    effects.forEach(function(e) {
+      var el = document.createElement('div');
+      el.className = e.cls;
+      el.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(el);
+    });
+  }
+
+  function injectBackdrop() {
+    if (!document.body) return;
+    document.body.classList.add('theme-1950s');
+    injectFilmEffects();
+    if (document.querySelector('.retro-film-bg')) return;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'retro-film-bg';
+    wrap.setAttribute('aria-hidden', 'true');
+
+    var video = document.createElement('video');
+    video.autoplay = true;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.poster = BASE + 'media/retro-warroom-poster.jpg';
+
+    var mp4 = document.createElement('source');
+    mp4.src = BASE + 'media/retro-warroom-loop.mp4';
+    mp4.type = 'video/mp4';
+    video.appendChild(mp4);
+
+    var overlay = document.createElement('div');
+    overlay.className = 'retro-film-overlay';
+
+    wrap.appendChild(video);
+    wrap.appendChild(overlay);
+    document.body.insertBefore(wrap, document.body.firstChild);
+
+    var motionQuery = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (motionQuery && motionQuery.matches) {
+      video.pause();
+    } else {
+      var playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(function() {});
+      }
+    }
+  }
+
   // ── Init ────────────────────────────────────────────────────────────────
   function init() {
+    injectBackdrop();
     if (isFrameShell) {
       // INDEX.HTML — frame shell: only load nav for the top bar
       ensureFrame('site-header-frame', 'div', 'prepend');

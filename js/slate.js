@@ -67,6 +67,10 @@
 
   // ── Nature Theme Enhancements ───────────────────────
   document.addEventListener('DOMContentLoaded', function() {
+    var presentationMode = document.body.classList.contains('theme-1950s') || document.getElementById('cinematic-engine') || document.querySelector('.news-hero');
+    if (presentationMode) {
+      return;
+    }
 
     // Add aurora strip to hero sections
     var heroes = document.querySelectorAll('.hero, .page-hero, [class*="hero"]');

@@ -2,7 +2,7 @@
 """
 LIRIL Voice — Dynamic page audio generator.
 Extracts data-narrate attributes from HTML pages and generates MP3+VTT.
-Uses edge-tts with AvaMultilingualNeural voice.
+Uses edge-tts with en-CA-ClaraNeural voice.
 
 Usage:
   python generate_page_audio.py s504-court-filing        # Single page
@@ -20,7 +20,7 @@ from pathlib import Path
 
 import edge_tts
 
-VOICE = "en-US-AvaMultilingualNeural"
+VOICE = "en-CA-ClaraNeural"
 RATE = "+10%"
 PITCH = "-4Hz"
 ROOT = Path(__file__).parent.parent
