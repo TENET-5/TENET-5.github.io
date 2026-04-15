@@ -163,12 +163,31 @@
     // Toggle
     var body = document.getElementById('mymp-body');
     var toggle = document.getElementById('mymp-toggle-btn');
-    var collapsed = false;
-    toggle.addEventListener('click', function() {
-      collapsed = !collapsed;
+    var header = widget.querySelector('.mymp-header');
+    var embeddedShell = false;
+    try { embeddedShell = window.self !== window.top; } catch (e) { embeddedShell = true; }
+    if (embeddedShell) widget.classList.add('mymp-embedded');
+    var collapsed = window.innerWidth <= 768 || embeddedShell;
+
+    function applyCollapsedState() {
       body.style.display = collapsed ? 'none' : 'block';
       toggle.textContent = collapsed ? '\u25B6' : '\u25BC';
+      toggle.setAttribute('aria-expanded', (!collapsed).toString());
+      widget.classList.toggle('mymp-collapsed', collapsed);
+    }
+
+    function toggleCollapsed() {
+      collapsed = !collapsed;
+      applyCollapsedState();
+    }
+
+    toggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleCollapsed();
     });
+    header.addEventListener('click', toggleCollapsed);
+    applyCollapsedState();
 
     // Search handler
     var input = document.getElementById('mymp-postal');
@@ -244,8 +263,14 @@
     '.mymp-action-primary{background:rgba(196,30,58,0.12);border-color:rgba(196,30,58,0.3);color:#fca5a5}' +
     '.mymp-loading{color:#888;font-size:12px;font-style:italic}' +
     '.mymp-error{color:#e87474;font-size:12px}' +
-    '@media(max-width:768px){.mymp-widget{left:8px;bottom:60px;width:260px;font-size:12px}}' +
-    '@media(max-width:480px){.mymp-widget{left:4px;right:4px;width:auto;bottom:56px}}';
+    'body:has(.pres-page-indicator) .mymp-widget{bottom:72px;max-width:170px}' +
+    'body:has(.pres-page-indicator) .mymp-widget .mymp-header{border-bottom:none}' +
+    'body:has(.pres-page-indicator) .mymp-widget .mymp-body{display:none}' +
+    '.mymp-embedded{bottom:72px;max-width:170px}' +
+    '.mymp-collapsed{width:auto;min-width:140px;max-width:180px}' +
+    '.mymp-collapsed .mymp-header{border-bottom:none}' +
+    '@media(max-width:768px){.mymp-widget{left:8px;bottom:112px;width:260px;max-width:calc(100vw - 16px);font-size:12px}.mymp-collapsed{bottom:72px;width:auto}}' +
+    '@media(max-width:480px){.mymp-widget{left:8px;right:8px;width:auto;bottom:104px}.mymp-collapsed{left:8px;right:auto;bottom:72px;max-width:170px}}';
   document.head.appendChild(style);
 
   // ── Init ──

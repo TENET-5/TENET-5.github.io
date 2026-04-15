@@ -37,6 +37,11 @@
   // ── Check all internal links on current page ────────────────
   function auditCurrentPage() {
     if (pagePath === 'index.html' || pagePath === '404.html') return;
+    try {
+      if (window.self !== window.top) return;
+    } catch (e) {
+      return;
+    }
 
     var links = document.querySelectorAll('a[href]');
     var checked = {};

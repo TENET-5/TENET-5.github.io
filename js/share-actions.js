@@ -188,7 +188,7 @@
     '.t5-share-btn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(10,15,22,0.9);color:#d4d0c8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.15s,transform 0.15s,border-color 0.15s;backdrop-filter:blur(8px)}' +
     '.t5-share-btn:hover{background:rgba(196,30,58,0.25);border-color:rgba(196,30,58,0.4);transform:scale(1.1)}' +
     '.t5-share-native{background:rgba(196,30,58,0.15);border-color:rgba(196,30,58,0.3)}' +
-    '@media(max-width:768px){.t5-share-bar{right:8px;bottom:16px;flex-direction:row;gap:4px}.t5-share-btn{width:36px;height:36px}}';
+    '@media(max-width:768px){.t5-share-bar{right:8px;bottom:72px;flex-direction:row;gap:4px;max-width:calc(100vw - 16px);overflow-x:auto}.t5-share-btn{width:36px;height:36px;flex:0 0 auto}}';
   document.head.appendChild(style);
 
   // ── Init ──
