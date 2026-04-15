@@ -141,7 +141,7 @@
       ]).then(function() {
         return loadScript(BASE + 'js/presentation.js?v=6');
       }).then(function() {
-        return loadScript(BASE + 'js/liril-walkthrough.js?v=6');
+        return loadScript(BASE + 'js/liril-walkthrough.js?v=7');
       }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
       .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
       .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
@@ -167,7 +167,7 @@
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
         .then(function() { return loadScript(BASE + 'js/presentation.js?v=6'); })
-        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=6'); })
+        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=7'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/video-bg.js?v=3'); })
