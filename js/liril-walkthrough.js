@@ -740,11 +740,7 @@
       startBtn.style.background = 'rgba(100,100,100,0.9)';
       startBtn.setAttribute('aria-expanded', 'true');
 
-      // Activate autopilot on first manual start
-      if (!getAutopilotState()) {
-        setAutopilotState({ autostart: true });
-        console.log('[LIRIL] Autopilot activated — full site walkthrough via PAGE_SEQUENCE');
-      }
+      // Autopilot disabled — do not persist autostart state across pages
       showTourProgress();
 
       showPoint(0);
@@ -864,17 +860,8 @@
     // Autopilot is ONLY set by manual user click on the walkthrough button.
     // Never auto-initialize — that causes unwanted voice "hallucinations".
 
-    if (autopilotState && autopilotState.autostart) {
-      // Wait longer (3s) for the target voice to load before auto-starting
-      setTimeout(function() {
-        if (!isActive && points.length >= 2) {
-          var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-          var hasTarget = v && window.LIRIL_VOICE.isTargetVoice(v);
-          console.log('[LIRIL] Autopilot auto-starting walkthrough', hasTarget ? '★ Clara ready' : '(waiting for best voice...)');
-          startWalkthrough();
-        }
-      }, 3000);
-    }
+    // Autopilot auto-start DISABLED — caused voice hallucinations.
+    // Users must click the walkthrough button manually to start narration.
   }
 
   if (document.readyState === 'loading') {
