@@ -1431,9 +1431,9 @@
   window.__TENET5_STOP_AUTOWALK = function() { try { sessionStorage.removeItem('liril-autowalk'); } catch(e){} };
 
   var SPEECH_RATES = [
-    { label: 'Slow', value: 0.8 },
-    { label: 'Normal', value: 0.95 },
-    { label: 'Fast', value: 1.2 }
+    { label: 'Slow', value: 0.95 },
+    { label: 'Normal', value: 1.1 },
+    { label: 'Fast', value: 1.35 }
   ];
 
   var RATE_STORAGE_KEY = 'liril-rate-idx';
@@ -1722,8 +1722,8 @@
     }).catch(function() { /* no audio for this page — speechSynthesis fallback */ });
   })();
 
-  /* getPageLang — returns en-GB (LIRIL is always British) */
-  function getPageLang() { return 'en-GB'; }
+  /* getPageLang — returns en-CA (LIRIL is Canadian) */
+  function getPageLang() { return 'en-CA'; }
 
   function updateNarrationButton() {
     if (!lirilNarration.button) return;
@@ -1841,9 +1841,10 @@
     // Re-resolve voice EVERY chunk to prevent Chrome voice drift
     var currentVoice = resolveNarrationVoice() || voice;
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = 'en-GB';
+    u.lang = 'en-CA';
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
-    u.pitch = 1.1;
+    u.pitch = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) ? window.LIRIL_VOICE.params.pitch : 0.92;
+    u.volume = 1.0;
     if (currentVoice) u.voice = currentVoice;
 
     u.onstart = function () {
@@ -1886,21 +1887,21 @@
     if (!text) return;
 
     var voice = resolveNarrationVoice();
-    var hasHazel = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
+    var hasClara = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
 
-    /* Wait for HAZEL specifically — up to 8s (Chrome loads voices async) */
-    if (!voice || !hasHazel) {
+    /* Wait for CLARA specifically — up to 8s (Chrome loads voices async) */
+    if (!voice || !hasClara) {
       var waitToken = ++lirilNarration.token;
       var waited = 0;
       var poll = setInterval(function () {
         waited += 200;
         voice = resolveNarrationVoice();
-        hasHazel = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
-        if (hasHazel || waited >= 8000) {
+        hasClara = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
+        if (hasClara || waited >= 8000) {
           clearInterval(poll);
           if (waitToken !== lirilNarration.token) return; // user cancelled
           if (voice) {
-            console.log('[PRES] Voice:', voice.name, hasHazel ? '★ HAZEL' : '⚠ fallback');
+            console.log('[PRES] Voice:', voice.name, hasClara ? '★ CLARA' : '⚠ fallback');
           }
           doNarrate(text, voice);
         }
@@ -1915,9 +1916,8 @@
     stopNarration();
     lirilNarration.token++;
 
-    /* CEO Directive: Hazel speechSynthesis ALWAYS preferred over pre-recorded MP3 */
-    var _hazelReady = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
-    if (!_hazelReady && _presAudio.ready && _presAudio.element) {
+    /* MP3 audio is HIGHEST QUALITY — always prefer pre-rendered neural TTS */
+    if (_presAudio.ready && _presAudio.element) {
       var cue = _presFindCue(text);
       if (cue) {
         var myToken = ++_presAudio.token;
@@ -2025,9 +2025,8 @@
     lirilNarration.token++;
     var myToken = lirilNarration.token;
 
-    /* CEO Directive: Hazel speechSynthesis preferred over MP3 */
-    var _hazelForAll = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
-    if (!_hazelForAll && _presAudio.ready && _presAudio.element) {
+    /* MP3 audio is HIGHEST QUALITY — prefer pre-rendered neural TTS */
+    if (_presAudio.ready && _presAudio.element) {
       var cue = _presFindCue(text);
       if (cue) {
         var audioTok = ++_presAudio.token;
@@ -2128,9 +2127,10 @@
     // Re-resolve voice EVERY chunk to prevent Chrome voice drift
     var currentVoice = resolveNarrationVoice() || voice;
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = 'en-GB';
+    u.lang = 'en-CA';
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
-    u.pitch = 1.1;
+    u.pitch = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) ? window.LIRIL_VOICE.params.pitch : 0.92;
+    u.volume = 1.0;
     if (currentVoice) u.voice = currentVoice;
 
     u.onstart = function () {

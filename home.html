@@ -829,7 +829,7 @@
 
   </div>
 
-  <script src="js/liril-voice.js?v=3"></script>
+  <script src="js/liril-voice.js?v=5"></script>
   <script>
     /* ── Voice-safe speak helper: waits for HAZEL specifically, never uses browser default ── */
     function _lirilSpeak(text, opts, onstart, onend, onerror) {
@@ -837,8 +837,9 @@
       function go(voice) {
         window.speechSynthesis.cancel();
         var u = new SpeechSynthesisUtterance(text);
-        u.rate = (opts && opts.rate) || 0.9;
-        u.pitch = (opts && opts.pitch) || 1.1;
+        var _p = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92 };
+        u.rate = (opts && opts.rate) || _p.rate;
+        u.pitch = (opts && opts.pitch) || _p.pitch;
         u.lang = 'en-GB';
         if (voice) u.voice = voice;
         if (onstart) u.onstart = onstart;
@@ -935,11 +936,9 @@
         this.stopAllAudio();
         const sceneEl = document.getElementById('scene-' + index);
         if(!sceneEl) return;
-        // CEO Directive: Hazel speechSynthesis preferred — only use MP3 if Hazel unavailable
-        const _hv2 = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-        const _hazelOk2 = _hv2 && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(_hv2);
+        // MP3 audio is HIGHEST QUALITY — always prefer pre-rendered neural TTS
         const audioId = sceneEl.getAttribute('data-audio');
-        if (!_hazelOk2 && audioId) {
+        if (audioId) {
           const audio = document.getElementById(audioId);
           if (audio) {
             audio.play().catch(e => console.error(e));
@@ -955,7 +954,7 @@
           if (text) {
             const btn = document.getElementById('btn-liril-narrate');
             const self = this;
-            _lirilSpeak(text, { rate: 0.9, pitch: 1.1 },
+            _lirilSpeak(text, { rate: 1.08, pitch: 0.92 },
               () => { if (btn) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; } },
               () => { if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; } self._autoAdvance(index, 1500); },
               () => { if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; } self._autoAdvance(index, 8000); }
@@ -1035,11 +1034,9 @@
         if (!scene) return;
         const btn = document.getElementById('btn-liril-narrate');
 
-        // CEO Directive: Hazel speechSynthesis ALWAYS preferred over pre-recorded MP3
-        const _hv = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-        const _hazelOk = _hv && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(_hv);
+        // MP3 audio is HIGHEST QUALITY — always prefer pre-rendered neural TTS
         const audioId = scene.getAttribute('data-audio');
-        if (!_hazelOk && audioId) {
+        if (audioId) {
           const audio = document.getElementById(audioId);
           if (audio) {
             this.stopAllAudio();
@@ -1065,7 +1062,7 @@
 
         const nIdx = this.currentScene;
         const self2 = this;
-        _lirilSpeak(text, { rate: 0.9, pitch: 1.1 },
+        _lirilSpeak(text, { rate: 1.08, pitch: 0.92 },
           () => { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; },
           () => { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; self2._autoAdvance(nIdx, 1500); },
           () => { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; }
@@ -1155,7 +1152,7 @@
 <script src="js/presenter.js"></script>
 <script src="js/impact.js"></script>
 <script src="js/auto-present.js"></script>
-<script src="js/liril-walkthrough.js?v=3"></script>
+<script src="js/liril-walkthrough.js?v=5"></script>
 <script src="js/integrity.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/metaverse.js?v=1"></script>
