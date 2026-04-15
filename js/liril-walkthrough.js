@@ -361,13 +361,14 @@
           50% { opacity: 0.3; box-shadow: none; }
         }
         .liril-start-btn {
-          position: fixed; bottom: 88px; right: 24px; z-index: 10002;
+          position: fixed !important; bottom: 88px !important; right: 24px !important;
+          z-index: 10002 !important;
           background: rgba(14, 165, 233, 0.85); color: white;
           border: 1px solid rgba(34, 211, 238, 0.3);
           border-radius: 4px; padding: 8px 18px;
           font-size: 0.75rem; font-weight: 600; cursor: pointer;
           font-family: 'Rajdhani', Inter, sans-serif; letter-spacing: 0.08em;
-          text-transform: uppercase; transition: all 0.25s;
+          text-transform: uppercase; transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;
           box-shadow: 0 2px 12px rgba(14,165,233,0.25);
         }
         .pres-page-indicator { pointer-events: none; }
@@ -395,7 +396,7 @@
         @media (max-width: 768px) {
           .liril-subtitle-bar { bottom: 78px; width: 95%; }
           .liril-subtitle-text { padding: 10px 16px; font-size: 0.85rem; line-height: 1.4; }
-          .liril-start-btn { bottom: 84px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
+          .liril-start-btn { top: 72px; right: 12px; bottom: auto; padding: 7px 12px; font-size: 0.72rem; }
         }
 
         /* Auto-tour progress bar */
