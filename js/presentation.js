@@ -193,7 +193,6 @@
     'canada-map.html',
     'records.html',
     'search.html',
-    'omniverse-viewer.html',
     's504-tracker.html',
 
     // ── TAKE ACTION ──
@@ -321,7 +320,6 @@
     'liril-analysis.html': 'LIRIL Analysis',
     'acelephius-report.html': 'ACELEPHIUS \u2014 LIRIL OSINT Engine',
     'acelephius-wardoll.html': 'ACELEPHIUS \u2014 War Doll Intelligence',
-    'omniverse-viewer.html': 'Omniverse Viewer \u2014 3D USD Viewport',
     'hansard-dashboard.html': 'Hansard Dashboard \u2014 Parliament 45-1',
     'hansard-evidence.html': 'Hansard \u2014 Institutional Dismissal of 76,475 Deaths',
     'network-analysis.html': 'Network Analysis',
@@ -372,7 +370,7 @@
       'COVID & ArriveCan': ['covid-accountability.html', 'arrivecan.html'],
       'Whistleblowers': ['whistleblower-failures.html', 'whistleblower-guide.html'],
       'Provincial & Municipal': ['provincial-analysis.html', 'municipal-accountability.html', 'municipal-intelligence.html', 'indigenous-accountability.html', 'belleville.html', 'quinte-west.html', 'ottawa.html', 'toronto.html', 'calgary.html', 'vancouver.html'],
-      'AI & Research': ['ai-research.html', 'liril-analysis.html', 'acelephius-report.html', 'acelephius-wardoll.html', 'omniverse-viewer.html'],
+      'AI & Research': ['ai-research.html', 'liril-analysis.html', 'acelephius-report.html', 'acelephius-wardoll.html'],
       'Tools & Reference': ['hansard-dashboard.html', 'hansard-evidence.html', 'network-analysis.html', 'osint-dashboard.html', 'entity-viewer.html', 'dossier-viewer.html', 'harm-index.html', 'cross-reference.html', 'ledger-book.html', 'infographics.html', 'canada-map.html', 'records.html', 'search.html'],
       'Take Action': ['take-action.html', 'open-letter.html', 'email-campaign.html', 'email-dispatch.html', 's504-court-filing.html', 'campaign-generator.html', 'campaign-tracker.html', 'report-generator.html', 'kids-guide.html'],
       'About & Context': ['my-story.html', 'history.html', 'about.html', 'faq.html', 'news.html', 'publications.html', 'resources.html', 'legal.html']
