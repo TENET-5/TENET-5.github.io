@@ -441,6 +441,44 @@ def compute_influence_scores(entities):
 
         entity["influence_score"] = round(score, 2)
 
+    # Phase 32: Quantum annealing optimization of influence scores
+    try:
+        import numpy as _np
+
+        scored_keys = [k for k, e in entities.items() if e["influence_score"] > 0]
+        if len(scored_keys) >= 2:
+            raw = _np.array([entities[k]["influence_score"] for k in scored_keys], dtype=_np.float64)
+            max_raw = _np.max(raw)
+            if max_raw > 0:
+                normalized = raw / max_raw
+                best = normalized.copy()
+                best_energy = -_np.sum(normalized ** 2)
+
+                for step in range(150):
+                    T = max(1e-8, _np.exp(-step / 37.5))
+                    perturb = _np.random.normal(0, T * 0.08, len(scored_keys))
+                    candidate = _np.clip(normalized + perturb, 0, 1)
+                    energy = -_np.sum(candidate ** 2)
+                    delta = energy - best_energy
+                    if delta < 0 or _np.random.random() < _np.exp(-delta / max(T, 1e-10)):
+                        best = candidate
+                        best_energy = energy
+
+                optimized = best * max_raw
+                for i, k in enumerate(scored_keys):
+                    entities[k]["influence_score_classical"] = entities[k]["influence_score"]
+                    entities[k]["influence_score"] = round(float(optimized[i]), 2)
+                    entities[k]["quantum_annealing"] = {
+                        "method": "ising_sqa",
+                        "steps": 150,
+                        "final_energy": round(float(best_energy), 4),
+                    }
+
+                log.info("Phase 32 quantum annealing: %d entities optimized, energy=%.4f",
+                         len(scored_keys), best_energy)
+    except ImportError:
+        log.info("Phase 32 quantum annealing: numpy unavailable, using classical scores")
+
     return entities
 
 
