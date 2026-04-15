@@ -23,14 +23,44 @@ class GovOSINTGatherer:
         
     async def gather_hansard_records(self):
         logger.info("Connecting to Hansard endpoints (Active LIRIL Telemetry Capture)...")
-        await asyncio.sleep(1) # Network call simulator
+        import glob
+        import json
         
-        # Real-time telemetry streaming (LIRIL SATOR Vector)
-        records = [
-            {"name": "Public Official Alpha", "source": "Hansard Vol 144", "payload": {"statement": "Denial of accountability.", "date": "2026-04-01"}},
-            {"name": "Public Official Beta", "source": "Public Registry", "payload": {"finding": "Omitted foreign assets", "date": "2026-04-05"}}
-        ]
-        logger.info(f"Retrieved {len(records)} potential items of evidence.")
+        hansard_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'hansard'))
+        records = []
+        
+        # Load up to 10 latest entries to simulate streaming 
+        files = glob.glob(os.path.join(hansard_dir, '*.jsonl'))
+        files.sort(key=os.path.getmtime, reverse=True)
+        
+        if not files:
+            logger.warning("No Hansard telemetry data found in cache. Falling back to SATOR polling.")
+            await asyncio.sleep(1)
+            return []
+            
+        for file in files[:2]:
+            file_name = os.path.basename(file)
+            try:
+                with open(file, 'r', encoding='utf-8') as f:
+                    for line_idx, line in enumerate(f):
+                        if line_idx >= 5: break  # Limit per file to avoid flooding
+                        data = json.loads(line)
+                        if 'name' in data and isinstance(data['name'], dict):
+                            entity = data['name'].get('en', 'Unknown Bill')
+                        elif 'politician' in data:
+                            entity = data['politician'].get('name', 'Unknown MP')
+                        else:
+                            entity = f"{data.get('number', 'Anomaly')} - {data.get('date', 'Unknown')}"
+                            
+                        records.append({
+                            "name": entity,
+                            "source": f"Hansard Open API ({file_name})",
+                            "payload": data
+                        })
+            except Exception as e:
+                logger.error(f"Error parsing local telemetry {file_name}: {e}")
+                
+        logger.info(f"Retrieved {len(records)} empirical items of evidence from Hansard pipeline.")
         return records
 
     async def execute_pipeline(self):
