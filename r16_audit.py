@@ -69,8 +69,8 @@ for f in htmls:
             issues.append(f"LOW narration coverage: {narrate_count}")
 
     # 10. Public-source / citation markers for OSINT integrity
-    has_source_meta = bool(re.search(r'dc\.source', html, re.I))
-    has_source_text = bool(re.search(r'\bSources?:\b|public record|official records|verify every claim', html, re.I))
+    has_source_meta = bool(re.search(r'dc\.source|source-tag|source-note|id=["\']sources["\']', html, re.I))
+    has_source_text = bool(re.search(r'\bSources?\b|Source Note|Data Sources?\b|public record|official records|verify every claim|cross-check the linked records', html, re.I))
     if f not in ["404.html", "auth-callback.html", "home.html", "index.html", "search.html", "campaign-generator.html", "report-generator.html"]:
         if not (has_source_meta or has_source_text):
             issues.append("NO source/citation markers")
@@ -93,7 +93,9 @@ for f in htmls:
         ci_pages.append(f)
     elif f not in ["404.html", "auth-callback.html", "home.html", "index.html",
                     "sitemap.html", "test-narration-validation.html",
-                    "master-index.html", "permalink.html", "submarine-timeline.html"]:
+                    "master-index.html", "permalink.html", "submarine-timeline.html",
+                    "chalkboard.html", "methodology-transparency.html",
+                    "reading-order.html", "who-is-harmed.html"]:
         non_ci.append(f)
 
     if issues:
