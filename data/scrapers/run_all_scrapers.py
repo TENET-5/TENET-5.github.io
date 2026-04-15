@@ -113,6 +113,14 @@ SCRAPERS = [
         'outputs': ['network_analysis/'],
     },
     {
+        'name': 'jeff_brown_tracker',
+        'file': 'jeff_brown_tracker.py',
+        'description': 'Tracks Jeff Brown OSINT lawsuits pipeline via OSINTVector base',
+        'priority': 99,
+        'timeout': 120,
+        'outputs': [],
+    },
+    {
         'name': 'local_ai_research_agent',
         'file': 'local_ai_research_agent.py',
         'description': 'LIRIL Local AI actively researches OSINT connections into insights',
