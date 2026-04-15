@@ -20,7 +20,29 @@ import time
 import hashlib
 import subprocess
 import argparse
+import concurrent.futures
+import threading
+from typing import Callable, List
 from datetime import datetime, timezone
+
+class OSINTDispatcher:
+    """ Phase 21 Concurrency Dispatcher mappings perfectly balancing OSINT throughput limitations. """
+    def __init__(self, max_workers: int = 5):
+        self.max_workers = max_workers
+        self.lock = threading.Lock()
+
+    def dispatch(self, scrapers: list, execute_func: Callable) -> list:
+        results = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            future_to_scraper = {executor.submit(execute_func, s): s for s in scrapers}
+            for future in concurrent.futures.as_completed(future_to_scraper):
+                try:
+                    res = future.result()
+                    results.append(res)
+                except Exception as e:
+                    scraper = future_to_scraper[future]
+                    results.append({'name': scraper['name'], 'status': 'CRASH', 'error': str(e), 'duration_s': 0})
+        return results
 
 try:
     from cija_pipeline_tracker import CIJAPipelineTracker
@@ -342,29 +364,36 @@ def main():
             print(f"  Available: {', '.join(s['name'] for s in SCRAPERS)}")
             return
 
-    # Execute
+    # Execute using OSINTDispatcher (Phase 21 Concurrency)
     results = []
     total_start = time.time()
     tracker = CIJAPipelineTracker() if CIJAPipelineTracker else None
 
-    for i, scraper in enumerate(scrapers):
-        if tracker:
-            tracker.update_status(scraper['name'], 'Running')
-        print(f"  [{i+1}/{len(scrapers)}] {scraper['name']}")
-        print(f"      {scraper['description']}")
-        result = run_scraper(scraper, dry_run=args.dry_run)
-        results.append(result)
+    # Thread-safe proxy tracking function mapping LIRIL bounds
+    dispatcher_lock = threading.Lock()
+    
+    def _thread_local_execution(scraper_block: dict) -> dict:
+        with dispatcher_lock:
+            if tracker:
+                tracker.update_status(scraper_block['name'], 'Running')
+            print(f"  [DISPATCHED] {scraper_block['name']}\n      {scraper_block['description']}")
+            
+        result = run_scraper(scraper_block, dry_run=args.dry_run)
+        
+        with dispatcher_lock:
+            status_icon = {'OK': '✓', 'ERROR': '✗', 'TIMEOUT': '⏱', 'SKIP': '⊘', 'DRY_RUN': '◉', 'CRASH': '☠'}
+            icon = status_icon.get(result['status'], '?')
+            if tracker:
+                tracker.update_status(scraper_block['name'], result['status'])
+            print(f"  [COMPLETED] {scraper_block['name']}: {icon} {result['status']} ({result['duration_s']}s)")
+            if result.get('emh_hash'):
+                print(f"      EMH: {result['emh_hash']}")
+            if result.get('error'):
+                print(f"      Error: {result['error']}")
+        return result
 
-        status_icon = {'OK': '✓', 'ERROR': '✗', 'TIMEOUT': '⏱', 'SKIP': '⊘', 'DRY_RUN': '◉', 'CRASH': '☠'}
-        icon = status_icon.get(result['status'], '?')
-        if tracker:
-            tracker.update_status(scraper['name'], result['status'])
-        print(f"      {icon} {result['status']} ({result['duration_s']}s)")
-        if result.get('emh_hash'):
-            print(f"      EMH: {result['emh_hash']}")
-        if result.get('error'):
-            print(f"      Error: {result['error']}")
-        print()
+    dispatcher = OSINTDispatcher(max_workers=8)
+    results = dispatcher.dispatch(scrapers, _thread_local_execution)
 
     total_duration = time.time() - total_start
 

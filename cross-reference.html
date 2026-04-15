@@ -649,6 +649,27 @@
 
     var datasets = {};
     var loaded = 0;
+    
+    // Phase 20: Stable Bridging Trajectory constraints natively mapped to tracking Arrays 
+    class FrontendBridgingOptimizer {
+      constructor(bridges) {
+        this.bridges = bridges;
+        this.discovery_loops = {};
+        bridges.forEach(b => this.discovery_loops[b] = []);
+      }
+      add_discovery_loop(bridge, loop) {
+        this.discovery_loops[bridge].push(loop);
+      }
+      stabilize_discovery_loops() {
+        this.bridges.forEach(bridge => {
+          this.discovery_loops[bridge].sort((a,b) => a.length - b.length);
+        });
+      }
+      get_stabilized_loop(bridge) {
+        return this.discovery_loops[bridge][0] || [];
+      }
+    }
+    
     var files = [
       { key: 'lobbying', url: 'data/lobbying_analysis.json' },
       { key: 'contributions', url: 'data/contributions_analysis.json' },
@@ -657,14 +678,20 @@
       { key: 'corporate', url: 'data/corporate_registry_analysis.json' },
       { key: 'procurement', url: 'data/contracts/anomaly_scan_20260407_221148.json' }
     ];
+    
+    var bridgeOptimizer = new FrontendBridgingOptimizer(files.map(f => f.key));
 
     files.forEach(function(f) {
       fetch(f.url)
         .then(function(r) { return r.json(); })
         .then(function(data) {
           datasets[f.key] = data;
+          bridgeOptimizer.add_discovery_loop(f.key, Object.keys(data));
           loaded++;
-          if (loaded === files.length) renderAll();
+          if (loaded === files.length) {
+              bridgeOptimizer.stabilize_discovery_loops();
+              renderAll();
+          }
         })
         .catch(function(err) {
           document.getElementById('content-area').innerHTML =
