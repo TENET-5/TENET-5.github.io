@@ -829,7 +829,38 @@
 
   </div>
 
+  <script src="js/liril-voice.js?v=2"></script>
   <script>
+    /* ── Voice-safe speak helper: waits for LIRIL_VOICE, never uses browser default ── */
+    function _lirilSpeak(text, opts, onstart, onend, onerror) {
+      if (!window.speechSynthesis) { if (onerror) onerror(); return; }
+      function go(voice) {
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.rate = (opts && opts.rate) || 0.9;
+        u.pitch = (opts && opts.pitch) || 1.1;
+        u.lang = 'en-GB';
+        if (voice) u.voice = voice;
+        if (onstart) u.onstart = onstart;
+        if (onend) u.onend = onend;
+        if (onerror) u.onerror = onerror;
+        window.speechSynthesis.speak(u);
+      }
+      var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+      if (v) { go(v); return; }
+      /* Poll up to 2s for async voice loading (Chrome/Edge) */
+      var waited = 0;
+      var poll = setInterval(function() {
+        waited += 100;
+        v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+        if (v || waited >= 2000) {
+          clearInterval(poll);
+          if (v) { go(v); }
+          else { console.warn('[home] LIRIL_VOICE: no female voice after 2s — suppressing speech'); if (onerror) onerror(); }
+        }
+      }, 100);
+    }
+
     const engine = {
       currentScene: 0,
       currentLogical: 0,
@@ -914,22 +945,13 @@
         if (narEl) {
           const text = narEl.getAttribute('data-narrate');
           if (text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 0.9;
-            utterance.pitch = 1.1;
-            utterance.lang = 'en-GB';
-            if (window.LIRIL_VOICE) { const v = window.LIRIL_VOICE.get(); if (v) utterance.voice = v; }
             const btn = document.getElementById('btn-liril-narrate');
-            utterance.onstart = () => { if (btn) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; } };
-            utterance.onend = () => {
-              if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; }
-              this._autoAdvance(index, 1500);
-            };
-            utterance.onerror = () => {
-              if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; }
-              this._autoAdvance(index, 8000);
-            };
-            window.speechSynthesis.speak(utterance);
+            const self = this;
+            _lirilSpeak(text, { rate: 0.9, pitch: 1.1 },
+              () => { if (btn) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; } },
+              () => { if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; } self._autoAdvance(index, 1500); },
+              () => { if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; } self._autoAdvance(index, 8000); }
+            );
             return;
           }
         }
@@ -1031,35 +1053,13 @@
         const text = narEl.getAttribute('data-narrate');
         if (!text) return;
 
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.1;
-        utterance.lang = 'en-GB';
-
-        // ── LIRIL voice lock — delegate to shared resolver ──
-        let preferredVoice = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-
-        if (preferredVoice) {
-          utterance.voice = preferredVoice;
-        }
-
         const nIdx = this.currentScene;
-        utterance.onstart = () => {
-          btn.style.borderColor = 'var(--accent)';
-          btn.style.background = 'rgba(14, 165, 233, 0.1)';
-        };
-        utterance.onend = () => {
-          btn.style.borderColor = '#27272a';
-          btn.style.background = 'transparent';
-          this._autoAdvance(nIdx, 1500);
-        };
-        utterance.onerror = () => {
-          btn.style.borderColor = '#27272a';
-          btn.style.background = 'transparent';
-        };
-
-        window.speechSynthesis.speak(utterance);
+        const self2 = this;
+        _lirilSpeak(text, { rate: 0.9, pitch: 1.1 },
+          () => { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; },
+          () => { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; self2._autoAdvance(nIdx, 1500); },
+          () => { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; }
+        );
       }
     };
 
@@ -1139,7 +1139,9 @@
   </div>
 </div>
 
-<script src="js/liril-voice.js?v=1"></script>
+<!-- liril-voice.js loaded above inline engine -->
+<div id="site-footer-frame"></div>
+<script src="shell.js?v=20"></script>
 <script src="js/presenter.js"></script>
 <script src="js/impact.js"></script>
 <script src="js/auto-present.js"></script>
