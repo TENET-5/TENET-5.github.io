@@ -52,7 +52,7 @@ with open('sitemap.xml', 'r', encoding='utf-8') as f:
     sitemap_content = f.read()
 
 if 'maid-policy-evolution.html' not in sitemap_content:
-    injection = '''  <url>\n    <loc>https://tenet-5.github.io/maid-policy-evolution.html</loc>\n    <priority>0.9</priority>\n    <changefreq>weekly</changefreq>\n  </url>'''
+    injection = '''  <url>\n    <loc>https://tenet5.github.io/maid-policy-evolution.html</loc>\n    <priority>0.9</priority>\n    <changefreq>weekly</changefreq>\n  </url>'''
     sitemap_content = sitemap_content.replace('</urlset>', injection + '\n</urlset>')
     with open('sitemap.xml', 'w', encoding='utf-8') as f:
         f.write(sitemap_content)

@@ -29,10 +29,10 @@ TEMPLATE = '''<!DOCTYPE html>
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{description}">
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://tenet-5.github.io/{slug}.html">
+  <meta property="og:url" content="https://tenet5.github.io/{slug}.html">
   <meta property="og:site_name" content="Canadian Accountability Project">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="canonical" href="https://tenet-5.github.io/{slug}.html">
+  <link rel="canonical" href="https://tenet5.github.io/{slug}.html">
   <link rel="stylesheet" href="style.css?v=12">
   <meta name="theme-color" content="#0a1628">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
