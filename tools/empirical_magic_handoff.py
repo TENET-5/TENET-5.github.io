@@ -12,6 +12,11 @@ class EmpiricalMagicHandoff:
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
         
+        # Phase 25: Chain-of-custody audit trail
+        self._chain_head = "GENESIS"  # First link in the chain
+        self._chain_length = 0
+        self._audit_log_path = os.path.join(self.output_dir, "_emh_audit_chain.jsonl")
+        
     async def secure_handoff(self, evidence_data, routing_agent="LIRIL/MINIM", ethics_cleared=True):
         """
         The Empirical Magic Handoff Memory System ensures OSINT findings are seamlessly recorded and structured.
@@ -118,7 +123,34 @@ Date Captured: {datetime.now().isoformat()}
         except Exception as e:
             self.logger.warning(f"Failed to push to ABCXYZ tracking ledger: {e}")
         
-        self.logger.info(f"Handoff Success: Data secured symmetrically with sig {signature[:8]} at {filepath}")
+        # Phase 25: Chain-of-custody audit trail
+        chain_link = {
+            "sequence": self._chain_length,
+            "timestamp": datetime.now().isoformat(),
+            "signature": signature,
+            "predecessor": self._chain_head,
+            "target": target_name,
+            "routing_agent": routing_agent,
+            "ethics": ethics_str,
+            "filepath": filepath,
+        }
+        # Chain integrity: new link hash includes predecessor
+        chain_hash = hashlib.blake2b(
+            json.dumps(chain_link, sort_keys=True).encode('utf-8'),
+            digest_size=16
+        ).hexdigest()
+        chain_link["chain_hash"] = chain_hash
+        self._chain_head = chain_hash
+        self._chain_length += 1
+        
+        # Append to audit log (JSONL for streaming reads)
+        try:
+            with open(self._audit_log_path, 'a', encoding='utf-8') as af:
+                af.write(json.dumps(chain_link) + '\n')
+        except Exception as e:
+            self.logger.warning(f"Audit chain write failed: {e}")
+        
+        self.logger.info(f"Handoff Success: Data secured symmetrically with sig {signature[:8]} at {filepath} [chain #{self._chain_length}]")
         return filepath
 
     async def align_osint_telemetry(self, osint_telemetry_url="http://127.0.0.1:8092/api/osint_telemetry"):
