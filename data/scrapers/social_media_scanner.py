@@ -6,6 +6,7 @@ Collects public posts, hooks into SATOR Nexus and ABCXYZ EMH for trajectory trac
 import os
 import json
 import time
+import math
 
 # TENET5 OSINT Standard paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +44,18 @@ class SocialMediaMonitor:
         self.nexus = None
         if HAS_SATOR:
             self.nexus = SATORMemoryNexus(grid=SATORGrid())
+
+    def temporal_decay_score(self, entity_name: str, edge_count: int, hours_since_last: float = 1.0) -> float:
+        """Phase 23: Temporal Decay Weighting for OSINT entity relevance.
+        
+        Applies exponential decay so recent intelligence is weighted higher.
+        Score = edge_count * e^(-lambda * hours_since_last)
+        Lambda calibrated to half-life of 48 hours for political OSINT.
+        """
+        HALF_LIFE_HOURS = 48.0
+        decay_lambda = math.log(2) / HALF_LIFE_HOURS
+        raw_score = edge_count * math.exp(-decay_lambda * hours_since_last)
+        return round(raw_score, 4)
 
     def scrape_targets(self):
         targets = ["CIJAinfo", "markcarney", "JustinTrudeau", "Puglaas"]
@@ -82,10 +95,14 @@ class SocialMediaMonitor:
             for t in targets:
                 content = mock_timelines.get(t, f"Activity from #{t}")
                 hashtags = re.findall(r'#\w+', content)
+                edge_list = [f"{t}_associates"] + hashtags
+                decay_score = self.temporal_decay_score(t, len(edge_list), hours_since_last=1.0)
                 results[t] = {
-                    "edges_discovered": [f"{t}_associates"] + hashtags,
+                    "edges_discovered": edge_list,
                     "primary_vector": "financial_policy_vectors" if "Offshore" in content else "political_messaging",
-                    "extracted_tags": hashtags
+                    "extracted_tags": hashtags,
+                    "temporal_decay_score": decay_score,
+                    "decay_half_life_hours": 48
                 }
                 
         return results
