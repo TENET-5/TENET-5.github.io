@@ -561,7 +561,36 @@
     // All voice resolution, caching, retry, and voiceschanged handling lives
     // in liril-voice.js. DO NOT duplicate logic here — that causes drift.
     function resolveVoice() {
-      return window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+      if (!window.LIRIL_VOICE) return null;
+      var v = window.LIRIL_VOICE.get();
+      if (v) {
+        var isHazel = window.LIRIL_VOICE.isTargetVoice(v);
+        if (!isHazel) {
+          console.warn('[LIRIL-WALK] Voice is NOT Hazel:', v.name, '— will keep trying');
+        }
+      }
+      return v;
+    }
+
+    // Wait until Hazel is available (up to 8 seconds), then call cb(voice)
+    function waitForHazel(cb) {
+      var waited = 0;
+      var poll = setInterval(function() {
+        waited += 200;
+        var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+        var gotHazel = v && window.LIRIL_VOICE.isTargetVoice(v);
+        if (gotHazel || waited >= 8000) {
+          clearInterval(poll);
+          if (gotHazel) {
+            console.log('[LIRIL-WALK] ★ Hazel ready:', v.name);
+          } else if (v) {
+            console.warn('[LIRIL-WALK] Hazel not found after 8s, using:', v.name);
+          } else {
+            console.warn('[LIRIL-WALK] No voice after 8s — speech disabled');
+          }
+          cb(v);
+        }
+      }, 200);
     }
 
     // ── Walkthrough controls ─────────────────────────
@@ -660,34 +689,30 @@
       if ('speechSynthesis' in window) {
         var chunks = chunkText(point.text);
         var voice = resolveVoice();
+        var hasHazel = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice(voice);
 
-        if (!voice) {
-          // LIRIL_VOICE may not have resolved yet (Chrome async) — poll briefly
-          var waited = 0;
-          var poll = setInterval(function() {
-            waited += 100;
-            voice = resolveVoice();
-            if (voice || waited >= 2000) {
-              clearInterval(poll);
-              if (!isActive) return;
-              speakChunks(chunks, voice, function() {
-                if (isActive && currentPoint < points.length - 1) {
-                  setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
-                } else if (isActive) {
-                  advanceToNextPageWalkthrough();
-                }
-              });
-            }
-          }, 100);
-        } else {
-          speakChunks(chunks, voice, function() {
-            if (isActive && currentPoint < points.length - 1) {
-              setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
-            } else if (isActive) {
-              advanceToNextPageWalkthrough();
-            }
+        if (!voice || !hasHazel) {
+          // Wait for Hazel specifically — don't start speaking with wrong voice
+          waitForHazel(function(hazelVoice) {
+            if (!isActive) return;
+            speakChunks(chunks, hazelVoice, function() {
+              if (isActive && currentPoint < points.length - 1) {
+                setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+              } else if (isActive) {
+                advanceToNextPageWalkthrough();
+              }
+            });
           });
+          return;
         }
+        // Already have Hazel — speak immediately
+        speakChunks(chunks, voice, function() {
+          if (isActive && currentPoint < points.length - 1) {
+            setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+          } else if (isActive) {
+            advanceToNextPageWalkthrough();
+          }
+        });
       }
     }
 
@@ -825,12 +850,15 @@
     }
 
     if (autopilotState && autopilotState.autostart) {
+      // Wait longer (3s) for Hazel voice to load before auto-starting
       setTimeout(function() {
         if (!isActive && points.length >= 2) {
-          console.log('[LIRIL] Autopilot auto-starting walkthrough');
+          var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+          var hasHazel = v && window.LIRIL_VOICE.isTargetVoice(v);
+          console.log('[LIRIL] Autopilot auto-starting walkthrough', hasHazel ? '★ Hazel ready' : '(waiting for Hazel...)');
           startWalkthrough();
         }
-      }, 1500);
+      }, 3000);
     }
   }
 

@@ -831,7 +831,7 @@
 
   <script src="js/liril-voice.js?v=2"></script>
   <script>
-    /* ── Voice-safe speak helper: waits for LIRIL_VOICE, never uses browser default ── */
+    /* ── Voice-safe speak helper: waits for HAZEL specifically, never uses browser default ── */
     function _lirilSpeak(text, opts, onstart, onend, onerror) {
       if (!window.speechSynthesis) { if (onerror) onerror(); return; }
       function go(voice) {
@@ -847,18 +847,23 @@
         window.speechSynthesis.speak(u);
       }
       var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-      if (v) { go(v); return; }
-      /* Poll up to 2s for async voice loading (Chrome/Edge) */
+      var isHazel = v && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(v);
+      if (isHazel) { go(v); return; }
+      /* Poll up to 8s for HAZEL specifically (Chrome loads voices async) */
       var waited = 0;
       var poll = setInterval(function() {
-        waited += 100;
+        waited += 200;
         v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-        if (v || waited >= 2000) {
+        isHazel = v && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(v);
+        if (isHazel || waited >= 8000) {
           clearInterval(poll);
-          if (v) { go(v); }
-          else { console.warn('[home] LIRIL_VOICE: no female voice after 2s — suppressing speech'); if (onerror) onerror(); }
+          if (v) {
+            console.log('[home] LIRIL voice:', v.name, isHazel ? '★ HAZEL' : '⚠ fallback');
+            go(v);
+          }
+          else { console.warn('[home] LIRIL_VOICE: no voice after 8s — suppressing speech'); if (onerror) onerror(); }
         }
-      }, 100);
+      }, 200);
     }
 
     const engine = {
