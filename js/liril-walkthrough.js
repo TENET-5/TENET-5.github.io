@@ -565,11 +565,11 @@
     function resolveVoice() {
       if (!window.LIRIL_VOICE) return null;
       var v = window.LIRIL_VOICE.get();
-      if (v) {
-        var isClara = window.LIRIL_VOICE.isTargetVoice(v);
-        if (!isClara) {
-          console.warn('[LIRIL-WALK] Voice is NOT Clara:', v.name, '— will keep trying');
-        }
+      if (!v) return null;
+      // STRICT: Clara or nothing. Wrong voice = silence.
+      if (!window.LIRIL_VOICE.isTargetVoice(v)) {
+        console.warn('[LIRIL-WALK] Voice is NOT Clara:', v.name, '— refusing to speak');
+        return null;
       }
       return v;
     }

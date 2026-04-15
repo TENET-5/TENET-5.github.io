@@ -157,23 +157,9 @@
       cached = null;
     }
 
-    /* P1-P5: ONLY if Clara is completely unavailable after full voice list loaded */
-    if (!cached && voices.length > 0) {
-      for (var f = 0; f < FALLBACK_VOICES.length && !cached; f++) {
-        cached = voices.find(function(v) { return nameOf(v) === FALLBACK_VOICES[f]; });
-      }
-      for (var f2 = 0; f2 < FALLBACK_VOICES.length && !cached; f2++) {
-        cached = voices.find(function(v) { return nameOf(v).indexOf(FALLBACK_VOICES[f2]) >= 0; });
-      }
-    }
-    /* P6: Highest-quality available female English voice by score */
-    if (!cached && voices.length > 0) {
-      var ranked = voices
-        .filter(function(v) { return isFemale(v) && !isMale(v) && isEn(v) && isNeural(v) && !isDesktop(v); })
-        .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
-      if (ranked.length && scoreVoice(ranked[0]) > 0) cached = ranked[0];
-    }
-    /* P7: silence is better than the wrong voice */
+    /* Clara or SILENCE. No fallback voices — they sound wrong and cause
+       "voice hallucinations" where LIRIL speaks in the wrong voice.
+       Silence is ALWAYS better than the wrong voice. */
 
     /* NEVER use Desktop SAPI5 voices — quality is unacceptable */
     if (cached && isDesktop(cached)) {
