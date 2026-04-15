@@ -70,26 +70,12 @@
   }
 
   function injectFilmEffects() {
-    if (!document.body || document.querySelector('.film-grain-overlay')) return;
-    /* Inject film grain, scanlines, vignette, scratches */
-    var effects = [
-      { cls: 'film-vignette' },
-      { cls: 'film-scanlines' },
-      { cls: 'film-grain-overlay' },
-      { cls: 'film-scratches' }
-    ];
-    effects.forEach(function(e) {
-      var el = document.createElement('div');
-      el.className = e.cls;
-      el.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(el);
-    });
+    return;
   }
 
   function injectBackdrop() {
-    if (!document.body) return;
+    if (!document.body || isFrameShell) return;
     document.body.classList.add('theme-1950s');
-    injectFilmEffects();
     if (document.querySelector('.retro-film-bg')) return;
 
     var wrap = document.createElement('div');
@@ -102,10 +88,10 @@
     video.loop = true;
     video.playsInline = true;
     video.preload = 'auto';
-    video.poster = BASE + 'media/retro-warroom-poster.jpg';
+    video.poster = BASE + 'media/evidence-cinematic-poster.jpg';
 
     var mp4 = document.createElement('source');
-    mp4.src = BASE + 'media/retro-warroom-loop.mp4';
+    mp4.src = BASE + 'media/evidence-cinematic-loop.mp4';
     mp4.type = 'video/mp4';
     video.appendChild(mp4);
 
