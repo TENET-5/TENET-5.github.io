@@ -10,7 +10,21 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     var page = window.location.pathname.split('/').pop() || '';
-    if (page === 'index.html' || page === '') return;
+    if (page === 'index.html' || page === '' || page === 'home.html') return;
+
+    // ── Scroll progress bar (Shopify Editions-tier) ──────
+    var progressBar = document.createElement('div');
+    progressBar.className = 'investigation-progress';
+    progressBar.innerHTML = '<div class="investigation-progress-fill"></div>';
+    document.body.appendChild(progressBar);
+    var progressFill = progressBar.querySelector('.investigation-progress-fill');
+
+    window.addEventListener('scroll', function() {
+      var scrollTop = window.scrollY || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressFill.style.width = Math.min(pct, 100) + '%';
+    }, { passive: true });
 
     // ── Auto-detect and animate ALL content blocks ──────
     var selectors = [
