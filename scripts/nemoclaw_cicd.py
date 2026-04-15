@@ -23,6 +23,14 @@ def run(script, args=None):
 def main():
     print("\nTENET5 NemoClaw CI/CD Orchestrator\n")
 
+    # Local LIRIL training pass for autonomous repo upkeep.
+    trainer = ROOT / "scripts" / "liril_autopilot.py"
+    if trainer.exists() and os.environ.get("TENET5_LOCAL_LIRIL_TRAIN", "1") == "1":
+        try:
+            run("scripts/liril_autopilot.py", ["--once"])
+        except subprocess.CalledProcessError as exc:
+            print(f"[WARN] Local LIRIL training step did not complete cleanly: {exc}")
+
     # Generate and cache the news page data first.
     run("scripts/news_pipeline.py")
 
