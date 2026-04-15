@@ -357,7 +357,7 @@
           50% { opacity: 0.3; box-shadow: none; }
         }
         .liril-start-btn {
-          position: fixed; bottom: 56px; right: 24px; z-index: 9998;
+          position: fixed; bottom: 88px; right: 24px; z-index: 10002;
           background: rgba(14, 165, 233, 0.85); color: white;
           border: 1px solid rgba(34, 211, 238, 0.3);
           border-radius: 4px; padding: 8px 18px;
@@ -366,6 +366,9 @@
           text-transform: uppercase; transition: all 0.25s;
           box-shadow: 0 2px 12px rgba(14,165,233,0.25);
         }
+        .pres-page-indicator { pointer-events: none; }
+        .pres-page-indicator .pres-page-nav { pointer-events: auto; }
+        .pres-page-info, .pres-narration-badge { pointer-events: none; }
         .liril-start-btn:hover {
           background: rgba(14, 165, 233, 1); border-color: #22d3ee;
           box-shadow: 0 0 24px rgba(14,165,233,0.5);
@@ -388,7 +391,7 @@
         @media (max-width: 768px) {
           .liril-subtitle-bar { bottom: 64px; width: 95%; }
           .liril-subtitle-text { padding: 10px 16px; font-size: 0.85rem; line-height: 1.4; }
-          .liril-start-btn { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
+          .liril-start-btn { bottom: 72px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
         }
 
         /* Auto-tour progress bar */
@@ -740,7 +743,8 @@
       startBtn.style.background = 'rgba(100,100,100,0.9)';
       startBtn.setAttribute('aria-expanded', 'true');
 
-      // Autopilot disabled — do not persist autostart state across pages
+      // Manual user click explicitly enables cross-page walkthrough.
+      setAutopilotState({ autostart: true });
       showTourProgress();
 
       showPoint(0);

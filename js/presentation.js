@@ -1818,10 +1818,10 @@
     _presAudio.playing = false;
     if (_presAudio.element) { _presAudio.element.pause(); }
     stopNarrationKeepalive();
-    stopNarrateAll();
     hideSubtitle();
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
     lirilNarration.speaking = false;
     updateNarrationButton();
   }
