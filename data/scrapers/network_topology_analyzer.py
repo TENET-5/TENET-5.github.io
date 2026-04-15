@@ -130,6 +130,7 @@ CONTRIBUTIONS_PATH = os.path.join(DATA_DIR, "contributions_analysis.json")
 ALL_MPS_PATH = os.path.join(DATA_DIR, "all_mps.json")
 FINANCIAL_ANALYSIS_PATH = os.path.join(DATA_DIR, "financial_transaction_analysis.json")
 SOCIAL_MEDIA_ANALYSIS_PATH = os.path.join(DATA_DIR, "social_media_analysis.json")
+CORPORATE_REGISTRY_PATH = os.path.join(DATA_DIR, "corporate_registry_analysis.json")
 
 # Output
 OUTPUT_DIR = os.path.join(DATA_DIR, "network_analysis")
@@ -189,11 +190,15 @@ def load_all_sources():
     sources["contributions"] = load_json_safe(CONTRIBUTIONS_PATH) or {}
     sources["financial_analysis"] = load_json_safe(FINANCIAL_ANALYSIS_PATH) or {}
     sources["social_media"] = load_json_safe(SOCIAL_MEDIA_ANALYSIS_PATH) or {}
+    sources["corporate_registry"] = load_json_safe(CORPORATE_REGISTRY_PATH) or {}
 
     # All MPs
     mps_data = load_json_safe(ALL_MPS_PATH) or {}
     sources["mps"] = mps_data.get("mps", [])
     log.info("MPs data: %d records", len(sources["mps"]))
+    log.info("Corporate registry: %d connections, %d revolving door entries",
+             len(sources["corporate_registry"].get("corporate_connections", [])),
+             len(sources["corporate_registry"].get("revolving_door_analysis", [])))
 
     return sources
 
@@ -330,6 +335,38 @@ def extract_all_entities(sources):
             entities[key]["categories"].add("social_media")
             entities[key]["sources"].add("social_media_analysis")
 
+    # 8. From Corporate Registry (Phase 27: includes revolving door analysis)
+    corp_registry = sources.get("corporate_registry", {})
+    for conn in corp_registry.get("corporate_connections", []):
+        person = conn.get("person", "")
+        if person:
+            key = normalize_name(person)
+            entities[key]["name"] = person
+            entities[key]["appearances"].append({
+                "source": "corporate_registry",
+                "corporation": conn.get("corporation", ""),
+                "role": conn.get("role", ""),
+                "is_politician": conn.get("is_politician", False),
+            })
+            entities[key]["categories"].add("corporate_connection")
+            entities[key]["sources"].add("corporate_registry")
+
+    for rd in corp_registry.get("revolving_door_analysis", []):
+        person = rd.get("person", "")
+        if person:
+            key = normalize_name(person)
+            entities[key]["name"] = person
+            entities[key]["appearances"].append({
+                "source": "revolving_door",
+                "political_role": rd.get("political_role", ""),
+                "corporate_role": rd.get("corporate_role", ""),
+                "sector_overlap": rd.get("sector_overlap", ""),
+                "regulatory_nexus": rd.get("regulatory_nexus", False),
+                "risk_level": rd.get("risk_level", "MEDIUM"),
+            })
+            entities[key]["categories"].add("revolving_door")
+            entities[key]["sources"].add("revolving_door")
+
     log.info("Extracted %d unique entities", len(entities))
     return entities
 
@@ -379,6 +416,17 @@ def compute_influence_scores(entities):
                 # Phase 24: Weight by temporal decay — fresh intel scores higher
                 decay = appearance.get("temporal_decay_score", 0)
                 score += 7 + (decay * 2)
+            elif src == "corporate_registry":
+                # Phase 27: Corporate connections scored by politician status
+                score += 8
+                if appearance.get("is_politician", False):
+                    score += 10  # Politician-to-corporate link is high-signal
+            elif src == "revolving_door":
+                # Phase 27: Revolving door scored by risk level and regulatory nexus
+                risk = appearance.get("risk_level", "MEDIUM")
+                score += 20 if risk == "HIGH" else 12
+                if appearance.get("regulatory_nexus", False):
+                    score += 15  # Direct regulator-to-regulated-entity transition
 
         # Cross-source overlap bonus
         unique_sources = len(entity["sources"])

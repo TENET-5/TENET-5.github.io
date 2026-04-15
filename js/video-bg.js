@@ -29,6 +29,8 @@
     'ethics-violations.html': 'ethics_violations_bg.mp4',
     'ethics-failures.html': 'ethics_violations_bg.mp4',
     'carney-conflicts.html': 'ethics_violations_bg.mp4',
+    'panama-papers.html': 'ethics_violations_bg.mp4',
+    'follow-the-money.html': 'lobbying_concentration_bg.mp4',
     'conflict-of-interest-registry.html': 'ethics_violations_bg.mp4',
     'phoenix-pay.html': 'phoenix_pay_bg.mp4',
     'cfnis.html': 'cfnis_military_bg.mp4',
