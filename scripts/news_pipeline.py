@@ -26,7 +26,6 @@ ANALYSIS_FILE = NEWS_DIR / "analysis.json"
 FEEDS = [
     {"name": "CBC Politics", "url": "https://www.cbc.ca/cmlink/rss-politics"},
     {"name": "CBC Canada", "url": "https://www.cbc.ca/cmlink/rss-canada"},
-    {"name": "CTV Canada", "url": "https://www.ctvnews.ca/rss/ctvnews-ca-canada-public-rss-1.822284"},
     {"name": "Global News CA", "url": "https://globalnews.ca/canada/feed/"},
     {"name": "National Post", "url": "https://nationalpost.com/category/news/feed/"},
     {"name": "Globe Politics", "url": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/?outputType=xml"},
