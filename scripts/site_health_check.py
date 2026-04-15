@@ -1,4 +1,4 @@
-# TENET5 Site Health Checker — CI/CD pipeline for tenet-5.github.io
+# TENET5 Site Health Checker — CI/CD pipeline for tenet5.github.io
 # Validates all pages, data files, links, and reports via NATS
 # Modified: 2026-04-09 | Author: claude_code | SYSTEM_SEED=118400
 """
