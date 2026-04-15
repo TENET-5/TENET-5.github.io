@@ -1838,11 +1838,13 @@
     var idx = chunkIdx || 0;
     var total = totalChunks || (idx + 1 + chunks.length);
     var retryCount = retries || 0;
+    // Re-resolve voice EVERY chunk to prevent Chrome voice drift
+    var currentVoice = resolveNarrationVoice() || voice;
     var u = new SpeechSynthesisUtterance(chunk);
     u.lang = 'en-GB';
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
     u.pitch = 1.1;
-    if (voice) u.voice = voice;
+    if (currentVoice) u.voice = currentVoice;
 
     u.onstart = function () {
       lirilNarration.speaking = true;
@@ -1884,20 +1886,25 @@
     if (!text) return;
 
     var voice = resolveNarrationVoice();
+    var hasHazel = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
 
-    /* If LIRIL_VOICE hasn't resolved yet (Chrome async), wait up to 2 s */
-    if (!voice) {
+    /* Wait for HAZEL specifically — up to 8s (Chrome loads voices async) */
+    if (!voice || !hasHazel) {
       var waitToken = ++lirilNarration.token;
       var waited = 0;
       var poll = setInterval(function () {
-        waited += 100;
+        waited += 200;
         voice = resolveNarrationVoice();
-        if (voice || waited >= 2000) {
+        hasHazel = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
+        if (hasHazel || waited >= 8000) {
           clearInterval(poll);
           if (waitToken !== lirilNarration.token) return; // user cancelled
+          if (voice) {
+            console.log('[PRES] Voice:', voice.name, hasHazel ? '★ HAZEL' : '⚠ fallback');
+          }
           doNarrate(text, voice);
         }
-      }, 100);
+      }, 200);
       return;
     }
 
@@ -2116,11 +2123,13 @@
     var chunk = chunks.shift();
     var idx = chunkIdx || 0;
     var total = totalChunks || (idx + 1 + chunks.length);
+    // Re-resolve voice EVERY chunk to prevent Chrome voice drift
+    var currentVoice = resolveNarrationVoice() || voice;
     var u = new SpeechSynthesisUtterance(chunk);
     u.lang = 'en-GB';
     u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
     u.pitch = 1.1;
-    if (voice) u.voice = voice;
+    if (currentVoice) u.voice = currentVoice;
 
     u.onstart = function () {
       lirilNarration.speaking = true;
@@ -2144,6 +2153,10 @@
       if (typeof onAllDone === 'function') onAllDone();
     };
 
+    // Cancel lingering speech to force Chrome to re-apply voice
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
     window.speechSynthesis.speak(u);
   }
 
