@@ -129,10 +129,23 @@
     function collectPoints() {
       points.length = 0;
 
-      // 1. Sections with data-narrate
+      // 1. Sections with data-narrate (skip navigation-only sections)
+      var seenTexts = {};
       document.querySelectorAll('[data-narrate]').forEach(function(el) {
-        var clean = sanitiseNarration(el.getAttribute('data-narrate'));
-        if (clean.length > 15) points.push({ el: el, text: clean });
+        var raw = el.getAttribute('data-narrate');
+        // Skip navigation/cross-link sections that aren't real content
+        if (raw === 'connected-intelligence') return;
+        if (raw.length < 20) return;
+        // Skip if inside a cross-link grid (navigation, not content)
+        if (el.closest('[style*="grid-template-columns"]') && !el.closest('section, .content, main, article')) return;
+        var clean = sanitiseNarration(raw);
+        if (clean.length > 15) {
+          // Skip duplicates (same text narrated twice)
+          var key = clean.substring(0, 60);
+          if (seenTexts[key]) return;
+          seenTexts[key] = true;
+          points.push({ el: el, text: clean });
+        }
       });
 
       // 2. Auto-generate for sparse pages
