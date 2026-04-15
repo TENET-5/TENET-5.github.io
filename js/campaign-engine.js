@@ -8,13 +8,16 @@ var CLOSING_FOOTER = '\n\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function generateCampaignEmail(contact, allFlaggedPeople) {
   switch (contact.category) {
-    case 'senate':   return generateSenateEmail(contact, allFlaggedPeople);
-    case 'media':    return generateMediaEmail(contact, allFlaggedPeople);
-    case 'thinkTank': return generateThinkTankEmail(contact, allFlaggedPeople);
-    case 'premier':  return generatePremierEmail(contact, allFlaggedPeople);
-    case 'military': return generateMilitaryEmail(contact, allFlaggedPeople);
-    case 'court':    return generateCourtEmail(contact, allFlaggedPeople);
-    default:         return generateGenericEmail(contact);
+    case 'senate':        return generateSenateEmail(contact, allFlaggedPeople);
+    case 'media':         return generateMediaEmail(contact, allFlaggedPeople);
+    case 'thinkTank':     return generateThinkTankEmail(contact, allFlaggedPeople);
+    case 'premier':       return generatePremierEmail(contact, allFlaggedPeople);
+    case 'military':      return generateMilitaryEmail(contact, allFlaggedPeople);
+    case 'court':         return generateCourtEmail(contact, allFlaggedPeople);
+    case 'lawEnforcement': return generateLawEnforcementEmail(contact, allFlaggedPeople);
+    case 'mp':            return generateMPEmail(contact, allFlaggedPeople);
+    case 'courthouse':    return generateCourthouseEmail(contact, allFlaggedPeople);
+    default:              return generateGenericEmail(contact);
   }
 }
 
@@ -393,6 +396,106 @@ function generateGenericEmail(contact) {
     '  Evidence Index: ' + BASE_URL + 'evidence-index.html\n' +
     '  Legal framework: ' + BASE_URL + 'legal.html\n' +
     '  About and methodology: ' + BASE_URL + 'about.html' +
+    CLOSING_FOOTER;
+
+  return { subject: subject, body: body, to: contact.email, category: contact.category };
+}
+
+// ============================================================
+// LAW ENFORCEMENT EMAIL (RCMP, Provincial Police, Crown)
+// ============================================================
+function generateLawEnforcementEmail(contact, allFlaggedPeople) {
+  var subject = 'Request for Criminal Investigation — Documented Evidence of Criminal Code Violations by Canadian Public Officers';
+  var body = 'Attention: ' + contact.name + '\n' +
+    (contact.title ? contact.title + '\n' : '') +
+    (contact.institution ? contact.institution + '\n' : '') + '\n' +
+    'This correspondence is a formal request to open or expand a criminal investigation based on publicly documented evidence of Criminal Code violations by Canadian public officers.\n\n' +
+    'DOCUMENTED CRIMINAL CODE VIOLATIONS:\n\n' +
+    '1. BREACH OF TRUST (s.122)\n' +
+    'Multiple Ethics Commissioner findings of Conflict of Interest Act violations by sitting and former Cabinet ministers. Combined penalties: ~$9,391 across all cases. Zero criminal referrals despite s.122 carrying up to 5 years imprisonment.\n' +
+    '  Evidence: ' + BASE_URL + 'ethics-violations.html\n\n' +
+    '2. FRAUD OVER $5,000 (s.380)\n' +
+    'ArriveCAN: $60M+ for an application estimated at $250K. GC Strategies (2 employees) received $20.9M. Auditor General: "basic contracting rules broken." 76% of contractor work unsubstantiated. SDTC: 186 conflicts of interest, ~$400M in questioned grants.\n' +
+    '  Evidence: ' + BASE_URL + 'arrivecan.html\n\n' +
+    '3. CRIMINAL NEGLIGENCE CAUSING DEATH (s.220)\n' +
+    '76,707 MAID deaths since 2016. PBO published cost-savings analysis BEFORE expansion vote. Track 2: 63% cited emotional distress, 53.8% inadequate disability services. 10 provinces demanded pause — government expanded anyway.\n' +
+    '  Evidence: ' + BASE_URL + 'maid-accountability.html\n\n' +
+    '4. OBSTRUCTION OF JUSTICE (s.139)\n' +
+    'Government found in contempt of Parliament (SDTC documents). CFNIS: Ontario Superior Court — "misconduct so egregious it shocks the conscience."\n' +
+    '  Evidence: ' + BASE_URL + 'cfnis.html\n\n' +
+    '5. s.504 PRIVATE PROSECUTION FILED\n' +
+    '28 counts submitted to courthouses under s.504 Criminal Code.\n' +
+    '  Evidence: ' + BASE_URL + 's504-covey-bae.html\n\n' +
+    'REQUEST:\n' +
+    'Review the evidence at ' + BASE_URL + 'evidence-index.html and determine whether criminal investigation is warranted.\n\n' +
+    '  Evidence index: ' + BASE_URL + 'evidence-index.html\n' +
+    '  Legal framework: ' + BASE_URL + 'legal.html\n' +
+    '  Investigation matrix: ' + BASE_URL + 'investigation-matrix.html' +
+    CLOSING_FOOTER;
+
+  return { subject: subject, body: body, to: contact.email, category: contact.category };
+}
+
+// ============================================================
+// MP-DIRECT EMAIL (with scorecard + voting record)
+// ============================================================
+function generateMPEmail(contact, allFlaggedPeople) {
+  var mpName = contact.name;
+  var riding = contact.riding || contact.province || '';
+
+  var subject = 'Your Accountability Record — ' + mpName + ', MP for ' + riding + ' | TENET5 Evidence Review';
+  var body = 'Dear ' + mpName + ',\n' +
+    'Member of Parliament for ' + riding + '\n\n' +
+    'Your publicly documented record, compiled from Hansard, Commissioner of Lobbying, Health Canada, and Ethics Commissioner:\n\n' +
+    '1. MAID VOTING RECORD\n' +
+    '76,707 Canadians died under MAID since 2016 (Health Canada 6th Report). 16,499 in 2024 — 5.1% of all deaths. Your C-14/C-7 votes are in Hansard.\n' +
+    '  Your scorecard: ' + BASE_URL + 'search.html?q=' + encodeURIComponent(mpName) + '\n\n' +
+    '2. LOBBYING CONTACTS\n' +
+    '547,889 registered communications in the Commissioner of Lobbying dataset.\n' +
+    '  ' + BASE_URL + 'sector-lobbying.html\n\n' +
+    '3. YOUR COLLEAGUES\' ETHICS VIOLATIONS\n' +
+    'Nine ministers found in violation. Combined penalties: ~$9,391. Zero criminal referrals.\n' +
+    '  ' + BASE_URL + 'ethics-violations.html\n\n' +
+    '4. s.504 CRIMINAL CODE FILINGS\n' +
+    '28 counts filed at courthouses. As a sitting MP you have the authority to ensure these receive attention.\n' +
+    '  ' + BASE_URL + 's504-covey-bae.html\n\n' +
+    'ACTION REQUESTED:\n' +
+    '1. Review your voting record and its consequences\n' +
+    '2. Support s.122 referrals for Ethics Commissioner findings\n' +
+    '3. Support Conflict of Interest Act reform with criminal penalties\n\n' +
+    '  Full record: ' + BASE_URL + 'investigation-matrix.html\n' +
+    '  Evidence: ' + BASE_URL + 'evidence-index.html' +
+    CLOSING_FOOTER;
+
+  return { subject: subject, body: body, to: contact.email, category: contact.category };
+}
+
+// ============================================================
+// COURTHOUSE s.504 COVER LETTER
+// ============================================================
+function generateCourthouseEmail(contact, allFlaggedPeople) {
+  var subject = 'Section 504 Criminal Code — Private Information to Compel Appearance of Accused';
+  var body = 'TO THE CLERK OF THE COURT\n' +
+    (contact.name ? contact.name + '\n' : '') +
+    (contact.institution ? contact.institution + '\n' : '') + '\n' +
+    'RE: Private Information under Section 504 of the Criminal Code of Canada\n\n' +
+    'INFORMANT: Daniel Perry, Canadian Forces Combat Veteran, Former Signals Operator\n' +
+    'DATE: ' + new Date().toISOString().slice(0, 10) + '\n\n' +
+    'The enclosed Information alleges offences under the Criminal Code and National Defence Act.\n\n' +
+    'CHARGES:\n' +
+    '  28 counts against named individuals\n' +
+    '  Criminal Code: s.122 (Breach of Trust), s.220 (Criminal Negligence),\n' +
+    '    s.380 (Fraud), s.139 (Obstruction)\n' +
+    '  National Defence Act: s.83 (Mutiny), s.130 (Prejudicial Conduct)\n\n' +
+    'EVIDENCE:\n' +
+    '  Evidence index: ' + BASE_URL + 'evidence-index.html\n' +
+    '  s.504 filing: ' + BASE_URL + 's504-covey-bae.html\n' +
+    '  Legal framework: ' + BASE_URL + 'legal.html\n' +
+    '  Investigation: ' + BASE_URL + 'investigation-matrix.html\n\n' +
+    'Respectfully requesting this Information be received under s.507.1.\n\n' +
+    'Daniel Perry\n' +
+    'Canadian Forces Combat Veteran\n' +
+    'tenet5.github.io' +
     CLOSING_FOOTER;
 
   return { subject: subject, body: body, to: contact.email, category: contact.category };
