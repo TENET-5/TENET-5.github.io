@@ -106,12 +106,14 @@
       opacity: 1;
     }
     .title-text {
-      font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+      font-family: 'Cinzel', 'Space Grotesk', serif;
       font-size: 3rem;
       font-weight: 700;
       color: #f3f4f6;
       margin-bottom: 0.5rem;
-      letter-spacing: -0.02em;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
     .subtitle-text {
       font-family: 'Inter', -apple-system, system-ui, sans-serif;
@@ -135,23 +137,24 @@
       pointer-events: none;
     }
     .subtitle-cue {
-      font-family: 'Space Grotesk', 'Inter', -apple-system, system-ui, sans-serif;
-      font-size: 1.8rem;
-      font-weight: 500;
-      color: #f3f4f6;
-      background: rgba(6, 8, 16, 0.92);
+      font-family: 'Crimson Text', 'Inter', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: #e8e4dc;
+      background: rgba(6, 8, 16, 0.94);
       padding: 0.8rem 2rem;
-      border-radius: 3px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border-radius: 2px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
       display: inline-block;
       opacity: 0;
       transform: translateY(10px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      line-height: 1.4;
-      border: 1px solid rgba(34, 211, 238, 0.06);
-      border-bottom: 2px solid rgba(14, 165, 233, 0.2);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      line-height: 1.5;
+      border: 1px solid rgba(196, 30, 58, 0.12);
+      border-left: 3px solid rgba(196, 30, 58, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      letter-spacing: 0.01em;
     }
     .subtitle-cue.visible {
       opacity: 1;
@@ -976,6 +979,20 @@
         } else {
           this.hud.style.opacity = '1';
           this.hud.style.pointerEvents = 'auto';
+        }
+
+        // Film gate flash — cinematic transition between scenes
+        if (logicalIndex > 0) {
+          var flash = document.createElement('div');
+          flash.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;background:#fff;opacity:0;';
+          document.body.appendChild(flash);
+          flash.animate([
+            { opacity: 0 },
+            { opacity: 0.15, offset: 0.1 },
+            { opacity: 0.08, offset: 0.3 },
+            { opacity: 0 }
+          ], { duration: 400, easing: 'ease-out' });
+          setTimeout(() => flash.remove(), 500);
         }
 
         this.scenes.forEach(s => s.classList.remove('active'));
