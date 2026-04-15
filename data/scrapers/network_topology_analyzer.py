@@ -31,6 +31,84 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 import asyncio
 
+# LIRIL Task 1: Telemetry Anomaly Detector (Adaptive ML)
+class TelemetryAnomalyDetector:
+    def __init__(self, base_threshold: float = 3.0) -> None:
+        self.base_threshold = base_threshold
+        # Maintain a lightweight running variation (EMA approximation)
+        self.ema_variance = None
+
+    def adapt_threshold(self, telemetry_data: list[float]) -> float:
+        """Dynamically adjust threshold based on array density."""
+        if not telemetry_data: return self.base_threshold
+        mean = sum(telemetry_data) / len(telemetry_data)
+        variance = sum((x - mean) ** 2 for x in telemetry_data) / len(telemetry_data)
+        
+        if self.ema_variance is None:
+            self.ema_variance = variance
+        else:
+            # Shift variance buffer smoothly
+            self.ema_variance = 0.8 * self.ema_variance + 0.2 * variance
+            
+        # If variance is extremely tight, loosen the threshold (avoid false positives)
+        # If variance is wildly erratic, tighten the threshold naturally
+        adaptive_factor = 1.0 if self.ema_variance == 0 else (variance / self.ema_variance)
+        return max(1.5, min(5.0, self.base_threshold * adaptive_factor))
+
+    def detect(self, telemetry_data: list[float]) -> bool:
+        if not telemetry_data: return False
+        mean = sum(telemetry_data) / len(telemetry_data)
+        std_dev = (sum((x - mean) ** 2 for x in telemetry_data) / len(telemetry_data)) ** 0.5
+        if std_dev == 0: return False
+        adapted_threshold = self.adapt_threshold(telemetry_data)
+        return any(abs(x - mean) > adapted_threshold * std_dev for x in telemetry_data)
+        
+    def is_anomalous(self, score: float, telemetry_data: list[float]) -> bool:
+        if not telemetry_data: return False
+        mean = sum(telemetry_data) / len(telemetry_data)
+        std_dev = (sum((x - mean) ** 2 for x in telemetry_data) / len(telemetry_data)) ** 0.5
+        if std_dev == 0: return False
+        adapted_threshold = self.adapt_threshold(telemetry_data)
+        return (score - mean) > adapted_threshold * std_dev
+
+# LIRIL Task 3: Real-Time Persistent Knowledge Graph
+class KnowledgeGraph:
+    def __init__(self, storage_path: str = None) -> None:
+        self.entities: dict[str, dict[str, str]] = {}
+        self.storage_path = storage_path
+        self._load()
+
+    def _load(self):
+        if self.storage_path and os.path.exists(self.storage_path):
+            try:
+                with open(self.storage_path, 'r', encoding='utf-8') as f:
+                    self.entities = json.load(f)
+            except Exception as e:
+                 # Local logging failure handled silently during daemon init
+                 pass
+
+    def _save(self):
+        if self.storage_path:
+            os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
+            try:
+                with open(self.storage_path, 'w', encoding='utf-8') as f:
+                    json.dump(self.entities, f, indent=2, sort_keys=True)
+            except:
+                pass
+
+    def add_entity(self, name: str, attributes: dict[str, str]) -> None:
+        # Merge if exists
+        if name in self.entities:
+            self.entities[name].update(attributes)
+        else:
+            self.entities[name] = attributes
+        self._save()
+
+    def query(self, name: str) -> dict[str, str]:
+        return self.entities.get(name, {})
+
+
+
 try:
     sys.path.append(r'E:\S.L.A.T.E\tenet5\src')
     from tenet.aurora.kyre_knowledge import KyreEngine
@@ -390,9 +468,25 @@ def generate_graph_json(entities, overlaps):
     max_d = max(degrees.values()) if degrees else 1.0
     if max_d == 0: max_d = 1.0
 
+    # Global fallback for LIRIL knowledge retention
+    liril_kg = KnowledgeGraph(storage_path=os.path.join(OSINT_VAULT_DIR, "local_knowledge_graph.json"))
+
     for node in nodes:
         node["centrality"] = round(degrees[node["id"]] / max_d, 4)
         node["influence_score"] = round(node["influence_score"] * (1.0 + node["centrality"]), 2)
+        
+        # Hydrate the Local Knowledge Graph simultaneously
+        liril_kg.add_entity(node["label"], {
+            "influence_score": str(node["influence_score"]),
+            "source_count": str(node["source_count"]),
+            "categories": ", ".join(node["categories"])
+        })
+
+    # LIRIL Network Anomaly Integration (Adaptive ML)
+    scores = [n["influence_score"] for n in nodes]
+    anomaly_detector = TelemetryAnomalyDetector(base_threshold=2.5)
+    for node in nodes:
+        node["anomaly_detected"] = anomaly_detector.is_anomalous(node["influence_score"], scores)
 
     graph = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

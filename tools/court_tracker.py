@@ -13,6 +13,8 @@ import hashlib
 import os
 import logging
 import time
+import schedule
+import threading
 
 # Set up logging for matrix ledger validation
 LOG_FILE = os.path.join(os.path.dirname(__file__), 'court_tracker.log')
@@ -131,5 +133,26 @@ def main():
             logging.error(f"Failed filing to {courthouse} ({email}): {str(e)}")
             print(f"  [✗] Failed: {str(e)}")
 
+def run_schedule():
+    # Execute autonomous filing every 24 hours to ensure continuous accountability
+    schedule.every(24).hours.do(main)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
+
 if __name__ == '__main__':
+    print("[ACTIVE] LIRIL s.504 Court Tracker (Daemon Mode)")
+    # Initial trigger
     main()
+    
+    # Initialize scheduling
+    thread = threading.Thread(target=run_schedule)
+    thread.daemon = True
+    thread.start()
+    
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n[STOP] Court Tracker Terminated.")

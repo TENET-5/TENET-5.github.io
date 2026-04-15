@@ -17,14 +17,23 @@ SMTP_PORT = int(os.environ.get("TENET_SMTP_PORT", 587))
 FROM_EMAIL = os.environ.get("TENET_EMAIL_ACCOUNT", "tenet5.osint@proton.me")
 PASSWORD = os.environ.get("TENET_EMAIL_PASS", "your-password")
 SUBJECT = "Urgent: Section 504 (Treason) Evidence"
-HTML_FILE = "Information_s504_Updated.html"
+HTML_FILE = "s504-court-filing.html"
 
-# In production this will pull from the MP tracker database dynamically
-RECIPIENT_EMAILS = [
-    "mp1@parl.gc.ca", "mp2@parl.gc.ca", 
-    "liberal-hq@example.com", "cpc-hq@example.com", 
-    "media@example.com"
-]
+# Dynamically pull from the MP tracker database
+RECIPIENT_EMAILS = []
+try:
+    with open(os.path.join(os.path.dirname(__file__), '..', 'data', 'osint_vault', 'maid_mp_dossiers.json'), 'r', encoding='utf-8') as f:
+        import json
+        profiles = json.load(f).get('profiles', [])
+        for p in profiles:
+            name_parts = p.get('name', '').lower().split()
+            if len(name_parts) >= 2:
+                # Format: firstname.lastname@parl.gc.ca
+                RECIPIENT_EMAILS.append(f"{name_parts[0]}.{name_parts[-1]}@parl.gc.ca")
+    print(f"[TENET5] Loaded {len(RECIPIENT_EMAILS)} MP targets from OSINT Vault.")
+except Exception as e:
+    print(f"[WARNING] Failed to load MP database: {e}")
+    RECIPIENT_EMAILS = ["test@example.com"]
 
 def send_email(recipient_email: str) -> None:
     msg = MIMEMultipart()

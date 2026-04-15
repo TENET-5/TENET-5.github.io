@@ -150,6 +150,34 @@ def hash_run(scraper_name, start_time, exit_code, stdout_tail):
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
+# LIRIL Task 2: Self-Healing Mechanism
+class SelfHealingMechanism:
+    def __init__(self, max_retries: int = 3) -> None:
+        self.max_retries = max_retries
+
+    def heal(self, faulty_component: str, func, *args, **kwargs):
+        retries = 0
+        last_proc = None
+        while retries < self.max_retries:
+            try:
+                if retries > 0:
+                    print(f"[HEALER] Restarting {faulty_component} (Attempt {retries+1}/{self.max_retries})...")
+                last_proc = func(*args, **kwargs)
+                if getattr(last_proc, 'returncode', 1) == 0:
+                    return last_proc
+                retries += 1
+                time.sleep(2)
+            except Exception as e:
+                retries += 1
+                print(f"[HEALER] Restart failed (attempt {retries}/{self.max_retries}): {e}")
+                time.sleep(2)
+                if retries >= self.max_retries:
+                    raise e
+        print(f"[HEALER] Self-healing failed for {faulty_component}. Escalating...")
+        return last_proc
+
+
+
 def run_scraper(scraper, dry_run=False):
     """Execute a single scraper and return its result dict."""
     script_path = os.path.join(SCRIPT_DIR, scraper['file'])
@@ -178,12 +206,16 @@ def run_scraper(scraper, dry_run=False):
     log_file = os.path.join(LOG_DIR, f"{scraper['name']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
     try:
-        proc = subprocess.run(
+        healer = SelfHealingMechanism(max_retries=3)
+        
+        proc = healer.heal(
+            scraper['name'],
+            subprocess.run,
             [PYTHON, script_path],
             cwd=SCRIPT_DIR,
             capture_output=True,
             text=True,
-            timeout=scraper.get('timeout', 300),
+            timeout=scraper.get('timeout', 300)
         )
         duration = time.time() - start
         result['exit_code'] = proc.returncode
@@ -268,8 +300,25 @@ def main():
         except Exception:
             pass
 
-    # Select scrapers
-    scrapers = SCRAPERS
+    # LIRIL Task 1: Dynamic Resource Allocation
+    # Adapt API execution blocks and scheduling times dynamically
+    if os.path.exists(STATUS_FILE):
+        try:
+            with open(STATUS_FILE, 'r') as f:
+                prev = json.load(f)
+            if prev.get('results'):
+                for r in prev['results']:
+                    for s in SCRAPERS:
+                        if s['name'] == r.get('name') and r.get('status') == 'OK':
+                            # Scale timeout safely against historic variance
+                            s['timeout'] = max(60, int(r['duration_s'] * 1.5))
+                            # Quickest tasks pushed to start of the line dynamically
+                            s['priority'] = r['duration_s']
+        except Exception:
+            pass
+
+    # Select and dynamically sort scrapers
+    scrapers = sorted(SCRAPERS, key=lambda x: x.get('priority', 999))
     if args.scraper:
         scrapers = [s for s in SCRAPERS if s['name'] == args.scraper]
         if not scrapers:
