@@ -33,27 +33,53 @@ try:
 except ImportError:
     EmpiricalMagicHandoff = None
 
-def analyze_registry_data(registry_results):
+async def analyze_registry_data_async(registry_results):
     """
     LIRIL Mandated: Dynamically analyze produced registry entries
-    and trigger Empirical Magic Handoff telemetry.
+    and trigger Empirical Magic Handoff telemetry. ZERO-ORPHAN enforced.
     """
-    flags = registry_results.get('cross_reference_flags', [])
-    if not flags: return
+    if not EmpiricalMagicHandoff: return
+    print("\n  [LIRIL] Initializing Empirical Magic Handoff for ZERO-ORPHAN Corporate Analysis...")
+    emh = EmpiricalMagicHandoff(output_dir=os.path.join(DATA_DIR, '..', 'evidence', 'profiles'))
     
-    if EmpiricalMagicHandoff:
-        print("\n  [LIRIL] Initializing Empirical Magic Handoff for Corporate Analysis...")
-        emh = EmpiricalMagicHandoff(output_dir=os.path.join(DATA_DIR, '..', 'evidence', 'profiles'))
-        for flag in flags:
-            evidence_data = {
-                'name': f"Corp_Analysis_{flag['entity']}",
-                'source': "TENET5 Corporate Registry Vector",
-                'topological_vector': "MF-D6CCB598BD53B394",
-                'matrix_complexity': "N_VS_NP_CONVERGED",
-                'abcxyz_compliance_check': "VERIFIED",
-                'payload': flag
-            }
-            asyncio.run(emh.secure_handoff(evidence_data, routing_agent="LIRIL/CORP_ANALYZER"))
+    flags = registry_results.get('cross_reference_flags', [])
+    for flag in flags:
+        evidence_data = {
+            'name': f"Corp_Analysis_Flag_{flag['entity']}",
+            'source': "TENET5 Corporate Registry Vector",
+            'topological_vector': "MF-D6CCB598BD53B394",
+            'matrix_complexity': "N_VS_NP_CONVERGED",
+            'abcxyz_compliance_check': "VERIFIED",
+            'payload': flag
+        }
+        await emh.secure_handoff(evidence_data, routing_agent="LIRIL/CORP_ANALYZER_FLAG")
+
+    connections = registry_results.get('corporate_connections', [])
+    for conn in connections:
+        evidence_data = {
+            'name': f"Corp_Connection_{conn['person']}_{conn['corporation']}",
+            'source': "TENET5 Corporate Registry Vector",
+            'topological_vector': "MF-87E633DCF77C09E3",
+            'matrix_complexity': "N_VS_NP_CONVERGED",
+            'abcxyz_compliance_check': "VERIFIED",
+            'payload': conn
+        }
+        await emh.secure_handoff(evidence_data, routing_agent="LIRIL/CORP_ANALYZER_CONN")
+
+    org_matches = registry_results.get('org_registry_matches', [])
+    for org in org_matches:
+        evidence_data = {
+            'name': f"Corp_OrgMatch_{org['organization']}",
+            'source': "TENET5 Corporate Registry Vector",
+            'topological_vector': "H-1823721e3241",
+            'matrix_complexity': "N_VS_NP_CONVERGED",
+            'abcxyz_compliance_check': "VERIFIED",
+            'payload': org
+        }
+        await emh.secure_handoff(evidence_data, routing_agent="LIRIL/CORP_ANALYZER_ORG")
+
+def analyze_registry_data(registry_results):
+    asyncio.run(analyze_registry_data_async(registry_results))
 
 
 # Known entities from the investigation for cross-referencing
