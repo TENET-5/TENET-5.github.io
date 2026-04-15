@@ -597,6 +597,45 @@
       }
       if (d.pattern) h += '<hr><h2 data-narrate="Pattern detail. ' + esc(d.pattern) + '.">Pattern</h2><p>' + esc(d.pattern) + '</p>';
 
+      // Harm Index Visualization (Phase 11 abcxyz ABCXYZ Memory Bridge mapping)
+      if (d.harm_index || d.maid_votes) {
+        h += '<hr><h2 data-narrate="Harm Index Topology Vector. Policy-driven harm metrics.">Policy Harm Index Vector</h2>';
+        h += '<div class="tnt-style-475" style="border-left: 4px solid #c41e3a; padding-left: 15px; margin: 15px 0;">';
+        
+        if (d.maid_votes && d.maid_votes.length > 0) {
+            h += '<p style="color: #ff3250; font-weight: bold; font-family: monospace;">[CRITICAL] MAID Expansion (C-14 / C-7) Complicity</p>';
+            h += '<p><strong>Documented Votes: </strong>' + esc(d.maid_votes.join(', ')) + '</p>';
+            h += '<p><em>Mapped to 44,958+ preventable deaths via Policy Harm Index.</em></p>';
+        }
+        if (d.harm_index) {
+            Object.keys(d.harm_index).forEach(function(k) {
+                var hi = d.harm_index[k];
+                h += '<p><strong>' + esc(hi.policy) + ': </strong>' + esc(hi.metric) + '</p>';
+                if (hi.vector) h += '<p style="color: #facc15; font-family: monospace;">Triple-Vector Link: ' + esc(hi.vector) + '</p>';
+            });
+        }
+        h += '</div>';
+      }
+
+      // Profiles Database Rendering
+      if (d.profiles && Array.isArray(d.profiles)) {
+          h += '<hr><h2>Intelligence Database (' + d.profiles.length + ' Profiles Documented)</h2>';
+          d.profiles.forEach(function(p) {
+              h += '<div style="background: var(--bg-surface); padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border);">';
+              h += '<h3 style="color: #93c5fd; margin-top: 0;">' + esc(p.name) + ' (' + esc(p.party) + ')</h3>';
+              h += '<p><strong>Riding:</strong> ' + esc(p.riding) + '</p>';
+              if (p.lobbying_contacts) h += '<p><strong>Lobbying Contacts:</strong> ' + p.lobbying_contacts + '</p>';
+              if (p.maid_votes && p.maid_votes.length > 0) h += '<p><strong>MAID Votes:</strong> ' + esc(p.maid_votes.join(', ')) + '</p>';
+              if (p.ethics_status) h += '<p><strong>Ethics Status:</strong> ' + esc(p.ethics_status) + '</p>';
+              if (p.controversies && p.controversies.length > 0) {
+                  h += '<ul>';
+                  p.controversies.forEach(function(c) { h += '<li>' + esc(c) + '</li>'; });
+                  h += '</ul>';
+              }
+              h += '</div>';
+          });
+      }
+
       // Defense
       if (d.defense) {
         h += '<hr><h2 data-narrate="Subject defense. ' + esc(d.defense.his_position) + '.">Subject\'s Defense</h2>';
