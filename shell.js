@@ -138,7 +138,9 @@
       .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
       .then(function() { return Promise.all([loadScript(BASE + 'js/comments.js?v=1'), loadScript(BASE + 'js/reactions.js?v=1')]); })
       .then(function() { return loadScript(BASE + 'js/hypothesis.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=1'); });
+      .then(function() { return loadScript(BASE + 'js/my-mp.js?v=1'); })
+      .then(function() { return loadScript(BASE + 'js/impact-tracker.js?v=1'); })
+      .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=2'); });
 
     } else {
       // DIRECT ACCESS fallback — full standalone page
@@ -161,7 +163,7 @@
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/share-actions.js?v=1'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
-        .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=1'); })
+        .then(function() { return loadScript(BASE + 'js/site-chalk.js?v=2'); })
         .then(function() { return loadScript(BASE + 'footer.js?v=3'); });
     }
   }
