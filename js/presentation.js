@@ -1915,8 +1915,9 @@
     stopNarration();
     lirilNarration.token++;
 
-    /* Try MP3 audio first (Azure Neural TTS — highest quality) */
-    if (_presAudio.ready && _presAudio.element) {
+    /* CEO Directive: Hazel speechSynthesis ALWAYS preferred over pre-recorded MP3 */
+    var _hazelReady = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
+    if (!_hazelReady && _presAudio.ready && _presAudio.element) {
       var cue = _presFindCue(text);
       if (cue) {
         var myToken = ++_presAudio.token;
@@ -2024,8 +2025,9 @@
     lirilNarration.token++;
     var myToken = lirilNarration.token;
 
-    /* Try MP3 cue for this slide first */
-    if (_presAudio.ready && _presAudio.element) {
+    /* CEO Directive: Hazel speechSynthesis preferred over MP3 */
+    var _hazelForAll = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
+    if (!_hazelForAll && _presAudio.ready && _presAudio.element) {
       var cue = _presFindCue(text);
       if (cue) {
         var audioTok = ++_presAudio.token;

@@ -829,7 +829,7 @@
 
   </div>
 
-  <script src="js/liril-voice.js?v=2"></script>
+  <script src="js/liril-voice.js?v=3"></script>
   <script>
     /* ── Voice-safe speak helper: waits for HAZEL specifically, never uses browser default ── */
     function _lirilSpeak(text, opts, onstart, onend, onerror) {
@@ -935,8 +935,11 @@
         this.stopAllAudio();
         const sceneEl = document.getElementById('scene-' + index);
         if(!sceneEl) return;
+        // CEO Directive: Hazel speechSynthesis preferred — only use MP3 if Hazel unavailable
+        const _hv2 = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+        const _hazelOk2 = _hv2 && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(_hv2);
         const audioId = sceneEl.getAttribute('data-audio');
-        if (audioId) {
+        if (!_hazelOk2 && audioId) {
           const audio = document.getElementById(audioId);
           if (audio) {
             audio.play().catch(e => console.error(e));
@@ -945,7 +948,7 @@
             return;
           }
         }
-        // No pre-generated audio — use speechSynthesis for data-narrate text (LIRIL voice)
+        // Hazel available OR no MP3 — use speechSynthesis (LIRIL voice)
         const narEl = sceneEl.querySelector('[data-narrate]');
         if (narEl) {
           const text = narEl.getAttribute('data-narrate');
@@ -1032,9 +1035,11 @@
         if (!scene) return;
         const btn = document.getElementById('btn-liril-narrate');
 
-        // Try pre-generated MP3 audio first (AvaMultilingual neural voice)
+        // CEO Directive: Hazel speechSynthesis ALWAYS preferred over pre-recorded MP3
+        const _hv = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+        const _hazelOk = _hv && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(_hv);
         const audioId = scene.getAttribute('data-audio');
-        if (audioId) {
+        if (!_hazelOk && audioId) {
           const audio = document.getElementById(audioId);
           if (audio) {
             this.stopAllAudio();
