@@ -119,6 +119,8 @@
       <button class="campaign-tab" onclick="switchTab('thinktanks', this)">Think Tanks</button>
       <button class="campaign-tab" onclick="switchTab('premiers', this)">Premiers</button>
       <button class="campaign-tab" onclick="switchTab('courts', this)">Courts &amp; Oversight</button>
+      <button class="campaign-tab" onclick="switchTab('lawenforcement', this)" style="color:#ef4444;font-weight:700;">RCMP / Police</button>
+      <button class="campaign-tab" onclick="switchTab('courthouses', this)" style="color:#f59e0b;font-weight:700;">s.504 Filing</button>
       <button class="campaign-tab" onclick="switchTab('fullcampaign', this)">&#x26A1; FULL CAMPAIGN</button>
     </div>
 
@@ -176,6 +178,29 @@
     </div>
     <div class="tab-panel" id="tab-courts">
       <div id="courts-content"></div>
+    </div>
+    <div class="tab-panel" id="tab-lawenforcement">
+      <div style="padding:1rem;">
+        <h3 style="color:#ef4444;margin-bottom:0.5rem;">RCMP / Provincial Police / Crown Prosecutors</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem;">Formal request for criminal investigation citing s.122 (Breach of Trust), s.220 (Criminal Negligence Causing Death), s.380 (Fraud), s.139 (Obstruction). Each email links to the full evidence index.</p>
+        <div class="btn-row" style="margin-bottom:1rem;">
+          <button class="btn btn-primary" onclick="generateLawEnforcementBatch()">Generate RCMP Letter</button>
+          <button class="btn" onclick="generateLawEnforcementBatch('provincial')">Provincial Police</button>
+          <button class="btn" onclick="generateLawEnforcementBatch('crown')">Crown Prosecutor</button>
+        </div>
+        <div id="lawenforcement-content"></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-courthouses">
+      <div style="padding:1rem;">
+        <h3 style="color:#f59e0b;margin-bottom:0.5rem;">Section 504 Criminal Code — Courthouse Filing</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem;">Private Information cover letter for court clerks. 28 counts under Criminal Code (s.122, s.220, s.380, s.139) and National Defence Act (s.83, s.130). Formatted for judicial intake.</p>
+        <div class="btn-row" style="margin-bottom:1rem;">
+          <button class="btn btn-primary" onclick="generateCourthouseLetter()">Generate s.504 Cover Letter</button>
+          <button class="btn" onclick="window.open('s504-covey-bae.html','_blank')">View Full s.504 Filing</button>
+        </div>
+        <div id="courthouses-content"></div>
+      </div>
     </div>
     <div class="tab-panel" id="tab-fullcampaign">
       <div id="fullcampaign-content"></div>
@@ -1053,6 +1078,48 @@
     };
 
   })();
+
+  // ── Law Enforcement + Courthouse generators ──
+  function generateLawEnforcementBatch(type) {
+    var target = type || 'rcmp';
+    var names = {
+      rcmp: { name: 'RCMP Commissioner', title: 'Commissioner', institution: 'Royal Canadian Mounted Police', email: '' },
+      provincial: { name: 'Provincial Police Chief', title: 'Chief of Police', institution: 'Provincial Police Service', email: '' },
+      crown: { name: 'Crown Prosecutor', title: 'Crown Attorney', institution: 'Public Prosecution Service of Canada', email: '' }
+    };
+    var contact = names[target] || names.rcmp;
+    contact.category = 'lawEnforcement';
+    var result = generateCampaignEmail(contact, []);
+    var el = document.getElementById('lawenforcement-content');
+    if (el) {
+      el.innerHTML =
+        '<div style="margin-top:0.5rem;padding:1rem;border-radius:8px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.05)">' +
+        '<h4 style="color:#ef4444;margin-bottom:0.5rem">' + result.subject + '</h4>' +
+        '<pre style="white-space:pre-wrap;font-size:0.82rem;color:var(--text-secondary);max-height:400px;overflow-y:auto;line-height:1.6">' +
+        result.body.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>' +
+        '<div style="margin-top:0.75rem;display:flex;gap:0.5rem">' +
+        '<button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector(\'#lawenforcement-content pre\').textContent)">Copy to Clipboard</button>' +
+        '<button class="btn" onclick="window.open(\'mailto:?subject=' + encodeURIComponent(result.subject) + '&body=' + encodeURIComponent(result.body.substring(0,1800)) + '\')">Open in Email</button>' +
+        '</div></div>';
+    }
+  }
+
+  function generateCourthouseLetter() {
+    var contact = { name: '', institution: '', category: 'courthouse' };
+    var result = generateCampaignEmail(contact, []);
+    var el = document.getElementById('courthouses-content');
+    if (el) {
+      el.innerHTML =
+        '<div style="margin-top:0.5rem;padding:1rem;border-radius:8px;border:1px solid rgba(245,158,11,0.2);background:rgba(245,158,11,0.05)">' +
+        '<h4 style="color:#f59e0b;margin-bottom:0.5rem">' + result.subject + '</h4>' +
+        '<pre style="white-space:pre-wrap;font-size:0.82rem;color:var(--text-secondary);max-height:400px;overflow-y:auto;line-height:1.6">' +
+        result.body.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>' +
+        '<div style="margin-top:0.75rem;display:flex;gap:0.5rem">' +
+        '<button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector(\'#courthouses-content pre\').textContent)">Copy to Clipboard</button>' +
+        '<button class="btn" onclick="window.print()">Print for Filing</button>' +
+        '</div></div>';
+    }
+  }
   </script>
 
   <div id="site-footer-frame"></div>
