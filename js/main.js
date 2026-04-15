@@ -247,8 +247,8 @@ var _S504_TEXT =
   'A Captain with 29 counts including attempted murder, torture,\n' +
   'and high treason faces nothing.\n\n' +
   'Source: https://www.canada.ca/en/chief-military-judge/services/upcoming-courts-martial.html\n\n' +
-  'Full filing: https://tenet-5.github.io/legal.html#s504\n' +
-  'Accountability database (1,005+ records): https://tenet-5.github.io/accountability.html\n\n' +
+  'Full filing: https://tenet5.github.io/legal.html#s504\n' +
+  'Accountability database (1,005+ records): https://tenet5.github.io/accountability.html\n\n' +
   'Daniel Perry — Canadian Forces Combat Veteran\n' +
   'Former Signals Operator — Afghanistan\n';
 
