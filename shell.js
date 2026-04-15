@@ -87,7 +87,8 @@
         loadScript(BASE + 'js/timeline.js?v=1'),
         loadScript(BASE + 'share.js?v=2'),
         loadScript(BASE + 'js/liril-voice.js?v=1'),
-        loadScript(BASE + 'js/figures.js?v=1')
+        loadScript(BASE + 'js/figures.js?v=1'),
+        loadScript(BASE + 'js/error-reporter.js?v=1')
       ]).then(function() {
         return loadScript(BASE + 'js/presentation.js?v=2');
       }).then(function() {
