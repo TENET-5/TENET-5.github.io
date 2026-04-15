@@ -32,6 +32,7 @@
     mode: 'draw',
     color: '#f5f2ec',
     size: 5,
+    text: 'Truth matters',
     user: null,
     canDraw: false,
     previewMode: false,
@@ -216,8 +217,39 @@
     }
   }
 
+  function drawTextMark(ctx, stroke) {
+    if (!stroke || !stroke.text || !stroke.points || !stroke.points.length) return;
+    var p = stroke.points[0];
+    var px = p.x * state.canvasWidth;
+    var py = p.y * state.canvasHeight;
+    var size = Math.max(16, Math.min(42, 12 + (stroke.size || 5) * 2));
+    var text = String(stroke.text || '').slice(0, 120);
+
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(((stroke.rotation || 0) * Math.PI) / 180);
+    ctx.font = '700 ' + size + 'px "Special Elite", "Courier Prime", serif';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = stroke.color || '#f5f2ec';
+    ctx.globalAlpha = 0.18;
+    ctx.fillText(text, 1.4, 1.2);
+    ctx.globalAlpha = 0.90;
+    ctx.fillText(text, 0, 0);
+    for (var c = 0; c < text.length * 2; c++) {
+      var seed = (stroke.created_at ? new Date(stroke.created_at).getTime() : 1) + c * 17;
+      var ox = (seededRandom(seed) - 0.5) * 1.6;
+      var oy = (seededRandom(seed + 9) - 0.5) * 1.2;
+      drawChalkDot(ctx, ox + seededRandom(seed + 13) * Math.max(40, size * text.length * 0.45), oy + size * 0.55, 0.35 + seededRandom(seed + 21) * 0.8, stroke.color || '#f5f2ec', 0.05);
+    }
+    ctx.restore();
+  }
+
   function drawStroke(ctx, stroke) {
     if (!stroke || !stroke.points || stroke.points.length === 0) return;
+    if (stroke.mode === 'text') {
+      drawTextMark(ctx, stroke);
+      return;
+    }
     ctx.save();
 
     if (stroke.mode === 'erase') {
@@ -437,7 +469,7 @@
     if (!el.contributors) return;
     var counts = {};
     state.strokes.forEach(function(stroke) {
-      if (stroke.mode !== 'draw') return;
+      if (stroke.mode === 'erase') return;
       var key = stroke.user_name || stroke.user_email || 'Anonymous';
       counts[key] = (counts[key] || 0) + 1;
     });
@@ -491,6 +523,35 @@
     if (!state.canDraw) return;
     evt.preventDefault();
     el.canvas.setPointerCapture(evt.pointerId);
+
+    if (state.mode === 'text') {
+      var message = String((el.textInput && el.textInput.value) || state.text || '').trim();
+      if (!message) {
+        setStatus(el.syncStatus, 'Type a chalk message first, then tap the board to place it.', 'warn');
+        return;
+      }
+      var note = {
+        board_key: BOARD_KEY,
+        user_id: state.user ? state.user.id : 'local-preview',
+        user_name: state.user ? getUserName(state.user) : 'Local preview',
+        user_email: state.user ? (state.user.email || '') : '',
+        user_avatar: (state.user && state.user.user_metadata && (state.user.user_metadata.avatar_url || state.user.user_metadata.picture)) || '',
+        mode: 'text',
+        text: message,
+        rotation: Math.round((seededRandom(Date.now()) - 0.5) * 6),
+        color: state.color,
+        size: state.size,
+        points: [canvasPoint(evt)],
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + MAX_AGE_MS).toISOString()
+      };
+      state.strokes.push(note);
+      redraw();
+      saveStroke(note);
+      setStatus(el.syncStatus, 'Chalk note placed on the board.', 'good');
+      return;
+    }
+
     state.current = {
       board_key: BOARD_KEY,
       user_id: state.user ? state.user.id : 'local-preview',
@@ -524,7 +585,9 @@
     state.mode = mode;
     el.toolDraw.classList.toggle('active', mode === 'draw');
     el.toolErase.classList.toggle('active', mode === 'erase');
-    el.canvas.style.cursor = mode === 'erase' ? 'cell' : 'crosshair';
+    if (el.toolText) el.toolText.classList.toggle('active', mode === 'text');
+    el.canvas.style.cursor = mode === 'erase' ? 'cell' : (mode === 'text' ? 'text' : 'crosshair');
+    if (mode === 'text' && el.textInput) el.textInput.focus();
   }
 
   function fetchRemoteStrokes() {
@@ -555,8 +618,18 @@
   function bindCanvas() {
     el.toolDraw.addEventListener('click', function() { setMode('draw'); });
     el.toolErase.addEventListener('click', function() { setMode('erase'); });
+    if (el.toolText) el.toolText.addEventListener('click', function() { setMode('text'); });
     el.size.addEventListener('input', function() { state.size = parseInt(el.size.value, 10) || 5; });
     el.color.addEventListener('input', function() { state.color = el.color.value; });
+    if (el.textInput) {
+      el.textInput.addEventListener('input', function() { state.text = el.textInput.value || ''; });
+      el.textInput.addEventListener('keydown', function(evt) {
+        if (evt.key === 'Enter') {
+          evt.preventDefault();
+          setMode('text');
+        }
+      });
+    }
 
     el.canvas.addEventListener('pointerdown', startStroke);
     el.canvas.addEventListener('pointermove', moveStroke);
@@ -578,8 +651,11 @@
     el.signOut = $('chalk-signout');
     el.toolDraw = $('tool-draw');
     el.toolErase = $('tool-erase');
+    el.toolText = $('tool-text');
     el.size = $('brush-size');
     el.color = $('brush-color');
+    el.textInput = $('chalk-text-input');
+    if (el.textInput) el.textInput.value = state.text;
     return true;
   }
 
