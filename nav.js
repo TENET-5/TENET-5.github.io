@@ -40,6 +40,7 @@
         '<div class="nav-content">' +
           '<div class="nav-group nav-primary">' +
             '<a href="/index.html" id="nav-home">Home</a>' +
+            '<a href="/search.html" id="nav-search" style="color: #ff4444; font-weight: 700;">Search</a>' +
             '<a href="/records.html" id="nav-records">Records DB</a>' +
             '<a href="/maid-accountability.html" id="nav-maid">MAID Report</a>' +
             '<a href="/rcmp-commissioners.html" id="nav-rcmp">RCMP</a>' +
