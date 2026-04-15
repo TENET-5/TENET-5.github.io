@@ -34,6 +34,7 @@
     size: 5,
     user: null,
     canDraw: false,
+    previewMode: false,
     sb: null,
     lastRemoteSync: 0,
     canvasWidth: 0,
@@ -80,6 +81,15 @@
     return meta.full_name || meta.name || user.email || 'Anonymous';
   }
 
+  function shouldEnablePreviewMode() {
+    var host = String(window.location.hostname || '').toLowerCase();
+    return !getClient() && (
+      window.location.protocol === 'file:' ||
+      host === '127.0.0.1' ||
+      host === 'localhost'
+    );
+  }
+
   function setStatus(target, message, tone) {
     if (!target) return;
     target.textContent = message;
@@ -90,9 +100,14 @@
     state.user = user || null;
     var canadian = isCanadianUser(state.user);
     var configured = !!getClient();
-    state.canDraw = !!(state.user && canadian && configured);
+    state.previewMode = shouldEnablePreviewMode() && !state.user;
+    state.canDraw = !!((state.user && canadian && configured) || state.previewMode);
 
-    if (state.canDraw) {
+    if (state.previewMode) {
+      el.lock.classList.add('hidden');
+      setStatus(el.status, 'Local preview mode active. Chalk physics are unlocked for testing.', 'good');
+      setStatus(el.syncStatus, 'Preview chalk mode is live on this local build. Public posting still requires Google auth.', 'good');
+    } else if (state.canDraw) {
       el.lock.classList.add('hidden');
       setStatus(el.status, 'Signed in as ' + getUserName(state.user) + '. Canadian account accepted.', 'good');
       setStatus(el.syncStatus, 'Live board ready. Marks expire automatically after one hour.', 'good');
@@ -169,10 +184,11 @@
     var rect = el.canvas.getBoundingClientRect();
     var x = clamp((evt.clientX - rect.left) / rect.width, 0, 1);
     var y = clamp((evt.clientY - rect.top) / rect.height, 0, 1);
-    return { x: x, y: y };
+    var pressure = (typeof evt.pressure === 'number' && evt.pressure > 0) ? evt.pressure : 0.55;
+    return { x: x, y: y, p: pressure };
   }
 
-  // ── Chalk texture renderer (dot-stamp for realistic chalk look) ──
+  // ── Chalk texture renderer (layered powder + edge breakup) ──
   function drawChalkDot(ctx, px, py, radius, color, alpha) {
     ctx.globalAlpha = alpha;
     ctx.fillStyle = color;
@@ -186,6 +202,20 @@
     return x - Math.floor(x);
   }
 
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function drawSegmentDust(ctx, x, y, nx, ny, spread, density, color, alpha, seedBase) {
+    for (var d = 0; d < density; d++) {
+      var seed = seedBase + d * 13;
+      var drift = (seededRandom(seed) - 0.5) * spread;
+      var offset = seededRandom(seed + 7) * spread * 0.55;
+      var rad = 0.25 + seededRandom(seed + 11) * 0.85;
+      drawChalkDot(ctx, x + nx * drift, y + ny * drift + offset, rad, color, alpha * (0.35 + seededRandom(seed + 17) * 0.65));
+    }
+  }
+
   function drawStroke(ctx, stroke) {
     if (!stroke || !stroke.points || stroke.points.length === 0) return;
     ctx.save();
@@ -194,8 +224,10 @@
       ctx.globalCompositeOperation = 'destination-out';
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
-      ctx.lineWidth = (stroke.size || 5) * 2.2;
-      ctx.strokeStyle = 'rgba(0,0,0,1)';
+      ctx.lineWidth = (stroke.size || 5) * 2.8;
+      ctx.strokeStyle = 'rgba(0,0,0,0.95)';
+      ctx.shadowBlur = (stroke.size || 5) * 1.2;
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
       ctx.beginPath();
       stroke.points.forEach(function(point, index) {
         var px = point.x * state.canvasWidth;
@@ -203,20 +235,43 @@
         if (index === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
       });
       ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.shadowBlur = 0;
+      stroke.points.forEach(function(point, index) {
+        var px = point.x * state.canvasWidth;
+        var py = point.y * state.canvasHeight;
+        drawChalkDot(ctx, px, py, (stroke.size || 5) * 0.18, 'rgba(230, 225, 214, 1)', 0.04 + (index % 3) * 0.01);
+      });
       ctx.restore();
       return;
     }
 
-    // Chalk dot-stamp rendering
     ctx.globalCompositeOperation = 'source-over';
-    var baseSize = (stroke.size || 5) * 0.45;
+    var baseSize = (stroke.size || 5) * 0.42;
     var color = stroke.color || '#f5f2ec';
 
-    // Fade strokes nearing expiry (last 5 minutes)
     var fadeAlpha = 1.0;
     if (stroke.expires_at) {
       var remaining = new Date(stroke.expires_at).getTime() - Date.now();
       if (remaining < 300000 && remaining > 0) fadeAlpha = remaining / 300000;
+    }
+
+    if (stroke.points.length > 1) {
+      ctx.beginPath();
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.lineWidth = (stroke.size || 5) * 1.22;
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.07 * fadeAlpha;
+      ctx.shadowBlur = (stroke.size || 5) * 0.9;
+      ctx.shadowColor = 'rgba(255,255,255,0.22)';
+      stroke.points.forEach(function(point, index) {
+        var px = point.x * state.canvasWidth;
+        var py = point.y * state.canvasHeight;
+        if (index === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
     }
 
     for (var i = 0; i < stroke.points.length; i++) {
@@ -225,29 +280,40 @@
       var py = p.y * state.canvasHeight;
 
       if (i > 0) {
-        // Interpolate between points for continuous chalk texture
         var prev = stroke.points[i - 1];
         var ppx = prev.x * state.canvasWidth;
         var ppy = prev.y * state.canvasHeight;
         var dist = Math.sqrt((px - ppx) * (px - ppx) + (py - ppy) * (py - ppy));
-        var steps = Math.max(1, Math.floor(dist / 3));
+        var steps = Math.max(2, Math.floor(dist / 1.8));
+        var dx = px - ppx;
+        var dy = py - ppy;
+        var segLen = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+        var nx = -dy / segLen;
+        var ny = dx / segLen;
 
         for (var s = 0; s <= steps; s++) {
           var t = s / steps;
-          var ix = ppx + (px - ppx) * t;
-          var iy = ppy + (py - ppy) * t;
+          var ix = lerp(ppx, px, t);
+          var iy = lerp(ppy, py, t);
+          var pressure = lerp(prev.p || 0.55, p.p || 0.55, t);
+          var slowFactor = clamp(1.2 - (dist / 22), 0.65, 1.15);
+          var density = Math.max(5, Math.floor((stroke.size || 5) * 1.3));
           var seed = i * 1000 + s;
-          var jx = ix + (seededRandom(seed) - 0.5) * 2.0;
-          var jy = iy + (seededRandom(seed + 7) - 0.5) * 2.0;
-          var alpha = (0.45 + seededRandom(seed + 13) * 0.4) * fadeAlpha;
-          var rad = baseSize * (0.7 + seededRandom(seed + 19) * 0.6);
-          drawChalkDot(ctx, jx, jy, rad, color, alpha);
+
+          for (var k = 0; k < density; k++) {
+            var jitter = (seededRandom(seed + k) - 0.5) * (stroke.size || 5) * 0.28;
+            var grain = baseSize * (0.35 + seededRandom(seed + k + 19) * 0.95) * (0.75 + pressure * 0.6);
+            var alpha = (0.12 + seededRandom(seed + k + 31) * 0.24) * slowFactor * fadeAlpha;
+            drawChalkDot(ctx, ix + nx * jitter, iy + ny * jitter, grain, color, alpha);
+          }
+
+          drawSegmentDust(ctx, ix, iy, nx, ny, (stroke.size || 5) * 0.7, Math.max(2, Math.floor((stroke.size || 5) / 2)), color, 0.045 * fadeAlpha, seed + 300);
         }
       } else {
-        // Single point
-        drawChalkDot(ctx, px, py, baseSize, color, 0.7 * fadeAlpha);
+        drawChalkDot(ctx, px, py, baseSize, color, 0.42 * fadeAlpha);
       }
     }
+
     ctx.globalAlpha = 1.0;
     ctx.restore();
   }
@@ -284,6 +350,30 @@
     state.strokes = state.strokes.filter(function(stroke) {
       return new Date(stroke.expires_at || stroke.created_at).getTime() > cutoff;
     });
+  }
+
+  function drawBoardTexture(ctx) {
+    var seedBase = state.canvasWidth * 1.37 + state.canvasHeight * 0.91;
+    ctx.save();
+
+    for (var i = 0; i < 18; i++) {
+      var y = state.canvasHeight * (0.04 + i * 0.053) + (seededRandom(seedBase + i) - 0.5) * 8;
+      ctx.strokeStyle = 'rgba(255,255,255,0.018)';
+      ctx.lineWidth = 6 + seededRandom(seedBase + i + 9) * 12;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.bezierCurveTo(state.canvasWidth * 0.3, y + 6, state.canvasWidth * 0.7, y - 6, state.canvasWidth, y + 2);
+      ctx.stroke();
+    }
+
+    for (var d = 0; d < 180; d++) {
+      var dustX = seededRandom(seedBase + d * 11) * state.canvasWidth;
+      var dustY = state.canvasHeight * 0.88 + seededRandom(seedBase + d * 17) * state.canvasHeight * 0.12;
+      var alpha = 0.015 + seededRandom(seedBase + d * 23) * 0.03;
+      var radius = 0.4 + seededRandom(seedBase + d * 29) * 1.2;
+      drawChalkDot(ctx, dustX, dustY, radius, '#f1ede2', alpha);
+    }
+    ctx.restore();
   }
 
   // ── Timeline background (faint chalk text from research events) ──
@@ -335,6 +425,7 @@
     if (!el.canvas) return;
     var ctx = el.canvas.getContext('2d');
     ctx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+    drawBoardTexture(ctx);
     drawTimelineBackground(ctx);
     pruneExpired();
     state.strokes.forEach(function(stroke) { drawStroke(ctx, stroke); });
@@ -402,10 +493,10 @@
     el.canvas.setPointerCapture(evt.pointerId);
     state.current = {
       board_key: BOARD_KEY,
-      user_id: state.user.id,
-      user_name: getUserName(state.user),
-      user_email: state.user.email || '',
-      user_avatar: (state.user.user_metadata && (state.user.user_metadata.avatar_url || state.user.user_metadata.picture)) || '',
+      user_id: state.user ? state.user.id : 'local-preview',
+      user_name: state.user ? getUserName(state.user) : 'Local preview',
+      user_email: state.user ? (state.user.email || '') : '',
+      user_avatar: (state.user && state.user.user_metadata && (state.user.user_metadata.avatar_url || state.user.user_metadata.picture)) || '',
       mode: state.mode,
       color: state.color,
       size: state.size,
