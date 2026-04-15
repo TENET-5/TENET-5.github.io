@@ -157,9 +157,22 @@
       cached = null;
     }
 
-    /* Clara or SILENCE. No fallback voices — they sound wrong and cause
-       "voice hallucinations" where LIRIL speaks in the wrong voice.
-       Silence is ALWAYS better than the wrong voice. */
+    /* P1-P6: If Clara is unavailable, use the best acceptable English fallback.
+       Priority order per site voice policy:
+       neural en-GB female → known female en-GB → non-male en-GB →
+       neural en female → known female en → non-male en → silence last. */
+    if (!cached && voices.length > 0) {
+      var rankedFemale = voices
+        .filter(function(v) { return isFemale(v) && !isMale(v) && isEn(v) && !isDesktop(v); })
+        .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
+      if (rankedFemale.length) cached = rankedFemale[0];
+    }
+    if (!cached && voices.length > 0) {
+      var rankedEnglish = voices
+        .filter(function(v) { return !isMale(v) && isEn(v) && !isDesktop(v); })
+        .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
+      if (rankedEnglish.length) cached = rankedEnglish[0];
+    }
 
     /* NEVER use Desktop SAPI5 voices — quality is unacceptable */
     if (cached && isDesktop(cached)) {
