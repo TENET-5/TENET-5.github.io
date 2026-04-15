@@ -63,6 +63,7 @@
             '<a href="/kids-guide.html" id="nav-kids" style="color: #facc15;">Simple Guide</a>' +
             '<a href="/cds-accountability.html" id="nav-cds">CDS</a>' +
             '<a href="/follow-the-money.html" id="nav-money" style="color: #facc15;">Follow $</a>' +
+            '<a href="/panama-papers.html" id="nav-panama" style="color: #ef4444;">Panama Papers</a>' +
             '<a href="/reading-order.html" id="nav-reading" style="color: #22d3ee;">Reading Order</a>' +
             '<a href="/news.html" id="nav-news" style="color:#dc2626;font-weight:700;">News</a>' +
             '<a href="/sitemap.html" id="nav-sitemap">All Pages</a>' +
