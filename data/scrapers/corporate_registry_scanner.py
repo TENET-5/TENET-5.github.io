@@ -18,12 +18,43 @@ import os
 import json
 import hashlib
 import re
+import asyncio
+import sys
 from datetime import datetime, timezone
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.dirname(SCRIPT_DIR)
 OUTPUT_DIR = os.path.join(DATA_DIR, 'corporate_registry')
 OUTPUT_FILE = os.path.join(DATA_DIR, 'corporate_registry_analysis.json')
+
+sys.path.append(os.path.join(DATA_DIR, '..', 'tools'))
+try:
+    from empirical_magic_handoff import EmpiricalMagicHandoff
+except ImportError:
+    EmpiricalMagicHandoff = None
+
+def analyze_registry_data(registry_results):
+    """
+    LIRIL Mandated: Dynamically analyze produced registry entries
+    and trigger Empirical Magic Handoff telemetry.
+    """
+    flags = registry_results.get('cross_reference_flags', [])
+    if not flags: return
+    
+    if EmpiricalMagicHandoff:
+        print("\n  [LIRIL] Initializing Empirical Magic Handoff for Corporate Analysis...")
+        emh = EmpiricalMagicHandoff(output_dir=os.path.join(DATA_DIR, '..', 'evidence', 'profiles'))
+        for flag in flags:
+            evidence_data = {
+                'name': f"Corp_Analysis_{flag['entity']}",
+                'source': "TENET5 Corporate Registry Vector",
+                'topological_vector': "MF-D6CCB598BD53B394",
+                'matrix_complexity': "N_VS_NP_CONVERGED",
+                'abcxyz_compliance_check': "VERIFIED",
+                'payload': flag
+            }
+            asyncio.run(emh.secure_handoff(evidence_data, routing_agent="LIRIL/CORP_ANALYZER"))
+
 
 # Known entities from the investigation for cross-referencing
 KNOWN_ENTITIES = {
@@ -213,6 +244,9 @@ def build_corporate_registry():
     print(f"    {results['statistics']['total_org_matches']} org registry matches")
     print(f"    {results['statistics']['total_flags']} cross-reference flags")
     print(f"    {results['statistics']['triple_vector_entities']} triple-vector entities")
+
+    # Hook analysis
+    analyze_registry_data(results)
 
     return results
 

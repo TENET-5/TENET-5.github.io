@@ -21,6 +21,10 @@
   if (window.__TENET5_PRESENTATION_LOADED) return;
   window.__TENET5_PRESENTATION_LOADED = true;
 
+  window.__TENET5_LIRIL_STOP = function () {
+    if (window.__TENET5_LIRIL_STOP_INTERNAL) window.__TENET5_LIRIL_STOP_INTERNAL();
+  };
+
   var prefersReducedMotion = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1769,10 +1773,10 @@
     el.className = 'pres-narration-subtitle';
     el.setAttribute('role', 'status');
     el.setAttribute('aria-live', 'polite');
-    el.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);' +
+    el.style.cssText = 'position:fixed;bottom:64px;left:50%;transform:translateX(-50%);' +
       'max-width:80vw;padding:0.7rem 1.4rem;background:rgba(5,5,10,0.94);' +
       'color:#e0ddd6;font-size:0.9rem;line-height:1.5;border-radius:4px;' +
-      'border:1px solid rgba(14,165,233,0.18);z-index:9990;' +
+      'border:1px solid rgba(14,165,233,0.18);z-index:10000;' +
       'backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);' +
       'pointer-events:none;opacity:0;transition:opacity 0.3s ease;' +
       'text-align:center;font-family:Inter,-apple-system,sans-serif;' +
@@ -1922,6 +1926,10 @@
   }
 
   function doNarrate(text, voice) {
+    if (window.__LIRIL_WALKTHROUGH_STOP) {
+      window.__LIRIL_WALKTHROUGH_STOP();
+    }
+
     stopNarration();
     lirilNarration.token++;
 
@@ -2014,6 +2022,10 @@
 
   function narrateAllStep(slides, tracker) {
     if (!lirilNarration.narrateAllActive) return;
+
+    if (window.__LIRIL_WALKTHROUGH_STOP) {
+      window.__LIRIL_WALKTHROUGH_STOP();
+    }
 
     var cur = tracker.getActive();
     var slide = slides[cur];
@@ -2192,11 +2204,16 @@
     }
 
     lirilNarration.button.addEventListener('click', function () {
-      narrateCurrentSlide();
+      if (lirilNarration.speaking) {
+        stopNarration();
+        if (lirilNarration.narrateAllActive) stopNarrateAll();
+      } else {
+        narrateCurrentSlide();
+      }
     });
 
     window.__TENET5_LIRIL_NARRATE = narrateCurrentSlide;
-    window.__TENET5_LIRIL_STOP = stopNarration;
+    window.__TENET5_LIRIL_STOP_INTERNAL = stopNarration;
     window.__TENET5_LIRIL_NARRATE_ALL = function () {
       var fakeTracker = { getActive: function () {
         var attr = lirilNarration.activeSlide && lirilNarration.activeSlide.getAttribute('data-slide-idx');

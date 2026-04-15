@@ -29,6 +29,14 @@ import re
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+import asyncio
+
+try:
+    sys.path.append(r'E:\S.L.A.T.E\tenet5\src')
+    from tenet.aurora.kyre_knowledge import KyreEngine
+    HAS_KYRE = True
+except ImportError:
+    HAS_KYRE = False
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "..")
@@ -532,6 +540,8 @@ def main():
                         help="Lookup specific entity")
     parser.add_argument("--export-graph", action="store_true",
                         help="Export influence graph for frontend")
+    parser.add_argument("--integrate-kyre", action="store_true",
+                        help="Feed topology securely into S.L.A.T.E Kyre knowledge graph")
     parser.add_argument("--verbose", action="store_true",
                         help="Debug logging")
 
@@ -562,6 +572,34 @@ def main():
         log.info("Graph nodes: %d, edges: %d",
                  graph["total_nodes"], graph["total_edges"])
         log.info("Dossier: %s", dossier_path)
+        
+        if args.integrate_kyre:
+            if HAS_KYRE:
+                log.info("[LIRIL] Unpacking Topology into S.L.A.T.E Kyre Matrix...")
+                try:
+                    engine = KyreEngine()
+                    async def pipe_intelligence():
+                        for key, entity in entities.items():
+                            if entity["influence_score"] >= 10:
+                                score = entity["influence_score"]
+                                payload = {
+                                    "source": "network_topology_analyzer",
+                                    "name": entity["name"],
+                                    "influence_score": score
+                                }
+                                await engine.ingest_osint_event(
+                                    source="TENET5 Topology Matrix",
+                                    text=f"Entity '{entity['name']}' has topological overlap yielding an Empirical Matrix score of {score}. Active in {len(entity['sources'])} vectors.",
+                                    entities=[entity["name"]],
+                                    domain="TECHNOLOGY",
+                                    metadata=payload
+                                )
+                    asyncio.run(pipe_intelligence())
+                    log.info("[SUCCESS] Topology embedded successfully inside KyreEngine OSINT Euclidean causal graph.")
+                except Exception as e:
+                    log.error(f"[ERROR] KyreEngine Link failed: {e}")
+            else:
+                log.warning("S.L.A.T.E Kyre Engine blocked natively.")
 
 
 if __name__ == "__main__":
