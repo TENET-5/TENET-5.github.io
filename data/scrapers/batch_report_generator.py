@@ -221,7 +221,7 @@ a {{ color: #c41e3a; }}
                 h += f'<div class="action">{escape(f["action"])}</div>\n'
             h += '</div>\n'
         if len(cc_findings) > 20:
-            h += f'<p style="color:#6b7280;font-size:0.78rem;">+ {len(cc_findings)-20} additional findings. See <a href="https://tenet-5.github.io/criminal-code-analysis.html">full analysis</a>.</p>\n'
+            h += f'<p style="color:#6b7280;font-size:0.78rem;">+ {len(cc_findings)-20} additional findings. See <a href="https://tenet5.github.io/criminal-code-analysis.html">full analysis</a>.</p>\n'
         h += '</div>\n'
 
         # Section 3: Accountability Records
@@ -275,11 +275,11 @@ a {{ color: #c41e3a; }}
         # Section 6: Evidence Links
         h += '<div class="section"><h2><span class="num">6</span> Public Evidence</h2>\n'
         links = [
-            ("Cross-Reference Findings", "https://tenet-5.github.io/findings.html"),
-            ("Follow the Money", "https://tenet-5.github.io/cross-reference.html"),
-            ("Criminal Code Analysis", "https://tenet-5.github.io/criminal-code-analysis.html"),
-            ("The 504 Database", "https://tenet-5.github.io/accountability.html"),
-            ("Foreign Influence Investigation", "https://tenet-5.github.io/foreign-influence.html"),
+            ("Cross-Reference Findings", "https://tenet5.github.io/findings.html"),
+            ("Follow the Money", "https://tenet5.github.io/cross-reference.html"),
+            ("Criminal Code Analysis", "https://tenet5.github.io/criminal-code-analysis.html"),
+            ("The 504 Database", "https://tenet5.github.io/accountability.html"),
+            ("Foreign Influence Investigation", "https://tenet5.github.io/foreign-influence.html"),
             ("Commissioner of Lobbying (verify)", "https://lobbycanada.gc.ca/en/open-data/"),
         ]
         h += '<ul>\n'
@@ -291,7 +291,7 @@ a {{ color: #c41e3a; }}
         h += '<div class="footer">\n'
         h += '<p>Every number in this report is sourced from Canadian government public records.</p>\n'
         h += '<p>Daniel Perry — Canadian Forces combat veteran, former Signals Operator, Afghanistan</p>\n'
-        h += '<p><a href="https://tenet-5.github.io/">tenet-5.github.io</a></p>\n'
+        h += '<p><a href="https://tenet5.github.io/">tenet5.github.io</a></p>\n'
         h += '</div>\n</body></html>'
 
         return {"subject": subject, "html": h, "name": name, "party": party,
