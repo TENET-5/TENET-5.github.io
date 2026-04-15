@@ -39,7 +39,7 @@ def inject_seo(filepath):
 
     # Base URL inference
     basename = os.path.basename(filepath)
-    canonical = f"https://tenet-5.github.io/{basename if basename != 'index.html' else ''}"
+    canonical = f"https://tenet5.github.io/{basename if basename != 'index.html' else ''}"
 
     # Build the injection block
     json_ld = {
@@ -50,7 +50,7 @@ def inject_seo(filepath):
         "publisher": {
             "@type": "Organization",
             "name": "TENET5 Investigation",
-            "logo": {"@type": "ImageObject", "url": "https://tenet-5.github.io/img/tenet5_logo.png"}
+            "logo": {"@type": "ImageObject", "url": "https://tenet5.github.io/img/tenet5_logo.png"}
         }
     }
 

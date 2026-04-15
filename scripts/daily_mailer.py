@@ -36,7 +36,7 @@ MEDIA_FILE = DATA_DIR / "media_contacts.json"
 INSTITUTION_FILE = DATA_DIR / "institution_contacts.json"
 LOG_FILE = SITE_DIR / "scripts" / "dispatch_log.jsonl"
 
-SITE_URL = "https://tenet-5.github.io"
+SITE_URL = "https://tenet5.github.io"
 
 
 def load_json(path):
