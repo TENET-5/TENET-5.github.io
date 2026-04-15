@@ -58,6 +58,7 @@
             '<a href="/institutional-malice.html" id="nav-malice" style="color: #dc2626;">Malice Doctrine</a>' +
             '<a href="/publications.html" id="nav-publications">Publications</a>' +
             '<a href="/ai-research.html" id="nav-research" style="color:#c9a84c;">Research</a>' +
+            '<a href="/quantum-developments.html" id="nav-quantum" style="color:#7dd3fc;">Quantum</a>' +
             '<a href="/ppcli-lawsuit.html" id="nav-kitshop">Kit Shop</a>' +
             '<a href="/kids-guide.html" id="nav-kids" style="color: #facc15;">Simple Guide</a>' +
             '<a href="/cds-accountability.html" id="nav-cds">CDS</a>' +

@@ -60,18 +60,29 @@ log = logging.getLogger("proactive_disclosure_scanner")
 # Rate-limited HTTP
 # ---------------------------------------------------------------------------
 
-_last_request_time = 0.0
+class SlidingWindowRateLimiter:
+    """ Phase 17 Native Token Bucket Limiter - Avoids external dependencies """
+    def __init__(self, max_calls=100, period=60.0):
+        self.max_calls = max_calls
+        self.period = period
+        self.calls = []
 
-def _rate_limit(seconds=3.0):
-    global _last_request_time
-    now = time.monotonic()
-    elapsed = now - _last_request_time
-    if elapsed < seconds:
-        time.sleep(seconds - elapsed)
-    _last_request_time = time.monotonic()
+    def wait(self):
+        now = time.monotonic()
+        # Drain calls older than the sliding window bounds
+        self.calls = [t for t in self.calls if now - t < self.period]
+        
+        if len(self.calls) >= self.max_calls:
+            sleep_time = self.period - (now - self.calls[0])
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+        
+        self.calls.append(time.monotonic())
+
+_osint_limiter = SlidingWindowRateLimiter(max_calls=100, period=60.0)
 
 def fetch_url(url, timeout=180):
-    _rate_limit(seconds=3.0)
+    _osint_limiter.wait()
     log.info("GET %s", url)
     req = urllib.request.Request(url, headers={
         "User-Agent": "TENET5-ProactiveDisclosureScanner/1.0 (public-government-data)",

@@ -178,6 +178,30 @@ class MillennialFalconTracker:
         self.logger.info(f"Target embedded: {data_point['topological_vector']} [{complexity}] -> Handoff Key: {subset_key}")
         return data_point
 
+    def optimize_financial_dimensionality(self, financial_payload: dict):
+        """ LIRIL Phase 19: PCA Financial Transformation Matrix dimensionality reduction. """
+        try:
+            import numpy as np
+            from sklearn.decomposition import PCA
+            
+            matrix = []
+            for key, val in financial_payload.items():
+                if isinstance(val, (int, float)):
+                    matrix.append([float(val)])
+                elif isinstance(val, dict) and "amount" in val:
+                    matrix.append([float(val["amount"])])
+            
+            if len(matrix) >= 2:
+                pca = PCA(n_components=0.95)
+                optimized = pca.fit_transform(np.array(matrix))
+                self.logger.info(f"Phase 19 PCA Dimensionality Reduction isolated 95% variance components.")
+                return {"variance_mapped": optimized.tolist(), "original_dimensions": len(matrix)}
+        except ImportError:
+            self.logger.warning("Phase 19 PCA bypass: scikit-learn mapping disabled.")
+        except Exception as e:
+            self.logger.error(f"Phase 19 PCA calculation failure: {e}")
+        return financial_payload
+
     async def parse_chronos_anomaly(self, anomaly_payload: dict):
         """
         Ingests CHRONOS_KAIROS_ANOMALY events emitted over the NATS bus,
