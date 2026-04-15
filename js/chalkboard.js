@@ -26,6 +26,9 @@
   var BOARD_KEY = 'tenet5-public';
   var MAX_AGE_MS = 60 * 60 * 1000;
   var POLL_MS = 15000;
+  var PREVIEW_STORAGE_KEY = 'tenet5-chalkboard-preview-v3';
+  var SPEAKER_POS_KEY = 'tenet5-speaker-pos-v1';
+
   var state = {
     strokes: [],
     current: null,
@@ -36,6 +39,13 @@
     user: null,
     canDraw: false,
     previewMode: false,
+    draggingTextId: null,
+    dragOffset: null,
+    selectedTextId: null,
+    cameraStream: null,
+    speakerVisible: false,
+    speakerDrag: null,
+    speakerPos: { x: 16, y: 16 },
     sb: null,
     lastRemoteSync: 0,
     canvasWidth: 0,
@@ -95,6 +105,53 @@
     if (!target) return;
     target.textContent = message;
     target.dataset.tone = tone || 'muted';
+  }
+
+  function setPromptText(message) {
+    state.text = message;
+    if (el.textInput) {
+      el.textInput.value = message;
+      el.textInput.focus();
+    }
+    setMode('text');
+    setStatus(el.syncStatus, 'LIRIL loaded a board prompt. Tap the board to place it.', 'good');
+  }
+
+  function speakCurrentText() {
+    var text = String((el.textInput && el.textInput.value) || state.text || '').trim();
+    if (!text) {
+      setStatus(el.syncStatus, 'Type a message first, then ask LIRIL to speak it.', 'warn');
+      return;
+    }
+    if (!('speechSynthesis' in window)) {
+      setStatus(el.syncStatus, 'Speech synthesis is unavailable in this browser.', 'warn');
+      return;
+    }
+
+    var premiumVoice = window.LIRIL_VOICE && window.LIRIL_VOICE.get ? window.LIRIL_VOICE.get() : null;
+    var safeVoice = !!(premiumVoice && (!window.LIRIL_VOICE || (
+      window.LIRIL_VOICE.isFemale(premiumVoice) &&
+      !window.LIRIL_VOICE.isMale(premiumVoice) &&
+      !window.LIRIL_VOICE.isDesktop(premiumVoice) &&
+      window.LIRIL_VOICE.isNeural(premiumVoice)
+    )));
+
+    if (!safeVoice) {
+      window.speechSynthesis.cancel();
+      setStatus(el.syncStatus, 'Premium voice is unavailable here, so LIRIL stays muted rather than using a robotic fallback.', 'warn');
+      return;
+    }
+
+    var utterance = new SpeechSynthesisUtterance(text);
+    var params = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 0.9, pitch: 1.1, volume: 1 };
+    utterance.voice = premiumVoice;
+    utterance.lang = premiumVoice.lang || 'en-GB';
+    utterance.rate = params.rate;
+    utterance.pitch = params.pitch;
+    utterance.volume = params.volume;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    setStatus(el.syncStatus, 'LIRIL is voicing the current chalk message with the premium voice lock.', 'good');
   }
 
   function syncAuthState(user) {
@@ -240,6 +297,14 @@
       var ox = (seededRandom(seed) - 0.5) * 1.6;
       var oy = (seededRandom(seed + 9) - 0.5) * 1.2;
       drawChalkDot(ctx, ox + seededRandom(seed + 13) * Math.max(40, size * text.length * 0.45), oy + size * 0.55, 0.35 + seededRandom(seed + 21) * 0.8, stroke.color || '#f5f2ec', 0.05);
+    }
+    if (state.selectedTextId === strokeKey(stroke)) {
+      var width = ctx.measureText(text).width;
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.setLineDash([5, 4]);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-5, -5, width + 10, size + 10);
+      ctx.setLineDash([]);
     }
     ctx.restore();
   }
@@ -492,9 +557,189 @@
       .replace(/'/g, '&#39;');
   }
 
+  function strokeKey(stroke) {
+    return String(stroke.id || stroke.created_at || ((stroke.user_id || 'anon') + ':' + (stroke.text || '') + ':' + (stroke.mode || 'draw')));
+  }
+
+  function findStrokeByKey(key) {
+    for (var i = 0; i < state.strokes.length; i++) {
+      if (strokeKey(state.strokes[i]) === key) return state.strokes[i];
+    }
+    return null;
+  }
+
+  function persistPreviewBoard() {
+    if (!state.previewMode) return;
+    try { localStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(state.strokes)); } catch (e) {}
+  }
+
+  function loadPreviewBoard() {
+    if (!shouldEnablePreviewMode()) return;
+    try {
+      var saved = localStorage.getItem(PREVIEW_STORAGE_KEY);
+      if (saved) state.strokes = JSON.parse(saved) || [];
+    } catch (e) {}
+  }
+
+  function getTextBounds(stroke) {
+    if (!stroke || stroke.mode !== 'text' || !stroke.points || !stroke.points.length || !el.canvas) return null;
+    var ctx = el.canvas.getContext('2d');
+    var size = Math.max(16, Math.min(42, 12 + (stroke.size || 5) * 2));
+    ctx.save();
+    ctx.font = '700 ' + size + 'px "Special Elite", "Courier Prime", serif';
+    var width = ctx.measureText(String(stroke.text || '')).width;
+    ctx.restore();
+    var px = stroke.points[0].x * state.canvasWidth;
+    var py = stroke.points[0].y * state.canvasHeight;
+    return { left: px - 8, top: py - 8, right: px + width + 8, bottom: py + size + 10 };
+  }
+
+  function findTextMarkAt(evt) {
+    var point = canvasPoint(evt);
+    var px = point.x * state.canvasWidth;
+    var py = point.y * state.canvasHeight;
+    for (var i = state.strokes.length - 1; i >= 0; i--) {
+      var stroke = state.strokes[i];
+      var box = getTextBounds(stroke);
+      if (!box) continue;
+      if (px >= box.left && px <= box.right && py >= box.top && py <= box.bottom) {
+        return { stroke: stroke, point: point };
+      }
+    }
+    return null;
+  }
+
+  function persistStrokeUpdate(stroke) {
+    if (!stroke) return Promise.resolve();
+    if (state.previewMode || !getClient() || !stroke.id) {
+      persistPreviewBoard();
+      return Promise.resolve();
+    }
+    return state.sb.from('chalkboard_marks')
+      .update({ points: stroke.points, text: stroke.text || null, size: stroke.size, rotation: stroke.rotation || 0 })
+      .eq('id', stroke.id)
+      .then(function() { return null; })
+      .catch(function() { return null; });
+  }
+
+  function setSpeakerVisible(visible) {
+    state.speakerVisible = !!visible;
+    if (!el.speakerCorner) return;
+    el.speakerCorner.classList.toggle('hidden', !visible);
+  }
+
+  function moveSpeakerFrame(x, y) {
+    if (!el.speakerCorner || !el.surface) return;
+    var maxX = Math.max(8, el.surface.clientWidth - el.speakerCorner.offsetWidth - 8);
+    var maxY = Math.max(8, el.surface.clientHeight - el.speakerCorner.offsetHeight - 8);
+    state.speakerPos = { x: clamp(x, 8, maxX), y: clamp(y, 8, maxY) };
+    el.speakerCorner.style.left = state.speakerPos.x + 'px';
+    el.speakerCorner.style.top = state.speakerPos.y + 'px';
+  }
+
+  function restoreSpeakerPosition() {
+    if (!el.speakerCorner) return;
+    try {
+      var saved = JSON.parse(localStorage.getItem(SPEAKER_POS_KEY) || 'null');
+      if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
+        moveSpeakerFrame(saved.x, saved.y);
+        return;
+      }
+    } catch (e) {}
+    moveSpeakerFrame(16, 16);
+  }
+
+  function storeSpeakerPosition() {
+    try { localStorage.setItem(SPEAKER_POS_KEY, JSON.stringify(state.speakerPos)); } catch (e) {}
+  }
+
+  function stopSpeakerCamera() {
+    if (state.cameraStream) {
+      state.cameraStream.getTracks().forEach(function(track) { track.stop(); });
+      state.cameraStream = null;
+    }
+    if (el.speakerVideo) el.speakerVideo.srcObject = null;
+    if (el.speakerPlaceholder) el.speakerPlaceholder.style.display = 'flex';
+    if (el.speakerStart) {
+      el.speakerStart.classList.remove('live');
+      el.speakerStart.textContent = 'Start Camera';
+    }
+    setSpeakerVisible(false);
+    if (el.speakerStatus) setStatus(el.speakerStatus, 'Camera is off. Start it to place yourself on the chalkboard while you write.', 'muted');
+  }
+
+  function startSpeakerCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (el.speakerStatus) setStatus(el.speakerStatus, 'This browser does not expose camera access.', 'warn');
+      return;
+    }
+    if (!window.isSecureContext && window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost') {
+      if (el.speakerStatus) setStatus(el.speakerStatus, 'Camera access requires HTTPS or local preview.', 'warn');
+      return;
+    }
+    if (state.cameraStream) {
+      setSpeakerVisible(true);
+      restoreSpeakerPosition();
+      if (el.speakerStatus) setStatus(el.speakerStatus, 'Live camera is already on the board.', 'good');
+      return;
+    }
+    if (el.speakerStatus) setStatus(el.speakerStatus, 'Requesting camera access for Speakers\' Corner…', 'muted');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false })
+      .then(function(stream) {
+        state.cameraStream = stream;
+        if (el.speakerVideo) el.speakerVideo.srcObject = stream;
+        if (el.speakerPlaceholder) el.speakerPlaceholder.style.display = 'none';
+        if (el.speakerName) el.speakerName.textContent = state.user ? getUserName(state.user) : 'Local preview';
+        if (el.speakerStart) {
+          el.speakerStart.classList.add('live');
+          el.speakerStart.textContent = 'Camera Live';
+        }
+        setSpeakerVisible(true);
+        restoreSpeakerPosition();
+        if (el.speakerStatus) setStatus(el.speakerStatus, 'Live camera is on the board. Drag the frame while you write.', 'good');
+      })
+      .catch(function(err) {
+        if (el.speakerPlaceholder) {
+          el.speakerPlaceholder.style.display = 'flex';
+          el.speakerPlaceholder.textContent = 'Camera access was blocked or unavailable. Allow permission to appear on the board.';
+        }
+        if (el.speakerStatus) setStatus(el.speakerStatus, 'Camera access failed: ' + (err && err.name ? err.name : 'unavailable'), 'warn');
+      });
+  }
+
+  function bindSpeakerDrag() {
+    if (!el.speakerHandle || !el.speakerCorner || !el.surface) return;
+
+    el.speakerHandle.addEventListener('pointerdown', function(evt) {
+      evt.preventDefault();
+      if (!state.speakerVisible) return;
+      var rect = el.speakerCorner.getBoundingClientRect();
+      state.speakerDrag = { pointerId: evt.pointerId, offsetX: evt.clientX - rect.left, offsetY: evt.clientY - rect.top };
+      el.speakerHandle.setPointerCapture(evt.pointerId);
+    });
+
+    window.addEventListener('pointermove', function(evt) {
+      if (!state.speakerDrag || !el.surface) return;
+      var surfaceRect = el.surface.getBoundingClientRect();
+      moveSpeakerFrame(evt.clientX - surfaceRect.left - state.speakerDrag.offsetX, evt.clientY - surfaceRect.top - state.speakerDrag.offsetY);
+    });
+
+    function endDrag() {
+      if (!state.speakerDrag) return;
+      state.speakerDrag = null;
+      storeSpeakerPosition();
+    }
+
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+  }
+
   function saveStroke(stroke) {
     var sb = getClient();
-    if (!sb || !state.user) return Promise.resolve();
+    if (!sb || !state.user) {
+      persistPreviewBoard();
+      return Promise.resolve();
+    }
     return sb.from('chalkboard_marks').insert(stroke).then(function(res) {
       if (res.error) {
         setStatus(el.syncStatus, 'Saved locally, but remote sync reported: ' + res.error.message, 'warn');
@@ -525,6 +770,19 @@
     el.canvas.setPointerCapture(evt.pointerId);
 
     if (state.mode === 'text') {
+      var hit = findTextMarkAt(evt);
+      if (hit && hit.stroke) {
+        state.selectedTextId = strokeKey(hit.stroke);
+        state.draggingTextId = state.selectedTextId;
+        state.dragOffset = {
+          x: hit.point.x - hit.stroke.points[0].x,
+          y: hit.point.y - hit.stroke.points[0].y
+        };
+        redraw();
+        setStatus(el.syncStatus, 'Dragging chalk note…', 'muted');
+        return;
+      }
+
       var message = String((el.textInput && el.textInput.value) || state.text || '').trim();
       if (!message) {
         setStatus(el.syncStatus, 'Type a chalk message first, then tap the board to place it.', 'warn');
@@ -545,6 +803,7 @@
         created_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + MAX_AGE_MS).toISOString()
       };
+      state.selectedTextId = strokeKey(note);
       state.strokes.push(note);
       redraw();
       saveStroke(note);
@@ -552,6 +811,7 @@
       return;
     }
 
+    state.selectedTextId = null;
     state.current = {
       board_key: BOARD_KEY,
       user_id: state.user ? state.user.id : 'local-preview',
@@ -569,6 +829,19 @@
   }
 
   function moveStroke(evt) {
+    if (state.draggingTextId) {
+      evt.preventDefault();
+      var target = findStrokeByKey(state.draggingTextId);
+      if (!target || !target.points || !target.points.length) return;
+      var point = canvasPoint(evt);
+      target.points[0] = {
+        x: clamp(point.x - (state.dragOffset ? state.dragOffset.x : 0), 0.02, 0.94),
+        y: clamp(point.y - (state.dragOffset ? state.dragOffset.y : 0), 0.02, 0.94),
+        p: point.p
+      };
+      redraw();
+      return;
+    }
     if (!state.current) return;
     evt.preventDefault();
     state.current.points.push(canvasPoint(evt));
@@ -576,6 +849,16 @@
   }
 
   function endStroke(evt) {
+    if (state.draggingTextId) {
+      if (evt) evt.preventDefault();
+      var moved = findStrokeByKey(state.draggingTextId);
+      state.draggingTextId = null;
+      state.dragOffset = null;
+      persistStrokeUpdate(moved);
+      redraw();
+      setStatus(el.syncStatus, 'Chalk note moved.', 'good');
+      return;
+    }
     if (!state.current) return;
     evt.preventDefault();
     finishStroke();
@@ -619,7 +902,15 @@
     el.toolDraw.addEventListener('click', function() { setMode('draw'); });
     el.toolErase.addEventListener('click', function() { setMode('erase'); });
     if (el.toolText) el.toolText.addEventListener('click', function() { setMode('text'); });
-    el.size.addEventListener('input', function() { state.size = parseInt(el.size.value, 10) || 5; });
+    el.size.addEventListener('input', function() {
+      state.size = parseInt(el.size.value, 10) || 5;
+      var selected = state.selectedTextId ? findStrokeByKey(state.selectedTextId) : null;
+      if (selected && selected.mode === 'text') {
+        selected.size = state.size;
+        redraw();
+        persistStrokeUpdate(selected);
+      }
+    });
     el.color.addEventListener('input', function() { state.color = el.color.value; });
     if (el.textInput) {
       el.textInput.addEventListener('input', function() { state.text = el.textInput.value || ''; });
@@ -630,6 +921,13 @@
         }
       });
     }
+    if (el.lirilSpeak) el.lirilSpeak.addEventListener('click', speakCurrentText);
+    if (el.seedWitness) el.seedWitness.addEventListener('click', function() { setPromptText('I am adding a witness note to the TENET5 board.'); });
+    if (el.seedQuestion) el.seedQuestion.addEventListener('click', function() { setPromptText('Why has this evidence not been answered publicly?'); });
+    if (el.seedEvidence) el.seedEvidence.addEventListener('click', function() { setPromptText('Follow the evidence chain and preserve the record.'); });
+    if (el.speakerStart) el.speakerStart.addEventListener('click', startSpeakerCamera);
+    if (el.speakerStop) el.speakerStop.addEventListener('click', stopSpeakerCamera);
+    bindSpeakerDrag();
 
     el.canvas.addEventListener('pointerdown', startStroke);
     el.canvas.addEventListener('pointermove', moveStroke);
@@ -642,9 +940,11 @@
   function initElements() {
     el.canvas = $('chalkboard-canvas');
     if (!el.canvas) return false;
+    el.surface = document.querySelector('.chalk-surface');
     el.lock = $('chalkboard-lock');
     el.status = $('chalkboard-status');
     el.syncStatus = $('chalk-sync-status');
+    el.speakerStatus = $('speaker-status');
     el.contributors = $('chalkboard-contributors');
     el.signIn = $('chalk-signin');
     el.signInOverlay = $('chalk-signin-overlay');
@@ -655,6 +955,17 @@
     el.size = $('brush-size');
     el.color = $('brush-color');
     el.textInput = $('chalk-text-input');
+    el.lirilSpeak = $('liril-speak');
+    el.seedWitness = $('liril-seed-witness');
+    el.seedQuestion = $('liril-seed-question');
+    el.seedEvidence = $('liril-seed-evidence');
+    el.speakerStart = $('speaker-start');
+    el.speakerStop = $('speaker-stop');
+    el.speakerCorner = $('speaker-corner');
+    el.speakerHandle = $('speaker-handle');
+    el.speakerVideo = $('speaker-video');
+    el.speakerPlaceholder = $('speaker-placeholder');
+    el.speakerName = $('speaker-name');
     if (el.textInput) el.textInput.value = state.text;
     return true;
   }
@@ -704,10 +1015,12 @@
 
   function init() {
     if (!initElements()) return;
+    loadPreviewBoard();
     bindCanvas();
     bindAuth();
     setMode('draw');
     resizeCanvas();
+    restoreSpeakerPosition();
     fetchRemoteStrokes();
     subscribeRealtime();
     // Fallback polling (in case Realtime is unavailable)

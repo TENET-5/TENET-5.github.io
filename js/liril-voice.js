@@ -13,8 +13,8 @@
   /* ── VOICE PERSONALITY — angry Canadian woman ────────── */
   /* She's exposing corruption. Not calm. Not neutral. FURIOUS. */
   var VOICE_PARAMS = {
-    rate: 1.08,    /* Slightly fast — urgent, angry pace */
-    pitch: 0.92,   /* Lower — authoritative, furious edge */
+    rate: 0.9,     /* Premium narration cadence */
+    pitch: 1.1,    /* Clear, natural female lock */
     volume: 1.0    /* Full volume */
   };
 
@@ -33,20 +33,14 @@
   var FALLBACK_VOICES = [
     'microsoft jenny online (natural)',
     'microsoft jenny online',
-    'microsoft jenny',
     'microsoft sonia online (natural)',
     'microsoft sonia online',
-    'microsoft sonia',
     'microsoft aria online (natural)',
     'microsoft aria online',
-    'microsoft aria',
-    'microsoft susan',
-    'microsoft zira',
+    'microsoft libby online (natural)',
+    'microsoft libby online',
     'microsoft hazel online (natural)',
-    'microsoft hazel online',
-    'microsoft hazel',
-    'google uk english female',
-    'google us english female'
+    'microsoft hazel online'
   ];
 
   /* ── CANONICAL BLOCKLIST — maintain here ONLY ────── */
@@ -92,19 +86,19 @@
   function isNeural(v) { return /(natural|online|neural)/i.test(v.name); }
   function isDesktop(v) { return /desktop/i.test(v.name); }
   function scoreVoice(v) {
-    if (!v || isMale(v)) return -999;
+    if (!v || isMale(v) || isDesktop(v)) return -999;
     var n = nameOf(v);
     var score = 0;
     if (isFemale(v)) score += 30;
     if (isEnCA(v)) score += 60;
     else if (isEnGB(v)) score += 35;
     else if (isEn(v)) score += 20;
-    if (isNeural(v)) score += 45;
+    if (isNeural(v)) score += 90;
+    else score -= 140;
     if (v.localService === false) score += 20;
-    if (n.indexOf('clara') >= 0) score += 200;
+    if (n.indexOf('clara') >= 0) score += 220;
     if (/(jenny|sonia|aria|libby)/i.test(n)) score += 120;
-    if (/(susan|zira)/i.test(n)) score += 90;
-    if (n.indexOf('hazel') >= 0) score += 50;
+    if (n.indexOf('hazel') >= 0) score += 40;
     return score;
   }
 
@@ -176,7 +170,7 @@
     /* P6: Highest-quality available female English voice by score */
     if (!cached && voices.length > 0) {
       var ranked = voices
-        .filter(function(v) { return isFemale(v) && !isMale(v) && isEn(v); })
+        .filter(function(v) { return isFemale(v) && !isMale(v) && isEn(v) && isNeural(v) && !isDesktop(v); })
         .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
       if (ranked.length && scoreVoice(ranked[0]) > 0) cached = ranked[0];
     }
