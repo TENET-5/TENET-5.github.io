@@ -680,11 +680,43 @@
     </a>
 </p>
     </div>
-  <div id="read-next"></div>
+  
+<div id="autonomous-ai-expansion" style="display:none; max-width:900px; margin:2rem auto;">
+  <h2 style="color:var(--accent);font-family:monospace;font-size:1.2rem;">[AI DIRECTIVE EXPANSION]</h2>
+  <div id="ai-expansion-content"></div>
+</div>
+
+<div id="read-next"></div>
 <script src="js/x-ai-glow.js?v=1"></script>
 
   <div id="site-footer-frame"></div>
-  <script src="shell.js?v=20"></script>
+  <script>
+
+    // ── STARK Local AI Asynchronous Content CMS Loading
+    fetch('data/ai_expansions/cfnis.json')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data.payload || data.payload.length === 0) return;
+        var el = document.getElementById('autonomous-ai-expansion');
+        if(el) el.style.display = 'block';
+        var html = '';
+        data.payload.forEach(function(insight) {
+           var alertColor = insight.severity === 'CRITICAL' ? '#ef4444' : '#f59e0b';
+           html += '<div class="tnt-style-210">';
+           html += '<h3 class="tnt-style-211"><span class="tnt-style-212"></span>' + (insight.title || 'Exp') + '</h3>';
+           html += '<p class="tnt-style-213">' + (insight.content || '') + '</p>';
+           if (insight.topological_vector) {
+             html += '<div class="tnt-style-214">N-vs-NP VECTOR HASH: ' + insight.topological_vector + '</div>';
+           }
+           html += '</div>';
+        });
+        var t = document.getElementById('ai-expansion-content');
+        if(t) t.innerHTML = html;
+      })
+      .catch(function(e) { /* AI expansion feed dormant — silent fallback */ });
+
+</script>
+<script src="shell.js?v=20"></script>
 <script src="js/ux.js"></script>
 <script src="js/slate.js"></script>
 <script src="js/cinema.js?v=2"></script>

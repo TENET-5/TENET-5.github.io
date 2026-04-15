@@ -26,11 +26,11 @@ class OSINTTracker:
     fetch('data/ai_expansions/FILENAME.json')
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (!data || !data.insights || data.insights.length === 0) return;
+        if (!data || !data.payload || data.payload.length === 0) return;
         var el = document.getElementById('autonomous-ai-expansion');
         if(el) el.style.display = 'block';
         var html = '';
-        data.insights.forEach(function(insight) {
+        data.payload.forEach(function(insight) {
            var alertColor = insight.severity === 'CRITICAL' ? '#ef4444' : '#f59e0b';
            html += '<div class="tnt-style-210">';
            html += '<h3 class="tnt-style-211"><span class="tnt-style-212"></span>' + (insight.title || 'Exp') + '</h3>';
@@ -114,7 +114,9 @@ def main() -> None:
     base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     html_files = [
         os.path.join(base, 'charity-pipeline.html'), 
-        os.path.join(base, 'foreign-influence.html')
+        os.path.join(base, 'foreign-influence.html'),
+        os.path.join(base, 'cfnis.html'),
+        os.path.join(base, 'treason-trajectory.html')
     ]
     scripts = [
         os.path.join(base, 'tools', 'gov_osint_gatherer.py'), 
