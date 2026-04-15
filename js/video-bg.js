@@ -31,7 +31,7 @@
     'carney-conflicts.html': 'ethics_violations_bg.mp4',
     'conflict-of-interest-registry.html': 'ethics_violations_bg.mp4',
     'phoenix-pay.html': 'phoenix_pay_bg.mp4',
-    'cfnis.html': 'dark_atmosphere_bg.mp4',
+    'cfnis.html': 'cfnis_military_bg.mp4',
     'cfnis-proxy.html': 'dark_atmosphere_bg.mp4',
     'cds-accountability.html': 'dark_atmosphere_bg.mp4',
     's504-covey-bae.html': 'red_pulse_bg.mp4',
