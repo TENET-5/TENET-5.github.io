@@ -59,13 +59,12 @@
     'google uk english male','google us english male'
   ];
   var FEMALE_NAMES = [
-    'hazel','clara','susan','libby','sonia','maisie','martha','kate','karen',
-    'moira','fiona','serena','samantha','victoria','zira','jenny',
+    'hazel','clara','libby','sonia','maisie','martha','kate','karen',
+    'moira','fiona','serena','samantha','victoria','jenny',
     'aria','sara','emily','emma','amy','natasha','linda','catherine',
-    'microsoft hazel','microsoft clara','microsoft libby','microsoft sonia','microsoft susan',
+    'microsoft hazel','microsoft clara','microsoft libby','microsoft sonia',
     'microsoft jenny','microsoft aria','microsoft sara','microsoft emily',
-    'microsoft zira','microsoft catherine','microsoft linda','microsoft natasha',
-    'google uk english female','google us english female'
+    'microsoft catherine','microsoft linda','microsoft natasha'
   ];
 
   function nameOf(v) { return (v.name || '').toLowerCase(); }
