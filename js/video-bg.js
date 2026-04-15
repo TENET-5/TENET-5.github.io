@@ -43,6 +43,7 @@
 
   var DEFAULT_VIDEO = 'dark_atmosphere_bg.mp4';
   var BASE_PATH = '/media/backgrounds/';
+  var LOOP_SECONDS = 15;
 
   // Skip on pages where video bg doesn't make sense
   var SKIP = ['index.html', 'search.html', 'sitemap.html', 'auth-callback.html',
@@ -72,6 +73,7 @@
     video.autoplay = true;
     video.loop = true;
     video.muted = true;
+    video.dataset.loopSeconds = String(LOOP_SECONDS);
     video.playsInline = true;
     video.poster = '/media/retro-warroom-poster.jpg';
     video.setAttribute('playsinline', '');
@@ -80,6 +82,12 @@
 
     video.addEventListener('loadeddata', function() {
       document.body.classList.add('t5-video-ready');
+    });
+
+    video.addEventListener('timeupdate', function() {
+      if (video.currentTime >= LOOP_SECONDS) {
+        video.currentTime = 0.05;
+      }
     });
 
     video.addEventListener('error', function() {
