@@ -525,13 +525,19 @@
           return;
         }
         var chunk = chunkQueue.shift();
+        // Re-resolve voice EVERY chunk to prevent Chrome voice drift
+        var currentVoice = resolveVoice() || voice;
         var u = new SpeechSynthesisUtterance(chunk);
         u.lang = 'en-GB'; // LIRIL is always British — never drift
         u.rate = 0.9;
         u.pitch = 1.1;
-        if (voice) u.voice = voice;
+        if (currentVoice) u.voice = currentVoice;
         u.onend = function() { setTimeout(next, 150); };
         u.onerror = function() { setTimeout(next, 150); };
+        // Cancel any lingering speech to force Chrome to re-apply voice
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
         window.speechSynthesis.speak(u);
       }
 
