@@ -86,13 +86,13 @@
         loadScript(BASE + 'js/reveal.js?v=2'),
         loadScript(BASE + 'js/timeline.js?v=1'),
         loadScript(BASE + 'share.js?v=2'),
-        loadScript(BASE + 'js/liril-voice.js?v=5'),
+        loadScript(BASE + 'js/liril-voice.js?v=6'),
         loadScript(BASE + 'js/figures.js?v=1'),
         loadScript(BASE + 'js/error-reporter.js?v=1')
       ]).then(function() {
-        return loadScript(BASE + 'js/presentation.js?v=5');
+        return loadScript(BASE + 'js/presentation.js?v=6');
       }).then(function() {
-        return loadScript(BASE + 'js/liril-walkthrough.js?v=5');
+        return loadScript(BASE + 'js/liril-walkthrough.js?v=6');
       }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
       .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
       .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
@@ -113,9 +113,9 @@
         .then(function() { return loadScript(BASE + 'js/main.js?v=3'); })
         .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=5'); })
-        .then(function() { return loadScript(BASE + 'js/presentation.js?v=5'); })
-        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=5'); })
+        .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
+        .then(function() { return loadScript(BASE + 'js/presentation.js?v=6'); })
+        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=6'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
