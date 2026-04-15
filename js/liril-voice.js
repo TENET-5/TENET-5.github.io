@@ -31,15 +31,20 @@
   /* Secondary fallbacks ONLY if Clara is completely unavailable on the system */
   /* All Canadian/high-quality neural female voices */
   var FALLBACK_VOICES = [
-    'microsoft hazel online (natural)',
-    'microsoft hazel online',
-    'microsoft hazel',
     'microsoft jenny online (natural)',
     'microsoft jenny online',
     'microsoft jenny',
     'microsoft sonia online (natural)',
     'microsoft sonia online',
     'microsoft sonia',
+    'microsoft aria online (natural)',
+    'microsoft aria online',
+    'microsoft aria',
+    'microsoft susan',
+    'microsoft zira',
+    'microsoft hazel online (natural)',
+    'microsoft hazel online',
+    'microsoft hazel',
     'google uk english female',
     'google us english female'
   ];
@@ -86,6 +91,22 @@
   function isMale(v) { return MALE_NAMES.some(function(m) { return nameOf(v).indexOf(m) >= 0; }); }
   function isNeural(v) { return /(natural|online|neural)/i.test(v.name); }
   function isDesktop(v) { return /desktop/i.test(v.name); }
+  function scoreVoice(v) {
+    if (!v || isMale(v)) return -999;
+    var n = nameOf(v);
+    var score = 0;
+    if (isFemale(v)) score += 30;
+    if (isEnCA(v)) score += 60;
+    else if (isEnGB(v)) score += 35;
+    else if (isEn(v)) score += 20;
+    if (isNeural(v)) score += 45;
+    if (v.localService === false) score += 20;
+    if (n.indexOf('clara') >= 0) score += 200;
+    if (/(jenny|sonia|aria|libby)/i.test(n)) score += 120;
+    if (/(susan|zira)/i.test(n)) score += 90;
+    if (n.indexOf('hazel') >= 0) score += 50;
+    return score;
+  }
 
   var cached = null;
   var resolved = false;
@@ -144,7 +165,7 @@
     }
 
     /* P1-P5: ONLY if Clara is completely unavailable after full voice list loaded */
-    if (!cached && voices.length > 5) {
+    if (!cached && voices.length > 0) {
       for (var f = 0; f < FALLBACK_VOICES.length && !cached; f++) {
         cached = voices.find(function(v) { return nameOf(v) === FALLBACK_VOICES[f]; });
       }
@@ -152,9 +173,13 @@
         cached = voices.find(function(v) { return nameOf(v).indexOf(FALLBACK_VOICES[f2]) >= 0; });
       }
     }
-    /* P6: Natural/Neural en-CA or en-GB female (last resort, only if voice list fully loaded) */
-    if (!cached && voices.length > 5) cached = voices.find(function(v) { return isEnCA(v) && isFemale(v) && /(natural|online|neural)/i.test(v.name); });
-    if (!cached && voices.length > 5) cached = voices.find(function(v) { return isEnGB(v) && isFemale(v) && isNeural(v) && !isDesktop(v); });
+    /* P6: Highest-quality available female English voice by score */
+    if (!cached && voices.length > 0) {
+      var ranked = voices
+        .filter(function(v) { return isFemale(v) && !isMale(v) && isEn(v); })
+        .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
+      if (ranked.length && scoreVoice(ranked[0]) > 0) cached = ranked[0];
+    }
     /* P7: silence is better than the wrong voice */
 
     /* NEVER use Desktop SAPI5 voices — quality is unacceptable */
@@ -236,7 +261,7 @@
     isEnCA: isEnCA,
     isEn: isEn,
     isClara: function() { return isTarget; },
-    isHazel: function() { return isTarget; },
+    isHazel: function() { return false; },
     VOICE_STORAGE_KEY: VOICE_STORAGE_KEY
   };
 })();
