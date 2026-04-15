@@ -1,0 +1,189 @@
+diff --git a/js/liril-voice.js b/js/liril-voice.js
+index 150d4b1..3060804 100644
+--- a/js/liril-voice.js
++++ b/js/liril-voice.js
+@@ -88,16 +88,16 @@
+     if (!v || isMale(v) || isDesktop(v)) return -999;
+     var n = nameOf(v);
+     var score = 0;
+-    if (isFemale(v)) score += 30;
+-    if (isEnCA(v)) score += 60;
+-    else if (isEnGB(v)) score += 35;
++    if (isFemale(v)) score += 50;
++    if (isEnCA(v)) score += 200;
++    else if (isEnGB(v)) score += 100;
+     else if (isEn(v)) score += 20;
+-    if (isNeural(v)) score += 90;
+-    else score -= 140;
+-    if (v.localService === false) score += 20;
+-    if (n.indexOf('clara') >= 0) score += 220;
+-    if (/(jenny|sonia|aria|libby)/i.test(n)) score += 120;
+-    if (n.indexOf('hazel') >= 0) score += 40;
++    if (isNeural(v)) score += 150;
++    else score -= 300; // Heavily penalize robotic voices
++    if (v.localService === false) score += 30;
++    if (n.indexOf('clara') >= 0) score += 500;
++    if (/(jenny|sonia|aria|libby)/i.test(n)) score += 200;
++    if (n.indexOf('hazel') >= 0) score += 80;
+     return score;
+   }
+ 
+@@ -116,7 +116,7 @@
+     var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+     if (!voices.length) return null;
+ 
+-    /* P0: Restore from sessionStorage ΓÇö but ONLY if it's Hazel */
++    /* P0: Restore from sessionStorage ΓÇö but ONLY if it's Clara */
+     try {
+       var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
+       if (saved) {
+@@ -159,8 +159,8 @@
+ 
+     /* P1-P6: If Clara is unavailable, use the best acceptable English fallback.
+        Priority order per site voice policy:
+-       neural en-GB female ΓåÆ known female en-GB ΓåÆ non-male en-GB ΓåÆ
+-       neural en female ΓåÆ known female en ΓåÆ non-male en ΓåÆ silence last. */
++       neural en-CA female ΓåÆ neural en-GB female ΓåÆ known female en-CA/GB ΓåÆ 
++       non-male en ΓåÆ silence last. */
+     if (!cached && voices.length > 0) {
+       var rankedFemale = voices
+         .filter(function(v) { return isFemale(v) && !isMale(v) && isEn(v) && !isDesktop(v); })
+diff --git a/js/liril-walkthrough.js b/js/liril-walkthrough.js
+index 6acbb7b..fb86017 100644
+--- a/js/liril-walkthrough.js
++++ b/js/liril-walkthrough.js
+@@ -14,6 +14,12 @@
+   if (window.__LIRIL_WALKTHROUGH_LOADED) return;
+   window.__LIRIL_WALKTHROUGH_LOADED = true;
+ 
++  /* ΓöÇΓöÇ MUTUAL EXCLUSION API ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
++  /* Define early so other scripts (like presentation) can call it immediately */
++  window.__LIRIL_WALKTHROUGH_STOP = function() {
++    if (window.__LIRIL_WALKTHROUGH_STOP_INTERNAL) window.__LIRIL_WALKTHROUGH_STOP_INTERNAL();
++  };
++
+   // ΓöÇΓöÇ Internationalization (I18N) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   window.LIRIL_I18N_LOCALE = document.documentElement.lang || 'en-GB';
+   window.LIRIL_I18N_STRINGS = {
+@@ -301,9 +307,9 @@
+       styleEl.id = 'liril-styles';
+       styleEl.innerHTML = `
+         .liril-subtitle-bar {
+-          position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%);
++          position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+           width: 90%; max-width: 800px; text-align: center;
+-          z-index: 9997; pointer-events: none;
++          z-index: 10000; pointer-events: none;
+           opacity: 0; transition: opacity 0.4s ease;
+         }
+         .liril-subtitle-text {
+@@ -389,9 +395,9 @@
+ 
+         /* Mobile Optimization */
+         @media (max-width: 768px) {
+-          .liril-subtitle-bar { bottom: 64px; width: 95%; }
++          .liril-subtitle-bar { bottom: 78px; width: 95%; }
+           .liril-subtitle-text { padding: 10px 16px; font-size: 0.85rem; line-height: 1.4; }
+-          .liril-start-btn { bottom: 72px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
++          .liril-start-btn { bottom: 84px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
+         }
+ 
+         /* Auto-tour progress bar */
+@@ -738,6 +744,12 @@
+     }
+ 
+     function startWalkthrough() {
++      // ΓöÇΓöÇ Synchronisation: Stop Presentation narration if active ΓöÇΓöÇ
++      if (window.__TENET5_LIRIL_STOP) {
++        console.log('[LIRIL-WALK] Stopping Presentation narration');
++        window.__TENET5_LIRIL_STOP();
++      }
++
+       isActive = true;
+       startBtn.innerHTML = getI18nStr('stop');
+       startBtn.style.background = 'rgba(100,100,100,0.9)';
+@@ -849,6 +861,9 @@
+ 
+     // Voice pre-warm handled by liril-voice.js ΓÇö no duplicate listeners needed
+ 
++    // ΓöÇΓöÇ Public API for synchronisation ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++    window.__LIRIL_WALKTHROUGH_STOP_INTERNAL = endWalkthrough;
++
+     // ΓöÇΓöÇ Rescan hook for dynamic pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+     window.lirilRescan = function() {
+       if (isActive) endWalkthrough();
+diff --git a/js/presentation.js b/js/presentation.js
+index fcc5384..b1e427b 100644
+--- a/js/presentation.js
++++ b/js/presentation.js
+@@ -21,6 +21,12 @@
+   if (window.__TENET5_PRESENTATION_LOADED) return;
+   window.__TENET5_PRESENTATION_LOADED = true;
+ 
++  /* ΓöÇΓöÇ MUTUAL EXCLUSION API ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
++  /* Define early so other scripts (like walkthrough) can call it immediately */
++  window.__TENET5_LIRIL_STOP = function() {
++    if (window.__TENET5_LIRIL_STOP_INTERNAL) window.__TENET5_LIRIL_STOP_INTERNAL();
++  };
++
+   var prefersReducedMotion = window.matchMedia &&
+     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ 
+@@ -1771,10 +1777,10 @@
+     el.className = 'pres-narration-subtitle';
+     el.setAttribute('role', 'status');
+     el.setAttribute('aria-live', 'polite');
+-    el.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);' +
++    el.style.cssText = 'position:fixed;bottom:64px;left:50%;transform:translateX(-50%);' +
+       'max-width:80vw;padding:0.7rem 1.4rem;background:rgba(5,5,10,0.94);' +
+       'color:#e0ddd6;font-size:0.9rem;line-height:1.5;border-radius:4px;' +
+-      'border:1px solid rgba(14,165,233,0.18);z-index:9990;' +
++      'border:1px solid rgba(14,165,233,0.18);z-index:10000;' +
+       'backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);' +
+       'pointer-events:none;opacity:0;transition:opacity 0.3s ease;' +
+       'text-align:center;font-family:Inter,-apple-system,sans-serif;' +
+@@ -1924,6 +1930,11 @@
+   }
+ 
+   function doNarrate(text, voice) {
++    // ΓöÇΓöÇ Synchronisation: Stop Walkthrough if active ΓöÇΓöÇ
++    if (window.__LIRIL_WALKTHROUGH_STOP) {
++      window.__LIRIL_WALKTHROUGH_STOP();
++    }
++
+     stopNarration();
+     lirilNarration.token++;
+ 
+@@ -2017,6 +2028,11 @@
+   function narrateAllStep(slides, tracker) {
+     if (!lirilNarration.narrateAllActive) return;
+ 
++    // ΓöÇΓöÇ Synchronisation: Stop Walkthrough if active ΓöÇΓöÇ
++    if (window.__LIRIL_WALKTHROUGH_STOP) {
++      window.__LIRIL_WALKTHROUGH_STOP();
++    }
++
+     var cur = tracker.getActive();
+     var slide = slides[cur];
+     if (!slide) { stopNarrateAll(); return; }
+@@ -2194,11 +2210,16 @@
+     }
+ 
+     lirilNarration.button.addEventListener('click', function () {
+-      narrateCurrentSlide();
++      if (lirilNarration.speaking) {
++        stopNarration();
++        if (lirilNarration.narrateAllActive) stopNarrateAll();
++      } else {
++        narrateCurrentSlide();
++      }
+     });
+ 
+     window.__TENET5_LIRIL_NARRATE = narrateCurrentSlide;
+-    window.__TENET5_LIRIL_STOP = stopNarration;
++    window.__TENET5_LIRIL_STOP_INTERNAL = stopNarration;
+     window.__TENET5_LIRIL_NARRATE_ALL = function () {
+       var fakeTracker = { getActive: function () {
+         var attr = lirilNarration.activeSlide && lirilNarration.activeSlide.getAttribute('data-slide-idx');
+
+

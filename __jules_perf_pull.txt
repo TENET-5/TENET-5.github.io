@@ -1,0 +1,682 @@
+diff --git a/css/film-grain.css b/css/film-grain.css
+index 8f441e5..814f4f0 100644
+--- a/css/film-grain.css
++++ b/css/film-grain.css
+@@ -29,13 +29,19 @@
+   pointer-events: none;
+   z-index: 9990;
+   mix-blend-mode: overlay;
+-  opacity: 0.12;
++  opacity: 0.08; /* Slightly reduced for better performance */
+   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+   background-size: 256px 256px;
++  will-change: transform;
++  animation: filmGrainShift 0.2s steps(4) infinite;
+ }
+ 
+ @keyframes filmGrainShift {
+-  0%, 100% { transform: translate(0, 0); }
++  0% { transform: translate(0, 0); }
++  25% { transform: translate(-1%, -1%); }
++  50% { transform: translate(1%, 1%); }
++  75% { transform: translate(-0.5%, 0.5%); }
++  100% { transform: translate(0, 0); }
+ }
+ 
+ /* ΓöÇΓöÇ Scan Lines (CRT / old projector) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+@@ -74,16 +80,28 @@
+   top: 0; left: 0; right: 0; bottom: 0;
+   pointer-events: none;
+   z-index: 9991;
+-  opacity: 0.06;
++  opacity: 0.04;
+   background:
+     linear-gradient(90deg, transparent 23%, rgba(255,250,240,0.15) 23.2%, transparent 23.4%),
+     linear-gradient(90deg, transparent 67%, rgba(255,250,240,0.08) 67.1%, transparent 67.3%),
+     linear-gradient(90deg, transparent 41%, rgba(255,250,240,0.12) 41.15%, transparent 41.3%),
+     linear-gradient(90deg, transparent 89%, rgba(255,250,240,0.1) 89.1%, transparent 89.25%);
++  will-change: transform;
++  animation: filmScratchDrift 4s steps(10) infinite;
+ }
+ 
+ @keyframes filmScratchDrift {
+-  0%, 100% { transform: translateX(0); }
++  0% { transform: translateX(0); }
++  10% { transform: translateX(2px); }
++  20% { transform: translateX(-1px); }
++  30% { transform: translateX(1px); }
++  40% { transform: translateX(-2px); }
++  50% { transform: translateX(3px); }
++  60% { transform: translateX(-1px); }
++  70% { transform: translateX(0); }
++  80% { transform: translateX(1px); }
++  90% { transform: translateX(-2px); }
++  100% { transform: translateX(0); }
+ }
+ 
+ /* ΓöÇΓöÇ EVIDENCE / CLASSIFIED Stamps ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+diff --git a/home.html b/home.html
+index 8a546e6..53c7412 100644
+--- a/home.html
++++ b/home.html
+@@ -51,43 +51,40 @@
+       align-items: center;
+       justify-content: center;
+       overflow: hidden;
+-      /* Exit: fade + slide left */
+-      animation: sceneExit 0.8s cubic-bezier(0.4, 0, 1, 1) forwards;
++      /* Default state: hidden */
+     }
+     .scene.active {
+       opacity: 1;
+       visibility: visible;
+       z-index: 10;
+       /* Enter: fade in + slide from right + subtle zoom */
+-      animation: sceneEnter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
++      animation: sceneEnter 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
++    }
++    .scene.exiting {
++      opacity: 1;
++      visibility: visible;
++      z-index: 5;
++      animation: sceneExit 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+     }
+ 
+     @keyframes sceneEnter {
+       0% {
+         opacity: 0;
+-        visibility: visible;
+-        transform: translateX(40px) scale(0.97);
+-        filter: brightness(1.3) contrast(0.8);
+-      }
+-      30% {
+-        filter: brightness(1.05) contrast(0.95);
++        transform: translateX(30px) scale(0.98);
+       }
+       100% {
+         opacity: 1;
+         transform: translateX(0) scale(1);
+-        filter: brightness(1) contrast(1);
+       }
+     }
+ 
+     @keyframes sceneExit {
+       0% {
+         opacity: 1;
+-        visibility: visible;
+         transform: translateX(0);
+       }
+       100% {
+         opacity: 0;
+-        visibility: hidden;
+         transform: translateX(-30px);
+       }
+     }
+@@ -1077,21 +1074,28 @@
+           this.hud.style.pointerEvents = 'auto';
+         }
+ 
+-        // Film gate flash ΓÇö cinematic transition between scenes
+-        if (logicalIndex > 0) {
++        // Film gate flash ΓÇö cinematic transition between scenes (disabled for reduced motion)
++        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
++        if (logicalIndex > 0 && !reduceMotion) {
+           var flash = document.createElement('div');
+           flash.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;background:#fff;opacity:0;';
+           document.body.appendChild(flash);
+           flash.animate([
+             { opacity: 0 },
+-            { opacity: 0.15, offset: 0.1 },
+-            { opacity: 0.08, offset: 0.3 },
++            { opacity: 0.12, offset: 0.1 },
++            { opacity: 0.05, offset: 0.3 },
+             { opacity: 0 }
+-          ], { duration: 400, easing: 'ease-out' });
+-          setTimeout(() => flash.remove(), 500);
++          ], { duration: 300, easing: 'ease-out' });
++          setTimeout(() => flash.remove(), 400);
+         }
+ 
+-        this.scenes.forEach(s => s.classList.remove('active'));
++        this.scenes.forEach(s => {
++          if (s.classList.contains('active')) {
++            s.classList.remove('active');
++            s.classList.add('exiting');
++            setTimeout(() => s.classList.remove('exiting'), 800);
++          }
++        });
+         document.getElementById('scene-' + phys).classList.add('active');
+         this.currentScene = phys;
+         this.currentLogical = logicalIndex;
+diff --git a/index.html b/index.html
+index e792a51..9a40477 100644
+--- a/index.html
++++ b/index.html
+@@ -21,6 +21,11 @@
+       /* fixed prevents iOS elastic bounce on shell while allowing iframe scroll */
+       position: fixed; width: 100%; top: 0; left: 0;
+     }
++    #site-header-frame {
++      min-height: 100px; /* Pre-size for two-tier nav (Ensign stripe + Identity + Bar) */
++      background: #080e1a;
++      flex-shrink: 0;
++    }
+     #content_frame {
+       flex: 1 1 0; min-height: 0; border: none; width: 100%;
+       background: linear-gradient(180deg, rgba(9,14,22,0.96), rgba(7,10,16,0.98));
+@@ -28,6 +33,14 @@
+       -webkit-overflow-scrolling: touch;
+     }
+     .site-footer { display: none !important; }
++
++    /* Hide the header slot on smaller screens initially to match mobile nav height */
++    @media (max-width: 1100px) {
++      #site-header-frame { min-height: 100px; }
++    }
++    @media (max-width: 600px) {
++      #site-header-frame { min-height: 80px; }
++    }
+   </style>
+ <!-- TENET5 SEO INJECT -->
+   <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
+diff --git a/infographics.html b/infographics.html
+index 8cdd2d4..5cd9294 100644
+--- a/infographics.html
++++ b/infographics.html
+@@ -1081,8 +1081,8 @@
+     <div class="chart-container">
+       <h3>AI Sovereignty: Native TENET5 Overrides</h3>
+       <p class="chart-subtitle">Why we bypassed external computing for an autonomous SWARM infrastructure</p>
+-      <img src="img/infographics/performance_chart.png" alt="TENET5 Performance" class="tnt-style-496">
+-      <img src="img/infographics/meme_copilot_vs_TENET5.png" alt="TENET5 vs Copilot" class="tnt-style-497">
++      <img src="img/infographics/performance_chart.png" alt="TENET5 Performance" class="tnt-style-496" width="1200" height="800" style="aspect-ratio: 3/2;">
++      <img src="img/infographics/meme_copilot_vs_tenet5.png" alt="TENET5 vs Copilot" class="tnt-style-497" width="1200" height="800" style="aspect-ratio: 3/2;">
+       <p class="chart-source">Source: TENET5 Analysis Pipeline</p>
+     </div>
+ 
+@@ -1091,15 +1091,15 @@
+       <h3>The Moral High Ground: Visual Operations</h3>
+       <p class="chart-subtitle">Synthesized AI Assistant subversion vectors mapping the state's atrocities against the Red Duster constitutional framework</p>
+       <div class="tnt-style-498">
+-        <img src="img/infographics/pil_moral_highground.png" alt="Moral High Ground" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_vs_canada.png" alt="Canada Math" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_map.png" alt="True Map" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_nazi_era.png" alt="Nazi Era" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_psych_warfare.png" alt="Psych Warfare" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_lawfare.png" alt="Lawfare" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_political_intel.png" alt="Political Intel" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_arrivecan.png" alt="ArriveCan" class="tnt-style-499" loading="lazy">
+-        <img src="img/infographics/pil_moral_ccp_infiltration.png" alt="CCP Defection" class="tnt-style-499" loading="lazy">
++        <img src="img/infographics/pil_moral_highground.png" alt="Moral High Ground" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_vs_canada.png" alt="Canada Math" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_map.png" alt="True Map" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_nazi_era.png" alt="Nazi Era" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_psych_warfare.png" alt="Psych Warfare" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_lawfare.png" alt="Lawfare" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_political_intel.png" alt="Political Intel" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_arrivecan.png" alt="ArriveCan" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
++        <img src="img/infographics/pil_moral_ccp_infiltration.png" alt="CCP Defection" class="tnt-style-499" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
+       </div>
+       <p class="chart-source">Source: TENET5 Subsystems, Phase 38 Asset Gen</p>
+     </div>
+@@ -1139,23 +1139,23 @@
+     <div class="tnt-style-502">
+       <div>
+         <h3 class="tnt-style-503">MAID Statistics</h3>
+-        <img src="img/infographics/maid_1080.png" alt="MAID Statistics ΓÇö 76,475 deaths since 2016" class="tnt-style-504" loading="lazy">
++        <img src="img/infographics/maid_1080.png" alt="MAID Statistics ΓÇö 76,475 deaths since 2016" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
+       </div>
+       <div>
+         <h3 class="tnt-style-503">Foreign Interference Timeline</h3>
+-        <img src="img/infographics/timeline_1080.png" alt="Foreign Interference Timeline 2018-2025" class="tnt-style-504" loading="lazy">
++        <img src="img/infographics/timeline_1080.png" alt="Foreign Interference Timeline 2018-2025" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
+       </div>
+       <div>
+         <h3 class="tnt-style-503">Whistleblower Scorecard</h3>
+-        <img src="img/infographics/scorecard_1080.png" alt="PSDPA Scorecard ΓÇö 7 referrals, 0 remedies" class="tnt-style-504" loading="lazy">
++        <img src="img/infographics/scorecard_1080.png" alt="PSDPA Scorecard ΓÇö 7 referrals, 0 remedies" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
+       </div>
+       <div>
+         <h3 class="tnt-style-503">20 Criminal Code Charges</h3>
+-        <img src="img/infographics/charges_1080.png" alt="20 Criminal Code Charges Filed" class="tnt-style-504" loading="lazy">
++        <img src="img/infographics/charges_1080.png" alt="20 Criminal Code Charges Filed" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
+       </div>
+       <div>
+         <h3 class="tnt-style-503">Tissue Paper Shield</h3>
+-        <img src="img/infographics/quote_1080.png" alt="Canada's whistleblower law ΓÇö tissue paper shield" class="tnt-style-504" loading="lazy">
++        <img src="img/infographics/quote_1080.png" alt="Canada's whistleblower law ΓÇö tissue paper shield" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
+       </div>
+     </div>
+   </section>
+diff --git a/js/main.js b/js/main.js
+index c816e50..c63be44 100644
+--- a/js/main.js
++++ b/js/main.js
+@@ -8,47 +8,69 @@
+   if (window.__TENET5_MAIN_LOADED) return;
+   window.__TENET5_MAIN_LOADED = true;
+ 
+-  // Horror atmosphere layers REMOVED ΓÇö looked awful, caused flicker
++  // Detect context
++  var isInIframe = (window !== window.top);
++  var isFrameShell = document.getElementById('content_frame') !== null;
+ 
+   // ΓöÇΓöÇ Scroll Progress Bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-  const progressBar = document.createElement('div');
+-  progressBar.className = 'scroll-progress';
+-  document.body.prepend(progressBar);
++  // Only show progress bar on content pages, not the shell
++  if (!isFrameShell) {
++    const progressBar = document.createElement('div');
++    progressBar.className = 'scroll-progress';
++    document.body.prepend(progressBar);
+ 
+-  function updateProgress() {
+-    const scrollTop = window.scrollY;
+-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+-    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+-    progressBar.style.width = pct + '%';
+-  }
++    const updateProgress = function() {
++      const scrollTop = window.scrollY;
++      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
++      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
++      progressBar.style.width = pct + '%';
++    };
+ 
+-  // ΓöÇΓöÇ Back to Top Button ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-  const topBtn = document.createElement('button');
+-  topBtn.className = 'back-to-top';
+-  topBtn.setAttribute('aria-label', 'Back to top');
+-  topBtn.innerHTML = '&#8593;';
+-  document.body.appendChild(topBtn);
++    // ΓöÇΓöÇ Back to Top Button ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++    const topBtn = document.createElement('button');
++    topBtn.className = 'back-to-top';
++    topBtn.setAttribute('aria-label', 'Back to top');
++    topBtn.innerHTML = '&#8593;';
++    document.body.appendChild(topBtn);
+ 
+-  topBtn.addEventListener('click', function () {
+-    window.scrollTo({ top: 0, behavior: 'smooth' });
+-  });
++    topBtn.addEventListener('click', function () {
++      window.scrollTo({ top: 0, behavior: 'smooth' });
++    });
+ 
+-  function updateTopBtn() {
+-    topBtn.classList.toggle('visible', window.scrollY > 400);
++    const updateTopBtn = function() {
++      topBtn.classList.toggle('visible', window.scrollY > 400);
++    };
++
++    // ΓöÇΓöÇ Scroll handler (throttled) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++    let ticking = false;
++    window.addEventListener('scroll', function () {
++      if (!ticking) {
++        requestAnimationFrame(function () {
++          updateProgress();
++          updateTopBtn();
++          ticking = false;
++        });
++        ticking = true;
++      }
++    }, { passive: true });
++
++    // Initial call
++    updateProgress();
++    updateTopBtn();
+   }
+ 
+-  // ΓöÇΓöÇ Scroll handler (throttled) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-  let ticking = false;
+-  window.addEventListener('scroll', function () {
+-    if (!ticking) {
+-      requestAnimationFrame(function () {
+-        updateProgress();
+-        updateTopBtn();
+-        ticking = false;
+-      });
+-      ticking = true;
+-    }
+-  }, { passive: true });
++  // ΓöÇΓöÇ Smooth scroll for anchor links ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++  document.querySelectorAll('a[href^="#"]').forEach(function(link) {
++    link.addEventListener('click', function(e) {
++      const href = this.getAttribute('href');
++      if (href === '#') return;
++      const target = document.querySelector(href);
++      if (target) {
++        e.preventDefault();
++        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
++      }
++    });
++  });
+ 
+   // ΓöÇΓöÇ Scroll Reveal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   // Extracted to standalone js/reveal.js to ensure it runs across all iframe screens
+@@ -91,33 +113,35 @@
+   }
+ 
+   // ΓöÇΓöÇ Mobile Navigation ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-  var nav = document.querySelector('.site-nav');
+-  if (nav) {
+-    var hamburger = document.createElement('button');
+-    hamburger.className = 'nav-hamburger';
+-    hamburger.setAttribute('aria-label', 'Toggle navigation');
+-    hamburger.innerHTML = '<span></span><span></span><span></span>';
+-    // Insert after brand link
+-    var brand = nav.querySelector('.brand');
+-    if (brand && brand.nextSibling) {
+-      nav.insertBefore(hamburger, brand.nextSibling);
+-    } else {
+-      nav.prepend(hamburger);
+-    }
++  // Redundant hamburger creation REMOVED ΓÇö nav.js and shell-injected CSS handle this.
++  // We just need to ensure the toggles work if they exist.
++  function initMobileNav() {
++    var nav = document.querySelector('.site-nav');
++    var hamburger = document.getElementById('nav-hamburger') || document.querySelector('.nav-hamburger');
++    var navContent = document.querySelector('.nav-content');
+ 
+-    hamburger.addEventListener('click', function () {
+-      nav.classList.toggle('open');
+-      hamburger.classList.toggle('active');
+-    });
++    if (hamburger && (navContent || nav)) {
++      // If navContent doesn't exist (legacy), use nav
++      var target = navContent || nav;
++      
++      hamburger.addEventListener('click', function () {
++        hamburger.classList.toggle('open');
++        hamburger.classList.toggle('active');
++        target.classList.toggle('nav-open');
++        target.classList.toggle('open');
++      });
+ 
+-    // Close on link click (mobile)
+-    nav.addEventListener('click', function (e) {
+-      if (e.target.tagName === 'A' && !e.target.classList.contains('brand')) {
+-        nav.classList.remove('open');
+-        hamburger.classList.remove('active');
+-      }
+-    });
++      target.addEventListener('click', function (e) {
++        if (e.target.tagName === 'A' && !e.target.classList.contains('brand')) {
++          hamburger.classList.remove('open');
++          hamburger.classList.remove('active');
++          target.classList.remove('nav-open');
++          target.classList.remove('open');
++        }
++      });
++    }
+   }
++  initMobileNav();
+ 
+   // ΓöÇΓöÇ Sticky Nav Shadow ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   if (nav) {
+@@ -153,9 +177,6 @@
+     document.body.appendChild(overlay);
+   }
+ 
+-  // ΓöÇΓöÇ Init ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-  updateProgress();
+-  updateTopBtn();
+ })();
+ 
+ 
+diff --git a/js/ux.js b/js/ux.js
+index a0ed434..4182f89 100644
+--- a/js/ux.js
++++ b/js/ux.js
+@@ -4,47 +4,71 @@
+    ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
+ 
+ (function() {
++  // Guard: prevent double execution
++  if (window.__TENET5_UX_LOADED) return;
++  window.__TENET5_UX_LOADED = true;
++
+   document.addEventListener('DOMContentLoaded', function() {
+ 
+-    // ΓöÇΓöÇ Reading Progress Bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-    const progressBar = document.createElement('div');
+-    progressBar.className = 'reading-progress';
+-    document.body.prepend(progressBar);
++    // ΓöÇΓöÇ Shared UI elements (only if main.js NOT loaded) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++    // Note: main.js also creates these. We use a guard to avoid duplicates.
++    if (!window.__TENET5_MAIN_LOADED) {
++      
++      // Reading Progress Bar
++      if (!document.querySelector('.reading-progress') && !document.querySelector('.scroll-progress')) {
++        const progressBar = document.createElement('div');
++        progressBar.className = 'reading-progress';
++        document.body.prepend(progressBar);
++
++        window.addEventListener('scroll', function() {
++          const scrollTop = window.scrollY;
++          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
++          const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
++          progressBar.style.width = Math.min(progress, 100) + '%';
++        }, { passive: true });
++      }
+ 
+-    window.addEventListener('scroll', function() {
+-      const scrollTop = window.scrollY;
+-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+-      progressBar.style.width = Math.min(progress, 100) + '%';
+-    }, { passive: true });
++      // Back to Top Button
++      if (!document.querySelector('.back-to-top')) {
++        const topBtn = document.createElement('button');
++        topBtn.className = 'back-to-top';
++        topBtn.innerHTML = '&#8593;';
++        topBtn.setAttribute('aria-label', 'Back to top');
++        topBtn.title = 'Back to top';
++        document.body.appendChild(topBtn);
+ 
+-    // ΓöÇΓöÇ Back to Top Button ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-    const topBtn = document.createElement('button');
+-    topBtn.className = 'back-to-top';
+-    topBtn.innerHTML = '&#8593;';
+-    topBtn.setAttribute('aria-label', 'Back to top');
+-    topBtn.title = 'Back to top';
+-    document.body.appendChild(topBtn);
++        window.addEventListener('scroll', function() {
++          topBtn.classList.toggle('visible', window.scrollY > 400);
++        }, { passive: true });
+ 
+-    window.addEventListener('scroll', function() {
+-      if (window.scrollY > 400) {
+-        topBtn.classList.add('visible');
+-      } else {
+-        topBtn.classList.remove('visible');
++        topBtn.addEventListener('click', function() {
++          window.scrollTo({ top: 0, behavior: 'smooth' });
++        });
+       }
+-    }, { passive: true });
+ 
+-    topBtn.addEventListener('click', function() {
+-      window.scrollTo({ top: 0, behavior: 'smooth' });
+-    });
++      // Smooth scroll for anchor links
++      document.querySelectorAll('a[href^="#"]').forEach(function(link) {
++        link.addEventListener('click', function(e) {
++          const href = this.getAttribute('href');
++          if (href === '#') return;
++          const target = document.querySelector(href);
++          if (target) {
++            e.preventDefault();
++            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
++          }
++        });
++      });
++    }
+ 
+     // ΓöÇΓöÇ Mobile Nav Toggle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+     // Works with the menu-toggle button in nav.js
+-    const menuBtn = document.getElementById('menu-toggle');
++    const menuBtn = document.getElementById('menu-toggle') || document.getElementById('nav-hamburger');
+     const siteNav = document.querySelector('.site-header .site-nav, nav.site-nav');
+     if (menuBtn && siteNav) {
+       menuBtn.addEventListener('click', function() {
+         siteNav.classList.toggle('open');
++        const navContent = siteNav.querySelector('.nav-content');
++        if (navContent) navContent.classList.toggle('nav-open');
+         menuBtn.setAttribute('aria-expanded',
+           siteNav.classList.contains('open') ? 'true' : 'false');
+       });
+@@ -52,24 +76,15 @@
+       // Close nav when clicking a link (mobile)
+       siteNav.querySelectorAll('a').forEach(function(link) {
+         link.addEventListener('click', function() {
+-          if (window.innerWidth <= 900) {
++          if (window.innerWidth <= 1100) {
+             siteNav.classList.remove('open');
++            const navContent = siteNav.querySelector('.nav-content');
++            if (navContent) navContent.classList.remove('nav-open');
+           }
+         });
+       });
+     }
+ 
+-    // ΓöÇΓöÇ Smooth scroll for anchor links ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+-    document.querySelectorAll('a[href^="#"]').forEach(function(link) {
+-      link.addEventListener('click', function(e) {
+-        const target = document.querySelector(this.getAttribute('href'));
+-        if (target) {
+-          e.preventDefault();
+-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+-        }
+-      });
+-    });
+-
+     // ΓöÇΓöÇ Lazy load images ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+     if ('IntersectionObserver' in window) {
+       const imgObserver = new IntersectionObserver(function(entries) {
+diff --git a/style.css b/style.css
+index a4b3754..180f5ff 100644
+--- a/style.css
++++ b/style.css
+@@ -121,7 +121,7 @@
+   --max-content: 780px;
+   --max-data: 960px;
+   --max-wide: 1200px;
+-  --nav-h: 56px;
++  --nav-h: 103px; /* Standard height for the two-tier nav */
+ 
+   /* ΓöÇΓöÇ Radius ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+   --r-sm: 4px;
+@@ -225,6 +225,7 @@ body.theme-1950s .sprite-strip--evidence {
+   opacity: 0.10;
+   filter: sepia(0.88) saturate(0.34) contrast(0.94) brightness(0.26) blur(0.8px);
+   animation: evidenceSpriteShift 42s steps(1, end) infinite, slowFloatA 42s ease-in-out infinite alternate;
++  will-change: background-position, transform;
+ }
+ 
+ body.theme-1950s .sprite-layer--court {
+@@ -233,6 +234,7 @@ body.theme-1950s .sprite-layer--court {
+   opacity: 0.05;
+   filter: grayscale(0.18) sepia(0.52) brightness(0.22);
+   animation: slowFloatB 52s ease-in-out infinite alternate;
++  will-change: transform;
+ }
+ 
+ body.theme-1950s .sprite-layer--parliament {
+@@ -241,6 +243,7 @@ body.theme-1950s .sprite-layer--parliament {
+   opacity: 0.05;
+   filter: sepia(0.72) brightness(0.20);
+   animation: slowFloatA 56s ease-in-out infinite alternate-reverse;
++  will-change: transform;
+ }
+ 
+ body.theme-1950s .sprite-layer--network {
+@@ -506,6 +509,9 @@ strong { color: var(--text-primary); font-weight: 600; }
+   white-space: nowrap;
+   text-decoration: none;
+   transition: color var(--dur) var(--ease);
++  display: flex;
++  align-items: center;
++  min-height: 56px; /* Match crest height */
+ }
+ .site-nav .brand:hover { color: var(--accent-bright); }
+ 
+@@ -3207,6 +3213,7 @@ body.board-shell-mode {
+ /* ΓöÇΓöÇ Live Counter Pulse Animation ΓöÇΓöÇ */
+ .live-counter-num {
+   animation: counterPulse 2s ease-in-out infinite;
++  will-change: text-shadow;
+ }
+ @keyframes counterPulse {
+   0%, 100% { text-shadow: 0 0 0 transparent; }
+@@ -3271,6 +3278,7 @@ body.board-shell-mode {
+   );
+   background-size: 3px 200%;
+   animation: litigationGradient 3s linear infinite;
++  will-change: background-position;
+ }
+ @keyframes litigationGradient {
+   0% { background-position: 0 0; }
+@@ -4035,7 +4043,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
+     transition-duration: 0.01ms !important;
+     scroll-behavior: auto !important;
+   }
+-  .reveal { opacity: 1; transform: none; }
++  .reveal, [data-reveal], .stagger-child, .reveal-left, .reveal-right, .reveal-scale,
++  .sprite-boot, .sprite-glitch, .sprite-type, .sprite-fade-up, .sprite-stagger > * {
++    opacity: 1 !important;
++    transform: none !important;
++    transition: none !important;
++    animation: none !important;
++    clip-path: none !important;
++    max-width: unset !important;
++  }
+ }
+ 
+ /* ΓòÉΓòÉΓòÉ A+ POLISH: STAT HERO BANNER ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
+@@ -4213,8 +4229,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
+ 
+ /* ΓöÇΓöÇ GLOBAL GLASSMORPHISM ΓöÇΓöÇ */
+ .evidence-box, .finding-card, .stat-card, .data-table, .card, .cta-card {
+-  backdrop-filter: blur(12px) saturate(160%);
+-  -webkit-backdrop-filter: blur(12px) saturate(160%);
++  backdrop-filter: blur(8px) saturate(140%);
++  -webkit-backdrop-filter: blur(8px) saturate(140%);
+   box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+ }
+ 
+@@ -4226,8 +4242,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
+ /* Cards */
+ .cta-card, .feature-card, .stat-callout, .finding-card, .evidence-box {
+   background: rgba(10, 14, 22, 0.55) !important;
+-  backdrop-filter: blur(10px) saturate(150%);
+-  -webkit-backdrop-filter: blur(10px) saturate(150%);
++  backdrop-filter: blur(8px) saturate(140%);
++  -webkit-backdrop-filter: blur(8px) saturate(140%);
+   border-color: rgba(255, 255, 255, 0.07) !important;
+   box-shadow: 0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+ }
+@@ -4964,8 +4980,8 @@ blockquote {
+ }
+ 
+ .brand-crest {
+-  height: 48px;
+-  width: auto;
++  height: 56px;
++  width: 56px; /* Aspect ratio 1:1 for the viewBox 0 0 80 80 square crest */
+   object-fit: contain;
+   filter: drop-shadow(0 2px 4px rgba(136, 192, 208, 0.4)); /* Base44 Nord cyan glow */
+ }
+@@ -6051,7 +6067,7 @@ blockquote {
+ }
+ 
+ /* Grain overlay REMOVED ΓÇö caused flicker and looked unprofessional */
+-.grain-overlay { display: none !important; }
++.grain-overlay, .vignette { display: none !important; }
+ 
+ /* Vignette REMOVED ΓÇö scanlines + dark edges looked unprofessional */
+ .vignette { display: none !important; }
+
+

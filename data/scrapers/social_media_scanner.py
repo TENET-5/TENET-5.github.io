@@ -23,10 +23,20 @@ try:
         HAS_NITTER = True
     except ImportError:
         HAS_NITTER = False
+        
+    sys.path.append(os.path.join(DATA_DIR, '..', 'tools'))
+    try:
+        from np_millennial_falcon import MillennialFalconTracker
+        import asyncio
+        HAS_FALCON = True
+    except ImportError:
+        HAS_FALCON = False
+        
     HAS_SATOR = True
 except ImportError:
     HAS_SATOR = False
     HAS_NITTER = False
+    HAS_FALCON = False
 
 class SocialMediaMonitor:
     def __init__(self):
@@ -67,16 +77,37 @@ def main():
     monitor = SocialMediaMonitor()
     results = monitor.scrape_targets()
     
+    if HAS_FALCON:
+        print("\n  [LIRIL] Invoking Millennial Falcon N-vs-NP Matrix Engine...")
+        tracker = MillennialFalconTracker()
+        
+        async def embed_intelligence():
+            for target, data in results.items():
+                import copy
+                cloned_data = copy.deepcopy(data)
+                node_payload = {
+                    "name": f"OSINT_SocialProxy_{target}",
+                    "source": "TENET5 Social Media Vector",
+                    "payload": cloned_data
+                }
+                metrics = await tracker.track_entity(node_payload)
+                # Strip the circular payload reflection out of the metrics dump
+                metrics.pop("payload", None)
+                results[target]['falcon_metrics'] = metrics
+                
+        asyncio.run(embed_intelligence())
+    
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump({
             "generated_at": time.time(),
             "targets": results,
             "metadata": {
                 "sator_nexus_integration": HAS_SATOR,
-                "nitter_bridge_integration": HAS_NITTER
+                "nitter_bridge_integration": HAS_NITTER,
+                "falcon_matrix_integration": HAS_FALCON
             }
         }, f, indent=2)
-    print(f"[SUCCESS] Social Media analysis completed and saved to {OUTPUT_FILE}")
+    print(f"\n[SUCCESS] Social Media analysis tracked and saved to {OUTPUT_FILE}")
 
 if __name__ == '__main__':
     main()

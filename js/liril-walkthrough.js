@@ -14,6 +14,10 @@
   if (window.__LIRIL_WALKTHROUGH_LOADED) return;
   window.__LIRIL_WALKTHROUGH_LOADED = true;
 
+  window.__LIRIL_WALKTHROUGH_STOP = function() {
+    if (window.__LIRIL_WALKTHROUGH_STOP_INTERNAL) window.__LIRIL_WALKTHROUGH_STOP_INTERNAL();
+  };
+
   // ── Internationalization (I18N) ──────────────────
   window.LIRIL_I18N_LOCALE = document.documentElement.lang || 'en-GB';
   window.LIRIL_I18N_STRINGS = {
@@ -301,9 +305,9 @@
       styleEl.id = 'liril-styles';
       styleEl.innerHTML = `
         .liril-subtitle-bar {
-          position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%);
+          position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
           width: 90%; max-width: 800px; text-align: center;
-          z-index: 9997; pointer-events: none;
+          z-index: 10000; pointer-events: none;
           opacity: 0; transition: opacity 0.4s ease;
         }
         .liril-subtitle-text {
@@ -389,9 +393,9 @@
 
         /* Mobile Optimization */
         @media (max-width: 768px) {
-          .liril-subtitle-bar { bottom: 64px; width: 95%; }
+          .liril-subtitle-bar { bottom: 78px; width: 95%; }
           .liril-subtitle-text { padding: 10px 16px; font-size: 0.85rem; line-height: 1.4; }
-          .liril-start-btn { bottom: 72px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
+          .liril-start-btn { bottom: 84px; right: 16px; padding: 6px 12px; font-size: 0.75rem; }
         }
 
         /* Auto-tour progress bar */
@@ -738,6 +742,10 @@
     }
 
     function startWalkthrough() {
+      if (window.__TENET5_LIRIL_STOP) {
+        window.__TENET5_LIRIL_STOP();
+      }
+
       isActive = true;
       startBtn.innerHTML = getI18nStr('stop');
       startBtn.style.background = 'rgba(100,100,100,0.9)';
@@ -848,6 +856,8 @@
     });
 
     // Voice pre-warm handled by liril-voice.js — no duplicate listeners needed
+
+    window.__LIRIL_WALKTHROUGH_STOP_INTERNAL = endWalkthrough;
 
     // ── Rescan hook for dynamic pages ────────────────
     window.lirilRescan = function() {
