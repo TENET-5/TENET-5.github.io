@@ -861,11 +861,8 @@
     var autopilotState = getAutopilotState();
     var path = window.location.pathname;
     
-    // Auto-initialize autopilot if on the first page and it hasn't been set
-    if (!autopilotState && (path === '/' || path.endsWith('index.html') || path.endsWith('home.html'))) {
-      autopilotState = { autostart: true };
-      setAutopilotState(autopilotState);
-    }
+    // Autopilot is ONLY set by manual user click on the walkthrough button.
+    // Never auto-initialize — that causes unwanted voice "hallucinations".
 
     if (autopilotState && autopilotState.autostart) {
       // Wait longer (3s) for the target voice to load before auto-starting
