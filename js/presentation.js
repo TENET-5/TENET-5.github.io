@@ -1840,11 +1840,12 @@
     var retryCount = retries || 0;
     // Re-resolve voice EVERY chunk to prevent Chrome voice drift
     var currentVoice = resolveNarrationVoice() || voice;
+    var voiceParams = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
     var u = new SpeechSynthesisUtterance(chunk);
     u.lang = 'en-CA';
-    u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
-    u.pitch = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) ? window.LIRIL_VOICE.params.pitch : 0.92;
-    u.volume = 1.0;
+    u.rate = Math.min(1.45, SPEECH_RATES[lirilNarration.rateIdx].value * voiceParams.rate);
+    u.pitch = voiceParams.pitch;
+    u.volume = voiceParams.volume;
     if (currentVoice) u.voice = currentVoice;
 
     u.onstart = function () {
@@ -1887,9 +1888,18 @@
     if (!text) return;
 
     var voice = resolveNarrationVoice();
-    var hasClara = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
 
-    /* Wait for CLARA specifically — up to 8s (Chrome loads voices async) */
+    /* VOICE CONSISTENCY FIX: If pre-rendered MP3 audio is available,
+       skip the Clara wait entirely — MP3 uses a single consistent neural
+       voice across the entire investigation. No voice drift, no delays.
+       Only wait for Clara when there's NO MP3 (speechSynthesis-only pages). */
+    if (_presAudio.ready && _presAudio.element) {
+      doNarrate(text, voice);
+      return;
+    }
+
+    /* No MP3 for this page — wait for best available voice (up to 4s) */
+    var hasClara = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
     if (!voice || !hasClara) {
       var waitToken = ++lirilNarration.token;
       var waited = 0;
@@ -1897,9 +1907,9 @@
         waited += 200;
         voice = resolveNarrationVoice();
         hasClara = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(voice);
-        if (hasClara || waited >= 8000) {
+        if (hasClara || waited >= 4000) {
           clearInterval(poll);
-          if (waitToken !== lirilNarration.token) return; // user cancelled
+          if (waitToken !== lirilNarration.token) return;
           if (voice) {
             console.log('[PRES] Voice:', voice.name, hasClara ? '★ CLARA' : '⚠ fallback');
           }
@@ -2126,11 +2136,12 @@
     var total = totalChunks || (idx + 1 + chunks.length);
     // Re-resolve voice EVERY chunk to prevent Chrome voice drift
     var currentVoice = resolveNarrationVoice() || voice;
+    var voiceParams = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
     var u = new SpeechSynthesisUtterance(chunk);
     u.lang = 'en-CA';
-    u.rate = SPEECH_RATES[lirilNarration.rateIdx].value;
-    u.pitch = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) ? window.LIRIL_VOICE.params.pitch : 0.92;
-    u.volume = 1.0;
+    u.rate = Math.min(1.45, SPEECH_RATES[lirilNarration.rateIdx].value * voiceParams.rate);
+    u.pitch = voiceParams.pitch;
+    u.volume = voiceParams.volume;
     if (currentVoice) u.voice = currentVoice;
 
     u.onstart = function () {

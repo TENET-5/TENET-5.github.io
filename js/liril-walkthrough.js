@@ -566,29 +566,29 @@
       if (!window.LIRIL_VOICE) return null;
       var v = window.LIRIL_VOICE.get();
       if (v) {
-        var isHazel = window.LIRIL_VOICE.isTargetVoice(v);
-        if (!isHazel) {
-          console.warn('[LIRIL-WALK] Voice is NOT Hazel:', v.name, '— will keep trying');
+        var isClara = window.LIRIL_VOICE.isTargetVoice(v);
+        if (!isClara) {
+          console.warn('[LIRIL-WALK] Voice is NOT Clara:', v.name, '— will keep trying');
         }
       }
       return v;
     }
 
-    // Wait until Hazel is available (up to 8 seconds), then call cb(voice)
-    function waitForHazel(cb) {
+    // Wait until Clara is available (up to 4 seconds), then call cb(voice)
+    function waitForClara(cb) {
       var waited = 0;
       var poll = setInterval(function() {
         waited += 200;
         var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-        var gotHazel = v && window.LIRIL_VOICE.isTargetVoice(v);
-        if (gotHazel || waited >= 8000) {
+        var gotClara = v && window.LIRIL_VOICE.isTargetVoice(v);
+        if (gotClara || waited >= 4000) {
           clearInterval(poll);
-          if (gotHazel) {
-            console.log('[LIRIL-WALK] ★ Hazel ready:', v.name);
+          if (gotClara) {
+            console.log('[LIRIL-WALK] ★ Clara ready:', v.name);
           } else if (v) {
-            console.warn('[LIRIL-WALK] Hazel not found after 8s, using:', v.name);
+            console.warn('[LIRIL-WALK] Clara not found after 4s, using:', v.name);
           } else {
-            console.warn('[LIRIL-WALK] No voice after 8s — speech disabled');
+            console.warn('[LIRIL-WALK] No voice after 4s — speech disabled');
           }
           cb(v);
         }
@@ -683,7 +683,23 @@
         };
         audioElement.addEventListener('timeupdate', _audioTimeHandler);
         audioElement.addEventListener('ended', _audioEndHandler);
-        audioElement.play().catch(function(e) { console.error('[LIRIL] Audio error:', e); });
+        audioElement.play().catch(function(e) {
+          console.warn('[LIRIL] MP3 play failed (autoplay policy?) — falling back to speech:', e);
+          audioElement.removeEventListener('timeupdate', _audioTimeHandler);
+          audioElement.removeEventListener('ended', _audioEndHandler);
+          // Fall through to speechSynthesis
+          if ('speechSynthesis' in window) {
+            var fbChunks = chunkText(point.text);
+            var fbVoice = resolveVoice();
+            speakChunks(fbChunks, fbVoice, function() {
+              if (isActive && currentPoint < points.length - 1) {
+                setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+              } else if (isActive) {
+                advanceToNextPageWalkthrough();
+              }
+            });
+          }
+        });
         return;
       }
 
@@ -691,13 +707,13 @@
       if ('speechSynthesis' in window) {
         var chunks = chunkText(point.text);
         var voice = resolveVoice();
-        var hasHazel = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice(voice);
+        var hasClara = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice(voice);
 
-        if (!voice || !hasHazel) {
-          // Wait for Hazel specifically — don't start speaking with wrong voice
-          waitForHazel(function(hazelVoice) {
+        if (!voice || !hasClara) {
+          // Wait for Clara specifically — don't start speaking with wrong voice
+          waitForClara(function(claraVoice) {
             if (!isActive) return;
-            speakChunks(chunks, hazelVoice, function() {
+            speakChunks(chunks, claraVoice, function() {
               if (isActive && currentPoint < points.length - 1) {
                 setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
               } else if (isActive) {
@@ -707,7 +723,7 @@
           });
           return;
         }
-        // Already have Hazel — speak immediately
+        // Already have Clara — speak immediately
         speakChunks(chunks, voice, function() {
           if (isActive && currentPoint < points.length - 1) {
             setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
@@ -852,12 +868,12 @@
     }
 
     if (autopilotState && autopilotState.autostart) {
-      // Wait longer (3s) for Hazel voice to load before auto-starting
+      // Wait longer (3s) for the target voice to load before auto-starting
       setTimeout(function() {
         if (!isActive && points.length >= 2) {
           var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-          var hasHazel = v && window.LIRIL_VOICE.isTargetVoice(v);
-          console.log('[LIRIL] Autopilot auto-starting walkthrough', hasHazel ? '★ Hazel ready' : '(waiting for Hazel...)');
+          var hasTarget = v && window.LIRIL_VOICE.isTargetVoice(v);
+          console.log('[LIRIL] Autopilot auto-starting walkthrough', hasTarget ? '★ Clara ready' : '(waiting for best voice...)');
           startWalkthrough();
         }
       }, 3000);
