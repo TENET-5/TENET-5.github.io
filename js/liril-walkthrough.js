@@ -540,10 +540,12 @@
         var chunk = chunkQueue.shift();
         // Re-resolve voice EVERY chunk to prevent Chrome voice drift
         var currentVoice = resolveVoice() || voice;
+        var params = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
         var u = new SpeechSynthesisUtterance(chunk);
-        u.lang = 'en-GB'; // LIRIL is always British — never drift
-        u.rate = 0.9;
-        u.pitch = 1.1;
+        u.lang = 'en-CA'; // LIRIL is Canadian — angry Canadian woman
+        u.rate = params.rate;
+        u.pitch = params.pitch;
+        u.volume = params.volume;
         if (currentVoice) u.voice = currentVoice;
         u.onend = function() { setTimeout(next, 150); };
         u.onerror = function() { setTimeout(next, 150); };
@@ -654,10 +656,8 @@
       // ── Play audio or speak ──────────────────────
       if (!isActive) return;
 
-      // CEO Directive: Hazel speechSynthesis ALWAYS preferred over pre-recorded MP3
-      // Only use MP3 audio if Hazel is completely unavailable (silence > wrong voice)
-      var _hazelAvail = window.LIRIL_VOICE && window.LIRIL_VOICE.get() && window.LIRIL_VOICE.isTargetVoice(window.LIRIL_VOICE.get());
-      if (!_hazelAvail && audioMode && audioElement && point.audioStart >= 0) {
+      // MP3 audio is HIGHEST QUALITY — always prefer pre-rendered neural TTS
+      if (audioMode && audioElement && point.audioStart >= 0) {
         audioElement.currentTime = point.audioStart;
 
         var endTime = point.audioEnd;

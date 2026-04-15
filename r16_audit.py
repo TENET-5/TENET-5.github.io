@@ -57,19 +57,37 @@ for f in htmls:
     if not re.search(r"shell\.js", html):
         issues.append("NO shell.js")
 
-    # 9. Empty headings (skip known JS-populated)
+    # 9. Voice + narration coverage
+    if not re.search(r"liril-voice\.js", html):
+        issues.append("NO liril-voice.js")
+
+    narrate_count = len(re.findall(r"data-narrate=", html, re.I))
+    if f not in ["404.html", "auth-callback.html"]:
+        if narrate_count == 0:
+            issues.append("NO data-narrate")
+        elif narrate_count < 3:
+            issues.append(f"LOW narration coverage: {narrate_count}")
+
+    # 10. Public-source / citation markers for OSINT integrity
+    has_source_meta = bool(re.search(r'dc\.source', html, re.I))
+    has_source_text = bool(re.search(r'\bSources?:\b|public record|official records|verify every claim', html, re.I))
+    if f not in ["404.html", "auth-callback.html", "home.html", "index.html", "search.html", "campaign-generator.html", "report-generator.html"]:
+        if not (has_source_meta or has_source_text):
+            issues.append("NO source/citation markers")
+
+    # 11. Empty headings (skip known JS-populated)
     for m in re.finditer(r"<(h[1-6])([^>]*)>\s*</(h[1-6])>", html):
         if "id=" in m.group(2): continue
         ln = html[:m.start()].count("\n") + 1
         issues.append(f"EMPTY HEADING L{ln}: <{m.group(1)}>")
 
-    # 10. Duplicate IDs
+    # 12. Duplicate IDs
     ids = re.findall(r'id=["\']([^"\']+)["\']', html)
     dupes = [x for x in set(ids) if ids.count(x) > 1]
     if dupes:
         issues.append(f"DUPE IDs: {dupes[:3]}")
 
-    # 11. CI detection — look for [CONNECTED INTELLIGENCE] section
+    # 13. CI detection — look for [CONNECTED INTELLIGENCE] section
     has_ci = bool(re.search(r"CONNECTED INTELLIGENCE", html))
     if has_ci:
         ci_pages.append(f)
@@ -81,7 +99,7 @@ for f in htmls:
     if issues:
         results.append((f, issues))
 
-# 12. CI link integrity
+# 14. CI link integrity
 ci_targets = defaultdict(list)
 ci_sources = defaultdict(list)
 for f in ci_pages:
@@ -106,7 +124,7 @@ if orphans:
 print(f"Issues: {sum(len(i) for _, i in results)}")
 for f, iss in results:
     for issue in iss:
-        sev = "HIGH" if any(k in issue for k in ["imbalance", "NO role", "NO TITLE", "NO shell"]) \
-              else "MED" if any(k in issue for k in ["TITLE", "EMPTY", "DUPE", "NO meta", "NO og", "NO canonical", "NO skip"]) \
+        sev = "HIGH" if any(k in issue for k in ["imbalance", "NO role", "NO TITLE", "NO shell", "NO liril-voice", "NO source/citation"]) \
+              else "MED" if any(k in issue for k in ["TITLE", "EMPTY", "DUPE", "NO meta", "NO og", "NO canonical", "NO skip", "NO data-narrate", "LOW narration"]) \
               else "LOW"
         print(f"  [{sev}] {f}: {issue}")

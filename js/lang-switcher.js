@@ -131,7 +131,7 @@
       document.querySelectorAll('[data-orig]').forEach(function(el) {
         el.textContent = el.getAttribute('data-orig');
       });
-      document.documentElement.lang = 'en-GB';
+      document.documentElement.lang = 'en-CA';
       return;
     }
 
@@ -148,7 +148,7 @@
       }
     });
 
-    document.documentElement.lang = currentLang === 'fr' ? 'fr-CA' : currentLang === 'nl' ? 'en-CA' : 'en-GB';
+    document.documentElement.lang = currentLang === 'fr' ? 'fr-CA' : currentLang === 'nl' ? 'en-CA' : 'en-CA';
   }
 
   // ── Init ─────────────────────────────────────────
