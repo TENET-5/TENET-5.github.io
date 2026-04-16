@@ -15,7 +15,7 @@
   var METRICS = {
     pages_read: 0,        // incremented on each page view
     emails_generated: 0,  // from campaign-engine usage
-    investigations: 266,  // total investigation pages
+    investigations: 267,  // total investigation pages
     evidence_docs: 0,     // total evidence documents cited
     mps_tracked: 340,     // from all_mps.json
     timeline_events: 52,  // from unified-timeline.js
