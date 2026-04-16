@@ -247,12 +247,16 @@ function generateThinkTankEmail(contact, allFlaggedPeople) {
     'The SDTC "Green Slush Fund" case illustrates board governance failure under conditions of weak oversight. 186 conflicts of interest; ~$400M in questioned grants; Board Chair voted on grants to her own company. The Auditor General confirmed violations of ss.6(1) and 21 of the Conflict of Interest Act. The government was held in contempt of Parliament for refusing to produce documents. This is a textbook case of board capture and audit failure. Source: Auditor General Report 2024.\n\n' +
     'OVERSIGHT INDEPENDENCE: CFNIS/MPCC\n' +
     'The Canadian Forces National Investigation Service reports to the same chain of command it investigates \u2014 a structural conflict of interest that the Military Police Complaints Commission has documented repeatedly. MPCC annual reports show investigations exceeding the 12-month standard (some ran 3\u20135 years). The MPCC itself lacks binding authority despite a Federal Court ruling that it can bind military police. This is a clear case of oversight institution design failure. Source: MPCC Annual Reports (mpcc-cppm.gc.ca), Federal Court.\n\n' +
+    'OFFSHORE FINANCIAL ENFORCEMENT: INSTITUTIONAL NON-PROSECUTION\n' +
+    'Eight major offshore document leaks from LuxLeaks (2014) through Cyprus Confidential (2023) exposed 268,488 entities. 912 Canadian entities in Panama Papers alone. CRA identified $76M in unpaid taxes \u2014 zero confirmed collected. PM holds $6.8M in Brookfield Asset Management options while cutting FINTRAC budget 12% and eliminating 47 analyst positions. This fits the non-prosecution equilibrium model: the system detects violations but structurally cannot or will not enforce. The watchdog is defunded by the entity it monitors. Source: ICIJ Offshore Leaks Database, CRA reports, FINTRAC Annual Report 2024.\n' +
+    '  ' + BASE_URL + 'panama-papers.html\n\n' +
     'PROPOSED AREAS FOR POLICY ANALYSIS:\n\n' +
     '1. Criminal penalties as accountability mechanisms: comparative analysis (UK CSBS model vs. Canadian Conflict of Interest Act)\n' +
     '2. Lobbying concentration and democratic equity: quantitative analysis of the January 2026 Lobbying Act reforms\n' +
     '3. Board governance reform at Crown corporations: post-SDTC lessons\n' +
     '4. Military police independence: CFNIS structural reform options\n' +
-    '5. PM divestiture requirements: comparative international models\n\n' +
+    '5. PM divestiture requirements: comparative international models\n' +
+    '6. Offshore enforcement gap: why 8 major leaks produced zero Canadian criminal prosecutions\n\n' +
     'All source data, methodology, and raw CSV files are available at:\n' +
     '  ' + BASE_URL + 'evidence-index.html\n\n' +
     'This analysis was produced from official government records. We welcome policy collaboration, corrections, or research citation.\n\n' +
@@ -286,7 +290,10 @@ function generatePremierEmail(contact, allFlaggedPeople) {
     'SDTC GREEN GRANTS: PROVINCIAL DISTRIBUTION CONCERNS\n' +
     'Sustainable Development Technology Canada distributed ~$400M in questioned grants under 186 conflicts of interest. Provincial innovation companies may have been disadvantaged relative to nationally connected applicants. Source: Auditor General Report 2024.\n\n' +
     'CAF AND PROVINCIAL LABOUR MARKET\n' +
-    'Questions about foreign national recruitment into the Canadian Armed Forces, vaccine mandate discharges (~1,500 service members), and CFNIS structural failures affect the federal-provincial relationship on security and labour market policy. Source: MPCC Annual Reports.\n\n';
+    'Questions about foreign national recruitment into the Canadian Armed Forces, vaccine mandate discharges (~1,500 service members), and CFNIS structural failures affect the federal-provincial relationship on security and labour market policy. Source: MPCC Annual Reports.\n\n' +
+    'OFFSHORE FINANCIAL ROUTING: PROVINCIAL TAX BASE EROSION\n' +
+    'Eight major offshore leaks (2014-2023) exposed 268,488 entities. CRA identified $76M in unpaid Canadian taxes \u2014 zero confirmed collected. PM holds $6.8M in Brookfield options while cutting FINTRAC budget 12%. Provincial tax revenues are directly eroded when federal offshore enforcement fails \u2014 every dollar hidden offshore is a dollar not flowing through provincial economies. Source: ICIJ Offshore Leaks Database, CRA, FINTRAC Annual Report 2024.\n' +
+    '  ' + BASE_URL + 'panama-papers.html\n\n';
 
   if (peerFlagged.length) {
     body += 'FLAGGED PROVINCIAL GOVERNMENT ISSUES IN OTHER JURISDICTIONS:\n\n';
@@ -303,7 +310,8 @@ function generatePremierEmail(contact, allFlaggedPeople) {
     '2. Participation in procurement reform advocacy: open competition requirements for federal contracts\n' +
     '3. Request for federal-provincial intelligence sharing framework re: foreign interference in provincial politics\n' +
     '4. Intergovernmental review of SDTC grant distribution by province\n' +
-    '5. Provincial human rights commission review of MAID MD-SUMC implementation\n\n' +
+    '5. Provincial human rights commission review of MAID MD-SUMC implementation\n' +
+    '6. Demand federal restoration of FINTRAC capacity to protect provincial tax base from offshore erosion\n\n' +
     'EVIDENCE:\n' +
     '  Full findings: ' + BASE_URL + 'findings.html\n' +
     '  Legal framework: ' + BASE_URL + 'legal.html\n' +
