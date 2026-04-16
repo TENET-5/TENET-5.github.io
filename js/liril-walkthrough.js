@@ -752,9 +752,10 @@
       startBtn.style.background = 'rgba(100,100,100,0.9)';
       startBtn.setAttribute('aria-expanded', 'true');
 
-      // Autopilot PERMANENTLY DISABLED — causes voice hallucinations + memory errors
-      // Do NOT re-enable. Cross-page auto-start is BANNED.
-      clearAutopilot();
+      // Set autopilot for cross-page navigation when user MANUALLY starts.
+      // This allows LIRIL to navigate through the full site investigation.
+      // Autopilot is only set here (user click) — never on page load.
+      setAutopilotState({ autostart: true, startedAt: Date.now() });
       showTourProgress();
 
       showPoint(0);
@@ -869,15 +870,23 @@
       else startBtn.style.display = 'none';
     };
 
-    // Auto-start if arriving via autopilot cross-page flow
+    // Auto-start if arriving via autopilot cross-page flow.
+    // Autopilot state is ONLY set when the user manually clicks the walkthrough
+    // button (startWalkthrough). It is never set on initial page load.
+    // This prevents "hallucinations" while still allowing full site tours.
     var autopilotState = getAutopilotState();
-    var path = window.location.pathname;
-    
-    // Autopilot is ONLY set by manual user click on the walkthrough button.
-    // Never auto-initialize — that causes unwanted voice "hallucinations".
-
-    // Autopilot auto-start DISABLED — caused voice hallucinations.
-    // Users must click the walkthrough button manually to start narration.
+    if (autopilotState && autopilotState.autostart && points.length >= 2) {
+      // Expire autopilot after 30 minutes to prevent stale sessions
+      var age = Date.now() - (autopilotState.startedAt || 0);
+      if (age > 30 * 60 * 1000) {
+        clearAutopilot();
+        console.log('[LIRIL] Autopilot expired (>30min)');
+      } else {
+        // Arriving from a previous page's walkthrough — auto-continue
+        console.log('[LIRIL] Autopilot: continuing walkthrough from previous page');
+        setTimeout(function() { startWalkthrough(); }, 1500);
+      }
+    }
   }
 
   if (document.readyState === 'loading') {
