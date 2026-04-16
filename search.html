@@ -137,6 +137,39 @@
       transition: opacity 0.2s;
     }
 
+    .search-tips {
+      max-width: 720px;
+      margin: 0.65rem auto 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-quaternary);
+      font-size: 0.76rem;
+    }
+
+    .search-tip-label {
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .search-tip-chip {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: var(--text-tertiary);
+      padding: 0.28rem 0.55rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-tip-chip:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 68, 68, 0.28);
+      background: rgba(255, 68, 68, 0.08);
+    }
+
     .search-input:focus ~ .search-shortcut {
       opacity: 0;
     }
@@ -714,12 +747,19 @@
           type="text"
           id="search-input"
           class="search-input"
-          placeholder="Search bills, MPs, lobbyists, donors..."
+          placeholder="Search bills, MPs, donors, or evidence refs like EV-0009..."
           autocomplete="off"
           spellcheck="false"
         >
         <button id="search-clear" class="search-clear" aria-label="Clear search">&#10005;</button>
         <span class="search-shortcut">/</span>
+      </div>
+      <div class="search-tips" aria-label="Search examples">
+        <span class="search-tip-label">Try:</span>
+        <button class="search-tip-chip" data-query="EV-0009">EV-0009</button>
+        <button class="search-tip-chip" data-query="ArriveCAN">ArriveCAN</button>
+        <button class="search-tip-chip" data-query="Brookfield">Brookfield</button>
+        <button class="search-tip-chip" data-query="RCMP">RCMP</button>
       </div>
     </div>
 
@@ -1045,11 +1085,30 @@
       return '$' + amount.toFixed(0);
     }
 
+    function syncQueryParam(query) {
+      try {
+        var url = new URL(window.location.href);
+        if (query && query.trim()) url.searchParams.set('q', query.trim());
+        else url.searchParams.delete('q');
+        history.replaceState(null, '', url.toString());
+      } catch (e) { /* ignore */ }
+    }
+
+    function getExactEvidenceMatch(query) {
+      var needle = (query || '').trim().toUpperCase();
+      if (!needle) return null;
+      for (var i = 0; i < data.evidence.length; i++) {
+        if ((data.evidence[i].id || '').toUpperCase() === needle) return data.evidence[i];
+      }
+      return null;
+    }
+
     function performSearch(query) {
       if (!loaded) return;
 
       var q = query.trim();
       if (!q) {
+        syncQueryParam('');
         showInitialState();
         renderRecentSearches();
         return;
@@ -1123,6 +1182,7 @@
       });
 
       renderResults(results, q);
+      syncQueryParam(q);
       saveRecentSearch(q);
     }
 
@@ -1135,7 +1195,22 @@
         return;
       }
 
+      var exactEvidenceMatch = getExactEvidenceMatch(query);
       var html = '<div class="result-count">Found <strong>' + total + '</strong> result' + (total !== 1 ? 's' : '') + '</div>';
+
+      if (exactEvidenceMatch) {
+        html += renderGroup('Direct Citation Match', 1, '<a href="permalink.html#' + encodeURIComponent(exactEvidenceMatch.id) + '" class="result-card">' +
+          '<div class="result-card-top">' +
+            '<span class="result-badge badge-evidence">EXACT</span>' +
+            '<div class="result-name">' + highlightMatch(exactEvidenceMatch.id + ' — ' + exactEvidenceMatch.summary, query) + '</div>' +
+          '</div>' +
+          '<div class="result-details">' +
+            '<span class="result-detail"><strong>Verified source:</strong> permalink resolver</span>' +
+            '<span class="result-detail"><strong>Page:</strong> ' + escapeHtml(exactEvidenceMatch.page) + '</span>' +
+            '<span class="result-detail"><strong>Action:</strong> open cited evidence</span>' +
+          '</div>' +
+        '</a>');
+      }
 
       // Evidence refs
       if (results.evidence.length > 0) {
@@ -1383,6 +1458,16 @@
       }, 300);
     });
 
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        var exact = getExactEvidenceMatch(searchInput.value);
+        if (exact) {
+          e.preventDefault();
+          window.location.href = 'permalink.html#' + encodeURIComponent(exact.id);
+        }
+      }
+    });
+
     searchClear.addEventListener('click', function() {
       searchInput.value = '';
       updateClearButton();
@@ -1393,6 +1478,16 @@
 
     recentClearBtn.addEventListener('click', function() {
       clearRecentSearches();
+    });
+
+    document.querySelectorAll('.search-tip-chip').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var q = this.getAttribute('data-query') || '';
+        searchInput.value = q;
+        updateClearButton();
+        performSearch(q);
+        searchInput.focus();
+      });
     });
 
     // Keyboard shortcut: / to focus search
