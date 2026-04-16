@@ -128,6 +128,13 @@
     // Pages with their own inline scene engines — walkthrough must not clash
     if (page === 'index.html' || page === 'home.html' || page === 'kids-guide.html' || page === '') return;
 
+    // MUTEX: If presentation.js is loaded and active, walkthrough yields
+    // Prevents double-speak when both systems try to narrate simultaneously
+    if (window.__TENET5_PRESENTATION_LOADED) {
+      console.log('[LIRIL-WALK] Presentation engine active — walkthrough yields to presentation narration');
+      return;
+    }
+
     // ── Anti-hallucination: deduplication + similarity engine ──
     // Prevents the walkthrough from repeating nearly-identical narration
     // across auto-generated or duplicated data-narrate sections.
@@ -597,15 +604,18 @@
 
     // ── Chrome keepalive ─────────────────────────────
     // Chrome/Chromium bug: speechSynthesis silently stops after ~15s.
-    // Workaround: pause + resume every 10s keeps it alive.
+    // Workaround: pause + resume every 12s keeps it alive.
+    // Using 12s (not 10s) to avoid collision with chunk transitions.
     function startKeepalive() {
       stopKeepalive();
       keepaliveTimer = setInterval(function() {
-        if (window.speechSynthesis && window.speechSynthesis.speaking) {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
+        if (window.speechSynthesis && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+          try {
+            window.speechSynthesis.pause();
+            setTimeout(function() { window.speechSynthesis.resume(); }, 50);
+          } catch(e) { /* ignore keepalive errors */ }
         }
-      }, 10000);
+      }, 12000);
     }
 
     function stopKeepalive() {
