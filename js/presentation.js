@@ -2408,10 +2408,17 @@
       'canada-map.html'
     ];
     var pageName = (location.pathname.split('/').pop() || '').toLowerCase();
+    /* Also check ?load= parameter (shell AJAX content loader) */
+    if (!pageName || pageName === 'index.html' || pageName === '') {
+      try {
+        var loadParam = new URLSearchParams(location.search).get('load');
+        if (loadParam) pageName = loadParam.split('?')[0].split('#')[0].split('/').pop().toLowerCase();
+      } catch(e) {}
+    }
     /* Also check iframe src if loaded inside index.html shell */
     if (!pageName || pageName === 'index.html' || pageName === '') {
       try {
-        var frame = document.querySelector('iframe');
+        var frame = document.querySelector('iframe[name="content_frame"], iframe');
         if (frame && frame.src) pageName = frame.src.split('/').pop().split('?')[0].toLowerCase();
       } catch(e) {}
     }
