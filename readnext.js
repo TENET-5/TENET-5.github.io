@@ -5,7 +5,7 @@
  * The investigation has a logical flow: understand the problem → see the evidence →
  * follow the money → take action. This component guides visitors through that flow.
  *
- * v2.0 — Full 82-page FLOW map coverage (up from 25 in v1.0).
+ * v2.0 — Full FLOW map coverage (batch 3: 8 new entries + 16 updated = 24 changes).
  *
  * Place <div id="read-next"></div> in pages that should show navigation.
  * If no element exists, the script does nothing.
@@ -134,9 +134,9 @@
     'mp-voting-records.html': {
       current: 'MP Voting Records',
       next: [
-        { href: 'voting-records.html', label: 'Full Voting Records', desc: '151 bills, 94 divisions — complete Parliament tracker' },
+        { href: 'maid-voting-record.html', label: 'MAID Voting Record', desc: '173 MPs — how every member voted on medical killing' },
         { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'All 340 MPs scored against lobbying and CIJA data' },
-        { href: 'hansard-dashboard.html', label: 'Hansard Dashboard', desc: 'Deep dive into Hansard division records' },
+        { href: 'mp-analysis.html', label: 'MP Analysis', desc: 'LIRIL intelligence report on members of Parliament' },
       ]
     },
     'dossier-viewer.html': {
@@ -150,9 +150,9 @@
     'corruption-map.html': {
       current: 'Corruption Map',
       next: [
-        { href: 'procurement-analysis.html', label: 'Procurement Analysis', desc: '$191B in documented waste' },
-        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of who did what' },
-        { href: 'findings.html', label: 'All 26+ Findings', desc: 'Cross-reference analysis' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
       ]
     },
     'procurement-analysis.html': {
@@ -199,8 +199,8 @@
       current: 'Lobbying Tracker',
       next: [
         { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts broken down by industry' },
-        { href: 'contributions-tracker.html', label: 'Contributions', desc: '6.2M donation records since 2004' },
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'What the lobbying data reveals' },
+        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'How lobbyists bought Canadian policy' },
+        { href: 'cija-lobbying.html', label: 'CIJA Lobbying Pipeline', desc: 'CIJA and institutional influence mapping' },
       ]
     },
     'contributions-tracker.html': {
@@ -214,9 +214,9 @@
     'evidence-index.html': {
       current: 'Evidence Index',
       next: [
-        { href: 'about.html', label: 'About & Methodology', desc: 'How to verify every claim' },
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'What the data reveals' },
-        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
+        { href: 'evidence.html', label: 'The Evidence', desc: 'What they said vs. what they did' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+        { href: 'methodology-transparency.html', label: 'Methodology & Transparency', desc: 'How TENET5 was built' },
       ]
     },
     'legal.html': {
@@ -356,9 +356,9 @@
     'elections-finance.html': {
       current: 'Elections Finance',
       next: [
-        { href: 'contributions-tracker.html', label: 'Contributions Tracker', desc: '6.2M donation records since 2004' },
         { href: 'lobbying-tracker.html', label: 'Lobbying Tracker', desc: 'Who meets with whom' },
-        { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How 25 key MPs voted on key bills' },
+        { href: 'contributions-tracker.html', label: 'Contributions Tracker', desc: '6.2M donation records since 2004' },
+        { href: 'foreign-interference.html', label: 'Foreign Interference', desc: 'Foreign interference in Canadian democracy' },
       ]
     },
     'email-campaign.html': {
@@ -388,9 +388,9 @@
     'faq.html': {
       current: 'FAQ',
       next: [
+        { href: 'reading-order.html', label: 'Reading Order', desc: 'How to navigate 267 investigation pages' },
+        { href: 'complete-thesis.html', label: 'The Complete Thesis', desc: 'What 267 pages prove' },
         { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
-        { href: 'history.html', label: 'History', desc: 'Historical context and background' },
-        { href: 'resources.html', label: 'Resources', desc: 'Tools and reference materials' },
       ]
     },
     'genocide-evidence.html': {
@@ -428,9 +428,9 @@
     'history.html': {
       current: 'History',
       next: [
-        { href: 'timeline.html', label: 'Timeline', desc: 'Visual chronology of key events' },
-        { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
-        { href: '5gw-subversion.html', label: '5GW Subversion', desc: 'Fifth-generation warfare analysis' },
+        { href: 'failure-timeline.html', label: 'The Decade of Institutional Failure', desc: 'Every major failure mapped chronologically' },
+        { href: 'before-and-after-2015.html', label: 'Before & After 2015', desc: 'A decade of documented decline' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
       ]
     },
     'infographics.html': {
@@ -613,17 +613,17 @@
     'demographics-to-death.html': {
       current: 'Demographics-to-Death Pipeline',
       next: [
-        { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'Understanding the overarching system' },
-        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'Tracking the financial incentives' },
-        { href: 's504-court-filing.html', label: 's.504 Legal Filing', desc: 'Execute criminal complaints directly' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'maid-economics.html', label: 'The Economics of MAID', desc: 'Cost per death vs. cost of care' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
       ]
     },
     'take-action.html': {
       current: 'Take Action',
       next: [
+        { href: 's504-court-filing.html', label: 's.504 Court Filing', desc: 'Private prosecution — file criminal complaints directly' },
+        { href: 'campaign-generator.html', label: 'Campaign Generator', desc: 'Create campaign materials and launch actions' },
         { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
-        { href: 'mp-brief.html', label: 'MP Brief', desc: 'Brief your MP with the evidence' },
-        { href: 'open-letter.html', label: 'Open Letter', desc: 'Public letter to elected officials' },
       ]
     },
     'the-boot.html': {
@@ -717,9 +717,9 @@
     'opioid-crisis.html': {
       current: 'Opioid Crisis',
       next: [
+        { href: 'opioid-crisis-accountability.html', label: 'Opioid Crisis Accountability', desc: 'The other death pipeline documented' },
         { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
-        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
-        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations against disabled Canadians' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
       ]
     },
     'media-concentration.html': {
@@ -733,9 +733,9 @@
     'telecom-oligopoly.html': {
       current: 'Telecom Oligopoly',
       next: [
-        { href: 'media-concentration.html', label: 'Media Concentration', desc: 'Same conglomerates own the news that covers telecom — Rogers, Bell, TELUS' },
-        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: '1,400+ lobbying contacts — who writes the CRTC rules' },
-        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-26 gives telecom carriers warrantless surveillance powers' },
+        { href: 'regulatory-capture.html', label: 'Regulatory Capture', desc: 'When regulators serve industry over the public' },
+        { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts broken down by industry' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
       ]
     },
     'arms-exports.html': {
@@ -781,25 +781,25 @@
     'housing-crisis.html': {
       current: 'Housing Crisis',
       next: [
-        { href: 'covid-accountability.html', label: 'COVID Accountability', desc: 'ArriveCAN, CERB fraud, $500B pandemic spending' },
-        { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'Canada Post, CBC, Via Rail — $7B+ burned' },
-        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'How lobbyists shaped housing policy' },
+        { href: 'housing-crisis-by-city.html', label: 'Housing Crisis by City', desc: 'Toronto, Vancouver, Montreal — city-by-city collapse' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
       ]
     },
     'crown-corporations.html': {
       current: 'Crown Corporations',
       next: [
-        { href: 'ag-findings.html', label: 'AG Findings Database', desc: '12 AG reports, $103B+ documented failures' },
-        { href: 'phoenix-pay.html', label: 'Phoenix Pay Disaster', desc: '$309M→$2.2B — the payroll catastrophe' },
-        { href: 'senate-expenses.html', label: 'Senate Expenses', desc: 'Duffy/Wallin/Brazeau — $500K scandal' },
+        { href: 'crown-corporation-oversight.html', label: 'Crown Corporation Oversight', desc: 'Billions without accountability' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+        { href: 'regulatory-capture.html', label: 'Regulatory Capture', desc: 'When regulators serve industry over the public' },
       ]
     },
     'covid-accountability.html': {
       current: 'COVID Accountability',
       next: [
-        { href: 'crown-corporations.html', label: 'Crown Corporations', desc: 'State enterprises burning billions' },
-        { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Engineered affordability collapse' },
-        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who profited from pandemic contracts' },
+        { href: 'phac-mandates-s6.html', label: 'PHAC Mandates & s.6', desc: 'Section 6 Charter violations and public health overreach' },
+        { href: 'arrivecan.html', label: 'ArriveCAN', desc: '$59.5M for a COVID questionnaire' },
+        { href: 'emergencies-act.html', label: 'Emergencies Act', desc: 'Federal Court ruled it unreasonable' },
       ]
     },
     'indigenous-accountability.html': {
@@ -829,9 +829,9 @@
     'immigration-policy.html': {
       current: 'Immigration Policy',
       next: [
-        { href: 'tfw-abuse.html', label: 'TFW Program Abuse', desc: '239K+ tied workers, LMIA fraud, wage suppression machine' },
-        { href: 'housing-crisis.html', label: 'Housing Crisis', desc: 'Immigration-housing gap documented by CMHC' },
-        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'System capacity vs. population growth' },
+        { href: 'immigration-maid-pipeline.html', label: 'Immigration-to-MAID Pipeline', desc: 'From arrival to death — the documented pathway' },
+        { href: 'tfw-abuse.html', label: 'TFW Program Abuse', desc: '239K+ tied workers, LMIA fraud, wage suppression' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
       ]
     },
     'tfw-abuse.html': {
@@ -861,9 +861,9 @@
     'environment-climate.html': {
       current: 'Environment & Climate',
       next: [
-        { href: 'infrastructure-deficit.html', label: 'Infrastructure Deficit', desc: 'Where climate infrastructure money should have gone' },
-        { href: 'indigenous-accountability.html', label: 'Indigenous Accountability', desc: 'Contaminated sites on First Nations land' },
-        { href: 'arms-exports.html', label: 'Arms Exports', desc: 'Selling oil AND weapons while preaching green' },
+        { href: 'carbon-tax.html', label: 'Carbon Tax', desc: 'Policy analysis and economic impact' },
+        { href: 'sovereignty-summary.html', label: 'Sovereignty Summary', desc: 'The sovereignty crisis across all domains' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
       ]
     },
     'debt-fiscal.html': {
@@ -1326,6 +1326,72 @@
         { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
         { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
         { href: 'institutional-malice.html', label: 'Institutional Malice', desc: 'The doctrine of deliberate institutional harm' },
+      ]
+    },
+
+    // ── Batch 3 — 8 new entries (2025-04-15c) ──────────────────
+    'appointments.html': {
+      current: 'Political Appointments — The Patronage Machine',
+      next: [
+        { href: 'judicial-appointments.html', label: 'Judicial Appointments', desc: 'Justice system and judicial appointment analysis' },
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals documented' },
+        { href: 'regulatory-capture.html', label: 'Regulatory Capture', desc: 'When regulators serve industry over the public' },
+      ]
+    },
+    'atip-backlog.html': {
+      current: 'ATIP Backlog — Access to Information Processing Crisis',
+      next: [
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+        { href: 'cabinet-confidence.html', label: 'Cabinet Confidence', desc: 'The document blockade' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of government misconduct' },
+      ]
+    },
+    'before-and-after-2015.html': {
+      current: 'Before & After 2015 — A Decade of Documented Decline',
+      next: [
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+        { href: 'complete-thesis.html', label: 'The Complete Thesis', desc: 'What 267 pages prove' },
+        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
+      ]
+    },
+    'caf-recruitment.html': {
+      current: 'CAF Recruitment Degradation — Institutional Analysis',
+      next: [
+        { href: 'caf-recruitment-crisis.html', label: 'CAF Recruitment Collapse', desc: 'Weaponized incompetence in military recruitment' },
+        { href: 'veterans.html', label: 'How Canada Treats Its Veterans', desc: 'Veterans advocacy and the full betrayal record' },
+        { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
+      ]
+    },
+    'emergencies-act.html': {
+      current: 'Emergencies Act — Federal Court Ruled It Unreasonable',
+      next: [
+        { href: 'phac-mandates-s6.html', label: 'PHAC Mandates & s.6', desc: 'Section 6 Charter violations and public health overreach' },
+        { href: 'institutional-malice.html', label: 'Institutional Malice', desc: 'The doctrine of deliberate institutional harm' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+      ]
+    },
+    'investigation-matrix.html': {
+      current: 'SATOR Investigation Matrix',
+      next: [
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Full index of sourced evidence' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+      ]
+    },
+    'mp-analysis.html': {
+      current: 'MP Analysis — LIRIL Intelligence Report',
+      next: [
+        { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'All 340 MPs scored against lobbying and CIJA data' },
+        { href: 'maid-voting-record.html', label: 'MAID Voting Record', desc: '173 MPs — how every member voted on medical killing' },
+        { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts broken down by industry' },
+      ]
+    },
+    'nova-scotia-oic.html': {
+      current: 'Nova Scotia Mass Casualty & Mendicino OIC Matrix',
+      next: [
+        { href: 'rcmp-commissioners.html', label: 'RCMP Commissioners', desc: '4 leaders, systemic failures documented' },
+        { href: 'emergencies-act.html', label: 'Emergencies Act', desc: 'Federal Court ruled it unreasonable' },
+        { href: 'phac-mandates-s6.html', label: 'PHAC Mandates & s.6', desc: 'Section 6 Charter violations and public health overreach' },
       ]
     },
   };
