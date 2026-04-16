@@ -540,14 +540,23 @@
     }
 
     function tryLoadAudio() {
-      var slug = (window.location.pathname.split('/').pop() || '').replace(/\.html$/, '');
+      var pageName = (window.location.pathname.split('/').pop() || '').toLowerCase();
+      // Shell fallback
+      if (!pageName || pageName === 'index.html') {
+        try {
+          var loadParam = new URLSearchParams(window.location.search).get('load');
+          if (loadParam) pageName = loadParam.split('?')[0].split('#')[0].split('/').pop().toLowerCase();
+        } catch(e) {}
+      }
+      var slug = pageName.replace(/\.html$/, '');
       if (!slug) return;
       var mp3 = 'audio/' + slug + '.mp3';
       var vtt = 'audio/' + slug + '.vtt';
 
-      fetch(mp3, { method: 'HEAD' }).then(function(r) {
-        if (!r.ok) return;
-        return fetch(vtt).then(function(r2) { return r2.ok ? r2.text() : ''; });
+      // Use GET on the lightweight VTT instead of HEAD on MP3, which GH Pages can block
+      fetch(vtt).then(function(r) {
+        if (!r.ok) throw new Error('No VTT');
+        return r.text();
       }).then(function(vttText) {
         if (!vttText) return;
         audioCues = parseVTT(vttText);
@@ -559,14 +568,14 @@
           p.audioStart = ci >= 0 ? audioCues[ci].start : -1;
           p.audioCueIdx = ci;
         });
-        // Sort mapped cue starts to find the next chronological audio point
+        
         var mappedStarts = points
           .filter(function(p) { return p.audioStart >= 0; })
           .map(function(p) { return p.audioStart; })
           .sort(function(a, b) { return a - b; });
+          
         for (var i = 0; i < points.length; i++) {
           if (points[i].audioStart < 0) continue;
-          // Find next chronologically-later audio start
           var next = -1;
           for (var k = 0; k < mappedStarts.length; k++) {
             if (mappedStarts[k] > points[i].audioStart + 0.1) { next = mappedStarts[k]; break; }
@@ -576,7 +585,14 @@
         audioMode = true;
         console.log('[LIRIL] Audio mode:', mp3, audioCues.length, 'cues,',
           points.filter(function(p) { return p.audioStart >= 0; }).length + '/' + points.length, 'mapped');
-      }).catch(function() { console.log('[LIRIL] No audio for page, using speech'); });
+        
+        // If we were already playing fallback speech because of a race condition, switch to audio!
+        if (isActive && !speakingChunks && audioElement) {
+            // we let the current speech chunk finish, then the next point will pick up the Audio!
+        }
+      }).catch(function() { 
+        console.log('[LIRIL] No audio for page, using speech fallback'); 
+      });
     }
 
     // ── Create walkthrough UI ────────────────────────
