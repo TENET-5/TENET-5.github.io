@@ -223,19 +223,75 @@ def append_log(text: str) -> None:
         handle.write(text.rstrip() + "\n")
 
 
-def ask_liril_for_guidance() -> dict:
+def ask_liril_for_guidance(site_checks: list[dict]) -> dict:
     if not LIRIL_CLI.exists():
         return {"ok": False, "message": "LIRIL CLI unavailable"}
+    failed = [item["name"] for item in site_checks if not item["result"].get("ok")]
     prompt = (
         "Prioritize the next autonomous improvements for the TENET-5 GitHub Pages "
         "accountability site after video, media, NATS, and quantum-integrated maintenance checks. "
-        "Include how LIRIL should collaborate with the quantum AI and cross-train on website development."
+        f"Current failing checks: {', '.join(failed) if failed else 'none'}. "
+        "Return guidance focused on narration quality, evidence integrity, shared shell stability, "
+        "news resilience, and reciprocal LIRIL to quantum cross-training for website upkeep."
     )
-    return run_command([PYTHON, str(LIRIL_CLI), "advise", prompt], LIRIL_ROOT)
+    options = [
+        "presentation polish",
+        "narration and accessibility QA",
+        "evidence integrity automation",
+        "shared shell stability",
+        "news source resilience",
+        "cross-training with quantum AI",
+    ]
+    return run_command(
+        [PYTHON, str(LIRIL_CLI), "advise", prompt, "--options", ",".join(options)],
+        LIRIL_ROOT,
+    )
+
+
+def normalize_liril_guidance(raw_guidance: dict, site_checks: list[dict]) -> dict:
+    parsed = parse_embedded_json(raw_guidance)
+    recommendations = []
+    generic_markers = (
+        "current classifier",
+        "retrain via",
+        "classified",
+        "training samples",
+    )
+
+    def normalize_item(item: object, limit: int = 240) -> str:
+        if isinstance(item, dict):
+            label = item.get("option") or item.get("title") or item.get("name") or ""
+            domain = item.get("domain")
+            if label and domain:
+                return compact_text(f"{label} [{domain}]", limit)
+            if label:
+                return compact_text(label, limit)
+            return compact_text(json.dumps(item, ensure_ascii=False), limit)
+        return compact_text(str(item), limit)
+
+    for item in parsed.get("recommendations", []) or []:
+        cleaned = normalize_item(item, 240)
+        if cleaned and not any(marker in cleaned.lower() for marker in generic_markers):
+            recommendations.append(cleaned)
+
+    for item in derive_recommendations(site_checks):
+        cleaned = normalize_item(item, 240)
+        if cleaned and cleaned not in recommendations:
+            recommendations.append(cleaned)
+
+    for item in parsed.get("ranked_options", []) or []:
+        cleaned = normalize_item(item, 180)
+        if cleaned and cleaned not in recommendations:
+            recommendations.append(cleaned)
+
+    parsed["recommendations"] = recommendations[:5]
+    parsed["source_ok"] = raw_guidance.get("ok", False)
+    parsed["site_specific"] = any("site" in item.lower() or "narrat" in item.lower() or "evidence" in item.lower() for item in recommendations)
+    return parsed
 
 
 def ask_quantum_for_guidance(liril_guidance: dict, site_checks: list[dict]) -> dict:
-    parsed_liril = parse_embedded_json(liril_guidance)
+    parsed_liril = liril_guidance if isinstance(liril_guidance, dict) else {}
     recommendations = parsed_liril.get("recommendations", []) or []
 
     failed = [item["name"] for item in site_checks if not item["result"].get("ok")]
@@ -285,8 +341,8 @@ def ask_quantum_for_guidance(liril_guidance: dict, site_checks: list[dict]) -> d
 
 
 def run_cross_training(site_checks: list[dict], liril_guidance: dict) -> dict:
-    parsed_liril = parse_embedded_json(liril_guidance)
-    quantum_guidance = ask_quantum_for_guidance(liril_guidance, site_checks)
+    parsed_liril = normalize_liril_guidance(liril_guidance, site_checks)
+    quantum_guidance = ask_quantum_for_guidance(parsed_liril, site_checks)
     exchange = []
     overall_ok = quantum_guidance.get("ok", False)
 
@@ -347,7 +403,7 @@ def derive_recommendations(site_checks: list[dict]) -> list[str]:
 def improvement_cycle(cycle_number: int) -> dict:
     training = train_liril()
     site_checks = run_site_cycle()
-    liril_guidance = ask_liril_for_guidance()
+    liril_guidance = ask_liril_for_guidance(site_checks)
     cross_training = run_cross_training(site_checks, liril_guidance)
     payload = {
         "generated": now_iso(),
