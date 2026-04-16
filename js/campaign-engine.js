@@ -140,7 +140,10 @@ function generateMediaEmail(contact, allFlaggedPeople) {
       'Documents: Global Affairs Canada export permits database; Auditor General testimony. $18.9M shipped after Joly\'s "pause" announcement. $37.2M in new permits. Crown corp signed $78.8M contract weeks after blocking the same company. 12 CRA charity revocations for funnelling to military operations abroad.\n\n' +
       'LEAD 6: FOREIGN INTERFERENCE \u2014 NSICOP 2024\n' +
       'Document: NSICOP Report 2024 (Public). Parliamentarians from multiple parties "wittingly" assisting foreign governments. CPC leadership races infiltrated. Han Dong: CSIS assessment as "witting affiliate." Bill C-70 foreign agent registry enforcement inconsistent. Document available: nsicop-cpsnr.ca.\n\n' +
-      'LEAD 7: CFNIS STRUCTURAL FAILURE\n' +
+      'LEAD 7: OFFSHORE FINANCIAL ROUTING \u2014 8 MAJOR LEAKS\n' +
+      'Documents: ICIJ Offshore Leaks Database; CRA reports; FINTRAC Annual Report 2024. Eight major offshore leaks (LuxLeaks 2014 through Cyprus Confidential 2023) exposed 268,488 entities. 912 Canadian entities in Panama Papers alone. CRA identified $76M unpaid taxes \u2014 zero confirmed collected. PM holds $6.8M in Brookfield options while cutting FINTRAC budget 12% and eliminating 47 analyst positions. Potential s.122 breach of trust. Source: ICIJ, CBC, CRA.\n' +
+      '  ' + BASE_URL + 'panama-papers.html\n\n' +
+      'LEAD 8: CFNIS STRUCTURAL FAILURE\n' +
       'Documents: MPCC Annual Reports (mpcc-cppm.gc.ca); Federal Court filings. CFNIS reports to same chain it investigates. Investigations ran 3\u20135 years exceeding 12-month standard. Provost Marshal accused of obstruction by MPCC. LCol LeBlanc cleared Gen Vance despite allegations.\n\n' +
       'Full evidence index with document download links:\n' + BASE_URL + 'evidence-index.html\n\n' +
       'All raw data files are public government records available at tenet5.github.io. Happy to share specific documents, methodology, or raw CSV extracts.' +
