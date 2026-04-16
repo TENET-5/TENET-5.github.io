@@ -13,6 +13,8 @@ import os
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -22,6 +24,10 @@ LIRIL_ROOT = Path(os.environ.get("LIRIL_ROOT", r"e:\S.L.A.T.E\tenet5"))
 LIRIL_CLI = LIRIL_ROOT / "tools" / "liril_ask.py"
 STATUS_FILE = ROOT / "data" / "liril_autopilot_status.json"
 LOG_FILE = ROOT / "data" / "liril_autopilot.log"
+QUANTUM_ENDPOINTS = [
+    ("nemotron-fast", "http://127.0.0.1:8082/completion"),
+    ("mistral-quality", "http://127.0.0.1:8083/completion"),
+]
 
 TRAINING_SAMPLES = [
     {
@@ -119,6 +125,11 @@ def train_liril() -> dict:
     }
 
 
+def compact_text(value: str, limit: int = 1200) -> str:
+    text = " ".join(str(value).split())
+    return text[:limit]
+
+
 def media_stack_check() -> dict:
     started = time.time()
     try:
@@ -192,9 +203,93 @@ def ask_liril_for_guidance() -> dict:
         return {"ok": False, "message": "LIRIL CLI unavailable"}
     prompt = (
         "Prioritize the next autonomous improvements for the TENET-5 GitHub Pages "
-        "accountability site after video, media, NATS, and quantum-integrated maintenance checks."
+        "accountability site after video, media, NATS, and quantum-integrated maintenance checks. "
+        "Include how LIRIL should collaborate with the quantum AI and cross-train on website development."
     )
     return run_command([PYTHON, str(LIRIL_CLI), "advise", prompt], LIRIL_ROOT)
+
+
+def ask_quantum_for_guidance(liril_guidance: dict, site_checks: list[dict]) -> dict:
+    recommendations = []
+    if isinstance(liril_guidance, dict):
+        recommendations = liril_guidance.get("recommendations", []) or []
+
+    failed = [item["name"] for item in site_checks if not item["result"].get("ok")]
+    prompt = (
+        "You are TENET5 quantum AI assisting LIRIL with developing the accountability website. "
+        "Return three concise, actionable priorities that improve the site and help LIRIL maintain it. "
+        f"LIRIL guidance: {'; '.join(recommendations) if recommendations else 'none yet'}. "
+        f"Failing checks: {', '.join(failed) if failed else 'none'}. "
+        "Focus on evidence integrity, narration, shared shell stability, media completion, and autonomous upkeep."
+    )
+    payload = json.dumps({
+        "prompt": prompt,
+        "n_predict": 220,
+        "temperature": 0.2,
+    }).encode("utf-8")
+
+    for name, url in QUANTUM_ENDPOINTS:
+        request = urllib.request.Request(
+            url,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            started = time.time()
+            with urllib.request.urlopen(request, timeout=45) as response:
+                data = json.loads(response.read().decode("utf-8", errors="replace"))
+            return {
+                "ok": True,
+                "endpoint": name,
+                "url": url,
+                "seconds": round(time.time() - started, 2),
+                "model": data.get("model", "unknown"),
+                "text": compact_text(data.get("content") or data.get("text") or ""),
+                "raw": data,
+            }
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+            last_error = str(exc)
+
+    return {
+        "ok": False,
+        "message": "No quantum endpoint returned guidance",
+        "text": "",
+        "error": last_error if 'last_error' in locals() else "unavailable",
+    }
+
+
+def run_cross_training(site_checks: list[dict], liril_guidance: dict) -> dict:
+    quantum_guidance = ask_quantum_for_guidance(liril_guidance, site_checks)
+    exchange = []
+    overall_ok = quantum_guidance.get("ok", False)
+
+    if LIRIL_CLI.exists() and quantum_guidance.get("text"):
+        quantum_text = quantum_guidance["text"]
+        train_prompt = (
+            "Use this quantum guidance to improve ongoing TENET-5 website development and autonomous maintenance: "
+            + quantum_text
+        )
+        exchange.append({
+            "direction": "quantum_to_liril_train",
+            "result": run_command([PYTHON, str(LIRIL_CLI), "train", train_prompt, "TECHNOLOGY"], LIRIL_ROOT),
+        })
+        reciprocal_prompt = (
+            "Quantum AI guidance for the TENET-5 website says: "
+            + quantum_text
+            + " Re-rank the next site priorities and explain how LIRIL should coordinate with that guidance."
+        )
+        exchange.append({
+            "direction": "liril_with_quantum_context",
+            "result": run_command([PYTHON, str(LIRIL_CLI), "advise", reciprocal_prompt], LIRIL_ROOT),
+        })
+        overall_ok = overall_ok and all(item["result"].get("ok") for item in exchange)
+
+    return {
+        "ok": overall_ok,
+        "quantum_guidance": quantum_guidance,
+        "exchange": exchange,
+    }
 
 
 def derive_recommendations(site_checks: list[dict]) -> list[str]:
@@ -225,6 +320,8 @@ def derive_recommendations(site_checks: list[dict]) -> list[str]:
 def improvement_cycle(cycle_number: int) -> dict:
     training = train_liril()
     site_checks = run_site_cycle()
+    liril_guidance = ask_liril_for_guidance()
+    cross_training = run_cross_training(site_checks, liril_guidance)
     payload = {
         "generated": now_iso(),
         "cycle": cycle_number,
@@ -233,7 +330,9 @@ def improvement_cycle(cycle_number: int) -> dict:
         "training": training,
         "site_checks": site_checks,
         "recommendations": derive_recommendations(site_checks),
-        "liril_guidance": ask_liril_for_guidance(),
+        "liril_guidance": liril_guidance,
+        "quantum_guidance": cross_training.get("quantum_guidance", {}),
+        "cross_training": cross_training,
     }
     write_status(payload)
     return payload
@@ -242,6 +341,10 @@ def improvement_cycle(cycle_number: int) -> dict:
 def print_summary(payload: dict) -> None:
     lines = [f"\n[TENET5 AUTOPILOT] cycle {payload['cycle']} @ {payload['generated']}"]
     lines.append(f"  training: {'OK' if payload['training'].get('ok') else 'WARN'}")
+    lines.append(f"  cross_training: {'OK' if payload.get('cross_training', {}).get('ok') else 'WARN'}")
+    quantum = payload.get("quantum_guidance", {})
+    if quantum.get("ok"):
+        lines.append(f"  quantum_model: {quantum.get('model', 'unknown')} via {quantum.get('endpoint', 'local')} ({quantum.get('seconds')}s)")
     for item in payload.get("site_checks", []):
         state = "OK" if item["result"].get("ok") else "WARN"
         lines.append(f"  {item['name']}: {state} ({item['result'].get('seconds')}s)")
