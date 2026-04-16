@@ -678,8 +678,8 @@
       current: 'Whistleblower Guide',
       next: [
         { href: 'whistleblower-failures.html', label: 'Whistleblower Failures', desc: 'How Canada punishes truth-tellers — PSDPA, PSIC, and systemic retaliation' },
-        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
-        { href: 'veterans.html', label: 'Veterans', desc: 'Veterans advocacy and support' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
       ]
     },
     'whistleblower-failures.html': {
@@ -693,9 +693,9 @@
         'dnd-procurement.html': {
       current: 'DND Procurement',
       next: [
-        { href: 'phoenix-pay.html', label: 'Phoenix Pay Disaster', desc: 'Same pattern — $309M became $2.2B' },
-        { href: 'ag-findings.html', label: 'AG Findings Database', desc: '12 AG reports, $103B+ documented waste' },
         { href: 'procurement-deep-dive.html', label: 'Procurement Deep Dive', desc: '1.26M contracts, 70K anomalies' },
+        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$229M+ flowing to Israel despite the pause' },
+        { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
       ]
     },
         'senate-expenses.html': {
@@ -741,9 +741,9 @@
     'arms-exports.html': {
       current: 'Arms Exports',
       next: [
-        { href: 'dnd-procurement.html', label: 'Defence Procurement', desc: '$100B military procurement — where the money goes' },
-        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Defence industry lobbying contacts' },
-        { href: 'veterans-betrayal.html', label: 'Veterans Betrayal', desc: 'Canada sells weapons abroad, neglects its own soldiers' },
+        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$229M+ flowing to Israel despite the pause' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
+        { href: 'charity-pipeline.html', label: 'Charity Pipeline', desc: '$276M from Canadian charities to Israel' },
       ]
     },
     'maid-policy-evolution.html': {
@@ -1136,6 +1136,196 @@
         { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
         { href: 'healthcare-crisis.html', label: 'Healthcare Crisis', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+      ]
+    },
+
+    // ── MAID expansion (batch 2025-04-15b) ──────────────────────
+    'cija-maid-pipeline.html': {
+      current: 'The CIJA-IHRA-MAID Pipeline — From Lobbying to Legislation',
+      next: [
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'cija-lobbying.html', label: 'CIJA Lobbying Pipeline', desc: 'How CIJA lobbying translates to policy' },
+        { href: 'disability-genocide.html', label: 'Disability & CRPD Violations', desc: 'UN Convention violations against disabled Canadians' },
+      ]
+    },
+    'disability-benefit.html': {
+      current: 'Canada Disability Benefit — $200/Month Below the Poverty Line',
+      next: [
+        { href: 'disability-genocide.html', label: 'Disability & CRPD Violations', desc: 'UN Convention violations against disabled Canadians' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+      ]
+    },
+    'maid-mental-health.html': {
+      current: 'MAID & Mental Health — Death Instead of Treatment',
+      next: [
+        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'healthcare-crisis.html', label: 'Healthcare Crisis', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
+      ]
+    },
+    'maid-provincial.html': {
+      current: 'MAID by Province — Per-Capita Death Rates Across Canada',
+      next: [
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
+        { href: 'canada-map.html', label: 'Canada Map', desc: 'Geographic data visualization' },
+      ]
+    },
+
+    // ── Military expansion (batch 2025-04-15b) ──────────────────
+    'caf-recruitment-crisis.html': {
+      current: 'CAF Recruitment Collapse & Weaponized Incompetence',
+      next: [
+        { href: 'caf-recruitment.html', label: 'CAF Recruitment', desc: 'Canadian Armed Forces recruitment data' },
+        { href: 'veterans.html', label: 'How Canada Treats Its Veterans', desc: 'Veterans advocacy and the full betrayal record' },
+        { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
+      ]
+    },
+    'cfnis-proxy.html': {
+      current: 'CFNIS & Military Justice Failures',
+      next: [
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability failures' },
+        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
+        { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
+      ]
+    },
+
+    // ── Financial expansion (batch 2025-04-15b) ─────────────────
+    'cost-of-failure.html': {
+      current: 'The Cost of Government Failure — $103B+ Documented',
+      next: [
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+        { href: 'budget-2025-analysis.html', label: 'Budget 2025 Analysis', desc: 'Where $585.9 billion goes' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+      ]
+    },
+    'debt-servicing.html': {
+      current: 'National Debt Servicing — Taxpayer Money to Bondholders',
+      next: [
+        { href: 'budget-2025-analysis.html', label: 'Budget 2025 Analysis', desc: 'Where $585.9 billion goes' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+        { href: 'bank-of-canada.html', label: 'Bank of Canada', desc: 'Bank of Canada independence analysis' },
+      ]
+    },
+    'indigenous-procurement-fraud.html': {
+      current: 'Indigenous Procurement Fraud — Jeglic Report March 2026',
+      next: [
+        { href: 'procurement-registry.html', label: 'Procurement Registry', desc: 'Full registry of procurement records' },
+        { href: 'arrivecan.html', label: 'ArriveCAN', desc: '$59.5M for a COVID questionnaire' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+      ]
+    },
+    'ledger-book.html': {
+      current: 'Volume I: The Accountability Ledger',
+      next: [
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+        { href: 'budget-2025-analysis.html', label: 'Budget 2025 Analysis', desc: 'Where $585.9 billion goes' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+      ]
+    },
+
+    // ── Governance expansion (batch 2025-04-15b) ────────────────
+    'accountability-reform-history.html': {
+      current: 'Accountability Reform History — Every Attempt Blocked',
+      next: [
+        { href: 'accountability-scorecard.html', label: 'Accountability Scorecard', desc: 'Government accountability tracking' },
+        { href: 'ethics-failures.html', label: 'Ethics Failures', desc: 'Violations found, zero consequences enforced' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+      ]
+    },
+    'crown-corporation-oversight.html': {
+      current: 'Crown Corporation Oversight — Billions Without Accountability',
+      next: [
+        { href: 'regulatory-capture.html', label: 'Regulatory Capture', desc: 'When regulators serve industry over the public' },
+        { href: 'conflict-of-interest-registry.html', label: 'Conflict of Interest Registry', desc: 'Every documented conflict of interest' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+      ]
+    },
+    'senate-accountability.html': {
+      current: 'Senate Accountability — The Unelected Chamber',
+      next: [
+        { href: 'senate-expenses.html', label: 'Senate Expenses', desc: 'Duffy/Wallin/Brazeau expense scandal' },
+        { href: 'ethics-failures.html', label: 'Ethics Failures', desc: 'Violations found, zero consequences enforced' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of government misconduct' },
+      ]
+    },
+
+    // ── Foreign/sovereignty expansion (batch 2025-04-15b) ───────
+    'arctic-sovereignty.html': {
+      current: 'Arctic Sovereignty — Canada Can\'t Patrol Its Own North',
+      next: [
+        { href: 'sovereignty-summary.html', label: 'Sovereignty Summary', desc: 'The sovereignty crisis across all domains' },
+        { href: 'foreign-interference.html', label: 'Foreign Interference', desc: 'Foreign interference in Canadian democracy' },
+        { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
+      ]
+    },
+    'data-sovereignty.html': {
+      current: 'Data Sovereignty — Your Data, Their Servers, Foreign Laws',
+      next: [
+        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-26, C-11, C-63 and civil liberties erosion' },
+        { href: 'bill-c63-online-harms.html', label: 'Bill C-63 Online Harms Act', desc: 'Censorship framework with life imprisonment for speech' },
+        { href: 'digital-identity.html', label: 'Digital Identity', desc: 'From ArriveCAN to national digital ID' },
+      ]
+    },
+    'energy-sovereignty.html': {
+      current: 'Energy Sovereignty — Landlocked by Politics',
+      next: [
+        { href: 'sovereignty-summary.html', label: 'Sovereignty Summary', desc: 'The sovereignty crisis across all domains' },
+        { href: 'carbon-tax.html', label: 'Carbon Tax', desc: 'Policy analysis and economic impact' },
+        { href: 'environment-climate.html', label: 'Environment & Climate', desc: 'Climate infrastructure and broken promises' },
+      ]
+    },
+    'bill-c22-surveillance.html': {
+      current: 'Bill C-22 Lawful Access Act — State Surveillance Expansion',
+      next: [
+        { href: 'bill-c63-online-harms.html', label: 'Bill C-63 Online Harms Act', desc: 'Censorship framework with life imprisonment for speech' },
+        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-26, C-11, C-63 and civil liberties erosion' },
+        { href: 'digital-identity.html', label: 'Digital Identity', desc: 'From ArriveCAN to national digital ID' },
+      ]
+    },
+
+    // ── Social expansion (batch 2025-04-15b) ────────────────────
+    'childcare.html': {
+      current: '$10/Day Childcare — Promise vs Waitlists',
+      next: [
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+        { href: 'housing-crisis-by-city.html', label: 'Housing Crisis by City', desc: 'City-by-city affordability collapse' },
+        { href: 'healthcare-crisis.html', label: 'Healthcare Crisis', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
+      ]
+    },
+    'food-supply-concentration.html': {
+      current: 'Food Supply Concentration — The Grocery Oligopoly',
+      next: [
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+        { href: 'sovereignty-summary.html', label: 'Sovereignty Summary', desc: 'The sovereignty crisis across all domains' },
+      ]
+    },
+    'healthcare-privatization.html': {
+      current: 'Healthcare Privatization — The Degradation Pipeline',
+      next: [
+        { href: 'healthcare-crisis.html', label: 'Healthcare Crisis', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+      ]
+    },
+
+    // ── Legal expansion (batch 2025-04-15b) ─────────────────────
+    'cds-carignan-charges.html': {
+      current: 'CDS Gen. Jennie Carignan — Charge Assessment Dossier',
+      next: [
+        { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability failures' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+      ]
+    },
+    's504-tracker.html': {
+      current: 's.504 Extraction Interface',
+      next: [
+        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+        { href: 'institutional-malice.html', label: 'Institutional Malice', desc: 'The doctrine of deliberate institutional harm' },
       ]
     },
   };
