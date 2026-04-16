@@ -487,6 +487,7 @@
     var audioMode = false;
     var _audioTimeHandler = null;
     var _audioEndHandler = null;
+    var _audioFetchPending = false;
 
     function parseVTT(vttText) {
       var cues = [];
@@ -540,6 +541,7 @@
     }
 
     function tryLoadAudio() {
+      _audioFetchPending = true;
       var pageName = (window.location.pathname.split('/').pop() || '').toLowerCase();
       // Shell fallback
       if (!pageName || pageName === 'index.html') {
@@ -549,19 +551,22 @@
         } catch(e) {}
       }
       var slug = pageName.replace(/\.html$/, '');
-      if (!slug) return;
+      if (!slug) { _audioFetchPending = false; return; }
       var mp3 = 'audio/' + slug + '.mp3';
       var vtt = 'audio/' + slug + '.vtt';
+
+      // Always create the audio element so we can unlock autoplay synchronously later
+      audioElement = new Audio(mp3);
+      audioElement.preload = 'auto';
 
       // Use GET on the lightweight VTT instead of HEAD on MP3, which GH Pages can block
       fetch(vtt).then(function(r) {
         if (!r.ok) throw new Error('No VTT');
         return r.text();
       }).then(function(vttText) {
+        _audioFetchPending = false;
         if (!vttText) return;
         audioCues = parseVTT(vttText);
-        audioElement = new Audio(mp3);
-        audioElement.preload = 'auto';
 
         points.forEach(function(p) {
           var ci = findCueIndexForPoint(p.text);
@@ -591,6 +596,7 @@
             // we let the current speech chunk finish, then the next point will pick up the Audio!
         }
       }).catch(function() { 
+        _audioFetchPending = false;
         console.log('[LIRIL] No audio for page, using speech fallback'); 
       });
     }
@@ -1053,13 +1059,34 @@
       startBtn.style.background = 'rgba(100,100,100,0.9)';
       startBtn.setAttribute('aria-expanded', 'true');
 
-      // Set autopilot for cross-page navigation when user MANUALLY starts.
-      // This allows LIRIL to navigate through the full site investigation.
-      // Autopilot is only set here (user click) — never on page load.
+      // UNLOCK AUTOPLAY: browsers require audio.play() to be called synchronously
+      // during a user click event to authorize background audio later.
+      if (audioElement) {
+        // Attempt a silent play/pause to unlock the element
+        var p = audioElement.play();
+        if (p !== undefined) {
+          p.then(function() { audioElement.pause(); }).catch(function(){});
+        }
+      }
+
       setAutopilotState({ autostart: true, startedAt: Date.now() });
       showTourProgress();
 
-      showPoint(0);
+      // Delay start if audio is still fetching to prevent SpeechSynthesis race condition
+      if (!audioMode && _audioFetchPending) {
+        console.log('[LIRIL] Waiting for audio fetch before starting...');
+        startBtn.innerHTML = 'SYNCING QUANTUM AUDIO...';
+        var checkInterval = setInterval(function() {
+          if (!isActive) { clearInterval(checkInterval); return; }
+          if (!_audioFetchPending) {
+            clearInterval(checkInterval);
+            startBtn.innerHTML = getI18nStr('stop');
+            showPoint(0);
+          }
+        }, 100);
+      } else {
+        showPoint(0);
+      }
     }
 
     // ── Cross-page autopilot state ──────────────────
