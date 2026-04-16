@@ -113,7 +113,7 @@
         e.preventDefault();
         var action = btn.dataset.share;
         var msg = 'My MP ' + name + ' (' + party + ', ' + riding + ') — check their full record on TENET5';
-        var url = 'https://tenet5.github.io/search.html?q=' + encodeURIComponent(name);
+        var url = 'https://tenet-5.github.io/search.html?q=' + encodeURIComponent(name);
         if (action === 'whatsapp') {
           window.open('https://wa.me/?text=' + encodeURIComponent(msg + '\n' + url), '_blank');
         } else if (action === 'x') {

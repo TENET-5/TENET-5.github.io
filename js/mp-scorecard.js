@@ -130,7 +130,7 @@
           '<button class="sc-btn" onclick="TENET5_SCORECARD.shareX(\'' + esc(mp.name) + '\',' + score.total + ',\'' + score.grade + '\')">Post on X</button>' +
           '<button class="sc-btn sc-btn-primary" onclick="TENET5_SCORECARD.shareCopy(\'' + esc(mp.name) + '\',' + score.total + ',\'' + score.grade + '\')">Copy</button>' +
         '</div>' +
-        '<div class="sc-footer">TENET5 Accountability Scorecard — tenet5.github.io — Sources: Health Canada, Hansard, Commissioner of Lobbying</div>' +
+        '<div class="sc-footer">TENET5 Accountability Scorecard — tenet-5.github.io — Sources: Health Canada, Hansard, Commissioner of Lobbying</div>' +
       '</div>';
   }
 
@@ -142,7 +142,7 @@
   var shareMsg = function(name, score, grade) {
     return 'My MP ' + name + ' scored ' + grade + ' (' + score + '/100) on the TENET5 Accountability Scorecard. Check your MP\'s record:';
   };
-  var shareUrl = 'https://tenet5.github.io/search.html';
+  var shareUrl = 'https://tenet-5.github.io/search.html';
 
   window.TENET5_SCORECARD = {
     score: scoreMP,
