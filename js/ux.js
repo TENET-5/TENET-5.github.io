@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    UX Enhancements — Reading progress, back-to-top, mobile nav
-   Canadian Accountability Project
+   TENET5
    ═══════════════════════════════════════════════════════ */
 
 (function() {
