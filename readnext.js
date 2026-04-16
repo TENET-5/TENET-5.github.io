@@ -667,11 +667,11 @@
       ]
     },
     'veterans.html': {
-      current: 'Veterans',
+      current: 'How Canada Treats Its Veterans',
       next: [
-        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
         { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
-        { href: 'whistleblower-guide.html', label: 'Whistleblower Guide', desc: 'How to safely report wrongdoing' },
+        { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
       ]
     },
     'whistleblower-guide.html': {
@@ -685,9 +685,9 @@
     'whistleblower-failures.html': {
       current: 'Whistleblower Failures',
       next: [
-        { href: 'whistleblower-guide.html', label: 'Whistleblower Guide', desc: 'How to safely report wrongdoing' },
-        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Institutional failures in law enforcement' },
-        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General reports documenting systemic waste' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+        { href: 'ethics-failures.html', label: 'Ethics Failures', desc: 'Violations found, zero consequences enforced' },
+        { href: 'institutional-malice.html', label: 'Institutional Malice', desc: 'The doctrine of deliberate institutional harm' },
       ]
     },
         'dnd-procurement.html': {
@@ -749,17 +749,17 @@
     'maid-policy-evolution.html': {
       current: 'MAID Policy Evolution',
       next: [
-        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
+        { href: 'maid-voting-record.html', label: 'MAID Voting Record', desc: '173 MPs — how every member voted on medical killing' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
         { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations against disabled Canadians' },
-        { href: 't4-comparison.html', label: 'The Pattern (T4)', desc: 'Historical comparison to Aktion T4' },
       ]
     },
     'disability-genocide.html': {
       current: 'Disability & CRPD Violations',
       next: [
-        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: 'How they legislated death over 8 years' },
-        { href: 'healthcare-crisis.html', label: 'Healthcare Collapse', desc: 'System collapse feeds the MAID pipeline' },
-        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Full pattern documentation' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Full pattern documentation across populations' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped' },
       ]
     },
     'lobbying-deepdive.html': {
@@ -896,6 +896,94 @@
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'How elite networks purchase Canadian policy' },
         { href: 'wef-davos.html', label: 'WEF & Davos Connections', desc: 'The same elite circles — Carney, Brookfield, Davos' },
         { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'How political donations translate to policy' },
+      ]
+    },
+    'arrivecan.html': {
+      current: 'ArriveCAN — $59.5M for a COVID Questionnaire',
+      next: [
+        { href: 'procurement-registry.html', label: 'Procurement Registry', desc: 'Full registry of government procurement records' },
+        { href: 'phoenix-pay.html', label: 'Phoenix Pay', desc: '$309M became $2.2B — same procurement pattern' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The complete fiscal pipeline from spending to MAID' },
+      ]
+    },
+    'cds-accountability.html': {
+      current: 'CDS Accountability — Defence Staff Record',
+      next: [
+        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability failures' },
+        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
+        { href: 'military-procurement-failures.html', label: 'Military Procurement Failures', desc: 'Decades late, billions over budget' },
+      ]
+    },
+    'complete-thesis.html': {
+      current: 'The Complete Thesis — What 267 Pages Prove',
+      next: [
+        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+        { href: 'reading-order.html', label: 'Reading Order', desc: 'How to navigate all 267 investigation pages' },
+      ]
+    },
+    'bill-c63-online-harms.html': {
+      current: 'Bill C-63 Online Harms Act',
+      next: [
+        { href: 'bill-c22-surveillance.html', label: 'Bill C-22 Surveillance', desc: 'State surveillance expansion under lawful access' },
+        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-26, C-11, C-63 and civil liberties erosion' },
+        { href: 'digital-identity.html', label: 'Digital Identity', desc: 'From ArriveCAN to national digital ID' },
+      ]
+    },
+    'bill-c70-registry.html': {
+      current: 'Bill C-70 — Zero Compliance After 650 Days',
+      next: [
+        { href: 'foreign-interference.html', label: 'Foreign Interference', desc: 'Foreign interference in Canadian democracy' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
+        { href: 'treason-trajectory.html', label: 'Treason Trajectory', desc: 'Pattern of policy decisions against national interest' },
+      ]
+    },
+    'brookfield-maid.html': {
+      current: 'Brookfield & MAID — The Financial Convergence',
+      next: [
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals, FINTRAC defunded' },
+        { href: 'panama-papers.html', label: '8 Offshore Leaks', desc: '268,488 entities, $76M unpaid taxes, 0 prosecutions' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+      ]
+    },
+    'cija-lobbying.html': {
+      current: 'CIJA Lobbying Pipeline',
+      next: [
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
+        { href: 'charity-pipeline.html', label: 'Charity Pipeline', desc: '$276M from Canadian charities to Israel' },
+        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$229M+ flowing to Israel despite the pause' },
+      ]
+    },
+    'conflict-of-interest-registry.html': {
+      current: 'Conflict of Interest Registry',
+      next: [
+        { href: 'ethics-failures.html', label: 'Ethics Failures', desc: 'Violations found, zero consequences enforced' },
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals documented' },
+        { href: 'regulatory-capture.html', label: 'Regulatory Capture', desc: 'When regulators serve industry over the public' },
+      ]
+    },
+    'failure-timeline.html': {
+      current: 'The Decade of Institutional Failure',
+      next: [
+        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+      ]
+    },
+    'institutional-malice.html': {
+      current: 'The Institutional Malice Doctrine',
+      next: [
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
+        { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'How every system was compromised' },
+      ]
+    },
+    'maid-economics.html': {
+      current: 'The Economics of MAID',
+      next: [
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'brookfield-maid.html', label: 'Brookfield & MAID', desc: 'The financial convergence behind medical killing' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'Cost per death vs. cost of care — the fiscal pipeline' },
       ]
     },
   };
