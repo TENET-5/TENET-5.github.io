@@ -130,6 +130,7 @@
     } else if (isInIframe) {
       // INSIDE IFRAME — content page: only load content-level components
       // (no header/footer — parent frame provides those)
+      loadScript(BASE + 'js/video-bg.js?v=2');
       Promise.all([
         loadScript(BASE + 'js/reveal.js?v=2'),
         loadScript(BASE + 'js/timeline.js?v=1'),
@@ -157,6 +158,7 @@
       ensureFrame('site-header-frame', 'div', 'prepend');
       ensureFrame('site-footer-frame', 'div', null);
 
+      loadScript(BASE + 'js/video-bg.js?v=2');
       loadScript(BASE + 'nav.js?v=16')
         .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
         .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
