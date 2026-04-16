@@ -187,3 +187,98 @@
     init();
   }
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BUG FLAG — one-click page reporting with automatic validation
+   No text input. Just flag. LIRIL validates via quantum pipeline.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  var FLAG_STORAGE_KEY = 'tenet5_flagged_pages';
+  var FLAG_COOLDOWN_MS = 30000; // 30s cooldown per page
+  var _lastFlag = 0;
+
+  function getPageSlug() {
+    return (window.location.pathname.split('/').pop() || 'index.html');
+  }
+
+  function getFlaggedPages() {
+    try {
+      return JSON.parse(localStorage.getItem(FLAG_STORAGE_KEY) || '{}');
+    } catch(e) { return {}; }
+  }
+
+  function saveFlaggedPages(flags) {
+    try { localStorage.setItem(FLAG_STORAGE_KEY, JSON.stringify(flags)); } catch(e) {}
+  }
+
+  window.__TENET5_FLAG_BUG = function() {
+    var now = Date.now();
+    if (now - _lastFlag < FLAG_COOLDOWN_MS) {
+      showFlagFeedback('Already flagged — cooldown active', '#facc15');
+      return;
+    }
+
+    var page = getPageSlug();
+    var flags = getFlaggedPages();
+    var count = (flags[page] || 0) + 1;
+    flags[page] = count;
+    saveFlaggedPages(flags);
+    _lastFlag = now;
+
+    // Collect automatic diagnostics (no user input needed)
+    var diagnostic = {
+      page: page,
+      flag_count: count,
+      timestamp: new Date().toISOString(),
+      viewport: window.innerWidth + 'x' + window.innerHeight,
+      scroll_y: Math.round(window.scrollY),
+      user_agent: navigator.userAgent.substring(0, 100),
+      errors: (window.__TENET5_JS_ERRORS || []).slice(-5),
+      narration_active: !!(window.__TENET5_PRESENTATION_LOADED || window.__LIRIL_WALKTHROUGH_LOADED),
+      speech_available: !!window.speechSynthesis,
+    };
+
+    // Store in localStorage for LIRIL to pick up
+    try {
+      var queue = JSON.parse(localStorage.getItem('tenet5_bug_queue') || '[]');
+      queue.push(diagnostic);
+      if (queue.length > 50) queue = queue.slice(-50);
+      localStorage.setItem('tenet5_bug_queue', JSON.stringify(queue));
+    } catch(e) {}
+
+    // Also send to data endpoint if available
+    try {
+      var beacon = new Blob([JSON.stringify(diagnostic)], {type: 'application/json'});
+      navigator.sendBeacon && navigator.sendBeacon('data:application/json,' + encodeURIComponent(JSON.stringify(diagnostic)));
+    } catch(e) {}
+
+    showFlagFeedback('Page flagged for review (' + count + ')', '#22d3ee');
+    console.log('[TENET5] Bug flagged:', diagnostic);
+  };
+
+  function showFlagFeedback(msg, color) {
+    var el = document.createElement('div');
+    el.textContent = msg;
+    el.style.cssText = 'position:fixed;top:80px;right:20px;z-index:99999;' +
+      'background:rgba(0,0,0,0.9);color:' + color + ';padding:0.8rem 1.2rem;' +
+      'border-radius:8px;font-size:0.8rem;font-weight:700;border:1px solid ' + color + ';' +
+      'transition:opacity 0.5s;pointer-events:none;';
+    document.body.appendChild(el);
+    setTimeout(function() { el.style.opacity = '0'; }, 2000);
+    setTimeout(function() { el.remove(); }, 3000);
+  }
+
+  // Track JS errors for automatic diagnostics
+  window.__TENET5_JS_ERRORS = [];
+  window.addEventListener('error', function(ev) {
+    window.__TENET5_JS_ERRORS.push({
+      msg: (ev.message || '').substring(0, 100),
+      file: (ev.filename || '').split('/').pop(),
+      line: ev.lineno,
+      ts: Date.now(),
+    });
+    if (window.__TENET5_JS_ERRORS.length > 20) window.__TENET5_JS_ERRORS.shift();
+  });
+})();

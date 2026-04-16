@@ -36,6 +36,7 @@
           '<span class="nav-status-pill">LIRIL narration</span>' +
           '<span class="nav-status-pill" style="color:var(--color-quantum, #a855f7);border-color:rgba(168,85,247,0.3);">[NV-QUANTUM]</span>' +
           '<span class="nav-status-pill">ABCXYZ Sync</span>' +
+          '<button class="nav-status-pill nav-bug-flag" onclick="window.__TENET5_FLAG_BUG && window.__TENET5_FLAG_BUG()" title="Flag this page for review" style="cursor:pointer;color:#ef4444;border-color:rgba(239,68,68,0.4);background:none;font-family:inherit;font-size:inherit;">&#x1F6A9; Flag</button>' +
         '</div>' +
       '</div>' +
       '<div class="nav-bar">' +
