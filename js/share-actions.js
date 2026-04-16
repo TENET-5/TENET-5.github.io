@@ -68,7 +68,7 @@
       var text = getShareText();
       var url = getShareUrl();
       var subject = encodeURIComponent(title);
-      var body = encodeURIComponent(text + '\n\nRead more: ' + url + '\n\nSource: TENET5 — tenet5.github.io');
+      var body = encodeURIComponent(text + '\n\nRead more: ' + url + '\n\nSource: TENET5 — tenet-5.github.io');
       window.open('mailto:?subject=' + subject + '&body=' + body, '_self');
     },
 

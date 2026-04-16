@@ -5,8 +5,8 @@
  * Setup: Create a free project at https://supabase.com
  *   1. Enable Google OAuth in Auth → Providers → Google
  *   2. Enable Twitter/X OAuth in Auth → Providers → Twitter
- *   3. Set Site URL to https://tenet5.github.io
- *   4. Add redirect URL: https://tenet5.github.io/auth-callback.html
+ *   3. Set Site URL to https://tenet-5.github.io
+ *   4. Add redirect URL: https://tenet-5.github.io/auth-callback.html
  *   5. Replace SUPABASE_URL and SUPABASE_ANON_KEY below with your project values
  */
 

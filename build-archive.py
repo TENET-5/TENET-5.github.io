@@ -101,7 +101,7 @@ def main():
             f"  The file integrity-manifest.json contains SHA-256 hashes for every\n"
             f"  asset and page. Each entry includes chain-of-custody timestamps\n"
             f"  (first_seen, last_verified, revisions).\n\n"
-            f"Source: https://tenet5.github.io/\n"
+            f"Source: https://tenet-5.github.io/\n"
         )
         zf.writestr("ARCHIVE-README.txt", readme)
 

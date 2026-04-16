@@ -278,7 +278,7 @@
         h += '</div>';
       });
       if (ccFindings.length > 15) {
-        h += '<div style="text-align:center;font-size:0.72rem;color:#9ca3af;margin-top:8px;">+ ' + (ccFindings.length - 15) + ' additional findings. See <a href="https://tenet5.github.io/criminal-code-analysis.html" style="color:#c41e3a;">full Criminal Code analysis</a>.</div>';
+        h += '<div style="text-align:center;font-size:0.72rem;color:#9ca3af;margin-top:8px;">+ ' + (ccFindings.length - 15) + ' additional findings. See <a href="https://tenet-5.github.io/criminal-code-analysis.html" style="color:#c41e3a;">full Criminal Code analysis</a>.</div>';
       }
       h += '</div>';
     }
@@ -346,11 +346,11 @@
     // ── Section 5: Evidence Links ──
     h += sectionHeader('5', 'Public Evidence & Source Data');
     h += '<ul style="font-size:0.78rem;line-height:2;color:#3d4355;">';
-    h += '<li><a href="https://tenet5.github.io/findings.html" style="color:#c41e3a;">Cross-Reference Findings</a> — 26+ findings from 7M+ government records</li>';
-    h += '<li><a href="https://tenet5.github.io/cross-reference.html" style="color:#c41e3a;">Follow the Money</a> — Lobbying, donations, votes, procurement cross-reference</li>';
-    h += '<li><a href="https://tenet5.github.io/evidence.html" style="color:#c41e3a;">Evidence Archive</a> — Primary source documents</li>';
-    h += '<li><a href="https://tenet5.github.io/accountability.html" style="color:#c41e3a;">The 504 Database</a> — 504+ sourced accountability records</li>';
-    h += '<li><a href="https://tenet5.github.io/foreign-influence.html" style="color:#c41e3a;">Foreign Influence Investigation</a> — CIJA lobbying pipeline analysis</li>';
+    h += '<li><a href="https://tenet-5.github.io/findings.html" style="color:#c41e3a;">Cross-Reference Findings</a> — 26+ findings from 7M+ government records</li>';
+    h += '<li><a href="https://tenet-5.github.io/cross-reference.html" style="color:#c41e3a;">Follow the Money</a> — Lobbying, donations, votes, procurement cross-reference</li>';
+    h += '<li><a href="https://tenet-5.github.io/evidence.html" style="color:#c41e3a;">Evidence Archive</a> — Primary source documents</li>';
+    h += '<li><a href="https://tenet-5.github.io/accountability.html" style="color:#c41e3a;">The 504 Database</a> — 504+ sourced accountability records</li>';
+    h += '<li><a href="https://tenet-5.github.io/foreign-influence.html" style="color:#c41e3a;">Foreign Influence Investigation</a> — CIJA lobbying pipeline analysis</li>';
     h += '<li><a href="https://lobbycanada.gc.ca/en/open-data/" style="color:#c41e3a;">Commissioner of Lobbying Open Data</a> — Government source (verify all claims)</li>';
     h += '</ul>';
     h += '</div>';
@@ -370,7 +370,7 @@
     h += '<div style="text-align:center;padding:20px 0;border-top:2px solid rgba(255,255,255,0.1);margin-top:20px;font-size:0.72rem;color:#9ca3af;">';
     h += '<p>Every number in this report is sourced from Canadian government public records.</p>';
     h += '<p>Prepared by Daniel Perry — Canadian Forces combat veteran, former Signals Operator, Afghanistan</p>';
-    h += '<p style="margin-top:8px;"><a href="https://tenet5.github.io/" style="color:#c41e3a;">tenet5.github.io</a></p>';
+    h += '<p style="margin-top:8px;"><a href="https://tenet-5.github.io/" style="color:#c41e3a;">tenet-5.github.io</a></p>';
     h += '</div>';
 
     return { subject: subject, html: h, plaintext: htmlToPlain(h), targetName: targetName, party: party, score: data.targetScore, omitted: data.omitted };
