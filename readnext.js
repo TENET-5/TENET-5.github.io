@@ -174,9 +174,17 @@
     'carney-conflicts.html': {
       current: 'Carney Conflicts',
       next: [
+        { href: 'panama-papers.html', label: '8 Offshore Leaks', desc: '268,488 entities, $76M unpaid taxes, 0 prosecutions' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
         { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts by industry' },
-        { href: 'arms-pipeline.html', label: 'Arms Pipeline', desc: '$229M+ to Israel despite pause' },
-        { href: 'mp-scorecard.html', label: 'MP Scorecard', desc: 'Search all 340 MPs' },
+      ]
+    },
+    'panama-papers.html': {
+      current: '8 Offshore Leaks',
+      next: [
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$6.8M Brookfield options, FINTRAC defunded' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The complete fiscal pipeline' },
+        { href: 'conflict-of-interest-registry.html', label: 'COI Registry', desc: 'Every documented conflict of interest' },
       ]
     },
     'sector-lobbying.html': {
