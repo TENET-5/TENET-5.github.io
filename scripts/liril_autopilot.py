@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -130,6 +131,30 @@ def compact_text(value: str, limit: int = 1200) -> str:
     return text[:limit]
 
 
+def parse_embedded_json(command_result: dict) -> dict:
+    if not isinstance(command_result, dict):
+        return {}
+    raw = (command_result.get("stdout") or "").strip()
+    if not raw:
+        return {}
+    start = raw.find("{")
+    end = raw.rfind("}")
+    if start == -1 or end == -1 or end < start:
+        return {}
+    try:
+        return json.loads(raw[start:end + 1])
+    except json.JSONDecodeError:
+        return {}
+
+
+def sanitize_guidance_text(value: str, limit: int = 1200) -> str:
+    text = str(value or "")
+    text = re.sub(r"</?think>", " ", text, flags=re.IGNORECASE)
+    text = text.replace("**", "")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:limit]
+
+
 def media_stack_check() -> dict:
     started = time.time()
     try:
@@ -210,9 +235,8 @@ def ask_liril_for_guidance() -> dict:
 
 
 def ask_quantum_for_guidance(liril_guidance: dict, site_checks: list[dict]) -> dict:
-    recommendations = []
-    if isinstance(liril_guidance, dict):
-        recommendations = liril_guidance.get("recommendations", []) or []
+    parsed_liril = parse_embedded_json(liril_guidance)
+    recommendations = parsed_liril.get("recommendations", []) or []
 
     failed = [item["name"] for item in site_checks if not item["result"].get("ok")]
     prompt = (
@@ -245,8 +269,9 @@ def ask_quantum_for_guidance(liril_guidance: dict, site_checks: list[dict]) -> d
                 "url": url,
                 "seconds": round(time.time() - started, 2),
                 "model": data.get("model", "unknown"),
-                "text": compact_text(data.get("content") or data.get("text") or ""),
+                "text": sanitize_guidance_text(data.get("content") or data.get("text") or ""),
                 "raw": data,
+                "liril_context": parsed_liril,
             }
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
             last_error = str(exc)
@@ -260,6 +285,7 @@ def ask_quantum_for_guidance(liril_guidance: dict, site_checks: list[dict]) -> d
 
 
 def run_cross_training(site_checks: list[dict], liril_guidance: dict) -> dict:
+    parsed_liril = parse_embedded_json(liril_guidance)
     quantum_guidance = ask_quantum_for_guidance(liril_guidance, site_checks)
     exchange = []
     overall_ok = quantum_guidance.get("ok", False)
@@ -287,6 +313,7 @@ def run_cross_training(site_checks: list[dict], liril_guidance: dict) -> dict:
 
     return {
         "ok": overall_ok,
+        "liril_guidance_parsed": parsed_liril,
         "quantum_guidance": quantum_guidance,
         "exchange": exchange,
     }
@@ -331,6 +358,7 @@ def improvement_cycle(cycle_number: int) -> dict:
         "site_checks": site_checks,
         "recommendations": derive_recommendations(site_checks),
         "liril_guidance": liril_guidance,
+        "liril_guidance_parsed": cross_training.get("liril_guidance_parsed", {}),
         "quantum_guidance": cross_training.get("quantum_guidance", {}),
         "cross_training": cross_training,
     }
