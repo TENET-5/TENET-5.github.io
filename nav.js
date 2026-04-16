@@ -33,7 +33,8 @@
         '<div class="nav-status-stack" aria-label="Platform status">' +
           '<span class="nav-status-pill nav-status-live">Live OSINT</span>' +
           '<span class="nav-status-pill">LIRIL narration</span>' +
-          '<span class="nav-status-pill">Evidence chain</span>' +
+          '<span class="nav-status-pill" style="color:var(--color-quantum, #a855f7);border-color:rgba(168,85,247,0.3);">[NV-QUANTUM]</span>' +
+          '<span class="nav-status-pill">ABCXYZ Sync</span>' +
         '</div>' +
       '</div>' +
       '<div class="nav-bar">' +
