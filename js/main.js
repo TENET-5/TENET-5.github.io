@@ -97,10 +97,15 @@
     hamburger.className = 'nav-hamburger';
     hamburger.setAttribute('aria-label', 'Toggle navigation');
     hamburger.innerHTML = '<span></span><span></span><span></span>';
-    // Insert after brand link
+    // Insert after brand link using the brand's actual parent container
     var brand = nav.querySelector('.brand');
-    if (brand && brand.nextSibling) {
-      nav.insertBefore(hamburger, brand.nextSibling);
+    if (brand && brand.parentNode) {
+      var brandContainer = brand.parentNode;
+      if (brand.nextSibling) {
+        brandContainer.insertBefore(hamburger, brand.nextSibling);
+      } else {
+        brandContainer.appendChild(hamburger);
+      }
     } else {
       nav.prepend(hamburger);
     }

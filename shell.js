@@ -166,7 +166,7 @@
         .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
         .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/auth-nav.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/main.js?v=3'); })
+        .then(function() { return loadScript(BASE + 'js/main.js?v=4'); })
         .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
