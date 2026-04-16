@@ -1,12 +1,10 @@
 /* ═══════════════════════════════════════════════════════
-   TENET5 Video Background — DISABLED
-   Video backgrounds removed site-wide per directive 2026-04-15.
-   File kept as no-op to prevent 404s if cached pages reference it.
+   TENET5 Video Background — RE-ENABLED 2026-04-16
+   Per-page investigation video backgrounds.
+   CSS-safe: no position overrides on child elements.
    ═══════════════════════════════════════════════════════ */
 (function() {
   'use strict';
-  // Video backgrounds disabled — no-op
-  return;
 
   // Page → video mapping
   var PAGE_VIDEOS = {
