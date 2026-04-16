@@ -142,7 +142,7 @@
         loadScript(BASE + 'js/figures.js?v=1'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
       ]).then(function() {
-        return loadScript(BASE + 'js/presentation.js?v=6');
+        return loadScript(BASE + 'js/presentation.js?v=7');
       }).then(function() {
         return loadScript(BASE + 'js/liril-walkthrough.js?v=8');
       }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
@@ -170,7 +170,7 @@
         .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
-        .then(function() { return loadScript(BASE + 'js/presentation.js?v=6'); })
+        .then(function() { return loadScript(BASE + 'js/presentation.js?v=7'); })
         .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=8'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
