@@ -50,6 +50,7 @@
     'gillespie-murder.html':          'red_pulse_bg.mp4',
 
     // ── Foreign interference / influence ──
+    'foreign-policy-is-foreign.html': 'foreign_interference_bg.mp4',
     'foreign-interference.html':      'foreign_interference_bg.mp4',
     'foreign-interference-deep.html': 'foreign_interference_bg.mp4',
     'foreign-influence.html':         'foreign_interference_bg.mp4',

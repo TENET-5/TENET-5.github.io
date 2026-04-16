@@ -359,6 +359,16 @@
         { href: 'lobbying-tracker.html', label: 'Lobbying Tracker', desc: 'Who meets with whom' },
         { href: 'contributions-tracker.html', label: 'Contributions Tracker', desc: '6.2M donation records since 2004' },
         { href: 'foreign-interference.html', label: 'Foreign Interference', desc: 'Foreign interference in Canadian democracy' },
+        { href: 'foreign-policy-is-foreign.html', label: 'Foreign Policy IS Foreign', desc: 'The staff are the interference — Goldman→WEF→PMO pipeline' },
+      ]
+    },
+    'foreign-policy-is-foreign.html': {
+      current: 'Foreign Policy IS Foreign',
+      next: [
+        { href: 'carney-conflicts.html', label: 'Carney-Brookfield COI', desc: '$6.8M options + FINTRAC defunding' },
+        { href: 'wef-davos.html', label: 'WEF & Davos Network', desc: 'The coordination layer' },
+        { href: 'panama-papers.html', label: 'Panama Papers', desc: '268,488 offshore entities, zero prosecutions' },
+        { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'How the system was replaced' },
       ]
     },
     'email-campaign.html': {
