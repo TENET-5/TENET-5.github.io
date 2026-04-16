@@ -2399,6 +2399,31 @@
   function init() {
     loadCSS('css/presentation.css?v=2');
 
+    /* ── Interactive page bailout ──
+       Pages with their own rendering systems (force-directed graphs, maps, etc.)
+       must NOT be converted to slides. The slide engine covers their canvas. */
+    var INTERACTIVE_PAGES = [
+      'conspiracy-board.html',
+      'network-analysis.html',
+      'canada-map.html'
+    ];
+    var pageName = (location.pathname.split('/').pop() || '').toLowerCase();
+    /* Also check iframe src if loaded inside index.html shell */
+    if (!pageName || pageName === 'index.html' || pageName === '') {
+      try {
+        var frame = document.querySelector('iframe');
+        if (frame && frame.src) pageName = frame.src.split('/').pop().split('?')[0].toLowerCase();
+      } catch(e) {}
+    }
+    var isInteractive = INTERACTIVE_PAGES.some(function(p) { return pageName.indexOf(p) >= 0; });
+    /* Also detect by DOM: if there's a .canvas-wrap with a canvas child, it's interactive */
+    if (!isInteractive && document.querySelector('.canvas-wrap canvas')) isInteractive = true;
+
+    if (isInteractive) {
+      console.log('[PRESENTATION] Interactive page detected (' + pageName + ') — slide engine disabled, canvas preserved');
+      return;
+    }
+
     requestAnimationFrame(function () {
       var elements = detectSlides();
       if (elements.length < 1) return;
