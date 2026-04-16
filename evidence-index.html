@@ -119,6 +119,16 @@
       </div>
     </section>
 
+    <section style="margin:0 0 1.5rem;padding:1rem 1.1rem;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.025);" aria-labelledby="citation-lookup-title">
+      <h2 id="citation-lookup-title" style="margin:0 0 0.45rem;font-size:0.98rem;color:#67e8f9;letter-spacing:0.05em;text-transform:uppercase;">Open a Citation Directly</h2>
+      <p style="margin:0 0 0.75rem;color:var(--text-secondary);font-size:0.84rem;line-height:1.55;">Paste any public citation such as EV-0009 to jump straight to the verified permalink and source context.</p>
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+        <input type="text" id="quick-ref-input" placeholder="EV-0009" style="flex:1;min-width:220px;padding:0.7rem 0.85rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.22);color:#fff;">
+        <button id="quick-ref-btn" style="padding:0.7rem 1rem;border:none;border-radius:8px;background:#b91c1c;color:#fff;font-weight:700;cursor:pointer;">Open Citation</button>
+      </div>
+      <div id="quick-ref-status" style="margin-top:0.65rem;font-size:0.78rem;color:var(--text-tertiary);">This opens a stable permalink with SHA-256 traceability.</div>
+    </section>
+
     <div class="tnt-style-319">
       <input type="text" id="ev-search" placeholder="Search files..." class="tnt-style-320">
       <select id="ev-filter" class="tnt-style-321">
@@ -412,6 +422,55 @@
   (function() {
     'use strict';
 
+    function syncEvidenceQuery(value) {
+      try {
+        var url = new URL(window.location.href);
+        if (value && value.trim()) url.searchParams.set('q', value.trim());
+        else url.searchParams.delete('q');
+        history.replaceState(null, '', url.toString());
+      } catch (e) { /* ignore */ }
+    }
+
+    function initCitationLookup() {
+      var refInput = document.getElementById('quick-ref-input');
+      var refBtn = document.getElementById('quick-ref-btn');
+      var refStatus = document.getElementById('quick-ref-status');
+      if (!refInput || !refBtn || !refStatus) return;
+
+      var registry = null;
+      fetch('data/evidence_permalinks.json', { cache: 'no-store' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          registry = (data && data.refs) || {};
+        })
+        .catch(function() {
+          refStatus.textContent = 'Citation registry temporarily unavailable. Use the search page if needed.';
+        });
+
+      function openCitation() {
+        var ref = (refInput.value || '').trim().toUpperCase();
+        if (!ref) {
+          refStatus.textContent = 'Enter a citation reference like EV-0009.';
+          return;
+        }
+        if (registry && registry[ref]) {
+          window.location.href = 'permalink.html#' + encodeURIComponent(ref);
+          return;
+        }
+        refStatus.innerHTML = 'Reference not found. Try the public <a href="search.html?q=' + encodeURIComponent(ref) + '" style="color:#67e8f9;">search page</a>.';
+      }
+
+      refBtn.addEventListener('click', openCitation);
+      refInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          openCitation();
+        }
+      });
+    }
+
+    initCitationLookup();
+
     // Complete evidence catalog — every data file with source verification
     var CATALOG = [
       // === GOVERNMENT SOURCE DATA ===
@@ -567,14 +626,21 @@
       }).join('');
     }
 
-    document.getElementById('ev-search').addEventListener('input', render);
+    var evSearch = document.getElementById('ev-search');
+    var initialQuery = new URLSearchParams(window.location.search).get('q') || '';
+    if (initialQuery) evSearch.value = initialQuery;
+
+    evSearch.addEventListener('input', function() {
+      syncEvidenceQuery(evSearch.value);
+      render();
+    });
     document.getElementById('ev-filter').addEventListener('change', render);
     render();
   })();
   </script>
 
   <div id="site-footer-frame"></div>
-  <script src="shell.js?v=22"></script>
+  <script src="shell.js?v=23"></script>
 <script src="js/ux.js"></script>
 <script src="js/slate.js"></script>
 <script src="js/cinema.js?v=2"></script>
