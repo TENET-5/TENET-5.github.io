@@ -3,8 +3,9 @@
    Auto-detects sections and provides sequential walk-through
    with subtitle display and section highlighting.
    TENET5 — Powered by LIRIL AI | SEED 118400
-   v2.1 — Fixes: Chrome speech cutoff, text sanitization,
-          sentence chunking, keepalive timer
+   v3.0 — FULL PAGE READING: cap raised to 200 sections, 2000 chars/section
+          LIRIL reads the entire page and presentation, not just summaries
+          Fixes: Chrome speech cutoff, text sanitization, sentence chunking
    ═══════════════════════════════════════════════════════ */
 
 (function() {
@@ -71,11 +72,11 @@
       else text = words.slice(0, 15).join(' ') + '.';
     }
 
-    // Cap at 500 chars, ending at sentence boundary if possible
-    if (text.length > 500) {
-      var cut = text.substring(0, 500);
+    // Cap at 2000 chars — LIRIL reads FULL sections, not truncated summaries
+    if (text.length > 2000) {
+      var cut = text.substring(0, 2000);
       var lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('? '), cut.lastIndexOf('! '));
-      if (lastStop > 200) text = cut.substring(0, lastStop + 1);
+      if (lastStop > 500) text = cut.substring(0, lastStop + 1);
       else text = cut + '…';
     }
 
@@ -130,7 +131,7 @@
     // ── Anti-hallucination: deduplication + similarity engine ──
     // Prevents the walkthrough from repeating nearly-identical narration
     // across auto-generated or duplicated data-narrate sections.
-    var MAX_POINTS_PER_PAGE = 30; // Hard cap — no page needs 193 slides
+    var MAX_POINTS_PER_PAGE = 200; // LIRIL reads the FULL page — CEO directive
 
     function normalizeForDedup(text) {
       return (text || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
