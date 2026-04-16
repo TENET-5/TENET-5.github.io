@@ -128,6 +128,7 @@
     'legislation.html',
 
     // ── FOREIGN INFLUENCE ──
+    'foreign-policy-is-foreign.html',
     'foreign-interference.html',
     'foreign-interference-deep.html',
     'foreign-influence.html',
@@ -326,6 +327,7 @@
     'mp-analysis.html': 'MP Analysis \u2014 LIRIL Intelligence Report',
     'appointments.html': 'The Patronage Machine',
     'judicial-appointments.html': 'Judicial Appointments & Justice System',
+    'foreign-policy-is-foreign.html': 'Foreign Policy IS Foreign \u2014 The Staff Are the Interference',
     'foreign-interference.html': 'Foreign Interference in Democracy',
     'foreign-interference-deep.html': 'Foreign Interference Deep Dive',
     'foreign-influence.html': 'Foreign Influence \u2014 Evidence-Based',
@@ -416,7 +418,7 @@
       'RCMP & Law Enforcement': ['rcmp-commissioners.html', 'rcmp-complicity.html', 'rcmp-maid-accountability.html', 'rcmp-reform.html', 'cfnis.html', 'cfnis-proxy.html', 'charges-sheet.html', 'criminal-code-analysis.html', 'mp-brief.html'],
       'Government Corruption': ['accountability.html', 'scandals.html', 'corruption-map.html', 'crown-corporations.html', 'senate-expenses.html', 'procurement-analysis.html', 'procurement-deep-dive.html', 'procurement-registry.html', 'phoenix-pay.html', 'debt-fiscal.html', 'ag-findings.html'],
       'Democracy & Elections': ['elections-finance.html', 'voting-records.html', 'mp-voting-records.html', 'mp-scorecard.html', 'mp-analysis.html', 'appointments.html', 'judicial-appointments.html'],
-      'Foreign Influence': ['foreign-interference.html', 'foreign-interference-deep.html', 'foreign-influence.html', 'influence-target-alpha.html', 'wef-davos.html', 'treason-trajectory.html', '5gw-subversion.html'],
+      'Foreign Influence': ['foreign-policy-is-foreign.html', 'foreign-interference.html', 'foreign-interference-deep.html', 'foreign-influence.html', 'influence-target-alpha.html', 'wef-davos.html', 'treason-trajectory.html', '5gw-subversion.html'],
       'Lobbying & Special Interests': ['lobbying-tracker.html', 'lobbying-deepdive.html', 'sector-lobbying.html', 'cija-lobbying.html', 'bill-c63-online-harms.html', 'contributions-tracker.html', 'charity-pipeline.html', 'carney-conflicts.html', 'brookfield-maid.html'],
       'Social Crisis': ['healthcare-crisis.html', 'housing-crisis.html', 'opioid-crisis.html', 'immigration-policy.html', 'telecom-oligopoly.html', 'infrastructure-deficit.html', 'privacy-surveillance.html', 'tfw-abuse.html', 'media-concentration.html', 'environment-climate.html', 'cra-enforcement.html'],
       'International Connections': ['epstein-canadian-connections.html', 'epstein-maxwell.html'],
