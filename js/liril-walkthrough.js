@@ -123,15 +123,208 @@
     return chunks.length ? chunks : [text.substring(0, 180)];
   }
 
+  // ── Presentation Bridge ────────────────────────────
+  // When presentation.js owns narration, this bridge creates the visible
+  // LIRIL Walkthrough button and wires it to __TENET5_LIRIL_NARRATE_ALL.
+  // Users see the blue pill, click it, and get the full-site narrated tour.
+  function _createPresentationBridge() {
+    // Inject styles if not already present
+    if (!document.getElementById('liril-styles')) {
+      var styleEl = document.createElement('style');
+      styleEl.id = 'liril-styles';
+      styleEl.textContent =
+        '.liril-start-btn {' +
+        '  position: fixed !important; top: 84px !important; right: 20px !important; bottom: auto !important;' +
+        '  z-index: 10002 !important;' +
+        '  background: rgba(14, 165, 233, 0.92); color: white;' +
+        '  border: 1px solid rgba(34, 211, 238, 0.38);' +
+        '  border-radius: 999px; padding: 10px 16px;' +
+        '  font-size: 0.75rem; font-weight: 700; cursor: pointer;' +
+        '  font-family: Rajdhani, Inter, sans-serif; letter-spacing: 0.08em;' +
+        '  text-transform: uppercase; transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;' +
+        '  box-shadow: 0 6px 18px rgba(14,165,233,0.28);' +
+        '}' +
+        '.liril-start-btn:hover {' +
+        '  background: rgba(14, 165, 233, 1); border-color: #22d3ee;' +
+        '  box-shadow: 0 0 24px rgba(14,165,233,0.5);' +
+        '  transform: translateY(-1px);' +
+        '}' +
+        '.liril-start-btn.liril-active {' +
+        '  background: rgba(100,100,100,0.9);' +
+        '}' +
+        '.liril-tour-progress {' +
+        '  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;' +
+        '  background: rgba(5, 5, 10, 0.92);' +
+        '  padding: 6px 20px; display: flex; align-items: center; gap: 12px;' +
+        '  border-bottom: 1px solid rgba(139, 92, 246, 0.2);' +
+        '  backdrop-filter: blur(12px);' +
+        '  box-shadow: 0 2px 12px rgba(0,0,0,0.4);' +
+        '  font-family: IBM Plex Mono, monospace;' +
+        '}' +
+        '.liril-tour-label {' +
+        '  font-size: 0.6rem; color: #8b5cf6;' +
+        '  letter-spacing: 2px; text-transform: uppercase; white-space: nowrap;' +
+        '}' +
+        '.liril-tour-track {' +
+        '  flex: 1; height: 3px; background: rgba(139, 92, 246, 0.12);' +
+        '  border-radius: 2px; overflow: hidden;' +
+        '}' +
+        '.liril-tour-fill {' +
+        '  height: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);' +
+        '  border-radius: 2px; transition: width 0.8s ease;' +
+        '}' +
+        '.liril-tour-count {' +
+        '  font-size: 0.6rem; color: rgba(139, 92, 246, 0.6);' +
+        '  letter-spacing: 1px; white-space: nowrap;' +
+        '}' +
+        '.liril-tour-stop {' +
+        '  background: none; border: 1px solid rgba(139, 92, 246, 0.3);' +
+        '  color: #a78bfa; padding: 2px 10px; border-radius: 3px;' +
+        '  font-size: 0.55rem; cursor: pointer; font-family: inherit;' +
+        '  letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s;' +
+        '}' +
+        '.liril-tour-stop:hover {' +
+        '  background: rgba(139, 92, 246, 0.15); border-color: #8b5cf6;' +
+        '}' +
+        '@media (max-width: 768px) {' +
+        '  .liril-start-btn { top: 72px !important; right: 12px !important; padding: 7px 12px; font-size: 0.72rem; }' +
+        '  .liril-tour-progress { padding: 4px 12px; gap: 8px; }' +
+        '  .liril-tour-label { font-size: 0.5rem; }' +
+        '}';
+      document.head.appendChild(styleEl);
+    }
+
+    var bridgeActive = false;
+    var tourProgressEl = null;
+
+    // Create the walkthrough button
+    var startBtn = document.createElement('button');
+    startBtn.id = 'liril-start-walkthrough';
+    startBtn.className = 'liril-start-btn';
+    startBtn.innerHTML = '&#9654; LIRIL Walkthrough';
+    startBtn.setAttribute('aria-label', 'Start LIRIL Full-Site Narrated Walkthrough');
+    document.body.appendChild(startBtn);
+
+    function updateTourProgress() {
+      if (!tourProgressEl) return;
+      var prog = window.__TENET5_PAGE_PROGRESS ? window.__TENET5_PAGE_PROGRESS() : null;
+      if (!prog) return;
+      var fill = tourProgressEl.querySelector('.liril-tour-fill');
+      var count = tourProgressEl.querySelector('.liril-tour-count');
+      if (fill) fill.style.width = Math.round((prog.current / prog.total) * 100) + '%';
+      if (count) count.textContent = 'PAGE ' + prog.current + ' / ' + prog.total;
+    }
+
+    function showTourProgress() {
+      if (tourProgressEl) return;
+      var prog = window.__TENET5_PAGE_PROGRESS ? window.__TENET5_PAGE_PROGRESS() : null;
+      if (!prog) return;
+
+      tourProgressEl = document.createElement('div');
+      tourProgressEl.className = 'liril-tour-progress';
+      tourProgressEl.innerHTML =
+        '<span class="liril-tour-label">LIRIL FULL SITE TOUR</span>' +
+        '<div class="liril-tour-track"><div class="liril-tour-fill"></div></div>' +
+        '<span class="liril-tour-count"></span>' +
+        '<button class="liril-tour-stop">STOP TOUR</button>';
+      document.body.appendChild(tourProgressEl);
+
+      tourProgressEl.querySelector('.liril-tour-stop').addEventListener('click', function() {
+        stopBridge();
+      });
+      updateTourProgress();
+    }
+
+    function hideTourProgress() {
+      if (tourProgressEl) { tourProgressEl.remove(); tourProgressEl = null; }
+    }
+
+    function stopBridge() {
+      bridgeActive = false;
+      // Stop presentation narration
+      if (window.__TENET5_LIRIL_STOP) window.__TENET5_LIRIL_STOP();
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      // Clear autopilot
+      try { sessionStorage.removeItem('liril_autopilot'); } catch(e) {}
+      // Reset button
+      startBtn.innerHTML = '&#9654; LIRIL Walkthrough';
+      startBtn.classList.remove('liril-active');
+      hideTourProgress();
+    }
+
+    function startBridge() {
+      bridgeActive = true;
+      startBtn.innerHTML = '&#9632; Stop';
+      startBtn.classList.add('liril-active');
+
+      // Set autopilot for cross-page navigation
+      try {
+        sessionStorage.setItem('liril_autopilot', JSON.stringify({
+          autostart: true,
+          startedAt: Date.now()
+        }));
+      } catch(e) {}
+
+      showTourProgress();
+
+      // Trigger presentation engine's Narrate All
+      // Wait briefly for presentation to initialise if it hasn't yet
+      var attempts = 0;
+      var tryNarrate = setInterval(function() {
+        attempts++;
+        if (window.__TENET5_LIRIL_NARRATE_ALL) {
+          clearInterval(tryNarrate);
+          window.__TENET5_LIRIL_NARRATE_ALL();
+        } else if (attempts > 20) {
+          // Fallback: if Narrate All isn't available, try single-slide narrate
+          clearInterval(tryNarrate);
+          if (window.__TENET5_LIRIL_NARRATE) window.__TENET5_LIRIL_NARRATE();
+        }
+      }, 250);
+    }
+
+    startBtn.addEventListener('click', function() {
+      if (bridgeActive) {
+        stopBridge();
+      } else {
+        startBridge();
+      }
+    });
+
+    // Expose stop function for external callers
+    window.__LIRIL_WALKTHROUGH_STOP_INTERNAL = stopBridge;
+    window.__LIRIL_WALKTHROUGH_STOP = function() {
+      if (window.__LIRIL_WALKTHROUGH_STOP_INTERNAL) window.__LIRIL_WALKTHROUGH_STOP_INTERNAL();
+    };
+
+    // Auto-start if arriving via cross-page autopilot
+    try {
+      var autopilot = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
+      if (autopilot && autopilot.autostart) {
+        var age = Date.now() - (autopilot.startedAt || 0);
+        if (age < 30 * 60 * 1000) {
+          console.log('[LIRIL-WALK] Bridge: autopilot continuing from previous page');
+          // Delay to let presentation.js fully initialise
+          setTimeout(function() { startBridge(); }, 2500);
+        } else {
+          sessionStorage.removeItem('liril_autopilot');
+        }
+      }
+    } catch(e) {}
+  }
+
   function initWalkthrough() {
     var page = window.location.pathname.split('/').pop() || '';
     // Pages with their own inline scene engines — walkthrough must not clash
     if (page === 'index.html' || page === 'home.html' || page === 'kids-guide.html' || page === '') return;
 
-    // MUTEX: If presentation.js is loaded and active, walkthrough yields
-    // Prevents double-speak when both systems try to narrate simultaneously
+    // DELEGATION: If presentation.js is loaded, create a bridge button that
+    // triggers the presentation engine's Narrate All + cross-page autopilot.
+    // This gives users a VISIBLE entry point to the full-site narrated tour
+    // instead of silently yielding (which broke the walkthrough entirely).
     if (window.__TENET5_PRESENTATION_LOADED) {
-      console.log('[LIRIL-WALK] Presentation engine active — walkthrough yields to presentation narration');
+      console.log('[LIRIL-WALK] Presentation engine active — creating delegation bridge');
+      _createPresentationBridge();
       return;
     }
 
