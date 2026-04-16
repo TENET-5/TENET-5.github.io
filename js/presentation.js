@@ -35,6 +35,10 @@
   var PAGE_SEQUENCE = [
     // ── OPENING ──
     'home.html',
+    'complete-thesis.html',
+    'system-architecture.html',
+    'who-is-harmed.html',
+    'reading-order.html',
 
     // ── THE INVESTIGATION ──
     'findings.html',
@@ -48,13 +52,20 @@
     'maid-accountability.html',
     'maid-policy-evolution.html',
     'maid-voting-record.html',
+    'maid-master-dossier.html',
+    'maid-speech-evidence.html',
+    'maid-hansard-record.html',
     'maid-exterminators.html',
+    'maid-dossier-index.html',
     'disability-genocide.html',
     'genocide-evidence.html',
+    'immigration-maid-pipeline.html',
     'cija-maid-pipeline.html',
+    'veterans-maid-cases.html',
     't4-comparison.html',
     'maid-economics.html',
     'maid-provincial.html',
+    'maid-mental-health.html',
 
     // ── MILITARY & VETERANS ──
     'veterans.html',
@@ -99,6 +110,10 @@
     'emergencies-act.html',
     'institutional-malice.html',
     'rogue-state.html',
+    'failure-timeline.html',
+    'crown-immunity.html',
+    'cabinet-confidence.html',
+    'budget-2025-analysis.html',
 
     // ── DEMOCRACY & ELECTIONS ──
     'elections-finance.html',
@@ -130,16 +145,23 @@
     'sector-lobbying.html',
     'cija-lobbying.html',
     'bill-c63-online-harms.html',
+    'bill-c22-surveillance.html',
     'contributions-tracker.html',
     'charity-pipeline.html',
     'carney-conflicts.html',
     'brookfield-maid.html',
     'follow-the-money.html',
+    'panama-papers.html',
+    'conflict-of-interest-registry.html',
+    'ethics-failures.html',
+    'regulatory-capture.html',
 
     // ── SOCIAL CRISIS ──
     'healthcare-crisis.html',
     'housing-crisis.html',
+    'housing-crisis-by-city.html',
     'opioid-crisis.html',
+    'opioid-crisis-accountability.html',
     'immigration-policy.html',
     'telecom-oligopoly.html',
     'infrastructure-deficit.html',
@@ -157,6 +179,13 @@
     'covid-accountability.html',
     'arrivecan.html',
     'phac-mandates-s6.html',
+    'digital-identity.html',
+
+    // ── FINANCIAL & OFFSHORE ──
+    'bank-of-canada.html',
+    'carbon-tax.html',
+    'infrastructure-bank.html',
+    'pension-fund-conflicts.html',
 
     // ── WHISTLEBLOWERS ──
     'whistleblower-failures.html',
