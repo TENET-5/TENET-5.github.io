@@ -1,5 +1,5 @@
 /**
- * Canadian Accountability Project — "Read Next" Navigation v2.0
+ * TENET5 — "Read Next" Navigation v2.0 — Powered by LIRIL AI
  *
  * Adds a guided "What to read next" section at the bottom of investigation pages.
  * The investigation has a logical flow: understand the problem → see the evidence →

@@ -1,5 +1,5 @@
 /**
- * Canadian Accountability Project — Investigation Board OS v3.0
+ * TENET5 — Investigation Board OS v3.0
  * 
  * The board IS the operating system. Documents open inside it.
  * Familiar desktop metaphor:
