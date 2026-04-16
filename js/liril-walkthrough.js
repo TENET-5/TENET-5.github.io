@@ -127,32 +127,96 @@
     // Pages with their own inline scene engines — walkthrough must not clash
     if (page === 'index.html' || page === 'home.html' || page === 'kids-guide.html' || page === '') return;
 
+    // ── Anti-hallucination: deduplication + similarity engine ──
+    // Prevents the walkthrough from repeating nearly-identical narration
+    // across auto-generated or duplicated data-narrate sections.
+    var MAX_POINTS_PER_PAGE = 30; // Hard cap — no page needs 193 slides
+
+    function normalizeForDedup(text) {
+      return (text || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function getWordSet(text) {
+      var words = normalizeForDedup(text).split(' ');
+      var set = {};
+      words.forEach(function(w) { if (w.length > 2) set[w] = true; });
+      return set;
+    }
+
+    function jaccardSimilarity(setA, setB) {
+      var keysA = Object.keys(setA);
+      var keysB = Object.keys(setB);
+      if (keysA.length === 0 && keysB.length === 0) return 1;
+      var intersection = 0;
+      keysA.forEach(function(k) { if (setB[k]) intersection++; });
+      var union = {};
+      keysA.forEach(function(k) { union[k] = true; });
+      keysB.forEach(function(k) { union[k] = true; });
+      var unionSize = Object.keys(union).length;
+      return unionSize > 0 ? intersection / unionSize : 0;
+    }
+
+    // Returns true if text is too similar to any existing point
+    function isDuplicateOrSimilar(text, existingPoints, seenNorms) {
+      var norm = normalizeForDedup(text);
+      // Exact match (full normalized text)
+      if (seenNorms[norm]) return true;
+      // Prefix match (first 80 chars)
+      var prefix = norm.substring(0, 80);
+      if (seenNorms['pfx:' + prefix]) return true;
+      // Fuzzy Jaccard word-overlap check (threshold: 0.6)
+      var wordSet = getWordSet(text);
+      for (var i = 0; i < existingPoints.length; i++) {
+        var existingSet = existingPoints[i]._wordSet;
+        if (existingSet && jaccardSimilarity(wordSet, existingSet) > 0.6) {
+          console.warn('[LIRIL-DEDUP] Rejected similar text:', text.substring(0, 60),
+            '≈', existingPoints[i].text.substring(0, 60));
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function registerPoint(text, seenNorms) {
+      var norm = normalizeForDedup(text);
+      seenNorms[norm] = true;
+      seenNorms['pfx:' + norm.substring(0, 80)] = true;
+    }
+
     // ── Collect all narration points ──────────────────
     var points = [];
 
     function collectPoints() {
       points.length = 0;
+      var seenNorms = {};
+      var hallucinationsBlocked = 0;
 
       // 1. Sections with data-narrate (skip navigation-only sections)
-      var seenTexts = {};
       document.querySelectorAll('[data-narrate]').forEach(function(el) {
+        if (points.length >= MAX_POINTS_PER_PAGE) return;
         var raw = el.getAttribute('data-narrate');
         // Skip navigation/cross-link sections that aren't real content
         if (raw === 'connected-intelligence') return;
         if (raw.length < 20) return;
         // Skip if inside a cross-link grid (navigation, not content)
         if (el.closest('[style*="grid-template-columns"]') && !el.closest('section, .content, main, article')) return;
+        // Skip if inside footer or connected-intelligence blocks
+        if (el.closest('footer, #site-footer-frame, [style*="grid-template-columns"]:not(section)')) return;
         var clean = sanitiseNarration(raw);
         if (clean.length > 15) {
-          // Skip duplicates (same text narrated twice)
-          var key = clean.substring(0, 60);
-          if (seenTexts[key]) return;
-          seenTexts[key] = true;
-          points.push({ el: el, text: clean });
+          // Full dedup + similarity check
+          if (isDuplicateOrSimilar(clean, points, seenNorms)) {
+            hallucinationsBlocked++;
+            return;
+          }
+          registerPoint(clean, seenNorms);
+          var pt = { el: el, text: clean };
+          pt._wordSet = getWordSet(clean);
+          points.push(pt);
         }
       });
 
-      // 2. Auto-generate for sparse pages
+      // 2. Auto-generate for sparse pages (only if truly sparse)
       if (points.length < 3) {
         var selectors = [
           'section', '.timeline-section', '[data-chapter]', '.glass-panel',
@@ -161,8 +225,11 @@
         ];
         selectors.forEach(function(sel) {
           document.querySelectorAll(sel).forEach(function(el) {
+            if (points.length >= MAX_POINTS_PER_PAGE) return;
             if (el.getAttribute('data-narrate')) return;
-            if (el.closest('nav, header, footer, #hud-controls')) return;
+            if (el.closest('nav, header, footer, #hud-controls, #site-footer-frame')) return;
+            // Skip connected-intelligence / cross-link navigation grids
+            if (el.closest('[style*="grid-template-columns"]')) return;
 
             var h = el.querySelector('h1, h2, h3');
             var p = el.querySelector('p');
@@ -171,11 +238,25 @@
               if (p) raw += '. ' + p.textContent.trim().substring(0, 200);
               var clean = sanitiseNarration(raw);
               if (clean.length > 20) {
-                points.push({ el: el, text: clean, auto: true });
+                // Apply SAME dedup + similarity to auto-generated points
+                if (isDuplicateOrSimilar(clean, points, seenNorms)) {
+                  hallucinationsBlocked++;
+                  return;
+                }
+                registerPoint(clean, seenNorms);
+                var pt = { el: el, text: clean, auto: true };
+                pt._wordSet = getWordSet(clean);
+                points.push(pt);
               }
             }
           });
         });
+      }
+
+      // Log dedup results
+      if (hallucinationsBlocked > 0) {
+        console.log('[LIRIL-DEDUP] Blocked ' + hallucinationsBlocked +
+          ' repetitive narration points. Final count: ' + points.length);
       }
     }
 
