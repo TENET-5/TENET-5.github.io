@@ -134,6 +134,10 @@
 
     document.body.classList.add('has-t5-video-bg');
 
+    // Hide the retro-film-bg backdrop when video is active
+    var retroBg = document.querySelector('.retro-film-bg');
+    if (retroBg) retroBg.style.display = 'none';
+
     // Insert at the start of body
     document.body.insertBefore(wrap, document.body.firstChild);
 

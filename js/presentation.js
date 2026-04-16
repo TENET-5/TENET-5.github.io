@@ -2164,10 +2164,20 @@
     if (!lirilNarration.narrateAllActive) return;
 
     if (cur >= slides.length - 1) {
-      // Reached last slide — stop narrate-all
-      showSubtitle('Narrate All: complete');
-      setTimeout(function () { hideSubtitle(); }, 2000);
+      // Reached last slide — advance to next page if available
       stopNarrateAll();
+      if (window.__TENET5_NEXT_PAGE) {
+        showSubtitle('Advancing to next investigation page...');
+        // Set autopilot so the next page auto-starts narration
+        try { sessionStorage.setItem('liril_autopilot', JSON.stringify({ autostart: true, startedAt: Date.now() })); } catch(e) {}
+        setTimeout(function () {
+          hideSubtitle();
+          window.__TENET5_NEXT_PAGE();
+        }, 2000);
+      } else {
+        showSubtitle('Narrate All: complete');
+        setTimeout(function () { hideSubtitle(); }, 2000);
+      }
       return;
     }
 
@@ -2300,6 +2310,24 @@
     });
 
     updateNarrationButton();
+
+    // Auto-start Narrate All if arriving from cross-page autopilot
+    try {
+      var autopilot = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
+      if (autopilot && autopilot.autostart) {
+        var age = Date.now() - (autopilot.startedAt || 0);
+        if (age < 30 * 60 * 1000) {
+          setTimeout(function() {
+            if (window.__TENET5_LIRIL_NARRATE_ALL) {
+              console.log('[LIRIL] Autopilot: auto-starting Narrate All');
+              window.__TENET5_LIRIL_NARRATE_ALL();
+            }
+          }, 2000);
+        } else {
+          sessionStorage.removeItem('liril_autopilot');
+        }
+      }
+    } catch(e) {}
     loadNarrationIndex().then(function () {
       updateNarrationButton();
     });
