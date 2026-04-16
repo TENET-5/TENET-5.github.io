@@ -707,11 +707,11 @@
       ]
     },
     'healthcare-crisis.html': {
-      current: 'Healthcare Crisis',
+      current: 'The Killing Fields of Neglect: Canada\'s Healthcare Collapse',
       next: [
-        { href: 'opioid-crisis.html', label: 'Opioid Crisis', desc: '47,000+ dead — pharma pipeline, fentanyl, and the MAID intersection' },
-        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
-        { href: 'disability-genocide.html', label: 'Disability & CRPD', desc: 'UN Convention violations, Charter Section 15' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'disability-genocide.html', label: 'Disability & CRPD Violations', desc: 'UN Convention violations against disabled Canadians' },
+        { href: 'maid-economics.html', label: 'The Economics of MAID', desc: 'Cost per death vs. cost of care — the fiscal pipeline' },
       ]
     },
     'opioid-crisis.html': {
@@ -813,9 +813,9 @@
     'privacy-surveillance.html': {
       current: 'Privacy & Surveillance',
       next: [
-        { href: 'judicial-appointments.html', label: 'Judicial Appointments', desc: 'Who appoints the judges enforcing surveillance law' },
-        { href: 'lobbying-deepdive.html', label: 'Lobbying Deep Dive', desc: 'Who lobbied for Bill C-26 and C-63' },
-        { href: 'mp-voting-records.html', label: 'MP Voting Records', desc: 'How your MP voted on surveillance bills' },
+        { href: 'bill-c63-online-harms.html', label: 'Bill C-63 Online Harms Act', desc: 'Censorship framework with life imprisonment for speech' },
+        { href: 'bill-c22-surveillance.html', label: 'Bill C-22 Surveillance', desc: 'State surveillance expansion under lawful access' },
+        { href: 'digital-identity.html', label: 'Digital Identity', desc: 'From ArriveCAN to national digital ID' },
       ]
     },
     'judicial-appointments.html': {
@@ -984,6 +984,158 @@
         { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
         { href: 'brookfield-maid.html', label: 'Brookfield & MAID', desc: 'The financial convergence behind medical killing' },
         { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'Cost per death vs. cost of care — the fiscal pipeline' },
+      ]
+    },
+
+    // ── MAID thread (batch 2025-04-15) ──────────────────────────
+    'maid-exterminators.html': {
+      current: 'MAID Exterminator Tracing',
+      next: [
+        { href: 'maid-voting-record.html', label: 'MAID Voting Record', desc: '173 MPs — how every member voted on medical killing' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'maid-master-dossier.html', label: 'MAID Still-Sitting MP Dossier', desc: 'Complete evidence chain on still-sitting MPs' },
+      ]
+    },
+    'maid-dossier-index.html': {
+      current: 'MAID Dossier Index',
+      next: [
+        { href: 'maid-master-dossier.html', label: 'MAID Still-Sitting MP Dossier', desc: 'Complete evidence chain on still-sitting MPs' },
+        { href: 'maid-speech-evidence.html', label: 'MAID Speech Evidence', desc: 'What still-sitting MPs said on the record' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+      ]
+    },
+    'immigration-maid-pipeline.html': {
+      current: 'The Immigration-to-MAID Pipeline',
+      next: [
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 'disability-genocide.html', label: 'Disability & CRPD Violations', desc: 'UN Convention violations against disabled Canadians' },
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+      ]
+    },
+    'maid-hansard-record.html': {
+      current: 'MAID Hansard Record',
+      next: [
+        { href: 'maid-speech-evidence.html', label: 'MAID Speech Evidence', desc: 'What still-sitting MPs said on the record' },
+        { href: 'maid-voting-record.html', label: 'MAID Voting Record', desc: '173 MPs — how every member voted on medical killing' },
+        { href: 'maid-policy-evolution.html', label: 'MAID Policy Evolution', desc: '8-year legislative expansion of medical killing' },
+      ]
+    },
+    'veterans-maid-cases.html': {
+      current: 'Veterans Offered MAID',
+      next: [
+        { href: 'veterans.html', label: 'How Canada Treats Its Veterans', desc: 'Veterans advocacy and the full betrayal record' },
+        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
+        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
+      ]
+    },
+
+    // ── Financial thread (batch 2025-04-15) ─────────────────────
+    'bank-of-canada.html': {
+      current: 'Bank of Canada Independence',
+      next: [
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals, FINTRAC defunded' },
+        { href: 'panama-papers.html', label: '8 Offshore Leaks', desc: '268,488 entities, $76M unpaid taxes, 0 prosecutions' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+      ]
+    },
+    'budget-2025-analysis.html': {
+      current: 'Budget 2025 Analysis',
+      next: [
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+        { href: 'carbon-tax.html', label: 'Carbon Tax', desc: 'Policy analysis and economic impact' },
+        { href: 'maid-economics.html', label: 'The Economics of MAID', desc: 'Cost per death vs. cost of care' },
+      ]
+    },
+    'carbon-tax.html': {
+      current: 'Carbon Tax',
+      next: [
+        { href: 'budget-2025-analysis.html', label: 'Budget 2025 Analysis', desc: 'Where $585.9 billion goes' },
+        { href: 'environment-climate.html', label: 'Environment & Climate', desc: 'Climate infrastructure and broken promises' },
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+      ]
+    },
+    'infrastructure-bank.html': {
+      current: 'Canada Infrastructure Bank',
+      next: [
+        { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
+        { href: 'procurement-deep-dive.html', label: 'Procurement Deep Dive', desc: 'Detailed procurement failure analysis' },
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals documented' },
+      ]
+    },
+    'pension-fund-conflicts.html': {
+      current: 'Pension Fund Conflicts',
+      next: [
+        { href: 'panama-papers.html', label: '8 Offshore Leaks', desc: '268,488 entities, $76M unpaid taxes, 0 prosecutions' },
+        { href: 'brookfield-maid.html', label: 'Brookfield & MAID', desc: 'The financial convergence behind medical killing' },
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals documented' },
+      ]
+    },
+
+    // ── Governance thread (batch 2025-04-15) ────────────────────
+    'accountability-scorecard.html': {
+      current: 'Accountability Scorecard',
+      next: [
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of government misconduct' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Full index of sourced evidence' },
+      ]
+    },
+    'crown-immunity.html': {
+      current: 'Crown Immunity',
+      next: [
+        { href: 'institutional-malice.html', label: 'Institutional Malice', desc: 'The doctrine of deliberate institutional harm' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+        { href: 'ethics-failures.html', label: 'Ethics Failures', desc: 'Violations found, zero consequences enforced' },
+      ]
+    },
+    'cabinet-confidence.html': {
+      current: 'Cabinet Confidence',
+      next: [
+        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
+        { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'How every system was compromised' },
+        { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
+      ]
+    },
+    'regulatory-capture.html': {
+      current: 'Regulatory Capture',
+      next: [
+        { href: 'conflict-of-interest-registry.html', label: 'Conflict of Interest Registry', desc: 'Every documented conflict of interest' },
+        { href: 'carney-conflicts.html', label: 'Carney Conflicts', desc: '$50B Brookfield, 100+ recusals documented' },
+        { href: 'sector-lobbying.html', label: 'Sector Lobbying', desc: '359,251 contacts by industry' },
+      ]
+    },
+
+    // ── Other key pages (batch 2025-04-15) ──────────────────────
+    'rogue-state.html': {
+      current: 'Rogue State Declaration',
+      next: [
+        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Documented evidence of complicity' },
+        { href: 'institutional-malice.html', label: 'Institutional Malice', desc: 'The doctrine of deliberate institutional harm' },
+        { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
+      ]
+    },
+    'digital-identity.html': {
+      current: 'Digital Identity',
+      next: [
+        { href: 'privacy-surveillance.html', label: 'Privacy & Surveillance', desc: 'C-26, C-11, C-63 and civil liberties erosion' },
+        { href: 'bill-c63-online-harms.html', label: 'Bill C-63 Online Harms Act', desc: 'Censorship framework with life imprisonment for speech' },
+        { href: 'arrivecan.html', label: 'ArriveCAN', desc: '$59.5M for a COVID questionnaire' },
+      ]
+    },
+    'housing-crisis-by-city.html': {
+      current: 'Housing Crisis by City',
+      next: [
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+        { href: 'canada-map.html', label: 'Canada Map', desc: 'Geographic data visualization' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
+      ]
+    },
+    'opioid-crisis-accountability.html': {
+      current: 'Opioid Crisis Accountability',
+      next: [
+        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
+        { href: 'healthcare-crisis.html', label: 'Healthcare Crisis', desc: 'Waitlist deaths, budget betrayal, CIHI data' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
       ]
     },
   };
