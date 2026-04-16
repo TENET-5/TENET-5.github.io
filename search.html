@@ -770,7 +770,7 @@
       <div class="osint-pulse-header">
         <div>
           <h2 id="osint-pulse-title" data-narrate="OSINT pulse. This panel shows live evidence coverage, indexed investigation volume, and current site verification status for rapid public validation.">OSINT Pulse</h2>
-          <p>Rapid public verification of evidence coverage, indexed investigations, and current site integrity.</p>
+          <p>Rapid public verification of evidence coverage, indexed investigations, current site integrity, and ABCXYZ quantum custody.</p>
         </div>
         <div class="pulse-meta" id="pulse-updated">Loading latest verification…</div>
       </div>
@@ -790,6 +790,14 @@
         <div class="pulse-card">
           <span class="pulse-label">Audit issues</span>
           <span class="pulse-value" id="pulse-issues">—</span>
+        </div>
+        <div class="pulse-card">
+          <span class="pulse-label">ABCXYZ coverage</span>
+          <span class="pulse-value" id="pulse-abcxyz">—</span>
+        </div>
+        <div class="pulse-card">
+          <span class="pulse-label">Quantum bus</span>
+          <span class="pulse-value" id="pulse-bus">—</span>
         </div>
       </div>
       <div class="pulse-meta" id="pulse-note">Connecting live accountability metrics…</div>
@@ -867,24 +875,39 @@
     const pulsePages = document.getElementById('pulse-pages');
     const pulseRefs = document.getElementById('pulse-refs');
     const pulseIssues = document.getElementById('pulse-issues');
+    const pulseAbcxyz = document.getElementById('pulse-abcxyz');
+    const pulseBus = document.getElementById('pulse-bus');
     const pulseUpdated = document.getElementById('pulse-updated');
     const pulseNote = document.getElementById('pulse-note');
 
-    function renderPulse(statusData, evidenceData) {
+    function renderPulse(statusData, evidenceData, quantumData) {
       var status = statusData && statusData.status ? String(statusData.status).toUpperCase() : 'UNKNOWN';
       var issueCount = statusData && typeof statusData.issues === 'number' ? statusData.issues : 0;
       var pageCount = data.pages.length || (statusData && statusData.pages) || 0;
       var refCount = data.evidence.length || (evidenceData && evidenceData.total_refs) || 0;
+      var abcxyzCoverage = quantumData && quantumData.abcxyz ? quantumData.abcxyz.coverage_percent : null;
+      var busReachable = quantumData && quantumData.quantum ? quantumData.quantum.bus_reachable : null;
 
       pulseHealth.textContent = status;
       pulsePages.textContent = pageCount ? pageCount.toLocaleString() : '—';
       pulseRefs.textContent = refCount ? refCount.toLocaleString() : '—';
       pulseIssues.textContent = String(issueCount);
+      pulseAbcxyz.textContent = abcxyzCoverage != null ? String(abcxyzCoverage) + '%' : '—';
+      pulseBus.textContent = busReachable === true ? 'ONLINE' : (busReachable === false ? 'OFFLINE' : '—');
 
       pulseHealth.classList.remove('pulse-good', 'pulse-warn', 'pulse-alert');
+      pulseAbcxyz.classList.remove('pulse-good', 'pulse-warn', 'pulse-alert');
+      pulseBus.classList.remove('pulse-good', 'pulse-warn', 'pulse-alert');
       if (status === 'GREEN') pulseHealth.classList.add('pulse-good');
       else if (status === 'WARN') pulseHealth.classList.add('pulse-warn');
       else pulseHealth.classList.add('pulse-alert');
+
+      if (abcxyzCoverage === 100) pulseAbcxyz.classList.add('pulse-good');
+      else if (abcxyzCoverage >= 50) pulseAbcxyz.classList.add('pulse-warn');
+      else pulseAbcxyz.classList.add('pulse-alert');
+
+      if (busReachable === true) pulseBus.classList.add('pulse-good');
+      else if (busReachable === false) pulseBus.classList.add('pulse-alert');
 
       if (statusData && statusData.generated) {
         var dt = new Date(statusData.generated);
@@ -894,7 +917,7 @@
       }
 
       if (status === 'GREEN') {
-        pulseNote.textContent = 'Evidence search is backed by a clean public verification pass and indexed accountability records.';
+        pulseNote.textContent = 'Evidence search is backed by a clean public verification pass, indexed accountability records, and live ABCXYZ quantum custody.';
       } else {
         pulseNote.textContent = 'Verification warnings exist; use the evidence and records links below to cross-check directly.';
       }
@@ -902,13 +925,15 @@
 
     async function loadPulseData() {
       try {
-        const [statusRes, evidenceRes] = await Promise.allSettled([
+        const [statusRes, evidenceRes, quantumRes] = await Promise.allSettled([
           fetch('data/website_quality_status.json', { cache: 'no-store' }),
-          fetch('data/evidence_permalinks.json', { cache: 'no-store' })
+          fetch('data/evidence_permalinks.json', { cache: 'no-store' }),
+          fetch('data/abcxyz_quantum_status.json', { cache: 'no-store' })
         ]);
 
         let statusData = null;
         let evidenceData = null;
+        let quantumData = null;
 
         if (statusRes.status === 'fulfilled' && statusRes.value.ok) {
           statusData = await statusRes.value.json();
@@ -916,10 +941,13 @@
         if (evidenceRes.status === 'fulfilled' && evidenceRes.value.ok) {
           evidenceData = await evidenceRes.value.json();
         }
+        if (quantumRes.status === 'fulfilled' && quantumRes.value.ok) {
+          quantumData = await quantumRes.value.json();
+        }
 
-        renderPulse(statusData, evidenceData);
+        renderPulse(statusData, evidenceData, quantumData);
       } catch (err) {
-        renderPulse(null, null);
+        renderPulse(null, null, null);
         pulseNote.textContent = 'Live pulse data is temporarily unavailable, but the evidence index remains searchable.';
       }
     }
@@ -1043,7 +1071,7 @@
           performSearch(q);
         }
       } catch (err) {
-        renderPulse(null, null);
+        renderPulse(null, null, null);
         loadingState.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9888;</div><h3>Failed to load datasets</h3><p>' + err.message + '</p></div>';
       }
     }
