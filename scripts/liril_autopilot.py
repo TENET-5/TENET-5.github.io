@@ -204,6 +204,7 @@ def run_site_cycle() -> list[dict]:
         ("link_validation", [PYTHON, str(ROOT / "scripts" / "cicd_validate.py")]),
         ("og_validation", [PYTHON, str(ROOT / "scripts" / "validate_og_meta.py")]),
         ("frame_validation", [PYTHON, str(ROOT / "scripts" / "validate_frame_buster.py")]),
+        ("quantum_integrity", [PYTHON, str(LIRIL_ROOT / "tools" / "quantum_integrity_verify.py"), "--nats"]),
     ]
 
     results = [{"name": "media_stack", "result": media_stack_check()}]
