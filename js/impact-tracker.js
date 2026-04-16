@@ -42,8 +42,20 @@
 
   // ── Count evidence documents (data-source citations on page) ──
   function countEvidence() {
-    var cites = document.querySelectorAll('a[href*="parl.ca"], a[href*="canada.ca"], a[href*="canlii"], a[href*="hansard"], .source-note a');
-    METRICS.evidence_docs = cites.length;
+    var cites = document.querySelectorAll('a[href*="parl.ca"], a[href*="canada.ca"], a[href*="canlii"], a[href*="hansard"], .source-note a, .source-cite, .source-cite a');
+    // Deduplicate: count unique source-cite blocks + unique citation links
+    var seen = {};
+    for (var i = 0; i < cites.length; i++) {
+      var el = cites[i];
+      var key;
+      if (el.classList && el.classList.contains('source-cite')) {
+        key = 'block:' + (el.textContent || '').substring(0, 60);
+      } else {
+        key = 'link:' + (el.href || el.textContent || i);
+      }
+      seen[key] = true;
+    }
+    METRICS.evidence_docs = Object.keys(seen).length;
   }
 
   // ── Format large numbers (1,234 or 12.3K) ──
