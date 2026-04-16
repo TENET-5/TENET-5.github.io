@@ -451,7 +451,7 @@ function generateMPEmail(contact, allFlaggedPeople) {
     'Member of Parliament for ' + riding + '\n\n' +
     'Your publicly documented record, compiled from Hansard, Commissioner of Lobbying, Health Canada, and Ethics Commissioner:\n\n' +
     '1. MAID VOTING RECORD\n' +
-    '76,707 Canadians died under MAID since 2016 (Health Canada 6th Report). 16,499 in 2024 — 5.1% of all deaths. Your C-14/C-7 votes are in Hansard.\n' +
+    '76,475+ Canadians died under MAID since 2016 (Health Canada 6th Report). 16,499 in 2024 — 5.1% of all deaths. Your C-14/C-7 votes are in Hansard.\n' +
     '  Your scorecard: ' + BASE_URL + 'search.html?q=' + encodeURIComponent(mpName) + '\n\n' +
     '2. LOBBYING CONTACTS\n' +
     '547,889 registered communications in the Commissioner of Lobbying dataset.\n' +
@@ -459,13 +459,17 @@ function generateMPEmail(contact, allFlaggedPeople) {
     '3. YOUR COLLEAGUES\' ETHICS VIOLATIONS\n' +
     'Nine ministers found in violation. Combined penalties: ~$9,391. Zero criminal referrals.\n' +
     '  ' + BASE_URL + 'ethics-violations.html\n\n' +
-    '4. s.504 CRIMINAL CODE FILINGS\n' +
+    '4. OFFSHORE FINANCIAL EXPOSURE\n' +
+    'Eight major offshore leaks (2014-2023) exposed 268,488 entities. $76M in unpaid Canadian taxes identified — zero confirmed collected. PM holds $6.8M in Brookfield options while cutting FINTRAC budget 12%.\n' +
+    '  ' + BASE_URL + 'panama-papers.html\n\n' +
+    '5. s.504 CRIMINAL CODE FILINGS\n' +
     '28 counts filed at courthouses. As a sitting MP you have the authority to ensure these receive attention.\n' +
     '  ' + BASE_URL + 's504-covey-bae.html\n\n' +
     'ACTION REQUESTED:\n' +
     '1. Review your voting record and its consequences\n' +
     '2. Support s.122 referrals for Ethics Commissioner findings\n' +
-    '3. Support Conflict of Interest Act reform with criminal penalties\n\n' +
+    '3. Support Conflict of Interest Act reform with criminal penalties\n' +
+    '4. Demand FINTRAC funding restoration and offshore tax enforcement\n\n' +
     '  Full record: ' + BASE_URL + 'investigation-matrix.html\n' +
     '  Evidence: ' + BASE_URL + 'evidence-index.html' +
     CLOSING_FOOTER;
