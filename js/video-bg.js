@@ -395,8 +395,6 @@
   style.textContent =
     '.t5-video-wrap{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1;background:radial-gradient(circle at center, rgba(15,23,42,0.18), rgba(2,6,23,0.72))}' +
     '.t5-video-bg{position:absolute;top:0;left:0;width:100vw;height:100vh;object-fit:cover;opacity:0.52;pointer-events:none;filter:brightness(0.72) saturate(0.95) contrast(1.05)}' +
-    /* Ensure all page content renders above the video layer */
-    'main,.content,.presentation-container,section,article,.container,.page-content,.glass-panel,.record-card,.stat-grid,.stat-hero-banner,.evidence-cinematic,[data-chapter]{position:relative;z-index:1}' +
     '@media(prefers-reduced-motion:reduce){.t5-video-wrap{display:none}}' +
     '@media(max-width:768px){.t5-video-bg{opacity:0.34;filter:brightness(0.78) saturate(0.9)}}';
   document.head.appendChild(style);
