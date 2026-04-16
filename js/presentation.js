@@ -156,12 +156,23 @@
     'ethics-failures.html',
     'regulatory-capture.html',
 
+    // ── GOVERNANCE EXPANSION ──
+    'accountability-reform-history.html',
+    'accountability-scorecard.html',
+    'crown-corporation-oversight.html',
+    'cost-of-failure.html',
+    'debt-servicing.html',
+    'indigenous-procurement-fraud.html',
+
     // ── SOCIAL CRISIS ──
     'healthcare-crisis.html',
+    'healthcare-privatization.html',
     'housing-crisis.html',
     'housing-crisis-by-city.html',
     'opioid-crisis.html',
     'opioid-crisis-accountability.html',
+    'childcare.html',
+    'food-supply-concentration.html',
     'immigration-policy.html',
     'telecom-oligopoly.html',
     'infrastructure-deficit.html',
@@ -170,6 +181,15 @@
     'media-concentration.html',
     'environment-climate.html',
     'cra-enforcement.html',
+
+    // ── SOVEREIGNTY ──
+    'arctic-sovereignty.html',
+    'data-sovereignty.html',
+    'energy-sovereignty.html',
+
+    // ── MAID EXPANSION ──
+    'disability-benefit.html',
+    'demographics-to-death.html',
 
     // ── INTERNATIONAL CONNECTIONS ──
     'epstein-canadian-connections.html',
