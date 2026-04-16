@@ -230,7 +230,7 @@
     'liril-analysis.html',
     'acelephius-report.html',
     'acelephius-wardoll.html',
-    'architecture.html',
+    // architecture.html removed — page doesn't exist; system-architecture.html (line 39) covers this topic
 
     // ── TOOLS & REFERENCE ──
     'hansard-dashboard.html',
