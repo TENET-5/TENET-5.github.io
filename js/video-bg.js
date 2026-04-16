@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════════════════════
-   TENET5 Video Background — Cinematic investigation loops
-   Auto-loads matching video per page, falls back to dark atmosphere
+   TENET5 Video Background — DISABLED
+   Video backgrounds removed site-wide per directive 2026-04-15.
+   File kept as no-op to prevent 404s if cached pages reference it.
    ═══════════════════════════════════════════════════════ */
 (function() {
   'use strict';
-  if (window.__TENET5_VIDEOBG_LOADED) return;
-  window.__TENET5_VIDEOBG_LOADED = true;
+  // Video backgrounds disabled — no-op
+  return;
 
   // Page → video mapping
   var PAGE_VIDEOS = {
