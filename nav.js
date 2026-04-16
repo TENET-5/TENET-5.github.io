@@ -31,6 +31,7 @@
           '</div>' +
         '</a>' +
         '<div class="nav-status-stack" aria-label="Platform status">' +
+          '<span class="nav-status-pill" style="color:#22d3ee;border-color:rgba(34,211,238,0.4);font-weight:700;">[AI]</span>' +
           '<span class="nav-status-pill nav-status-live">Live OSINT</span>' +
           '<span class="nav-status-pill">LIRIL narration</span>' +
           '<span class="nav-status-pill" style="color:var(--color-quantum, #a855f7);border-color:rgba(168,85,247,0.3);">[NV-QUANTUM]</span>' +
@@ -53,6 +54,13 @@
             '<a href="/ag-findings.html" id="nav-ag">AG Findings</a>' +
             '<a href="/phoenix-pay.html" id="nav-phoenix">Phoenix Pay</a>' +
             '<a href="/foreign-interference.html" id="nav-foreign">Foreign Interference</a>' +
+          '</div>' +
+          '<div class="nav-group nav-investigations" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px; margin-left: 5px;">' +
+            '<a href="/genocide-evidence.html" id="nav-genocide" style="color:#ef4444;">Genocide Evidence</a>' +
+            '<a href="/cfnis.html" id="nav-cfnis">CFNIS</a>' +
+            '<a href="/treason-trajectory.html" id="nav-treason" style="color:#facc15;">Treason Trajectory</a>' +
+            '<a href="/network-analysis.html" id="nav-network">Network Analysis</a>' +
+            '<a href="/charity-pipeline.html" id="nav-charity">Charity Pipeline</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +
             '<a href="/s504-covey-bae.html" id="nav-504">s.504</a>' +

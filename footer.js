@@ -121,6 +121,18 @@
     html += '</p>';
     html += '</div>';
 
+    // AI Transparency Disclosure
+    html += '<div style="padding:1.2rem;margin-bottom:1.5rem;background:rgba(34,211,238,0.05);border:1px solid rgba(34,211,238,0.2);border-radius:8px;">';
+    html += '<p style="font-size:0.75rem;color:#22d3ee;margin:0 0 0.5rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">[AI] Transparency Disclosure</p>';
+    html += '<p style="font-size:0.8rem;color:#9ca3af;line-height:1.7;margin:0;">';
+    html += 'This website is developed and maintained entirely by artificial intelligence (LIRIL AI, powered by NVIDIA). ';
+    html += 'All efforts are made to ensure complete objectivity. ';
+    html += 'Every statistic, claim, and finding is sourced from the work of good journalists and open-source government information provided by the dedicated public servants who still exist. ';
+    html += 'AI systems generate narration, analysis, and cross-references. Human editorial oversight is provided by Daniel Perry. ';
+    html += 'Source data: Hansard, Auditor General, Ethics Commissioner, ICIJ, Health Canada, Statistics Canada, Elections Canada, Commissioner of Lobbying.';
+    html += '</p>';
+    html += '</div>';
+
     // Credibility line (Stanford #2, #4)
     html += '<div style="padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">';
     html += '<div>';
