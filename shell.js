@@ -149,7 +149,7 @@
       .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
       .then(function() { return loadScript(BASE + 'js/my-mp.js?v=2'); })
       .then(function() { return loadScript(BASE + 'js/mp-scorecard.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'js/impact-tracker.js?v=1'); });
+      .then(function() { return loadScript(BASE + 'js/impact-tracker.js?v=2'); });
 
     } else {
       // DIRECT ACCESS fallback — full standalone page
