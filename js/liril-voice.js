@@ -116,7 +116,7 @@
     var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
     if (!voices.length) return null;
 
-    /* P0: Restore from sessionStorage — but ONLY if it's Hazel */
+    /* P0: Restore from sessionStorage — but ONLY if it's Clara */
     try {
       var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
       if (saved) {
