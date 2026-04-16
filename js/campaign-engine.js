@@ -423,7 +423,10 @@ function generateLawEnforcementEmail(contact, allFlaggedPeople) {
     '4. OBSTRUCTION OF JUSTICE (s.139)\n' +
     'Government found in contempt of Parliament (SDTC documents). CFNIS: Ontario Superior Court — "misconduct so egregious it shocks the conscience."\n' +
     '  Evidence: ' + BASE_URL + 'cfnis.html\n\n' +
-    '5. s.504 PRIVATE PROSECUTION FILED\n' +
+    '5. OFFSHORE FINANCIAL ROUTING (s.380, s.122)\n' +
+    'Eight major document leaks (2014-2023) exposed 268,488 offshore entities. 912 Canadian entities in Panama Papers. CRA identified $76M in unpaid taxes — zero confirmed collected. PM holds $6.8M in Brookfield options while defunding FINTRAC (the offshore monitoring agency) by 12%. Potential s.122 breach of trust and s.380 fraud facilitation.\n' +
+    '  Evidence: ' + BASE_URL + 'panama-papers.html\n\n' +
+    '6. s.504 PRIVATE PROSECUTION FILED\n' +
     '28 counts submitted to courthouses under s.504 Criminal Code.\n' +
     '  Evidence: ' + BASE_URL + 's504-covey-bae.html\n\n' +
     'REQUEST:\n' +
