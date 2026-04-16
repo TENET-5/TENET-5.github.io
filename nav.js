@@ -75,6 +75,11 @@
               '<option value="fr">Français</option>' +
               '<option value="nf">Newfie</option>' +
             '</select>' +
+            '<div class="theme-slider-wrap" title="Theme: Dark to Light">' +
+              '<span class="tsl-icon">\u263E</span>' +
+              '<input type="range" id="theme-slider" min="0" max="100" value="0">' +
+              '<span class="tsl-icon">\u2600</span>' +
+            '</div>' +
           '</div>' +
           '<div class="nav-auth" id="nav-auth"></div>' +
         '</div>' +
