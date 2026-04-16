@@ -1322,6 +1322,12 @@
       nextPage = PAGE_SEQUENCE[nextIdx];
     }
 
+    // CRITICAL: Stop ALL narration BEFORE navigating — prevents race
+    // condition where cancel() fires after new page starts loading
+    stopNarration();
+    if (window.__LIRIL_WALKTHROUGH_STOP) window.__LIRIL_WALKTHROUGH_STOP();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({
         type: 'pres-navigate',
@@ -1850,12 +1856,15 @@
 
   function startNarrationKeepalive() {
     stopNarrationKeepalive();
+    // 12s interval (not 10s) to avoid collision with 250ms chunk transitions
     lirilNarration.keepaliveTimer = setInterval(function () {
-      if (window.speechSynthesis && window.speechSynthesis.speaking) {
-        window.speechSynthesis.pause();
-        window.speechSynthesis.resume();
+      if (window.speechSynthesis && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        try {
+          window.speechSynthesis.pause();
+          setTimeout(function() { window.speechSynthesis.resume(); }, 50);
+        } catch(e) { /* ignore keepalive errors */ }
       }
-    }, 10000);
+    }, 12000);
   }
 
   function stopNarrationKeepalive() {
@@ -1892,8 +1901,9 @@
     var idx = chunkIdx || 0;
     var total = totalChunks || (idx + 1 + chunks.length);
     var retryCount = retries || 0;
-    // Re-resolve voice EVERY chunk to prevent Chrome voice drift
-    var currentVoice = resolveNarrationVoice() || voice;
+    // Use LOCKED voice from initial resolve — re-resolving every chunk
+    // causes voice DRIFT when Chrome async-loads new voices mid-narration
+    var currentVoice = voice || resolveNarrationVoice();
     var voiceParams = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
     var u = new SpeechSynthesisUtterance(chunk);
     u.lang = 'en-CA';
@@ -1910,9 +1920,12 @@
     };
     u.onend = function () {
       if (token !== lirilNarration.token) return;
+      // Longer gap between chunks prevents Chrome glitch where keepalive
+      // timer fires during transition causing double-speak or silence
       setTimeout(function () {
+        if (token !== lirilNarration.token) return;  // Re-check after delay
         speakNarrationChunks(chunks, voice, token, idx + 1, total);
-      }, 120);
+      }, 250);
     };
     u.onerror = function (ev) {
       if (token !== lirilNarration.token) return;
@@ -2206,8 +2219,9 @@
     var chunk = chunks.shift();
     var idx = chunkIdx || 0;
     var total = totalChunks || (idx + 1 + chunks.length);
-    // Re-resolve voice EVERY chunk to prevent Chrome voice drift
-    var currentVoice = resolveNarrationVoice() || voice;
+    // Use LOCKED voice from initial resolve — re-resolving every chunk
+    // causes voice DRIFT when Chrome async-loads new voices mid-narration
+    var currentVoice = voice || resolveNarrationVoice();
     var voiceParams = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
     var u = new SpeechSynthesisUtterance(chunk);
     u.lang = 'en-CA';
