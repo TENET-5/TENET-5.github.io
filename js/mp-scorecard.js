@@ -41,7 +41,7 @@
 
     if (votedBoth.indexOf(name) !== -1) {
       score.total -= 30;
-      score.factors.push({ label: 'Voted YEA on both C-14 and C-7', impact: -30, detail: 'Legalized + expanded MAID (76,707 deaths and counting)' });
+      score.factors.push({ label: 'Voted YEA on both C-14 and C-7', impact: -30, detail: 'Legalized + expanded MAID (76,475+ deaths and counting)' });
     } else if (votedC7.indexOf(name) !== -1) {
       score.total -= 20;
       score.factors.push({ label: 'Voted YEA on C-7 expansion', impact: -20, detail: 'Expanded MAID to non-terminal illness' });
