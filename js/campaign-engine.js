@@ -47,17 +47,20 @@ function generateSenateEmail(contact, allFlaggedPeople) {
       '5. FOREIGN INTERFERENCE\n' +
       'The NSICOP 2024 report found that parliamentarians from multiple parties are "wittingly" assisting foreign governments. CPC leadership races were infiltrated. Bill C-70\'s foreign agent registry was delayed by the election and enforcement remains inconsistent. Source: NSICOP Report 2024.\n\n' +
       '6. MEDICAL ASSISTANCE IN DYING (MAID)\n' +
-      'Canada has the highest per-capita MAID deaths of any country with MAID legislation. 13,102 deaths in 2022. Bill C-7 removed the 10-day reflection period and allowed MAID for mental illness alone. Source: Health Canada Annual Report on MAID.\n\n' +
+      'Canada has the highest per-capita MAID deaths of any country with MAID legislation. 76,475+ cumulative deaths. 16,499 in 2024 alone \u2014 5.1% of all Canadian deaths. Bill C-7 removed the 10-day reflection period and allowed MAID for mental illness alone. Source: Health Canada Annual Report on MAID.\n\n' +
       '7. PROCUREMENT FAILURES\n' +
       'ArriveCAN: $60M for an app estimated at $250K. GC Strategies (2 employees) received $20.9M in contracts. Source: Auditor General Report 2024.\n\n' +
-      '8. CAF/CFNIS OVERSIGHT\n' +
+      '8. OFFSHORE FINANCIAL ROUTING\n' +
+      'Eight major document leaks (LuxLeaks 2014 through Cyprus Confidential 2023) exposed 268,488 offshore entities. 912 Canadian entities in Panama Papers alone. CRA identified $76M in unpaid taxes \u2014 zero confirmed collected. PM holds $6.8M in Brookfield options while cutting FINTRAC budget 12% (47 analyst positions). Source: ICIJ Offshore Leaks Database, CRA, FINTRAC Annual Report 2024.\n\n' +
+      '9. CAF/CFNIS OVERSIGHT\n' +
       'CFNIS reports to the same chain of command it investigates. MPCC has repeatedly found investigations exceeded the 12-month standard (some ran 3\u20135 years). The Provost Marshal was accused of obstruction. LCol LeBlanc cleared Gen Vance despite allegations. Source: MPCC Annual Reports, Federal Court.\n\n' +
       'RECOMMENDED SENATE ACTION:\n\n' +
       '1. Refer Ethics Commissioner findings to RCMP under Criminal Code s.122 (Breach of Trust by Public Officer \u2014 up to 5 years imprisonment)\n' +
       '2. Senate study on Conflict of Interest Act reform: 10-year post-employment cooling period, full PM divestiture, criminal penalties\n' +
       '3. Senate study on independent CFNIS oversight: remove from chain of command, give MPCC binding investigative power\n' +
       '4. Senate study on lobbying concentration patterns using Commissioner of Lobbying raw data\n' +
-      '5. Senate review of Bill C-70 foreign agent registry enforcement consistency\n\n' +
+      '5. Senate review of Bill C-70 foreign agent registry enforcement consistency\n' +
+      '6. Senate study on FINTRAC defunding: demand restoration of 47 analyst positions and offshore tax enforcement\n\n' +
       'EVIDENCE:\n' +
       '  Full investigation findings: ' + BASE_URL + 'findings.html\n' +
       '  Legal framework: ' + BASE_URL + 'legal.html\n' +
@@ -193,7 +196,7 @@ function generateMediaEmail(contact, allFlaggedPeople) {
       '$229M ARMS TO ISRAEL \u2014 DESPITE THE PAUSE\n' +
       'Minister Joly announced a "pause" on arms exports to Israel in January 2024. Since that announcement: $18.9M in arms shipped, $37.2M in new export permits issued. A Crown corporation signed a $78.8M contract with a weapons manufacturer weeks after publicly blocking the same company for human rights concerns. 12 CRA charity revocations for funnelling donations to military operations. Source: Global Affairs Canada permit data, Auditor General.\n\n' +
       'MAID EXPANSION: THE INTERNATIONAL OUTLIER\n' +
-      'Canada has the highest per-capita Medical Assistance in Dying deaths of any country with MAID legislation. 13,102 deaths in 2022. Bill C-7 (2021) removed the 10-day reflection period and expanded eligibility to mental illness alone (MAID MD-SUMC). This expansion has no equivalent in any other MAID-legal jurisdiction. Disability rights organizations have raised systemic concerns about socioeconomic drivers. Source: Health Canada Annual Report on Medical Assistance in Dying 2022.\n\n' +
+      'Canada has the highest per-capita Medical Assistance in Dying deaths of any country with MAID legislation. 76,475+ cumulative deaths. 16,499 in 2024 2014 5.1% of all Canadian deaths. Bill C-7 (2021) removed the 10-day reflection period and expanded eligibility to mental illness alone (MAID MD-SUMC). This expansion has no equivalent in any other MAID-legal jurisdiction. Disability rights organizations have raised systemic concerns about socioeconomic drivers. Source: Health Canada Annual Report on Medical Assistance in Dying 2022.\n\n' +
       'BILL C-70: CHARTER CONCERNS IN THE FOREIGN AGENT REGISTRY\n' +
       'Bill C-70\'s foreign agent registry creates new disclosure obligations for organizations receiving foreign direction. Civil liberties groups including CCLA raised concerns about overbreadth and political targeting. Enforcement has been inconsistent \u2014 applied selectively against some organizations while similar activities by others go unregistered. Source: CCLA submissions, NSICOP 2024 report.\n\n' +
       'FOREIGN INTERFERENCE: THE SUPPRESSED REPORT\n' +
@@ -208,7 +211,7 @@ function generateMediaEmail(contact, allFlaggedPeople) {
     body = 'Dear ' + contact.name + ' Newsroom,\n\n' +
       'Three documented accountability issues with direct impact on Indigenous communities:\n\n' +
       'MAID AND INDIGENOUS COMMUNITIES\n' +
-      'Canada has the highest per-capita MAID deaths of any country with MAID legislation: 13,102 in 2022. Bill C-7 expanded eligibility to mental illness alone (MAID MD-SUMC). Indigenous community organizations and disability rights advocates have documented how poverty, lack of housing, and inadequate health services create conditions where MAID becomes an economic choice rather than a medical one. This is a systemic equity concern the federal government has not addressed. Source: Health Canada Annual Report on Medical Assistance in Dying 2022, Indigenous community submissions to Parliamentary review.\n\n' +
+      'Canada has the highest per-capita MAID deaths of any country with MAID legislation: 76,475+ cumulative. 16,499 in 2024 2014 5.1% of all deaths. Bill C-7 expanded eligibility to mental illness alone (MAID MD-SUMC). Indigenous community organizations and disability rights advocates have documented how poverty, lack of housing, and inadequate health services create conditions where MAID becomes an economic choice rather than a medical one. This is a systemic equity concern the federal government has not addressed. Source: Health Canada Annual Report on Medical Assistance in Dying 2022, Indigenous community submissions to Parliamentary review.\n\n' +
       'RESIDENTIAL SCHOOL LEGACY IN THE SENATE\n' +
       'Senator Lynn Beyak (CPC, retired 2021) posted racist letters defending residential schools on her official Senate website. She was suspended twice by the Senate Ethics Officer. The Senate\'s response \u2014 suspension rather than expulsion \u2014 drew criticism from Indigenous survivors\' organizations. Source: Senate Ethics Officer reports 2017\u20132019.\n\n' +
       'FOREIGN INTERFERENCE AND INDIGENOUS LAND RIGHTS\n' +
@@ -273,7 +276,7 @@ function generatePremierEmail(contact, allFlaggedPeople) {
   var body = 'Dear ' + contact.name + ',\n\n' +
     'This briefing presents documented federal accountability failures with direct implications for provincial jurisdiction under Constitution Act s.92. This analysis was generated by CAP OSINT, an automated intelligence system cross-referencing 7 million records from official Canadian government databases.\n\n' +
     'FEDERAL MAID EXPANSION: PROVINCIAL HEALTH JURISDICTION (s.92(7))\n' +
-    'Canada has the highest per-capita MAID deaths of any country with MAID legislation: 13,102 deaths in 2022. Bill C-7 removed the 10-day reflection period and expanded eligibility to mental illness (MAID MD-SUMC). Under Constitution Act s.92(7), hospitals and health institutions are a provincial matter. Federal MAID expansion creates downstream budget pressure on provincial health systems without commensurate federal funding. Disability rights organizations have raised concerns about socioeconomic drivers that vary by province. Source: Health Canada Annual Report on Medical Assistance in Dying 2022.\n\n' +
+    'Canada has the highest per-capita MAID deaths of any country with MAID legislation: 76,475+ cumulative deaths. 16,499 in 2024 2014 5.1% of all Canadian deaths. Bill C-7 removed the 10-day reflection period and expanded eligibility to mental illness (MAID MD-SUMC). Under Constitution Act s.92(7), hospitals and health institutions are a provincial matter. Federal MAID expansion creates downstream budget pressure on provincial health systems without commensurate federal funding. Disability rights organizations have raised concerns about socioeconomic drivers that vary by province. Source: Health Canada Annual Report on Medical Assistance in Dying 2022.\n\n' +
     'FEDERAL PROCUREMENT BYPASS: PROVINCIAL ECONOMIC INTEREST\n' +
     'ArriveCAN ($60M for a $250K app) and the SDTC ($400M in questioned grants) represent federal procurement failures that bypassed competitive processes. GC Strategies (2 employees, $20.9M in contracts) was selected without open competition. These concentrated procurement patterns exclude provincial suppliers and small businesses. Source: Auditor General Report 2024.\n\n' +
     'LOBBYING CAPTURE: NATIONAL INTERESTS AT PROVINCIAL EXPENSE\n' +
@@ -421,7 +424,7 @@ function generateLawEnforcementEmail(contact, allFlaggedPeople) {
     'ArriveCAN: $60M+ for an application estimated at $250K. GC Strategies (2 employees) received $20.9M. Auditor General: "basic contracting rules broken." 76% of contractor work unsubstantiated. SDTC: 186 conflicts of interest, ~$400M in questioned grants.\n' +
     '  Evidence: ' + BASE_URL + 'arrivecan.html\n\n' +
     '3. CRIMINAL NEGLIGENCE CAUSING DEATH (s.220)\n' +
-    '76,707 MAID deaths since 2016. PBO published cost-savings analysis BEFORE expansion vote. Track 2: 63% cited emotional distress, 53.8% inadequate disability services. 10 provinces demanded pause — government expanded anyway.\n' +
+    '76,475+ MAID deaths since 2016. PBO published cost-savings analysis BEFORE expansion vote. Track 2: 63% cited emotional distress, 53.8% inadequate disability services. 10 provinces demanded pause — government expanded anyway.\n' +
     '  Evidence: ' + BASE_URL + 'maid-accountability.html\n\n' +
     '4. OBSTRUCTION OF JUSTICE (s.139)\n' +
     'Government found in contempt of Parliament (SDTC documents). CFNIS: Ontario Superior Court — "misconduct so egregious it shocks the conscience."\n' +
