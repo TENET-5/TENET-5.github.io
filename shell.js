@@ -149,8 +149,7 @@
       .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
       .then(function() { return loadScript(BASE + 'js/my-mp.js?v=2'); })
       .then(function() { return loadScript(BASE + 'js/mp-scorecard.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'js/impact-tracker.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'js/video-bg.js?v=3'); });
+      .then(function() { return loadScript(BASE + 'js/impact-tracker.js?v=1'); });
 
     } else {
       // DIRECT ACCESS fallback — full standalone page
@@ -170,7 +169,6 @@
         .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=7'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/video-bg.js?v=3'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/share-actions.js?v=2'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
