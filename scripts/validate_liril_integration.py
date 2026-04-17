@@ -209,6 +209,84 @@ def check_shell_loads_scripts():
         error("shell.js does NOT load liril-walkthrough.js")
 
 
+def check_fabricated_telemetry_guard():
+    """Fail the build if the fabricated-telemetry labels return.
+
+    On 2026-04-17 the site-wide truth audit (commit 717da47e) removed
+    internal-telemetry-labelled speculation across 26 pages: ABCXYZ tracker,
+    Millennial Falcon system, MF-hash vectors, Target Alpha branding,
+    topological convergence, threat correlation scores. These were fabricated
+    labels that presented as data-source credibility without traceable
+    origin in the actual TENET5 architecture.
+
+    This check enforces that the sweep is durable — if any page re-introduces
+    these labels (e.g., via NemoClaw auto-cycle regeneration), the CI build
+    fails before deploy.
+
+    Allowed exceptions: HTML comments and explicit retraction notes that
+    reference the old label in past tense (documented in retraction audit
+    trail). Those are detected by surrounding "RETRACTED" / "retraction note"
+    context.
+    """
+    BANNED = [
+        # Each tuple: (regex, human description)
+        (r"\bABCXYZ[- ]tracker",        "ABCXYZ tracker algorithm (fabricated data-source label)"),
+        (r"\bABCXYZ EMPIRICAL SYNC",    "ABCXYZ EMPIRICAL SYNC framing (fabricated sync)"),
+        (r"\bMillennial Falcon (?:tracking system|timeline|system|matrix|Convergence|Tracker)",
+                                         "Millennial Falcon internal-telemetry label (fabricated system)"),
+        (r"\bMF-[A-F0-9]{8,}",          "MF-hash vector (fabricated hash label)"),
+        (r"\bVector:\s*MF-[A-F0-9]+",   "Vector: MF-hash (fabricated internal-system label)"),
+        (r"\btopological convergence",  "topological convergence (speculative mathematical framing)"),
+        (r"\bThreat correlation locked at \d+",
+                                         "Threat correlation locked at N% (unsourced numerical framing)"),
+        (r"\bTHREAT SCORE:\s*0\.\d{2}", "THREAT SCORE: 0.XX (unsourced numerical framing)"),
+        (r'\btriggers a "magic handoff"',"'magic handoff' (fabricated procedural mechanism)"),
+        (r"\bFOREIGN INFLUENCE: TARGET ALPHA",
+                                         "FOREIGN INFLUENCE: TARGET ALPHA (speculative branding — use Hogue/NSICOP)"),
+        (r"\bTarget Alpha\b",            "'Target Alpha' speculative branding (use Hogue/NSICOP source citations)"),
+    ]
+
+    offenders: list[tuple[str,str,int]] = []  # (file, pattern_desc, line_no)
+
+    for html in ROOT.glob("*.html"):
+        try:
+            txt = html.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            continue
+        for pat, desc in BANNED:
+            for m in re.finditer(pat, txt, flags=re.IGNORECASE):
+                # Check 1: is this match inside an HTML comment? Walk backwards
+                # to find the last <!-- before the match; if no matching -->
+                # closes before the match position, we're inside a comment.
+                before = txt[:m.start()]
+                last_open = before.rfind("<!--")
+                if last_open != -1:
+                    between = before[last_open:]
+                    # Close only counts if it comes AFTER the last <!--
+                    if "-->" not in between:
+                        continue  # inside an HTML comment — allowed
+                # Check 2: wider retraction-documentation context window
+                ctx_start = max(0, m.start() - 600)
+                ctx_end = min(len(txt), m.end() + 300)
+                context = txt[ctx_start:ctx_end]
+                if ("RETRACTED" in context or "retraction note" in context.lower() or
+                    "Retraction note" in context or
+                    "<!-- RETRACTED" in context):
+                    continue  # allowed — audit-trail context
+                line_no = txt.count("\n", 0, m.start()) + 1
+                offenders.append((html.name, desc, line_no))
+
+    if offenders:
+        for fn, desc, ln in offenders[:20]:
+            error(f"{fn}:{ln}: FABRICATED TELEMETRY '{desc}' — "
+                  f"removed in 2026-04-17 truth audit (commit 717da47e); "
+                  f"must not return without primary-source citation")
+        if len(offenders) > 20:
+            error(f"...and {len(offenders)-20} more fabricated-telemetry occurrences")
+    else:
+        ok("no fabricated ABCXYZ/Millennial Falcon/MF-hash/Target Alpha telemetry detected")
+
+
 def check_nav_read_only_guard():
     """Nav regression guard — ensures nav.js has no interactive widgets (flag,
     language selector, theme slider) and stays within a 20-link budget.
@@ -296,8 +374,11 @@ def main():
     print("║  TENET5 · ABCXYZ · SEED 118400                   ║")
     print("╚═══════════════════════════════════════════════════╝\n")
 
-    print("── 0. Nav Read-Only Guard ──")
+    print("── 0a. Nav Read-Only Guard ──")
     check_nav_read_only_guard()
+
+    print("\n── 0b. Fabricated Telemetry Guard ──")
+    check_fabricated_telemetry_guard()
 
     print("\n── 1. Double-Init Guards ──")
     check_double_init_guard()
