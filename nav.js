@@ -61,10 +61,7 @@
             '<a href="/cfnis.html" id="nav-cfnis">CFNIS</a>' +
             '<a href="/treason-trajectory.html" id="nav-treason" style="color:#facc15;">Treason Trajectory</a>' +
             '<a href="/network-analysis.html" id="nav-network">Network Analysis</a>' +
-            '<a href="/corruption.html" id="nav-corruption-hub" style="color:#c9a84c;font-weight:700;">Corruption Hub</a>' +
-            '<a href="/corruption-map.html" id="nav-corruption-map" style="color:#c9a84c;">↳ Map</a>' +
-            '<a href="/corruption-atlas.html" id="nav-corruption-atlas" style="color:#c9a84c;">↳ Atlas</a>' +
-            '<a href="/corruption-territory.html" id="nav-corruption-territory" style="color:#c9a84c;">↳ Territory</a>' +
+            '<a href="/corruption.html" id="nav-corruption-hub" style="color:#c9a84c;font-weight:700;" title="Corruption Hub — Map, Atlas, Territory">Corruption Hub</a>' +
             '<a href="/charity-pipeline.html" id="nav-charity">Charity Pipeline</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +
@@ -131,6 +128,22 @@
           navContent.classList.remove('nav-open');
         }
       });
+    }
+
+    /* 2026-04-16: Wheel-to-horizontal-scroll on nav — converts vertical wheel
+       to horizontal pan so users can scroll the nav bar naturally without
+       having to hold shift. Only active on desktop (when nav is a single row). */
+    if (navContent) {
+      navContent.addEventListener('wheel', function(e) {
+        /* Skip if mobile nav is open (column layout, vertical scroll wanted) */
+        if (navContent.classList.contains('nav-open')) return;
+        /* Skip if horizontal is already the intended axis */
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        /* Only intercept when there is actually overflow to scroll */
+        if (navContent.scrollWidth <= navContent.clientWidth) return;
+        e.preventDefault();
+        navContent.scrollLeft += e.deltaY;
+      }, { passive: false });
     }
 
     /* Highlight active nav link + set target for frame shell */

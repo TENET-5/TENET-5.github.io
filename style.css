@@ -470,14 +470,28 @@ strong { color: var(--text-primary); font-weight: 600; }
   box-shadow: 0 1px 20px rgba(0,0,0,0.4);
 }
 /* nav.js wrapper — flex row on desktop */
+/* 2026-04-16: overflow changed from visible!important to auto so the nav
+   scrolls horizontally when it exceeds viewport width, instead of clipping
+   items off the right edge. Hides the scrollbar aesthetically and fades
+   the right edge when more content is available off-screen. */
 .nav-content {
   display: flex;
   align-items: center;
   gap: 0;
   flex: 1;
   height: 100%;
-  overflow: visible !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE 10+ */
+  scroll-behavior: smooth;
+  /* Mask: fade right edge when content overflows */
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 30px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 30px), transparent 100%);
 }
+.nav-content::-webkit-scrollbar { display: none; }  /* Chrome/Safari/Edge */
+.nav-content > * { flex-shrink: 0; }                 /* prevent groups collapsing */
+/* Shift + wheel converts vertical wheel to horizontal pan handled by JS below */
 .skip-link {
   position: absolute;
   left: -9999px;
