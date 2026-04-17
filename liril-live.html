@@ -197,6 +197,10 @@
     <!-- Cross-axis bridges ── -->
     <h2 data-narrate="Cross axis bridges. These are Canadian actors whose tenures are independently Grover marked across multiple accountability axes. The more axes, the higher the cross-axis score. Justin Trudeau is octuple-marked across eight independent failure chains. David Lametti is triple-marked with the addition of the judicial axis. Dominic LeBlanc is triple-marked. Marco Mendicino is triple-marked. These are the actors the quantum investigation identifies as the most cross-axis.">Cross-axis bridges — top actors</h2>
     <p style="color:#b0b0c4;">Actors Grover-marked across <strong>two or more independent axes</strong>. The axis count is a second-order score: how many failure chains does one person appear in? Data source: <code>data/cross_axis_portfolio_14axis.json</code>.</p>
+    <p style="color:#a0a0b8;font-size:0.9rem;background:rgba(74,222,128,0.08);padding:0.8rem 1rem;border-radius:6px;border-left:3px solid #4ade80;">
+      <strong style="color:#86efac;">LIRIL-surfaced:</strong> The dual-marked finding on Jody Wilson-Raybould (indigenous + judicial) opens a structural accountability question about AG-era judicial appointment oversight — see
+      <a href="wilson-raybould-dual-axis.html" style="color:#4ade80;font-weight:700;">wilson-raybould-dual-axis.html</a>.
+    </p>
     <table class="bridge-table" id="bridge-table">
       <thead><tr><th>Actor</th><th style="width:80px;">Axes</th><th>Axis list</th></tr></thead>
       <tbody id="bridge-body"><tr><td colspan="3" style="color:#888;">Loading…</td></tr></tbody>
@@ -219,6 +223,20 @@
     <!-- Merkle timeline ── -->
     <h2 data-narrate="Merkle chain. Each row is an integrity anchor published to NATS tenet5.quantum.integrity.result. Any downstream consumer can replay the chain to verify the investigation's state at any point in time.">Recent Merkle anchors</h2>
     <div id="merkle-list" class="snapshot-footer"><em>Loading…</em></div>
+
+    <!-- Quantum benchmark ── -->
+    <h2 data-narrate="Quantum benchmark. The TENET5 orchestrator runs a P versus NP palindrome SAT benchmark on demand against the Ising decoder backend on GPU one. The benchmark verifies polynomial scaling at three, five and eight variables. Throughput is measured in iterations per second. Solve verify ratio of one point zero means every solved instance was independently verified.">Quantum benchmark — P vs NP (Ising / GPU1)</h2>
+    <p style="color:#b0b0c4;">Live snapshot from <code>tenet5.quantum.benchmark</code>. Data source: <code>data/quantum_benchmark_snapshot.json</code>.</p>
+    <div class="liril-metrics" id="qb-metrics">
+      <div class="liril-metric"><div class="liril-metric-val" id="qb-iter">—</div><div class="liril-metric-label">Iterations</div><div class="liril-metric-sub" id="qb-verified">verified</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="qb-mean">—</div><div class="liril-metric-label">Mean (ms)</div><div class="liril-metric-sub" id="qb-range">min / max</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="qb-thru">—</div><div class="liril-metric-label">Throughput</div><div class="liril-metric-sub">iter / sec</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="qb-svr">—</div><div class="liril-metric-label">Solve / verify</div><div class="liril-metric-sub" id="qb-poly">scaling</div></div>
+    </div>
+    <table class="bridge-table" id="qb-scaling" style="margin-top:1rem;">
+      <thead><tr><th>n vars</th><th>clauses</th><th>steps</th><th>ms</th><th>polynomial</th></tr></thead>
+      <tbody id="qb-scaling-body"><tr><td colspan="5" style="color:#888;">Loading…</td></tr></tbody>
+    </table>
 
     <div class="snapshot-footer" id="snap-footer">
       Loading snapshot…
@@ -250,17 +268,45 @@
           .then(r => r.ok ? r.json() : null)
           .then(d => ({ ax, data: d }))
           .catch(() => ({ ax, data: null }))
-      ))
-    ]).then(([snap, portfolio, manifest, axisData]) => {
+      )),
+      fetch('data/quantum_benchmark_snapshot.json').then(r => r.ok ? r.json() : null).catch(() => null)
+    ]).then(([snap, portfolio, manifest, axisData, qbench]) => {
       renderStatus(snap);
       renderAxisGrid(axisData);
       renderBridges(portfolio);
       renderProbes(snap);
       renderCampaigns(manifest);
+      renderQuantumBenchmark(qbench);
       renderFooter(snap);
     }).catch(err => {
       console.error('LIRIL-live load error:', err);
     });
+
+    function renderQuantumBenchmark(qb) {
+      var setText = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+      if (!qb || !qb.pvnp_benchmark) {
+        setText('qb-iter', 'n/a'); setText('qb-mean', 'n/a');
+        setText('qb-thru', 'n/a'); setText('qb-svr', 'n/a');
+        var sb = document.getElementById('qb-scaling-body');
+        if (sb) sb.innerHTML = '<tr><td colspan="5" style="color:#888;">Snapshot not available.</td></tr>';
+        return;
+      }
+      var b = qb.pvnp_benchmark;
+      setText('qb-iter', b.iterations);
+      setText('qb-verified', b.all_verified ? 'all verified' : 'verification failed');
+      setText('qb-mean', (b.mean_ms != null) ? b.mean_ms.toFixed(3) : '—');
+      setText('qb-range', 'min ' + (b.min_ms != null ? b.min_ms.toFixed(3) : '—') + ' / max ' + (b.max_ms != null ? b.max_ms.toFixed(3) : '—'));
+      setText('qb-thru', (b.throughput_hz != null) ? Math.round(b.throughput_hz).toLocaleString() : '—');
+      setText('qb-svr', (b.solve_verify_ratio != null) ? b.solve_verify_ratio.toFixed(2) : '—');
+      setText('qb-poly', b.sat_polynomial ? 'polynomial verified' : 'non-polynomial');
+      var body = document.getElementById('qb-scaling-body');
+      if (body && Array.isArray(b.scaling)) {
+        body.innerHTML = b.scaling.map(function(s) {
+          var poly = s.polynomial ? '<span style="color:#4ade80;">yes</span>' : '<span style="color:#ef4444;">no</span>';
+          return '<tr><td>' + s.n_vars + '</td><td>' + s.clauses + '</td><td>' + s.steps + '</td><td>' + s.ms.toFixed(3) + '</td><td>' + poly + '</td></tr>';
+        }).join('');
+      }
+    }
 
     function renderStatus(snap) {
       if (!snap) {
@@ -399,5 +445,6 @@
     }
   })();
   </script>
+  <script defer src="js/quantum-trust-banner.js?v=1"></script>
 </body>
 </html>
