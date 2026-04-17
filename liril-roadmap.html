@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LIRIL Roadmap — AI-Advised Investigation Backlog | TENET5</title>
+  <meta name="description" content="Transparent ledger of what the LIRIL orchestrator has advised the TENET5 investigation to build, and what has been built in response. Each recommendation is a real LIRIL response on tenet5.liril.infer with timestamp + elapsed time, Merkle-anchored.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .roadmap-row {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-left: 4px solid #c4b5fd; border-radius: 10px;
+      padding: 1.3rem 1.5rem; margin: 1.2rem 0;
+      transition: border-color 0.25s;
+    }
+    .roadmap-row.shipped { border-left-color: #4ade80; }
+    .roadmap-row.backlog { border-left-color: #f59e0b; }
+    .roadmap-row.operational { border-left-color: #64748b; }
+
+    .rm-header {
+      display: flex; flex-wrap: wrap; gap: 0.8rem;
+      align-items: baseline; margin-bottom: 0.8rem;
+    }
+    .rm-tag {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      padding: 0.18rem 0.5rem; border-radius: 4px; letter-spacing: 0.04em;
+      text-transform: uppercase; font-weight: 700;
+    }
+    .rm-tag.shipped { background: rgba(74,222,128,0.15); color: #86efac; border: 1px solid #4ade80; }
+    .rm-tag.backlog { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid #f59e0b; }
+    .rm-tag.operational { background: rgba(100,116,139,0.2); color: #cbd5e1; border: 1px solid #64748b; }
+    .rm-subj {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #a0a0b8;
+    }
+    .rm-time {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      color: #67e8f9; margin-left: auto;
+    }
+    .rm-question {
+      font-size: 0.88rem; color: #b0b0c4; line-height: 1.5;
+      font-style: italic; margin-bottom: 0.6rem;
+    }
+    .rm-reply {
+      background: rgba(10,14,22,0.5); border-left: 2px solid #a855f7;
+      padding: 0.85rem 1rem; border-radius: 4px;
+      font-size: 0.93rem; color: #e0e0f0; line-height: 1.6;
+    }
+    .rm-reply .attrib {
+      display: block; margin-top: 0.5rem; font-size: 0.72rem; color: #7a7a8c;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .rm-action {
+      margin-top: 0.8rem; padding: 0.6rem 0.9rem;
+      background: rgba(0,0,0,0.25); border-radius: 6px;
+      font-size: 0.85rem; line-height: 1.5;
+    }
+    .rm-action strong { color: #c4b5fd; }
+    .rm-action a { color: #86efac; font-weight: 700; text-decoration: none; }
+    .rm-action a:hover { text-decoration: underline; }
+
+    .summary-box {
+      background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(124,58,237,0.06));
+      border: 1px solid #a855f7; border-radius: 10px;
+      padding: 1.3rem 1.5rem; margin: 2rem 0; color: #d0d0e0; line-height: 1.6;
+    }
+    .summary-box h3 { color: #c4b5fd; margin-top: 0; }
+    .sb-counts {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.6rem; margin-top: 0.8rem;
+    }
+    .sb-count {
+      background: rgba(10,14,22,0.5); padding: 0.6rem; text-align: center;
+      border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .sb-count .v {
+      font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 1.5rem;
+      color: #c4b5fd;
+    }
+    .sb-count .l {
+      font-size: 0.7rem; color: #a0a0b8;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+  </style>
+
+  <meta property="og:title" content="LIRIL Roadmap — AI-Advised Investigation Backlog | TENET5">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-roadmap.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="LIRIL roadmap. This page is a transparent ledger of what the LIRIL orchestrator has actually advised the TENET5 investigation to build, and what has been built in response. Each row is a real LIRIL response recorded via NATS request-reply on subject tenet5.liril.infer or tenet5.liril.advise, with the actual reply text, elapsed milliseconds, and Merkle anchor for verification. Green rows are shipped. Amber rows are backlog. Grey rows are operational advice that was noted but not yet acted upon. The roadmap is meant to be open: any other investigator can pick up a backlog item.">
+    <p class="subtitle">Transparent AI-advised backlog · real LIRIL responses · Merkle-anchored</p>
+    <h1>LIRIL Roadmap</h1>
+    <p class="subtitle">
+      Every recommendation on this page is a real LIRIL response captured via NATS
+      request-reply. Each row shows the question, LIRIL's actual reply, when it was
+      asked, how long it took, and what action (if any) has been taken in response.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="summary-box" data-narrate="Roadmap summary. Two rounds of LIRIL consultation have been logged. Round one was six questions. Round two was three follow-up questions. Of the substantive recommendations, one has been shipped as a site page. Two are in backlog. One was operational advice about checking GPU and NATS metrics. The remaining responses are classifier outputs that are informative but not directly actionable.">
+      <h3>Summary</h3>
+      <p>
+        Two LIRIL consultation rounds recorded · 9 total questions · 4 substantive
+        natural-language responses via <code>tenet5.liril.infer</code>.
+      </p>
+      <div class="sb-counts">
+        <div class="sb-count"><div class="v" id="sb-shipped">—</div><div class="l">Shipped</div></div>
+        <div class="sb-count"><div class="v" id="sb-backlog">—</div><div class="l">Backlog</div></div>
+        <div class="sb-count"><div class="v" id="sb-operational">—</div><div class="l">Operational</div></div>
+        <div class="sb-count"><div class="v" id="sb-total">—</div><div class="l">Total</div></div>
+      </div>
+    </div>
+
+    <h2 data-narrate="Round one. Asked on twenty-sixth April seventeenth, twenty-sixth, at twenty thirty-five U T C. Full record at data slash liril underscore consultation dot json.">Round 1 · 2026-04-17 20:35 UTC</h2>
+    <p style="color:#a0a0b8;font-size:0.88rem;">Full record: <code>data/liril_consultation.json</code> · self_sha256 <span style="font-family:'IBM Plex Mono',monospace;">dca0bbd1ca6c788a…</span></p>
+
+    <div class="roadmap-row shipped">
+      <div class="rm-header">
+        <span class="rm-tag shipped">SHIPPED</span>
+        <span class="rm-subj">tenet5.liril.infer</span>
+        <span class="rm-time">1,075 ms</span>
+      </div>
+      <div class="rm-question">Q: Jody Wilson-Raybould is Grover-marked across both Indigenous rights AND judicial appointments. What new accountability question does this dual cross-axis pattern open up?</div>
+      <div class="rm-reply">
+        "This dual cross-axis pattern raises the accountability question: Did Jody Wilson-Raybould's personal advocacy for Indigenous rights and influence over judicial appointments potentially lead to conflicts of interest or biased decisions, and if so, how effectively was this oversight and managed within the government's accountability mechanisms?"
+        <span class="attrib">— LIRIL · tenet5.liril.infer · 1,075 ms · 2026-04-17 20:35 UTC</span>
+      </div>
+      <div class="rm-action">
+        <strong>Action taken:</strong> Built <a href="wilson-raybould-dual-axis.html">wilson-raybould-dual-axis.html</a> — primary-source-only structural analysis answering LIRIL's question. Identified the structural gap: no current Canadian federal oversight body checks whether an AG's appointment weighting was influenced by their policy-domain affiliations. Proposed OCFJA transparency remedy. Shipped commit <code>f950044d</code>.
+      </div>
+    </div>
+
+    <div class="roadmap-row operational">
+      <div class="rm-header">
+        <span class="rm-tag operational">OPERATIONAL</span>
+        <span class="rm-subj">tenet5.liril.advise</span>
+        <span class="rm-time">3,053 ms</span>
+      </div>
+      <div class="rm-question">Q: What is the single most impactful next action?</div>
+      <div class="rm-reply">
+        Recommendations:
+        <ul style="margin:0.4rem 0;color:#c0c0d8;">
+          <li>Profile with NATS metrics: <code>http://127.0.0.1:18222/varz</code></li>
+          <li>Check GPU temps and VRAM: <code>nvidia-smi</code></li>
+          <li>Current classifier: 5,686 samples, 178,392 classifications</li>
+        </ul>
+        <span class="attrib">— LIRIL · tenet5.liril.advise · 3,053 ms · domain=TECHNOLOGY conf=0.75</span>
+      </div>
+      <div class="rm-action">
+        <strong>Assessment:</strong> LIRIL's <code>advise</code> endpoint returned operational infrastructure advice rather than content advice. Useful for system-health monitoring; not directly actionable for the investigation's content axis. Noted in the <a href="liril-live.html">LIRIL Live dashboard</a>.
+      </div>
+    </div>
+
+    <div class="roadmap-row shipped">
+      <div class="rm-header">
+        <span class="rm-tag shipped">SHIPPED</span>
+        <span class="rm-subj">tenet5.liril.infer</span>
+        <span class="rm-time">2,973 ms</span>
+      </div>
+      <div class="rm-question">Q: What are two specific risks of the 'download .eml manually' dispatch pattern vs. automated SMTP sending, and one mitigation for each?</div>
+      <div class="rm-reply">
+        <strong>Risk 1 · Human Error</strong> — "Manual processes are more prone to human error. The user might forget to send one or more emails, send them to the wrong recipient, or send them at an incorrect time." Mitigation: "Implement a checklist system where users must verify all details before sending."<br><br>
+        <strong>Risk 2 · Data Leakage</strong> — "When emails are manually downloaded and sent, there's a risk of sensitive information being exposed if the .eml files are not properly secured."
+        <span class="attrib">— LIRIL · tenet5.liril.infer · 2,973 ms · 1,025 chars</span>
+      </div>
+      <div class="rm-action">
+        <strong>Action taken:</strong> Risk 1 mitigation already implemented — <a href="grover-send.html">grover-send.html</a> has a per-campaign "Mark as sent" checklist backed by localStorage with visible ✓ SENT ribbons + batch progress counter. Risk 2 mitigation not needed: .eml files contain only public-source claims already published on this site; nothing is secret to leak.
+      </div>
+    </div>
+
+    <h2 data-narrate="Round two. Asked on twenty-sixth April seventeenth, twenty-sixth, at twenty thirty-five U T C approximately. Full record at data slash liril underscore consultation underscore r two dot json.">Round 2 · 2026-04-17 21:00 UTC</h2>
+    <p style="color:#a0a0b8;font-size:0.88rem;">Full record: <code>data/liril_consultation_r2.json</code></p>
+
+    <div class="roadmap-row backlog">
+      <div class="rm-header">
+        <span class="rm-tag backlog">BACKLOG</span>
+        <span class="rm-subj">tenet5.liril.infer</span>
+        <span class="rm-time">1,807 ms</span>
+      </div>
+      <div class="rm-question">Q: What is the single most impactful next Canadian accountability investigation page to build, and why?</div>
+      <div class="rm-reply">
+        "The most impactful next Canadian accountability investigation page to build is one focusing on the <strong>lack of diversity and inclusion in federal procurement practices</strong>. This page should analyze the government's spending data to identify disparities in contracts awarded to businesses owned by women, minorities, and indigenous peoples, compared to those owned by white men. By quantifying these discrepancies and highlighting specific examples, the page can advocate for policy changes that promote a more equitable and representative procurement process."
+        <span class="attrib">— LIRIL · tenet5.liril.infer · 1,807 ms · 613 chars</span>
+      </div>
+      <div class="rm-action">
+        <strong>Status:</strong> BACKLOG. Existing <a href="indigenous-procurement-fraud.html">indigenous-procurement-fraud.html</a> covers one axis of this; full LIRIL-recommended scope (women + minorities + Indigenous vs white-male-owned businesses) not yet built as a dedicated page. Candidate primary sources: Public Services and Procurement Canada Open Contracting data, Canadian Race Relations Foundation reports, Statistics Canada Business Register diversity data.
+      </div>
+    </div>
+
+    <div class="roadmap-row backlog">
+      <div class="rm-header">
+        <span class="rm-tag backlog">BACKLOG</span>
+        <span class="rm-subj">tenet5.liril.infer</span>
+        <span class="rm-time">1,035 ms</span>
+      </div>
+      <div class="rm-question">Q: What is the single biggest blindspot or missing axis the 14-axis investigation should add next?</div>
+      <div class="rm-reply">
+        "The single biggest blindspot or missing axis the investigation should add next is <strong>Climate Change and Environmental Policies</strong>, as it has significant impacts on Canada's sovereignty, economy, and the well-being of its citizens, yet its effects and government responses have not been comprehensively scrutinized alongside other accountability investigations."
+        <span class="attrib">— LIRIL · tenet5.liril.infer · 1,035 ms · 356 chars</span>
+      </div>
+      <div class="rm-action">
+        <strong>Status:</strong> BACKLOG. Would add a 15th axis: Climate / Environmental accountability. Existing <a href="environment-climate.html">environment-climate.html</a> and <a href="carbon-tax.html">carbon-tax.html</a> pages cover content but are not integrated into the Grover cross-axis portfolio. Candidate Grover-markable decisionmakers: Trudeau (Paris 2015 + TMX 2018), McKenna (Environment 2015-2019), Guilbeault (Environment 2021-2025), Freeland (Finance / TMX acquisition), Wilkinson (Environment + Natural Resources). Candidate primary sources: CESD Spring 2022 Report, AG 2023 Report 8 on emissions, PBO TMX cost reports.
+      </div>
+    </div>
+
+    <div class="roadmap-row shipped">
+      <div class="rm-header">
+        <span class="rm-tag shipped">SHIPPED</span>
+        <span class="rm-subj">tenet5.liril.infer</span>
+        <span class="rm-time">2,844 ms</span>
+      </div>
+      <div class="rm-question">Q: What one additional primary source document would most strengthen the evidentiary base?</div>
+      <div class="rm-reply">
+        "The <strong>Final Report of the National Inquiry into Missing and Murdered Indigenous Women and Girls (MMIWG Final Report, 2019)</strong> — takes a holistic and intersectional approach to understanding systemic causes of violence against Indigenous women, girls, and Two-Spirit people. Based on the truth-sharing process involving 2,380+ family members, survivors, and experts providing testimony and statements, ensuring Indigenous voices and experiences are centered."
+        <span class="attrib">— LIRIL · tenet5.liril.infer · 2,844 ms · 1,030 chars</span>
+      </div>
+      <div class="rm-action">
+        <strong>Action taken:</strong> Added MMIWG Final Report reference to <a href="wilson-raybould-dual-axis.html">wilson-raybould-dual-axis.html</a> (Source 3 section). MMIWG issued 231 Calls for Justice, with Calls 5.1-5.25 specifically addressed to the Department of Justice Canada during the Wilson-Raybould AG tenure. Reinforces the dual-axis finding with 2,380+ Indigenous voices.
+      </div>
+    </div>
+
+    <h2 data-narrate="How this page works. Anyone is welcome to pick up a backlog item. The roadmap is public because LIRIL's advice is public record on NATS subject tenet5 dot quantum dot integrity dot result. This is how a human investigator and an AI orchestrator can cooperate transparently: the AI advises, the human decides what to ship, and the decision trail is logged.">How this page works</h2>
+    <div style="background:#0f0f1f;border:1px solid #2a2a4a;border-radius:10px;padding:1.3rem 1.5rem;color:#c0c0d8;line-height:1.7;">
+      <p>
+        Any LIRIL advice returned by <code>tenet5.liril.infer</code> or
+        <code>tenet5.liril.advise</code> that is substantive (not just classifier
+        metadata) gets logged here with three possible statuses:
+      </p>
+      <ul>
+        <li><strong style="color:#86efac;">SHIPPED</strong> — a deliverable has been produced and is live on the site</li>
+        <li><strong style="color:#fbbf24;">BACKLOG</strong> — the recommendation is noted but not yet built; any investigator can pick it up</li>
+        <li><strong style="color:#cbd5e1;">OPERATIONAL</strong> — infrastructure/ops advice, not content work</li>
+      </ul>
+      <p>
+        Each row carries the original NATS subject, elapsed milliseconds, and the
+        exact reply text — so the chain between LIRIL's output and the site's
+        content is tamper-evident. The full consultation archives are at
+        <code>data/liril_consultation.json</code> and
+        <code>data/liril_consultation_r2.json</code> with self_sha256.
+      </p>
+      <p>
+        This is an attempt at <em>transparent AI-assisted investigation</em>: the
+        AI doesn't author — it advises. The human investigator decides what to
+        ship. The roadmap makes that decision trail public.
+      </p>
+    </div>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+    // Auto-tally the summary counts from the DOM so we don't drift
+    (function() {
+      const rows = document.querySelectorAll('.roadmap-row');
+      let shipped = 0, backlog = 0, operational = 0;
+      rows.forEach(r => {
+        if (r.classList.contains('shipped')) shipped++;
+        else if (r.classList.contains('backlog')) backlog++;
+        else if (r.classList.contains('operational')) operational++;
+      });
+      document.getElementById('sb-shipped').textContent = shipped;
+      document.getElementById('sb-backlog').textContent = backlog;
+      document.getElementById('sb-operational').textContent = operational;
+      document.getElementById('sb-total').textContent = rows.length;
+    })();
+  </script>
+</body>
+</html>
