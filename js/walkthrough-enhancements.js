@@ -22,6 +22,7 @@
   var LS_CC_KEY       = 'tenet5_wt_cc_on';             // closed captions toggle
   var LS_AUTOPLAY_KEY = 'tenet5_wt_autoplay';          // auto-advance to next page
   var LS_SCROLLPAUSE_KEY = 'tenet5_wt_scrollpause';    // pause on manual scroll
+  var LS_VOLUME_KEY   = 'tenet5_wt_volume';            // 0.0 — 1.0 narration volume
   var LS_RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 
   // Average words-per-minute for rate=1.0 (measured empirically on the LIRIL
@@ -188,6 +189,21 @@
     '}',
     '@keyframes wt-toast-in { from { transform: translate(-50%, -8px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }',
 
+    '.wt-volume-slider {',
+    '  -webkit-appearance: none; appearance: none; width: 70px; height: 4px;',
+    '  background: rgba(255,255,255,0.1); border-radius: 2px; outline: none;',
+    '  cursor: pointer; margin: 0 2px;',
+    '}',
+    '.wt-volume-slider::-webkit-slider-thumb {',
+    '  -webkit-appearance: none; appearance: none; width: 12px; height: 12px;',
+    '  border-radius: 50%; background: #c4b5fd; cursor: pointer;',
+    '  box-shadow: 0 0 6px rgba(168,85,247,0.5);',
+    '}',
+    '.wt-volume-slider::-moz-range-thumb {',
+    '  width: 12px; height: 12px; border-radius: 50%; background: #c4b5fd;',
+    '  cursor: pointer; border: none;',
+    '}',
+
     '@media (max-width: 640px) {',
     '  .wt-enhance-bar { left: 6px; right: 6px; transform: none; padding: 6px 10px; gap: 6px; font-size: 0.7rem; flex-wrap: wrap; justify-content: center; }',
     '  .wt-enhance-bar .wt-section-track { width: 80px; }',
@@ -239,9 +255,13 @@
       '<button id="wt-sp-2" data-spd="1.25">1.25×</button>' +
       '<button id="wt-sp-3" data-spd="1.5">1.5×</button>' +
       '<div class="wt-sep"></div>' +
-      '<button id="wt-auto-btn" title="Autoplay — advance to next page">▶▶</button>' +
+      '<button id="wt-mute-btn" title="Mute / unmute (V)">🔊</button>' +
+      '<input type="range" id="wt-vol-slider" class="wt-volume-slider" min="0" max="1" step="0.05" title="Volume">' +
+      '<div class="wt-sep"></div>' +
+      '<button id="wt-auto-btn" title="Autoplay — advance to next page (A)">▶▶</button>' +
       '<button id="wt-cc-btn" title="Closed captions (C)">CC</button>' +
       '<button id="wt-transcript-btn" title="Show transcript (T)">☰ Text</button>' +
+      '<button id="wt-export-btn" title="Download transcript .txt (D)">⤓</button>' +
       '<button id="wt-share-btn" title="Copy shareable link (M)">🔗</button>' +
       '<button id="wt-help-btn" title="Show help">? Help</button>' +
       '<span class="wt-time-pill" id="wt-time-pill"></span>';
@@ -255,9 +275,16 @@
     bar.querySelector('#wt-cc-btn').addEventListener('click', toggleCC);
     bar.querySelector('#wt-auto-btn').addEventListener('click', toggleAutoplay);
     bar.querySelector('#wt-share-btn').addEventListener('click', shareWalkthrough);
+    bar.querySelector('#wt-mute-btn').addEventListener('click', toggleMute);
+    bar.querySelector('#wt-export-btn').addEventListener('click', exportTranscript);
+    var vs = bar.querySelector('#wt-vol-slider');
+    vs.value = String(volume);
+    vs.addEventListener('input', function() { setVolume(parseFloat(vs.value)); });
     markActiveSpeedBtn();
     markCCBtn();
     markAutoplayBtn();
+    // Ensure volume is actually written to LIRIL_VOICE.params on mount
+    setVolume(volume);
   }
 
   function markActiveSpeedBtn() {
@@ -422,6 +449,8 @@
         '<div class="wt-help-row"><span class="wt-help-key">T</span><span class="wt-help-desc">Toggle transcript panel</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">C</span><span class="wt-help-desc">Toggle closed captions</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">A</span><span class="wt-help-desc">Toggle autoplay (auto-advance to next page)</span></div>' +
+        '<div class="wt-help-row"><span class="wt-help-key">V</span><span class="wt-help-desc">Mute / unmute narration</span></div>' +
+        '<div class="wt-help-row"><span class="wt-help-key">D</span><span class="wt-help-desc">Download transcript as .txt file</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">M</span><span class="wt-help-desc">Copy shareable walkthrough link</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">?  or  H</span><span class="wt-help-desc">Show / hide this help</span></div>' +
         '<div class="wt-help-row" style="margin-top:0.8rem;padding-top:0.4rem;border-top:1px solid rgba(255,255,255,0.08);"><span class="wt-help-key" style="color:#7a7a8c;">URL</span><span class="wt-help-desc" style="font-family:\'IBM Plex Mono\',monospace;font-size:0.78rem;">?wt=1&amp;section=5&amp;speed=1.25</span></div>' +
@@ -762,6 +791,103 @@
     } catch (e) { done(false); console.log(url); }
   }
 
+  // ── Volume control ───────────────────────────────────────────────────────
+  // Writes window.LIRIL_VOICE.params.volume; presentation.js reads that on
+  // each new utterance (same contract used by setSpeed).
+  var volume = 1.0;
+  try {
+    var stored = parseFloat(localStorage.getItem(LS_VOLUME_KEY));
+    if (!isNaN(stored) && stored >= 0 && stored <= 1) volume = stored;
+  } catch (e) {}
+  var preMuteVolume = 1.0;
+
+  function setVolume(v) {
+    volume = Math.max(0, Math.min(1, v));
+    try { localStorage.setItem(LS_VOLUME_KEY, String(volume)); } catch (e) {}
+    try {
+      if (!window.LIRIL_VOICE) window.LIRIL_VOICE = { params: {} };
+      if (!window.LIRIL_VOICE.params) window.LIRIL_VOICE.params = {};
+      window.LIRIL_VOICE.params.volume = volume;
+    } catch (e) {}
+    // Update slider + icon if visible
+    if (bar) {
+      var sl = bar.querySelector('#wt-vol-slider');
+      if (sl) sl.value = String(volume);
+      var mute = bar.querySelector('#wt-mute-btn');
+      if (mute) mute.textContent = volume === 0 ? '🔇' : (volume < 0.5 ? '🔉' : '🔊');
+    }
+  }
+  function toggleMute() {
+    if (volume > 0) {
+      preMuteVolume = volume;
+      setVolume(0);
+      showShareToast('🔇 Narration muted');
+    } else {
+      setVolume(preMuteVolume > 0 ? preMuteVolume : 1.0);
+      showShareToast('🔊 Narration unmuted');
+    }
+  }
+
+  // ── Export transcript (.txt download) ────────────────────────────────────
+  // Collects every [data-narrate] block on the page into a clean text file
+  // with a header citing the page URL + SYSTEM_SEED so users can share
+  // archived text of the investigation.
+  function exportTranscript() {
+    try {
+      var sects = document.querySelectorAll('[data-narrate]');
+      if (!sects.length) { showShareToast('No narration on this page', '#facc15'); return; }
+      var title = (document.title || 'TENET5 narration').replace(/\s*\|\s*TENET5\s*$/i, '');
+      var url = (function() {
+        try {
+          if (window.top !== window) {
+            var page = window.location.pathname.split('/').pop();
+            return window.top.location.origin + '/?load=' + page;
+          }
+        } catch (e) {}
+        return window.location.href;
+      })();
+
+      var lines = [];
+      lines.push('TENET5 — Narration Transcript');
+      lines.push('Title: ' + title);
+      lines.push('Source: ' + url);
+      lines.push('Generated: ' + new Date().toISOString());
+      lines.push('SYSTEM_SEED: 118400');
+      lines.push('Sections: ' + sects.length);
+      lines.push('═'.repeat(48));
+      lines.push('');
+
+      Array.prototype.forEach.call(sects, function(s, i) {
+        var txt = (s.getAttribute('data-narrate') || s.textContent || '').trim();
+        if (!txt) return;
+        lines.push('[§ ' + (i + 1) + ']');
+        lines.push(txt);
+        lines.push('');
+      });
+
+      lines.push('─'.repeat(48));
+      lines.push('Licensed: EOSL-2.0 · Daniel Perry © 2024-2026');
+      lines.push('LIRIL AI · TENET5 · Canadian Accountability Investigation');
+
+      var blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+      var href = URL.createObjectURL(blob);
+      var fname = (window.location.pathname.split('/').pop() || 'page').replace('.html', '') + '-transcript.txt';
+
+      var a = document.createElement('a');
+      a.href = href;
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(href); }, 2000);
+
+      showShareToast('✓ Transcript downloaded — ' + sects.length + ' sections');
+    } catch (e) {
+      showShareToast('Download failed — see console', '#facc15');
+      console.error('[tenet5] transcript export error:', e);
+    }
+  }
+
   // ── Pause on manual scroll ───────────────────────────────────────────────
   // When the user scrolls mid-narration we pause speechSynthesis so they
   // can read without the voice racing ahead. Resumes after 2 s of calm.
@@ -934,6 +1060,18 @@
       showShareToast(autoplayEnabled ? '▶▶ Autoplay ON' : '⏸ Autoplay OFF');
       return;
     }
+    // Volume mute / unmute
+    if (key === 'v' || key === 'V') {
+      e.preventDefault();
+      toggleMute();
+      return;
+    }
+    // Download transcript
+    if (key === 'd' || key === 'D') {
+      e.preventDefault();
+      exportTranscript();
+      return;
+    }
     // Help
     if (key === '?' || key === 'h' || key === 'H') {
       e.preventDefault();
@@ -1049,6 +1187,10 @@
     autoplayEnabled: function() { return autoplayEnabled; },
     shareWalkthrough: shareWalkthrough,
     buildShareURL: buildShareURL,
+    setVolume: setVolume,
+    getVolume: function() { return volume; },
+    toggleMute: toggleMute,
+    exportTranscript: exportTranscript,
     showHint: maybeShowHint,
     clearResume: clearPosition,
     nextSection: function() { return window.__TENET5_NEXT_SECTION && window.__TENET5_NEXT_SECTION(); },
