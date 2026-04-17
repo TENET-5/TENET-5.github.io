@@ -1407,9 +1407,17 @@
     'geneva-vs-jails.html': {
       current: 'Below Geneva — Jails vs. PoW Standards',
       next: [
+        { href: 'quantum-accountability.html', label: 'Quantum Accountability', desc: 'Grover amplification on the corrections dossier and the 1,181-node network' },
         { href: 'disability-genocide.html', label: 'Disability & CRPD Violations', desc: 'Canada\u2019s war on the disabled \u2014 same treaty-violation pattern' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 confirmed records of government misconduct' },
-        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Full pattern documentation across populations' },
+      ]
+    },
+    'quantum-accountability.html': {
+      current: 'Quantum Accountability',
+      next: [
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'The corrections thesis Grover amplifies' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'The 1,181-node reclassified influence graph' },
+        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'Israel-linked actors surfaced across five type filters' },
       ]
     },
   };
