@@ -61,6 +61,8 @@
             '<a href="/cfnis.html" id="nav-cfnis">CFNIS</a>' +
             '<a href="/treason-trajectory.html" id="nav-treason" style="color:#facc15;">Treason Trajectory</a>' +
             '<a href="/network-analysis.html" id="nav-network">Network Analysis</a>' +
+            '<a href="/corruption-map.html" id="nav-corruption-map" style="color:#c9a84c;">Corruption Map</a>' +
+            '<a href="/corruption-atlas.html" id="nav-corruption-atlas" style="color:#c9a84c;">Corruption Atlas</a>' +
             '<a href="/charity-pipeline.html" id="nav-charity">Charity Pipeline</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +
