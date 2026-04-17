@@ -330,9 +330,18 @@
 
   function injectVideo() {
     var page = getPageName();
+
+    // ── Inject Topography Mapping Layer (Applies to ALL pages) ──
+    if (!document.querySelector('.topography-layer')) {
+      var topoWrap = document.createElement('div');
+      topoWrap.className = 'topography-layer';
+      topoWrap.setAttribute('aria-hidden', 'true');
+      document.body.insertBefore(topoWrap, document.body.firstChild);
+    }
+
     if (SKIP.indexOf(page) !== -1) return;
 
-    // Don't duplicate
+    // Don't duplicate video wrap
     if (document.querySelector('.t5-video-wrap, .t5-video-bg')) return;
 
     var videoFile = PAGE_VIDEOS[page] || DEFAULT_VIDEO;
