@@ -241,8 +241,384 @@ body.topo.topo-dense {
 .peak-node.p-foreign { background: radial-gradient(circle at 35% 30%, rgba(168,85,247,0.80), rgba(90,30,160,0.85)); }
 .peak-node.p-media   { background: radial-gradient(circle at 35% 30%, rgba(107,142,90,0.80), rgba(60,85,48,0.85)); }
 
-/* ── 10. Topographic reduced motion ────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   TENET5 — Topography v2.0 — Corruption Terrain Mapping
+   New motifs: trail paths, terrain sections, isobars,
+   investigation depth contours, entity heatmap rings,
+   cartographic headers, and map-inset panels.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 10. Trail path — SVG-styled connection lines ──────────────── */
+/* Use between corruption entities to show the money/influence flow */
+.trail-path {
+  position: relative;
+  height: 3px;
+  margin: 8px 0;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(185, 28, 28, 0.50) 0, rgba(185, 28, 28, 0.50) 8px,
+      transparent 8px, transparent 14px);
+  border-radius: 1px;
+}
+.trail-path::before {
+  content: '';
+  position: absolute;
+  left: 0; top: -3px; bottom: -3px; right: 0;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0, transparent 48px,
+      rgba(201, 168, 76, 0.25) 48px, rgba(201, 168, 76, 0.25) 50px);
+}
+.trail-path.tp-gold {
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(201, 168, 76, 0.55) 0, rgba(201, 168, 76, 0.55) 8px,
+      transparent 8px, transparent 14px);
+}
+.trail-path.tp-vertical {
+  width: 3px;
+  height: auto;
+  min-height: 40px;
+  background:
+    repeating-linear-gradient(180deg,
+      rgba(185, 28, 28, 0.50) 0, rgba(185, 28, 28, 0.50) 8px,
+      transparent 8px, transparent 14px);
+}
+
+/* ── 11. Terrain section — full-width contour backdrop panels ──── */
+/* Wraps a content section with layered topographic elevation feel */
+.terrain-section {
+  position: relative;
+  padding: 3rem 0;
+  overflow: hidden;
+}
+.terrain-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 200' fill='none'><path d='M0,160 C80,120 160,140 280,100 C400,60 520,80 640,50 C720,30 780,45 800,40' stroke='%23b91c1c' stroke-width='0.8' opacity='0.08'/><path d='M0,170 C100,140 200,155 320,120 C440,85 540,100 660,70 C740,50 790,60 800,55' stroke='%23b91c1c' stroke-width='0.6' opacity='0.06'/><path d='M0,180 C120,155 220,165 340,135 C460,105 560,115 680,90 C750,72 795,80 800,75' stroke='%23c9a84c' stroke-width='0.5' opacity='0.05'/><path d='M0,190 C130,168 240,175 360,150 C480,125 570,132 690,110 C760,95 800,100 800,95' stroke='%23c9a84c' stroke-width='0.4' opacity='0.04'/></svg>") repeat-x bottom / 800px 200px;
+}
+.terrain-section.ts-peak::before {
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 200' fill='none'><path d='M0,180 C100,160 200,100 400,40 C600,100 700,160 800,180' stroke='%23b91c1c' stroke-width='1' opacity='0.12'/><path d='M0,185 C120,168 220,115 400,60 C580,115 680,168 800,185' stroke='%23b91c1c' stroke-width='0.8' opacity='0.09'/><path d='M0,190 C140,175 240,130 400,80 C560,130 660,175 800,190' stroke='%23c9a84c' stroke-width='0.6' opacity='0.06'/><path d='M0,195 C160,182 260,145 400,100 C540,145 640,182 800,195' stroke='%23c9a84c' stroke-width='0.5' opacity='0.04'/></svg>") repeat-x bottom / 800px 200px;
+}
+
+/* ── 12. Isobar — horizontal contour lines between content ─────── */
+/* Wider version of pressure-ridge for section separators */
+.isobar {
+  position: relative;
+  height: 32px;
+  margin: 2rem 0;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 32' fill='none'><path d='M0,8 C60,4 120,12 200,6 C280,0 360,10 440,4 C520,-2 560,8 600,6' stroke='%23b91c1c' stroke-width='0.7' opacity='0.12'/><path d='M0,16 C80,12 140,20 220,14 C300,8 380,18 460,12 C540,6 580,14 600,12' stroke='%23c9a84c' stroke-width='0.5' opacity='0.08'/><path d='M0,24 C70,20 150,28 240,22 C330,16 400,24 480,18 C560,12 590,20 600,18' stroke='%23b91c1c' stroke-width='0.5' opacity='0.06'/></svg>") repeat-x center / 600px 32px;
+  opacity: 0.85;
+}
+.isobar.isobar-thick {
+  height: 48px;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 48' fill='none'><path d='M0,8 C60,2 140,14 220,6 C300,-2 380,12 460,4 C540,-4 580,8 600,4' stroke='%23b91c1c' stroke-width='1' opacity='0.14'/><path d='M0,18 C80,12 160,24 240,16 C320,8 400,20 480,12 C560,4 590,14 600,10' stroke='%23c9a84c' stroke-width='0.7' opacity='0.10'/><path d='M0,28 C70,22 150,34 230,26 C310,18 390,28 470,20 C550,12 585,22 600,18' stroke='%23b91c1c' stroke-width='0.6' opacity='0.08'/><path d='M0,38 C90,32 170,42 250,34 C330,26 410,36 490,28 C560,20 590,30 600,26' stroke='%23c9a84c' stroke-width='0.5' opacity='0.06'/></svg>") repeat-x center / 600px 48px;
+}
+
+/* ── 13. Investigation depth contour — stacked rings ───────────── */
+/* Concentric rings radiating from a high-corruption entity */
+.depth-contour {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle,
+      rgba(185, 28, 28, 0.25) 0%, rgba(185, 28, 28, 0.25) 18%,
+      transparent 18%, transparent 28%,
+      rgba(185, 28, 28, 0.18) 28%, rgba(185, 28, 28, 0.18) 32%,
+      transparent 32%, transparent 42%,
+      rgba(185, 28, 28, 0.12) 42%, rgba(185, 28, 28, 0.12) 46%,
+      transparent 46%, transparent 58%,
+      rgba(201, 168, 76, 0.08) 58%, rgba(201, 168, 76, 0.08) 61%,
+      transparent 61%, transparent 74%,
+      rgba(201, 168, 76, 0.05) 74%, rgba(201, 168, 76, 0.05) 77%,
+      transparent 77%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.depth-contour .dc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  z-index: 1;
+}
+.depth-contour.dc-sm { width: 100px; height: 100px; }
+.depth-contour.dc-lg { width: 220px; height: 220px; }
+.depth-contour.dc-xl { width: 300px; height: 300px; }
+
+/* ── 14. Heatmap ring — glowing entity importance indicator ────── */
+.heatmap-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(185, 28, 28, 0.30);
+  background: radial-gradient(circle, rgba(185, 28, 28, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  animation: heatPulse 4s ease-in-out infinite alternate;
+}
+@keyframes heatPulse {
+  0%   { opacity: 0.4; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* ── 15. Cartographic header — map title bar with scale ────────── */
+.carto-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+.carto-header h2, .carto-header h3 {
+  font-family: 'Cinzel', 'Crimson Text', Georgia, serif;
+  color: var(--text-light);
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.carto-header .ch-scale {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-royal-gold);
+  opacity: 0.7;
+  white-space: nowrap;
+}
+.carto-header .ch-datum {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.10em;
+  color: var(--text-tertiary);
+}
+
+/* ── 16. Map inset panel — small reference map in corner ───────── */
+.map-inset {
+  position: relative;
+  width: 180px;
+  height: 120px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.map-inset::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 120' fill='none'><g stroke='%23b91c1c' stroke-width='0.5' opacity='0.15'><ellipse cx='90' cy='60' rx='70' ry='45'/><ellipse cx='90' cy='60' rx='50' ry='32'/><ellipse cx='90' cy='60' rx='30' ry='19'/><ellipse cx='90' cy='60' rx='12' ry='8'/></g><g stroke='%23c9a84c' stroke-width='0.4' opacity='0.10'><path d='M0,90 C40,75 80,85 120,70 C150,58 170,65 180,60'/><path d='M0,70 C50,55 90,65 130,50 C160,38 175,45 180,40'/></g></svg>") no-repeat center / cover;
+  pointer-events: none;
+}
+.map-inset .mi-label {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-royal-gold);
+  opacity: 0.65;
+}
+.map-inset .mi-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.6);
+}
+
+/* ── 17. Corruption terrain card — entity card with topo layers ── */
+.terrain-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.terrain-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200' fill='none'><path d='M0,160 C50,140 100,150 180,130 C260,110 280,120 300,115' stroke='%23b91c1c' stroke-width='0.5' opacity='0.08'/><path d='M0,175 C60,158 120,165 200,148 C270,134 285,140 300,135' stroke='%23c9a84c' stroke-width='0.4' opacity='0.06'/><path d='M0,190 C70,176 130,182 210,168 C275,156 290,160 300,157' stroke='%23b91c1c' stroke-width='0.3' opacity='0.04'/></svg>") no-repeat bottom / 100% auto;
+}
+.terrain-card > * { position: relative; z-index: 1; }
+.terrain-card:hover {
+  border-color: rgba(185, 28, 28, 0.35);
+  transform: translateY(-2px);
+}
+.terrain-card .tc-elev {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  opacity: 0.7;
+  z-index: 1;
+}
+.terrain-card .tc-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin: 0 0 0.5rem;
+}
+.terrain-card .tc-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
+
+/* ── 18. Connection line (CSS-only graph edges) ────────────────── */
+.conn-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(185, 28, 28, 0.4), rgba(201, 168, 76, 0.2), transparent);
+  transform-origin: 0 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.conn-line.cl-strong {
+  height: 2px;
+  background: linear-gradient(90deg, rgba(185, 28, 28, 0.7), rgba(185, 28, 28, 0.3), transparent);
+}
+.conn-line.cl-dashed {
+  background: none;
+  border-top: 1px dashed rgba(201, 168, 76, 0.3);
+}
+
+/* ── 19. Terrain grid — corruption topology layout ─────────────── */
+.terrain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.terrain-grid.tg-dense {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* ── 20. Ridge label — inline corruption category tag ──────────── */
+.ridge-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+.ridge-label.rl-lobbying  { color: var(--color-royal-gold); border-color: rgba(201,168,76,0.35); background: rgba(201,168,76,0.08); }
+.ridge-label.rl-treason   { color: var(--accent-bright);    border-color: rgba(220,38,38,0.35);  background: rgba(220,38,38,0.08); }
+.ridge-label.rl-foreign   { color: var(--color-purple);     border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.08); }
+.ridge-label.rl-financial { color: var(--hud-amber);        border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.08); }
+.ridge-label.rl-osint     { color: var(--hud-cyan);         border-color: rgba(34,211,238,0.35); background: rgba(34,211,238,0.08); }
+.ridge-label.rl-media     { color: var(--color-green);      border-color: rgba(107,142,90,0.35); background: rgba(107,142,90,0.08); }
+
+/* ── 21. Topographic scale bar ─────────────────────────────────── */
+.topo-scale {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  color: var(--text-quaternary);
+  text-transform: uppercase;
+}
+.topo-scale .ts-bar {
+  display: flex;
+  height: 4px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.topo-scale .ts-bar span {
+  display: block;
+  height: 100%;
+}
+.topo-scale .ts-bar .ts-fill { background: var(--accent); }
+.topo-scale .ts-bar .ts-empty { background: rgba(255,255,255,0.06); }
+
+/* ── 22. Corruption altitude meter ─────────────────────────────── */
+.alt-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 28px;
+}
+.alt-meter .am-bar {
+  width: 100%;
+  height: 3px;
+  border-radius: 1px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.alt-meter .am-bar .am-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 0.6s ease;
+}
+.alt-meter .am-fill.am-critical { background: var(--accent-bright); }
+.alt-meter .am-fill.am-high     { background: var(--color-warning); }
+.alt-meter .am-fill.am-mid      { background: var(--color-gold); }
+.alt-meter .am-fill.am-low      { background: var(--color-green); }
+.alt-meter .am-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.4rem;
+  letter-spacing: 0.08em;
+  color: var(--text-quaternary);
+  text-transform: uppercase;
+}
+
+/* ── 23. Topographic reduced motion ────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   body.topo { background-attachment: scroll, scroll; }
   .peak-node { transition: none; }
+  .heatmap-ring { animation: none; opacity: 0.6; }
+  .terrain-card { transition: none; }
+}
+
+/* ── 24. Responsive adjustments ────────────────────────────────── */
+@media (max-width: 768px) {
+  .terrain-grid { grid-template-columns: 1fr; }
+  .terrain-grid.tg-dense { grid-template-columns: 1fr; }
+  .depth-contour { width: 120px; height: 120px; }
+  .depth-contour.dc-lg { width: 160px; height: 160px; }
+  .depth-contour.dc-xl { width: 200px; height: 200px; }
+  .map-inset { width: 140px; height: 93px; }
+  .carto-header { flex-wrap: wrap; gap: 0.5rem; }
 }
