@@ -1423,9 +1423,17 @@
     'quantum-methodology.html': {
       current: 'Methodology',
       next: [
+        { href: 'grover-send.html', label: 'Ready-to-Send Campaigns', desc: 'Pre-built emails targeting the Grover-amplified actors' },
         { href: 'quantum-accountability.html', label: 'Quantum Accountability', desc: 'The findings the methodology produced (8 axes, 5 chairs)' },
-        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'A worked example of the methodology' },
         { href: 'cija-maid-pipeline.html', label: 'Retraction Trail', desc: 'What the method retracted and why' },
+      ]
+    },
+    'grover-send.html': {
+      current: 'Ready-to-Send Campaigns',
+      next: [
+        { href: 'quantum-accountability.html', label: 'Quantum Accountability', desc: 'The 8-axis findings behind the campaigns' },
+        { href: 'quantum-methodology.html', label: 'Methodology', desc: 'How the targets were identified' },
+        { href: 'email-campaign.html', label: 'Full MP Campaign Generator', desc: 'Individualized emails for every MP (340 total)' },
       ]
     },
   };
