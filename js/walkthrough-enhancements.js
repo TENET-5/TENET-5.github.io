@@ -19,7 +19,12 @@
   var LS_SPEED_KEY    = 'tenet5_narration_speed';
   var LS_HINT_KEY     = 'tenet5_wt_hint_shown';       // first-run keyboard hint
   var LS_TRANSCRIPT_KEY = 'tenet5_wt_transcript_open'; // remember panel state
+  var LS_CC_KEY       = 'tenet5_wt_cc_on';             // closed captions toggle
   var LS_RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
+
+  // Average words-per-minute for rate=1.0 (measured empirically on the LIRIL
+  // voice presets). Scales inversely with the current speed multiplier.
+  var BASE_WPM = 170;
 
   var SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5];
   var DEFAULT_SPEED = 1.0;
@@ -153,6 +158,24 @@
     '.wt-transcript-body p:hover { color: #e0e0f0; border-left-color: #a855f7; }',
     '.wt-transcript-body p.active { color: #f0f0f0; border-left-color: #c4b5fd; background: rgba(168,85,247,0.08); }',
 
+    '.wt-cc {',
+    '  position: fixed; left: 50%; transform: translateX(-50%);',
+    '  bottom: 72px; max-width: min(760px, 92vw); min-width: 240px;',
+    '  padding: 14px 22px; font-family: \'Inter\', system-ui, sans-serif;',
+    '  font-size: 1.05rem; line-height: 1.45; text-align: center; color: #f4f4fa;',
+    '  background: rgba(5,8,14,0.88); border: 1px solid rgba(168,85,247,0.35);',
+    '  border-radius: 10px; backdrop-filter: blur(8px); z-index: 99994;',
+    '  display: none; pointer-events: none;',
+    '  box-shadow: 0 8px 28px rgba(0,0,0,0.55);',
+    '}',
+    '.wt-cc.active { display: block; }',
+    '.wt-cc .wt-cc-text { text-shadow: 0 2px 8px rgba(0,0,0,0.8); }',
+
+    '.wt-time-pill {',
+    '  font-family: \'IBM Plex Mono\', monospace; font-size: 0.72rem;',
+    '  color: #a0a0b8; white-space: nowrap; padding-left: 4px;',
+    '}',
+
     '@media (max-width: 640px) {',
     '  .wt-enhance-bar { left: 6px; right: 6px; transform: none; padding: 6px 10px; gap: 6px; font-size: 0.7rem; flex-wrap: wrap; justify-content: center; }',
     '  .wt-enhance-bar .wt-section-track { width: 80px; }',
@@ -204,8 +227,10 @@
       '<button id="wt-sp-2" data-spd="1.25">1.25×</button>' +
       '<button id="wt-sp-3" data-spd="1.5">1.5×</button>' +
       '<div class="wt-sep"></div>' +
+      '<button id="wt-cc-btn" title="Closed captions (C)">CC</button>' +
       '<button id="wt-transcript-btn" title="Show transcript (T)">☰ Text</button>' +
-      '<button id="wt-help-btn" title="Show help">? Help</button>';
+      '<button id="wt-help-btn" title="Show help">? Help</button>' +
+      '<span class="wt-time-pill" id="wt-time-pill"></span>';
     document.body.appendChild(bar);
     // Speed buttons
     Array.prototype.forEach.call(bar.querySelectorAll('button[data-spd]'), function(b) {
@@ -213,7 +238,9 @@
     });
     bar.querySelector('#wt-help-btn').addEventListener('click', showHelp);
     bar.querySelector('#wt-transcript-btn').addEventListener('click', toggleTranscript);
+    bar.querySelector('#wt-cc-btn').addEventListener('click', toggleCC);
     markActiveSpeedBtn();
+    markCCBtn();
   }
 
   function markActiveSpeedBtn() {
@@ -248,6 +275,7 @@
       if (fill) fill.style.width = '0%';
       if (count) count.textContent = 'sect —/—';
     }
+    updateTimePill();
   }
 
   // ── Speed control ────────────────────────────────────────────────────────
@@ -282,6 +310,7 @@
     } catch (e) {}
     // Nudge the engine to pick up the new rate on next utterance. We don't
     // cancel mid-sentence (jarring); the multiplier applies from the next one.
+    updateTimePill();
   }
 
   // ── Session resume ───────────────────────────────────────────────────────
@@ -374,7 +403,9 @@
         '<div class="wt-help-row"><span class="wt-help-key">Esc</span><span class="wt-help-desc">Stop walkthrough</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">S</span><span class="wt-help-desc">Cycle narration speed (0.75× → 1× → 1.25× → 1.5×)</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">T</span><span class="wt-help-desc">Toggle transcript panel</span></div>' +
+        '<div class="wt-help-row"><span class="wt-help-key">C</span><span class="wt-help-desc">Toggle closed captions</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">?  or  H</span><span class="wt-help-desc">Show / hide this help</span></div>' +
+        '<div class="wt-help-row" style="margin-top:0.8rem;padding-top:0.4rem;border-top:1px solid rgba(255,255,255,0.08);"><span class="wt-help-key" style="color:#7a7a8c;">URL</span><span class="wt-help-desc" style="font-family:\'IBM Plex Mono\',monospace;font-size:0.78rem;">?wt=1&amp;section=5&amp;speed=1.25</span></div>' +
         '<button class="wt-close" id="wt-close-help">Close</button>' +
       '</div>';
     document.body.appendChild(helpOverlay);
@@ -484,6 +515,174 @@
     else showTranscript();
   }
 
+  // ── Closed captions ──────────────────────────────────────────────────────
+  // Non-invasive hook: wrap speechSynthesis.speak() so any utterance that
+  // passes through gets 'start', 'boundary', and 'end' listeners attached.
+  // presentation.js builds utterances with u.onstart/u.onend already set;
+  // addEventListener is additive and doesn't displace those existing handlers.
+  var ccEl = null;
+  var ccEnabled = false;
+  try { ccEnabled = localStorage.getItem(LS_CC_KEY) === '1'; } catch (e) {}
+  var ccCurrentText = '';
+  var ccCurrentSentenceStart = 0;
+
+  function buildCC() {
+    if (ccEl) return;
+    ccEl = document.createElement('div');
+    ccEl.className = 'wt-cc';
+    ccEl.innerHTML = '<span class="wt-cc-text"></span>';
+    ccEl.setAttribute('aria-live', 'polite');
+    ccEl.setAttribute('role', 'status');
+    document.body.appendChild(ccEl);
+  }
+  function showCCText(txt) {
+    if (!ccEnabled) return;
+    if (!ccEl) buildCC();
+    var span = ccEl.querySelector('.wt-cc-text');
+    if (span) span.textContent = txt || '';
+    if (txt) ccEl.classList.add('active');
+  }
+  function hideCC() {
+    if (ccEl) ccEl.classList.remove('active');
+  }
+  function toggleCC() {
+    ccEnabled = !ccEnabled;
+    try { localStorage.setItem(LS_CC_KEY, ccEnabled ? '1' : '0'); } catch (e) {}
+    if (!ccEnabled) hideCC();
+    markCCBtn();
+  }
+  function markCCBtn() {
+    if (!bar) return;
+    var btn = bar.querySelector('#wt-cc-btn');
+    if (!btn) return;
+    if (ccEnabled) btn.classList.add('active'); else btn.classList.remove('active');
+  }
+
+  // Split utterance text into sentences for cleaner CC cadence.
+  function splitSentences(text) {
+    if (!text) return [];
+    // Keep trailing punctuation with each sentence. Handle Mr./Mrs./etc later.
+    return text.split(/(?<=[.!?])\s+(?=[A-Z0-9"'])/g).filter(Boolean);
+  }
+
+  function installSpeechHook() {
+    try {
+      if (!window.speechSynthesis || window.__TENET5_CC_HOOK_INSTALLED) return;
+      window.__TENET5_CC_HOOK_INSTALLED = true;
+
+      var origSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+      window.speechSynthesis.speak = function(u) {
+        try {
+          if (u && !u.__tenet5_cc_hooked) {
+            u.__tenet5_cc_hooked = true;
+            ccCurrentText = String(u.text || '');
+            u.addEventListener('start', function() {
+              ccCurrentSentenceStart = 0;
+              // Show first sentence immediately (boundary may lag)
+              var first = splitSentences(ccCurrentText)[0] || ccCurrentText;
+              showCCText(first);
+            });
+            u.addEventListener('boundary', function(ev) {
+              // ev.charIndex is the start of the current word in the text.
+              // Find the sentence that contains charIndex and show it.
+              if (typeof ev.charIndex !== 'number') return;
+              var txt = ccCurrentText;
+              var sents = splitSentences(txt);
+              var cursor = 0;
+              for (var i = 0; i < sents.length; i++) {
+                var end = cursor + sents[i].length;
+                if (ev.charIndex <= end) {
+                  showCCText(sents[i]);
+                  return;
+                }
+                // advance over any whitespace between sentences
+                cursor = end + 1;
+              }
+              // Fallback: just show the current word region
+              showCCText(txt.slice(Math.max(0, ev.charIndex - 40), ev.charIndex + 80));
+            });
+            u.addEventListener('end', function() {
+              // Clear after a short delay so the last sentence stays readable.
+              setTimeout(hideCC, 900);
+            });
+            u.addEventListener('error', function() { hideCC(); });
+          }
+        } catch (err) {}
+        return origSpeak(u);
+      };
+    } catch (e) {}
+  }
+  // Run immediately so we catch the first utterance.
+  installSpeechHook();
+
+  // ── Reading time estimate ───────────────────────────────────────────────
+  // Word count across all [data-narrate] elements on this page, scaled by
+  // the effective speech rate. Updates when speed changes.
+  var cachedWordCount = null;
+  function countPageWords() {
+    if (cachedWordCount !== null) return cachedWordCount;
+    try {
+      var sects = document.querySelectorAll('[data-narrate]');
+      var total = 0;
+      Array.prototype.forEach.call(sects, function(s) {
+        var txt = (s.getAttribute('data-narrate') || s.textContent || '').trim();
+        if (!txt) return;
+        total += txt.split(/\s+/).length;
+      });
+      cachedWordCount = total;
+    } catch (e) { cachedWordCount = 0; }
+    return cachedWordCount;
+  }
+  function estimateTimeRemaining() {
+    var words = countPageWords();
+    if (!words) return '';
+    var effectiveWpm = BASE_WPM * speed;
+    var remainingWords = Math.max(0, words * (1 - (currentSection / Math.max(1, totalSections))));
+    var seconds = Math.round(remainingWords / effectiveWpm * 60);
+    if (seconds < 1) return 'done';
+    var m = Math.floor(seconds / 60);
+    var s = seconds % 60;
+    return m > 0 ? m + ':' + (s < 10 ? '0' : '') + s : seconds + 's';
+  }
+  function updateTimePill() {
+    if (!bar) return;
+    var pill = bar.querySelector('#wt-time-pill');
+    if (!pill) return;
+    var txt = estimateTimeRemaining();
+    pill.textContent = txt ? '~' + txt + ' left' : '';
+  }
+
+  // ── Deep-link resume via URL params ─────────────────────────────────────
+  // Supported:  ?wt=1        auto-start walkthrough on load
+  //             ?section=N   scroll to section N (1-based) after start
+  //             ?speed=1.25  set narration speed
+  function honorURLParams() {
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      var speedStr = qs.get('speed');
+      if (speedStr) {
+        var sp = parseFloat(speedStr);
+        if (SPEED_OPTIONS.indexOf(sp) !== -1) setSpeed(sp);
+      }
+      var sec = parseInt(qs.get('section') || '', 10);
+      var autostart = qs.get('wt') === '1';
+      if (!autostart && !sec) return;
+      // Wait up to 4 s for walkthrough button, then trigger
+      var tries = 0;
+      var iv = setInterval(function() {
+        tries++;
+        var btn = document.getElementById('liril-start-walkthrough');
+        if (btn || tries > 16) {
+          clearInterval(iv);
+          if (btn && autostart && !btn.classList.contains('liril-active')) btn.click();
+          if (sec && sec > 0) {
+            setTimeout(function() { scrollToSection(sec - 1); }, 800);
+          }
+        }
+      }, 250);
+    } catch (e) {}
+  }
+
   // ── Section navigation (scrolls between [data-narrate] blocks) ──────────
   function scrollToSection(idx) {
     try {
@@ -567,6 +766,12 @@
       toggleTranscript();
       return;
     }
+    // Closed captions toggle
+    if (key === 'c' || key === 'C') {
+      e.preventDefault();
+      toggleCC();
+      return;
+    }
     // Help
     if (key === '?' || key === 'h' || key === 'H') {
       e.preventDefault();
@@ -633,6 +838,7 @@
   function init() {
     countSections();
     buildBar();
+    buildCC(); // prebuild CC overlay so first utterance has a target
     // Try to install the button hook; retry if button isn't mounted yet
     var tries = 0;
     var iv = setInterval(function() {
@@ -640,10 +846,17 @@
       if (installHooks() || tries > 20) clearInterval(iv);
     }, 250);
     installSectionObserver();
+    // Re-install speech hook in case our first attempt ran before
+    // speechSynthesis was ready (some browsers lazy-initialize it).
+    installSpeechHook();
     // Auto-offer resume if applicable
     setTimeout(offerResume, 800);
+    // Honor ?wt=1&section=N&speed=1.25 deep links
+    setTimeout(honorURLParams, 400);
     // Save position on unload so resume works on reload
     window.addEventListener('beforeunload', savePosition);
+    // Seed the time-pill
+    updateTimePill();
   }
 
   if (document.readyState === 'loading') {
@@ -661,6 +874,10 @@
     showTranscript: showTranscript,
     hideTranscript: hideTranscript,
     toggleTranscript: toggleTranscript,
+    toggleCC: toggleCC,
+    ccEnabled: function() { return ccEnabled; },
+    estimateTimeRemaining: estimateTimeRemaining,
+    honorURLParams: honorURLParams,
     showHint: maybeShowHint,
     clearResume: clearPosition,
     nextSection: function() { return window.__TENET5_NEXT_SECTION && window.__TENET5_NEXT_SECTION(); },
