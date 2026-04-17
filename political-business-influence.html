@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Political-Business Influence Graph — 19th Axis | TENET5</title>
+  <meta name="description" content="19th accountability axis: documented revolving-door, corporate board, and lobbying connections between Grover-marked Canadian federal decision-makers and private-sector institutions. Public-record only. Primary sources cited per entry.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .scope-banner {
+      background: rgba(245,158,11,0.08); border: 1px solid #fbbf24;
+      border-radius: 10px; padding: 1.2rem 1.5rem; margin: 2rem 0;
+      color: #e0e0f0; line-height: 1.65;
+    }
+    .scope-banner .tag {
+      display: inline-block; font-weight: 900; font-size: 0.72rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #fbbf24;
+      margin-bottom: 0.5rem;
+    }
+    .type-filter {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 1.5rem;
+    }
+    .type-chip {
+      padding: 0.35rem 0.8rem; border-radius: 999px;
+      background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.4);
+      color: #c4b5fd; font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem; font-weight: 700; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      transition: all 0.15s;
+    }
+    .type-chip:hover, .type-chip.active {
+      background: #a855f7; color: #0a0a14;
+      border-color: #a855f7;
+    }
+    .infl-card {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-left: 4px solid #a855f7; border-radius: 10px;
+      padding: 1.3rem 1.5rem; margin: 1rem 0; color: #d0d0e0; line-height: 1.6;
+      transition: border-color 0.2s;
+    }
+    .infl-card:hover { border-color: #c4b5fd; }
+    .infl-card.revolving_door { border-left-color: #dc2626; }
+    .infl-card.prior_corporate_role { border-left-color: #f97316; }
+    .infl-card.post_cabinet_consulting { border-left-color: #22d3ee; }
+    .infl-card.unregistered_lobbying_finding { border-left-color: #ef4444; background: rgba(239,68,68,0.04); }
+    .infl-card.concurrent_board_seat { border-left-color: #fbbf24; }
+    .infl-card.private_sector_to_ambassador_to_boards { border-left-color: #a855f7; }
+
+    .infl-head { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; margin-bottom: 0.4rem; }
+    .infl-name { font-size: 1.15rem; font-weight: 700; color: #f0f0f0; }
+    .infl-amp {
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+      background: rgba(168,85,247,0.18); color: #c4b5fd;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .infl-type {
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      margin-left: auto;
+    }
+    .infl-type.revolving_door { background: rgba(220,38,38,0.2); color: #fca5a5; border: 1px solid #dc2626; }
+    .infl-type.prior_corporate_role { background: rgba(249,115,22,0.18); color: #fdba74; border: 1px solid #f97316; }
+    .infl-type.post_cabinet_consulting { background: rgba(34,211,238,0.15); color: #67e8f9; border: 1px solid #22d3ee; }
+    .infl-type.unregistered_lobbying_finding { background: rgba(239,68,68,0.2); color: #fecaca; border: 1px solid #ef4444; font-weight: 900; }
+    .infl-type.concurrent_board_seat { background: rgba(251,191,36,0.2); color: #fde68a; border: 1px solid #fbbf24; }
+
+    .infl-role {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;
+      color: #c4b5fd; margin-bottom: 0.35rem;
+    }
+    .infl-arrow {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem;
+      color: #a0a0b8; margin: 0.35rem 0; line-height: 1.5;
+    }
+    .infl-arrow .from { color: #f0f0f0; font-weight: 700; }
+    .infl-arrow .to { color: #fbbf24; font-weight: 700; }
+    .infl-finding {
+      font-size: 0.92rem; color: #d0d0e0; margin-top: 0.5rem;
+    }
+    .infl-sources {
+      margin-top: 0.7rem; padding-top: 0.5rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      color: #8090a8; line-height: 1.6;
+    }
+    .infl-sources strong { color: #c4b5fd; }
+
+    .summary-card {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.8rem; margin: 1.5rem 0;
+    }
+    .summary-stat {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-radius: 10px; padding: 1rem 0.8rem; text-align: center;
+    }
+    .summary-stat .v {
+      font-family: 'IBM Plex Mono', monospace; font-size: 1.8rem;
+      font-weight: 900; color: #c4b5fd;
+    }
+    .summary-stat .l {
+      font-size: 0.72rem; color: #a0a0b8; margin-top: 0.3rem;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+
+    .finding-box {
+      background: linear-gradient(135deg, rgba(220,38,38,0.1), rgba(236,72,153,0.06));
+      border: 1px solid #dc2626; border-radius: 12px;
+      padding: 1.5rem 1.8rem; margin: 2rem 0; color: #d0d0e0; line-height: 1.65;
+    }
+    .finding-box h3 { color: #fca5a5; margin-top: 0; }
+    .finding-box em { color: #fbbf24; font-style: italic; }
+  </style>
+
+  <meta property="og:title" content="Political-Business Influence Graph — 19th Axis | TENET5">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/political-business-influence.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="Political business influence graph. Nineteenth accountability axis. Documented revolving door transitions, prior corporate roles, post cabinet consulting arrangements, concurrent board seats, and unregistered lobbying findings connecting Grover marked Canadian federal decision makers to private sector institutions. Strict scope: public record only. Every entry cites primary sources from the Commissioner of Lobbying Registry, Ethics Commissioner reports, SEDAR filings, Canada Gazette, and on the record Canadian news coverage.">
+    <p class="subtitle">19th axis · Revolving doors · Board interlocks · Lobbying · Public-record only</p>
+    <h1>Political-Business Influence Graph</h1>
+    <p class="subtitle">
+      Documented connections between Grover-marked Canadian federal decision-makers
+      and private-sector institutions. <strong>Every entry cites primary sources</strong> —
+      Commissioner of Lobbying Registry, Ethics Commissioner reports, SEDAR filings,
+      Canada Gazette, and on-the-record Canadian news.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="scope-banner">
+      <div class="tag">Scope discipline</div>
+      <strong>Public-record only.</strong> Overlap-required: the business connection must
+      have financial / consulting / lobbying / board-appointment / judicial overlap with
+      the decision-maker's federal role. No speculation, no private personal details,
+      no aggregate group-smearing. Each entry stands on its own primary sources.
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-stat"><div class="v" id="s-total">—</div><div class="l">Connections</div></div>
+      <div class="summary-stat"><div class="v" id="s-revolving">—</div><div class="l">Revolving-door</div></div>
+      <div class="summary-stat"><div class="v" id="s-post">—</div><div class="l">Post-cabinet consulting</div></div>
+      <div class="summary-stat"><div class="v" id="s-prior">—</div><div class="l">Prior corporate role</div></div>
+      <div class="summary-stat"><div class="v" id="s-unreg">—</div><div class="l">Unregistered lobbying</div></div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="type-filter" id="type-filter"></div>
+
+    <!-- Cards -->
+    <div id="infl-list">
+      <p style="color:#888;font-style:italic;">Loading influence graph…</p>
+    </div>
+
+    <!-- Structural finding -->
+    <div class="finding-box" data-narrate="Structural finding. The Canadian federal accountability system distinguishes between lobbying registration, handled by the Commissioner of Lobbying, and post cabinet activity, subject to a Lobbying Act five year cooling off period for designated public office holders. But there is no oversight body whose designated scope is the aggregate revolving door pattern as a whole. The Brison to BMO, Bains to CIBC, McKenna to TD Bank, Butts to Eurasia, MacNaughton to Palantir pattern is individually reviewed by the Commissioner of Lobbying where post cabinet lobbying occurs, but the cluster itself is not. This extends the spouse family finding: Canada's oversight architecture reviews each connection in isolation; the pattern formed by combining all of them together is nobody's jurisdiction.">
+      <h3>Structural finding</h3>
+      <p>
+        The Canadian federal accountability system distinguishes between <em>lobbying
+        registration</em> (Commissioner of Lobbying) and <em>post-cabinet activity</em>
+        (Lobbying Act 5-year cooling-off for designated public office-holders).
+      </p>
+      <p>
+        <strong>But there is no oversight body whose designated scope is the aggregate
+        revolving-door pattern as a whole.</strong> Each Brison-to-BMO, Bains-to-CIBC,
+        McKenna-to-TD, Butts-to-Eurasia, MacNaughton-to-Palantir transition is
+        individually reviewed only to the narrow extent each person personally
+        registered to lobby (or, in the MacNaughton case, <em>failed to register</em>,
+        which produced the 2021 Commissioner of Lobbying finding). But the <em>cluster
+        itself</em> — the pattern of federal-executive-to-major-bank /
+        federal-ambassador-to-major-tech-contractor transitions — is nobody's jurisdiction.
+      </p>
+      <p>
+        This is the same structural gap the <a href="state-of-investigation.html" style="color:#c4b5fd;font-weight:700;">state-of-investigation</a>
+        and <a href="family-connections.html" style="color:#c4b5fd;font-weight:700;">family-connections</a> pages
+        identify: the Canadian federal accountability system distributes review across
+        independent bodies so thoroughly that no body has jurisdiction over cross-axis,
+        cross-relationship, or cross-institutional patterns.
+      </p>
+    </div>
+
+    <div style="background:rgba(0,0,0,0.25);padding:1rem 1.2rem;border-radius:8px;margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
+      <strong style="color:#c4b5fd;">Receipts:</strong> <code>data/political_business_influence_grover_decisionmakers.json</code> ·
+      12 Grover-marked actors · 13 influence edges · SYSTEM_SEED 118400
+    </div>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+  (function() {
+    'use strict';
+    const list = document.getElementById('infl-list');
+    const filter = document.getElementById('type-filter');
+
+    function escape(s) {
+      if (typeof s !== 'string') return String(s || '');
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    fetch('data/political_business_influence_grover_decisionmakers.json')
+      .then(r => r.json())
+      .then(d => render(d))
+      .catch(e => { list.innerHTML = '<p style="color:#ef4444;">Load error: ' + e + '</p>'; });
+
+    function render(d) {
+      const actors = d.marked_actors || [];
+      // Tally summary
+      const counts = { total: actors.length, revolving_door: 0, post_cabinet_consulting: 0,
+                        prior_corporate_role: 0, unregistered_lobbying_finding: 0,
+                        concurrent_board_seat: 0, private_sector_to_ambassador_to_boards: 0 };
+      actors.forEach(a => {
+        const t = a.connection_type;
+        if (counts.hasOwnProperty(t)) counts[t]++;
+      });
+      document.getElementById('s-total').textContent = counts.total;
+      document.getElementById('s-revolving').textContent = counts.revolving_door;
+      document.getElementById('s-post').textContent = counts.post_cabinet_consulting;
+      document.getElementById('s-prior').textContent = counts.prior_corporate_role;
+      document.getElementById('s-unreg').textContent = counts.unregistered_lobbying_finding;
+
+      // Build filter chips
+      const types = Array.from(new Set(actors.map(a => a.connection_type))).filter(Boolean).sort();
+      filter.innerHTML = '<span class="type-chip active" data-type="__all__">All</span>' +
+        types.map(t => '<span class="type-chip" data-type="' + escape(t) + '">' + escape(t.replace(/_/g, ' ')) + '</span>').join('');
+      filter.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('type-chip')) return;
+        filter.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        const t = e.target.getAttribute('data-type');
+        list.querySelectorAll('.infl-card').forEach(card => {
+          card.style.display = (t === '__all__' || card.getAttribute('data-type') === t) ? '' : 'none';
+        });
+      });
+
+      // Render cards (sorted by amplification desc)
+      const sorted = actors.slice().sort((a, b) => (b.score || 0) - (a.score || 0));
+      list.innerHTML = '';
+      sorted.forEach(a => {
+        const typeClass = a.connection_type || '';
+        const card = document.createElement('div');
+        card.className = 'infl-card ' + typeClass;
+        card.setAttribute('data-type', typeClass);
+        const sources = (a.primary_sources || []).map(s => '· ' + escape(s)).join('<br>');
+        card.innerHTML =
+          '<div class="infl-head">' +
+            '<span class="infl-name">' + escape(a.name) + '</span>' +
+            '<span class="infl-amp">' + (a.score || 0).toFixed(2) + '×</span>' +
+            '<span class="infl-type ' + typeClass + '">' + escape(typeClass.replace(/_/g, ' ')) + '</span>' +
+          '</div>' +
+          '<div class="infl-role">' + escape(a.role_cat || '') + '</div>' +
+          '<div class="infl-arrow">' +
+            '<span class="from">' + escape(a.federal_role || '—') + '</span>' +
+            '<br>↓<br>' +
+            '<span class="to">' + escape(a.business_connection || '—') + '</span>' +
+          '</div>' +
+          '<div class="infl-finding">' + escape(a.overlap_finding || '') + '</div>' +
+          '<div class="infl-sources"><strong>Sources:</strong><br>' + sources + '</div>';
+        list.appendChild(card);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
