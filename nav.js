@@ -2,29 +2,19 @@
      SHARED NAV — Two-Tier Royal Canadian Header
      Red Ensign stripe → Identity band → Navigation bar
      TENET5 — Powered by LIRIL AI
+     Modified: 2026-04-17 — Remove flag/lang/theme interactive widgets
+                            per "0 interactions from user" directive.
+                            Compact nav to ~12 links to prevent overflow.
      ═══════════════════════════════════════════════════════ */
 (function() {
   if (window.__TENET5_NAV_LOADED) return;
   window.__TENET5_NAV_LOADED = true;
-
-  /* Brand Monogram — T5 in a clean rounded square */
-  var crestSVG =
-    '<svg class="brand-crest" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<defs><linearGradient id="t5-gold" x1="0" y1="0" x2="0" y2="1">' +
-    '<stop offset="0%" stop-color="#dcc175"/><stop offset="100%" stop-color="#a07c30"/>' +
-    '</linearGradient></defs>' +
-    '<rect x="4" y="4" width="72" height="72" rx="14" ry="14" fill="none" stroke="url(#t5-gold)" stroke-width="3"/>' +
-    '<rect x="16" y="4" width="48" height="3" rx="1.5" fill="#b91c1c"/>' +
-    '<text x="28" y="56" font-family="Space Grotesk,Inter,system-ui,sans-serif" font-size="38" font-weight="700" fill="url(#t5-gold)" letter-spacing="-1">T</text>' +
-    '<text x="54" y="38" font-family="IBM Plex Mono,monospace" font-size="18" font-weight="700" fill="#b91c1c">5</text>' +
-    '</svg>';
 
   var headerHTML =
     '<nav class="site-nav" id="site-nav">' +
       '<div class="nav-ensign-stripe"></div>' +
       '<div class="nav-identity">' +
         '<a href="/index.html" class="brand">' +
-          '' +
           '<div class="brand-text">' +
             '<span class="brand-title">TENET<sup>5</sup></span>' +
             '<span class="brand-subtitle">Powered by LIRIL AI \u2022 NVIDIA \u2022 Intel</span>' +
@@ -34,67 +24,49 @@
           '<span class="nav-status-pill" style="color:#22d3ee;border-color:rgba(34,211,238,0.4);font-weight:700;">[AI]</span>' +
           '<span class="nav-status-pill nav-status-live">Live OSINT</span>' +
           '<span class="nav-status-pill">LIRIL narration</span>' +
-          '<span class="nav-status-pill" style="color:var(--color-quantum, #a855f7);border-color:rgba(168,85,247,0.3);">[NV-QUANTUM]</span>' +
-          '<span class="nav-status-pill">ABCXYZ Sync</span>' +
-          '<button class="nav-status-pill nav-bug-flag" onclick="window.__TENET5_FLAG_BUG && window.__TENET5_FLAG_BUG()" title="Flag this page for review" style="cursor:pointer;color:#ef4444;border-color:rgba(239,68,68,0.4);background:none;font-family:inherit;font-size:inherit;">&#x1F6A9; Flag</button>' +
+          '<span class="nav-status-pill" style="color:#a855f7;border-color:rgba(168,85,247,0.3);">[NV-QUANTUM]</span>' +
         '</div>' +
       '</div>' +
       '<div class="nav-bar">' +
         '<div class="nav-content">' +
           '<div class="nav-group nav-primary">' +
             '<a href="/index.html" id="nav-home">Home</a>' +
-            '<a href="/search.html" id="nav-search" style="color: #ff4444; font-weight: 700;">Search</a>' +
-            '<a href="/records.html" id="nav-records">Records DB</a>' +
-            '<a href="/maid-accountability.html" id="nav-maid">MAID Report</a>' +
-            '<a href="/rcmp-commissioners.html" id="nav-rcmp">RCMP</a>' +
+            '<a href="/search.html" id="nav-search">Search</a>' +
+            '<a href="/records.html" id="nav-records">Records</a>' +
+            '<a href="/findings.html" id="nav-findings">Findings</a>' +
           '</div>' +
           '<div class="nav-group">' +
-            '<a href="/arrivecan.html" id="nav-arrivecan">ArriveCAN</a>' +
-            '<a href="/phac-mandates-s6.html" id="nav-phac">PHAC S.6</a>' +
-            '<a href="/senate-expenses.html" id="nav-senate">Senate</a>' +
-            '<a href="/ag-findings.html" id="nav-ag">AG Findings</a>' +
-            '<a href="/phoenix-pay.html" id="nav-phoenix">Phoenix Pay</a>' +
-            '<a href="/foreign-interference.html" id="nav-foreign">Foreign Interference</a>' +
+            '<a href="/maid-accountability.html" id="nav-maid">MAID</a>' +
+            '<a href="/geneva-vs-jails.html" id="nav-geneva" style="color:#c9a84c;">Geneva vs Jails</a>' +
+            '<a href="/genocide-evidence.html" id="nav-genocide" style="color:#ef4444;">Genocide</a>' +
+            '<a href="/disability-genocide.html" id="nav-disability">Disability</a>' +
           '</div>' +
-          '<div class="nav-group nav-investigations" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px; margin-left: 5px;">' +
-            '<a href="/genocide-evidence.html" id="nav-genocide" style="color:#ef4444;">Genocide Evidence</a>' +
+          '<div class="nav-group">' +
+            '<a href="/foreign-interference.html" id="nav-foreign">Foreign</a>' +
+            '<a href="/follow-the-money.html" id="nav-money" style="color:#facc15;">Follow $</a>' +
             '<a href="/cfnis.html" id="nav-cfnis">CFNIS</a>' +
-            '<a href="/treason-trajectory.html" id="nav-treason" style="color:#facc15;">Treason Trajectory</a>' +
-            '<a href="/network-analysis.html" id="nav-network">Network Analysis</a>' +
-            '<a href="/corruption.html" id="nav-corruption-hub" style="color:#c9a84c;font-weight:700;" title="Corruption Hub — Map, Atlas, Territory">Corruption Hub</a>' +
-            '<a href="/charity-pipeline.html" id="nav-charity">Charity Pipeline</a>' +
+            '<a href="/corruption.html" id="nav-corruption" style="color:#c9a84c;">Corruption</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +
-            '<a href="/s504-covey-bae.html" id="nav-504">s.504</a>' +
-            '<a href="/institutional-malice.html" id="nav-malice" style="color: #dc2626;">Malice Doctrine</a>' +
-            '<a href="/publications.html" id="nav-publications">Publications</a>' +
-            '<a href="/ai-research.html" id="nav-research" style="color:#c9a84c;">Research</a>' +
-            '<a href="/ppcli-lawsuit.html" id="nav-kitshop">Kit Shop</a>' +
-            '<a href="/kids-guide.html" id="nav-kids" style="color: #facc15;">Simple Guide</a>' +
-            '<a href="/cds-accountability.html" id="nav-cds">CDS</a>' +
-            '<a href="/follow-the-money.html" id="nav-money" style="color: #facc15;">Follow $</a>' +
-            '<a href="/panama-papers.html" id="nav-panama" style="color: #ef4444;">Panama Papers</a>' +
-            '<a href="/reading-order.html" id="nav-reading" style="color: #22d3ee;">Reading Order</a>' +
-            '<a href="/news.html" id="nav-news" style="color:#dc2626;font-weight:700;">News</a>' +
-            '<a href="/sitemap.html" id="nav-sitemap">All Pages</a>' +
-          '</div>' +
-          '<div class="nav-group nav-lang" style="margin-left: auto;">' +
-            '<a href="/submarine-timeline.html" id="nav-dial" style="color:#22d3ee;">Timeline</a>' +
-            '<select id="lang-selector" onchange="window.setSiteLanguage(this.value)" style="background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); border-radius: 4px; padding: 0.2rem; font-size: 0.85rem;">' +
-              '<option value="en">English</option>' +
-              '<option value="fr">Français</option>' +
-            '</select>' +
-            '<div class="theme-slider-wrap" title="Theme: Dark to Light">' +
-              '<span class="tsl-icon">\u263E</span>' +
-              '<input type="range" id="theme-slider" min="0" max="100" value="0">' +
-              '<span class="tsl-icon">\u2600</span>' +
-            '</div>' +
+            '<a href="/accountability.html" id="nav-504">504</a>' +
+            '<a href="/network-analysis.html" id="nav-network">Network</a>' +
+            '<a href="/sitemap.html" id="nav-sitemap" style="color:#22d3ee;">All Pages</a>' +
           '</div>' +
           '<div class="nav-auth" id="nav-auth"></div>' +
         '</div>' +
         '<button class="nav-hamburger" id="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>' +
       '</div>' +
     '</nav>';
+
+  /* Flag-button stub: if anything on the page still calls the old FLAG handler,
+     route it to a no-op so no broken interactions leak. */
+  if (!window.__TENET5_FLAG_BUG) {
+    window.__TENET5_FLAG_BUG = function() { return false; };
+  }
+  /* Lang setter stub: same reason, so legacy code doesn't throw. */
+  if (!window.setSiteLanguage) {
+    window.setSiteLanguage = function() { return false; };
+  }
 
   function initNav() {
     var frame = document.getElementById('site-header-frame') ||
@@ -105,14 +77,13 @@
       document.body.insertAdjacentHTML('afterbegin', headerHTML);
     }
 
-    /* Hamburger toggle — single clean listener */
+    /* Hamburger toggle */
     var hamburger = document.getElementById('nav-hamburger');
     var navContent = document.querySelector('.site-nav .nav-content');
     if (hamburger && navContent) {
       hamburger.addEventListener('click', function() {
         hamburger.classList.toggle('open');
         navContent.classList.toggle('nav-open');
-        /* Position dropdown right below the nav bar */
         if (navContent.classList.contains('nav-open')) {
           var siteNav = document.getElementById('site-nav');
           if (siteNav) {
@@ -129,23 +100,18 @@
       });
     }
 
-    /* 2026-04-16: Wheel-to-horizontal-scroll on nav — converts vertical wheel
-       to horizontal pan so users can scroll the nav bar naturally without
-       having to hold shift. Only active on desktop (when nav is a single row). */
+    /* Wheel-to-horizontal-scroll on nav — for the rare overflow case */
     if (navContent) {
       navContent.addEventListener('wheel', function(e) {
-        /* Skip if mobile nav is open (column layout, vertical scroll wanted) */
         if (navContent.classList.contains('nav-open')) return;
-        /* Skip if horizontal is already the intended axis */
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-        /* Only intercept when there is actually overflow to scroll */
         if (navContent.scrollWidth <= navContent.clientWidth) return;
         e.preventDefault();
         navContent.scrollLeft += e.deltaY;
       }, { passive: false });
     }
 
-    /* Highlight active nav link + set target for frame shell */
+    /* Active link highlight + frame-shell target rewiring */
     var isFrameShell = !!document.getElementById('content_frame');
     var isInIframe = window !== window.top;
     var path = window.location.pathname.split('/').pop() || 'index.html';
@@ -163,7 +129,6 @@
       if (isFrameShell) {
         a.setAttribute('target', 'content_frame');
       }
-      /* Convert /index.html → home.html in ANY frame context (shell OR iframe child) */
       if (isFrameShell || isInIframe) {
         if (a.getAttribute('href').replace(/^\//, '') === 'index.html') {
           a.setAttribute('href', 'home.html');
@@ -173,7 +138,7 @@
       if (linkPage === activePage) a.classList.add('active');
     });
 
-    /* Brand link: in frame context, point to home.html (prevents iframe inception) */
+    /* Brand link: in frame context, point to home.html */
     var brandLink = document.querySelector('.site-nav .brand');
     if (brandLink && (isFrameShell || isInIframe)) {
       if (isFrameShell) brandLink.setAttribute('target', 'content_frame');
