@@ -63,6 +63,7 @@
             '<a href="/network-analysis.html" id="nav-network">Network Analysis</a>' +
             '<a href="/corruption-map.html" id="nav-corruption-map" style="color:#c9a84c;">Corruption Map</a>' +
             '<a href="/corruption-atlas.html" id="nav-corruption-atlas" style="color:#c9a84c;">Corruption Atlas</a>' +
+            '<a href="/corruption-territory.html" id="nav-corruption-territory" style="color:#c9a84c;">Corruption Territory</a>' +
             '<a href="/charity-pipeline.html" id="nav-charity">Charity Pipeline</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +
