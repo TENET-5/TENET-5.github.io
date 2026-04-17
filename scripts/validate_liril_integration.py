@@ -193,7 +193,9 @@ def check_page_sequence_coverage():
 
 
 def check_shell_loads_scripts():
-    """Verify shell.js loads both presentation.js and liril-walkthrough.js."""
+    """Verify shell.js loads presentation.js, liril-walkthrough.js, and the
+    walkthrough-enhancements layer. Also verify the enhancements load AFTER
+    the walkthrough script (otherwise hooks miss their targets)."""
     src = read(SHELL_JS)
     if not src:
         return
@@ -207,6 +209,18 @@ def check_shell_loads_scripts():
         ok("shell.js loads liril-walkthrough.js")
     else:
         error("shell.js does NOT load liril-walkthrough.js")
+
+    if "walkthrough-enhancements.js" in src:
+        ok("shell.js loads walkthrough-enhancements.js")
+        # Ordering guard: enhancements must come AFTER liril-walkthrough.js
+        wt_idx = src.find("liril-walkthrough.js")
+        en_idx = src.find("walkthrough-enhancements.js")
+        if wt_idx != -1 and en_idx != -1 and en_idx > wt_idx:
+            ok("walkthrough-enhancements.js loads AFTER liril-walkthrough.js")
+        else:
+            error("walkthrough-enhancements.js must load AFTER liril-walkthrough.js")
+    else:
+        error("shell.js does NOT load walkthrough-enhancements.js")
 
 
 def check_fabricated_telemetry_guard():
