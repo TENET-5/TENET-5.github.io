@@ -209,6 +209,71 @@ def check_shell_loads_scripts():
         error("shell.js does NOT load liril-walkthrough.js")
 
 
+def check_nav_read_only_guard():
+    """Nav regression guard — ensures nav.js has no interactive widgets (flag,
+    language selector, theme slider) and stays within a 20-link budget.
+
+    User directive 2026-04-15: "remove the flag system from the website / have
+    0 interactions from the user with the website for security." The NemoClaw
+    auto-cycle has repeatedly reintroduced these widgets, so we check them in
+    CI to fail deploy if they return.
+    """
+    nav = ROOT / "nav.js"
+    if not nav.exists():
+        error(f"nav.js not found at {nav}")
+        return
+    txt = read(nav)
+
+    # Banned patterns — each is a hard fail
+    banned = [
+        (r"nav-bug-flag",                "Flag button — interactive widget forbidden"),
+        (r"lang-selector",               "Language selector — site is read-only"),
+        (r"theme-slider",                "Theme slider — interactive widget forbidden"),
+        (r"onchange\s*=",                "onchange handler — no interactive state changes"),
+        (r"<input\s+type=[\"']range",    "Range input — interactive widget forbidden"),
+    ]
+    # Exception: setSiteLanguage as a stub returning false is allowed; active
+    # usage (invocations outside the stub definition) is banned.
+    active_lang_setter = re.search(r"setSiteLanguage\(['\"a-zA-Z0-9_]", txt)
+    if active_lang_setter:
+        error("nav.js: active setSiteLanguage() invocation — site is read-only")
+
+    for pat, desc in banned:
+        m = re.search(pat, txt)
+        if m:
+            line_no = txt.count("\n", 0, m.start()) + 1
+            error(f"nav.js:{line_no}: BANNED pattern '{m.group(0)}' — {desc}")
+
+    # Link count budget (prevents off-screen overflow on desktop)
+    link_count = len(re.findall(r'<a\s+href=["\'][^"\']+["\'][^>]*>', txt))
+    if link_count > 20:
+        error(f"nav.js: {link_count} nav links exceeds MAX_NAV_LINKS=20 — "
+              f"nav will overflow on desktop")
+
+    # Warning banner required
+    if "DO NOT RE-ADD" not in txt:
+        error("nav.js: DO NOT RE-ADD warning banner missing — see CLAUDE.md rule")
+
+    # Inline <nav> blocks in HTML pages must not contain banned widgets
+    banned_inline = ["nav-bug-flag", "\U0001f6a9", "lang-selector", "theme-slider"]
+    for html in ROOT.glob("*.html"):
+        try:
+            h = read(html)
+        except Exception:
+            continue
+        for m in re.finditer(r"<nav\b[^>]*>(.*?)</nav>", h,
+                             flags=re.IGNORECASE | re.DOTALL):
+            block = m.group(1)
+            for b in banned_inline:
+                if b in block:
+                    error(f"{html.name}: inline <nav> contains banned '{b}'")
+                    break
+
+    if not ERRORS:
+        ok("nav.js: no interactive widgets, warning banner present, "
+           f"{link_count} links (<=20)")
+
+
 def check_double_init_guard():
     """Verify both scripts have double-init protection."""
     walk_src = read(WALK_JS)
@@ -231,7 +296,10 @@ def main():
     print("║  TENET5 · ABCXYZ · SEED 118400                   ║")
     print("╚═══════════════════════════════════════════════════╝\n")
 
-    print("── 1. Double-Init Guards ──")
+    print("── 0. Nav Read-Only Guard ──")
+    check_nav_read_only_guard()
+
+    print("\n── 1. Double-Init Guards ──")
     check_double_init_guard()
 
     print("\n── 2. Walkthrough ↔ Presentation Cooperation ──")
