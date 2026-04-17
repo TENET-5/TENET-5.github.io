@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <!-- TENET5 SC_FRAME BUSTER -->
+  <script>
+    if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+        window.location.replace('index.html?load=' + encodeURIComponent(window.location.pathname.split('/').pop()));
+    }
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corruption Territory — Investigation Cartography | TENET5</title>
+  <meta name="description" content="Topographic territory map of the investigation: 6 domains of institutional failure rendered as elevation. MAID, Foreign Interference, Procurement, Whistleblower, s.504 Prosecution, Oversight. From official government records. TENET5 — Powered by LIRIL AI.">
+  <meta property="og:title" content="Corruption Territory | TENET5">
+  <meta property="og:description" content="Six territories of institutional failure rendered as topography. Elevation equals depth of corruption in the public record.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:url" content="https://tenet-5.github.io/corruption-territory.html">
+  <meta property="og:locale" content="en_CA">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/corruption-territory.html">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <link rel="stylesheet" href="style.css?v=23">
+  <meta name="theme-color" content="#0c1220">
+  <meta name="color-scheme" content="dark">
+  <link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
+
+  <style>
+    .terr-shell { max-width: 1400px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    .terr-hero { position: relative; text-align: center; padding: 32px 8px 18px; }
+    .terr-hero h1 {
+      font-family: 'Cinzel', 'Crimson Text', Georgia, serif;
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      color: var(--text-light);
+      margin: 0; letter-spacing: 0.015em;
+    }
+    .terr-hero .sub {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.28em;
+      color: var(--color-royal-gold);
+      text-transform: uppercase;
+      margin: 14px 0 0;
+    }
+    .terr-hero .byline {
+      color: var(--text-secondary);
+      font-family: 'Crimson Text', Georgia, serif;
+      font-style: italic;
+      margin: 18px auto 0;
+      max-width: 780px;
+      line-height: 1.75;
+      font-size: 1.04rem;
+    }
+
+    /* The cartographic canvas */
+    .terr-map {
+      position: relative;
+      margin: 32px 0;
+      background: rgba(8, 14, 26, 0.60);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+    #territory-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      background:
+        radial-gradient(ellipse at center, rgba(20, 30, 48, 0.50) 0%, rgba(5, 8, 16, 0.90) 80%),
+        var(--bg-dark);
+    }
+    .territory {
+      cursor: pointer;
+      transition: filter 0.25s ease, transform 0.25s ease;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    .territory:hover { filter: brightness(1.25) drop-shadow(0 0 18px currentColor); }
+    .territory:hover .territory-label { font-weight: 700; }
+    .territory.t-critical { color: #dc2626; }
+    .territory.t-warn     { color: #d08770; }
+    .territory.t-mid      { color: #c9a84c; }
+    .territory.t-ok       { color: #6b8e5a; }
+    .territory-fill {
+      fill: rgba(185, 28, 28, 0.18);
+      stroke: rgba(201, 168, 76, 0.45);
+      stroke-width: 0.8;
+      stroke-dasharray: none;
+      transition: stroke 0.2s;
+    }
+    .territory.t-critical .territory-fill { fill: rgba(185, 28, 28, 0.22); stroke: rgba(220, 38, 38, 0.65); }
+    .territory.t-warn     .territory-fill { fill: rgba(208, 135, 112, 0.16); stroke: rgba(208, 135, 112, 0.55); }
+    .territory.t-mid      .territory-fill { fill: rgba(201, 168, 76, 0.14); stroke: rgba(201, 168, 76, 0.55); }
+    .territory.t-ok       .territory-fill { fill: rgba(107, 142, 90, 0.14); stroke: rgba(107, 142, 90, 0.55); }
+
+    .territory-contours path,
+    .territory-contours ellipse {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 0.6;
+      opacity: 0.35;
+    }
+    .territory-contours .peak-ring { opacity: 0.55; stroke-width: 0.8; }
+
+    .territory-label {
+      font-family: 'Cinzel', 'Crimson Text', serif;
+      fill: var(--color-royal-cream);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-anchor: middle;
+      text-shadow: 0 0 4px rgba(0,0,0,0.95);
+      pointer-events: none;
+    }
+    .territory-metric {
+      font-family: 'IBM Plex Mono', monospace;
+      fill: currentColor;
+      font-size: 19px;
+      font-weight: 700;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+    .territory-subtitle {
+      font-family: 'IBM Plex Mono', monospace;
+      fill: var(--color-royal-gold);
+      font-size: 8.5px;
+      letter-spacing: 0.16em;
+      text-anchor: middle;
+      text-transform: uppercase;
+      opacity: 0.80;
+      pointer-events: none;
+    }
+
+    .supply-line {
+      fill: none;
+      stroke: rgba(201, 168, 76, 0.22);
+      stroke-width: 0.7;
+      stroke-dasharray: 3 4;
+      pointer-events: none;
+    }
+    .supply-line.critical { stroke: rgba(220, 38, 38, 0.45); stroke-width: 1.2; stroke-dasharray: 4 3; }
+
+    /* Detail panel */
+    .terr-detail {
+      display: none;
+      margin: 20px 0;
+      padding: 22px 26px;
+      background: rgba(8, 14, 26, 0.80);
+      border: 1px solid var(--color-royal-gold);
+      border-radius: 4px;
+      position: relative;
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.3s ease;
+    }
+    .terr-detail.visible { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .terr-detail::before {
+      content: ''; position: absolute; top: 4px; left: 4px;
+      width: 14px; height: 14px;
+      border: 1px solid var(--color-royal-gold); opacity: 0.6;
+      border-width: 1px 0 0 1px;
+    }
+    .terr-detail::after {
+      content: ''; position: absolute; bottom: 4px; right: 4px;
+      width: 14px; height: 14px;
+      border: 1px solid var(--color-royal-gold); opacity: 0.6;
+      border-width: 0 1px 1px 0;
+    }
+    .td-head {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      border-bottom: 1px solid rgba(201, 168, 76, 0.20);
+      padding-bottom: 14px; margin-bottom: 14px;
+    }
+    .td-kicker {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--color-royal-gold);
+    }
+    .td-title {
+      font-family: 'Cinzel', serif;
+      color: var(--text-light);
+      font-size: 1.6rem;
+      margin: 0;
+      flex: 1;
+    }
+    .td-elev {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 2px;
+      background: rgba(185, 28, 28, 0.15);
+      border: 1px solid var(--accent-bright);
+      color: var(--accent-bright);
+    }
+    .td-body {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 24px;
+    }
+    @media (max-width: 760px) { .td-body { grid-template-columns: 1fr; } }
+    .td-stats { display: flex; flex-direction: column; gap: 10px; }
+    .td-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(12, 18, 32, 0.65);
+      border-radius: 3px;
+      border-left: 3px solid var(--color-royal-gold);
+    }
+    .td-stat .k { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; color: var(--text-tertiary); text-transform: uppercase; }
+    .td-stat .v { font-family: 'Cinzel', serif; color: var(--text-light); font-size: 1rem; }
+
+    .td-narrative {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+    .td-links { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .td-link {
+      display: inline-flex;
+      align-items: center; gap: 6px;
+      padding: 7px 14px;
+      background: rgba(20, 30, 48, 0.70);
+      border: 1px solid rgba(201, 168, 76, 0.30);
+      border-radius: 3px;
+      color: var(--color-royal-gold);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .td-link:hover { background: rgba(201, 168, 76, 0.12); border-color: var(--color-royal-gold); color: var(--color-royal-gold-light); }
+
+    /* Legend + guide */
+    .terr-guide {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      background: rgba(12, 18, 32, 0.55);
+    }
+
+    .terr-narrative { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
+    @media (max-width: 900px) { .terr-narrative { grid-template-columns: 1fr; } }
+    .terr-narrative p {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+    .terr-narrative h2 {
+      font-family: 'Cinzel', serif;
+      color: var(--text-light);
+      margin: 0 0 12px;
+      font-size: 1.3rem;
+    }
+
+    .terr-method {
+      margin-top: 28px;
+      padding: 18px 22px;
+      background: rgba(8, 14, 26, 0.55);
+      border-left: 3px solid var(--color-royal-gold);
+      border-radius: 0 4px 4px 0;
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+    .terr-method code {
+      background: rgba(185, 28, 28, 0.10);
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82em;
+      color: var(--accent-bright);
+    }
+  </style>
+</head>
+
+<body class="topo topo-dense">
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <main class="terr-shell" id="main" role="main">
+
+    <header class="terr-hero">
+      <svg class="compass lg" aria-hidden="true" focusable="false"
+           style="position:absolute;top:20px;right:8px;width:80px;height:80px;" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.55"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="#c9a84c" stroke-width="0.4" opacity="0.35"/>
+        <circle cx="50" cy="50" r="2.5" fill="#c9a84c" opacity="0.7"/>
+        <polygon points="50,8 46,48 54,48" fill="#c9a84c" opacity="0.80"/>
+        <polygon points="50,92 46,52 54,52" fill="#7a776e" opacity="0.55"/>
+        <polygon points="8,50 48,46 48,54" fill="#7a776e" opacity="0.55"/>
+        <polygon points="92,50 52,46 52,54" fill="#7a776e" opacity="0.55"/>
+        <text x="50" y="6" text-anchor="middle" font-family="Cinzel, serif" font-size="7" fill="#c9a84c" opacity="0.9">N</text>
+      </svg>
+      <h1 data-narrate="The Corruption Territory. A topographic view of the investigation itself. Six domains of institutional failure, rendered as terrain. Elevation equals the depth of evidence. Supply lines trace where the failures intersect. This is the shape of the record. Walk it.">The Corruption Territory</h1>
+      <p class="sub">Conceptual cartography · 6 domains · elevation = depth of record</p>
+      <p class="byline">
+        Six territories of institutional failure, rendered as terrain. Each
+        peak's elevation is the depth of documented evidence in that domain.
+        Each supply line traces where the failures intersect — the same people,
+        the same money, the same silence. Click a territory to descend into it.
+      </p>
+      <div class="pressure-ridge" aria-hidden="true" style="margin-top:22px;"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px;">
+        <span class="map-legend ml-critical"><span class="ml-key"></span>Peak · active crisis</span>
+        <span class="map-legend ml-warn"><span class="ml-key"></span>High · sustained pattern</span>
+        <span class="map-legend ml-gold"><span class="ml-key"></span>Mid · documented concern</span>
+        <span class="map-legend ml-ok"><span class="ml-key"></span>Base · emerging record</span>
+      </div>
+    </header>
+
+    <hr class="survey-rule" aria-hidden="true">
+
+    <div class="terr-map map-frame">
+      <span class="mf-tr"></span>
+      <span class="mf-br"></span>
+
+      <svg id="territory-svg" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="Corruption territory — six investigation domains">
+        <defs>
+          <!-- Topographic contour pattern scoped to the map background -->
+          <pattern id="terr-contours" patternUnits="userSpaceOnUse" width="180" height="180">
+            <g stroke="rgba(201,168,76,0.09)" fill="none" stroke-width="0.4">
+              <ellipse cx="90" cy="90" rx="85" ry="64"/>
+              <ellipse cx="90" cy="90" rx="65" ry="48"/>
+              <ellipse cx="90" cy="90" rx="46" ry="34"/>
+              <ellipse cx="90" cy="90" rx="28" ry="20"/>
+              <ellipse cx="90" cy="90" rx="13" ry="9"/>
+            </g>
+          </pattern>
+          <!-- Subtle shading under each territory -->
+          <radialGradient id="terr-base" cx="50%" cy="45%">
+            <stop offset="0%" stop-color="rgba(200,210,240,0.04)"/>
+            <stop offset="100%" stop-color="rgba(5,8,16,0)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Full-map contour canvas -->
+        <rect x="0" y="0" width="900" height="600" fill="url(#terr-contours)" opacity="0.7"/>
+
+        <!-- Supply lines — connections between thematic domains, drawn first so territories overlay -->
+        <g id="g-supply">
+          <!-- MAID <-> Oversight (MPs who voted) -->
+          <path class="supply-line critical" d="M 220 180 C 320 220, 430 240, 540 190"/>
+          <!-- Foreign Interference <-> Procurement (CIJA lobbying + contracts) -->
+          <path class="supply-line critical" d="M 690 180 C 620 270, 520 310, 430 380"/>
+          <!-- Procurement <-> s.504 (charges flow to prosecution) -->
+          <path class="supply-line" d="M 430 380 C 380 430, 320 460, 220 420"/>
+          <!-- MAID <-> Whistleblower (reprisal suppresses evidence) -->
+          <path class="supply-line" d="M 220 180 C 160 260, 140 340, 160 420"/>
+          <!-- Oversight <-> s.504 (AG findings + prosecutions) -->
+          <path class="supply-line" d="M 540 190 C 480 290, 350 370, 220 420"/>
+          <!-- Whistleblower <-> s.504 (whistleblower complaints surface charges) -->
+          <path class="supply-line" d="M 160 420 C 190 450, 200 450, 220 420"/>
+          <!-- Foreign Interference <-> Oversight (intelligence failures) -->
+          <path class="supply-line" d="M 690 180 C 640 160, 600 170, 540 190"/>
+        </g>
+
+        <!-- ══════════ TERRITORY 1 — MAID (NW) ══════════ -->
+        <g class="territory t-critical" data-id="maid" transform="translate(220,180)"
+           role="button" tabindex="0" aria-label="MAID Expansion territory">
+          <ellipse class="territory-fill" cx="0" cy="0" rx="95" ry="70"/>
+          <g class="territory-contours">
+            <ellipse cx="0" cy="0" rx="80" ry="58"/>
+            <ellipse cx="0" cy="0" rx="62" ry="44"/>
+            <ellipse cx="0" cy="0" rx="42" ry="28"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="24" ry="15"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="10" ry="6"/>
+          </g>
+          <text class="territory-subtitle" y="-48">DOMAIN · 01</text>
+          <text class="territory-label" y="-28">MAID Expansion</text>
+          <text class="territory-metric" y="8">76,475</text>
+          <text class="territory-subtitle" y="26">recorded deaths</text>
+          <text class="territory-subtitle" y="42" fill="#dc2626">46 MPs · Track 2 · UN flagged</text>
+        </g>
+
+        <!-- ══════════ TERRITORY 2 — OVERSIGHT (N) ══════════ -->
+        <g class="territory t-warn" data-id="oversight" transform="translate(540,190)"
+           role="button" tabindex="0" aria-label="Oversight & Accountability territory">
+          <ellipse class="territory-fill" cx="0" cy="0" rx="105" ry="78"/>
+          <g class="territory-contours">
+            <ellipse cx="0" cy="0" rx="88" ry="65"/>
+            <ellipse cx="0" cy="0" rx="70" ry="50"/>
+            <ellipse cx="0" cy="0" rx="50" ry="34"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="30" ry="18"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="14" ry="8"/>
+          </g>
+          <text class="territory-subtitle" y="-56">DOMAIN · 02</text>
+          <text class="territory-label" y="-36">Oversight Failure</text>
+          <text class="territory-metric" y="-4">314</text>
+          <text class="territory-subtitle" y="14">Criminal Code charges documented</text>
+          <text class="territory-subtitle" y="30" fill="#d08770">271 officials · $59.5M ArriveCAN · AG-confirmed</text>
+        </g>
+
+        <!-- ══════════ TERRITORY 3 — FOREIGN INTERFERENCE (NE) ══════════ -->
+        <g class="territory t-critical" data-id="foreign" transform="translate(755,195)"
+           role="button" tabindex="0" aria-label="Foreign Interference territory">
+          <ellipse class="territory-fill" cx="0" cy="0" rx="100" ry="72"/>
+          <g class="territory-contours">
+            <ellipse cx="0" cy="0" rx="85" ry="62"/>
+            <ellipse cx="0" cy="0" rx="65" ry="46"/>
+            <ellipse cx="0" cy="0" rx="44" ry="30"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="26" ry="16"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="12" ry="7"/>
+          </g>
+          <text class="territory-subtitle" y="-52">DOMAIN · 03</text>
+          <text class="territory-label" y="-32">Foreign Interference</text>
+          <text class="territory-metric" y="0">2,138</text>
+          <text class="territory-subtitle" y="18">CIJA lobbying contacts · 56% of MPs</text>
+          <text class="territory-subtitle" y="34" fill="#dc2626">Hogue · NSICOP · Han Dong</text>
+        </g>
+
+        <!-- ══════════ TERRITORY 4 — PROCUREMENT (CENTER-S) ══════════ -->
+        <g class="territory t-warn" data-id="procurement" transform="translate(430,380)"
+           role="button" tabindex="0" aria-label="Procurement Fraud territory">
+          <ellipse class="territory-fill" cx="0" cy="0" rx="120" ry="85"/>
+          <g class="territory-contours">
+            <ellipse cx="0" cy="0" rx="102" ry="72"/>
+            <ellipse cx="0" cy="0" rx="80" ry="55"/>
+            <ellipse cx="0" cy="0" rx="58" ry="38"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="34" ry="20"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="16" ry="9"/>
+          </g>
+          <text class="territory-subtitle" y="-62">DOMAIN · 04</text>
+          <text class="territory-label" y="-42">Procurement Fraud</text>
+          <text class="territory-metric" y="-10">$59.5M</text>
+          <text class="territory-subtitle" y="10">ArriveCAN from $80K estimate · 744x overrun</text>
+          <text class="territory-subtitle" y="26" fill="#d08770">GC Strategies · McKinsey · Deloitte</text>
+          <text class="territory-subtitle" y="44" fill="#c9a84c">$1.2T federal debt</text>
+        </g>
+
+        <!-- ══════════ TERRITORY 5 — WHISTLEBLOWER (SW) ══════════ -->
+        <g class="territory t-mid" data-id="whistleblower" transform="translate(160,420)"
+           role="button" tabindex="0" aria-label="Whistleblower Suppression territory">
+          <ellipse class="territory-fill" cx="0" cy="0" rx="82" ry="60"/>
+          <g class="territory-contours">
+            <ellipse cx="0" cy="0" rx="68" ry="48"/>
+            <ellipse cx="0" cy="0" rx="52" ry="36"/>
+            <ellipse cx="0" cy="0" rx="36" ry="24"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="22" ry="14"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="10" ry="6"/>
+          </g>
+          <text class="territory-subtitle" y="-42">DOMAIN · 05</text>
+          <text class="territory-label" y="-22">Whistleblower Wall</text>
+          <text class="territory-metric" y="8">7</text>
+          <text class="territory-subtitle" y="24">referrals to Tribunal in PSDPA history</text>
+          <text class="territory-subtitle" y="38" fill="#c9a84c">$10K max comp · "tissue paper shield"</text>
+        </g>
+
+        <!-- ══════════ TERRITORY 6 — s.504 PROSECUTION (S) ══════════ -->
+        <g class="territory t-warn" data-id="s504" transform="translate(220,440)"
+           role="button" tabindex="0" aria-label="s.504 Private Prosecution territory">
+          <ellipse class="territory-fill" cx="0" cy="0" rx="75" ry="52"/>
+          <g class="territory-contours">
+            <ellipse cx="0" cy="0" rx="62" ry="42"/>
+            <ellipse cx="0" cy="0" rx="46" ry="30"/>
+            <ellipse cx="0" cy="0" rx="30" ry="20"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="18" ry="11"/>
+            <ellipse class="peak-ring" cx="0" cy="0" rx="8" ry="5"/>
+          </g>
+          <text class="territory-subtitle" y="-36">DOMAIN · 06</text>
+          <text class="territory-label" y="-16">s.504 Prosecution</text>
+          <text class="territory-metric" y="14">17</text>
+          <text class="territory-subtitle" y="30">superior court registries</text>
+          <text class="territory-subtitle" y="44" fill="#d08770">Covey · Bae · 29 counts</text>
+        </g>
+
+        <!-- Coordinate grid labels at the corners -->
+        <g fill="rgba(201,168,76,0.35)" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="2">
+          <text x="10"  y="14">N 56° 00′</text>
+          <text x="818" y="14">N 56° 00′</text>
+          <text x="10"  y="595">N 42° 00′</text>
+          <text x="820" y="595">N 42° 00′</text>
+        </g>
+      </svg>
+
+      <div class="terr-guide">
+        <span class="map-legend ml-gold">Click a territory to descend</span>
+        <span class="map-legend">Supply lines = thematic connections</span>
+        <span class="map-legend">Peak rings = documented intensity</span>
+        <span style="flex:1"></span>
+        <span class="map-legend">Seed 118400 · Auditor-grade</span>
+      </div>
+    </div>
+
+    <!-- ══════════ DETAIL PANEL — populated on click ══════════ -->
+    <aside id="terr-detail" class="terr-detail" aria-live="polite">
+      <div class="td-head">
+        <span class="td-kicker" id="td-kicker">Domain</span>
+        <h2 class="td-title" id="td-title">—</h2>
+        <span class="td-elev" id="td-elev">ELEVATION —</span>
+      </div>
+      <div class="td-body">
+        <div class="td-stats" id="td-stats"></div>
+        <div>
+          <div class="td-narrative" id="td-narrative"></div>
+          <div class="td-links" id="td-links"></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="terr-narrative">
+      <div>
+        <h2>Reading the Territory</h2>
+        <p>
+          Each of the six landforms is a <strong>domain of institutional
+          failure</strong> documented in the public record. The contour rings
+          show how deep that domain runs — more rings, more documented evidence.
+          Colour indicates state: <span style="color:#dc2626;">peak red</span>
+          for active crisis, <span style="color:#d08770;">warm amber</span> for
+          sustained pattern, <span style="color:#c9a84c;">gold</span> for
+          documented concern, <span style="color:#6b8e5a;">sage</span> for
+          emerging record.
+        </p>
+        <p>
+          The dashed <strong>supply lines</strong> between territories are not
+          conjecture. They mark where the failures meet: the same MPs who voted
+          for MAID expansion also sit on oversight committees; the same lobbying
+          rosters touch procurement contracts; whistleblower suppression is what
+          turns procurement fraud into s.504 filings.
+        </p>
+      </div>
+      <div>
+        <h2>How to Use the Map</h2>
+        <p>
+          Click any territory to open its detail panel — you get the headline
+          figure, the sources, and direct links into the relevant investigation
+          pages. This map is a <strong>hub</strong>: from here you can descend
+          into the MAID MP register, the s.504 court filings, the network atlas,
+          or the whistleblower record without navigating through the index.
+        </p>
+        <p>
+          The elevation is calibrated against the public-record depth. It is
+          not opinion; it is documentary weight. When a territory grows
+          (more charges, more deaths, more evidence), its ring count grows.
+          This map regenerates as the investigation does.
+        </p>
+      </div>
+    </section>
+
+    <hr class="survey-rule" aria-hidden="true">
+
+    <div class="terr-method">
+      <strong>Methodology —</strong> Each territory aggregates statistics from
+      existing pages on TENET5. <code>MAID</code> pulls from
+      <code>maid-accountability.html</code> and <code>maid-exterminators.html</code>
+      (46 sitting MPs, 76,475 MAID deaths, UN Committee commentary on Track 2).
+      <code>Oversight</code> references the 271-official / 314-charge charges
+      sheet and the $59.5M Auditor-General ArriveCAN finding.
+      <code>Foreign Interference</code> references the Hogue Commission, NSICOP,
+      and the 2,138 CIJA lobbying-contact count (56% of MPs).
+      <code>Procurement</code> draws on AG findings and procurement anomaly
+      scans. <code>Whistleblower</code> references the PSDPA record surfaced in
+      <code>whistleblower-failures.html</code>. <code>s.504</code> references
+      the 17-registry court-filing dispatch in
+      <code>s504-court-filing.html</code>. Supply lines are drawn where two
+      territories share at least one named person, entity, or statute in the
+      underlying data; they are descriptive of the public record, not
+      accusatory. Seed <code>118400</code>.
+    </div>
+
+  </main>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="nav.js?v=36"></script>
+  <script src="footer.js?v=16"></script>
+  <script src="shell.js?v=23"></script>
+  <script>
+  (function() {
+    'use strict';
+    var DATA = {
+      maid: {
+        title: 'MAID Expansion',
+        elevation: 'PEAK · 76,475',
+        kicker: 'Domain 01 · Active crisis',
+        stats: [
+          ['Sitting MPs who voted C-14 + C-7', '46'],
+          ['Total recorded MAID deaths', '76,475'],
+          ['Share of all deaths (2024)', '5.1%'],
+          ['Held accountable', '0']
+        ],
+        narrative: 'Bill C-14 legalised MAID in 2016. Bill C-7 expanded it in 2021 to non-terminal conditions and removed the ten-day reflection period for most applicants. 46 currently sitting Members of Parliament signed both. The UN Committee on the Rights of Persons with Disabilities has called for Track 2 to be repealed. Ten provinces oppose further expansion. Zero of the 46 MPs have faced accountability.',
+        links: [
+          ['MAID Register', '/maid-exterminators.html'],
+          ['MAID Accountability', '/maid-accountability.html'],
+          ['MP Voting Records', '/mp-voting-records.html']
+        ]
+      },
+      oversight: {
+        title: 'Oversight Failure',
+        elevation: 'HIGH · 314 CHARGES',
+        kicker: 'Domain 02 · Sustained pattern',
+        stats: [
+          ['Officials with charges documented', '271'],
+          ['Criminal Code counts', '314'],
+          ['ArriveCAN cost overrun', '$59.5M'],
+          ['Estimate at contract signing', '$80K']
+        ],
+        narrative: 'The Auditor General confirmed that ArriveCAN — originally estimated at $80,000 — ultimately cost $59.5 million, a 744× overrun. The contract cascade involved GC Strategies, McKinsey, and Deloitte. Across all investigations, 314 Criminal Code charges have been documented against 271 officials in public records. Oversight bodies (the AG, PBO, Ethics Commissioner) have identified the failures; prosecutors have not yet acted.',
+        links: [
+          ['Charges Sheet', '/charges-sheet.html'],
+          ['AG Findings', '/ag-findings.html'],
+          ['ArriveCAN', '/arrivecan.html']
+        ]
+      },
+      foreign: {
+        title: 'Foreign Interference',
+        elevation: 'PEAK · 2,138 CONTACTS',
+        kicker: 'Domain 03 · Active crisis',
+        stats: [
+          ['CIJA lobbying contacts logged', '2,138'],
+          ['MPs contacted (share)', '56%'],
+          ['Hogue findings', 'Confirmed'],
+          ['NSICOP classified annex', 'Redacted']
+        ],
+        narrative: 'The Hogue Commission confirmed foreign interference in the 2019 and 2021 federal elections. NSICOP has flagged classified material. The Han Dong case remains unresolved. Separately, the Commissioner of Lobbying registry records 2,138 distinct contacts by CIJA, touching 56% of sitting MPs. These are not accusations; they are counts from the public registry.',
+        links: [
+          ['Foreign Interference (deep)', '/foreign-interference-deep.html'],
+          ['Foreign Interference', '/foreign-interference.html'],
+          ['Influence Network', '/network-analysis.html']
+        ]
+      },
+      procurement: {
+        title: 'Procurement Fraud',
+        elevation: 'HIGH · $59.5M SINGLE CONTRACT',
+        kicker: 'Domain 04 · Sustained pattern',
+        stats: [
+          ['ArriveCAN final cost', '$59.5M'],
+          ['Overrun vs original estimate', '744×'],
+          ['Federal debt burden', '$1.2 trillion'],
+          ['Named contractor cascade', 'GC / McKinsey / Deloitte']
+        ],
+        narrative: 'Procurement is the valley where ethics erodes — a single contract stretching from $80,000 to $59.5 million became the emblem. The $1.2 trillion national debt is the downstream consequence of unchecked procurement. The same consulting cascade (GC Strategies, McKinsey, Deloitte) recurs across multiple federal contracts. These are documented AG findings, not allegations.',
+        links: [
+          ['ArriveCAN', '/arrivecan.html'],
+          ['Follow the Money', '/follow-the-money.html'],
+          ['Debt & Fiscal', '/debt-fiscal.html']
+        ]
+      },
+      whistleblower: {
+        title: 'Whistleblower Wall',
+        elevation: 'MID · 7 REFERRALS IN 17 YEARS',
+        kicker: 'Domain 05 · Documented concern',
+        stats: [
+          ['Tribunal referrals (entire PSDPA history)', '7'],
+          ['Maximum compensation per complainant', '$10,000'],
+          ['Described by legal experts as', 'Tissue paper shield'],
+          ['Cases reaching remedy stage', '0']
+        ],
+        narrative: 'Since its 2007 passage, the Public Servants Disclosure Protection Act has generated exactly seven Tribunal referrals. Zero cases have reached the point where the Tribunal could order a remedy. Tom Devine of the U.S. Government Accountability Project called the PSDPA a "tissue paper shield." The maximum compensation is $10,000 — far below what any reprisal actually costs a whistleblower.',
+        links: [
+          ['Whistleblower Failures', '/whistleblower-failures.html'],
+          ['Whistleblower Protection', '/whistleblower-protection-failure.html'],
+          ['Privacy & Surveillance', '/privacy-surveillance.html']
+        ]
+      },
+      s504: {
+        title: 's.504 Private Prosecution',
+        elevation: 'HIGH · 17 REGISTRIES',
+        kicker: 'Domain 06 · Sustained action',
+        stats: [
+          ['Superior court registries in dispatch', '17'],
+          ['Counts filed (Covey & Bae)', '29'],
+          ['Applicable sections', 's.122 · s.139(2) · s.380 · s.423.1'],
+          ['Filing method', 'Criminal Code s.504, s.507']
+        ],
+        narrative: 'Section 504 of the Criminal Code permits any person who, on reasonable grounds, believes that an indictable offence has been committed to lay an information in writing under oath before a justice. Filings have been dispatched to 17 superior court registries across Canada. The 29-count Covey and Bae filing draws on s.122 (breach of trust), s.139(2) (obstruction), s.380 (fraud over $5,000), and s.423.1 (intimidation of justice-system participants).',
+        links: [
+          ['s.504 Court Filing', '/s504-court-filing.html'],
+          ['s.504 — Covey & Bae', '/s504-covey-bae.html'],
+          ['Prosecution Framework', '/prosecution.html']
+        ]
+      }
+    };
+
+    var detail = document.getElementById('terr-detail');
+    var kicker = document.getElementById('td-kicker');
+    var title  = document.getElementById('td-title');
+    var elev   = document.getElementById('td-elev');
+    var stats  = document.getElementById('td-stats');
+    var narr   = document.getElementById('td-narrative');
+    var links  = document.getElementById('td-links');
+
+    function openDomain(id) {
+      var d = DATA[id];
+      if (!d) return;
+      kicker.textContent = d.kicker;
+      title.textContent  = d.title;
+      elev.textContent   = 'ELEVATION · ' + d.elevation;
+      stats.innerHTML = d.stats.map(function(s) {
+        return '<div class="td-stat"><span class="k">' + escapeHtml(s[0]) + '</span><span class="v">' + escapeHtml(s[1]) + '</span></div>';
+      }).join('');
+      narr.textContent = d.narrative;
+      links.innerHTML = d.links.map(function(l) {
+        return '<a class="td-link" href="' + escapeAttr(l[1]) + '">' + escapeHtml(l[0]) + ' &rarr;</a>';
+      }).join('');
+      detail.classList.add('visible');
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/"/g, '&quot;');
+    }
+
+    document.querySelectorAll('.territory').forEach(function(el) {
+      var id = el.getAttribute('data-id');
+      el.addEventListener('click', function() { openDomain(id); });
+      el.addEventListener('keydown', function(ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openDomain(id); }
+      });
+    });
+
+    // If URL has ?domain=xxx, open it on load
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      var d = qs.get('domain');
+      if (d && DATA[d]) setTimeout(function() { openDomain(d); }, 400);
+    } catch(e) {}
+  })();
+  </script>
+</body>
+</html>
