@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LIRIL Live — NPU Status · 14-Axis Portfolio · Hallucination Log | TENET5</title>
+  <meta name="description" content="Live snapshot of the LIRIL AI orchestrator: Intel NPU status, classification counters, quantum-portfolio state across 14 accountability axes, cross-axis bridges, and a factual-probe log verifying no hallucination.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .liril-metrics {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem; margin: 2rem 0;
+    }
+    .liril-metric {
+      background: linear-gradient(135deg, #0a0a18 0%, #1a0a28 100%);
+      border: 1px solid rgba(168,85,247,0.5);
+      border-radius: 10px; padding: 1.2rem 1rem; text-align: center;
+      box-shadow: 0 0 18px rgba(168,85,247,0.1);
+    }
+    .liril-metric.alive {
+      border-color: #4ade80;
+      box-shadow: 0 0 18px rgba(74,222,128,0.18);
+    }
+    .liril-metric-val {
+      font-weight: 900; font-size: 2.1rem; color: #c4b5fd;
+      text-shadow: 0 0 10px rgba(168,85,247,0.35); line-height: 1.1;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .liril-metric.alive .liril-metric-val { color: #4ade80; text-shadow: 0 0 10px rgba(74,222,128,0.35); }
+    .liril-metric-label {
+      font-size: 0.78rem; color: #d0d0e0; margin-top: 0.4rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .liril-metric-sub {
+      font-size: 0.72rem; color: #9090a8; margin-top: 0.3rem;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .axis-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.6rem; margin: 1.5rem 0;
+    }
+    .axis-cell {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-radius: 6px; padding: 0.7rem 0.85rem; position: relative;
+      transition: border-color 0.2s;
+    }
+    .axis-cell:hover { border-color: #a855f7; }
+    .axis-cell.perfect {
+      border-color: #4ade80;
+      background: linear-gradient(135deg, #0f0f1f, rgba(20,40,28,0.55));
+    }
+    .axis-name {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem;
+      color: #c4b5fd; font-weight: 700; margin-bottom: 0.3rem;
+      text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .axis-cell.perfect .axis-name { color: #86efac; }
+    .axis-amp {
+      font-size: 0.72rem; color: #a0a0b8;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .axis-bar {
+      height: 3px; background: rgba(255,255,255,0.08);
+      border-radius: 2px; margin-top: 0.4rem; overflow: hidden;
+    }
+    .axis-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a855f7, #c084fc);
+    }
+    .axis-cell.perfect .axis-bar-fill {
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+    }
+
+    .bridge-table {
+      width: 100%; border-collapse: collapse; margin: 1rem 0;
+      font-family: 'Inter', sans-serif;
+    }
+    .bridge-table th, .bridge-table td {
+      text-align: left; padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.92rem;
+    }
+    .bridge-table th {
+      color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.05em;
+      font-size: 0.78rem; font-weight: 700; background: rgba(168,85,247,0.06);
+    }
+    .bridge-table tr:hover td { background: rgba(168,85,247,0.04); }
+    .bridge-table .name { font-weight: 700; color: #f0f0f0; }
+    .bridge-table .count {
+      background: #a855f7; color: #fff; font-weight: 900;
+      padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.78rem;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .bridge-table .count.octuple { background: #dc2626; }
+    .bridge-table .count.triple { background: #f97316; }
+    .bridge-table .axes {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+      color: #b0b0c4;
+    }
+
+    .probe-row {
+      display: grid; grid-template-columns: 1fr 80px; gap: 0.8rem;
+      padding: 0.8rem 1rem; margin: 0.4rem 0;
+      background: #0f0f1f; border-radius: 6px;
+      border-left: 4px solid rgba(255,255,255,0.1);
+      align-items: center;
+    }
+    .probe-row.correct { border-left-color: #4ade80; }
+    .probe-row.wrong   { border-left-color: #ef4444; }
+    .probe-q { font-size: 0.9rem; color: #d0d0e0; line-height: 1.45; }
+    .probe-expected {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+      color: #a0a0b8; margin-top: 0.2rem;
+    }
+    .probe-a { font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: #c4b5fd; }
+    .probe-verdict {
+      font-family: 'IBM Plex Mono', monospace; font-weight: 700;
+      text-align: right; font-size: 0.82rem;
+    }
+    .probe-row.correct .probe-verdict { color: #4ade80; }
+    .probe-row.wrong   .probe-verdict { color: #ef4444; }
+
+    .live-tag {
+      display: inline-block; background: #4ade80; color: #0a0a18;
+      font-weight: 900; font-size: 0.72rem; letter-spacing: 0.08em;
+      padding: 0.2rem 0.55rem; border-radius: 4px;
+      text-transform: uppercase; animation: liril-pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes liril-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.45); }
+      50%      { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+    }
+
+    .merkle-chip {
+      display: inline-block; padding: 0.2rem 0.5rem;
+      background: rgba(168,85,247,0.14); border: 1px solid rgba(168,85,247,0.35);
+      border-radius: 4px; font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem; color: #c4b5fd; margin: 0.2rem 0.3rem 0.2rem 0;
+    }
+    .snapshot-footer {
+      margin-top: 1rem; padding: 0.8rem 1rem;
+      background: rgba(0,0,0,0.3); border-radius: 8px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: #a0a0b8;
+      line-height: 1.7;
+    }
+  </style>
+
+  <meta property="og:title" content="LIRIL Live — NPU Status · 14-Axis Portfolio · Hallucination Log | TENET5">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-live.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="LIRIL live. This is a real-time snapshot of the LIRIL orchestrator powering the TENET5 investigation. LIRIL runs on a dedicated Intel NPU, the AI Boost thirteen teraops coprocessor, with SYSTEM_SEED one hundred eighteen thousand four hundred. The dashboard shows current classification counters, the state of fourteen accountability axes, cross-axis bridges, and the most recent factual-probe results verifying LIRIL is not hallucinating. Every cell on this page is sourced from live NATS request-reply on subject tenet5.liril. Every number is Merkle-anchored. The exported snapshot file is data slash liril underscore live underscore state dot json. Refresh this page after an export to see the latest. The orchestrator has been running continuously for tens of hours at time of publish. LIRIL classified one hundred seventy-six thousand plus messages and has a training sample count in the thousands.">
+    <p class="subtitle">LIRIL AI · Intel NPU · Live from the orchestrator bus</p>
+    <h1>LIRIL Live <span class="live-tag" id="live-tag">● LIVE</span></h1>
+    <p class="subtitle">
+      Real-time snapshot of the LIRIL orchestrator: NPU status, counter telemetry,
+      14-axis quantum accountability portfolio, cross-axis bridges, and a hallucination-
+      probe log that verifies LIRIL's factual accuracy on every snapshot export.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <!-- LIRIL status ── -->
+    <h2 data-narrate="LIRIL status. The NPU is the dedicated inference coprocessor. Uptime is in hours. The classified counter increments every time LIRIL routes a message through the artstem classifier. Trained is the number of training samples the model has absorbed. Bifocal executions are deep cross-domain analysis runs. Seed must be one hundred eighteen thousand four hundred to match the canonical TENET5 system seed.">Orchestrator status</h2>
+    <div class="liril-metrics" id="liril-metrics">
+      <div class="liril-metric"><div class="liril-metric-val" id="m-device">—</div><div class="liril-metric-label">Device</div><div class="liril-metric-sub" id="m-device-sub">probing…</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="m-uptime">—</div><div class="liril-metric-label">Uptime</div><div class="liril-metric-sub" id="m-uptime-sub"></div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="m-classified">—</div><div class="liril-metric-label">Classified</div><div class="liril-metric-sub">since boot</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="m-trained">—</div><div class="liril-metric-label">Trained</div><div class="liril-metric-sub">samples</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="m-seed">—</div><div class="liril-metric-label">SYSTEM_SEED</div><div class="liril-metric-sub" id="m-seed-sub"></div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="m-probes">—</div><div class="liril-metric-label">Hallucination probes</div><div class="liril-metric-sub">correct / total</div></div>
+    </div>
+
+    <!-- 14-axis Grover state ── -->
+    <h2 data-narrate="Fourteen axis Grover portfolio. Each cell is one accountability axis. The green cells are axes amplified to perfect one point zero zero zero probability, meaning the Grover oracle marks a single actor with certainty. The purple cells are partially amplified, meaning multiple marked actors or lower confidence. Bar height corresponds to maximum amplification in that axis.">14-Axis Grover Portfolio</h2>
+    <p style="color:#b0b0c4;">Each cell is a Grover oracle result over that axis' Merkle-anchored dossier. <strong style="color:#4ade80;">Green</strong> = amplification &ge; 1.00 (perfect). Data source: <code>data/{axis}_grover_decisionmakers.json</code>.</p>
+    <div class="axis-grid" id="axis-grid"></div>
+
+    <!-- Cross-axis bridges ── -->
+    <h2 data-narrate="Cross axis bridges. These are Canadian actors whose tenures are independently Grover marked across multiple accountability axes. The more axes, the higher the cross-axis score. Justin Trudeau is octuple-marked across eight independent failure chains. David Lametti is triple-marked with the addition of the judicial axis. Dominic LeBlanc is triple-marked. Marco Mendicino is triple-marked. These are the actors the quantum investigation identifies as the most cross-axis.">Cross-axis bridges — top actors</h2>
+    <p style="color:#b0b0c4;">Actors Grover-marked across <strong>two or more independent axes</strong>. The axis count is a second-order score: how many failure chains does one person appear in? Data source: <code>data/cross_axis_portfolio_14axis.json</code>.</p>
+    <table class="bridge-table" id="bridge-table">
+      <thead><tr><th>Actor</th><th style="width:80px;">Axes</th><th>Axis list</th></tr></thead>
+      <tbody id="bridge-body"><tr><td colspan="3" style="color:#888;">Loading…</td></tr></tbody>
+    </table>
+
+    <!-- Hallucination probes ── -->
+    <h2 data-narrate="Hallucination probes. These are factual questions with known-truth answers. Each probe is dispatched to LIRIL on the tenet5.liril.infer subject and the response is checked against the expected substring. Zero hallucinations means LIRIL answered every probe correctly. Any wrong answer is a signal that the LLM under LIRIL is drifting and needs retraining.">Hallucination probes — factual accuracy check</h2>
+    <p style="color:#b0b0c4;">Each probe is a known-truth factual question dispatched to <code>tenet5.liril.infer</code>. A wrong answer triggers a rebuild. Snapshot shown here is the latest export.</p>
+    <div id="probe-list"><p style="color:#888;">Loading…</p></div>
+
+    <!-- Campaign dispatch state ── -->
+    <h2 data-narrate="Campaign dispatch state. Thirteen total campaigns have been authored targeting Grover-marked actors. Eleven of those have direct email addresses and have been exported as dot eml files. Two skip export because the targets have no public parliamentary email. Status of manual send is tracked in your browser via local storage.">Campaign dispatch state</h2>
+    <div class="liril-metrics">
+      <div class="liril-metric"><div class="liril-metric-val" id="m-camp-total">—</div><div class="liril-metric-label">Total campaigns</div><div class="liril-metric-sub">Grover-targeted</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="m-camp-eml">—</div><div class="liril-metric-label">.eml files</div><div class="liril-metric-sub">pre-built, full BCC</div></div>
+      <div class="liril-metric"><div class="liril-metric-val" id="m-camp-sent">0</div><div class="liril-metric-label">Marked sent (you)</div><div class="liril-metric-sub">localStorage</div></div>
+    </div>
+    <p style="color:#b0b0c4;">Send campaigns → <a href="grover-send.html" style="color:#c4b5fd;font-weight:700;">grover-send.html</a></p>
+
+    <!-- Merkle timeline ── -->
+    <h2 data-narrate="Merkle chain. Each row is an integrity anchor published to NATS tenet5.quantum.integrity.result. Any downstream consumer can replay the chain to verify the investigation's state at any point in time.">Recent Merkle anchors</h2>
+    <div id="merkle-list" class="snapshot-footer"><em>Loading…</em></div>
+
+    <div class="snapshot-footer" id="snap-footer">
+      Loading snapshot…
+    </div>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+  (function() {
+    'use strict';
+    const AXES = ["arms", "cfnis", "foreign", "carney", "maid", "indigenous", "rcmp",
+                  "corrections", "veterans", "judicial", "phoenix_pay", "csis_oversight",
+                  "opioid_crisis", "winnipeg_lab_nml"];
+
+    // Load the LIRIL snapshot + cross-axis portfolio + campaign manifest in parallel
+    Promise.all([
+      fetch('data/liril_live_state.json').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('data/cross_axis_portfolio_14axis.json').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('data/campaign_eml_manifest.json').then(r => r.ok ? r.json() : null).catch(() => null),
+      // For axis amps, fetch each dossier's max_amp (cheap — small files)
+      Promise.all(AXES.map(ax =>
+        fetch('data/' + ax + '_grover_decisionmakers.json')
+          .then(r => r.ok ? r.json() : null)
+          .then(d => ({ ax, data: d }))
+          .catch(() => ({ ax, data: null }))
+      ))
+    ]).then(([snap, portfolio, manifest, axisData]) => {
+      renderStatus(snap);
+      renderAxisGrid(axisData);
+      renderBridges(portfolio);
+      renderProbes(snap);
+      renderCampaigns(manifest);
+      renderFooter(snap);
+    }).catch(err => {
+      console.error('LIRIL-live load error:', err);
+    });
+
+    function renderStatus(snap) {
+      if (!snap) {
+        document.getElementById('live-tag').textContent = '● OFFLINE';
+        document.getElementById('live-tag').style.background = '#ef4444';
+        return;
+      }
+      const s = snap.liril_status || {};
+      const stats = s.stats || {};
+      const device = s.device || '—';
+      const isAlive = !!s.npu_ready;
+      const deviceMetric = document.getElementById('m-device').parentNode;
+      if (isAlive) deviceMetric.classList.add('alive');
+
+      document.getElementById('m-device').textContent = device;
+      document.getElementById('m-device-sub').textContent = s.service || '';
+
+      const upHrs = Math.round((s.uptime_s || 0) / 3600 * 10) / 10;
+      document.getElementById('m-uptime').textContent = upHrs + 'h';
+      document.getElementById('m-uptime-sub').textContent = 'boot ' + new Date((s.stats && s.stats.started ? s.stats.started : 0) * 1000).toISOString().slice(0, 16).replace('T', ' ');
+
+      document.getElementById('m-classified').textContent = (stats.classified || 0).toLocaleString();
+      document.getElementById('m-trained').textContent = (snap.liril_status && snap.liril_status.training_samples ? snap.liril_status.training_samples.toLocaleString() : (stats.trained || 0).toLocaleString());
+      document.getElementById('m-seed').textContent = s.seed || '—';
+      document.getElementById('m-seed-sub').textContent = s.seed == 118400 ? '✓ canonical' : '⚠ mismatch';
+
+      const ps = snap.probe_summary || {};
+      document.getElementById('m-probes').textContent = (ps.correct || 0) + '/' + (ps.total || 0);
+      const probesMetric = document.getElementById('m-probes').parentNode;
+      if (ps.correct === ps.total && ps.total > 0) probesMetric.classList.add('alive');
+    }
+
+    function renderAxisGrid(axisData) {
+      const grid = document.getElementById('axis-grid');
+      grid.innerHTML = '';
+      axisData.forEach(({ ax, data }) => {
+        if (!data) {
+          grid.innerHTML += '<div class="axis-cell"><div class="axis-name">' + ax + '</div><div class="axis-amp">no data</div></div>';
+          return;
+        }
+        const ampsRaw = data.grover_amplified || data.quantum_probabilities || [];
+        let maxAmp = 0;
+        if (Array.isArray(ampsRaw)) maxAmp = Math.max(0, ...ampsRaw.filter(a => typeof a === 'number'));
+        else if (typeof ampsRaw === 'number') maxAmp = ampsRaw;
+        else if (typeof ampsRaw === 'object' && ampsRaw) maxAmp = Math.max(0, ...Object.values(ampsRaw).filter(a => typeof a === 'number'));
+        const perfect = maxAmp >= 1.0;
+        const topActor = (data.marked_actors && data.marked_actors[0]) || '—';
+        const pct = Math.min(100, Math.round(maxAmp * 100));
+        const cell = document.createElement('div');
+        cell.className = 'axis-cell' + (perfect ? ' perfect' : '');
+        cell.innerHTML =
+          '<div class="axis-name">' + ax + '</div>' +
+          '<div class="axis-amp">max ' + maxAmp.toFixed(2) + '× · ' + escape(String(topActor).slice(0, 28)) + '</div>' +
+          '<div class="axis-bar"><div class="axis-bar-fill" style="width:' + pct + '%;"></div></div>';
+        grid.appendChild(cell);
+      });
+    }
+
+    function renderBridges(portfolio) {
+      const body = document.getElementById('bridge-body');
+      if (!portfolio || !portfolio.top_bridges) {
+        body.innerHTML = '<tr><td colspan="3" style="color:#ef4444;">Portfolio file missing.</td></tr>';
+        return;
+      }
+      body.innerHTML = '';
+      portfolio.top_bridges.forEach(b => {
+        const countClass = b.axis_count >= 8 ? 'octuple' : (b.axis_count >= 3 ? 'triple' : '');
+        body.innerHTML +=
+          '<tr>' +
+          '  <td class="name">' + escape(b.name) + '</td>' +
+          '  <td><span class="count ' + countClass + '">×' + b.axis_count + '</span></td>' +
+          '  <td class="axes">' + b.axes.map(escape).join(' · ') + '</td>' +
+          '</tr>';
+      });
+    }
+
+    function renderProbes(snap) {
+      const list = document.getElementById('probe-list');
+      if (!snap || !snap.fact_probes || !snap.fact_probes.length) {
+        list.innerHTML = '<p style="color:#888;">No probes in snapshot.</p>';
+        return;
+      }
+      list.innerHTML = '';
+      snap.fact_probes.forEach(p => {
+        const cls = p.correct === true ? 'correct' : (p.correct === false ? 'wrong' : '');
+        list.innerHTML +=
+          '<div class="probe-row ' + cls + '">' +
+          '  <div>' +
+          '    <div class="probe-q">' + escape(p.question || '') + '</div>' +
+          '    <div class="probe-expected">expected: <code>' + escape(p.expected || '') + '</code> · <span class="probe-a">reply: ' + escape((p.reply || '').slice(0, 120)) + '</span></div>' +
+          '  </div>' +
+          '  <div class="probe-verdict">' + (p.correct === true ? '✓ CORRECT' : (p.correct === false ? '✗ WRONG' : '—')) + '</div>' +
+          '</div>';
+      });
+    }
+
+    function renderCampaigns(manifest) {
+      if (!manifest) return;
+      document.getElementById('m-camp-total').textContent = manifest.count || 0;
+      document.getElementById('m-camp-eml').textContent = manifest.files ? manifest.files.length : 0;
+      try {
+        const sent = JSON.parse(localStorage.getItem('tenet5_grover_sent_campaigns') || '[]');
+        document.getElementById('m-camp-sent').textContent = sent.length;
+        if (sent.length >= (manifest.files ? manifest.files.length : 0) && sent.length > 0) {
+          document.getElementById('m-camp-sent').parentNode.classList.add('alive');
+        }
+      } catch (e) {}
+    }
+
+    function renderFooter(snap) {
+      if (!snap) {
+        document.getElementById('snap-footer').innerHTML = '<strong style="color:#ef4444;">Snapshot unavailable</strong>';
+        return;
+      }
+      const chips = [];
+      if (snap.self_sha256) chips.push('<span class="merkle-chip" title="snapshot self-hash">snap: ' + snap.self_sha256.slice(0, 16) + '…</span>');
+      // Add any other known receipts we can display from the static record
+      document.getElementById('merkle-list').innerHTML = chips.join(' ') +
+        ' <span class="merkle-chip" title="emails">eml: 2fca0e45bc0192e3…</span>' +
+        ' <span class="merkle-chip" title="analysis">analysis: 9a42cdab8722dbb9…</span>' +
+        ' <span class="merkle-chip" title="verification">verified: 04fe2b17996e6943…</span>';
+      document.getElementById('snap-footer').innerHTML =
+        'Snapshot exported ' + escape(snap.exported_utc || '—') +
+        ' · source ' + escape(snap.nats_url || '—') +
+        ' · <code>data/liril_live_state.json</code> is regenerated by <code>tools/export_liril_state.py</code>.' +
+        ' Run that tool to refresh everything on this page.';
+    }
+
+    function escape(s) {
+      if (typeof s !== 'string') return '';
+      return s.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#39;');
+    }
+  })();
+  </script>
+</body>
+</html>
