@@ -321,6 +321,7 @@
       <div class="item"><span class="lbl">Data Vectors</span><span class="val blue" id="vec-count">5</span></div>
       <div class="item"><span class="lbl">Entity Graph</span><span class="val red" id="entity-count">LOADING...</span></div>
       <div class="item"><span class="lbl">Quantum Engine</span><span class="val" style="color:#22d3ee;">NV-ISING</span></div>
+      <div class="item"><span class="lbl">Phase 56 Disinfo Radar</span><span class="val" style="color:#bb86fc;">[ ENGAGED ]</span></div>
     </div>
 
     <!-- Score Overview -->
@@ -430,6 +431,13 @@
       <h2 data-narrate="Multi-vector entities. © 2026 Daniel Perry. Canadian Forces combat veteran, Afghanistan. All rights reserved.">Multi-Vector Entities (&#9888; appear in 3+ investigation sources)</h2>
       <div id="overlap-list"></div>
     </div>
+    
+    <!-- PHASE 59: Foreign Exposure Index -->
+    <div class="entity-section">
+      <h2 data-narrate="Foreign Exposure Index. Phase 59 algorithm.">LIRIL Foreign Exposure Index <span>[PHASE 59 MATRICES]</span></h2>
+      <div class="disclaimer tnt-style-694">Influence propagated directly through N vs NP algorithms tracking Topographical Intelligence. Mapped to target nodes: Beijing, PRC, United Front.</div>
+      <div id="foreign-exposure-list" style="margin-top: 15px;"></div>
+    </div>
   </div>
 
   <footer>
@@ -528,6 +536,35 @@
         initPhysics();
         requestAnimationFrame(tick);
         renderTable();
+        
+        // Fetch Phase 59
+        fetch('data/influence_scores.json')
+          .then(function(r) { return r.json(); })
+          .then(function(data) { renderPhase59(data); })
+          .catch(function(e) { console.error("Phase 59 fetch failed", e); });
+    }
+
+    function renderPhase59(data) {
+      if (!data || !data.exposed_entities) {
+          document.getElementById('foreign-exposure-list').innerHTML = '<p class="tnt-style-407">No algorithms mathematically derived exposure vectors.</p>';
+          return;
+      }
+      var html = '<div class="disclaimer-inline tnt-style-17" style="margin-bottom:10px;">Targets: ' + (data.foreign_orgs || []).join(', ') + '</div>';
+      var topExposed = data.exposed_entities.filter(function(e) { return e.foreign_exposure > 0; }).slice(0, 15);
+      
+      if (topExposed.length === 0) {
+          document.getElementById('foreign-exposure-list').innerHTML = html + '<p class="tnt-style-407">No entities topologically exposed.</p>';
+          return;
+      }
+      
+      topExposed.forEach(function(e) {
+          var glow = (e.foreign_exposure > 0.5) ? 'rgba(255,51,51,0.2)' : 'rgba(250,204,21,0.1)';
+          html += '<div class="overlap-card" style="background: ' + glow + '; border-color: rgba(255,255,255,0.1)">';
+          html += '<div class="name">' + e.label + ' <span style="font-size: 0.72rem; opacity: 0.8; font-family: \'JetBrains Mono\', monospace; margin-left: 5px;">(Score: ' + e.foreign_exposure.toFixed(4) + ')</span></div>';
+          html += '<div class="meta" style="margin-top: 5px;">Classification: <strong style="color: #c0c0c6">' + (e.category || 'Entity').toUpperCase() + '</strong></div>';
+          html += '</div>';
+      });
+      document.getElementById('foreign-exposure-list').innerHTML = html;
     }
 
     // ── GLOW RADIUS MAP ──
@@ -1208,5 +1245,6 @@
 <script src="js/liril-walkthrough.js?v=7"></script>
 <script src="js/integrity.js"></script>
 <script src="js/i18n.js?v=4"></script>
+<script src="js/behavior_analytics.js"></script>
 </body>
 </html>

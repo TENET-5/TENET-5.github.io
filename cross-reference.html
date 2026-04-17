@@ -683,7 +683,8 @@
       { key: 'mps', url: 'data/all_mps.json' },
       { key: 'corporate', url: 'data/corporate_registry_analysis.json' },
       { key: 'procurement', url: 'data/contracts/anomaly_scan_20260407_221148.json' },
-      { key: 'financial', url: 'data/financial_transaction_analysis.json' }
+      { key: 'financial', url: 'data/financial_transaction_analysis.json' },
+      { key: 'verifications', url: 'data/claim_verifications.json' }
     ];
     
     var bridgeOptimizer = new FrontendBridgingOptimizer(files.map(f => f.key));
@@ -811,6 +812,7 @@
       var analysisData = datasets.analysis;
       var mpData = datasets.mps;
       var procData = datasets.procurement;
+      var verifData = datasets.verifications;
 
       var mpLookup = buildMpLookup(mpData);
       var html = '';
@@ -922,6 +924,15 @@
       html += '<div class="disclaimer tnt-style-694">These flags are generated algorithmically by matching datasets. They identify patterns that are common in democratic governance. Appearing here is not evidence of wrongdoing. Lobbying and donating are legal activities. These patterns are presented for transparency and public awareness only.</div>';
       html += renderPatternFlags(lobbyData, contribData, analysisData, mpLookup);
       html += '</div>';
+
+      // ── Section D-2: OSINT Claim Verifications ──
+      if (verifData && verifData.length > 0) {
+        html += '<div class="section-block" style="border-left: 3px solid #facc15;">';
+        html += '<h2 data-narrate="OSINT claim mathematical verifications.">OSINT Claim Verifications [ PHASE 58 ENGAGED ]</h2>';
+        html += '<div class="disclaimer tnt-style-694">Assertions algorithmically cross-referenced against empirical registries utilizing BM25 + Topographical NLP maps.</div>';
+        html += renderVerifications(verifData);
+        html += '</div>';
+      }
 
       // ── Section E: Data Sources ──
       html += '<div class="section-block">';
@@ -1422,6 +1433,37 @@
         h += '<div class="tnt-style-716"></div>';
         h += '</div>';
 
+        h += '</div>';
+      });
+      h += '</div>';
+      return h;
+    }
+
+    function renderVerifications(verifData) {
+      if (!verifData || verifData.length === 0) return '<p class="tnt-style-407">No claim verifications processed.</p>';
+      var h = '<div class="org-grid">'; // Reuse org-grid layout
+      
+      verifData.forEach(function(v) {
+        var vColor = v.verdict === 'SUPPORTED' ? '#22c55e' : (v.verdict === 'REFUTED' ? '#ef4444' : '#f59e0b');
+        h += '<div class="org-card" style="border-left: 4px solid ' + vColor + '">';
+        h += '<div class="org-card-name" style="margin-bottom: 8px;">Claim: "' + escHtml(v.claim) + '"</div>';
+        
+        h += '<div class="mp-stat-val" style="color: ' + vColor + '; font-size: 1.1rem; margin-bottom: 2px;">' + escHtml(v.verdict) + '</div>';
+        h += '<div class="mp-stat-label" style="margin-bottom: 12px;">Confidence: ' + (v.confidence * 100).toFixed(1) + '%</div>';
+        
+        if (v.evidence && v.evidence.length > 0) {
+          h += '<div class="org-card-section-title" style="color: var(--accent);">Topological Evidence Trace</div>';
+          h += '<div class="flag-desc" style="font-size: 0.75rem; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.1);">';
+          v.evidence.forEach(function(ev) {
+            h += '<div style="margin-bottom: 6px;">&mdash; ' + escHtml(ev) + '</div>';
+          });
+          h += '</div>';
+        }
+        
+        if (v.entity) {
+           h += '<div class="flag-note" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">Source Entity: <strong>' + escHtml(v.entity) + '</strong></div>';
+        }
+        
         h += '</div>';
       });
       h += '</div>';
