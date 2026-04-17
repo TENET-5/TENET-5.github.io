@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════════════
+   TENET5 — Topography + Cartography theme layer (v1.0)
+
+   Motifs:
+   - Faint contour lines on the body (elevation-map background)
+   - Grid-tick bezels on cards (map frame aesthetic)
+   - Survey-tick dividers and compass accents
+   - Map-legend chip component
+   - "Pressure ridge" accent for hero sections
+
+   Usage:
+     <body class="topo">                    // subtle contour background
+     <body class="topo topo-dense">         // higher contour density
+     <div class="map-frame">...</div>       // cartographic card frame
+     <div class="map-legend">...</div>      // map-style legend chip
+     <div class="compass" aria-hidden>...   // NE compass rose accent
+
+   Safe to load on every page — zero runtime cost.
+   All colour tokens come from :root in style.css.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Contour line background ────────────────────────────────── */
+/* A 600×600 SVG pattern with ~10 concentric closed contours that tile
+   seamlessly. Encoded as data URI so no extra HTTP request. */
+body.topo {
+  background-image:
+    /* Top layer: fine topographic lines (blood red, 4% opacity) */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600' fill='none'><g stroke='%23b91c1c' stroke-width='0.6' opacity='0.04'><ellipse cx='300' cy='300' rx='280' ry='220'/><ellipse cx='300' cy='300' rx='240' ry='185'/><ellipse cx='300' cy='300' rx='200' ry='152'/><ellipse cx='300' cy='300' rx='162' ry='122'/><ellipse cx='300' cy='300' rx='126' ry='94'/><ellipse cx='300' cy='300' rx='92' ry='68'/><ellipse cx='300' cy='300' rx='60' ry='44'/><ellipse cx='300' cy='300' rx='32' ry='22'/></g><g stroke='%23c9a84c' stroke-width='0.4' opacity='0.025'><path d='M0,480 C100,440 200,460 300,420 C400,380 500,410 600,380'/><path d='M0,420 C120,390 220,400 320,360 C420,320 520,350 600,320'/><path d='M0,360 C100,330 210,340 310,300 C410,260 500,290 600,260'/><path d='M0,300 C100,270 210,280 310,240 C410,200 500,230 600,200'/><path d='M0,240 C100,210 210,220 310,180 C410,140 500,170 600,140'/></g></svg>"),
+    /* Background base */
+    var(--bg);
+  background-size: 600px 600px, auto;
+  background-repeat: repeat, no-repeat;
+  background-attachment: fixed, scroll;
+}
+
+body.topo.topo-dense {
+  /* Denser version — for map-centric pages */
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400' fill='none'><g stroke='%23b91c1c' stroke-width='0.5' opacity='0.06'><ellipse cx='200' cy='200' rx='190' ry='155'/><ellipse cx='200' cy='200' rx='165' ry='133'/><ellipse cx='200' cy='200' rx='142' ry='114'/><ellipse cx='200' cy='200' rx='120' ry='95'/><ellipse cx='200' cy='200' rx='99' ry='77'/><ellipse cx='200' cy='200' rx='79' ry='60'/><ellipse cx='200' cy='200' rx='60' ry='44'/><ellipse cx='200' cy='200' rx='42' ry='29'/><ellipse cx='200' cy='200' rx='25' ry='16'/></g><g stroke='%23c9a84c' stroke-width='0.4' opacity='0.04'><path d='M0,320 C80,295 160,305 240,280 C320,255 380,270 400,255'/><path d='M0,270 C80,245 160,255 240,230 C320,205 380,220 400,205'/><path d='M0,220 C80,195 160,205 240,180 C320,155 380,170 400,155'/><path d='M0,170 C80,145 160,155 240,130 C320,105 380,120 400,105'/><path d='M0,120 C80,95 160,105 240,80 C320,55 380,70 400,55'/></g></svg>"),
+    var(--bg);
+  background-size: 400px 400px, auto;
+  background-repeat: repeat, no-repeat;
+  background-attachment: fixed, scroll;
+}
+
+/* ── 2. Cartographic card frame ────────────────────────────────── */
+.map-frame {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px 28px;
+  backdrop-filter: blur(14px);
+}
+
+/* Corner tick marks — cartographer's bezel */
+.map-frame::before,
+.map-frame::after,
+.map-frame > .mf-tr,
+.map-frame > .mf-br {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  border-color: var(--color-royal-gold);
+  opacity: 0.55;
+}
+.map-frame::before   { top: 6px;    left: 6px;   border-style: solid; border-width: 1px 0 0 1px; }
+.map-frame::after    { bottom: 6px; right: 6px;  border-style: solid; border-width: 0 1px 1px 0; }
+.map-frame > .mf-tr  { top: 6px;    right: 6px;  border-style: solid; border-width: 1px 1px 0 0; }
+.map-frame > .mf-br  { bottom: 6px; left: 6px;   border-style: solid; border-width: 0 0 1px 1px; }
+
+/* Map-frame heading: serif, with coordinate-style sub-label */
+.map-frame > h2, .map-frame > h3 {
+  font-family: 'Cinzel', 'Crimson Text', Georgia, serif;
+  color: var(--text-light);
+  margin: 0 0 12px;
+}
+.map-frame .coord {
+  display: inline-block;
+  margin-left: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--color-royal-gold);
+  opacity: 0.75;
+  vertical-align: middle;
+}
+
+/* ── 3. Survey-tick horizontal divider ─────────────────────────── */
+.survey-rule {
+  height: 14px;
+  margin: 20px 0;
+  border: 0;
+  background-image:
+    linear-gradient(to right,
+      transparent 0, transparent calc(25% - 0.5px),
+      rgba(201, 168, 76, 0.35) calc(25% - 0.5px), rgba(201, 168, 76, 0.35) calc(25% + 0.5px),
+      transparent calc(25% + 0.5px), transparent calc(50% - 0.5px),
+      rgba(201, 168, 76, 0.55) calc(50% - 0.5px), rgba(201, 168, 76, 0.55) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px), transparent calc(75% - 0.5px),
+      rgba(201, 168, 76, 0.35) calc(75% - 0.5px), rgba(201, 168, 76, 0.35) calc(75% + 0.5px),
+      transparent calc(75% + 0.5px), transparent 100%),
+    linear-gradient(to right, transparent 0%, rgba(201, 168, 76, 0.20) 15%, rgba(201, 168, 76, 0.20) 85%, transparent 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 8px, 100% 1px;
+  background-position: center 0, center 8px;
+}
+
+/* ── 4. Map legend chip ────────────────────────────────────────── */
+.map-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(8, 14, 26, 0.70);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-royal-cream);
+  backdrop-filter: blur(8px);
+}
+.map-legend .ml-key {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.8;
+}
+.map-legend.ml-critical { color: var(--color-critical); }
+.map-legend.ml-warn     { color: var(--color-warning); }
+.map-legend.ml-info     { color: var(--color-info); }
+.map-legend.ml-gold     { color: var(--color-royal-gold); }
+.map-legend.ml-ok       { color: var(--color-green); }
+
+/* ── 5. Compass rose accent ────────────────────────────────────── */
+.compass {
+  width: 56px;
+  height: 56px;
+  opacity: 0.55;
+  filter: drop-shadow(0 0 2px rgba(201, 168, 76, 0.25));
+  pointer-events: none;
+  user-select: none;
+}
+.compass.lg { width: 96px; height: 96px; }
+
+/* ── 6. Elevation badge (corruption depth indicator) ──────────── */
+.elev-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(185, 28, 28, 0.08);
+  border: 1px solid rgba(185, 28, 28, 0.30);
+  color: var(--accent-bright);
+}
+.elev-badge::before {
+  content: '▲';
+  font-size: 0.55rem;
+  opacity: 0.8;
+}
+.elev-badge.e-peak    { background: rgba(185, 28, 28, 0.18); border-color: var(--accent); }
+.elev-badge.e-high    { background: rgba(208, 135, 112, 0.12); border-color: rgba(208, 135, 112, 0.30); color: var(--color-warning); }
+.elev-badge.e-mid     { background: rgba(184, 134, 11, 0.12); border-color: rgba(184, 134, 11, 0.30); color: var(--color-gold); }
+.elev-badge.e-base    { background: rgba(107, 142, 90, 0.10); border-color: rgba(107, 142, 90, 0.25); color: var(--color-green); }
+
+/* ── 7. Pressure-ridge hero accent ─────────────────────────────── */
+/* Horizontal layered-strata visual for hero sections */
+.pressure-ridge {
+  position: relative;
+  height: 48px;
+  margin: 28px 0;
+  background:
+    linear-gradient(180deg,
+      transparent 0, transparent 8px,
+      rgba(185, 28, 28, 0.25) 8px, rgba(185, 28, 28, 0.25) 9px,
+      transparent 9px, transparent 16px,
+      rgba(201, 168, 76, 0.20) 16px, rgba(201, 168, 76, 0.20) 17px,
+      transparent 17px, transparent 26px,
+      rgba(201, 168, 76, 0.35) 26px, rgba(201, 168, 76, 0.35) 27px,
+      transparent 27px, transparent 38px,
+      rgba(185, 28, 28, 0.15) 38px, rgba(185, 28, 28, 0.15) 39px,
+      transparent 39px);
+  overflow: hidden;
+}
+.pressure-ridge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(8, 14, 26, 0.75) 100%);
+}
+
+/* ── 8. Map-grid overlay (for containers) ──────────────────────── */
+/* Lightweight 20px grid with 100px majors — opt in via .map-grid class */
+.map-grid {
+  background-image:
+    linear-gradient(rgba(201, 168, 76, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 168, 76, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(201, 168, 76, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 168, 76, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
+
+/* ── 9. Node bubble — used on corruption-map page ──────────────── */
+/* Stand-alone CSS for a force-directed graph node styled as a topographic peak */
+.peak-node {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%,
+              rgba(220, 38, 38, 0.85) 0%,
+              rgba(185, 28, 28, 0.70) 35%,
+              rgba(120, 20, 20, 0.85) 100%);
+  border: 1px solid rgba(201, 168, 76, 0.55);
+  box-shadow:
+    inset 0 0 10px rgba(0,0,0,0.5),
+    0 0 18px rgba(185, 28, 28, 0.15);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--color-royal-cream);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.75);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.peak-node:hover { transform: scale(1.08); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 32px rgba(220, 38, 38, 0.35); }
+.peak-node.p-gov     { background: radial-gradient(circle at 35% 30%, rgba(220,38,38,0.9), rgba(120,20,20,0.9)); }
+.peak-node.p-corp    { background: radial-gradient(circle at 35% 30%, rgba(184,134,11,0.85), rgba(120,85,10,0.85)); }
+.peak-node.p-mp      { background: radial-gradient(circle at 35% 30%, rgba(129,161,192,0.80), rgba(66,102,144,0.85)); }
+.peak-node.p-foreign { background: radial-gradient(circle at 35% 30%, rgba(168,85,247,0.80), rgba(90,30,160,0.85)); }
+.peak-node.p-media   { background: radial-gradient(circle at 35% 30%, rgba(107,142,90,0.80), rgba(60,85,48,0.85)); }
+
+/* ── 10. Topographic reduced motion ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  body.topo { background-attachment: scroll, scroll; }
+  .peak-node { transition: none; }
+}
