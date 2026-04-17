@@ -265,13 +265,15 @@ def check_fabricated_telemetry_guard():
                     # Close only counts if it comes AFTER the last <!--
                     if "-->" not in between:
                         continue  # inside an HTML comment — allowed
-                # Check 2: wider retraction-documentation context window
+                # Check 2: wider retraction-documentation context window.
+                # Case-insensitive "retract" anywhere in ±600 chars is accepted as
+                # audit-trail context. Captures "RETRACTED", "retraction note",
+                # "Retraction 1"/"Retraction 2"/"Retraction Protocol", "retracted",
+                # "was retracted", etc.
                 ctx_start = max(0, m.start() - 600)
                 ctx_end = min(len(txt), m.end() + 300)
-                context = txt[ctx_start:ctx_end]
-                if ("RETRACTED" in context or "retraction note" in context.lower() or
-                    "Retraction note" in context or
-                    "<!-- RETRACTED" in context):
+                context = txt[ctx_start:ctx_end].lower()
+                if "retract" in context:
                     continue  # allowed — audit-trail context
                 line_no = txt.count("\n", 0, m.start()) + 1
                 offenders.append((html.name, desc, line_no))

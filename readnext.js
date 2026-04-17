@@ -1415,9 +1415,17 @@
     'quantum-accountability.html': {
       current: 'Quantum Accountability',
       next: [
+        { href: 'quantum-methodology.html', label: 'Methodology', desc: 'How to reproduce + verify the investigation' },
         { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'The corrections thesis Grover amplifies' },
         { href: 'network-analysis.html', label: 'Network Analysis', desc: 'The 1,181-node reclassified influence graph' },
-        { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'Israel-linked actors surfaced across five type filters' },
+      ]
+    },
+    'quantum-methodology.html': {
+      current: 'Methodology',
+      next: [
+        { href: 'quantum-accountability.html', label: 'Quantum Accountability', desc: 'The findings the methodology produced (8 axes, 5 chairs)' },
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'A worked example of the methodology' },
+        { href: 'cija-maid-pipeline.html', label: 'Retraction Trail', desc: 'What the method retracted and why' },
       ]
     },
   };
