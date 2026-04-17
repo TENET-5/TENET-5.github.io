@@ -78,9 +78,9 @@
     'accountability.html': {
       current: 'The 504 Database',
       next: [
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canadian jails vs. the standards we owe prisoners of war' },
         { href: 'corruption-map.html', label: 'Corruption Map', desc: 'Documented procurement failures' },
         { href: 'procurement-analysis.html', label: 'Procurement Analysis', desc: '$191B in documented waste' },
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'What the data reveals' },
       ]
     },
     'osint-dashboard.html': {
@@ -111,8 +111,8 @@
       current: 'CFNIS Investigation',
       next: [
         { href: 's504-covey-bae.html', label: 's.504 Prosecution: Covey & Bae', desc: 'Information filed against CFNIS under Criminal Code s.504' },
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canada holds its own below the standards it owes captured enemy soldiers' },
         { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
-        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
       ]
     },
     's504-covey-bae.html': {
@@ -406,9 +406,9 @@
     'genocide-evidence.html': {
       current: 'Genocide Evidence',
       next: [
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Inmate conditions below the treaty floor for enemy soldiers' },
         { href: 't4-comparison.html', label: 'T4 Comparison', desc: 'Historical parallels to the T4 program' },
         { href: 'harm-index.html', label: 'Harm Index', desc: 'Quantified harm across populations' },
-        { href: 'rcmp-complicity.html', label: 'RCMP Complicity', desc: 'Documented law enforcement failures' },
       ]
     },
     'hansard-dashboard.html': {
@@ -454,9 +454,9 @@
     'ppcli-lawsuit.html': {
       current: 'PPCLI Lawsuit',
       next: [
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canada\u2019s inmate conditions vs. the treaty floor for PoWs' },
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
         { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
-        { href: 'veterans.html', label: 'Veterans', desc: 'Veterans advocacy and support' },
       ]
     },
     'mp-brief.html': {
@@ -679,9 +679,9 @@
     'veterans.html': {
       current: 'How Canada Treats Its Veterans',
       next: [
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canadian jails held below the treaty floor Canada owes prisoners of war' },
         { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
         { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
-        { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
       ]
     },
     'whistleblower-guide.html': {
@@ -767,9 +767,9 @@
     'disability-genocide.html': {
       current: 'Disability & CRPD Violations',
       next: [
+        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canadian jails held below the treaty floor we owe prisoners of war' },
         { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
         { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Full pattern documentation across populations' },
-        { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped' },
       ]
     },
     'lobbying-deepdive.html': {
@@ -1402,6 +1402,14 @@
         { href: 'rcmp-commissioners.html', label: 'RCMP Commissioners', desc: '4 leaders, systemic failures documented' },
         { href: 'emergencies-act.html', label: 'Emergencies Act', desc: 'Federal Court ruled it unreasonable' },
         { href: 'phac-mandates-s6.html', label: 'PHAC Mandates & s.6', desc: 'Section 6 Charter violations and public health overreach' },
+      ]
+    },
+    'geneva-vs-jails.html': {
+      current: 'Below Geneva — Jails vs. PoW Standards',
+      next: [
+        { href: 'disability-genocide.html', label: 'Disability & CRPD Violations', desc: 'Canada\u2019s war on the disabled \u2014 same treaty-violation pattern' },
+        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 confirmed records of government misconduct' },
+        { href: 'genocide-evidence.html', label: 'Genocide Evidence', desc: 'Full pattern documentation across populations' },
       ]
     },
   };
