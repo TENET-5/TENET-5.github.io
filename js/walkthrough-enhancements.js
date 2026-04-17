@@ -20,6 +20,8 @@
   var LS_HINT_KEY     = 'tenet5_wt_hint_shown';       // first-run keyboard hint
   var LS_TRANSCRIPT_KEY = 'tenet5_wt_transcript_open'; // remember panel state
   var LS_CC_KEY       = 'tenet5_wt_cc_on';             // closed captions toggle
+  var LS_AUTOPLAY_KEY = 'tenet5_wt_autoplay';          // auto-advance to next page
+  var LS_SCROLLPAUSE_KEY = 'tenet5_wt_scrollpause';    // pause on manual scroll
   var LS_RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 
   // Average words-per-minute for rate=1.0 (measured empirically on the LIRIL
@@ -176,6 +178,16 @@
     '  color: #a0a0b8; white-space: nowrap; padding-left: 4px;',
     '}',
 
+    '.wt-share-toast {',
+    '  position: fixed; top: 84px; left: 50%; transform: translateX(-50%);',
+    '  background: rgba(10,14,22,0.95); color: #c4b5fd;',
+    '  padding: 8px 14px; border-radius: 8px; font-size: 0.82rem;',
+    '  font-family: \'Inter\', system-ui, sans-serif; z-index: 99994;',
+    '  border: 1px solid rgba(168,85,247,0.4); pointer-events: none;',
+    '  animation: wt-toast-in 0.2s ease-out;',
+    '}',
+    '@keyframes wt-toast-in { from { transform: translate(-50%, -8px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }',
+
     '@media (max-width: 640px) {',
     '  .wt-enhance-bar { left: 6px; right: 6px; transform: none; padding: 6px 10px; gap: 6px; font-size: 0.7rem; flex-wrap: wrap; justify-content: center; }',
     '  .wt-enhance-bar .wt-section-track { width: 80px; }',
@@ -227,8 +239,10 @@
       '<button id="wt-sp-2" data-spd="1.25">1.25×</button>' +
       '<button id="wt-sp-3" data-spd="1.5">1.5×</button>' +
       '<div class="wt-sep"></div>' +
+      '<button id="wt-auto-btn" title="Autoplay — advance to next page">▶▶</button>' +
       '<button id="wt-cc-btn" title="Closed captions (C)">CC</button>' +
       '<button id="wt-transcript-btn" title="Show transcript (T)">☰ Text</button>' +
+      '<button id="wt-share-btn" title="Copy shareable link (M)">🔗</button>' +
       '<button id="wt-help-btn" title="Show help">? Help</button>' +
       '<span class="wt-time-pill" id="wt-time-pill"></span>';
     document.body.appendChild(bar);
@@ -239,8 +253,11 @@
     bar.querySelector('#wt-help-btn').addEventListener('click', showHelp);
     bar.querySelector('#wt-transcript-btn').addEventListener('click', toggleTranscript);
     bar.querySelector('#wt-cc-btn').addEventListener('click', toggleCC);
+    bar.querySelector('#wt-auto-btn').addEventListener('click', toggleAutoplay);
+    bar.querySelector('#wt-share-btn').addEventListener('click', shareWalkthrough);
     markActiveSpeedBtn();
     markCCBtn();
+    markAutoplayBtn();
   }
 
   function markActiveSpeedBtn() {
@@ -404,6 +421,8 @@
         '<div class="wt-help-row"><span class="wt-help-key">S</span><span class="wt-help-desc">Cycle narration speed (0.75× → 1× → 1.25× → 1.5×)</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">T</span><span class="wt-help-desc">Toggle transcript panel</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">C</span><span class="wt-help-desc">Toggle closed captions</span></div>' +
+        '<div class="wt-help-row"><span class="wt-help-key">A</span><span class="wt-help-desc">Toggle autoplay (auto-advance to next page)</span></div>' +
+        '<div class="wt-help-row"><span class="wt-help-key">M</span><span class="wt-help-desc">Copy shareable walkthrough link</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">?  or  H</span><span class="wt-help-desc">Show / hide this help</span></div>' +
         '<div class="wt-help-row" style="margin-top:0.8rem;padding-top:0.4rem;border-top:1px solid rgba(255,255,255,0.08);"><span class="wt-help-key" style="color:#7a7a8c;">URL</span><span class="wt-help-desc" style="font-family:\'IBM Plex Mono\',monospace;font-size:0.78rem;">?wt=1&amp;section=5&amp;speed=1.25</span></div>' +
         '<button class="wt-close" id="wt-close-help">Close</button>' +
@@ -652,6 +671,136 @@
     pill.textContent = txt ? '~' + txt + ' left' : '';
   }
 
+  // ── Autoplay / Podcast mode ──────────────────────────────────────────────
+  // When this page's walkthrough finishes and autoplay is on, advance to
+  // the next page in PAGE_SEQUENCE and auto-start the walkthrough there.
+  // The page chain is owned by presentation.js (window.__TENET5_NEXT_PAGE);
+  // we set sessionStorage.liril_autopilot so the next page boots into a
+  // running walkthrough without a click.
+  var autoplayEnabled = false;
+  try { autoplayEnabled = localStorage.getItem(LS_AUTOPLAY_KEY) === '1'; } catch (e) {}
+
+  function setAutoplay(on) {
+    autoplayEnabled = !!on;
+    try { localStorage.setItem(LS_AUTOPLAY_KEY, on ? '1' : '0'); } catch (e) {}
+    markAutoplayBtn();
+  }
+  function toggleAutoplay() { setAutoplay(!autoplayEnabled); }
+  function markAutoplayBtn() {
+    if (!bar) return;
+    var btn = bar.querySelector('#wt-auto-btn');
+    if (!btn) return;
+    if (autoplayEnabled) btn.classList.add('active'); else btn.classList.remove('active');
+    btn.title = autoplayEnabled ? 'Autoplay ON — Pause auto-advance' : 'Autoplay OFF — Click to auto-advance to next page';
+  }
+
+  function maybeAutoAdvance() {
+    if (!autoplayEnabled) return;
+    // Only advance if we actually reached the last section (prevents
+    // false triggers when the user stops mid-page).
+    if (totalSections > 0 && currentSection < totalSections) return;
+    try {
+      sessionStorage.setItem('liril_autopilot', JSON.stringify({
+        autostart: true, startedAt: Date.now(), resume: false, autoplay: true,
+      }));
+    } catch (e) {}
+    if (typeof window.__TENET5_NEXT_PAGE === 'function') {
+      // Short delay so the user sees the final section finish before jump.
+      setTimeout(function() { window.__TENET5_NEXT_PAGE(); }, 1800);
+    }
+  }
+
+  // ── Share current walkthrough position ───────────────────────────────────
+  // Builds a ?wt=1&section=N&speed=S URL, copies to clipboard, shows toast.
+  function buildShareURL() {
+    var path = window.location.pathname + window.location.hash;
+    var qs = new URLSearchParams();
+    qs.set('wt', '1');
+    if (currentSection > 0) qs.set('section', String(currentSection));
+    if (Math.abs(speed - 1.0) > 0.01) qs.set('speed', String(speed));
+    var base = window.location.origin + (window.location.pathname === '/' ? '' : window.location.pathname);
+    // For the iframe-based shell, prefer the ?load=page.html pattern
+    try {
+      if (window.top !== window && window.location.pathname.endsWith('.html')) {
+        var page = window.location.pathname.split('/').pop();
+        return window.top.location.origin + '/?load=' + page + '&' + qs.toString();
+      }
+    } catch (e) {}
+    return base + '?' + qs.toString();
+  }
+  function showShareToast(msg, color) {
+    var t = document.createElement('div');
+    t.className = 'wt-share-toast';
+    t.textContent = msg;
+    if (color) t.style.color = color;
+    document.body.appendChild(t);
+    setTimeout(function() { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; }, 1600);
+    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 2200);
+  }
+  function shareWalkthrough() {
+    var url = buildShareURL();
+    var done = function(ok) {
+      if (ok) showShareToast('✓ Link copied — section ' + currentSection + ' · ' + speed + '×');
+      else showShareToast('Copy failed — URL in console', '#facc15');
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() { done(true); }, function() { done(false); console.log(url); });
+        return;
+      }
+    } catch (e) {}
+    // Fallback via execCommand
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed'; ta.style.top = '-2000px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      done(ok);
+    } catch (e) { done(false); console.log(url); }
+  }
+
+  // ── Pause on manual scroll ───────────────────────────────────────────────
+  // When the user scrolls mid-narration we pause speechSynthesis so they
+  // can read without the voice racing ahead. Resumes after 2 s of calm.
+  var scrollPauseEnabled = true;
+  try { scrollPauseEnabled = localStorage.getItem(LS_SCROLLPAUSE_KEY) !== '0'; } catch (e) {}
+  var lastUserScroll = 0;
+  var scrollPauseTimer = null;
+  var autoPausedByScroll = false;
+
+  function onUserScroll() {
+    if (!scrollPauseEnabled) return;
+    lastUserScroll = Date.now();
+    try {
+      if (window.speechSynthesis && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        window.speechSynthesis.pause();
+        autoPausedByScroll = true;
+      }
+    } catch (e) {}
+    if (scrollPauseTimer) clearTimeout(scrollPauseTimer);
+    scrollPauseTimer = setTimeout(function() {
+      try {
+        if (autoPausedByScroll && window.speechSynthesis && window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+          autoPausedByScroll = false;
+        }
+      } catch (e) {}
+    }, 2200);
+  }
+  // Use wheel/touchmove rather than scroll so programmatic scrollIntoView
+  // (from our own next/prev buttons) doesn't trigger a false pause.
+  window.addEventListener('wheel', onUserScroll, { passive: true });
+  window.addEventListener('touchmove', onUserScroll, { passive: true });
+  window.addEventListener('keydown', function(e) {
+    // Spacebar-as-scroll, PageDown, PageUp also count as user scroll intent
+    if (e.key === 'PageDown' || e.key === 'PageUp' || e.key === 'Home' || e.key === 'End') {
+      onUserScroll();
+    }
+  });
+
   // ── Deep-link resume via URL params ─────────────────────────────────────
   // Supported:  ?wt=1        auto-start walkthrough on load
   //             ?section=N   scroll to section N (1-based) after start
@@ -772,6 +921,19 @@
       toggleCC();
       return;
     }
+    // Share current position
+    if (key === 'm' || key === 'M') {
+      e.preventDefault();
+      shareWalkthrough();
+      return;
+    }
+    // Autoplay toggle
+    if (key === 'a' || key === 'A') {
+      e.preventDefault();
+      toggleAutoplay();
+      showShareToast(autoplayEnabled ? '▶▶ Autoplay ON' : '⏸ Autoplay OFF');
+      return;
+    }
     // Help
     if (key === '?' || key === 'h' || key === 'H') {
       e.preventDefault();
@@ -787,8 +949,10 @@
     var startBtn = document.getElementById('liril-start-walkthrough');
     if (!startBtn) return;
     // Observe class changes to detect start/stop
+    var wasActive = startBtn.classList.contains('liril-active');
     var observer = new MutationObserver(function() {
-      if (startBtn.classList.contains('liril-active')) {
+      var isActive = startBtn.classList.contains('liril-active');
+      if (isActive) {
         showBar();
         countSections();
         updateSectionProgress();
@@ -801,7 +965,10 @@
         } catch (e) {}
       } else {
         hideBar();
+        // Transitioned active → inactive: if autoplay is on, advance.
+        if (wasActive) maybeAutoAdvance();
       }
+      wasActive = isActive;
     });
     observer.observe(startBtn, { attributes: true, attributeFilter: ['class'] });
     return true;
@@ -878,6 +1045,10 @@
     ccEnabled: function() { return ccEnabled; },
     estimateTimeRemaining: estimateTimeRemaining,
     honorURLParams: honorURLParams,
+    toggleAutoplay: toggleAutoplay,
+    autoplayEnabled: function() { return autoplayEnabled; },
+    shareWalkthrough: shareWalkthrough,
+    buildShareURL: buildShareURL,
     showHint: maybeShowHint,
     clearResume: clearPosition,
     nextSection: function() { return window.__TENET5_NEXT_SECTION && window.__TENET5_NEXT_SECTION(); },
