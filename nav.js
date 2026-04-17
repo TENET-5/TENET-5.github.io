@@ -55,10 +55,7 @@
           '<div class="nav-group nav-tools">' +
             '<a href="/accountability.html" id="nav-504">504</a>' +
             '<a href="/network-analysis.html" id="nav-network">Network</a>' +
-            '<a href="/liril-live.html" id="nav-liril" style="color:#4ade80;">LIRIL Live</a>' +
-            '<a href="/quantum-meta.html" id="nav-quantum-meta" style="color:#c4b5fd;">Meta-Grover</a>' +
             '<a href="/state-of-investigation.html" id="nav-soi" style="color:#fbbf24;">State</a>' +
-            '<a href="/family-connections.html" id="nav-family" style="color:#fbbf24;">Family</a>' +
             '<a href="/political-business-influence.html" id="nav-influence" style="color:#f97316;">Influence</a>' +
             '<a href="/sitemap.html" id="nav-sitemap" style="color:#22d3ee;">All Pages</a>' +
           '</div>' +
