@@ -17,6 +17,8 @@
 
   var LS_POSITION_KEY = 'tenet5_walkthrough_position';
   var LS_SPEED_KEY    = 'tenet5_narration_speed';
+  var LS_HINT_KEY     = 'tenet5_wt_hint_shown';       // first-run keyboard hint
+  var LS_TRANSCRIPT_KEY = 'tenet5_wt_transcript_open'; // remember panel state
   var LS_RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 
   var SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5];
@@ -113,11 +115,52 @@
     '}',
     '.wt-help-card .wt-close:hover { border-color: #a855f7; color: #c4b5fd; }',
 
+    '.wt-hint {',
+    '  position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%);',
+    '  background: rgba(10,14,22,0.96); border: 1px solid rgba(192,132,252,0.55);',
+    '  border-radius: 8px; padding: 10px 14px; z-index: 99996; max-width: 380px;',
+    '  font-family: \'Inter\', system-ui, sans-serif; font-size: 0.78rem;',
+    '  color: #d8d8e0; box-shadow: 0 6px 24px rgba(0,0,0,0.45), 0 0 16px rgba(168,85,247,0.18);',
+    '  animation: wt-hint-in 0.35s ease-out;',
+    '}',
+    '@keyframes wt-hint-in { from { transform: translate(-50%, 14px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }',
+    '.wt-hint b { color: #c4b5fd; }',
+    '.wt-hint button {',
+    '  background: transparent; border: none; color: #a0a0b8; cursor: pointer;',
+    '  font-size: 1.1rem; padding: 0 4px; margin-left: 8px; line-height: 1;',
+    '}',
+
+    '.wt-transcript {',
+    '  position: fixed; top: 68px; right: 12px; width: 340px; max-height: 60vh;',
+    '  background: rgba(10,14,22,0.95); border: 1px solid rgba(168,85,247,0.35);',
+    '  border-radius: 10px; z-index: 99995; display: none; flex-direction: column;',
+    '  font-family: \'Inter\', system-ui, sans-serif;',
+    '  backdrop-filter: blur(12px); color: #d0d0e0;',
+    '  box-shadow: 0 10px 40px rgba(0,0,0,0.55);',
+    '}',
+    '.wt-transcript.active { display: flex; }',
+    '.wt-transcript-header {',
+    '  padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.08);',
+    '  display: flex; align-items: center; justify-content: space-between;',
+    '  font-size: 0.78rem; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.05em;',
+    '}',
+    '.wt-transcript-header button {',
+    '  background: transparent; border: none; color: #a0a0b8; cursor: pointer;',
+    '  font-size: 1.1rem; padding: 0 4px;',
+    '}',
+    '.wt-transcript-body { overflow-y: auto; padding: 10px 12px; font-size: 0.83rem; line-height: 1.55; }',
+    '.wt-transcript-body p { margin: 0 0 8px 0; color: #b0b0c4; cursor: pointer; border-left: 2px solid transparent; padding-left: 8px; transition: all 0.15s; }',
+    '.wt-transcript-body p:hover { color: #e0e0f0; border-left-color: #a855f7; }',
+    '.wt-transcript-body p.active { color: #f0f0f0; border-left-color: #c4b5fd; background: rgba(168,85,247,0.08); }',
+
     '@media (max-width: 640px) {',
     '  .wt-enhance-bar { left: 6px; right: 6px; transform: none; padding: 6px 10px; gap: 6px; font-size: 0.7rem; flex-wrap: wrap; justify-content: center; }',
     '  .wt-enhance-bar .wt-section-track { width: 80px; }',
     '  .wt-enhance-bar .wt-sep { display: none; }',
     '  .wt-resume-banner { right: 6px; left: 6px; max-width: none; }',
+    '  .wt-transcript { right: 6px; left: 6px; width: auto; top: 56px; max-height: 50vh; }',
+    '  .wt-hint { left: 6px; right: 6px; transform: none; max-width: none; }',
+    '  @keyframes wt-hint-in { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }',
     '}',
   ].join('\n');
 
@@ -161,6 +204,7 @@
       '<button id="wt-sp-2" data-spd="1.25">1.25×</button>' +
       '<button id="wt-sp-3" data-spd="1.5">1.5×</button>' +
       '<div class="wt-sep"></div>' +
+      '<button id="wt-transcript-btn" title="Show transcript (T)">☰ Text</button>' +
       '<button id="wt-help-btn" title="Show help">? Help</button>';
     document.body.appendChild(bar);
     // Speed buttons
@@ -168,6 +212,7 @@
       b.addEventListener('click', function() { setSpeed(parseFloat(b.getAttribute('data-spd'))); });
     });
     bar.querySelector('#wt-help-btn').addEventListener('click', showHelp);
+    bar.querySelector('#wt-transcript-btn').addEventListener('click', toggleTranscript);
     markActiveSpeedBtn();
   }
 
@@ -328,6 +373,7 @@
         '<div class="wt-help-row"><span class="wt-help-key">←  or  P</span><span class="wt-help-desc">Previous section</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">Esc</span><span class="wt-help-desc">Stop walkthrough</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">S</span><span class="wt-help-desc">Cycle narration speed (0.75× → 1× → 1.25× → 1.5×)</span></div>' +
+        '<div class="wt-help-row"><span class="wt-help-key">T</span><span class="wt-help-desc">Toggle transcript panel</span></div>' +
         '<div class="wt-help-row"><span class="wt-help-key">?  or  H</span><span class="wt-help-desc">Show / hide this help</span></div>' +
         '<button class="wt-close" id="wt-close-help">Close</button>' +
       '</div>';
@@ -344,6 +390,98 @@
   }
   function hideHelp() {
     if (helpOverlay) helpOverlay.classList.remove('active');
+  }
+
+  // ── First-run keyboard hint ──────────────────────────────────────────────
+  // Shown once per user on their first walkthrough start, then suppressed.
+  function maybeShowHint() {
+    try {
+      if (localStorage.getItem(LS_HINT_KEY) === '1') return;
+    } catch (e) {}
+    var hint = document.createElement('div');
+    hint.className = 'wt-hint';
+    hint.innerHTML =
+      '<b>Tip:</b> Press <kbd>Space</kbd> to pause, <kbd>←/→</kbd> to step, ' +
+      '<kbd>S</kbd> for speed, <kbd>?</kbd> for all shortcuts.' +
+      '<button title="Got it" aria-label="Dismiss">×</button>';
+    document.body.appendChild(hint);
+    var dismiss = function() {
+      try { localStorage.setItem(LS_HINT_KEY, '1'); } catch (e) {}
+      if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
+    };
+    hint.querySelector('button').addEventListener('click', dismiss);
+    // Auto-dismiss after 12 s
+    setTimeout(dismiss, 12000);
+  }
+
+  // ── Transcript panel ─────────────────────────────────────────────────────
+  // Collects every [data-narrate] block's text so users who can't hear the
+  // narration can read along. Click a paragraph to jump to that section.
+  var transcriptEl = null;
+  function buildTranscript() {
+    if (transcriptEl) return;
+    transcriptEl = document.createElement('div');
+    transcriptEl.className = 'wt-transcript';
+    transcriptEl.innerHTML =
+      '<div class="wt-transcript-header">' +
+        '<span>Transcript</span>' +
+        '<button id="wt-transcript-close" aria-label="Close">×</button>' +
+      '</div>' +
+      '<div class="wt-transcript-body" id="wt-transcript-body"></div>';
+    document.body.appendChild(transcriptEl);
+    transcriptEl.querySelector('#wt-transcript-close').addEventListener('click', hideTranscript);
+    populateTranscript();
+  }
+  function populateTranscript() {
+    if (!transcriptEl) return;
+    var body = transcriptEl.querySelector('#wt-transcript-body');
+    if (!body) return;
+    body.innerHTML = '';
+    var sects = document.querySelectorAll('[data-narrate]');
+    Array.prototype.forEach.call(sects, function(s, i) {
+      var text = (s.getAttribute('data-narrate') || s.textContent || '').trim();
+      if (!text) return;
+      // Clip very long section text — the full text is still narrated.
+      var display = text.length > 320 ? text.slice(0, 320) + '…' : text;
+      var p = document.createElement('p');
+      p.textContent = display;
+      p.setAttribute('data-sect-idx', String(i));
+      p.addEventListener('click', function() {
+        scrollToSection(i);
+      });
+      body.appendChild(p);
+    });
+  }
+  function highlightActiveTranscript() {
+    if (!transcriptEl) return;
+    var body = transcriptEl.querySelector('#wt-transcript-body');
+    if (!body) return;
+    Array.prototype.forEach.call(body.querySelectorAll('p'), function(p) {
+      var idx = parseInt(p.getAttribute('data-sect-idx'), 10);
+      if (idx + 1 === currentSection) {
+        if (!p.classList.contains('active')) {
+          p.classList.add('active');
+          // Scroll into view within panel
+          try { p.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+        }
+      } else {
+        p.classList.remove('active');
+      }
+    });
+  }
+  function showTranscript() {
+    if (!transcriptEl) buildTranscript();
+    transcriptEl.classList.add('active');
+    highlightActiveTranscript();
+    try { localStorage.setItem(LS_TRANSCRIPT_KEY, '1'); } catch (e) {}
+  }
+  function hideTranscript() {
+    if (transcriptEl) transcriptEl.classList.remove('active');
+    try { localStorage.setItem(LS_TRANSCRIPT_KEY, '0'); } catch (e) {}
+  }
+  function toggleTranscript() {
+    if (transcriptEl && transcriptEl.classList.contains('active')) hideTranscript();
+    else showTranscript();
   }
 
   // ── Section navigation (scrolls between [data-narrate] blocks) ──────────
@@ -423,6 +561,12 @@
       setSpeed(next);
       return;
     }
+    // Transcript toggle
+    if (key === 't' || key === 'T') {
+      e.preventDefault();
+      toggleTranscript();
+      return;
+    }
     // Help
     if (key === '?' || key === 'h' || key === 'H') {
       e.preventDefault();
@@ -443,6 +587,13 @@
         showBar();
         countSections();
         updateSectionProgress();
+        maybeShowHint();
+        // Re-open transcript if user had it open before
+        try {
+          if (localStorage.getItem(LS_TRANSCRIPT_KEY) === '1') {
+            showTranscript();
+          }
+        } catch (e) {}
       } else {
         hideBar();
       }
@@ -469,6 +620,7 @@
               currentSection = idx + 1;
               updateSectionProgress();
               savePosition();
+              highlightActiveTranscript();
             }
           }
         });
@@ -506,7 +658,13 @@
     getSpeed: function() { return speed; },
     showHelp: showHelp,
     hideHelp: hideHelp,
+    showTranscript: showTranscript,
+    hideTranscript: hideTranscript,
+    toggleTranscript: toggleTranscript,
+    showHint: maybeShowHint,
     clearResume: clearPosition,
+    nextSection: function() { return window.__TENET5_NEXT_SECTION && window.__TENET5_NEXT_SECTION(); },
+    prevSection: function() { return window.__TENET5_PREV_SECTION && window.__TENET5_PREV_SECTION(); },
     currentSection: function() { return currentSection; },
     totalSections: function() { return totalSections; },
   };
