@@ -2,9 +2,14 @@
      SHARED NAV — Two-Tier Royal Canadian Header
      Red Ensign stripe → Identity band → Navigation bar
      TENET5 — Powered by LIRIL AI
+
+     ⚠️  DO NOT RE-ADD: FLAG button, language selector, theme slider,
+         or any other interactive widget. Site is READ-ONLY.
+         Rule established 2026-04-15. See CLAUDE.md.
+
      Modified: 2026-04-17 — Remove flag/lang/theme interactive widgets
                             per "0 interactions from user" directive.
-                            Compact nav to ~12 links to prevent overflow.
+                            Compact nav to 15 links to prevent overflow.
      ═══════════════════════════════════════════════════════ */
 (function() {
   if (window.__TENET5_NAV_LOADED) return;
