@@ -83,7 +83,6 @@
             '<select id="lang-selector" onchange="window.setSiteLanguage(this.value)" style="background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); border-radius: 4px; padding: 0.2rem; font-size: 0.85rem;">' +
               '<option value="en">English</option>' +
               '<option value="fr">Français</option>' +
-              '<option value="nf">Newfie</option>' +
             '</select>' +
             '<div class="theme-slider-wrap" title="Theme: Dark to Light">' +
               '<span class="tsl-icon">\u263E</span>' +
