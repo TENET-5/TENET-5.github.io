@@ -58,6 +58,7 @@
             '<a href="/liril-live.html" id="nav-liril" style="color:#4ade80;">LIRIL Live</a>' +
             '<a href="/quantum-meta.html" id="nav-quantum-meta" style="color:#c4b5fd;">Meta-Grover</a>' +
             '<a href="/state-of-investigation.html" id="nav-soi" style="color:#fbbf24;">State</a>' +
+            '<a href="/family-connections.html" id="nav-family" style="color:#fbbf24;">Family</a>' +
             '<a href="/sitemap.html" id="nav-sitemap" style="color:#22d3ee;">All Pages</a>' +
           '</div>' +
           '<div class="nav-auth" id="nav-auth"></div>' +
