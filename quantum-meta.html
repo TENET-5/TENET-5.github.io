@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Meta-Grover Portfolio — 15-Axis Quantum Analysis | TENET5</title>
+  <meta name="description" content="Second-order quantum analysis across all 15 accountability axes. Grover-over-Grover computes meta-amplifications for each actor, surfacing the Canadians whose cross-axis Grover signal dominates the entire investigation. Interactive heatmap, LIRIL interpretation, Merkle-anchored.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .meta-headline {
+      background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(220,38,38,0.08));
+      border: 1px solid #a855f7; border-radius: 12px;
+      padding: 1.75rem 2rem; margin: 2rem 0;
+    }
+    .meta-headline h2 { color: #c4b5fd; margin: 0 0 0.5rem 0; font-size: 1.25rem; }
+    .meta-headline .top1-name {
+      font-size: 2.4rem; font-weight: 900; color: #fff;
+      text-shadow: 0 2px 12px rgba(220,38,38,0.4); margin: 0.6rem 0;
+      font-family: 'Inter', sans-serif; letter-spacing: -0.01em;
+    }
+    .meta-headline .top1-stats {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.92rem; color: #fbbf24;
+    }
+    .meta-headline .top1-axes {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: #c4b5fd;
+      margin-top: 0.6rem;
+    }
+
+    .meta-table {
+      width: 100%; border-collapse: collapse; margin: 1.2rem 0;
+      font-family: 'Inter', sans-serif; background: #0f0f1f;
+      border-radius: 10px; overflow: hidden;
+    }
+    .meta-table th, .meta-table td {
+      text-align: left; padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.9rem;
+    }
+    .meta-table th {
+      color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.04em;
+      font-size: 0.78rem; font-weight: 700; background: rgba(168,85,247,0.08);
+    }
+    .meta-table tbody tr:hover td { background: rgba(168,85,247,0.04); }
+    .meta-table .rank { font-family: 'IBM Plex Mono', monospace; color: #a0a0b8; text-align: right; width: 40px; }
+    .meta-table .name { font-weight: 700; color: #f0f0f0; }
+    .meta-table .metaamp {
+      font-family: 'IBM Plex Mono', monospace; color: #c4b5fd; font-weight: 700;
+      text-align: right; font-size: 1rem;
+    }
+    .meta-table .axis-count {
+      font-family: 'IBM Plex Mono', monospace;
+      background: #7e22ce; color: #fff; font-weight: 900;
+      padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.78rem;
+      display: inline-block; min-width: 32px; text-align: center;
+    }
+    .meta-table .axis-count.x9 { background: #dc2626; }
+    .meta-table .axis-count.x3 { background: #f97316; }
+    .meta-table .axis-count.x2 { background: #a855f7; }
+    .meta-table .axis-list {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      color: #a0a0b8; line-height: 1.5;
+    }
+
+    .heatmap {
+      overflow-x: auto; background: #0f0f1f; border-radius: 10px;
+      padding: 1rem; margin: 1.5rem 0; border: 1px solid #2a2a4a;
+    }
+    .heatmap table {
+      border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      width: 100%; min-width: 900px;
+    }
+    .heatmap th, .heatmap td {
+      padding: 0.35rem 0.45rem; text-align: center;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .heatmap th {
+      color: #c4b5fd; font-weight: 700; background: rgba(0,0,0,0.25);
+      letter-spacing: 0.02em; text-transform: uppercase;
+      writing-mode: vertical-rl; transform: rotate(180deg);
+      min-height: 100px; vertical-align: bottom; white-space: nowrap;
+      font-size: 0.65rem;
+    }
+    .heatmap th.actor-cell {
+      writing-mode: horizontal-tb; transform: none; text-align: left;
+      padding: 0.35rem 0.8rem 0.35rem 0.6rem; color: #e0e0f0;
+      background: rgba(0,0,0,0.35); min-height: auto; font-size: 0.82rem;
+    }
+    .heatmap td.empty { background: rgba(255,255,255,0.02); color: #555; }
+    /* Amp intensity tiers */
+    .heatmap td.a-very-low  { background: rgba(168,85,247,0.10); color: #9ca3af; }
+    .heatmap td.a-low       { background: rgba(168,85,247,0.22); color: #c4b5fd; }
+    .heatmap td.a-mid       { background: rgba(168,85,247,0.40); color: #e9d5ff; font-weight: 700; }
+    .heatmap td.a-high      { background: rgba(236,72,153,0.45); color: #fff; font-weight: 900; }
+    .heatmap td.a-peak      { background: rgba(220,38,38,0.55); color: #fff; font-weight: 900; text-shadow: 0 0 4px rgba(0,0,0,0.6); }
+
+    .liril-interp {
+      background: rgba(74,222,128,0.08); border: 1px solid #4ade80;
+      border-radius: 10px; padding: 1.3rem 1.5rem; margin: 2rem 0;
+      color: #d0d0e0; line-height: 1.65;
+    }
+    .liril-interp .tag {
+      color: #86efac; font-weight: 900; font-size: 0.78rem;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem;
+    }
+    .liril-interp blockquote {
+      background: rgba(10,14,22,0.5); border-left: 3px solid #4ade80;
+      padding: 0.85rem 1.1rem; margin: 0.6rem 0; font-size: 0.95rem;
+      color: #e0e0f0;
+    }
+    .liril-interp .attrib {
+      font-size: 0.72rem; color: #7a7a8c; font-family: 'IBM Plex Mono', monospace;
+      margin-top: 0.4rem;
+    }
+
+    .method-box {
+      background: #0f0f1f; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 1.2rem 1.5rem; margin: 2rem 0;
+      font-family: 'IBM Plex Mono', monospace; color: #b0b0c4;
+      line-height: 1.7; font-size: 0.85rem;
+    }
+    .method-box strong { color: #c4b5fd; }
+    .method-box code {
+      color: #67e8f9; font-size: 0.92rem;
+      background: rgba(0,0,0,0.3); padding: 0.1rem 0.35rem; border-radius: 3px;
+    }
+
+    .merkle-chip {
+      display: inline-block; padding: 0.2rem 0.5rem;
+      background: rgba(168,85,247,0.14); border: 1px solid rgba(168,85,247,0.35);
+      border-radius: 4px; font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem; color: #c4b5fd; margin: 0.2rem 0.3rem 0.2rem 0;
+    }
+  </style>
+
+  <meta property="og:title" content="Meta-Grover Portfolio — 15-Axis Quantum Analysis | TENET5">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/quantum-meta.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="Meta Grover portfolio. Second-order quantum analysis. The TENET5 investigation now covers fifteen independent accountability axes, each with its own Grover amplitude amplification oracle over its marked state actors. This page runs a meta-Grover pass over all fifteen axes at once, computing the meta-amplification for every actor who appears in any axis. The meta-amplification formula is square root of axis count multiplied by sum of per-axis amplifications divided by ten. This gives sub-linear scaling with axis count so one triple-marked actor isn't eight times as important as one single-marked one, just three times as important at parity. The top meta-amplified actor across all fifteen axes is Justin Trudeau at nine axes and meta amp of twenty-three point nine four.">
+    <p class="subtitle">Grover-over-Grover · second-order amplification · 15 axes · LIRIL-verified</p>
+    <h1>Meta-Grover Portfolio</h1>
+    <p class="subtitle">
+      Second-order quantum analysis across all 15 accountability axes.
+      <strong style="color:#fbbf24;">Grover-over-Grover</strong> computes a meta-amplification for every
+      Canadian actor who appears in any axis, surfacing who the investigation's
+      overall quantum signal points at — not per-axis, but portfolio-wide.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <!-- Dominant actor headline -->
+    <div class="meta-headline" id="headline" data-narrate="Dominant actor. This is the top meta-amplified actor across the whole investigation. The number of axes is how many independent accountability dossiers the actor appears in. Total amp is the raw sum of per-axis amplifications. Meta amp is the portfolio-wide quantum signal, normalized so an axis count of one with amp ten gives meta amp one point zero.">
+      <h2>Top meta-amplified actor</h2>
+      <div class="top1-name" id="top-name">—</div>
+      <div class="top1-stats" id="top-stats">—</div>
+      <div class="top1-axes" id="top-axes">—</div>
+    </div>
+
+    <!-- LIRIL interpretation -->
+    <div class="liril-interp" id="liril-interp">
+      <div class="tag">LIRIL interpretation (tenet5.liril.infer)</div>
+      <blockquote id="liril-text">—</blockquote>
+      <div class="attrib" id="liril-attrib">—</div>
+    </div>
+
+    <!-- Top ranked actors -->
+    <h2 data-narrate="Top meta amplified actors. Ranked by the meta amplification score. Multi axis actors bubble to the top because the square root weighting rewards breadth. But actors with very high per axis amplifications can still out rank multi axis ones. David Vigneault for example is only in two axes but his per axis amplifications are so high that his meta amp beats Chrystia Freeland's who is in the same number of axes.">Top meta-amplified actors</h2>
+    <p style="color:#b0b0c4;">Ranked by <code style="color:#67e8f9;">meta_amp = sqrt(axis_count) × sum(per_axis_amps) / 10</code>. Multi-axis actors score higher due to sqrt weighting; high-per-axis actors can still out-rank them.</p>
+    <table class="meta-table">
+      <thead>
+        <tr><th>#</th><th>Actor</th><th>Axes</th><th style="text-align:right;">Meta-amp</th><th style="text-align:right;">Total amp</th><th>Axis list</th></tr>
+      </thead>
+      <tbody id="ranking-body">
+        <tr><td colspan="6" style="color:#888;padding:1rem;">Loading…</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Interactive heatmap -->
+    <h2 data-narrate="Actor by axis heat matrix. Rows are actors. Columns are the fifteen accountability axes. Darker purple cells are lower amplifications. Red cells are peak amplifications above seven times. Empty cells mean the actor is not Grover marked in that axis. The heat pattern reveals the structural shape of the investigation.">Actor × axis heat matrix</h2>
+    <p style="color:#b0b0c4;">Each row is an actor, each column is one of 15 axes. Cell intensity = per-axis amplification. Empty cells = not Grover-marked in that axis.</p>
+    <div class="heatmap" id="heatmap-wrap"><table id="heatmap"><tbody><tr><td style="color:#888;padding:1rem;">Loading…</td></tr></tbody></table></div>
+
+    <!-- Methodology -->
+    <div class="method-box" data-narrate="Method. Step one. For each of fifteen axes, read the Grover marked actors and their per axis amplifications from the published dossier JSON files. Step two. Canonicalize actor names to merge honorific variants. Step three. Build actor by axis amplitude matrix. Step four. Compute meta amp equals square root of axis count multiplied by sum of per axis amps divided by ten. Step five. Consult LIRIL on the top result for institutional interpretation. Step six. Merkle anchor the whole computation and publish to NATS.">
+      <strong>Method (reproducible)</strong><br>
+      1. Read <code>{axis}_grover_decisionmakers.json</code> for all 15 axes.<br>
+      2. Canonicalize actor names (strip honorifics) to merge variants.<br>
+      3. Build actor × axis amplitude matrix from <code>marked_actors</code> dict entries.<br>
+      4. Compute <code>meta_amp = sqrt(axis_count) * sum(per_axis_amps) / 10.0</code>.<br>
+      5. Rank actors by meta_amp. Publish top 20.<br>
+      6. Consult LIRIL on <code>tenet5.liril.infer</code> for institutional interpretation.<br>
+      7. Hash the result, publish to NATS <code>tenet5.quantum.integrity.result</code>.<br>
+      <br>
+      <strong>Tool:</strong> <code>tools/_quantum_meta_analysis.py</code>
+      (SYSTEM_SEED 118400, reproduces deterministically from dossier JSONs).<br>
+      <strong>Data:</strong> <code>data/quantum_meta_portfolio.json</code> (full) ·
+      <code>data/quantum_meta_actors.json</code> (compact).
+    </div>
+
+    <div style="background:rgba(0,0,0,0.25);padding:1rem 1.2rem;border-radius:8px;margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
+      <strong style="color:#c4b5fd;">Receipts:</strong><br>
+      full portfolio sha256: <span class="merkle-chip" id="sha256-chip">loading…</span><br>
+      published → NATS <code>tenet5.quantum.integrity.result</code><br>
+      SYSTEM_SEED 118400 · generated at <span id="gen-time">—</span>
+    </div>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // Tier thresholds for heatmap cell color
+    function tierForAmp(a) {
+      if (!a || a <= 0) return 'empty';
+      if (a < 3.5) return 'a-very-low';
+      if (a < 5.0) return 'a-low';
+      if (a < 6.5) return 'a-mid';
+      if (a < 8.0) return 'a-high';
+      return 'a-peak';
+    }
+
+    function escape(s) {
+      if (typeof s !== 'string') return String(s);
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    Promise.all([
+      fetch('data/quantum_meta_actors.json').then(r => r.json()).catch(() => null),
+      fetch('data/quantum_meta_portfolio.json').then(r => r.json()).catch(() => null),
+    ]).then(([actors, portfolio]) => {
+      if (!actors || !portfolio) {
+        document.getElementById('ranking-body').innerHTML = '<tr><td colspan="6" style="color:#ef4444;">data files missing</td></tr>';
+        return;
+      }
+      renderHeadline(actors, portfolio);
+      renderLirilInterp(portfolio);
+      renderRanking(actors.actors);
+      renderHeatmap(actors);
+      renderFooter(portfolio);
+    });
+
+    function renderHeadline(actors, portfolio) {
+      const top = actors.actors[0];
+      if (!top) return;
+      document.getElementById('top-name').textContent = top.name;
+      document.getElementById('top-stats').textContent =
+        `${top.axis_count} axes · total amp ${top.total_amp.toFixed(2)} · meta amp ${top.meta_amp.toFixed(3)}`;
+      document.getElementById('top-axes').textContent = 'axes: ' + top.axes.join(' · ');
+    }
+
+    function renderLirilInterp(portfolio) {
+      const interp = portfolio.liril_interpretation;
+      if (!interp || !interp.ok) {
+        document.getElementById('liril-text').textContent = '(LIRIL response unavailable)';
+        return;
+      }
+      document.getElementById('liril-text').textContent = '"' + interp.text.trim() + '"';
+      document.getElementById('liril-attrib').textContent =
+        'LIRIL · tenet5.liril.infer · answering: ' + (interp.prompt || '').slice(0, 120) + '…';
+    }
+
+    function renderRanking(actors) {
+      const body = document.getElementById('ranking-body');
+      body.innerHTML = '';
+      actors.slice(0, 20).forEach((a, i) => {
+        const cnt = a.axis_count;
+        const cntClass = cnt >= 8 ? 'x9' : (cnt >= 3 ? 'x3' : (cnt >= 2 ? 'x2' : ''));
+        body.innerHTML +=
+          '<tr>' +
+          `  <td class="rank">${i+1}</td>` +
+          `  <td class="name">${escape(a.name)}</td>` +
+          `  <td><span class="axis-count ${cntClass}">×${cnt}</span></td>` +
+          `  <td class="metaamp">${a.meta_amp.toFixed(3)}</td>` +
+          `  <td class="metaamp">${a.total_amp.toFixed(2)}</td>` +
+          `  <td class="axis-list">${a.axes.map(escape).join(' · ')}</td>` +
+          '</tr>';
+      });
+    }
+
+    function renderHeatmap(actors) {
+      const axes = actors.axes;
+      // Top 15 actors for the heat grid
+      const rows = actors.actors.slice(0, 15);
+      const table = document.getElementById('heatmap');
+      let html = '<thead><tr><th class="actor-cell">Actor</th>';
+      axes.forEach(ax => { html += `<th>${escape(ax)}</th>`; });
+      html += '</tr></thead><tbody>';
+      rows.forEach(a => {
+        html += `<tr><th class="actor-cell">${escape(a.name)}</th>`;
+        axes.forEach(ax => {
+          const v = a.per_axis_amp[ax];
+          if (!v) {
+            html += '<td class="empty">—</td>';
+          } else {
+            html += `<td class="${tierForAmp(v)}" title="${escape(ax)}: ${v.toFixed(2)}×">${v.toFixed(1)}</td>`;
+          }
+        });
+        html += '</tr>';
+      });
+      html += '</tbody>';
+      table.innerHTML = html;
+    }
+
+    function renderFooter(portfolio) {
+      const s = portfolio.self_sha256 || '';
+      document.getElementById('sha256-chip').textContent = s.slice(0, 24) + '…';
+      document.getElementById('gen-time').textContent = new Date((portfolio.timestamp_utc||0)*1000).toISOString();
+    }
+  })();
+  </script>
+</body>
+</html>
