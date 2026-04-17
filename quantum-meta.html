@@ -10,8 +10,8 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Meta-Grover Portfolio — 15-Axis Quantum Analysis | TENET5</title>
-  <meta name="description" content="Second-order quantum analysis across all 15 accountability axes. Grover-over-Grover computes meta-amplifications for each actor, surfacing the Canadians whose cross-axis Grover signal dominates the entire investigation. Interactive heatmap, LIRIL interpretation, Merkle-anchored.">
+  <title>Meta-Grover Portfolio — 16-Axis Quantum Analysis | TENET5</title>
+  <meta name="description" content="Second-order quantum analysis across all 16 accountability axes. Grover-over-Grover computes meta-amplifications for each actor, surfacing the Canadians whose cross-axis Grover signal dominates the entire investigation. Interactive heatmap, LIRIL interpretation, Merkle-anchored.">
   <link rel="stylesheet" href="style.css?v=22">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
   <style>
@@ -140,7 +140,7 @@
     }
   </style>
 
-  <meta property="og:title" content="Meta-Grover Portfolio — 15-Axis Quantum Analysis | TENET5">
+  <meta property="og:title" content="Meta-Grover Portfolio — 16-Axis Quantum Analysis | TENET5">
   <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
   <meta property="og:site_name" content="TENET5">
   <meta name="twitter:card" content="summary_large_image">
@@ -157,10 +157,16 @@
     <p class="subtitle">Grover-over-Grover · second-order amplification · 15 axes · LIRIL-verified</p>
     <h1>Meta-Grover Portfolio</h1>
     <p class="subtitle">
-      Second-order quantum analysis across all 15 accountability axes.
+      Second-order quantum analysis across all 16 accountability axes.
       <strong style="color:#fbbf24;">Grover-over-Grover</strong> computes a meta-amplification for every
       Canadian actor who appears in any axis, surfacing who the investigation's
       overall quantum signal points at — not per-axis, but portfolio-wide.
+      <br><br>
+      <strong style="color:#86efac;">Latest re-run (16 axes):</strong> LIRIL-surfaced
+      central-banking axis promoted <strong>Tiff Macklem</strong> to #5 and
+      <strong>Mark Carney</strong> to #6 meta-ranked actors, above prior top-10.
+      See <a href="liril-roadmap.html" style="color:#86efac;font-weight:700;">LIRIL roadmap</a>
+      for how the axis was surfaced in round 5.
     </p>
   </section>
 
@@ -218,6 +224,9 @@
     <div style="background:rgba(0,0,0,0.25);padding:1rem 1.2rem;border-radius:8px;margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
       <strong style="color:#c4b5fd;">Receipts:</strong><br>
       full portfolio sha256: <span class="merkle-chip" id="sha256-chip">loading…</span><br>
+      meta-grover merkle root: <span class="merkle-chip" id="merkle-root-chip">loading…</span>
+      &nbsp;·&nbsp; leaves: <span id="merkle-leaves">—</span>
+      &nbsp;·&nbsp; phase: <code id="merkle-phase">—</code><br>
       published → NATS <code>tenet5.quantum.integrity.result</code><br>
       SYSTEM_SEED 118400 · generated at <span id="gen-time">—</span>
     </div>
@@ -253,7 +262,8 @@
     Promise.all([
       fetch('data/quantum_meta_actors.json').then(r => r.json()).catch(() => null),
       fetch('data/quantum_meta_portfolio.json').then(r => r.json()).catch(() => null),
-    ]).then(([actors, portfolio]) => {
+      fetch('data/meta_grover_merkle.json').then(r => r.json()).catch(() => null),
+    ]).then(([actors, portfolio, merkle]) => {
       if (!actors || !portfolio) {
         document.getElementById('ranking-body').innerHTML = '<tr><td colspan="6" style="color:#ef4444;">data files missing</td></tr>';
         return;
@@ -262,7 +272,7 @@
       renderLirilInterp(portfolio);
       renderRanking(actors.actors);
       renderHeatmap(actors);
-      renderFooter(portfolio);
+      renderFooter(portfolio, merkle);
     });
 
     function renderHeadline(actors, portfolio) {
@@ -327,10 +337,21 @@
       table.innerHTML = html;
     }
 
-    function renderFooter(portfolio) {
+    function renderFooter(portfolio, merkle) {
       const s = portfolio.self_sha256 || '';
       document.getElementById('sha256-chip').textContent = s.slice(0, 24) + '…';
       document.getElementById('gen-time').textContent = new Date((portfolio.timestamp_utc||0)*1000).toISOString();
+      const mEl = document.getElementById('merkle-root-chip');
+      const lEl = document.getElementById('merkle-leaves');
+      const pEl = document.getElementById('merkle-phase');
+      if (merkle && merkle.merkle_root) {
+        mEl.textContent = merkle.merkle_root.slice(0, 24) + '…';
+        mEl.title = merkle.merkle_root;
+        if (lEl) lEl.textContent = String(merkle.leaf_count != null ? merkle.leaf_count : '—');
+        if (pEl) pEl.textContent = merkle.phase || '—';
+      } else {
+        mEl.textContent = '(unavailable)';
+      }
     }
   })();
   </script>
