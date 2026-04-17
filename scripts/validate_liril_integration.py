@@ -192,6 +192,45 @@ def check_page_sequence_coverage():
         warn(f"{len(missing)} HTML pages exist but are NOT in PAGE_SEQUENCE")
 
 
+def check_narration_integrity_subset():
+    """Lightweight check: every HTML page that participates in the walkthrough
+    (has data-narrate) must have no EMPTY narrations and no TOO_LONG_HARD
+    blocks. Full scan runs in scan_narration_integrity.py — this is the
+    CI smoke test so the main gate doesn't require the full report.
+    """
+    import re as _re
+    root = ROOT
+    HARD_MAX = 2400
+    NARRATE_RE = _re.compile(
+        r'data-narrate\s*=\s*(?:"([^"]*)"|\'([^\']*)\')', _re.IGNORECASE | _re.DOTALL
+    )
+    hard_pages = []
+    empty_pages = []
+    for p in sorted(root.glob("*.html")):
+        try:
+            txt = p.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+        for m in NARRATE_RE.finditer(txt):
+            n = (m.group(1) or m.group(2) or "").strip()
+            if not n:
+                empty_pages.append(p.name)
+                break
+            if len(n) > HARD_MAX:
+                hard_pages.append((p.name, len(n)))
+                break
+    if empty_pages:
+        error(f"Empty data-narrate blocks found on: {', '.join(empty_pages[:5])}"
+              + (f" (+{len(empty_pages)-5} more)" if len(empty_pages) > 5 else ""))
+    else:
+        ok("no empty data-narrate blocks on any page")
+    if hard_pages:
+        for page, size in hard_pages[:5]:
+            error(f"{page}: data-narrate {size} chars exceeds 2400 hard limit (TTS truncation)")
+    else:
+        ok("no data-narrate block exceeds TTS hard limit (2400 chars)")
+
+
 def check_shell_loads_scripts():
     """Verify shell.js loads presentation.js, liril-walkthrough.js, and the
     walkthrough-enhancements layer. Also verify the enhancements load AFTER
@@ -419,6 +458,9 @@ def main():
 
     print("\n── 8. Shell Script Loading ──")
     check_shell_loads_scripts()
+
+    print("\n── 9. Narration Integrity (subset check) ──")
+    check_narration_integrity_subset()
 
     print("\n" + "═" * 55)
     if ERRORS:
