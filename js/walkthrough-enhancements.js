@@ -739,8 +739,23 @@
   // The page chain is owned by presentation.js (window.__TENET5_NEXT_PAGE);
   // we set sessionStorage.liril_autopilot so the next page boots into a
   // running walkthrough without a click.
-  var autoplayEnabled = false;
-  try { autoplayEnabled = localStorage.getItem(LS_AUTOPLAY_KEY) === '1'; } catch (e) {}
+  //
+  // DEFAULT-ON: autoplay is the expected behaviour for a curated
+  // investigation walkthrough — users start it once and expect it to
+  // chain across pages. Users can disable explicitly with the A key
+  // (persisted in localStorage). Before this change, the default was
+  // OFF, which made users think the walkthrough was broken when in
+  // fact they just had to opt in. Now:
+  //   localStorage unset      → autoplay ON
+  //   localStorage === '0'    → autoplay OFF (user explicitly disabled)
+  //   localStorage === '1'    → autoplay ON (user explicitly enabled)
+  var autoplayEnabled = true;
+  try {
+    var savedAP = localStorage.getItem(LS_AUTOPLAY_KEY);
+    if (savedAP === '0') autoplayEnabled = false;
+    else if (savedAP === '1') autoplayEnabled = true;
+    // unset (null) → keep the DEFAULT-ON setting
+  } catch (e) {}
 
   function setAutoplay(on) {
     autoplayEnabled = !!on;
@@ -761,14 +776,27 @@
     // Only advance if we actually reached the last section (prevents
     // false triggers when the user stops mid-page).
     if (totalSections > 0 && currentSection < totalSections) return;
+
+    // Set both autopilot flags so whichever chain mechanism picks up
+    // (liril-walkthrough.js reads sessionStorage.liril_autopilot, our
+    // layer reads localStorage.tenet5_wt_autoplay).
     try {
       sessionStorage.setItem('liril_autopilot', JSON.stringify({
         autostart: true, startedAt: Date.now(), resume: false, autoplay: true,
       }));
     } catch (e) {}
+
     if (typeof window.__TENET5_NEXT_PAGE === 'function') {
-      // Short delay so the user sees the final section finish before jump.
-      setTimeout(function() { window.__TENET5_NEXT_PAGE(); }, 1800);
+      // Show a visible "Advancing..." toast so the user knows it's
+      // chaining (not just stuck at end-of-page).
+      try {
+        showShareToast('▶▶ Advancing to next investigation page…');
+      } catch (e) {}
+      // Short delay so the user sees the final section finish + reads
+      // the toast before the page transition.
+      setTimeout(function() { window.__TENET5_NEXT_PAGE(); }, 2000);
+    } else {
+      console.warn('[wt-enhance] autoplay triggered but __TENET5_NEXT_PAGE not defined — presentation.js may not be loaded');
     }
   }
 
