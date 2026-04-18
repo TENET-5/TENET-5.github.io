@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LIRIL Autonomous Dev — Transparent AI Site Development | TENET5</title>
+  <meta name="description" content="LIRIL autonomous development dashboard: every action LIRIL has taken on the TENET5 GitHub site shown in an append-only log, with safety rails (branch-only commits, never touches banned paths, pre-commit gate + hallucination probe).">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .safety-banner {
+      background: linear-gradient(135deg, rgba(74,222,128,0.1), rgba(34,197,94,0.04));
+      border: 1px solid #4ade80; border-radius: 12px;
+      padding: 1.5rem 1.75rem; margin: 2rem 0;
+      color: #e0e0f0; line-height: 1.65;
+    }
+    .safety-banner strong { color: #86efac; }
+    .rail {
+      background: rgba(10,14,22,0.4); border-left: 3px solid #4ade80;
+      padding: 0.6rem 1rem; border-radius: 4px; margin: 0.5rem 0;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem;
+      color: #d0d0e0; line-height: 1.55;
+    }
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.8rem; margin: 1.5rem 0;
+    }
+    .metric {
+      background: #0f0f1f; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 1rem 0.8rem; text-align: center;
+    }
+    .metric.enabled { border-color: #4ade80; background: linear-gradient(135deg, #0f0f1f, rgba(20,40,28,0.35)); }
+    .metric.disabled { border-color: #f59e0b; background: linear-gradient(135deg, #0f0f1f, rgba(60,40,10,0.2)); }
+    .metric-v {
+      font-family: 'IBM Plex Mono', monospace; font-weight: 900;
+      font-size: 1.8rem; color: #c4b5fd; line-height: 1;
+    }
+    .metric.enabled .metric-v { color: #86efac; }
+    .metric.disabled .metric-v { color: #fbbf24; }
+    .metric-l {
+      font-size: 0.72rem; color: #a0a0b8; margin-top: 0.3rem;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .log-entry {
+      background: #0f0f1f; border: 1px solid #2a2a4a; border-left: 4px solid #a855f7;
+      border-radius: 6px; padding: 0.8rem 1rem; margin: 0.5rem 0;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem;
+      color: #d0d0e0; line-height: 1.55; overflow-x: auto;
+    }
+    .log-entry.cycle_complete { border-left-color: #4ade80; }
+    .log-entry.heartbeat { border-left-color: #64748b; opacity: 0.5; }
+    .log-entry.daemon_start { border-left-color: #22d3ee; }
+    .log-entry .ts { color: #7a7a8c; font-size: 0.72rem; }
+    .log-entry .kind { color: #c4b5fd; font-weight: 700; }
+    .proposal-card {
+      background: #0f0f1f; border: 1px solid #2a2a4a; border-left: 4px solid #fbbf24;
+      border-radius: 10px; padding: 1rem 1.3rem; margin: 0.8rem 0;
+      color: #d0d0e0; line-height: 1.6;
+    }
+    .proposal-card .task {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+      color: #fde68a; text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+    }
+    .proposal-card .draft {
+      background: rgba(0,0,0,0.3); padding: 0.8rem 1rem; border-radius: 6px;
+      font-size: 0.93rem; color: #e0e0f0; line-height: 1.55;
+      margin: 0.5rem 0; font-style: italic;
+    }
+    .proposal-card .probes {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+      color: #a0a0b8; margin-top: 0.5rem;
+    }
+  </style>
+
+  <meta property="og:title" content="LIRIL Autonomous Dev — Transparent AI Site Development | TENET5">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-autonomous.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="LIRIL autonomous development. This dashboard shows every action LIRIL has taken on the TENET5 GitHub site, running on local hardware. The daemon listens on NATS subject tenet5.liril.dev.trigger for development cycle triggers. Each cycle audits the site, picks one issue, asks LIRIL to draft a fix, runs the draft through a pre-commit gate, and if everything passes commits to a liril-auto branch never to main. Human review merges to main. Safety rails include: branch only commits, pre-commit gate with hallucination probe, banned paths never touched, rate limits, size limits, and full Merkle anchoring.">
+    <p class="subtitle">Transparent AI-driven site development · Safety-railed · Branch-only</p>
+    <h1>LIRIL Autonomous Dev</h1>
+    <p class="subtitle">
+      LIRIL running on local hardware (Intel NPU + dual RTX 5070 Ti) autonomously
+      audits, drafts, gates, and commits site improvements — <strong>only to a
+      liril-auto branch, never to main</strong>. Human review merges to main.
+      Every action logged with full provenance.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <!-- Safety rails -->
+    <div class="safety-banner">
+      <strong>Safety rails in force — every commit passes all of these:</strong>
+      <div class="rail">1 · Commits ONLY to <code>liril-auto-{YYYYMMDD}</code> branch · NEVER to main</div>
+      <div class="rail">2 · Banned paths never touched: CLAUDE.md, nav.js, shell.js, style.css, any .github/ workflow file, etc.</div>
+      <div class="rail">3 · Pre-commit gate runs <code>validate_liril_integration.py</code> + <code>scan_narration_integrity.py</code></div>
+      <div class="rail">4 · Hallucination gate: every LIRIL draft must pass ≥3 fact probes at 100% pass rate</div>
+      <div class="rail">5 · Rate limits: max commits/day + cooldown between actions (per config)</div>
+      <div class="rail">6 · Size limits: max new chars/commit + max files touched/commit (per config)</div>
+      <div class="rail">7 · Every action Merkle-anchored to <code>tenet5.quantum.integrity.result</code> on NATS</div>
+      <div class="rail">8 · Safe-launch mode: drafts written to <code>liril_autonomous_proposals.jsonl</code>, NOT applied to live pages</div>
+    </div>
+
+    <!-- Metrics -->
+    <h2>Current state</h2>
+    <div class="metrics-grid" id="metrics">
+      <div class="metric"><div class="metric-v" id="m-enabled">—</div><div class="metric-l">config.enabled</div></div>
+      <div class="metric"><div class="metric-v" id="m-proposals">—</div><div class="metric-l">Proposals drafted</div></div>
+      <div class="metric"><div class="metric-v" id="m-applied">—</div><div class="metric-l">Applied to site</div></div>
+      <div class="metric"><div class="metric-v" id="m-rejections">—</div><div class="metric-l">Gate rejections</div></div>
+      <div class="metric"><div class="metric-v" id="m-last">—</div><div class="metric-l">Last action</div></div>
+    </div>
+
+    <!-- How to use -->
+    <h2 data-narrate="How to operate the daemon. The daemon runs on the user's local hardware. To start it, run the Python entry point from the tenet5 tools directory. It will connect to NATS on port four two two three, subscribe to the trigger and status subjects, and wait. A human or an automated scheduler can trigger a development cycle by sending a message to tenet5 dot liril dot dev dot trigger. The daemon audits, drafts, gates, and commits in one cycle.">How to operate</h2>
+    <div style="background:#0f0f1f;border:1px solid #2a2a4a;border-radius:10px;padding:1.2rem 1.5rem;color:#c0c0d8;font-family:'IBM Plex Mono',monospace;font-size:0.85rem;line-height:1.65;">
+      <strong style="color:#c4b5fd;">Start daemon:</strong><br>
+      <code style="color:#67e8f9;">cd E:/S.L.A.T.E/tenet5</code><br>
+      <code style="color:#67e8f9;">NATS_URL="nats://127.0.0.1:4223" python tools/liril_autonomous_dev.py</code>
+      <br><br>
+      <strong style="color:#c4b5fd;">Trigger one cycle (from any terminal):</strong><br>
+      <code style="color:#67e8f9;">nats request tenet5.liril.dev.trigger '{"mode":"full"}'</code>
+      <br><br>
+      <strong style="color:#c4b5fd;">Query daemon status:</strong><br>
+      <code style="color:#67e8f9;">nats request tenet5.liril.dev.status '{}'</code>
+      <br><br>
+      <strong style="color:#c4b5fd;">Enable full commit mode:</strong><br>
+      Edit <code style="color:#67e8f9;">data/liril_autonomous_config.json</code> · set <code>"enabled": true</code>
+    </div>
+
+    <!-- Recent proposals -->
+    <h2 data-narrate="Recent LIRIL drafted proposals. Each entry is a specific improvement LIRIL proposed for the site with its task type, target, and the exact draft text. Proposals are written to a log file before any commit happens. A human can review them in the log and decide whether to accept or reject.">Recent proposals</h2>
+    <div id="proposals-list">
+      <p style="color:#888;font-style:italic;">Loading proposals log…</p>
+    </div>
+
+    <!-- Recent log -->
+    <h2 data-narrate="Recent action log. Every action the daemon takes is appended to the log. Heartbeats are dimmed. Cycle completions are green. Daemon starts are cyan. Other actions are purple.">Recent action log</h2>
+    <div id="log-list">
+      <p style="color:#888;font-style:italic;">Loading action log…</p>
+    </div>
+
+    <div style="margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
+      <strong style="color:#c4b5fd;">Receipts:</strong>
+      config: <code>data/liril_autonomous_config.json</code> ·
+      log: <code>data/liril_autonomous_log.jsonl</code> ·
+      proposals: <code>data/liril_autonomous_proposals.jsonl</code> ·
+      daemon: <code>tools/liril_autonomous_dev.py</code> ·
+      auditor: <code>tools/liril_audit_site.py</code> ·
+      gate: <code>tools/liril_commit_gate.py</code><br>
+      SYSTEM_SEED 118400
+    </div>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+  (function() {
+    'use strict';
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // Load config
+    fetch('data/liril_autonomous_config.json').then(r => r.json()).then(cfg => {
+      const en = cfg.enabled === true;
+      const m = document.getElementById('m-enabled');
+      m.textContent = en ? 'ENABLED' : 'AUDIT';
+      m.parentNode.classList.add(en ? 'enabled' : 'disabled');
+      document.getElementById('m-last').textContent = cfg.last_action_timestamp_utc ? 'yes' : '—';
+    }).catch(() => {});
+
+    // Load proposals
+    fetch('data/liril_autonomous_proposals.jsonl').then(r => r.ok ? r.text() : '').then(txt => {
+      const lines = txt.split('\n').filter(l => l.trim());
+      document.getElementById('m-proposals').textContent = lines.length;
+      const list = document.getElementById('proposals-list');
+      if (!lines.length) {
+        list.innerHTML = '<p style="color:#888;font-style:italic;">No proposals yet. Daemon will populate this file when triggered.</p>';
+        return;
+      }
+      list.innerHTML = '';
+      lines.slice(-20).reverse().forEach(line => {
+        try {
+          const e = JSON.parse(line);
+          const d = e.draft || {};
+          const probes = (d.fact_probes || []);
+          const passing = probes.filter(p => p.correct).length;
+          list.innerHTML +=
+            '<div class="proposal-card">' +
+              '<div class="task">' + esc(d.task_type || '?') + ' · ' + esc(d.target || '?') + '</div>' +
+              '<div class="draft">' + esc(d.text || '(empty)') + '</div>' +
+              '<div class="probes">fact probes: ' + passing + '/' + probes.length + ' passed · ' + esc(e.ts_utc || '—') + '</div>' +
+            '</div>';
+        } catch (e) {}
+      });
+    }).catch(() => {
+      document.getElementById('proposals-list').innerHTML = '<p style="color:#888;">No proposals file yet.</p>';
+    });
+
+    // Load action log
+    fetch('data/liril_autonomous_log.jsonl').then(r => r.ok ? r.text() : '').then(txt => {
+      const lines = txt.split('\n').filter(l => l.trim());
+      const list = document.getElementById('log-list');
+      if (!lines.length) {
+        list.innerHTML = '<p style="color:#888;font-style:italic;">No log entries yet. Daemon appends here on each action.</p>';
+        document.getElementById('m-applied').textContent = '0';
+        document.getElementById('m-rejections').textContent = '0';
+        return;
+      }
+      // Tally
+      let applied = 0, rejections = 0;
+      lines.forEach(l => { try { const e = JSON.parse(l); if (e.kind === 'cycle_complete') applied++; if (e.kind === 'gate_rejected') rejections++; } catch(e){}});
+      document.getElementById('m-applied').textContent = applied;
+      document.getElementById('m-rejections').textContent = rejections;
+
+      list.innerHTML = '';
+      lines.slice(-30).reverse().forEach(line => {
+        try {
+          const e = JSON.parse(line);
+          let kind = e.kind || '?';
+          list.innerHTML += '<div class="log-entry ' + kind + '">' +
+            '<span class="ts">' + esc(e.ts_utc || '') + '</span>  ' +
+            '<span class="kind">' + esc(kind) + '</span>' +
+            (e.config_enabled !== undefined ? '  enabled=' + e.config_enabled : '') +
+            (e.issues !== undefined ? '  issues=' + e.issues : '') +
+            '</div>';
+        } catch (e) {}
+      });
+    }).catch(() => {
+      document.getElementById('log-list').innerHTML = '<p style="color:#888;">No log file yet.</p>';
+    });
+  })();
+  </script>
+</body>
+</html>

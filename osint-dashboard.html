@@ -95,7 +95,7 @@
       <strong style="color: var(--color-cross-reference, #eab308);">PRIMARY-SOURCE CROSS-REFERENCE:</strong> All data on this page is procedurally mapped from public government repositories, legislative actions, and verified OSINT streams. Telemetry anchored via <span class="quantum-sig">[verified]</span>. Every node is authenticated.
     </div>
 
-    <div class="dash-grid" id="stats-grid" data-narrate="Dashboard metrics. Each cluster represents an independent investigation area with cross-referenced entities and sourced evidence chains.">
+    <div class="dash-grid" id="stats-grid" data-narrate="Network Entities: 12,500+ actors, events, orgs. Connections: 45,000+ sourced relationships. Scandal Clusters: 17 independent investigations. Criminal Findings: 6 Rome Statute charges. Financial Exposure: $613B+ in waste, fraud, liabilities. Deaths: 361,000+ (MAID, opioids, Yemen). -">
       <div class="dash-card"><h3>Network Entities</h3><div class="dash-big red" id="d-nodes">--</div><div class="dash-sub">Documented actors, events, organizations</div></div>
       <div class="dash-card"><h3>Documented Connections</h3><div class="dash-big blue" id="d-edges">--</div><div class="dash-sub">Sourced relationships between entities</div></div>
       <div class="dash-card"><h3>Scandal Clusters</h3><div class="dash-big yellow" id="d-clusters">--</div><div class="dash-sub">Independent investigation areas</div></div>
@@ -346,6 +346,58 @@
         <!-- JS populates -->
       </div>
       <div id="phase79-alerts" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase80-nats" style="display:none; margin-top:28px;">
+      <h2 data-narrate="NATS Message Rate Monitor. Real-time telemetry on system-wide message bus throughput and topic density." style="color:#f43f5e;">⚡ NATS Telemetry [PHASE 80]</h2>
+      <p>Live tracking of TENET5 event bus message rates, top subjects, and broker payload volume.</p>
+      <div id="phase80-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase80-subjects" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase81-chat" style="display:none; margin-top:28px;">
+      <h2 data-narrate="LIRIL Streaming WebSocket Chat. Core metric tracking for active user generative sessions and token delivery." style="color:#a855f7;">💬 LIRIL Chat Telemetry [PHASE 81]</h2>
+      <p>System metrics for the active websocket chat infrastructure, token streams, and active sessions.</p>
+      <div id="phase81-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase82-nemoclaw" style="display:none; margin-top:28px;">
+      <h2 data-narrate="NemoClaw Request Queue. Visualiser for active inference requests, throughput, and hardware queue depth." style="color:#14b8a6;">🧠 NemoClaw Inference Queue [PHASE 82]</h2>
+      <p>Live tracking of GPU worker states, local LLM orchestration metrics, request completion, and error rates.</p>
+      <div id="phase82-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase82-gpus" style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase83-confidence" style="display:none; margin-top:28px;">
+      <h2 data-narrate="LIRIL Confidence Tracker. Monitors classification accuracy drift and domain boundary shifts over rolling windows." style="color:#f59e0b;">🛡️ LIRIL Classification Confidence [PHASE 83]</h2>
+      <p>Tracks per-domain routing confidence, NPU vs GPU payload offloading, and dynamic drift alerting.</p>
+      <div id="phase83-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase83-domains" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase84-heatmap" style="display:none; margin-top:28px;">
+      <h2 data-narrate="LIRIL Training Heatmap. Multi-dimensional evaluation of self-supervised learning velocity across the matrix." style="color:#d946ef;">🔥 LIRIL Training Heatmap [PHASE 84]</h2>
+      <p>Real-time training velocity and domain coverage mapping to ensure balanced subkernel alignment.</p>
+      <div id="phase84-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase84-domains" style="margin-top:16px;">
         <!-- JS populates -->
       </div>
     </section>
@@ -1082,6 +1134,127 @@
             alerts.innerHTML = ah;
           }
         }).catch(function(e) { console.error("Phase 79 error", e); });
+
+      // ── PHASE 80 NATS MONITOR ──
+      fetch('data/osint_phase80_nats.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase80-nats');
+          var stats = document.getElementById('phase80-stats');
+          var subjects = document.getElementById('phase80-subjects');
+          if (!stats || !d.top_subjects) return;
+          feed.style.display = '';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Total Msgs</h3><div class="dash-big" style="color:#f43f5e;">' + d.total_msgs.toLocaleString() + '</div></div>' +
+            '<div class="dash-card"><h3>Subjs Seen</h3><div class="dash-big" style="color:#fbd38d;">' + d.subjects_seen + '</div></div>' +
+            '<div class="dash-card"><h3>Msg/s (Peak)</h3><div class="dash-big" style="color:#e879f9;">' + (d.top_subjects[0] ? d.top_subjects[0].rate_per_s.toFixed(1) : 0) + '</div></div>';
+          var sh = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Top Active Subjects</h3>';
+          d.top_subjects.forEach(function(s) {
+            sh += '<div style="display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.75rem;">' +
+              '<span style="color:#e0e0e6;font-family:monospace;">' + s.subject + '</span>' +
+              '<span style="color:#f43f5e;">' + s.rate_per_s.toFixed(1) + ' msg/s</span>' +
+            '</div>';
+          });
+          subjects.innerHTML = sh;
+        }).catch(function(e) { console.error("Phase 80 error", e); });
+
+      // ── PHASE 81 WS CHAT ──
+      fetch('data/osint_phase81_chat.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase81-chat');
+          var stats = document.getElementById('phase81-stats');
+          if (!stats || !d.metadata) return;
+          feed.style.display = '';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Active Sessions</h3><div class="dash-big" style="color:#22c55e;">' + d.active_sessions + '</div></div>' +
+            '<div class="dash-card"><h3>Total Msgs</h3><div class="dash-big" style="color:#a855f7;">' + d.total_msgs.toLocaleString() + '</div></div>' +
+            '<div class="dash-card"><h3>Generations</h3><div class="dash-big" style="color:#facc15;">' + d.total_tokens.toLocaleString() + '</div><div style="font-size:0.6rem;color:#a1a1aa;">tokens streamed</div></div>';
+        }).catch(function(e) { console.error("Phase 81 error", e); });
+
+      // ── PHASE 82 NEMOCLAW QUEUE ──
+      fetch('data/osint_phase82_nemoclaw.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase82-nemoclaw');
+          var stats = document.getElementById('phase82-stats');
+          var gpus = document.getElementById('phase82-gpus');
+          if (!stats || !d.gpus) return;
+          feed.style.display = '';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Queue Depth</h3><div class="dash-big" style="color:' + (d.queue_depth > 5 ? '#ef4444' : '#14b8a6') + ';">' + d.queue_depth + '</div></div>' +
+            '<div class="dash-card"><h3>Tasks Done</h3><div class="dash-big" style="color:#22c55e;">' + d.total_done.toLocaleString() + '</div></div>' +
+            '<div class="dash-card"><h3>Tasks Fail</h3><div class="dash-big" style="color:' + (d.total_fail > 0 ? '#ef4444' : '#9ca3af') + ';">' + d.total_fail + '</div></div>';
+          var gh = '';
+          for (var k in d.gpus) {
+            var g = d.gpus[k];
+            var sc = g.state === 'processing' ? '#eab308' : (g.state === 'idle' ? '#22c55e' : '#9ca3af');
+            gh += '<div style="flex:1;min-width:200px;background:rgba(20,184,166,0.05);border:1px solid rgba(20,184,166,0.2);padding:10px;border-radius:4px;">' +
+              '<div style="display:flex;justify-content:space-between;margin-bottom:8px;">' +
+                '<h4 style="margin:0;color:#14b8a6;font-size:0.9rem;">' + g.label + ' <span style="color:#a1a1aa;font-size:0.7rem;">(' + g.model + ')</span></h4>' +
+                '<span style="font-size:0.65rem;padding:2px 6px;border-radius:3px;background:' + sc + '20;color:' + sc + ';text-transform:uppercase;">' + g.state + '</span>' +
+              '</div>' +
+              '<div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px;"><span style="color:#9ca3af;">Throughput</span><span style="color:#e0e0e6;">' + g.throughput_rpm.toFixed(1) + ' rpm</span></div>' +
+              '<div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px;"><span style="color:#9ca3af;">Latency (Last)</span><span style="color:#e0e0e6;">' + g.last_latency_ms.toFixed(1) + ' ms</span></div>' +
+              '<div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span style="color:#9ca3af;">Worker Q</span><span style="color:#e0e0e6;">' + g.queue_depth + '</span></div>' +
+            '</div>';
+          }
+          gpus.innerHTML = gh;
+        }).catch(function(e) { console.error("Phase 82 error", e); });
+
+      // ── PHASE 83 LIRIL CONFIDENCE ──
+      fetch('data/osint_phase83_confidence.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase83-confidence');
+          var stats = document.getElementById('phase83-stats');
+          var domains = document.getElementById('phase83-domains');
+          if (!stats || !d.per_domain) return;
+          feed.style.display = '';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Run Volume</h3><div class="dash-big" style="color:#f59e0b;">' + d.total_classifications.toLocaleString() + '</div></div>' +
+            '<div class="dash-card"><h3>Top Domain</h3><div class="dash-big" style="color:#38bdf8;font-size:1.4rem;align-self:center;">' + d.top_domain + '</div></div>' +
+            '<div class="dash-card"><h3>NPU Offload</h3><div class="dash-big" style="color:#84cc16;">' + d.npu_pct.toFixed(1) + '%</div></div>';
+          var dh = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Domain Confidence Breakdown</h3>';
+          for (var k in d.per_domain) {
+            var pd = d.per_domain[k];
+            var ac = pd.drift_alert ? '#ef4444' : '#eab308';
+            dh += '<div style="display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.75rem;">' +
+              '<span style="color:#e0e0e6;min-width:100px;">' + k + '</span>' +
+              '<span style="color:#9ca3af;">' + pd.count_5min + ' (5m)</span>' +
+              '<span style="color:' + ac + ';">' + (pd.avg_confidence*100).toFixed(1) + '% <span style="font-size:0.6rem;">(EMA ' + (pd.ema*100).toFixed(1) + '%)</span>' +
+              (pd.drift_alert ? ' 🚨 DRIFT' : '') + '</span>' +
+            '</div>';
+          }
+          domains.innerHTML = dh;
+        }).catch(function(e) { console.error("Phase 83 error", e); });
+
+      // ── PHASE 84 LIRIL HEATMAP ──
+      fetch('data/osint_phase84_heatmap.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase84-heatmap');
+          var stats = document.getElementById('phase84-stats');
+          var domains = document.getElementById('phase84-domains');
+          if (!stats || !d.per_domain) return;
+          feed.style.display = '';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Train Velocity</h3><div class="dash-big" style="color:#d946ef;">' + d.velocity_rpm.toFixed(1) + ' <span style="font-size:0.8rem">rpm</span></div></div>' +
+            '<div class="dash-card"><h3>Most Active</h3><div class="dash-big" style="color:#a855f7;font-size:1.4rem;align-self:center;">' + d.most_active + '</div></div>' +
+            '<div class="dash-card"><h3>Stale Domains</h3><div class="dash-big" style="color:' + (d.stale_domains.length > 0 ? '#ef4444' : '#22c55e') + ';">' + d.stale_domains.length + '</div></div>';
+          var dh = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Training Domain Coverage</h3>';
+          for (var k in d.per_domain) {
+            var pd = d.per_domain[k];
+            var ac = pd.stale ? '#ef4444' : '#d946ef';
+            dh += '<div style="display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.75rem;">' +
+              '<span style="color:#e0e0e6;min-width:100px;">' + k + '</span>' +
+              '<span style="color:#9ca3af;">Total: ' + pd.total.toLocaleString() + '</span>' +
+              '<span style="color:' + ac + ';">' + (pd.stale ? '⏳ STALE (' + pd.stale_hours + 'h)' : 'Acc: ' + (pd.acc_ema*100).toFixed(1) + '%') + '</span>' +
+            '</div>';
+          }
+          domains.innerHTML = dh;
+        }).catch(function(e) { console.error("Phase 84 error", e); });
+
   </script>
 
 <div style="max-width:900px;margin:2rem auto;">
