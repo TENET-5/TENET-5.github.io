@@ -140,6 +140,7 @@
         loadScript(BASE + 'js/share-actions.js?v=2'),
         loadScript(BASE + 'js/liril-voice.js?v=6'),
         loadScript(BASE + 'js/figures.js?v=1'),
+        loadScript(BASE + 'js/breadcrumbs.js?v=1'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
       ]).then(function() {
         return loadScript(BASE + 'js/presentation.js?v=10');
@@ -181,6 +182,7 @@
         .then(function() { return loadScript(BASE + 'js/perception.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=10'); })
         // walkthrough-enhancements.js neutralized — see comment above
+        .then(function() { return loadScript(BASE + 'js/breadcrumbs.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
