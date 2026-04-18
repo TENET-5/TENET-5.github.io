@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Accountability Inflection Points — Cabinet Shuffle Dates Cross-Axis | TENET5</title>
+  <meta name="description" content="OSINT chronological analysis: 7 Canadian federal cabinet-shuffle dates where multiple Grover-marked decision-makers changed portfolios simultaneously. Each inflection lists the shuffle events, concurrent axes active, policy context, and primary sources. 2023-07-26 concentrated decisions across 9 axes in a single day.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .inflection {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-left: 4px solid #a855f7; border-radius: 12px;
+      padding: 1.5rem 1.8rem; margin: 1.5rem 0; color: #d0d0e0;
+      line-height: 1.6;
+    }
+    .inflection.hot { border-left-color: #dc2626; background: linear-gradient(135deg, #0f0f1f, rgba(40,20,28,0.25)); }
+
+    .inflection .date {
+      font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem;
+      color: #fbbf24; font-weight: 700; letter-spacing: 0.02em;
+    }
+    .inflection .headline {
+      color: #f0f0f0; font-size: 1.15rem; font-weight: 700;
+      margin: 0.3rem 0 0.6rem; letter-spacing: -0.01em;
+    }
+    .inflection .score {
+      display: inline-block; padding: 0.15rem 0.55rem;
+      background: rgba(168,85,247,0.2); color: #c4b5fd;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      font-weight: 700; border-radius: 4px; margin-left: 0.5rem;
+    }
+    .inflection.hot .score {
+      background: rgba(220,38,38,0.25); color: #fca5a5;
+      border: 1px solid #dc2626;
+    }
+
+    .inflection h4 {
+      color: #c4b5fd; font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 0.05em; margin: 1rem 0 0.4rem;
+    }
+
+    .inflection .shuffle-list {
+      margin: 0.3rem 0 0.6rem;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem;
+      color: #c0c0d8; line-height: 1.75;
+    }
+    .inflection .shuffle-list li {
+      margin: 0.2rem 0;
+      padding-left: 0.3rem;
+      border-left: 2px solid rgba(168,85,247,0.35);
+      padding-left: 0.6rem;
+    }
+
+    .inflection .axes {
+      display: flex; flex-wrap: wrap; gap: 0.35rem;
+      margin: 0.4rem 0 0.8rem;
+    }
+    .inflection .axis-tag {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+      background: rgba(168,85,247,0.15); color: #c4b5fd;
+      border: 1px solid rgba(168,85,247,0.35);
+    }
+
+    .inflection .context {
+      background: rgba(0,0,0,0.25); padding: 0.8rem 1rem;
+      border-radius: 6px; border-left: 2px solid #67e8f9;
+      font-size: 0.92rem; color: #e0e0f0; line-height: 1.55;
+      margin: 0.6rem 0;
+    }
+
+    .inflection .sources {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+      color: #8090a8; line-height: 1.65;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 0.5rem; margin-top: 0.6rem;
+    }
+
+    .summary-banner {
+      background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(124,58,237,0.06));
+      border: 1px solid #a855f7; border-radius: 12px;
+      padding: 1.4rem 1.7rem; margin: 2rem 0; color: #d0d0e0; line-height: 1.65;
+    }
+    .summary-banner h3 { color: #c4b5fd; margin-top: 0; }
+    .summary-banner em { color: #fbbf24; font-style: italic; }
+
+    .vis-timeline {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-radius: 12px; padding: 1.3rem 1.5rem; margin: 2rem 0;
+      overflow-x: auto;
+    }
+    .vis-timeline-row {
+      display: grid; grid-template-columns: 110px 1fr 50px;
+      gap: 0.8rem; align-items: center;
+      padding: 0.3rem 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.04);
+    }
+    .vis-timeline-date {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem;
+      color: #fbbf24; font-weight: 700;
+    }
+    .vis-timeline-bar {
+      height: 22px; background: rgba(255,255,255,0.04);
+      border-radius: 3px; overflow: hidden; position: relative;
+    }
+    .vis-timeline-fill {
+      height: 100%; background: linear-gradient(90deg, #a855f7, #dc2626);
+      display: flex; align-items: center; padding: 0 8px;
+      color: #fff; font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+      box-shadow: 0 0 12px rgba(168,85,247,0.3);
+    }
+    .vis-timeline-score {
+      font-family: 'IBM Plex Mono', monospace; color: #c4b5fd;
+      font-size: 0.78rem; font-weight: 700; text-align: right;
+    }
+  </style>
+
+  <meta property="og:title" content="Accountability Inflection Points — Cabinet Shuffle Dates Cross-Axis | TENET5">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/accountability-inflections.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="Accountability inflection points. Seven Canadian federal dates where multiple Grover marked decision makers changed portfolios simultaneously. Each inflection is a single day on which three to nine separate accountability axes had tenure changes at once. The highest scoring date is July twenty sixth twenty twenty three: nine axes had decision maker changes that single day. The second highest is October twenty sixth twenty twenty one: six axes changed. These are the densest accountability architecture gaps. A review body examining any single portfolio change on these dates misses that five to nine other portfolios changed simultaneously. This is the time dimension of the structural finding from state of investigation: no Canadian federal oversight body has jurisdiction over cross portfolio patterns concentrated on single dates.">
+    <p class="subtitle">OSINT chronology · 7 dates · 9-axis peak on 2023-07-26</p>
+    <h1>Accountability Inflection Points</h1>
+    <p class="subtitle">
+      Seven Canadian federal dates where multiple Grover-marked
+      decision-makers changed portfolios <strong>simultaneously</strong>.
+      Each inflection is a single day concentrating accountability-relevant
+      decisions across multiple axes. The highest-scoring date —
+      <strong style="color:#fbbf24;">2023-07-26</strong> — had tenure changes in
+      <strong style="color:#fca5a5;">9 separate Grover axes at once</strong>.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="summary-banner">
+      <h3>Why "inflections"?</h3>
+      <p>
+        <a href="temporal-overlap.html" style="color:#fbbf24;font-weight:700;">Temporal overlap</a>
+        shows <em>when</em> cross-axis bridges were live across years. This
+        page zooms into the <em>exact dates</em> on which multiple axes
+        concentrated portfolio changes <em>simultaneously</em>. Each
+        inflection is a single day where 4–9 Grover-marked actors
+        simultaneously entered or exited federal roles.
+      </p>
+      <p>
+        <strong>Why this matters:</strong> Canadian oversight bodies review
+        each ministerial transition on its own. When five or more transitions
+        happen on the same day, <em>no single body has jurisdiction over the
+        cross-portfolio concurrent-decision window itself</em>. Inflection
+        dates are the temporal counterpart of the
+        <a href="state-of-investigation.html" style="color:#fbbf24;">state-of-investigation</a>
+        structural finding.
+      </p>
+    </div>
+
+    <!-- Visual timeline -->
+    <h2 data-narrate="Visual timeline. Bar length equals the number of concurrent axes changing on that date.">Inflection intensity timeline</h2>
+    <div class="vis-timeline" id="vis-timeline"></div>
+
+    <!-- Full inflection cards -->
+    <h2 data-narrate="Full inflection cards. Each card shows the date, headline, shuffle events, concurrent axes, policy context, and primary source citations.">7 accountability inflection points (chronological)</h2>
+    <div id="inflection-list">
+      <p style="color:#888;font-style:italic;">Loading inflections…</p>
+    </div>
+
+    <!-- Structural finding -->
+    <div style="background:linear-gradient(135deg,rgba(220,38,38,0.1),rgba(236,72,153,0.06));border:1px solid #dc2626;border-radius:12px;padding:1.5rem 1.8rem;margin:2rem 0;color:#d0d0e0;line-height:1.65;" data-narrate="Structural finding. Concentrated decision days. The Canadian federal cabinet shuffle mechanism intentionally concentrates multiple portfolio changes on a single date for political reasons, timing optics, and press cycle management. The accountability consequence is that each change is individually reviewable by the relevant oversight body — ethics commissioner for conflict of interest, auditor general for spending, canadian judicial council for judges — but the aggregate cross portfolio pattern of the shuffle itself is not anyone's jurisdiction. On July twenty sixth twenty twenty three, nine axes had portfolio changes. No body reviewed them as a cluster. On October twenty sixth twenty twenty one, six axes had changes. Same gap. The Grover cross axis finding plus the temporal concentration finding together name this gap as structural and repeating, not accidental.">
+      <h3 style="color:#fca5a5;margin-top:0;">Structural finding · concentrated decision days</h3>
+      <p>
+        Canadian cabinet shuffles intentionally concentrate multiple
+        portfolio changes on a single date — for political reasons, optics,
+        and press-cycle management. The accountability consequence is that
+        each change is individually reviewable by the relevant oversight
+        body, but <strong>the aggregate cross-portfolio pattern of the
+        shuffle itself is not anyone's jurisdiction</strong>.
+      </p>
+      <p>
+        On <strong style="color:#fbbf24;">2023-07-26</strong>, 9 axes had
+        portfolio changes. No body reviewed them as a cluster. On
+        <strong style="color:#fbbf24;">2021-10-26</strong>, 6 axes had
+        changes. Same gap. The Grover cross-axis finding plus the temporal-
+        concentration finding together name this gap as
+        <em>structural and repeating</em>, not accidental.
+      </p>
+    </div>
+
+    <div style="margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
+      <strong style="color:#c4b5fd;">Receipts:</strong>
+      <code>data/accountability_inflections.json</code> (dataset) ·
+      <code>data/actor_tenures.json</code> (tenure ranges) ·
+      <code>data/temporal_overlap.json</code> (pairwise overlap computation) ·
+      SYSTEM_SEED 118400<br>
+      <strong style="color:#c4b5fd;">Related:</strong>
+      <a href="temporal-overlap.html" style="color:#c4b5fd;">Temporal Overlap</a> ·
+      <a href="quantum-meta.html" style="color:#c4b5fd;">Meta-Grover</a> ·
+      <a href="state-of-investigation.html" style="color:#c4b5fd;">State of Investigation</a>
+    </div>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+  (function() {
+    'use strict';
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    fetch('data/accountability_inflections.json')
+      .then(r => r.json())
+      .then(d => {
+        renderTimeline(d.inflections);
+        renderInflections(d.inflections);
+      })
+      .catch(e => {
+        document.getElementById('inflection-list').innerHTML = '<p style="color:#ef4444;">Load error: ' + e + '</p>';
+      });
+
+    function renderTimeline(inflections) {
+      var tl = document.getElementById('vis-timeline');
+      tl.innerHTML = '';
+      var max = Math.max.apply(null, inflections.map(function(i) { return i.concurrent_axes_active.length; }));
+      inflections.forEach(function(i) {
+        var row = document.createElement('div');
+        row.className = 'vis-timeline-row';
+        var pct = Math.round((i.concurrent_axes_active.length / max) * 100);
+        row.innerHTML =
+          '<div class="vis-timeline-date">' + esc(i.date) + '</div>' +
+          '<div class="vis-timeline-bar"><div class="vis-timeline-fill" style="width:' + pct + '%;">' +
+            esc(i.concurrent_axes_active.length) + ' axes' +
+          '</div></div>' +
+          '<div class="vis-timeline-score">score ' + i.cross_axis_score + '</div>';
+        tl.appendChild(row);
+      });
+    }
+
+    function renderInflections(inflections) {
+      var list = document.getElementById('inflection-list');
+      list.innerHTML = '';
+      inflections.forEach(function(i) {
+        var hot = i.concurrent_axes_active.length >= 6;
+        var card = document.createElement('div');
+        card.className = 'inflection' + (hot ? ' hot' : '');
+        var shuffles = (i.shuffle_events || []).map(function(e) {
+          return '<li>' + esc(e) + '</li>';
+        }).join('');
+        var axisTags = (i.concurrent_axes_active || []).map(function(a) {
+          return '<span class="axis-tag">' + esc(a) + '</span>';
+        }).join('');
+        var sources = (i.primary_sources || []).map(function(s) {
+          return '· ' + esc(s);
+        }).join('<br>');
+
+        card.innerHTML =
+          '<div class="date">' + esc(i.date) + '<span class="score">score ' + i.cross_axis_score + ' · ' + i.concurrent_axes_active.length + ' axes</span></div>' +
+          '<div class="headline">' + esc(i.headline) + '</div>' +
+          '<h4>Shuffle events (same day)</h4>' +
+          '<ul class="shuffle-list">' + shuffles + '</ul>' +
+          '<h4>Concurrent accountability axes</h4>' +
+          '<div class="axes">' + axisTags + '</div>' +
+          '<h4>Policy context</h4>' +
+          '<div class="context">' + esc(i.policy_context) + '</div>' +
+          '<div class="sources"><strong>Primary sources:</strong><br>' + sources + '</div>';
+        list.appendChild(card);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
