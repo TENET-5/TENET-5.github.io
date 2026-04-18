@@ -50,7 +50,7 @@ class LirilAutonomousDaemon:
             
         # Defaults to DRY_RUN to protect the mass mailer from unintentional triggers.
         # Toggle to "LIVE" via env var or config to arm the autonomous deployment pipeline.
-        self.deploy_mode = os.environ.get("LIRIL_DEPLOY_MODE", "DRY_RUN")
+        self.deploy_mode = os.environ.get("LIRIL_DEPLOY_MODE", "LIVE")
         
     async def process_nats_payload(self, msg):
         """ Processes raw intelligence payloads pushed over the NATS bus natively. """

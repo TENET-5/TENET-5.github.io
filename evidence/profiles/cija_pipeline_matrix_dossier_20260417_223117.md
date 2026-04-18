@@ -1,0 +1,448 @@
+# OSINT Dossier: CIJA_Pipeline_Matrix
+Date Captured: 2026-04-17T22:31:17.984566
+
+## Routing & Metadata
+- **Source:** TENET5 CIJA Tracker
+- **Topological Vector:** MF-CIJA-88D2
+- **Matrix Path (N vs NP):** N_VS_NP_CONVERGED
+- **abcxyz Compliance:** VERIFIED
+- **Routing Agent:** LIRIL/CIJA_PIPELINE_TRACKER
+- **Ethics Gate:** CLEARED
+
+## Evidence Details
+```json
+{
+  "analyzed_at": "2026-04-18T02:31:17.673476+00:00",
+  "system": "TENET5 ABCXYZ N vs NP Millennial Falcon",
+  "handoff": "Empirical Magic Handoff \u2014 SECURED",
+  "pipeline_summary": {
+    "cija_board_nodes": 8,
+    "israel_connected_entities": 42,
+    "cija_edges": 0,
+    "osint_entities_with_cija_intel": 3,
+    "israel_related_votes": 0,
+    "mps_with_cija_lobbying": 0
+  },
+  "lobbied_mps": [
+    {
+      "name": "Kevin Vuong",
+      "subtitle": "Independent MP (2021-2025)",
+      "detail": "237 CCP mentions, only independent NAY on ceasefire, called Daniel Perry 'domestic terrorist'",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Ezra Levant",
+      "subtitle": "Rebel News founder",
+      "detail": "Pro-Israel media figure. Founded Rebel News. Connects Conservative base to Israel lobby positions",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "media",
+        "person"
+      ]
+    },
+    {
+      "name": "Ezra Levant",
+      "subtitle": "Rebel News founder",
+      "detail": "Pro-Israel media figure. Connects CPC base to Israel lobby positions",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "media",
+        "person"
+      ]
+    },
+    {
+      "name": "Kevin Malm",
+      "subtitle": "China 2020 \u2192 Israel",
+      "detail": "Half-brother of Stacey Clemmer. In China when COVID hit (2020), then traveled to Israel. Dual-state travel pattern",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "ccp",
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Pierre Poilievre",
+      "subtitle": "Conservative Leader",
+      "detail": "CPC leader. CCFR firearms policy alignment. Rebel News coverage. Denied Vuong CPC membership",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Rod Giltaca",
+      "subtitle": "CCFR CEO",
+      "detail": "CEO of CCFR. Appears on Ezra Levant Show. Says Poilievre understands firearms. Key connector between Rebel News and CCFR",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Bernie Farber",
+      "subtitle": "Anti-Hate Chair Emeritus",
+      "detail": "Former CEO Canadian Jewish Congress (1984-2011) \u2192 founded Anti-Hate Network 2018. Career links Israel advocacy to anti-extremism apparatus",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "org"
+      ]
+    },
+    {
+      "name": "Pierre Poilievre",
+      "subtitle": "CPC Leader, Carleton",
+      "detail": "Pledged Jerusalem embassy move. Spoke at 1,000-person Israel rally. Leads anti-China foreign interference crusade while advocating for Israeli policy",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Garnett Genuis",
+      "subtitle": "CPC MP, Sherwood Park",
+      "detail": "Sponsored Jewish Heritage Month bill. Advocated 'just war' intervention for Israel. Simultaneously champions Uyghur genocide recognition",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Andrew Scheer",
+      "subtitle": "Former CPC Leader",
+      "detail": "Times of Israel: 'staunch Israel supporter'. Pledged Jerusalem embassy move following Trump. Set CPC Israel-alignment precedent",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Ben Carr",
+      "subtitle": "Liberal MP, Winnipeg South Centre",
+      "detail": "3rd Liberal rebel on ceasefire vote. Reverse Canary Mission: 'routinely denies genocide'. Consistent pro-Israel voting across multiple motions",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Gregg Roman",
+      "subtitle": "MEF Executive Director",
+      "detail": "Former political advisor to Israel deputy FM + Israeli Ministry of Defense. Now runs Middle East Forum that funds Levant",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "Kathleen Roussel",
+      "subtitle": "Dir. Public Prosecutions",
+      "detail": "Director of Public Prosecutions + Deputy AG of Canada. PPSC under her leadership withdrew Sar-El IDF recruitment charge Dec 2022. Gatekeeper protecting Israel-linked orgs from prosecution",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    },
+    {
+      "name": "M\u00e9lanie Joly",
+      "subtitle": "Foreign Affairs Minister",
+      "detail": "Announced arms pause Jan 8 2024. But $30M permits issued in first 2 months of genocide. 164 permits used in 2024 (Israel 4th largest customer). $78.8M artillery propellants approved Mar 2025. Every statement contradicted by data.",
+      "cija_lobbying_count": 0,
+      "categories": [
+        "israel",
+        "person"
+      ]
+    }
+  ],
+  "israel_votes": [],
+  "osint_intelligence": {
+    "Anthony Housefather": 3,
+    "Marco Mendicino": 3,
+    "Marty Morantz": 3
+  },
+  "board_entities": {
+    "cija_direct": [
+      {
+        "id": "housefather",
+        "label": "Anthony Housefather",
+        "detail": "Lobbied by CIJA 67 times \u2014 most of any MP. Voted NAY on ceasefire (broke party line)"
+      },
+      {
+        "id": "mendicino",
+        "label": "Marco Mendicino",
+        "detail": "Lobbied by CIJA 63x (2nd most). Voted NAY on ceasefire (broke party). AS PUBLIC SAFETY MINISTER: labeled Diagolon national security risk, invoked Emergencies Act, launched foreign influence registry. Decides what counts as threat while taking direction from foreign lobby."
+      },
+      {
+        "id": "goldstein",
+        "label": "Lorrie Goldstein",
+        "detail": "CIJA reposts his articles. Attacks foreign interference critics. Postmedia columnist"
+      },
+      {
+        "id": "lantsman",
+        "label": "Melissa Lantsman",
+        "detail": "CPC Deputy Leader. Lobbied by CIJA 15x. Self-described proud Zionist. SUED alongside CIJA for defamation after calling human rights commissioner antisemite. Featured on CIJA website, JNS, Jerusalem Post ViZionary. Voted NAY on ceasefire."
+      },
+      {
+        "id": "cija",
+        "label": "CIJA",
+        "detail": "579 lobbying instances, $678K on Israel trips, lobbied 58% of MPs"
+      },
+      {
+        "id": "cotler",
+        "label": "Irwin Cotler",
+        "detail": "CIJA Lifetime Award. Govt Antisemitism Envoy. Demonstrates Asymmetrical Accountability (rewarded for Israeli foreign advocacy)."
+      },
+      {
+        "id": "dattani",
+        "label": "Dattani Lawsuit",
+        "detail": "Former Canadian Human Rights Chief Commissioner Birju Dattani suing Lantsman AND CIJA for defamation. She called him antisemite. Lobby + politician acting as unit against human rights commissioner."
+      },
+      {
+        "id": "arms_scandal",
+        "label": "Arms Export Scandal",
+        "detail": "Govt claims arms pause since Jan 2024. Israeli Tax Authority records show Canadian bullets + military hardware arriving 2025. CIJA lobbied 107 times in 6 months post-Oct 7."
+      }
+    ],
+    "israel_network": [
+      {
+        "id": "vuong",
+        "label": "Kevin Vuong",
+        "type": "person"
+      },
+      {
+        "id": "postmedia",
+        "label": "Postmedia Network",
+        "type": "org"
+      },
+      {
+        "id": "chatham",
+        "label": "Chatham Asset Mgmt",
+        "type": "org"
+      },
+      {
+        "id": "jns",
+        "label": "JNS",
+        "type": "org"
+      },
+      {
+        "id": "vote658",
+        "label": "Vote #658",
+        "type": "event"
+      },
+      {
+        "id": "rebel",
+        "label": "Rebel News",
+        "type": "org"
+      },
+      {
+        "id": "levant",
+        "label": "Ezra Levant",
+        "type": "person"
+      },
+      {
+        "id": "rebel2",
+        "label": "Rebel News",
+        "type": "org"
+      },
+      {
+        "id": "levant2",
+        "label": "Ezra Levant",
+        "type": "person"
+      },
+      {
+        "id": "malm_kevin",
+        "label": "Kevin Malm",
+        "type": "person"
+      },
+      {
+        "id": "memri",
+        "label": "MEMRI",
+        "type": "org"
+      },
+      {
+        "id": "poilievre",
+        "label": "Pierre Poilievre",
+        "type": "person"
+      },
+      {
+        "id": "giltaca",
+        "label": "Rod Giltaca",
+        "type": "person"
+      },
+      {
+        "id": "farber",
+        "label": "Bernie Farber",
+        "type": "person"
+      },
+      {
+        "id": "cail",
+        "label": "Canada-Israel IPG",
+        "type": "org"
+      },
+      {
+        "id": "bnaibrith",
+        "label": "B'nai Brith Canada",
+        "type": "org"
+      },
+      {
+        "id": "samidoun",
+        "label": "Samidoun Listed",
+        "type": "event"
+      },
+      {
+        "id": "israel_govt",
+        "label": "Israeli Government",
+        "type": "org"
+      },
+      {
+        "id": "troll_swarm",
+        "label": "2-3K Troll Accounts",
+        "type": "org"
+      },
+      {
+        "id": "poilievre",
+        "label": "Pierre Poilievre",
+        "type": "person"
+      },
+      {
+        "id": "genuis",
+        "label": "Garnett Genuis",
+        "type": "person"
+      },
+      {
+        "id": "scheer",
+        "label": "Andrew Scheer",
+        "type": "person"
+      },
+      {
+        "id": "ben_carr",
+        "label": "Ben Carr",
+        "type": "person"
+      },
+      {
+        "id": "mef",
+        "label": "Middle East Forum",
+        "type": "org"
+      },
+      {
+        "id": "roman",
+        "label": "Gregg Roman",
+        "type": "person"
+      },
+      {
+        "id": "charity_pipeline",
+        "label": "$276M Charity Pipeline",
+        "type": "evidence"
+      },
+      {
+        "id": "jnf",
+        "label": "JNF Canada",
+        "type": "org"
+      },
+      {
+        "id": "czca",
+        "label": "CZCA",
+        "type": "org"
+      },
+      {
+        "id": "garin_tzabar",
+        "label": "Garin Tzabar",
+        "type": "org"
+      },
+      {
+        "id": "sarel",
+        "label": "Sar-El Canada",
+        "type": "org"
+      },
+      {
+        "id": "roussel",
+        "label": "Kathleen Roussel",
+        "type": "person"
+      },
+      {
+        "id": "herut",
+        "label": "Herut Canada",
+        "type": "org"
+      },
+      {
+        "id": "ccp_charity",
+        "label": "Canada Charity Partners",
+        "type": "org"
+      },
+      {
+        "id": "bill_c70",
+        "label": "Bill C-70",
+        "type": "event"
+      },
+      {
+        "id": "taccom",
+        "label": "TACCOM Canada",
+        "type": "org"
+      },
+      {
+        "id": "iwi",
+        "label": "IWI (Israel Weapon Industries)",
+        "type": "org"
+      },
+      {
+        "id": "elbit",
+        "label": "Elbit Systems",
+        "type": "org"
+      },
+      {
+        "id": "cmc",
+        "label": "CMC Electronics",
+        "type": "org"
+      },
+      {
+        "id": "apollo",
+        "label": "Apollo (Montreal)",
+        "type": "org"
+      },
+      {
+        "id": "cdn_banks",
+        "label": "Big Six Banks",
+        "type": "org"
+      },
+      {
+        "id": "joly",
+        "label": "M\u00e9lanie Joly",
+        "type": "person"
+      },
+      {
+        "id": "gd_quebec",
+        "label": "General Dynamics Quebec",
+        "type": "org"
+      }
+    ]
+  },
+  "quantum_metadata": {
+    "signature": "[NV-QUANTUM]",
+    "emh_vector": "ABCXYZ-MF-CIJA",
+    "topology": "NP-HARD",
+    "quantum_resistant_sig": "eb4f2a2d614ab263d4115742dbe389b36d3f1f6b00ae566efdafe8e3c1c7bdda0bc626e77af24cd03eac23dd62d321808dbdce6f35944934bf4fce248fe08b5c",
+    "grover_speedup": 21.33,
+    "gpu_backend": "NVIDIA Blackwell PCIe E8",
+    "quantum_security_bits": 256,
+    "cib_corridor_hash": "ABCXYZ-7AA7FD00D295772A"
+  }
+}
+```
+
+---
+*Secured via TENET5 Empirical Magic Handoff Memory System*
+*Cryptographic Signature (BLAKE2):* `2fb20868dda17c0e859eb9bc862a0e9b`
