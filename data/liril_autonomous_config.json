@@ -1,0 +1,82 @@
+{
+  "_comment": "LIRIL Autonomous Development config. Controls what the LIRIL dev daemon is authorized to do when running. Changes here take effect on daemon reload.",
+  "_generated": "2026-04-18",
+  "_seed": 118400,
+
+  "enabled": false,
+  "_enabled_note": "Set to true to allow the daemon to actually commit. While false, daemon runs in audit-only mode and produces reports but does not write to the repo.",
+
+  "target_branch_pattern": "liril-auto-{date}",
+  "_branch_note": "Daemon commits ONLY to a liril-auto-{date} branch. Never pushes to main. Human merges via PR.",
+
+  "never_touch_paths": [
+    "CLAUDE.md",
+    "nav.js",
+    "shell.js",
+    "style.css",
+    "index.html",
+    "404.html",
+    "auth-callback.html",
+    "footer.js",
+    "js/presentation.js",
+    "js/liril-walkthrough.js",
+    "js/walkthrough-enhancements.js",
+    "scripts/validate_liril_integration.py",
+    "scripts/scan_narration_integrity.py",
+    ".github/workflows/",
+    ".git/",
+    "img/",
+    "audio/",
+    "data/liril_autonomous_config.json"
+  ],
+
+  "allowed_scope": {
+    "can_add_new_pages_matching": ["*-accountability.html", "*-axis.html", "*-dossier.html"],
+    "can_edit_narration_attributes_only": true,
+    "can_append_primary_source_citations": true,
+    "can_update_data_json_files": ["data/liril_autonomous_log.jsonl", "data/liril_autonomous_merkle.json"],
+    "cannot_modify_existing_content_bodies": true,
+    "cannot_add_new_axes": true,
+    "cannot_delete_files": true
+  },
+
+  "hallucination_gate": {
+    "min_fact_probes_per_draft": 3,
+    "min_pass_rate": 1.0,
+    "_note": "Every LIRIL-authored draft must pass ALL fact probes. R6 showed long-form synthesis fabricates; short retrieval is reliable."
+  },
+
+  "size_limits": {
+    "max_new_chars_per_commit": 8000,
+    "max_files_touched_per_commit": 3,
+    "max_commits_per_day": 6,
+    "cooldown_seconds_between_actions": 120
+  },
+
+  "ci_gate": {
+    "must_pass": ["scripts/validate_liril_integration.py", "scripts/scan_narration_integrity.py"],
+    "block_on": ["hard_failure"],
+    "warn_on": ["soft_warning"]
+  },
+
+  "nats_subjects": {
+    "listen_for_trigger": "tenet5.liril.dev.trigger",
+    "listen_for_propose": "tenet5.liril.dev.propose",
+    "listen_for_status": "tenet5.liril.dev.status",
+    "publish_progress": "tenet5.liril.dev.progress",
+    "publish_receipt": "tenet5.quantum.integrity.result"
+  },
+
+  "audit_targets": {
+    "scan_narration_integrity": true,
+    "scan_broken_links": true,
+    "scan_axis_cross_references": true,
+    "scan_merkle_drift": true
+  },
+
+  "log_file": "data/liril_autonomous_log.jsonl",
+  "last_action_timestamp_utc": null,
+  "session_action_count": 0,
+  "total_commits_authored": 0,
+  "total_rejections_caught": 0
+}
