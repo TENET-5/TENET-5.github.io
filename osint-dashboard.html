@@ -230,6 +230,47 @@
       </div>
     </section>
 
+    <section id="phase66-anomalies" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Anomaly Detector. Z-score and exponentially weighted moving average deviation scanner tracking entity mention frequency spikes." style="color:#f43f5e;">⚡ Statistical Anomaly Detector [PHASE 66]</h2>
+      <p>Real-time Z-score deviation analysis on OSINT entity mention streams. Flags spikes exceeding 2.5σ across rolling 30-sample windows with EWMA smoothing.</p>
+      <div id="phase66-alerts" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase66-series" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase67-sentiment" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Sentiment Analyser. Lexicon-based political speech analysis detecting tone, sentiment polarity, and foreign influence indicators." style="color:#10b981;">🎭 Political Sentiment Analyser [PHASE 67]</h2>
+      <p>Analyses Hansard speeches and OSINT text for sentiment polarity (POSITIVE/NEGATIVE/NEUTRAL), tone (ASSERTIVE/EVASIVE/AGGRESSIVE/CONCILIATORY), and domain-specific foreign influence flags.</p>
+      <div id="phase67-corpus" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase67-analyses" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase68-router" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Smart Event Router. LIRIL domain classification routing OSINT events to ETHICS, TECHNOLOGY, SCIENCE, MATHEMATICS, and ART training pipelines." style="color:#06b6d4;">🔀 NATS Smart Event Router [PHASE 68]</h2>
+      <p>Intelligent event routing classifier. Each OSINT event is domain-classified and dispatched to the correct LIRIL training pipeline via NATS subjects.</p>
+      <div id="phase68-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase68-routes" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase69-dossiers" style="display:none; margin-top:28px;">
+      <h2 data-narrate="MP Dossier Builder. Compiling complete intelligence profiles from FIIS scores, cross-references, anomalies, and sentiment analysis." style="color:#f97316;">📁 MP Intelligence Dossiers [PHASE 69]</h2>
+      <p>Complete per-MP intelligence profiles aggregating FIIS foreign influence scores, cross-reference corroboration, statistical anomalies, and political sentiment analysis into weighted risk assessments.</p>
+      <div id="phase69-cards" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+    </section>
+
     <section id="corp-intel-feed" style="display:none; margin-top:28px;">
       <h2 data-narrate="Corporate Registry Intelligence. Flagging intersecting nodes between structural corporate governance and federal lobbying registries.">🏢 Corporate Registry Intelligence</h2>
       <p>Data ingested automatically from ISED Corporations Canada. Cross-referenced to identify systemic influence trajectories.</p>
@@ -577,6 +618,157 @@
           grid.innerHTML = html;
         })
         .catch(function(e) { console.error("Phase 65 load error", e); });
+
+      // ── PHASE 66 ANOMALY DETECTOR ──
+      fetch('data/osint_anomaly_alerts.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase66-anomalies');
+          var alerts = document.getElementById('phase66-alerts');
+          var series = document.getElementById('phase66-series');
+          if (!alerts || !d.anomalies) return;
+          
+          feed.style.display = '';
+          var html = '';
+          d.anomalies.forEach(function(a) {
+            var sc = a.severity === 'CRITICAL' ? '#ef4444' : (a.severity === 'HIGH' ? '#f59e0b' : '#f43f5e');
+            html += '<div class="dash-card" style="border-left:3px solid ' + sc + ';">' +
+                      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                        '<h3 style="margin:0;color:#e0e0e6;font-size:0.95rem;">' + a.key + '</h3>' +
+                        '<span style="font-size:0.7rem;padding:2px 6px;background:' + sc + '20;color:' + sc + ';border-radius:3px;font-weight:700;">' + a.severity + '</span>' +
+                      '</div>' +
+                      '<div style="margin-top:8px;font-size:0.82rem;color:#a1a1aa;">' +
+                        'Z-score: <strong style="color:#f43f5e;">' + a.zscore.toFixed(2) + 'σ</strong> | ' +
+                        'Value: <strong>' + a.value + '</strong> vs Mean: ' + a.mean + ' | ' +
+                        'Direction: <span style="color:' + (a.direction === 'spike' ? '#ef4444' : '#3b82f6') + ';">' + a.direction.toUpperCase() + '</span>' +
+                      '</div>' +
+                    '</div>';
+          });
+          alerts.innerHTML = html;
+
+          // Series summaries
+          if (d.series_summaries && d.series_summaries.length) {
+            var sh = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Monitored Series</h3>';
+            d.series_summaries.forEach(function(s) {
+              var anomFlag = s.anomaly_count > 0 ? '<span style="color:#ef4444;">⚠ ' + s.anomaly_count + '</span>' : '<span style="color:#22c55e;">✓</span>';
+              sh += '<div style="display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.78rem;">' +
+                      '<span style="color:#d1d5db;">' + s.key + '</span>' +
+                      '<span style="color:#9ca3af;">n=' + s.samples + ' μ=' + s.mean + ' EWMA=' + s.ewma + ' ' + anomFlag + '</span>' +
+                    '</div>';
+            });
+            series.innerHTML = sh;
+          }
+        })
+        .catch(function(e) { console.error("Phase 66 load error", e); });
+
+      // ── PHASE 67 SENTIMENT ANALYSER ──
+      fetch('data/osint_sentiment_analysis.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase67-sentiment');
+          var corpus = document.getElementById('phase67-corpus');
+          var analyses = document.getElementById('phase67-analyses');
+          if (!corpus || !d.metadata) return;
+          
+          feed.style.display = '';
+          var cs = d.metadata.corpus_summary || {};
+          corpus.innerHTML =
+            '<div class="dash-card"><h3>Dominant Sentiment</h3><div class="dash-big" style="color:' + (cs.dominant_sentiment === 'NEGATIVE' ? '#ef4444' : '#22c55e') + ';">' + (cs.dominant_sentiment || 'N/A') + '</div></div>' +
+            '<div class="dash-card"><h3>Dominant Tone</h3><div class="dash-big" style="color:#818cf8;">' + (cs.dominant_tone || 'N/A') + '</div></div>' +
+            '<div class="dash-card"><h3>Top Domains</h3><div class="dash-big" style="color:#10b981;font-size:1rem;">' + (cs.top_domains ? cs.top_domains.join(', ') : 'N/A') + '</div></div>' +
+            '<div class="dash-card"><h3>Corpus Size</h3><div class="dash-big blue">' + (cs.corpus_size || 0) + '</div><div class="dash-sub">Speeches analysed</div></div>';
+
+          if (d.analyses && d.analyses.length) {
+            var ah = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Individual Analyses</h3>';
+            d.analyses.forEach(function(a) {
+              var sentColor = a.sentiment === 'NEGATIVE' ? '#ef4444' : (a.sentiment === 'POSITIVE' ? '#22c55e' : '#9ca3af');
+              var fiFlag = a.foreign_influence_flag ? '<span style="font-size:0.65rem;padding:1px 4px;background:rgba(239,68,68,0.2);color:#ef4444;border-radius:2px;margin-left:6px;">🚨 FI FLAG</span>' : '';
+              ah += '<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+                      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">' +
+                        '<span style="font-size:0.7rem;padding:2px 5px;background:' + sentColor + '20;color:' + sentColor + ';border-radius:3px;font-weight:600;">' + a.sentiment + '</span>' +
+                        '<span style="font-size:0.7rem;padding:2px 5px;background:rgba(129,140,248,0.15);color:#818cf8;border-radius:3px;">' + a.tone + '</span>' +
+                        '<span style="font-size:0.65rem;color:#6b7280;">[' + a.source + ']</span>' +
+                        fiFlag +
+                      '</div>' +
+                      '<div style="font-size:0.8rem;color:#d1d5db;">' + (a.text_preview || '') + '</div>' +
+                      '<div style="font-size:0.65rem;color:#6b7280;margin-top:2px;">Domains: ' + a.domains.join(', ') + ' | Confidence: ' + (a.confidence * 100).toFixed(0) + '%</div>' +
+                    '</div>';
+            });
+            analyses.innerHTML = ah;
+          }
+        })
+        .catch(function(e) { console.error("Phase 67 load error", e); });
+
+      // ── PHASE 68 NATS SMART ROUTER ──
+      fetch('data/osint_smart_router.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase68-router');
+          var stats = document.getElementById('phase68-stats');
+          var routes = document.getElementById('phase68-routes');
+          if (!stats || !d.metadata) return;
+          
+          feed.style.display = '';
+          var dd = d.metadata.domain_distribution || {};
+          var domCards = '';
+          var domColors = {ETHICS:'#ef4444',TECHNOLOGY:'#3b82f6',SCIENCE:'#22c55e',MATHEMATICS:'#a855f7',ART:'#f59e0b',REASONING:'#06b6d4'};
+          Object.keys(dd).forEach(function(dom) {
+            domCards += '<div class="dash-card"><h3>' + dom + '</h3><div class="dash-big" style="color:' + (domColors[dom]||'#888') + ';">' + dd[dom] + '</div><div class="dash-sub">Events routed</div></div>';
+          });
+          stats.innerHTML = '<div class="dash-card"><h3>Total Routed</h3><div class="dash-big blue">' + d.metadata.total_routed + '</div><div class="dash-sub">OSINT events classified</div></div>' + domCards;
+
+          if (d.routes && d.routes.length) {
+            var rh = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Routing Log</h3>';
+            d.routes.forEach(function(r) {
+              var dc = domColors[r.classified_domain] || '#888';
+              rh += '<div style="display:flex;justify-content:space-between;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.78rem;">' +
+                      '<span style="color:#d1d5db;flex:1;">' + r.text_preview + '</span>' +
+                      '<span style="color:' + dc + ';font-weight:600;min-width:100px;text-align:right;">' + r.classified_domain + '</span>' +
+                    '</div>';
+            });
+            routes.innerHTML = rh;
+          }
+        })
+        .catch(function(e) { console.error("Phase 68 load error", e); });
+
+      // ── PHASE 69 MP DOSSIER BUILDER ──
+      fetch('data/osint_mp_dossiers.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase69-dossiers');
+          var cards = document.getElementById('phase69-cards');
+          if (!cards || !d.dossiers) return;
+          
+          feed.style.display = '';
+          var html = '';
+          d.dossiers.forEach(function(dos) {
+            var rc = dos.risk_level === 'CRITICAL' ? '#ef4444' : (dos.risk_level === 'HIGH' ? '#f59e0b' : (dos.risk_level === 'MEDIUM' ? '#eab308' : '#22c55e'));
+            var sentC = dos.dominant_sentiment === 'NEGATIVE' ? '#ef4444' : (dos.dominant_sentiment === 'POSITIVE' ? '#22c55e' : '#9ca3af');
+            var evHtml = '';
+            (dos.recent_events || []).forEach(function(ev) {
+              evHtml += '<div style="font-size:0.72rem;color:#a1a1aa;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);">[' + ev.source.toUpperCase() + '] ' + ev.text.substring(0, 120) + '</div>';
+            });
+            var fiCount = (dos.fi_flags || []).length;
+            var fiHtml = fiCount > 0 ? '<span style="font-size:0.65rem;padding:1px 4px;background:rgba(239,68,68,0.2);color:#ef4444;border-radius:2px;">🚨 ' + fiCount + ' FI FLAGS</span>' : '';
+            
+            html += '<div class="dash-card" style="border:1px solid ' + rc + '40;border-left:4px solid ' + rc + ';">' +
+                      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                        '<h3 style="margin:0;color:#e0e0e6;font-size:1.05rem;">' + dos.mp_name + '</h3>' +
+                        '<span style="font-size:0.7rem;padding:2px 8px;background:' + rc + '20;color:' + rc + ';border-radius:4px;font-weight:700;">' + dos.risk_level + ' (' + (dos.risk_score * 100).toFixed(1) + '%)</span>' +
+                      '</div>' +
+                      '<div style="margin-top:6px;font-size:0.78rem;color:#9ca3af;">' +
+                        'Party: <strong style="color:#d1d5db;">' + dos.party + '</strong> | ' +
+                        'CCP: <strong style="color:#ef4444;">' + dos.ccp_influence_pct.toFixed(1) + '%</strong> | ' +
+                        'Sources: ' + dos.corroborated_sources + ' | ' +
+                        'Sentiment: <span style="color:' + sentC + ';">' + dos.dominant_sentiment + '</span> ' +
+                        fiHtml +
+                      '</div>' +
+                      '<div style="margin-top:8px;">' + evHtml + '</div>' +
+                    '</div>';
+          });
+          cards.innerHTML = html;
+        })
+        .catch(function(e) { console.error("Phase 69 load error", e); });
   </script>
 
 <div style="max-width:900px;margin:2rem auto;">
