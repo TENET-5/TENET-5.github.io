@@ -35,7 +35,7 @@
   // ── Inject CSS ───────────────────────────────────────────────────────────
   var css = [
     '.wt-enhance-bar {',
-    '  position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);',
+    '  position: fixed; bottom: 74px; left: 50%; transform: translateX(-50%);',
     '  background: rgba(10,14,22,0.92); border: 1px solid rgba(168,85,247,0.4);',
     '  border-radius: 10px; padding: 8px 16px; display: flex; gap: 12px;',
     '  align-items: center; z-index: 99998; font-family: \'Inter\', system-ui, sans-serif;',
@@ -295,8 +295,28 @@
     });
   }
 
+  // When presentation.js is running, IT owns the primary progress+nav UI
+  // (the "21/195 · page · voice · ALL" bottom bar + .pres-keyhint hint).
+  // Our bar duplicates that. Detect and hide the duplicate parts so the
+  // user only ever sees one canonical walkthrough UI.
+  function presentationOwnsUI() {
+    return !!(document.querySelector('.pres-progress') ||
+              document.querySelector('.pres-rail') ||
+              document.querySelector('.pres-keyhint'));
+  }
+
   function showBar() {
     if (!bar) buildBar();
+    if (presentationOwnsUI()) {
+      // presentation.js already has a progress counter + keyboard hint.
+      // Hide our duplicate progress section; keep only the unique
+      // feature buttons (CC, transcript, autoplay, volume, share, export).
+      var progSec = bar.querySelector('.wt-section-prog');
+      if (progSec) progSec.style.display = 'none';
+      // Also hide the first separator so the bar starts cleanly
+      var firstSep = bar.querySelector('.wt-sep');
+      if (firstSep) firstSep.style.display = 'none';
+    }
     bar.classList.add('active');
     updateSectionProgress();
   }
@@ -389,6 +409,11 @@
   }
 
   function offerResume() {
+    try {
+      var ap = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
+      if (ap && ap.autostart) return;
+    } catch(e) {}
+
     var pos = loadPosition();
     if (!pos) return;
     var currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -473,10 +498,18 @@
 
   // ── First-run keyboard hint ──────────────────────────────────────────────
   // Shown once per user on their first walkthrough start, then suppressed.
+  // Skip entirely if presentation.js is already showing its own key-hint
+  // (`.pres-keyhint`) — that was the duplicate the user saw.
   function maybeShowHint() {
     try {
       if (localStorage.getItem(LS_HINT_KEY) === '1') return;
     } catch (e) {}
+    // Yield to presentation.js's canonical hint if it's present
+    if (document.querySelector('.pres-keyhint')) {
+      // Mark as shown so we don't keep re-checking
+      try { localStorage.setItem(LS_HINT_KEY, '1'); } catch (e) {}
+      return;
+    }
     var hint = document.createElement('div');
     hint.className = 'wt-hint';
     hint.innerHTML =
