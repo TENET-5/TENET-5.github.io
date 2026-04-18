@@ -889,33 +889,41 @@
     // ── Voice selection — delegates to LIRIL_VOICE (single source of truth) ──
     // All voice resolution, caching, retry, and voiceschanged handling lives
     // in liril-voice.js. DO NOT duplicate logic here — that causes drift.
+    //
+    // 2026-04-18 FIX: previous version hard-rejected any non-Clara voice and
+    // returned null, which meant the walkthrough went SILENT on every system
+    // without Microsoft Clara installed (most Windows/Mac/Linux defaults).
+    // liril-voice.js already has proper fallback ranking (jenny, sonia, aria,
+    // hazel, libby) — we must NOT throw that fallback away. If Clara is
+    // absent, use the best-ranked female English neural voice available.
     function resolveVoice() {
       if (!window.LIRIL_VOICE) return null;
       var v = window.LIRIL_VOICE.get();
       if (!v) return null;
-      // STRICT: Clara or nothing. Wrong voice = silence.
       if (!window.LIRIL_VOICE.isTargetVoice(v)) {
-        console.warn('[LIRIL-WALK] Voice is NOT Clara:', v.name, '— refusing to speak');
-        return null;
+        // Accept the fallback voice liril-voice.js already selected.
+        // This is a legitimate female English neural voice — safe to use.
+        console.log('[LIRIL-WALK] Using fallback voice (Clara unavailable):', v.name);
       }
       return v;
     }
 
-    // Wait until Clara is available (up to 4 seconds), then call cb(voice)
+    // Wait until ANY acceptable voice is available (up to 2.5 seconds).
+    // Previous version waited 4 seconds specifically for Clara; with the
+    // fallback fix above, we just need the voice engine ready at all.
     function waitForClara(cb) {
       var waited = 0;
       var poll = setInterval(function() {
         waited += 200;
         var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
-        var gotClara = v && window.LIRIL_VOICE.isTargetVoice(v);
-        if (gotClara || waited >= 4000) {
+        if (v || waited >= 2500) {
           clearInterval(poll);
-          if (gotClara) {
+          if (v && window.LIRIL_VOICE.isTargetVoice(v)) {
             console.log('[LIRIL-WALK] ★ Clara ready:', v.name);
           } else if (v) {
-            console.warn('[LIRIL-WALK] Clara not found after 4s, using:', v.name);
+            console.log('[LIRIL-WALK] Voice ready (fallback):', v.name);
           } else {
-            console.warn('[LIRIL-WALK] No voice after 4s — speech disabled');
+            console.warn('[LIRIL-WALK] No voice after 2.5s — speech disabled');
           }
           cb(v);
         }
@@ -1030,17 +1038,31 @@
         return;
       }
 
-      // Fallback: speechSynthesis with chunking
+      // Fallback: speechSynthesis with chunking.
+      // 2026-04-18 FIX: previously only started speaking if Clara was loaded,
+      // which meant 4+ second delays on every point and total silence when
+      // Clara wasn't installed. Now: speak IMMEDIATELY with whatever voice
+      // resolveVoice() returns (Clara if available, best female fallback
+      // otherwise). Only wait if speechSynthesis has returned no voices at
+      // all yet (cold browser start).
       if ('speechSynthesis' in window) {
         var chunks = chunkText(point.text);
         var voice = resolveVoice();
-        var hasClara = voice && window.LIRIL_VOICE && window.LIRIL_VOICE.isTargetVoice(voice);
 
-        if (!voice || !hasClara) {
-          // Wait for Clara specifically — don't start speaking with wrong voice
-          waitForClara(function(claraVoice) {
+        if (voice) {
+          // Voice ready (Clara or fallback) — speak immediately
+          speakChunks(chunks, voice, function() {
+            if (isActive && currentPoint < points.length - 1) {
+              setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
+            } else if (isActive) {
+              advanceToNextPageWalkthrough();
+            }
+          });
+        } else {
+          // No voice available yet — wait briefly for engine to populate
+          waitForClara(function(anyVoice) {
             if (!isActive) return;
-            speakChunks(chunks, claraVoice, function() {
+            speakChunks(chunks, anyVoice, function() {
               if (isActive && currentPoint < points.length - 1) {
                 setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
               } else if (isActive) {
@@ -1048,16 +1070,7 @@
               }
             });
           });
-          return;
         }
-        // Already have Clara — speak immediately
-        speakChunks(chunks, voice, function() {
-          if (isActive && currentPoint < points.length - 1) {
-            setTimeout(function() { showPoint(currentPoint + 1); }, 1500);
-          } else if (isActive) {
-            advanceToNextPageWalkthrough();
-          }
-        });
       }
     }
 
