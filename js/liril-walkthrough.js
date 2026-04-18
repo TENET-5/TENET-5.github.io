@@ -318,16 +318,28 @@
     // Pages with their own inline scene engines — walkthrough must not clash
     if (page === 'index.html' || page === 'home.html' || page === 'kids-guide.html' || page === '') return;
 
-    // DELEGATION: If presentation.js is loaded, create a bridge button that
-    // triggers the presentation engine's Narrate All + cross-page autopilot.
-    // This gives users a VISIBLE entry point to the full-site narrated tour
-    // instead of silently yielding (which broke the walkthrough entirely).
-    if (window.__TENET5_PRESENTATION_LOADED) {
-      console.log('[LIRIL-WALK] Presentation engine active — creating delegation bridge');
-      _createPresentationBridge();
-      return;
-    }
+    // DELEGATION: presentation.js may be loading asynchronously via shell.js.
+    // Poll for it, and only fall back to the local loop if we are SURE it isn't coming.
+    var maxChecks = 40; // 4s timeout
+    var checks = 0;
 
+    function checkBridge() {
+      if (window.__TENET5_PRESENTATION_LOADED) {
+        console.log('[LIRIL-WALK] Presentation engine active — creating delegation bridge');
+        _createPresentationBridge();
+      } else if (checks < maxChecks && window.__TENET5_SHELL_LOADED) {
+        // Wait for shell.js to finish injecting presentation.js
+        checks++;
+        setTimeout(checkBridge, 100);
+      } else {
+        console.log('[LIRIL-WALK] No presentation engine detected. Executing local narration loop.');
+        _initLocalWalkthrough();
+      }
+    }
+    checkBridge();
+  }
+
+  function _initLocalWalkthrough() {
     // ── Anti-hallucination: deduplication + similarity engine ──
     // Prevents the walkthrough from repeating nearly-identical narration
     // across auto-generated or duplicated data-narrate sections.
