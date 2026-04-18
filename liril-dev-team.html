@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIRIL dev team — autonomous work schedule | TENET5</title>
+  <meta name="description" content="Live work schedule of the LIRIL autonomous dev team. Every task routed through researcher → architect → designer → engineer → editor → gatekeeper, with LIRIL PASS/WATCH/FAIL hallucination gate before commit.">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-dev-team.html">
+  <meta property="og:title" content="LIRIL dev team — autonomous work schedule | TENET5">
+  <meta property="og:description" content="LIRIL running as a multi-role dev team with a publicly visible backlog, PASS-only commits, and zero jargon.">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap">
+
+  <style>
+    :root { --ink: #1a1f36; --muted: #6b7280; --border: #e5e5e3; --crimson: #c41e3a; --navy: #0a1a2f; --green: #15803d; --amber: #b45309; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); background: #fafaf9; }
+    .hero { padding: 3.5rem 2rem 2rem; background: linear-gradient(135deg, #0a1a2f 0%, #15803d 100%); color: #fff; text-align: center; }
+    .hero h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 900; margin: 0 0 0.6rem; letter-spacing: -0.5px; }
+    .hero .subtitle { color: #d0f0dd; max-width: 820px; margin: 0 auto; line-height: 1.65; font-size: 1.0rem; }
+    .hero .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 8px #39ff14; vertical-align: middle; margin-right: 6px; animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .content { max-width: 1080px; margin: 0 auto; padding: 2rem 1.4rem 3rem; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; margin-bottom: 1.6rem; }
+    .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; text-align: center; }
+    .stat-card .big { font-size: 1.6rem; font-weight: 900; color: var(--navy); line-height: 1.1; }
+    .stat-card .big.green { color: var(--green); }
+    .stat-card .big.amber { color: var(--amber); }
+    .stat-card .big.crimson { color: var(--crimson); }
+    .stat-card .lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem; font-weight: 700; }
+
+    .intro { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--green); border-radius: 8px; padding: 1.2rem 1.4rem; margin-bottom: 1.6rem; font-size: 0.95rem; line-height: 1.65; color: #3d4355; }
+    .intro strong { color: var(--ink); }
+    .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--crimson); font-weight: 700; margin-bottom: 0.5rem; }
+    h2 { color: var(--ink); font-size: 1.25rem; font-weight: 800; margin: 1.8rem 0 0.8rem; }
+
+    .roles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.7rem; margin-bottom: 1.6rem; }
+    .role-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.95rem 1.1rem; }
+    .role-card h4 { margin: 0 0 0.3rem; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1.5px; color: var(--crimson); font-weight: 700; }
+    .role-card p { margin: 0; font-size: 0.83rem; color: #3d4355; line-height: 1.5; }
+
+    .task { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.3rem; margin-bottom: 0.8rem; border-left: 5px solid var(--muted); }
+    .task.p-high { border-left-color: var(--crimson); }
+    .task.p-medium { border-left-color: var(--amber); }
+    .task.p-low { border-left-color: var(--muted); }
+    .task.in-progress { background: #f0fdf4; border-left-color: var(--green); }
+    .task.done { background: #f9fafb; opacity: 0.75; }
+    .task-hdr { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: baseline; margin-bottom: 0.4rem; }
+    .task-id { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; color: var(--muted); }
+    .task-pri { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .task-pri.high { background: rgba(196,30,58,0.12); color: var(--crimson); }
+    .task-pri.medium { background: rgba(180,83,9,0.12); color: var(--amber); }
+    .task-pri.low { background: rgba(107,114,128,0.12); color: var(--muted); }
+    .task-axis { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; background: #eef2ff; color: #3730a3; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .task h3 { font-size: 1.0rem; font-weight: 700; margin: 0.2rem 0 0.4rem; color: var(--ink); }
+    .task .context { font-size: 0.86rem; color: #3d4355; line-height: 1.55; margin: 0 0 0.5rem; }
+    .task .accept { font-size: 0.83rem; color: #3d4355; background: #fafaf9; padding: 0.5rem 0.75rem; border-radius: 4px; border-left: 3px solid var(--green); }
+    .task .accept strong { color: var(--green); text-transform: uppercase; letter-spacing: 1px; font-size: 0.70rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 0.2rem; }
+    .pipe { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; }
+    .pipe span { padding: 2px 8px; border-radius: 4px; background: #f3f4f6; color: var(--muted); }
+    .pipe span.gk { background: rgba(21,128,61,0.12); color: var(--green); }
+
+    .verdict-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 800; letter-spacing: 1px; margin-left: 0.5rem; }
+    .verdict-pass { background: rgba(34,197,94,0.15); color: var(--green); }
+    .verdict-watch { background: rgba(234,179,8,0.15); color: var(--amber); }
+    .verdict-fail { background: rgba(196,30,58,0.15); color: var(--crimson); }
+
+    .methodology { margin-top: 2rem; padding: 1.1rem 1.3rem; background: #f3f4f6; border-radius: 8px; font-size: 0.86rem; color: #4b5563; line-height: 1.6; }
+    .methodology code { background: #fff; padding: 1px 5px; border-radius: 3px; font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="The LIRIL dev team. This page shows what LIRIL is working on right now, as an autonomous multi-role dev team. Every task flows through researcher, architect, designer, engineer, editor, and finally a gatekeeper hallucination gate. Only tasks that score PASS on the gate are committed. Tasks that score WATCH or FAIL bounce back to research. The user can see in real time what LIRIL proposes, what the gate says, and whether anything shipped.">
+    <h1><span class="live-dot"></span>LIRIL dev team</h1>
+    <p class="subtitle">
+      Autonomous multi-role dev team with a publicly visible work schedule.
+      Every task: researcher → architect → designer → engineer → editor →
+      <strong>gatekeeper</strong>. Only PASS commits. No jargon.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="intro" data-narrate="How this system works. The user asked for LIRIL to be writing and maintaining a work schedule as a full dev team. This page is that schedule. Each task here is picked up by LIRIL, routed through six specialist roles, and only shipped if the final gatekeeper role returns PASS from the hallucination gate. Tasks that return WATCH or FAIL go back to research. The raw data lives in data/liril_work_schedule.json and is re-rendered here every cycle.">
+      <p><strong>What you are looking at.</strong> This page shows the <strong>current work schedule of LIRIL, acting as a multi-role dev team</strong>. The user (CEO Daniel Perry) directed on 2026-04-18 that LIRIL should be autonomously writing and maintaining this schedule as if it were a full dev team. This page is that directive, made visible.</p>
+      <p><strong>How each task is handled.</strong> LIRIL picks the highest-priority pending task, then routes it through six roles in sequence: a researcher pulls a primary source, an architect decides where it belongs, a designer picks the UX form, an engineer writes the literal content, an editor copy-checks, and a gatekeeper (the on-GPU hallucination gate) returns <strong>VERDICT: PASS / WATCH / FAIL</strong>. Only PASS reaches the commit stage. The installed commit-msg hook additionally rejects any jargon subject line.</p>
+      <p><strong>Why this exists.</strong> Prior autonomous systems on this machine produced 1,357 commits in seven days labeled <em>"[PHASE 14]"</em>, <em>"ABCXYZ Millennial Falcon metrics"</em>, <em>"Atmosphere optimizer matrices applied"</em> — zero value. This dev team replaces that with a structured pipeline whose every step is auditable. See <a href="docs/AUTOMATION_DIAGNOSTIC_2026-04-18.md">docs/AUTOMATION_DIAGNOSTIC_2026-04-18.md</a> for the full before-state.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat-card"><div class="big" id="stat-backlog">--</div><div class="lbl">In backlog</div></div>
+      <div class="stat-card"><div class="big green" id="stat-progress">--</div><div class="lbl">In progress</div></div>
+      <div class="stat-card"><div class="big green" id="stat-done">--</div><div class="lbl">Completed today</div></div>
+      <div class="stat-card"><div class="big amber" id="stat-rework">--</div><div class="lbl">Flagged WATCH/FAIL</div></div>
+      <div class="stat-card"><div class="big" id="stat-passrate">--</div><div class="lbl">Commit PASS rate</div></div>
+    </div>
+
+    <!-- Roles -->
+    <p class="section-label">Team composition</p>
+    <div class="roles-grid" id="roles-grid"></div>
+
+    <!-- In progress -->
+    <h2>In progress</h2>
+    <div id="in-progress-list">
+      <p style="color:var(--muted);font-style:italic;">Loading&hellip;</p>
+    </div>
+
+    <!-- Backlog -->
+    <h2>Backlog</h2>
+    <div id="backlog-list">
+      <p style="color:var(--muted);font-style:italic;">Loading&hellip;</p>
+    </div>
+
+    <!-- Done today -->
+    <h2>Completed today</h2>
+    <div id="done-list">
+      <p style="color:var(--muted);font-style:italic;">Loading&hellip;</p>
+    </div>
+
+    <!-- Methodology -->
+    <div class="methodology">
+      <strong>Transport.</strong> LIRIL reasoning runs on <code>mercury.infer → llama-server</code> (RTX 5070 Ti, ~2–8s per role). Classification uses <code>tenet5.liril.classify</code> on the NPU (~3–80ms, 99% confidence). All routed via host NATS on <code>127.0.0.1:4223</code> — the port fix that unblocked the documented daemon stack on 2026-04-18.<br><br>
+      <strong>Commit policy.</strong> Every commit from this dev team must pass the <code>.git/hooks/commit-msg</code> jargon filter. The hook rejects subject lines containing <code>[PHASE N]</code>, <code>[LIRIL PHASE N]</code>, <code>ABCXYZ</code>, <code>Millennial Falcon</code>, <code>Empirical Magic Handoff</code>, <code>Atmosphere optimizer</code>, <code>EMH tracker badge</code>, <code>Genocide-Evidence EMH</code>, <code>ActionGuard-verified</code>, <code>N-vs-NP convergence</code>, and the mass-inject pattern. Hook installer: <a href="docs/install-commit-msg-hook.sh">docs/install-commit-msg-hook.sh</a>.<br><br>
+      <strong>Canonical data.</strong> <a href="data/liril_work_schedule.json">data/liril_work_schedule.json</a> is the on-repo source of truth for this board. The daemon at <code>E:\S.L.A.T.E\tenet5\tools\liril_dev_team.py</code> reads and writes it atomically. Per-task transcripts land in <code>data/liril_dev_team_log/</code> for reviewer audit.
+    </div>
+
+  </div>
+
+  <div id="site-footer-frame"></div>
+  <script src="shell.js?v=27"></script>
+  <script src="js/ux.js"></script>
+  <script>
+  (function(){
+    'use strict';
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function renderRoles(roles){
+      var el = document.getElementById('roles-grid');
+      if (!el) return;
+      var html = '';
+      Object.keys(roles || {}).forEach(function(k){
+        html += '<div class="role-card"><h4>' + esc(k) + '</h4><p>' + esc(roles[k]) + '</p></div>';
+      });
+      el.innerHTML = html;
+    }
+
+    function renderStats(board){
+      var s = board.stats || {};
+      var setT = function(id, val){ var e = document.getElementById(id); if (e) e.textContent = val; };
+      setT('stat-backlog', (board.backlog || []).length);
+      setT('stat-progress', (board.in_progress || []).length);
+      setT('stat-done', (board.done_today || []).length);
+      var rework = (board.backlog || []).filter(function(t){ return t.status === 'needs_rework'; }).length
+                 + (board.recent_rejections || []).length;
+      setT('stat-rework', rework);
+      setT('stat-passrate', s.commit_pass_rate_pct != null ? (s.commit_pass_rate_pct + '%') : '—');
+    }
+
+    function taskCard(t, opts){
+      opts = opts || {};
+      var cls = 'task p-' + (t.priority || 'low') + (opts.inProgress ? ' in-progress' : '') + (opts.done ? ' done' : '');
+      var pipe = '<div class="pipe">' + (t.role_pipeline || []).map(function(r){
+        return '<span' + (r === 'gatekeeper' ? ' class="gk"' : '') + '>' + esc(r) + '</span>';
+      }).join('') + '</div>';
+      var verdictBadge = '';
+      if (t.last_verdict) {
+        var vc = t.last_verdict.toLowerCase();
+        var cls2 = vc === 'pass' ? 'verdict-pass' : (vc === 'watch' ? 'verdict-watch' : 'verdict-fail');
+        verdictBadge = '<span class="verdict-badge ' + cls2 + '">LIRIL: ' + esc(t.last_verdict) + '</span>';
+      }
+      return '<div class="' + cls + '" id="' + esc(t.id || '') + '">' +
+        '<div class="task-hdr">' +
+          '<span class="task-id">' + esc(t.id) + '</span>' +
+          '<span class="task-pri ' + esc(t.priority || 'low') + '">' + esc(t.priority || 'low') + '</span>' +
+          '<span class="task-axis">' + esc(t.axis_domain || '') + '</span>' +
+          verdictBadge +
+        '</div>' +
+        '<h3>' + esc(t.title) + '</h3>' +
+        (t.context ? '<p class="context">' + esc(t.context) + '</p>' : '') +
+        (t.acceptance ? '<div class="accept"><strong>Acceptance</strong>' + esc(t.acceptance) + '</div>' : '') +
+        pipe +
+      '</div>';
+    }
+
+    function renderInProgress(board){
+      var el = document.getElementById('in-progress-list');
+      if (!el) return;
+      var list = board.in_progress || [];
+      if (!list.length){
+        el.innerHTML = '<p style="color:var(--muted);font-style:italic;">Nothing in progress right now. LIRIL picks up tasks on each cycle.</p>';
+        return;
+      }
+      el.innerHTML = list.map(function(t){ return taskCard(t, {inProgress: true}); }).join('');
+    }
+
+    function renderBacklog(board){
+      var el = document.getElementById('backlog-list');
+      if (!el) return;
+      var list = (board.backlog || []).filter(function(t){ return t.status !== 'in_progress'; });
+      if (!list.length){
+        el.innerHTML = '<p style="color:var(--muted);font-style:italic;">Backlog is empty. Add tasks to data/liril_work_schedule.json.</p>';
+        return;
+      }
+      el.innerHTML = list.map(function(t){ return taskCard(t); }).join('');
+    }
+
+    function renderDone(board){
+      var el = document.getElementById('done-list');
+      if (!el) return;
+      var list = board.done_today || [];
+      if (!list.length){
+        el.innerHTML = '<p style="color:var(--muted);font-style:italic;">No completed tasks yet today.</p>';
+        return;
+      }
+      var html = list.map(function(e){
+        var vc = String(e.liril_verdict || '').toLowerCase();
+        var cls = vc === 'pass' ? 'verdict-pass' : (vc === 'watch' ? 'verdict-watch' : 'verdict-fail');
+        return '<div class="task done"><div class="task-hdr"><span class="task-id">' + esc(e.id) + '</span>' +
+          '<span class="verdict-badge ' + cls + '">LIRIL: ' + esc(e.liril_verdict || '') + '</span></div>' +
+          '<p class="context">Finished ' + esc(e.finished_at || '') + ' · committed=' + (e.committed ? 'yes' : 'no') + '</p>' +
+          (e.reason ? '<div class="accept"><strong>Reason</strong>' + esc(e.reason) + '</div>' : '') +
+        '</div>';
+      }).join('');
+      el.innerHTML = html;
+    }
+
+    function render(board){
+      renderStats(board);
+      renderRoles(board.roles);
+      renderInProgress(board);
+      renderBacklog(board);
+      renderDone(board);
+    }
+
+    fetch('data/liril_work_schedule.json?t=' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(b){ render(b); })
+      .catch(function(e){
+        document.getElementById('backlog-list').innerHTML =
+          '<p style="color:var(--crimson);padding:1rem;">Could not load schedule: ' + esc(e.message) + '</p>';
+      });
+
+    // auto-refresh every 60s so the board stays live
+    setInterval(function(){
+      fetch('data/liril_work_schedule.json?t=' + Date.now())
+        .then(function(r){ return r.json(); })
+        .then(function(b){ render(b); })
+        .catch(function(){});
+    }, 60000);
+  })();
+  </script>
+</body>
+</html>
