@@ -34,14 +34,16 @@
   }
 
   // ── Text sanitisation ────────────────────────────
-  // Strips HTML entities, gear/product lists, error messages,
-  // leading punctuation, and caps narration length.
+  // 2026-04-18: relaxed. Previous version over-matched on any 3
+  // consecutive uppercase-acronyms-with-spaces (killing legitimate
+  // text like "NDA s.83 s.124" and "CFNIS MPCC CAEFISS") and had a
+  // 40% uppercase truncation rule that chopped military/government
+  // content to a single sentence. Now: just decode entities, strip
+  // error messages, cap at 6000 chars.
   var JUNK_PATTERNS = [
     /Could not load \S+/gi,              // error messages from failed fetches
-    /\b[A-Z0-9]{2,}[\s\-]+[A-Z0-9]{2,}[\s\-]+[A-Z0-9]/g, // product model codes (3+ consecutive)
     /&#\d+;/g,                           // numeric HTML entities
-    /&[a-z]+;/g,                         // named HTML entities
-    /\b(SRPE|AOR|MOE|RATH|SIG|MSAR|SYLI|LV119)\b[^.;]*/gi // specific gear model noise
+    /&[a-z]+;/g                          // named HTML entities
   ];
 
   function sanitiseNarration(raw) {
@@ -49,12 +51,12 @@
     var text = raw;
 
     // Decode common HTML entities first
-    var entityMap = {'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'",'&mdash;':' — ','&ndash;':' – '};
+    var entityMap = {'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'",'&mdash;':' — ','&ndash;':' – ','&hellip;':'…','&nbsp;':' '};
     Object.keys(entityMap).forEach(function(ent) {
       text = text.split(ent).join(entityMap[ent]);
     });
 
-    // Strip remaining HTML entities
+    // Strip remaining HTML entities + error strings
     JUNK_PATTERNS.forEach(function(rx) { text = text.replace(rx, ''); });
 
     // Strip leading punctuation / whitespace
@@ -63,20 +65,14 @@
     // Collapse whitespace
     text = text.replace(/\s{2,}/g, ' ').trim();
 
-    // If text looks like a product/gear list (>40% uppercase words), truncate to first sentence
-    var words = text.split(/\s+/);
-    var upperCount = words.filter(function(w) { return w === w.toUpperCase() && w.length > 2; }).length;
-    if (words.length > 5 && upperCount / words.length > 0.4) {
-      var firstSentence = text.match(/^[^.!?]+[.!?]/);
-      if (firstSentence) text = firstSentence[0];
-      else text = words.slice(0, 15).join(' ') + '.';
-    }
-
-    // Cap at 2000 chars — LIRIL reads FULL sections, not truncated summaries
-    if (text.length > 2000) {
-      var cut = text.substring(0, 2000);
+    // Cap at 6000 chars (~10 minutes speech) per slide. Previous 2000
+    // cap cut most investigation sections mid-sentence. 6k allows the
+    // full content to be read while still protecting against
+    // runaway narration on malformed pages.
+    if (text.length > 6000) {
+      var cut = text.substring(0, 6000);
       var lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('? '), cut.lastIndexOf('! '));
-      if (lastStop > 500) text = cut.substring(0, lastStop + 1);
+      if (lastStop > 1500) text = cut.substring(0, lastStop + 1);
       else text = cut + '…';
     }
 
@@ -340,137 +336,138 @@
   }
 
   function _initLocalWalkthrough() {
-    // ── Anti-hallucination: deduplication + similarity engine ──
-    // Prevents the walkthrough from repeating nearly-identical narration
-    // across auto-generated or duplicated data-narrate sections.
-    var MAX_POINTS_PER_PAGE = 200; // LIRIL reads the FULL page — CEO directive
+    // ── 2026-04-18 REWRITE ────────────────────────────────────────────
+    // User complaint: "doesn't read the full slides, out of sorts,
+    // hallucinated garbage." Root causes of the previous version:
+    //   1. TWO-PASS collection (all data-narrate first, then auto-gen
+    //      only if < 3 points) broke chronological order — hero
+    //      data-narrate attributes from anywhere on the page were
+    //      collected first, then section headings, so the user heard
+    //      summaries, then random headings out of context.
+    //   2. Jaccard-similarity dedup at 0.6 threshold silently dropped
+    //      whole sections on topic-focused investigation pages where
+    //      sections share vocabulary (MAID, vaccine, Brookfield, etc.).
+    //   3. Auto-generated points took heading + first 200 chars of
+    //      first paragraph only — the rest of every section was never
+    //      read aloud.
+    //   4. Sections WITH data-narrate were narrated using ONLY the
+    //      short curated summary — the actual body text never read.
+    //
+    // New behaviour: SINGLE-PASS, DOCUMENT-ORDER, FULL-CONTENT.
+    // Each slide = one narratable section, text = full visible text in
+    // document order, optionally prefixed by the data-narrate summary
+    // as a lead-in sentence. Exact-dedup only (no jaccard).
+    // ────────────────────────────────────────────────────────────────
+    var MAX_POINTS_PER_PAGE = 200;
 
     function normalizeForDedup(text) {
       return (text || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
     }
 
-    function getWordSet(text) {
-      var words = normalizeForDedup(text).split(' ');
-      var set = {};
-      words.forEach(function(w) { if (w.length > 2) set[w] = true; });
-      return set;
-    }
+    // Tags whose text is narrated (leaves).
+    var NARRATE_TAGS = {H1:1, H2:1, H3:1, H4:1, H5:1, H6:1, P:1, LI:1,
+                        BLOCKQUOTE:1, FIGCAPTION:1, CAPTION:1, DT:1, DD:1,
+                        TH:1, TD:1, SUMMARY:1};
+    // Tags whose subtree we never read.
+    var SKIP_TAGS = {SCRIPT:1, STYLE:1, NAV:1, HEADER:1, FOOTER:1,
+                     BUTTON:1, FORM:1, INPUT:1, SELECT:1, TEXTAREA:1,
+                     IFRAME:1, SVG:1, CANVAS:1, TEMPLATE:1};
+    var SKIP_CLASSES = {
+      'skip-link':1, 'pres-indicator':1, 'pres-narration-badge':1,
+      'liril-subtitle-bar':1, 'liril-tour-progress':1, 'liril-counter':1,
+      'liril-start-btn':1, 'source-cite':1
+    };
 
-    function jaccardSimilarity(setA, setB) {
-      var keysA = Object.keys(setA);
-      var keysB = Object.keys(setB);
-      if (keysA.length === 0 && keysB.length === 0) return 1;
-      var intersection = 0;
-      keysA.forEach(function(k) { if (setB[k]) intersection++; });
-      var union = {};
-      keysA.forEach(function(k) { union[k] = true; });
-      keysB.forEach(function(k) { union[k] = true; });
-      var unionSize = Object.keys(union).length;
-      return unionSize > 0 ? intersection / unionSize : 0;
-    }
-
-    // Returns true if text is too similar to any existing point
-    function isDuplicateOrSimilar(text, existingPoints, seenNorms) {
-      var norm = normalizeForDedup(text);
-      // Exact match (full normalized text)
-      if (seenNorms[norm]) return true;
-      // Prefix match (first 80 chars)
-      var prefix = norm.substring(0, 80);
-      if (seenNorms['pfx:' + prefix]) return true;
-      // Fuzzy Jaccard word-overlap check (threshold: 0.6)
-      var wordSet = getWordSet(text);
-      for (var i = 0; i < existingPoints.length; i++) {
-        var existingSet = existingPoints[i]._wordSet;
-        if (existingSet && jaccardSimilarity(wordSet, existingSet) > 0.6) {
-          console.warn('[LIRIL-DEDUP] Rejected similar text:', text.substring(0, 60),
-            '≈', existingPoints[i].text.substring(0, 60));
-          return true;
+    function extractSlideText(slide) {
+      var parts = [];
+      function visit(n) {
+        if (!n || n.nodeType !== 1) return;
+        if (SKIP_TAGS[n.tagName]) return;
+        if (n.classList) {
+          for (var ci = 0; ci < n.classList.length; ci++) {
+            if (SKIP_CLASSES[n.classList[ci]]) return;
+          }
         }
+        var view = n.ownerDocument && n.ownerDocument.defaultView;
+        if (view && view.getComputedStyle) {
+          var st = view.getComputedStyle(n);
+          if (st.display === 'none' || st.visibility === 'hidden') return;
+        }
+        if (NARRATE_TAGS[n.tagName]) {
+          var t = (n.textContent || '').replace(/\s+/g, ' ').trim();
+          if (t.length >= 2) parts.push(t);
+          return;
+        }
+        var ch = n.children;
+        for (var i = 0; i < ch.length; i++) visit(ch[i]);
       }
-      return false;
+      visit(slide);
+      return parts.join('. ').replace(/\.\.+/g, '.').replace(/\s+\./g, '.');
     }
 
-    function registerPoint(text, seenNorms) {
-      var norm = normalizeForDedup(text);
-      seenNorms[norm] = true;
-      seenNorms['pfx:' + norm.substring(0, 80)] = true;
-    }
+    // Slide = a narratable section of content. Outer-wins for nesting.
+    var SLIDE_SELECTORS = [
+      '.page-hero', '.hero', '.tl-hero', '.stat-hero-banner',
+      'section', 'article',
+      '.timeline-section', '.tl-timeline', '.timeline',
+      '.finding-box', '.case-card', '.evidence-block',
+      '.loop-diagram', '.loop-step',
+      '.narrative-intro', '.credibility-card'
+    ];
 
-    // ── Collect all narration points ──────────────────
     var points = [];
 
     function collectPoints() {
       points.length = 0;
       var seenNorms = {};
-      var hallucinationsBlocked = 0;
+      var seenEls = new Set();
+      var nodes = document.querySelectorAll(SLIDE_SELECTORS.join(','));
 
-      // 1. Sections with data-narrate (skip navigation-only sections)
-      document.querySelectorAll('[data-narrate]').forEach(function(el) {
+      // Iterate in document order (querySelectorAll preserves it).
+      // For nested matches, keep OUTER and skip INNER (prevents reading
+      // the same content twice once-as-section, once-as-timeline-node).
+      nodes.forEach(function(el) {
         if (points.length >= MAX_POINTS_PER_PAGE) return;
-        var raw = el.getAttribute('data-narrate');
-        // Skip navigation/cross-link sections that aren't real content
-        if (raw === 'connected-intelligence') return;
-        if (raw.length < 20) return;
-        // Skip if inside a cross-link grid (navigation, not content)
-        if (el.closest('[style*="grid-template-columns"]') && !el.closest('section, .content, main, article')) return;
-        // Skip if inside footer or connected-intelligence blocks
-        if (el.closest('footer, #site-footer-frame, [style*="grid-template-columns"]:not(section)')) return;
-        var clean = sanitiseNarration(raw);
-        if (clean.length > 15) {
-          // Full dedup + similarity check
-          if (isDuplicateOrSimilar(clean, points, seenNorms)) {
-            hallucinationsBlocked++;
-            return;
-          }
-          registerPoint(clean, seenNorms);
-          var pt = { el: el, text: clean };
-          pt._wordSet = getWordSet(clean);
-          points.push(pt);
+        if (seenEls.has(el)) return;
+        var anc = el.parentElement, dominated = false;
+        while (anc) {
+          if (seenEls.has(anc)) { dominated = true; break; }
+          anc = anc.parentElement;
         }
+        if (dominated) return;
+        if (el.closest('nav, header, footer, #site-header-frame, #site-footer-frame, #hud-controls')) return;
+        if (el.closest('[style*="grid-template-columns"]') &&
+            !el.matches('section, article, main') &&
+            !el.closest('main, article')) return;
+
+        var body = extractSlideText(el);
+        var lead = ((el.getAttribute && (
+          el.getAttribute('data-narrate') || el.getAttribute('data-narration')
+        )) || '').trim();
+        if (lead === 'connected-intelligence') lead = '';
+
+        var raw = '';
+        if (lead && body && body.toLowerCase().indexOf(lead.toLowerCase().substring(0, 40)) < 0) {
+          raw = lead + (/[.!?]$/.test(lead) ? ' ' : '. ') + body;
+        } else {
+          raw = body || lead;
+        }
+        var clean = sanitiseNarration(raw);
+        if (clean.length < 15) return;
+
+        // Exact-duplicate only — do NOT jaccard-reject similar sections.
+        var norm = normalizeForDedup(clean);
+        if (seenNorms[norm]) return;
+        seenNorms[norm] = true;
+        seenEls.add(el);
+
+        points.push({ el: el, text: clean });
       });
 
-      // 2. Auto-generate for sparse pages (only if truly sparse)
-      if (points.length < 3) {
-        var selectors = [
-          'section', '.timeline-section', '[data-chapter]', '.glass-panel',
-          '.evidence-block', '.timeline-node', '.thesis-statement',
-          '.card', '.report-block', '.panel', 'article'
-        ];
-        selectors.forEach(function(sel) {
-          document.querySelectorAll(sel).forEach(function(el) {
-            if (points.length >= MAX_POINTS_PER_PAGE) return;
-            if (el.getAttribute('data-narrate')) return;
-            if (el.closest('nav, header, footer, #hud-controls, #site-footer-frame')) return;
-            // Skip connected-intelligence / cross-link navigation grids
-            if (el.closest('[style*="grid-template-columns"]')) return;
-
-            var h = el.querySelector('h1, h2, h3');
-            var p = el.querySelector('p');
-            if (h) {
-              var raw = h.textContent.trim();
-              if (p) raw += '. ' + p.textContent.trim().substring(0, 200);
-              var clean = sanitiseNarration(raw);
-              if (clean.length > 20) {
-                // Apply SAME dedup + similarity to auto-generated points
-                if (isDuplicateOrSimilar(clean, points, seenNorms)) {
-                  hallucinationsBlocked++;
-                  return;
-                }
-                registerPoint(clean, seenNorms);
-                var pt = { el: el, text: clean, auto: true };
-                pt._wordSet = getWordSet(clean);
-                points.push(pt);
-              }
-            }
-          });
-        });
-      }
-
-      // Log dedup results
-      if (hallucinationsBlocked > 0) {
-        console.log('[LIRIL-DEDUP] Blocked ' + hallucinationsBlocked +
-          ' repetitive narration points. Final count: ' + points.length);
-      }
+      console.log('[LIRIL-WALK] Collected ' + points.length +
+                  ' slides in document order (' +
+                  points.reduce(function(s,p){return s+p.text.length;}, 0) +
+                  ' total chars).');
     }
 
     collectPoints();

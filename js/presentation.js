@@ -1668,36 +1668,97 @@
     return bestScore >= 2 ? cleanNarrationText(best) : '';
   }
 
+  // 2026-04-18 REWRITE: user complaint — "doesn't read the full slides,
+  // out of sorts, hallucinated garbage." Root cause was this function:
+  // previously it returned ONLY the curated data-narrate summary (a
+  // hand-written one-line intro) OR fell back to heading + first 180
+  // chars of first paragraph. That meant 90% of page content was never
+  // narrated. Now: we walk the slide's content in DOCUMENT ORDER and
+  // emit headings + paragraphs + list items + table cells in full.
+  // The data-narrate summary, if present, is used as a LEAD-IN (so the
+  // curated context still sets up each slide) followed by the body.
   function getNarrationText(slide) {
     if (!slide) return '';
 
-    var explicit = cleanNarrationText(slide.getAttribute('data-narrate') || '');
-    if (explicit) return explicit;
+    // Optional lead-in: data-narrate / data-narration summary (as written
+    // by the page author). Used as an intro sentence, NOT a replacement.
+    var lead = cleanNarrationText(
+      slide.getAttribute('data-narrate') ||
+      slide.getAttribute('data-narration') || ''
+    );
 
-    var legacy = cleanNarrationText(slide.getAttribute('data-narration') || '');
-    if (legacy) return legacy;
+    // Walk the slide's content in document order, collecting every
+    // narratable block. Skip script/style/nav/footer/button/hidden.
+    var parts = [];
+    var NARRATE_TAGS = {H1:1, H2:1, H3:1, H4:1, H5:1, H6:1, P:1, LI:1,
+                        BLOCKQUOTE:1, FIGCAPTION:1, CAPTION:1, DT:1, DD:1,
+                        TH:1, TD:1, SUMMARY:1};
+    var SKIP_TAGS = {SCRIPT:1, STYLE:1, NAV:1, HEADER:1, FOOTER:1,
+                     BUTTON:1, FORM:1, INPUT:1, SELECT:1, TEXTAREA:1,
+                     IFRAME:1, SVG:1, CANVAS:1, TEMPLATE:1};
+    function visit(node) {
+      if (!node) return;
+      // Element nodes
+      if (node.nodeType !== 1) return;
+      var tag = node.tagName;
+      if (SKIP_TAGS[tag]) return;
+      // Skip visually-hidden elements (display:none / visibility:hidden)
+      var style = node.ownerDocument.defaultView &&
+                  node.ownerDocument.defaultView.getComputedStyle
+                    ? node.ownerDocument.defaultView.getComputedStyle(node)
+                    : null;
+      if (style && (style.display === 'none' || style.visibility === 'hidden')) return;
+      // Skip source-citation / skip-link / nav chrome by class
+      if (node.classList && (
+            node.classList.contains('skip-link') ||
+            node.classList.contains('pres-indicator') ||
+            node.classList.contains('pres-narration-badge') ||
+            node.classList.contains('liril-subtitle-bar') ||
+            node.classList.contains('liril-tour-progress') ||
+            node.classList.contains('liril-counter'))) return;
+      // If this is a narratable leaf-text container, capture its text
+      if (NARRATE_TAGS[tag]) {
+        var txt = (node.textContent || '').replace(/\s+/g, ' ').trim();
+        if (txt.length >= 2) parts.push(txt);
+        return; // don't recurse into headings/paragraphs/list items
+      }
+      // Recurse into structural containers (div/section/article/etc.)
+      var kids = node.children;
+      for (var i = 0; i < kids.length; i++) visit(kids[i]);
+    }
+    visit(slide);
 
-    var narratedChild = slide.querySelector('[data-narrate], [data-narration]');
-    if (narratedChild) {
-      var childText = cleanNarrationText(
-        narratedChild.getAttribute('data-narrate') ||
-        narratedChild.getAttribute('data-narration') || ''
-      );
-      if (childText) return childText;
+    // Build final narration
+    var body = parts.join('. ').replace(/\.\.+/g, '.').replace(/\s+\./g, '.');
+    var text = '';
+    if (lead && body && body.toLowerCase().indexOf(lead.toLowerCase().substring(0, 40)) < 0) {
+      // Lead doesn't appear inline — prefix it as an intro sentence.
+      text = lead + (/[.!?]$/.test(lead) ? ' ' : '. ') + body;
+    } else if (lead && !body) {
+      text = lead;
+    } else {
+      text = body;
     }
 
-    var indexed = getIndexedNarration(slide);
-    if (indexed) return indexed;
-
-    var heading = slide.querySelector('h1, h2, h3');
-    if (heading) {
-      var p = slide.querySelector('p');
-      var text = heading.textContent.trim();
-      if (p) text += '. ' + p.textContent.trim().substring(0, 180);
-      return cleanNarrationText(text);
+    // Fallback paths (indexed narration, etc.) for slides with no readable
+    // HTML content (e.g. pure-canvas or pure-img slides).
+    if (!text) {
+      var indexed = getIndexedNarration(slide);
+      if (indexed) return indexed;
     }
 
-    return '';
+    // Cap at 6000 chars (~10 minutes speech). Previously 2000 chars cut
+    // most slides mid-paragraph. 6k allows full-page sections to breathe
+    // while still protecting against runaway narration.
+    if (text.length > 6000) {
+      var cut = text.substring(0, 6000);
+      var lastStop = Math.max(cut.lastIndexOf('. '),
+                              cut.lastIndexOf('? '),
+                              cut.lastIndexOf('! '));
+      text = (lastStop > 1500) ? cut.substring(0, lastStop + 1) : cut + '…';
+    }
+
+    return cleanNarrationText(text);
   }
 
   /* ── Voice selection — delegates to LIRIL_VOICE (single source of truth) ──
