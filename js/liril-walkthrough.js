@@ -405,11 +405,21 @@
       return parts.join('. ').replace(/\.\.+/g, '.').replace(/\s+\./g, '.');
     }
 
-    // Slide = a narratable section of content. Outer-wins for nesting.
+    // Slide = a narratable section of content. Outer-wins for nesting
+    // EXCEPT for explicit card patterns (ALWAYS_INDEPENDENT) which
+    // stay independent even when inside a dominating section. This
+    // handles pages like charges-sheet.html that have ONE wrapping
+    // <section> containing 40+ individual .person-card entries each
+    // of which should be its own slide.
+    var ALWAYS_INDEPENDENT = [
+      '.person-card', '.charge-card', '.case-card',
+      '.program-card', '.node-card', '.record',
+      '.dossier', '.intel-card', '.investigation-card',
+      '.stat-card', '.finding-box', '.evidence-block',
+      '.verdict-box', '.callout', '.call-out'
+    ];
     // Comprehensive selector list covers the ~30+ card/section patterns
-    // used across different investigation pages on TENET5. Pages that
-    // use <div class="program-card"> or <div class="callout"> instead
-    // of <section> still get full narration coverage.
+    // used across different investigation pages on TENET5.
     var SLIDE_SELECTORS = [
       // Explicit data-narrate — always a slide, regardless of tag
       '[data-narrate]',
@@ -438,7 +448,14 @@
       '.ph-section', '.se-section', '.ta-section', '.war-section',
       '.charge-section', '.corp-section', '.data-section',
       '.entity-section', '.networks-section', '.pattern-section',
-      '.section-block', '.section-head',
+      '.section-block', '.section-head', '.section-title',
+      // Page-specific content blocks (ADDED 2026-04-18 after E2E test
+      // caught bloggins / charges-sheet / s504-tracker under-collecting
+      // because they invented their own class names)
+      '.dossier', '.bloggins-intro',
+      '.charge-card',
+      '.node-card',
+      '.intel-card', '.investigation-card',
       // Loop / diagram blocks
       '.loop-diagram', '.loop-step'
     ];
@@ -454,15 +471,27 @@
       // Iterate in document order (querySelectorAll preserves it).
       // For nested matches, keep OUTER and skip INNER (prevents reading
       // the same content twice once-as-section, once-as-timeline-node).
+      // Helper: does this element match one of the always-independent
+      // card patterns? If so, it stays a slide even when nested.
+      function isAlwaysIndependent(el) {
+        for (var i = 0; i < ALWAYS_INDEPENDENT.length; i++) {
+          if (el.matches && el.matches(ALWAYS_INDEPENDENT[i])) return true;
+        }
+        return false;
+      }
+
       nodes.forEach(function(el) {
         if (points.length >= MAX_POINTS_PER_PAGE) return;
         if (seenEls.has(el)) return;
+        var independent = isAlwaysIndependent(el);
         var anc = el.parentElement, dominated = false;
         while (anc) {
           if (seenEls.has(anc)) { dominated = true; break; }
           anc = anc.parentElement;
         }
-        if (dominated) return;
+        // Card patterns (person-card, charge-card, record, etc.) stay
+        // independent even when inside a dominating section.
+        if (dominated && !independent) return;
         if (el.closest('nav, header, footer, #site-header-frame, #site-footer-frame, #hud-controls')) return;
         if (el.closest('[style*="grid-template-columns"]') &&
             !el.matches('section, article, main') &&
@@ -1099,7 +1128,55 @@
       }
     }
 
+    // 2026-04-18: auto-rescan on DOM mutations so pages that fetch
+    // their content async (charges-sheet.html, any data-driven page)
+    // get their new content included in the walkthrough. Debounced
+    // so we don't thrash on small DOM changes.
+    var _rescanTimer = null;
+    function _scheduleRescan() {
+      if (_rescanTimer) return;
+      _rescanTimer = setTimeout(function() {
+        _rescanTimer = null;
+        var before = points.length;
+        if (isActive) return;  // never change points mid-walkthrough
+        collectPoints();
+        if (points.length !== before) {
+          console.log('[LIRIL-WALK] Auto-rescan after DOM change: ' +
+                      before + ' → ' + points.length + ' slides.');
+          if (points.length >= 2) startBtn.style.display = '';
+        }
+      }, 1200);
+    }
+    if (typeof MutationObserver !== 'undefined') {
+      try {
+        var contentRoot = document.querySelector('.content, main, #main') || document.body;
+        var mo = new MutationObserver(function(muts) {
+          // Only react to substantive additions (> 30 chars of new text)
+          for (var i = 0; i < muts.length; i++) {
+            var m = muts[i];
+            if (m.type !== 'childList' || !m.addedNodes.length) continue;
+            for (var j = 0; j < m.addedNodes.length; j++) {
+              var node = m.addedNodes[j];
+              if (node.nodeType === 1 &&
+                  (node.textContent || '').trim().length > 30) {
+                _scheduleRescan();
+                return;
+              }
+            }
+          }
+        });
+        mo.observe(contentRoot, { childList: true, subtree: true });
+      } catch (e) {
+        console.warn('[LIRIL-WALK] MutationObserver setup failed:', e);
+      }
+    }
+
     function startWalkthrough() {
+      // Always re-collect on click — picks up any content that loaded
+      // after initial page render (async fetches, etc.).
+      collectPoints();
+
+
       if (window.__TENET5_LIRIL_STOP) {
         window.__TENET5_LIRIL_STOP();
       }

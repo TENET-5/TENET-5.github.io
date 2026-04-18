@@ -458,6 +458,10 @@
     '.source-block', '.callout', '.call-out', '.callout-box',
     '.loop-diagram', '.loop-step', '.finding-box',
     '.timeline-item', '.timeline-node',
+    // ── Page-specific blocks surfaced by E2E test (bloggins / charges-sheet / s504-tracker) ──
+    '.dossier', '.bloggins-intro', '.section-title',
+    '.charge-card', '.node-card',
+    '.intel-card', '.investigation-card',
 
     // ── Financial & accountability ──
     '.purchase-callout', '.record', '.crpd-card', '.crpd-cards',

@@ -29,13 +29,18 @@ import sys
 from pathlib import Path
 
 
-# Pages chosen to cover different structural conventions:
+# Pages chosen to cover different structural conventions across the
+# ~300 pages on TENET5:
 #   - section-based   (vaccine-injury-accountability)
 #   - timeline-based  (maid-accountability)
 #   - card-based      (covid-accountability)
+#   - database        (accountability)
 #   - hero+cards      (follow-the-money)
-#   - timeline-heavy  (legal)
+#   - essay pages     (institutional-malice, etc.)
+#   - legal pages     (legal, s504-tracker)
+#   - evidence pages  (evidence-ledger, etc.)
 TEST_PAGES = [
+    # Core investigations
     "vaccine-injury-accountability.html",
     "maid-accountability.html",
     "covid-accountability.html",
@@ -43,6 +48,30 @@ TEST_PAGES = [
     "genocide-evidence.html",
     "foreign-interference.html",
     "follow-the-money.html",
+    # Legal / accountability
+    "legal.html",
+    "charges-sheet.html",
+    "prosecution.html",
+    "s504-tracker.html",
+    # Investigation topics
+    "arrivecan.html",
+    "brookfield-maid.html",
+    "carney-conflicts.html",
+    "cfnis.html",
+    "indigenous-accountability.html",
+    "bloggins.html",
+    "institutional-malice.html",
+    # Military / CAF
+    "caf-recruitment.html",
+    "cds-accountability.html",
+    "arms-exports.html",
+    # Economic / financial
+    "debt-fiscal.html",
+    "corporate-welfare.html",
+    "cra-enforcement.html",
+    # Rights / civil
+    "disability-genocide.html",
+    "opioid-crisis-accountability.html",
 ]
 
 RESULTS_PATH = Path(r"E:/TENET-5.github.io/data/walkthrough_e2e_results.json")
@@ -87,7 +116,10 @@ EXTRACTION_JS = r"""
     '.ph-section','.se-section','.ta-section','.war-section',
     '.charge-section','.corp-section','.data-section',
     '.entity-section','.networks-section','.pattern-section',
-    '.section-block','.section-head',
+    '.section-block','.section-head','.section-title',
+    '.dossier','.bloggins-intro',
+    '.charge-card','.node-card',
+    '.intel-card','.investigation-card',
     '.loop-diagram','.loop-step'
   ];
   function extractSlideText(slide) {
@@ -107,14 +139,25 @@ EXTRACTION_JS = r"""
     visit(slide);
     return parts.join('. ').replace(/\.\.+/g,'.');
   }
+  const ALWAYS_INDEPENDENT = [
+    '.person-card', '.charge-card', '.case-card',
+    '.program-card', '.node-card', '.record',
+    '.dossier', '.intel-card', '.investigation-card',
+    '.stat-card', '.finding-box', '.evidence-block',
+    '.verdict-box', '.callout', '.call-out'
+  ];
+  function isAlwaysIndependent(el) {
+    return ALWAYS_INDEPENDENT.some(sel => el.matches && el.matches(sel));
+  }
   const nodes = document.querySelectorAll(SLIDE_SELECTORS.join(','));
   const seenEls = new Set();
   const slides = [];
   for (const el of nodes) {
     if (seenEls.has(el)) continue;
+    const independent = isAlwaysIndependent(el);
     let p = el.parentElement, dominated = false;
     while (p) { if (seenEls.has(p)) { dominated = true; break; } p = p.parentElement; }
-    if (dominated) continue;
+    if (dominated && !independent) continue;
     if (el.closest('nav,header,footer,#site-header-frame,#site-footer-frame,#hud-controls')) continue;
     const body = extractSlideText(el);
     const lead = (el.getAttribute('data-narrate') ||
@@ -149,7 +192,10 @@ async def test_page(browser, page_name: str) -> dict:
     page = await browser.new_page(viewport={"width": 1280, "height": 900})
     try:
         await page.goto(url, wait_until="networkidle", timeout=30000)
-        await page.wait_for_timeout(5000)
+        # Wait 8s for iframe + shell.js + async JSON fetches to complete.
+        # charges-sheet.html for example fetches data/charges_sheet.json
+        # then renders dynamic content; 5s wasn't always enough.
+        await page.wait_for_timeout(8000)
 
         content_frame = None
         for f in page.frames:
