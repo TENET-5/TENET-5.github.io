@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Temporal Overlap — When Cross-Axis Bridges Were Live | TENET5</title>
+  <meta name="description" content="OSINT temporal analysis: when did Grover-marked multi-axis actors hold federal roles at the same time? Pairwise concurrent-tenure windows + single-actor cross-portfolio periods. Primary sources: Canada Gazette, Parliament of Canada biographical records.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .method {
+      background: rgba(34,211,238,0.07); border: 1px solid rgba(34,211,238,0.3);
+      border-radius: 10px; padding: 1.2rem 1.5rem; margin: 2rem 0;
+      color: #d0d0e0; line-height: 1.65;
+    }
+    .method strong { color: #67e8f9; }
+    .method code { background: rgba(0,0,0,0.35); padding: 0.1rem 0.4rem; border-radius: 3px; color: #67e8f9; font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; }
+
+    .pair-card {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-left: 4px solid #a855f7; border-radius: 10px;
+      padding: 1.2rem 1.4rem; margin: 1rem 0; color: #d0d0e0;
+      line-height: 1.55;
+    }
+    .pair-card.hot { border-left-color: #dc2626; background: linear-gradient(135deg, #0f0f1f, rgba(40,20,28,0.3)); }
+    .pair-card .header {
+      display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: baseline;
+      margin-bottom: 0.6rem;
+    }
+    .pair-card .names {
+      font-weight: 700; color: #f0f0f0; font-size: 1.05rem;
+    }
+    .pair-card .score {
+      font-family: 'IBM Plex Mono', monospace; font-weight: 700;
+      background: rgba(168,85,247,0.18); color: #c4b5fd;
+      padding: 0.15rem 0.55rem; border-radius: 4px; font-size: 0.72rem;
+      margin-left: auto;
+    }
+    .pair-card.hot .score {
+      background: rgba(220,38,38,0.2); color: #fca5a5;
+      border: 1px solid #dc2626;
+    }
+    .pair-card .years {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+      color: #fbbf24;
+    }
+    .pair-card .periods {
+      margin-top: 0.7rem; padding-top: 0.6rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+      color: #a0a0b8; line-height: 1.7;
+    }
+
+    .concurrent-card {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-left: 4px solid #fbbf24; border-radius: 10px;
+      padding: 1.1rem 1.4rem; margin: 0.8rem 0; color: #d0d0e0;
+    }
+    .concurrent-card .name {
+      font-weight: 700; color: #f0f0f0; font-size: 1.02rem;
+      margin-bottom: 0.4rem;
+    }
+    .concurrent-card .count {
+      font-family: 'IBM Plex Mono', monospace; color: #fde68a;
+      font-size: 0.78rem;
+    }
+    .concurrent-card .role-pair {
+      background: rgba(0,0,0,0.3); padding: 0.5rem 0.8rem;
+      margin: 0.4rem 0; border-radius: 5px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+      color: #c0c0d8; line-height: 1.6;
+    }
+    .concurrent-card .role-pair .span {
+      color: #67e8f9; font-weight: 700;
+    }
+
+    .timeline {
+      background: #0f0f1f; border: 1px solid #2a2a4a;
+      border-radius: 10px; padding: 1.2rem 1.5rem; margin: 2rem 0;
+    }
+    .timeline-row {
+      display: grid; grid-template-columns: 60px 1fr 60px;
+      gap: 0.6rem; align-items: center; padding: 0.25rem 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.04);
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;
+    }
+    .timeline-year { color: #c4b5fd; font-weight: 700; }
+    .timeline-bar {
+      height: 16px; background: rgba(255,255,255,0.04);
+      border-radius: 3px; overflow: hidden; position: relative;
+    }
+    .timeline-fill {
+      height: 100%; background: linear-gradient(90deg, #a855f7, #dc2626);
+      transition: width 0.35s;
+    }
+    .timeline-count { color: #fbbf24; text-align: right; font-weight: 700; }
+
+    .finding-pillar {
+      background: linear-gradient(135deg, rgba(220,38,38,0.1), rgba(236,72,153,0.06));
+      border: 1px solid #dc2626; border-radius: 12px;
+      padding: 1.5rem 1.8rem; margin: 2rem 0; color: #d0d0e0; line-height: 1.65;
+    }
+    .finding-pillar h3 { color: #fca5a5; margin-top: 0; }
+    .finding-pillar em { color: #fbbf24; font-style: italic; }
+  </style>
+
+  <meta property="og:title" content="Temporal Overlap — When Cross-Axis Bridges Were Live | TENET5">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/temporal-overlap.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="Temporal overlap. This is new OSINT analysis answering a question meta Grover cannot: when were the cross axis bridges actually live? Meta Grover is atemporal. It treats all marked actors as concurrent. But in the Canadian federal record, bridges between two actors existed only during their overlapping tenure periods. This page surfaces those concurrent windows. For each pair of multi axis Grover marked actors, we compute the total days they both held federal roles at the same time. Joint score equals meta amp a times meta amp b times overlap years. Higher joint score equals more consequential cross axis concurrent period. The top finding: Trudeau Carney have thirteen point eight role pair years of overlap across four concurrent Carney roles during Trudeau's prime ministerial tenure.">
+    <p class="subtitle">OSINT temporal analysis · primary-source tenure ranges · Canada Gazette + Parliament records</p>
+    <h1>Temporal Overlap</h1>
+    <p class="subtitle">
+      <strong>When were the cross-axis bridges actually live?</strong>
+      Meta-Grover is atemporal — it treats all marked actors as concurrent.
+      But bridges between two actors existed only during their overlapping
+      tenure periods. This page surfaces those concurrent windows.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="method">
+      <strong>Methodology:</strong> For each multi-axis meta-Grover actor
+      (top 15 by <code>meta_amp</code>), federal role ranges are sourced
+      from <strong>Canada Gazette Order-in-Council appointment notices,
+      Parliament of Canada biographical records, and on-the-record news
+      of record</strong>. Per-actor ranges committed to
+      <code>data/actor_tenures.json</code>. Pairwise overlap in days
+      computed via standard interval intersection.
+      <strong>joint_score = a.meta_amp × b.meta_amp × overlap_years</strong> —
+      higher means more consequential cross-axis concurrent period. Where
+      one actor holds multiple simultaneous roles (Freeland: DPM + Finance;
+      Carney: BoE + UN Envoy + Brookfield), the pair's total overlap days
+      sum across all role-pair combinations. Full algorithm:
+      <code>tools/_temporal_overlap.py</code>.
+    </div>
+
+    <!-- Top pairs -->
+    <h2 data-narrate="Top concurrent cross axis pairs. Ranked by joint score. Red bordered cards are concurrent windows greater than five years — sustained cross axis bridges. Purple bordered are shorter but non trivial. Each card shows total overlap years across all role pair combinations for that actor pair.">Top concurrent cross-axis pairs</h2>
+    <div id="pairs-list">
+      <p style="color:#888;font-style:italic;">Loading pairwise overlaps…</p>
+    </div>
+
+    <!-- Per-actor concurrent roles -->
+    <h2 data-narrate="Single actor concurrent roles. When one person held multiple federal portfolios at the same time. These are cross portfolio accountability surfaces: a minister with Finance plus Foreign Affairs at the same time holds two decision authorities concurrently. Freeland held deputy Prime Minister plus Finance Minister simultaneously for over four years. Carney held four positions concurrently for parts of twenty twenty to twenty twenty four. LeBlanc had six concurrent role pairs.">Single actors holding concurrent federal roles</h2>
+    <p style="color:#b0b0c4;">
+      Each card shows an actor whose federal role ranges include
+      simultaneous portfolios. These are <strong>cross-portfolio
+      accountability surfaces</strong> — a person in two federal roles at
+      once. Source: <code>data/actor_tenures.json</code>.
+    </p>
+    <div id="concurrent-list">
+      <p style="color:#888;font-style:italic;">Loading concurrent roles…</p>
+    </div>
+
+    <!-- Timeline -->
+    <h2 data-narrate="Timeline. Number of meta Grover actors active in federal roles each year from twenty thirteen to twenty twenty six. Higher bars indicate years with more concurrent marked actors across the portfolio.">Timeline — multi-axis actors active per year</h2>
+    <div class="timeline" id="timeline"></div>
+
+    <!-- Structural finding -->
+    <div class="finding-pillar" data-narrate="Structural finding. The temporal overlap data shows that the Canadian federal accountability architecture has been reviewing each single actor role separately, and each single axis separately, when the decision making is in fact deeply concurrent and cross portfolio. Freeland's deputy Prime Minister plus Finance combination for over four years. Carney's four simultaneous roles for parts of the twenty twenty to twenty twenty four period. Trudeau plus LeBlanc's eleven point four years of overlap covering the full range of LeBlanc's multiple portfolios. These are not separate decision chains. They are interlocking ones. No single oversight body has jurisdiction over interlocking concurrent cross portfolio decision chains. The Grover plus temporal overlap finding names that gap.">
+      <h3>Structural finding · cross-axis + temporal</h3>
+      <p>
+        The Canadian federal accountability architecture reviews each single-
+        actor role separately, and each single-axis separately. The temporal-
+        overlap data shows the <em>decision-making is in fact deeply concurrent
+        and cross-portfolio</em>.
+      </p>
+      <p>
+        Freeland held Deputy PM + Finance for 4.3+ years simultaneously.
+        Carney held 4 concurrent roles for parts of 2020–2024 (BoE + UN Envoy
+        + Brookfield + earlier BoC). Trudeau × LeBlanc overlapped for 11.4
+        role-pair-years covering the full range of LeBlanc's successive
+        portfolios.
+      </p>
+      <p>
+        <strong>These are not separate decision chains. They are
+        interlocking ones.</strong> No single Canadian federal oversight
+        body has jurisdiction over interlocking concurrent cross-portfolio
+        decision chains. The Grover + temporal-overlap combined finding
+        names that gap, adds the time dimension that
+        <a href="quantum-meta.html" style="color:#c4b5fd;">meta-Grover</a>
+        lacks, and makes the gap visually obvious.
+      </p>
+    </div>
+
+    <div style="margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
+      <strong style="color:#c4b5fd;">Receipts:</strong>
+      <code>data/actor_tenures.json</code> (tenure dataset) ·
+      <code>data/temporal_overlap.json</code> (computation output) ·
+      <code>tools/_temporal_overlap.py</code> (reproducible algorithm) ·
+      SYSTEM_SEED 118400<br>
+      <strong style="color:#c4b5fd;">See also:</strong>
+      <a href="quantum-meta.html" style="color:#c4b5fd;">Meta-Grover Portfolio</a> ·
+      <a href="state-of-investigation.html" style="color:#c4b5fd;">State of Investigation</a> ·
+      <a href="information-architecture.html" style="color:#c4b5fd;">Information Architecture</a>
+    </div>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+  (function() {
+    'use strict';
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function fmtDate(iso) {
+      if (!iso) return '?';
+      var d = new Date(iso);
+      return d.toISOString().slice(0, 7); // YYYY-MM
+    }
+
+    fetch('data/temporal_overlap.json')
+      .then(r => r.json())
+      .then(d => {
+        renderPairs(d.pairwise_overlaps_top_25 || []);
+        renderConcurrent(d.concurrent_roles || {});
+        renderTimeline(d.timeline_actors_per_year || []);
+      })
+      .catch(e => {
+        document.getElementById('pairs-list').innerHTML = '<p style="color:#ef4444;">Load error: ' + e + '</p>';
+      });
+
+    function renderPairs(pairs) {
+      var list = document.getElementById('pairs-list');
+      list.innerHTML = '';
+      pairs.forEach(function(p) {
+        var hot = p.total_overlap_years >= 5;
+        var card = document.createElement('div');
+        card.className = 'pair-card' + (hot ? ' hot' : '');
+        var periods = (p.overlapping_periods || []).slice(0, 3).map(function(x) {
+          return '· ' + esc(x.a_role) + '  ×  ' + esc(x.b_role) + '  ·  ' +
+                 fmtDate(x.start) + ' → ' + fmtDate(x.end) +
+                 ' (' + (x.days / 365.25).toFixed(1) + 'y)';
+        }).join('<br>');
+        if ((p.overlapping_periods || []).length > 3) {
+          periods += '<br>· (+' + (p.overlapping_periods.length - 3) + ' more role-pair overlap periods)';
+        }
+        card.innerHTML =
+          '<div class="header">' +
+            '<span class="names">' + esc(p.actor_a) + ' × ' + esc(p.actor_b) + '</span>' +
+            '<span class="score">joint=' + p.joint_score.toFixed(2) + '</span>' +
+          '</div>' +
+          '<div class="years">' +
+            '<strong>' + p.total_overlap_years + ' role-pair years</strong> · ' +
+            'a.meta_amp=' + p.a_meta_amp.toFixed(3) + ' · ' +
+            'b.meta_amp=' + p.b_meta_amp.toFixed(3) +
+          '</div>' +
+          '<div class="periods">' + periods + '</div>';
+        list.appendChild(card);
+      });
+    }
+
+    function renderConcurrent(byActor) {
+      var list = document.getElementById('concurrent-list');
+      list.innerHTML = '';
+      var sorted = Object.entries(byActor).sort(function(a, b) { return b[1].length - a[1].length; });
+      sorted.forEach(function(entry) {
+        var name = entry[0];
+        var pairs = entry[1];
+        var card = document.createElement('div');
+        card.className = 'concurrent-card';
+        var rolePairs = pairs.map(function(pp) {
+          var years = (pp.overlap_days / 365.25).toFixed(1);
+          return '<div class="role-pair">' +
+            esc(pp.role_a) + '<br>' +
+            '<span style="color:#a0a0b8;">+</span> ' + esc(pp.role_b) + '<br>' +
+            '<span class="span">concurrent ' + fmtDate(pp.overlap_start) + ' → ' + fmtDate(pp.overlap_end) + ' (' + years + 'y)</span>' +
+            '</div>';
+        }).join('');
+        card.innerHTML =
+          '<div class="name">' + esc(name) + '</div>' +
+          '<div class="count">' + pairs.length + ' concurrent role-pair' + (pairs.length !== 1 ? 's' : '') + '</div>' +
+          rolePairs;
+        list.appendChild(card);
+      });
+    }
+
+    function renderTimeline(years) {
+      var tl = document.getElementById('timeline');
+      tl.innerHTML = '';
+      var max = 0;
+      years.forEach(function(y) { if (y[1] > max) max = y[1]; });
+      years.forEach(function(y) {
+        var pct = max > 0 ? Math.round((y[1] / max) * 100) : 0;
+        var row = document.createElement('div');
+        row.className = 'timeline-row';
+        row.innerHTML =
+          '<div class="timeline-year">' + y[0] + '</div>' +
+          '<div class="timeline-bar"><div class="timeline-fill" style="width:' + pct + '%;"></div></div>' +
+          '<div class="timeline-count">' + y[1] + ' actors</div>';
+        tl.appendChild(row);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
