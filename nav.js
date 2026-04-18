@@ -42,6 +42,7 @@
           '</div>' +
           '<div class="nav-group">' +
             '<a href="/maid-accountability.html" id="nav-maid">MAID</a>' +
+            '<a href="/vaccine-injury-accountability.html" id="nav-vaccine" style="color:#ef4444;">Vaccine Injury</a>' +
             '<a href="/geneva-vs-jails.html" id="nav-geneva" style="color:#c9a84c;">Geneva vs Jails</a>' +
             '<a href="/genocide-evidence.html" id="nav-genocide" style="color:#ef4444;">Genocide</a>' +
             '<a href="/disability-genocide.html" id="nav-disability">Disability</a>' +
