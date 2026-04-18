@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIRIL local AI coders — training status | TENET5</title>
+  <meta name="description" content="Six local AI coders run the TENET5 autonomous dev team. Each is a specialized role (researcher, architect, designer, engineer, editor, gatekeeper) with its own correction-trained LoRA adapter. This page shows their training status — how many corrections they have accumulated, whether they are ready to fine-tune, and their cycle-pass rate.">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-coders.html">
+  <meta property="og:title" content="LIRIL local AI coders — training status | TENET5">
+  <meta property="og:site_name" content="TENET5">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap">
+
+  <style>
+    :root { --ink: #1a1f36; --muted: #6b7280; --border: #e5e5e3; --crimson: #c41e3a; --navy: #0a1a2f; --green: #15803d; --amber: #b45309; --purple: #7c3aed; --blue: #0369a1; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); background: #fafaf9; }
+    .hero { padding: 3.5rem 2rem 2rem; background: linear-gradient(135deg, #0a1a2f 0%, #0369a1 100%); color: #fff; text-align: center; }
+    .hero h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 900; margin: 0 0 0.6rem; letter-spacing: -0.5px; }
+    .hero .subtitle { color: #bae6fd; max-width: 820px; margin: 0 auto; line-height: 1.65; font-size: 0.98rem; }
+    .content { max-width: 1080px; margin: 0 auto; padding: 2rem 1.3rem 3rem; }
+    .intro { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--blue); border-radius: 8px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; font-size: 0.93rem; line-height: 1.65; color: #3d4355; }
+    .intro strong { color: var(--ink); }
+    .intro code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 0.82rem; }
+
+    .pipeline-flow { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:0.3rem; padding:1rem 0.5rem; margin:1rem 0 1.5rem; background:#fff; border:1px solid var(--border); border-radius:10px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; }
+    .pipeline-flow .step { background:#eef2ff; color:#3730a3; padding:0.45rem 0.8rem; border-radius:999px; font-weight:700; }
+    .pipeline-flow .step.gk { background: rgba(21,128,61,0.12); color: var(--green); }
+    .pipeline-flow .arrow { color: var(--muted); }
+
+    .coder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.9rem; margin-bottom: 1.5rem; }
+    .coder { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; border-left: 4px solid var(--muted); }
+    .coder.r-researcher { border-left-color: #0369a1; }
+    .coder.r-architect { border-left-color: #7c3aed; }
+    .coder.r-designer { border-left-color: #ec4899; }
+    .coder.r-engineer { border-left-color: #eab308; }
+    .coder.r-editor { border-left-color: #14b8a6; }
+    .coder.r-gatekeeper { border-left-color: var(--green); }
+
+    .coder-hdr { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+    .coder-id { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--muted); font-weight: 700; }
+    .coder-role { font-size: 1.05rem; font-weight: 800; color: var(--ink); text-transform: uppercase; letter-spacing: 1.5px; font-family: 'JetBrains Mono', monospace; }
+    .status-pill { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .status-pill.base { background: #f3f4f6; color: var(--muted); }
+    .status-pill.watch { background: rgba(234,179,8,0.12); color: var(--amber); }
+    .status-pill.tuned { background: rgba(34,197,94,0.12); color: var(--green); }
+
+    .coder p.resp { font-size: 0.85rem; line-height: 1.5; color: #3d4355; margin: 0.4rem 0 0.8rem; }
+
+    .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; margin-top: 0.6rem; }
+    .metric { background: #fafaf9; border-radius: 6px; padding: 0.5rem; text-align: center; }
+    .metric .v { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 900; color: var(--ink); line-height: 1; }
+    .metric .v.green { color: var(--green); }
+    .metric .v.blue { color: var(--blue); }
+    .metric .v.amber { color: var(--amber); }
+    .metric .l { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.25rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+    .training-bar { margin-top: 0.7rem; }
+    .training-bar .label { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.25rem; display: flex; justify-content: space-between; }
+    .training-bar .track { height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+    .training-bar .fill { height: 100%; background: linear-gradient(90deg, #0369a1, #15803d); transition: width 0.3s; }
+
+    .failure-modes { margin-top: 0.7rem; padding: 0.6rem 0.8rem; background: rgba(234,179,8,0.06); border-left: 3px solid var(--amber); border-radius: 3px; font-size: 0.80rem; color: #3d4355; line-height: 1.5; }
+    .failure-modes strong { color: var(--amber); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; display: block; margin-bottom: 0.2rem; }
+
+    .methodology { margin-top: 2rem; padding: 1.1rem 1.3rem; background: #f3f4f6; border-radius: 8px; font-size: 0.85rem; color: #4b5563; line-height: 1.6; }
+    .methodology code { background: #fff; padding: 1px 4px; border-radius: 3px; font-size: 0.80rem; }
+    .methodology pre { background: #0a1a2f; color: #c4b5fd; padding: 0.8rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.80rem; line-height: 1.6; margin: 0.5rem 0; }
+
+    .cross-link { display: inline-block; margin-top: 0.9rem; padding: 0.4rem 0.8rem; background: #fff; border: 1px solid var(--border); border-radius: 5px; text-decoration: none; color: var(--blue); font-size: 0.82rem; font-weight: 600; transition: border-color 0.15s; }
+    .cross-link:hover { border-color: var(--blue); }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <div id="site-header-frame"></div>
+
+  <div id="breadcrumb-mount" data-breadcrumb='["Home","State of investigation","LIRIL dev team","Coders"]'></div>
+
+  <section class="hero" data-narrate="The LIRIL local AI coders. Six specialized roles operating on the same base model with per-role LoRA adapters trained on captured corrections. Every cycle, every corrected failure, becomes a training example. Over time the coders should need fewer corrections for the same task domain. This page shows where each coder stands: how many cycles it has run, its pass rate, how many corrections it has accumulated, whether it is ready to fine-tune. This is the replacement for the year of no training signal — every role now has a ledger that gets shorter per cycle, not longer.">
+    <h1>LIRIL local AI coders</h1>
+    <p class="subtitle">
+      Six specialized role-coders. One base model. Per-role LoRA adapters
+      trained on corrections. Every rejected output becomes a training
+      example so the next cycle is better.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="intro">
+      <p><strong>What broke before.</strong> For months LIRIL didn't produce useful work. The <a href="docs/AUTOMATION_DIAGNOSTIC_2026-04-18.md">automation diagnostic</a> traced it to a NATS port mismatch, a rogue jargon-emitter making 1,357 noise commits a week, and the absence of any correction-capture loop. Fixes landed today in commits <code>5d55d6a3</code>, <code>0dc9c984</code>, <code>b893ce7c</code>.</p>
+      <p><strong>What this page is.</strong> The correction-training loop, made visible. Each time a role produces a bad output and gets corrected, <code>data/liril_corrections.jsonl</code> appends one line. Every 50+ corrections for a role, its LoRA can be fine-tuned on the RTX 5070 Ti (~45 min). The coder's status flips from <code>base</code> to <code>tuned-v1</code>; subsequent cycles use the trained adapter. The bar here shows how close each coder is to its first trainable batch.</p>
+    </div>
+
+    <!-- Pipeline flow diagram -->
+    <div class="pipeline-flow">
+      <span class="step">Researcher</span>
+      <span class="arrow">→</span>
+      <span class="step">Architect</span>
+      <span class="arrow">→</span>
+      <span class="step">Designer</span>
+      <span class="arrow">→</span>
+      <span class="step">Engineer</span>
+      <span class="arrow">→</span>
+      <span class="step">Editor</span>
+      <span class="arrow">→</span>
+      <span class="step gk">Gatekeeper</span>
+      <span class="arrow">→</span>
+      <span class="step">commit</span>
+    </div>
+
+    <!-- Coder cards -->
+    <div class="coder-grid" id="coder-grid">
+      <p style="color:var(--muted);font-style:italic;grid-column:1/-1;">Loading coder registry&hellip;</p>
+    </div>
+
+    <!-- Cross-links -->
+    <a href="liril-dev-team.html" class="cross-link">→ Live work schedule (backlog + in-progress + done today)</a>
+    <a href="docs/AUTOMATION_DIAGNOSTIC_2026-04-18.md" class="cross-link">→ Automation diagnostic</a>
+
+    <!-- Methodology -->
+    <div class="methodology">
+      <strong>Training loop</strong>
+      <ol>
+        <li><code>tools/liril_dev_team.py</code> runs a cycle; each role's output lands in <code>data/liril_dev_team_log/</code>.</li>
+        <li>Reviewer runs <code>python tools/liril_correct.py log --role engineer --transcript WS-009_*.json --bad "..." --correct "..." --annotation "..." --severity high --label negative</code> to capture a correction.</li>
+        <li>When ≥50 corrections accumulate for a role, <code>python tools/liril_build_training_set.py</code> compiles them into <code>models/loras/&lt;role&gt;/train.jsonl</code>.</li>
+        <li><code>python tools/liril_train_lora.py --role engineer</code> fine-tunes the LoRA on the RTX 5070 Ti (~45 min, ~14 GB VRAM peak).</li>
+        <li>Registry status flips; next dev-team cycle for that role loads the new adapter. Measure: does pass-rate go up?</li>
+      </ol>
+      <strong>Base model</strong>
+      <p><code>Mistral-Nemo-Instruct-2407-Q4_K_M.gguf</code> (12B params, 4-bit quantized) on both RTX 5070 Tis via llama-server 8082 + 8083. LoRA rank 16, alpha 32, dropout 0.05. Target modules: q_proj, k_proj, v_proj, o_proj. Seed 118400.</p>
+      <strong>Why LoRA, not full fine-tune</strong>
+      <p>A 12B full fine-tune needs 48 GB+ VRAM. A rank-16 LoRA on the same model needs ~14 GB. Two RTX 5070 Tis have 32 GB combined — easy headroom for LoRA but impossible for full fine-tune. LoRAs are also ~30 MB each, so we can keep multiple role-adapters on disk and swap at inference time.</p>
+    </div>
+
+  </div>
+
+  <div id="site-footer-frame"></div>
+  <script src="shell.js?v=27"></script>
+  <script src="js/ux.js"></script>
+  <script>
+  (function(){
+    'use strict';
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function statusClass(s){
+      s = String(s||'').toLowerCase();
+      if (s.indexOf('tuned') === 0) return 'tuned';
+      if (s.indexOf('watch') !== -1) return 'watch';
+      return 'base';
+    }
+    function render(data){
+      var el = document.getElementById('coder-grid');
+      var coders = data.coders || [];
+      var minReq = (data.training_framework && data.training_framework.min_examples_to_train) || 50;
+      if (!coders.length){
+        el.innerHTML = '<p style="color:var(--muted);">No coders in registry.</p>';
+        return;
+      }
+      var html = '';
+      coders.forEach(function(c){
+        var m = c.metrics || {};
+        var ex = c.training_examples || 0;
+        var pct = Math.min(100, Math.round(ex * 100 / minReq));
+        var statusTxt = c.status || 'base';
+        var passRate = (m.pass_rate_pct !== null && m.pass_rate_pct !== undefined) ? (m.pass_rate_pct + '%') : '—';
+        var cycles = m.cycles_run || 0;
+        var failureModes = (c.known_failure_modes || []).map(function(f){ return esc(f); }).join('<br>');
+
+        html += '<div class="coder r-' + esc(c.role) + '">' +
+          '<div class="coder-hdr">' +
+            '<div><div class="coder-id">' + esc(c.id) + '</div><div class="coder-role">' + esc(c.role) + '</div></div>' +
+            '<span class="status-pill ' + statusClass(statusTxt) + '">' + esc(statusTxt) + '</span>' +
+          '</div>' +
+          '<p class="resp">' + esc(c.responsibilities) + '</p>' +
+          '<div class="metric-row">' +
+            '<div class="metric"><div class="v blue">' + cycles + '</div><div class="l">cycles run</div></div>' +
+            '<div class="metric"><div class="v green">' + passRate + '</div><div class="l">pass rate</div></div>' +
+            '<div class="metric"><div class="v amber">' + ex + '</div><div class="l">corrections</div></div>' +
+          '</div>' +
+          '<div class="training-bar">' +
+            '<div class="label"><span>Training-ready</span><span>' + ex + ' / ' + minReq + '</span></div>' +
+            '<div class="track"><div class="fill" style="width:' + pct + '%"></div></div>' +
+          '</div>' +
+          (failureModes ? '<div class="failure-modes"><strong>Known failure modes</strong>' + failureModes + '</div>' : '') +
+          '</div>';
+      });
+      el.innerHTML = html;
+    }
+    fetch('data/liril_coders.json?t=' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(render)
+      .catch(function(e){
+        document.getElementById('coder-grid').innerHTML = '<p style="color:var(--crimson);grid-column:1/-1;">Could not load: ' + esc(e.message) + '</p>';
+      });
+  })();
+  </script>
+</body>
+</html>

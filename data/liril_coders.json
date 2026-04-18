@@ -1,0 +1,146 @@
+{
+  "generated_at": "2026-04-18T02:35:00+00:00",
+  "seed": 118400,
+  "source": "liril_local_ai_coder_registry",
+  "note": "Local AI coders that run on the TENET5 host — each is a specialized role inside the liril_dev_team pipeline. Every coder uses the same base model (Mistral-Nemo-Instruct-2407-Q4_K_M on RTX 5070 Ti) plus an optional role-specific LoRA adapter trained on captured corrections. When a coder's output is rejected by the gatekeeper or diff-audit, the rejection becomes a training example. Over time the coders should need fewer corrections for the same task domain.",
+  "base_model": {
+    "name": "Mistral-Nemo-Instruct-2407-Q4_K_M",
+    "path": "E:/S.L.A.T.E/tenet5/models/Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+    "context_length": 4096,
+    "parameters": "12B",
+    "served_on": ["llama-server:8082 (GPU0)", "llama-server:8083 (GPU1)"]
+  },
+  "training_framework": {
+    "name": "unsloth + peft (LoRA)",
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "epochs_default": 3,
+    "batch_size": 4,
+    "learning_rate": 2e-4,
+    "min_examples_to_train": 50,
+    "storage": "E:/S.L.A.T.E/tenet5/models/loras/"
+  },
+  "coders": [
+    {
+      "id": "coder-researcher",
+      "role": "researcher",
+      "status": "base",
+      "lora_path": null,
+      "training_examples": 0,
+      "last_trained_at": null,
+      "last_trained_commit": null,
+      "metrics": {
+        "cycles_run": 2,
+        "pass_rate_pct": 100,
+        "watch_rate_pct": 0,
+        "fail_rate_pct": 0,
+        "avg_latency_ms": null
+      },
+      "responsibilities": "Reads primary sources (Canada Gazette, Hansard, Commissioner reports, court filings via CanLII). Identifies one specific, citable fact needed for the task. Outputs SOURCE + QUOTE + GAP_FILLED triple."
+    },
+    {
+      "id": "coder-architect",
+      "role": "architect",
+      "status": "base",
+      "lora_path": null,
+      "training_examples": 0,
+      "last_trained_at": null,
+      "last_trained_commit": null,
+      "metrics": {
+        "cycles_run": 1,
+        "pass_rate_pct": 100,
+        "watch_rate_pct": 0,
+        "fail_rate_pct": 0,
+        "avg_latency_ms": null
+      },
+      "responsibilities": "Decides where in the 19-axis / IA-pillar layout a change belongs. Outputs FILE + ANCHOR + POSITION."
+    },
+    {
+      "id": "coder-designer",
+      "role": "designer",
+      "status": "base",
+      "lora_path": null,
+      "training_examples": 0,
+      "last_trained_at": null,
+      "last_trained_commit": null,
+      "metrics": {
+        "cycles_run": 0,
+        "pass_rate_pct": null,
+        "watch_rate_pct": null,
+        "fail_rate_pct": null,
+        "avg_latency_ms": null
+      },
+      "responsibilities": "Proposes UX/visual form (card / inline paragraph / list item / badge) + accessibility (ARIA/alt/contrast) + copy tone following Shneiderman, NN/g, WCAG."
+    },
+    {
+      "id": "coder-engineer",
+      "role": "engineer",
+      "status": "base",
+      "lora_path": null,
+      "training_examples": 0,
+      "last_trained_at": null,
+      "last_trained_commit": null,
+      "metrics": {
+        "cycles_run": 1,
+        "pass_rate_pct": 100,
+        "watch_rate_pct": 0,
+        "fail_rate_pct": 0,
+        "avg_latency_ms": null
+      },
+      "responsibilities": "Produces the literal fenced-code-block content to insert. No explanation, no narration — only the change itself."
+    },
+    {
+      "id": "coder-editor",
+      "role": "editor",
+      "status": "base",
+      "lora_path": null,
+      "training_examples": 0,
+      "last_trained_at": null,
+      "last_trained_commit": null,
+      "metrics": {
+        "cycles_run": 2,
+        "pass_rate_pct": 100,
+        "watch_rate_pct": 0,
+        "fail_rate_pct": 0,
+        "avg_latency_ms": null
+      },
+      "responsibilities": "Copy-checks the engineer output. CHECK_CITATIONS / CHECK_LINKS / CHECK_A11Y + OVERALL: CLEAN | NEEDS_REWORK."
+    },
+    {
+      "id": "coder-gatekeeper",
+      "role": "gatekeeper",
+      "status": "base_WATCH_LIST",
+      "lora_path": null,
+      "training_examples": 1,
+      "last_trained_at": null,
+      "last_trained_commit": null,
+      "metrics": {
+        "cycles_run": 2,
+        "pass_rate_pct": 100,
+        "watch_rate_pct": 0,
+        "fail_rate_pct": 0,
+        "avg_latency_ms": null
+      },
+      "responsibilities": "Hallucination gate. Returns VERDICT: PASS | WATCH | FAIL + REASON. PASS commits; WATCH/FAIL triggers rework.",
+      "known_failure_modes": [
+        "False-positive PASS: gatekeeper can PASS a pipeline whose engineer role produced NOTHING, because the upstream text outputs sound coherent. See cycle WS-001_1776489500: PASS with no file change. Mitigated by the liril_dev_team downgrade rule (engineer pipeline + no apply = PASS→WATCH), but the gatekeeper itself should learn to detect 'pipeline produced no concrete deliverable' as a FAIL condition."
+      ]
+    }
+  ],
+  "training_loop": {
+    "capture": "Every role's output is logged to data/liril_dev_team_log/<task>_<ts>.json at cycle time.",
+    "annotate": "Corrections land in data/liril_corrections.jsonl via tools/liril_correct.py. Each entry: role, task_id, role_input, bad_output, correction, annotation.",
+    "compile": "tools/liril_build_training_set.py collects corrections per role → models/loras/<role>/train.jsonl in OpenAI chat format.",
+    "train": "tools/liril_train_lora.py runs unsloth fine-tuning on the RTX 5070 Ti when ≥50 examples accumulated for a role. Requires GPU.",
+    "deploy": "Registry status flips from 'base' to 'tuned-v1' with lora_path. Dev-team daemon loads the LoRA adapter for that role via llama-server --lora flag."
+  },
+  "gpu_budget": {
+    "inference_vram_per_base_model_mb": 6800,
+    "lora_swap_overhead_mb": 80,
+    "training_peak_vram_mb": 14000,
+    "training_expected_minutes": 45,
+    "note": "Training pauses inference. Only schedule when the dev-team daemon is idle."
+  }
+}
