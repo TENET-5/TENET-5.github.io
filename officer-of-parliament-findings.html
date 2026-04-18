@@ -120,6 +120,23 @@
     .finding .source-link { display: inline-block; margin-top: 0.4rem; font-size: 0.82rem; color: #0369a1; text-decoration: none; font-weight: 600; word-break: break-all; }
     .finding .source-link:hover { text-decoration: underline; }
 
+    /* LIRIL audit badge */
+    .liril-verdict { display: inline-flex; align-items: center; gap: 0.45rem; margin-top: 0.9rem; padding: 0.5rem 0.8rem; border-radius: 6px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; line-height: 1.4; }
+    .liril-verdict.v-pass  { background: rgba(34,197,94,0.10); color: #15803d; border: 1px solid rgba(34,197,94,0.25); }
+    .liril-verdict.v-watch { background: rgba(234,179,8,0.10); color: #854d0e; border: 1px solid rgba(234,179,8,0.3); }
+    .liril-verdict.v-fail  { background: rgba(196,30,58,0.10); color: #9f1239; border: 1px solid rgba(196,30,58,0.3); }
+    .liril-verdict .verdict-label { font-weight: 900; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.72rem; white-space: nowrap; }
+    .liril-verdict .verdict-reason { font-family: 'Inter', system-ui, sans-serif; color: inherit; opacity: 0.9; font-size: 0.80rem; }
+
+    .liril-audit-summary { background: #fff; border: 1px solid var(--border); border-left: 5px solid #15803d; border-radius: 10px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+    .liril-audit-summary h3 { font-size: 0.80rem; color: #15803d; margin: 0 0 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; font-family: 'JetBrains Mono', monospace; }
+    .liril-audit-summary p { font-size: 0.88rem; color: #3d4355; line-height: 1.6; margin: 0 0 0.5rem; }
+    .liril-audit-summary .audit-tally { display: inline-flex; gap: 0.6rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; margin-top: 0.2rem; }
+    .liril-audit-summary .audit-tally span { padding: 2px 9px; border-radius: 4px; font-weight: 700; }
+    .liril-audit-summary .audit-tally .pass-pill  { background: rgba(34,197,94,0.12); color: #15803d; }
+    .liril-audit-summary .audit-tally .watch-pill { background: rgba(234,179,8,0.12); color: #854d0e; }
+    .liril-audit-summary .audit-tally .fail-pill  { background: rgba(196,30,58,0.12); color: #9f1239; }
+
     /* Cross-layer navigation */
     .cross-layer { margin: 2.5rem 0 1rem; padding: 1.4rem 1.6rem; background: #fff; border: 1px solid var(--border); border-radius: 10px; }
     .cross-layer h3 { font-size: 0.80rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--crimson); margin: 0 0 0.8rem; font-weight: 700; }
@@ -190,6 +207,13 @@
       <button class="filter-btn" data-filter="IECR">Arbour IECR</button>
       <button class="filter-btn" data-filter="POEC">Rouleau POEC</button>
       <button class="filter-btn" data-filter="FIC">Hogue FIC</button>
+    </div>
+
+    <!-- LIRIL audit summary -->
+    <div class="liril-audit-summary" id="liril-audit-panel" style="display:none;">
+      <h3>LIRIL hallucination gate — audit results</h3>
+      <p id="liril-audit-text"></p>
+      <div class="audit-tally" id="liril-audit-tally"></div>
     </div>
 
     <!-- Findings list -->
@@ -314,6 +338,18 @@
           ? '<p style="font-size:0.78rem;color:var(--muted);font-style:italic;margin-top:0.4rem;">Source note: ' + esc(f.source_note) + '</p>'
           : '';
 
+        // LIRIL audit badge — shows per-finding the verdict from the on-site inference gate
+        var lirilBadge = '';
+        if (f.liril_audit && f.liril_audit.verdict) {
+          var v = String(f.liril_audit.verdict).toLowerCase();
+          var vClass = (v === 'pass') ? 'v-pass' : (v === 'watch' ? 'v-watch' : (v === 'fail' ? 'v-fail' : 'v-watch'));
+          lirilBadge =
+            '<div class="liril-verdict ' + vClass + '" title="LIRIL on-GPU consistency gate">' +
+              '<span class="verdict-label">LIRIL: ' + esc(f.liril_audit.verdict) + '</span>' +
+              '<span class="verdict-reason">' + esc(f.liril_audit.reason) + '</span>' +
+            '</div>';
+        }
+
         html += '<div class="finding ' + typeClass + '" id="' + esc(f.id) + '">' +
           '<div class="finding-header">' +
             '<span class="finding-date">' + esc(f.date_published) + '</span>' +
@@ -332,9 +368,25 @@
           '</div>' +
           source +
           sourceNote +
+          lirilBadge +
         '</div>';
       });
       el.innerHTML = html;
+    }
+
+    function renderLirilAuditPanel(summary){
+      if (!summary) return;
+      var panel = document.getElementById('liril-audit-panel');
+      var textEl = document.getElementById('liril-audit-text');
+      var tallyEl = document.getElementById('liril-audit-tally');
+      if (!panel || !textEl || !tallyEl) return;
+      var whenTxt = summary.audited_at_utc ? new Date(summary.audited_at_utc * 1000).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'recently';
+      textEl.innerHTML = 'Each finding on this page was passed through an on-GPU consistency gate — <em>' + esc(summary.transport || 'mercury.infer -> llama-server') + '</em> — on ' + esc(whenTxt) + '. The gate checks for internal inconsistencies (date/name/section/URL) that LIRIL recognizes from its training. It does <strong>not</strong> verify against the live internet. <strong>Zero FAIL verdicts</strong> means no specific fact was flagged as wrong; WATCH verdicts flag substantive tensions that are worth noting, not data errors. See individual badges on each finding below.';
+      tallyEl.innerHTML =
+        '<span class="pass-pill">PASS ' + (summary.pass || 0) + '</span>' +
+        '<span class="watch-pill">WATCH ' + (summary.watch || 0) + '</span>' +
+        '<span class="fail-pill">FAIL ' + (summary.fail || 0) + '</span>';
+      panel.style.display = '';
     }
 
     fetch('data/officer_of_parliament_findings.json')
@@ -344,6 +396,7 @@
         glossary = data.officer_glossary || {};
         renderGlossary();
         renderStats();
+        renderLirilAuditPanel(data.liril_audit_summary);
         renderFindings();
       })
       .catch(function(e){
