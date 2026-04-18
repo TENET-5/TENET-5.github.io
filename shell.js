@@ -143,11 +143,11 @@
         loadScript(BASE + 'js/breadcrumbs.js?v=1'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
       ]).then(function() {
-        return loadScript(BASE + 'js/presentation.js?v=12');
+        return loadScript(BASE + 'js/presentation.js?v=13');
       }).then(function() {
         return loadScript(BASE + 'js/perception.js?v=2');
       }).then(function() {
-        return loadScript(BASE + 'js/liril-walkthrough.js?v=13');
+        return loadScript(BASE + 'js/liril-walkthrough.js?v=14');
       // walkthrough-enhancements.js was a purple duplicate bar at bottom:74px
       // that rendered alongside the presentation.js indicator at bottom:16px,
       // producing two visible walkthrough UIs. The file is now a no-op shim.
@@ -178,9 +178,9 @@
         .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
-        .then(function() { return loadScript(BASE + 'js/presentation.js?v=12'); })
+        .then(function() { return loadScript(BASE + 'js/presentation.js?v=13'); })
         .then(function() { return loadScript(BASE + 'js/perception.js?v=2'); })
-        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=13'); })
+        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=14'); })
         // walkthrough-enhancements.js neutralized — see comment above
         .then(function() { return loadScript(BASE + 'js/breadcrumbs.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
