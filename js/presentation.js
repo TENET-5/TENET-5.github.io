@@ -2329,20 +2329,30 @@
 
     updateNarrationButton();
 
-    // Auto-start Narrate All if arriving from cross-page autopilot
+    // Auto-start Narrate All if arriving from cross-page autopilot.
+    // DEFER to liril-walkthrough.js when it's loaded (bridge pattern) — that
+    // script has its own autopilot trigger at line ~302 which calls
+    // startBridge() which calls __TENET5_LIRIL_NARRATE_ALL() via polling.
+    // Running BOTH triggers produced double-narration (two voices at once,
+    // presentation.js at 2000ms + liril-walkthrough at 2500ms).
     try {
       var autopilot = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
       if (autopilot && autopilot.autostart) {
         var age = Date.now() - (autopilot.startedAt || 0);
-        if (age < 30 * 60 * 1000) {
+        if (age >= 30 * 60 * 1000) {
+          sessionStorage.removeItem('liril_autopilot');
+        } else if (!window.__LIRIL_WALKTHROUGH_LOADED &&
+                   !document.getElementById('liril-start-walkthrough')) {
+          // liril-walkthrough.js isn't loaded — we're the only engine. Fire.
           setTimeout(function() {
             if (window.__TENET5_LIRIL_NARRATE_ALL) {
-              console.log('[LIRIL] Autopilot: auto-starting Narrate All');
+              console.log('[LIRIL] Autopilot: auto-starting Narrate All (no walkthrough bridge)');
               window.__TENET5_LIRIL_NARRATE_ALL();
             }
           }, 2000);
         } else {
-          sessionStorage.removeItem('liril_autopilot');
+          // liril-walkthrough.js will handle autopilot via its own startBridge trigger.
+          console.log('[LIRIL] Autopilot: deferring to walkthrough bridge (double-voice fix)');
         }
       }
     } catch(e) {}

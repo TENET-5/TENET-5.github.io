@@ -142,7 +142,7 @@
         loadScript(BASE + 'js/figures.js?v=1'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
       ]).then(function() {
-        return loadScript(BASE + 'js/presentation.js?v=9');
+        return loadScript(BASE + 'js/presentation.js?v=10');
       }).then(function() {
         return loadScript(BASE + 'js/perception.js?v=2');
       }).then(function() {
@@ -174,7 +174,7 @@
         .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
-        .then(function() { return loadScript(BASE + 'js/presentation.js?v=9'); })
+        .then(function() { return loadScript(BASE + 'js/presentation.js?v=10'); })
         .then(function() { return loadScript(BASE + 'js/perception.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=9'); })
         .then(function() { return loadScript(BASE + 'js/walkthrough-enhancements.js?v=7'); })
