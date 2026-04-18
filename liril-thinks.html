@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIRIL is thinking — continuous perception stream | TENET5</title>
+  <meta name="description" content="LIRIL's live thought stream. Three always-running watchers (sees filesystem + git + transcripts; hears RSS + Parliament; thinks about everything) publish a continuous stream of observations, signals, alerts, and task proposals. This page renders the latest 200 in real time.">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-thinks.html">
+  <meta property="og:title" content="LIRIL is thinking — continuous perception stream | TENET5">
+  <meta property="og:site_name" content="TENET5">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+  <style>
+    :root { --ink: #1a1f36; --muted: #6b7280; --border: #e5e5e3; --crimson: #c41e3a; --navy: #0a1a2f; --green: #15803d; --amber: #b45309; --purple: #7c3aed; --blue: #0369a1; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); background: #fafaf9; }
+    .hero { padding: 3rem 2rem 1.8rem; background: linear-gradient(135deg, #0a1a2f 0%, #7c3aed 100%); color: #fff; text-align: center; }
+    .hero h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 900; margin: 0 0 0.5rem; letter-spacing: -0.5px; }
+    .hero h1 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 8px #39ff14; vertical-align: middle; margin-right: 8px; animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+    .hero .subtitle { color: #e9d5ff; max-width: 860px; margin: 0 auto; line-height: 1.6; font-size: 0.98rem; }
+    .content { max-width: 1080px; margin: 0 auto; padding: 1.8rem 1.2rem 3rem; }
+
+    .intro { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--purple); border-radius: 8px; padding: 1.1rem 1.3rem; margin-bottom: 1.4rem; font-size: 0.92rem; line-height: 1.6; color: #3d4355; }
+    .intro strong { color: var(--ink); }
+    .intro code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 0.82rem; }
+
+    .faculty-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.7rem; margin-bottom: 1.3rem; }
+    .faculty { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; border-left: 4px solid var(--muted); }
+    .faculty.sees { border-left-color: var(--blue); }
+    .faculty.hears { border-left-color: var(--green); }
+    .faculty.thinks { border-left-color: var(--purple); }
+    .faculty h4 { font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 0.3rem; font-weight: 700; }
+    .faculty.sees h4 { color: var(--blue); }
+    .faculty.hears h4 { color: var(--green); }
+    .faculty.thinks h4 { color: var(--purple); }
+    .faculty p { margin: 0; font-size: 0.80rem; color: #3d4355; line-height: 1.5; }
+
+    .stream-hdr { display: flex; justify-content: space-between; align-items: baseline; margin: 1.8rem 0 0.8rem; }
+    .stream-hdr h2 { font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--ink); }
+    .stream-hdr .live-info { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+
+    .filter-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+    .filter-btn { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: #fff; color: var(--muted); cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; transition: all 0.15s; }
+    .filter-btn:hover { border-color: #999; color: var(--ink); }
+    .filter-btn.active { border-color: var(--purple); color: #fff; background: var(--purple); }
+
+    .thought { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--muted); border-radius: 6px; padding: 0.7rem 1rem; margin-bottom: 0.45rem; font-size: 0.87rem; display: grid; grid-template-columns: 90px 110px 1fr; gap: 0.7rem; align-items: baseline; }
+    .thought.kind-observation       { border-left-color: var(--muted); }
+    .thought.kind-good              { border-left-color: var(--green); background: #f0fdf4; }
+    .thought.kind-signal            { border-left-color: var(--blue); background: #eff6ff; }
+    .thought.kind-watch             { border-left-color: var(--amber); background: #fffbeb; }
+    .thought.kind-alert             { border-left-color: var(--crimson); background: #fef2f2; }
+    .thought.kind-correction_needed { border-left-color: var(--crimson); background: #fef2f2; }
+
+    .thought .t-when  { font-family: 'JetBrains Mono', monospace; font-size: 0.70rem; color: var(--muted); font-weight: 600; letter-spacing: 0.3px; white-space: nowrap; }
+    .thought .t-source { font-family: 'JetBrains Mono', monospace; font-size: 0.70rem; padding: 1px 6px; border-radius: 3px; background: #f3f4f6; color: var(--muted); text-align: center; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700; align-self: start; margin-top: 1px; }
+    .thought .t-body { color: #3d4355; line-height: 1.55; word-break: break-word; }
+    .thought .t-body .kw { background: rgba(124,58,237,0.12); color: var(--purple); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem; margin-right: 3px; display: inline-block; margin-top: 3px; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    .thought .t-body a { color: var(--blue); text-decoration: none; word-break: break-all; }
+    .thought .t-body a:hover { text-decoration: underline; }
+
+    @media (max-width: 680px) {
+      .thought { grid-template-columns: 1fr; gap: 0.2rem; }
+      .thought .t-source { justify-self: start; }
+    }
+
+    .methodology { margin-top: 2rem; padding: 1rem 1.2rem; background: #f3f4f6; border-radius: 8px; font-size: 0.84rem; color: #4b5563; line-height: 1.6; }
+    .methodology code { background: #fff; padding: 1px 4px; border-radius: 3px; font-size: 0.80rem; }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <div id="site-header-frame"></div>
+
+  <div id="breadcrumb-mount" data-breadcrumb='["Home","State of investigation","LIRIL dev team","Thoughts"]'></div>
+
+  <section class="hero" data-narrate="LIRIL is thinking. Three continuous watchers run without gap. Sees watches the filesystem, the git log, and the dev team transcript directory. Hears polls RSS feeds from Canadian news and the House of Commons order paper. Thinks subscribes to both streams, classifies every event, writes a running thought log, and proposes backlog tasks when an external signal matches the nineteen accountability axis keywords. The dot pulsing at the top of this page is live. What you see below is whatever LIRIL is observing right now.">
+    <h1><span class="dot"></span>LIRIL is thinking</h1>
+    <p class="subtitle">
+      Continuous perception: <strong>sees</strong> the filesystem, git log, and
+      dev-team transcripts; <strong>hears</strong> RSS + Parliament;
+      <strong>thinks</strong> classifies every event and proposes backlog
+      tasks when signals match the 19-axis keyword set.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="intro">
+      <p><strong>Three always-running watchers, CPU-only.</strong> They run during gaming. They run when the dev-team daemon is idle. They run when mercury.infer is down. They only stop if you explicitly kill them. Events stream to NATS, accumulate in <code>data/liril_thoughts.jsonl</code>, and render here with a 10-second auto-refresh.</p>
+      <p><strong>What 'thinking' means in this version.</strong> CPU-heuristic classification: keyword matching against the 19-axis vocabulary, git subject-line pattern check, schema-validation of every transcript. <em>Not</em> full-neural reasoning yet — that's what happens when a signal escalates to a backlog task and the dev-team daemon picks it up. The heuristics filter the firehose; the neural model does the hard thinking on the survivors.</p>
+    </div>
+
+    <!-- Faculty cards -->
+    <div class="faculty-grid">
+      <div class="faculty sees">
+        <h4>sees</h4>
+        <p>Filesystem (*.json, *.html, *.js, *.md), git HEAD, dev-team transcripts. Publishes <code>tenet5.liril.see.{file_change,new_commit,transcript}</code>.</p>
+      </div>
+      <div class="faculty hears">
+        <h4>hears</h4>
+        <p>CBC Politics RSS, House of Commons order paper. Publishes <code>tenet5.liril.hear.{news,parl,court}</code>. Polls every 30 min; dedup by URL hash.</p>
+      </div>
+      <div class="faculty thinks">
+        <h4>thinks</h4>
+        <p>Subscribes to both streams. Classifies <em>observation</em> / <em>good</em> / <em>signal</em> / <em>watch</em> / <em>alert</em> / <em>correction_needed</em>. Escalates to a task proposal when 3+ axis keywords match.</p>
+      </div>
+    </div>
+
+    <!-- Stream -->
+    <div class="stream-hdr">
+      <h2>Live thought stream</h2>
+      <div class="live-info" id="live-info">— thoughts loaded</div>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="alert">Alerts</button>
+      <button class="filter-btn" data-filter="correction_needed">Correction needed</button>
+      <button class="filter-btn" data-filter="signal">Signals</button>
+      <button class="filter-btn" data-filter="watch">Watch</button>
+      <button class="filter-btn" data-filter="good">Good</button>
+      <button class="filter-btn" data-filter="observation">Observations</button>
+    </div>
+
+    <div id="thoughts-list">
+      <p style="color:var(--muted);font-style:italic;padding:1rem;">Loading&hellip;</p>
+    </div>
+
+    <div class="methodology">
+      <strong>Data:</strong> <code>data/liril_thoughts.jsonl</code> (tail-capped at 10k entries / 5 MB).<br>
+      <strong>Proposals:</strong> <code>data/liril_task_proposals.jsonl</code> — thoughts that escalated to backlog-task candidates; the PM step reviews and promotes to the real backlog.<br>
+      <strong>Subjects:</strong> six published by <code>liril_sees</code> and <code>liril_hears</code>; <code>liril_thinks</code> subscribes to all six and republishes thought + proposal events.<br>
+      <strong>Daemons:</strong> started by <code>Boot_LIRIL_AUTONOMOUS.ps1</code>; survive NATS restarts via on-disk <code>data/liril_perception_queue.jsonl</code> fallback.
+    </div>
+
+  </div>
+
+  <div id="site-footer-frame"></div>
+  <script src="shell.js?v=27"></script>
+  <script src="js/ux.js"></script>
+  <script>
+  (function(){
+    'use strict';
+    var currentFilter = 'all';
+    var thoughts = [];
+
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function formatWhen(ts){
+      if (!ts) return '—';
+      var d = new Date(ts * 1000);
+      var now = Date.now();
+      var age = now - d.getTime();
+      if (age < 60000) return Math.max(1, Math.floor(age/1000)) + 's ago';
+      if (age < 3600000) return Math.floor(age/60000) + 'm ago';
+      if (age < 86400000) return Math.floor(age/3600000) + 'h ago';
+      return d.toISOString().slice(5,16).replace('T',' ');
+    }
+
+    function parseJsonl(text){
+      var out = [];
+      (text||'').split(/\r?\n/).forEach(function(L){
+        var s = L.trim();
+        if (!s) return;
+        try { out.push(JSON.parse(s)); } catch(e) {}
+      });
+      return out;
+    }
+
+    function thoughtCard(t){
+      var kind = String(t.kind || 'observation').toLowerCase();
+      var source = String(t.source || '').split('.').pop() || '—';
+      var body = esc(t.summary || '(no summary)');
+      if (Array.isArray(t.keywords) && t.keywords.length) {
+        body += '<br>' + t.keywords.map(function(k){ return '<span class="kw">' + esc(k) + '</span>'; }).join('');
+      }
+      if (t.link) body += '<br><a href="' + esc(t.link) + '" target="_blank" rel="noopener">' + esc(t.link) + '</a>';
+      if (t.path && !t.link) body += '<br><code style="font-size:0.78rem;">' + esc(t.path) + '</code>';
+      return '<div class="thought kind-' + kind + '">' +
+        '<div class="t-when">' + formatWhen(t.ts) + '</div>' +
+        '<div class="t-source">' + esc(source) + '</div>' +
+        '<div class="t-body">' + body + '</div>' +
+        '</div>';
+    }
+
+    function render(){
+      var el = document.getElementById('thoughts-list');
+      var list = currentFilter === 'all'
+        ? thoughts
+        : thoughts.filter(function(t){ return String(t.kind||'').toLowerCase() === currentFilter; });
+      // newest first, cap at 200
+      list = list.slice().sort(function(a,b){ return (b.ts||0) - (a.ts||0); }).slice(0, 200);
+      if (!list.length){
+        el.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:1rem;">No thoughts match this filter.</p>';
+        return;
+      }
+      el.innerHTML = list.map(thoughtCard).join('');
+      var info = document.getElementById('live-info');
+      if (info) info.textContent = 'showing ' + list.length + ' of ' + thoughts.length;
+    }
+
+    function refresh(){
+      fetch('data/liril_thoughts.jsonl?t=' + Date.now())
+        .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(function(text){
+          thoughts = parseJsonl(text);
+          render();
+        })
+        .catch(function(e){
+          document.getElementById('thoughts-list').innerHTML =
+            '<p style="color:var(--crimson);padding:1rem;">Could not load thoughts: ' + esc(e.message) + '</p>';
+        });
+    }
+
+    refresh();
+    setInterval(refresh, 10000);
+
+    document.querySelector('.filter-row').addEventListener('click', function(e){
+      var btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentFilter = btn.getAttribute('data-filter');
+      render();
+    });
+  })();
+  </script>
+</body>
+</html>
