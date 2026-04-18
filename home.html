@@ -437,6 +437,7 @@
         <div style="font-size:0.82rem;color:#8e877d;margin-bottom:1.3rem;max-width:760px;margin-left:auto;margin-right:auto;">Confirmed: Health Canada 6th Annual Report (Dec 2024). Estimated today: ~97,764 at 45.2 per day. <strong style="color:#d2cbc0;">The government stopped publishing.</strong></div>
         <div style="font-size:clamp(0.95rem,2vw,1.3rem);color:#f3d9d9;font-weight:700;margin-bottom:2rem;">PM holds <span style="color:#facc15;">$6.8M</span> in Brookfield options • Government saves <span style="color:#facc15;">$20,685</span> per death</div>
         <button class="btn-cinematic btn-primary" id="btn-start" style="border-radius:30px;font-size:1.1rem;padding:1rem 3rem;">Begin Investigation &rarr;</button>
+        <button class="btn-cinematic" id="btn-liril-fullsite" style="border-radius:30px;font-size:1rem;padding:0.85rem 2.4rem;margin-left:0.6rem;background:linear-gradient(135deg,#7c3aed,#a855f7);border:1px solid rgba(168,85,247,0.5);color:#fff;font-weight:700;" title="Start narrated walkthrough across all pages">&#9654; LIRIL Full-Site Walkthrough</button>
         <div class="hero-meta-ribbon">
           <span class="hero-meta-pill">TENET5 edition desk</span>
           <span class="hero-meta-pill">LIRIL narration</span>
@@ -1236,7 +1237,19 @@
       },
       nextScene() {
         if (this.currentLogical >= this.sceneOrder.length - 1) {
-          this.goToScene(1);
+          // End of home journey — hand off to PAGE_SEQUENCE via cross-page autopilot
+          try {
+            sessionStorage.setItem('liril_autopilot', JSON.stringify({autostart: true, startedAt: Date.now()}));
+          } catch(e) {}
+          this.stopAllAudio();
+          var nextPage = 'complete-thesis.html';
+          try {
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({type: 'pres-navigate', page: nextPage}, '*');
+              return;
+            }
+          } catch(e) {}
+          window.location.href = nextPage;
           return;
         }
         this.goToScene(this.currentLogical + 1);
@@ -1298,6 +1311,9 @@
 
     // ── LIRIL voice priming — handled by liril-voice.js (no duplicate logic) ──
 
+    // Expose engine for cross-frame test harness (LIRIL walkthrough test).
+    try { window.engine = engine; } catch(e) {}
+
     document.addEventListener("DOMContentLoaded", () => {
       engine.init();
       
@@ -1305,6 +1321,29 @@
       if (lirilBtn) {
         lirilBtn.addEventListener('click', () => engine.narrate());
       }
+
+      // Full-site LIRIL walkthrough — sets autopilot flag and starts home journey;
+      // when home reaches end-of-sequence, nextScene() hands off to PAGE_SEQUENCE.
+      const fullSiteBtn = document.getElementById('btn-liril-fullsite');
+      if (fullSiteBtn) {
+        fullSiteBtn.addEventListener('click', () => {
+          try {
+            sessionStorage.setItem('liril_autopilot', JSON.stringify({autostart: true, startedAt: Date.now()}));
+          } catch(e) {}
+          fullSiteBtn.textContent = 'Walkthrough Running...';
+          fullSiteBtn.style.opacity = '0.75';
+          fullSiteBtn.disabled = true;
+          if (engine.currentLogical === 0) engine.startJourney();
+        });
+      }
+
+      // Auto-resume home journey if arriving via cross-page autopilot loop-back
+      try {
+        var ap = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
+        if (ap && ap.autostart && (Date.now() - (ap.startedAt || 0)) < 30 * 60 * 1000) {
+          setTimeout(() => { if (engine.currentLogical === 0) engine.startJourney(); }, 2000);
+        }
+      } catch(e) {}
 
       const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!reduceMotion) {
@@ -1380,11 +1419,11 @@
 
 <!-- liril-voice.js loaded above inline engine -->
 <div id="site-footer-frame"></div>
-<script src="shell.js?v=23"></script>
+<script src="shell.js?v=26"></script>
 <script src="js/presenter.js"></script>
 <script src="js/impact.js"></script>
 <script src="js/auto-present.js?v=2"></script>
-<script src="js/liril-walkthrough.js?v=7"></script>
+<script src="js/liril-walkthrough.js?v=9"></script>
 <script src="js/integrity.js"></script>
 <script src="js/i18n.js?v=4"></script>
 <script src="js/metaverse.js?v=1"></script>

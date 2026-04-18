@@ -154,6 +154,8 @@
     'follow-the-money.html',
     'panama-papers.html',
     'conflict-of-interest-registry.html',
+    'kinship-accountability.html',
+    'business-accountability.html',
     'ethics-failures.html',
     'regulatory-capture.html',
 

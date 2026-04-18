@@ -424,11 +424,32 @@
       }
       const chips = [];
       if (snap.self_sha256) chips.push('<span class="merkle-chip" title="snapshot self-hash">snap: ' + snap.self_sha256.slice(0, 16) + '…</span>');
-      // Add any other known receipts we can display from the static record
-      document.getElementById('merkle-list').innerHTML = chips.join(' ') +
-        ' <span class="merkle-chip" title="emails">eml: 2fca0e45bc0192e3…</span>' +
-        ' <span class="merkle-chip" title="analysis">analysis: 9a42cdab8722dbb9…</span>' +
-        ' <span class="merkle-chip" title="verification">verified: 04fe2b17996e6943…</span>';
+      // Static legacy receipts (kept for continuity)
+      chips.push('<span class="merkle-chip" title="emails">eml: 2fca0e45bc0192e3…</span>');
+      chips.push('<span class="merkle-chip" title="analysis">analysis: 9a42cdab8722dbb9…</span>');
+      chips.push('<span class="merkle-chip" title="verification">verified: 04fe2b17996e6943…</span>');
+      const merkleEl = document.getElementById('merkle-list');
+      merkleEl.innerHTML = chips.join(' ') + ' <em style="color:#7a7a8a;">· loading live attestations…</em>';
+      // Live attestations: meta-Grover portfolio + LIRIL R5 16th-axis
+      Promise.all([
+        fetch('data/meta_grover_merkle.json', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('data/liril_r5_merkle.json',    {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
+      ]).then(function(arr){
+        var meta = arr[0], r5 = arr[1];
+        var live = [];
+        if (meta && meta.merkle_root) {
+          live.push('<span class="merkle-chip" title="meta-Grover portfolio · ' + meta.merkle_root + ' · leaves=' + meta.leaf_count + ' · phase=' + meta.phase + '">meta-grover: ' + meta.merkle_root.slice(0,16) + '…</span>');
+        }
+        if (r5 && r5.merkle_root) {
+          var closes = (r5.closes_backlog || []).join(',') || 'none';
+          live.push('<span class="merkle-chip" title="LIRIL R5 · new_axis=' + (r5.new_axis||'?') + ' · closes=' + closes + ' · leaves=' + r5.leaf_count + ' · ' + r5.merkle_root + '">liril-r5 (' + (r5.new_axis||'r5') + '): ' + r5.merkle_root.slice(0,16) + '…</span>');
+        }
+        if (live.length) {
+          merkleEl.innerHTML = chips.join(' ') + ' ' + live.join(' ');
+        } else {
+          merkleEl.innerHTML = chips.join(' ');
+        }
+      });
       document.getElementById('snap-footer').innerHTML =
         'Snapshot exported ' + escape(snap.exported_utc || '—') +
         ' · source ' + escape(snap.nats_url || '—') +

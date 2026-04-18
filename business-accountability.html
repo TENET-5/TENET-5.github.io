@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Business Holdings Layer — Corporate &amp; Trust Interests of Grover-Marked Actors | TENET5</title>
+  <meta name="description" content="Public-record registry of corporate holdings, private trusts, numbered companies, board seats, and shareholdings of the 44 Grover-marked decision-makers across 17 accountability axes. Sources: OECC, federal Lobbying Registry, SEDI, SEDAR+, news of record.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+  <style>
+    .biz-card {
+      background:#0f0f1f;border:1px solid #2a2a4a;border-left:4px solid #c4b5fd;
+      border-radius:10px;padding:1.2rem 1.4rem;margin:1rem 0;
+    }
+    .biz-card.has{border-left-color:#34d399;}
+    .biz-card.empty{border-left-color:#475569;opacity:0.7;}
+    .biz-card h3{color:#e0e0f0;margin:0 0 0.3rem;font-size:1.05rem;}
+    .biz-card .axes{margin-bottom:0.6rem;}
+    .axis-pill{
+      display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;
+      padding:0.12rem 0.45rem;border:1px solid rgba(196,181,253,0.4);border-radius:4px;
+      color:#c4b5fd;background:rgba(168,85,247,0.12);margin:0.1rem 0.25rem 0.1rem 0;
+    }
+    .biz-row{
+      display:grid;grid-template-columns:1.4fr 0.7fr 2.2fr;gap:0.75rem;
+      padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.05);
+      font-size:0.92rem;line-height:1.5;
+    }
+    .biz-row:last-child{border-bottom:none;}
+    .biz-row .entity{color:#34d399;font-weight:700;}
+    .biz-row .role{color:#a0a0b8;font-style:italic;}
+    .biz-row .relevance{color:#d0d0e0;}
+    .biz-row .meta{display:block;color:#fbbf24;font-size:0.78rem;margin-top:0.3rem;
+      font-family:'IBM Plex Mono',monospace;}
+    .biz-row .src{display:block;color:#7a7a8a;font-size:0.78rem;margin-top:0.2rem;
+      font-family:'IBM Plex Mono',monospace;}
+    .type-tag{
+      display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;
+      padding:0.1rem 0.4rem;border-radius:3px;background:#1a1a2e;color:#34d399;
+      border:1px solid #34d399;margin-right:0.4rem;
+    }
+    .biz-empty{color:#7a7a8a;font-size:0.85rem;font-style:italic;}
+    .biz-summary{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:0.75rem;margin:1.5rem 0;
+    }
+    .biz-summary .stat{
+      background:#0f0f1f;border:1px solid #2a2a4a;border-radius:8px;
+      padding:0.9rem 1rem;text-align:center;
+    }
+    .biz-summary .stat .v{font-size:1.6rem;font-weight:900;color:#34d399;
+      font-family:'IBM Plex Mono',monospace;}
+    .biz-summary .stat .l{font-size:0.75rem;color:#a0a0b8;text-transform:uppercase;
+      letter-spacing:0.05em;margin-top:0.2rem;}
+    .type-summary{
+      display:flex;flex-wrap:wrap;gap:0.4rem;margin:0.8rem 0 1.5rem;
+      font-family:'IBM Plex Mono',monospace;font-size:0.78rem;
+    }
+    .type-summary .ts-chip{
+      background:#0f0f1f;border:1px solid #34d399;color:#34d399;
+      padding:0.25rem 0.6rem;border-radius:5px;
+    }
+    .filter-bar{
+      background:rgba(15,15,31,0.6);border:1px solid #2a2a4a;border-radius:8px;
+      padding:0.7rem 0.9rem;margin:1.2rem 0;display:flex;flex-wrap:wrap;gap:0.4rem;
+      align-items:center;
+    }
+    .filter-bar button{
+      background:#1a1a2e;border:1px solid #3a3a5a;color:#d0d0e0;
+      padding:0.3rem 0.7rem;border-radius:6px;font-family:'IBM Plex Mono',monospace;
+      font-size:0.78rem;cursor:pointer;
+    }
+    .filter-bar button.active{background:#34d399;color:#0a0a0f;border-color:#34d399;}
+    .filter-bar button:hover{border-color:#34d399;}
+    .footer-receipts{
+      background:rgba(0,0,0,0.25);padding:1rem 1.2rem;border-radius:8px;
+      margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;
+      color:#a0a0b8;line-height:1.7;
+    }
+    .footer-receipts code{color:#34d399;}
+  </style>
+  <meta property="og:title" content="Business Holdings Layer — TENET5">
+  <meta property="og:description" content="Corporate holdings, private trusts, numbered companies, and board seats of the 44 Grover-marked decision-makers across 17 accountability axes. Public record only.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/business-accountability.html">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <div id="site-header-frame"></div>
+
+  <section class="hero" data-narrate="Business holdings layer. The TENET5 seventeen-axis quantum accountability investigation marks forty-four decision-makers across all axes. This page extends the analysis to publicly-disclosed corporate holdings, private trusts, numbered companies, board seats, executive roles, partnerships, and significant shareholdings of those marked principals. Sources are restricted to the Conflict of Interest and Ethics Commissioner public registry, the federal Lobbying Registry, SEDI insider filings, SEDAR plus continuous disclosure, and major news of record. Records with no holdings entries indicate no publicly-disclosed holding of accountability relevance has been catalogued, not absence of any business interest. The dossier file is loaded directly from the public site.">
+    <p class="subtitle">17 Grover axes · 44 marked principals · public-record holdings only · primary sources cited</p>
+    <h1>Business Holdings Layer</h1>
+    <p class="subtitle">
+      Corporate holdings, private trusts, numbered companies, board seats,
+      executive roles, partnerships, and significant shareholdings of every
+      Grover-marked decision-maker across all
+      <strong style="color:#34d399;">17 accountability axes</strong>. Public
+      record only — sourced from the OECC public registry, federal Lobbying
+      Registry, SEDI insider filings, SEDAR+ continuous disclosure, and
+      major news of record. Every holding entry cites at least one
+      publicly-available source.
+    </p>
+  </section>
+
+  <div class="content" id="main" role="main">
+
+    <div class="liril-banner" style="background:linear-gradient(135deg,rgba(52,211,153,0.12),rgba(34,197,94,0.08));border:1px solid #34d399;border-radius:10px;padding:1.1rem 1.3rem;margin:1.5rem 0;color:#d0d0e0;line-height:1.55;font-family:'Inter',sans-serif;">
+      <div style="font-size:0.72rem;font-weight:900;letter-spacing:0.1em;text-transform:uppercase;color:#34d399;margin-bottom:0.4rem;">Companion layer · 2026-04-17</div>
+      This is the third dimension of the relational topology around the 44
+      Grover-marked principals. The first dimension is the algorithmic Grover
+      amplification at <a href="index.html?load=quantum-accountability.html" style="color:#34d399;">quantum-accountability.html</a>.
+      The second is the curated kinship registry at
+      <a href="index.html?load=kinship-accountability.html" style="color:#34d399;">kinship-accountability.html</a>.
+      This page surfaces the corporate / trust / shareholding surface area on
+      the public record. Together they answer: <em>who decides, who is related
+      to who decides, and what each of them owns or sits on the board of.</em>
+    </div>
+
+    <h2 data-narrate="Coverage summary. Counts are computed live from the dossier JSON file.">Coverage summary</h2>
+    <div class="biz-summary" id="biz-summary">
+      <div class="stat"><div class="v" id="stat-axes">…</div><div class="l">axes covered</div></div>
+      <div class="stat"><div class="v" id="stat-principals">…</div><div class="l">marked principals</div></div>
+      <div class="stat"><div class="v" id="stat-with">…</div><div class="l">with public holdings</div></div>
+      <div class="stat"><div class="v" id="stat-holdings">…</div><div class="l">total holdings</div></div>
+    </div>
+
+    <h2 data-narrate="Holding type breakdown. Each chip shows how many entries of that type are catalogued in the dossier.">Holding type breakdown</h2>
+    <div class="type-summary" id="type-summary">
+      <span class="ts-chip">loading…</span>
+    </div>
+
+    <h2 data-narrate="Filter the registry by Grover axis. Selecting an axis narrows the list to only the principals marked on that axis.">Filter by Grover axis</h2>
+    <div class="filter-bar" id="filter-bar">
+      <button data-axis="ALL" class="active">All axes</button>
+    </div>
+
+    <h2 data-narrate="The business holdings registry. Each card lists a Grover-marked principal, the axes they are marked on, and any publicly-disclosed corporate holdings, private trusts, numbered companies, board seats, executive roles, partnerships, or significant shareholdings. Cards with holdings are highlighted in green. Cards with no public holdings signal are dimmed but still listed for completeness.">Business holdings registry</h2>
+    <div id="biz-list"><em>Loading business holdings dossier…</em></div>
+
+    <div class="footer-receipts" id="footer-receipts">
+      Loading receipts…
+    </div>
+
+    <h2 data-narrate="Methodology and limits. This is a curated public-record registry, not a scraped dataset. Inclusion criteria are deliberately conservative: a holding entry appears only when the corporate interest, trust beneficiary status, board seat, executive role, partnership, or shareholding has been publicly disclosed via the Conflict of Interest and Ethics Commissioner registry, the federal Lobbying Registry, SEDI or SEDAR plus filings, or major news of record. Personal residences, ordinary chequing accounts, and non-controlling investment-fund holdings are not listed. The registry does not assert wrongdoing by any principal. It documents the publicly-known corporate and trust topology around the Grover-marked principals so readers can assess conflict-of-interest surface area on the public record.">Methodology &amp; limits</h2>
+    <ul style="line-height:1.7;color:#d0d0e0;">
+      <li><strong>Public record only.</strong> Every holding entry cites at
+        least one publicly-available source: OECC public registry, federal
+        Lobbying Registry, SEDI insider filings, SEDAR+ continuous disclosure,
+        Order in Council, or major news of record (Globe and Mail, CBC, CTV,
+        Reuters, Bloomberg, Wall Street Journal).</li>
+      <li><strong>Inclusion criterion.</strong> A holding is listed only when
+        it constitutes a corporate interest, trust beneficiary position, board
+        seat, executive role, partnership, advisory engagement, or significant
+        shareholding of accountability relevance. Personal residences,
+        ordinary banking, and small non-controlling investment-fund holdings
+        are not listed.</li>
+      <li><strong>Empty holdings lists.</strong> A principal with
+        <code>holdings=[]</code> is not a claim of "no business interest." It
+        means no publicly-disclosed holding of accountability relevance has
+        been catalogued for this principal yet.</li>
+      <li><strong>No accusation.</strong> Listing a holding does not assert
+        wrongdoing. The registry documents the corporate / trust topology
+        around Grover-marked principals so readers can independently assess
+        conflict-of-interest surface area on the public record.</li>
+      <li><strong>Reproducible.</strong> Generated by
+        <code>tools/generate_business_holdings_dossier.py</code> with
+        SYSTEM_SEED 118400. Output:
+        <code>data/business_holdings_dossier.json</code>. The page is a
+        direct render of that file.</li>
+    </ul>
+
+    <div id="read-next"></div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script src="shell.js"></script>
+  <script src="readnext.js"></script>
+
+  <script>
+  (function(){
+    'use strict';
+    function esc(s){
+      if (s == null) return '';
+      return String(s).replace(/[&<>"']/g, function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+    function setText(id,v){ var el=document.getElementById(id); if (el) el.textContent=v; }
+
+    var STATE = { dossier:null, axisFilter:'ALL' };
+
+    function renderSummary(d){
+      setText('stat-axes', String((d.axes_covered||[]).length));
+      setText('stat-principals', String(d.principal_count||0));
+      setText('stat-with', String(d.principals_with_holdings||0));
+      setText('stat-holdings', String(d.total_holdings||0));
+    }
+
+    function renderTypes(d){
+      var bar = document.getElementById('type-summary');
+      var tb = d.type_breakdown || {};
+      var keys = Object.keys(tb).sort(function(a,b){ return tb[b]-tb[a]; });
+      if (!keys.length){ bar.innerHTML = '<span class="ts-chip">no holdings catalogued</span>'; return; }
+      bar.innerHTML = keys.map(function(k){
+        return '<span class="ts-chip">'+esc(k)+': <strong>'+tb[k]+'</strong></span>';
+      }).join('');
+    }
+
+    function renderFilter(d){
+      var bar = document.getElementById('filter-bar');
+      var axes = (d.axes_covered||[]).slice().sort();
+      axes.forEach(function(ax){
+        var b = document.createElement('button');
+        b.dataset.axis = ax;
+        b.textContent = ax;
+        bar.appendChild(b);
+      });
+      bar.addEventListener('click', function(ev){
+        var t = ev.target;
+        if (t.tagName !== 'BUTTON') return;
+        STATE.axisFilter = t.dataset.axis || 'ALL';
+        Array.prototype.forEach.call(bar.querySelectorAll('button'), function(b){
+          b.classList.toggle('active', b.dataset.axis === STATE.axisFilter);
+        });
+        renderList();
+      });
+    }
+
+    function renderList(){
+      var d = STATE.dossier; if (!d) return;
+      var list = document.getElementById('biz-list');
+      var recs = (d.records||[]).filter(function(r){
+        if (STATE.axisFilter === 'ALL') return true;
+        return (r.axes||[]).indexOf(STATE.axisFilter) !== -1;
+      });
+      // Sort: with-holdings first (by count desc), then empty by name
+      recs.sort(function(a,b){
+        var ah=(a.holdings||[]).length, bh=(b.holdings||[]).length;
+        if (ah !== bh) return bh - ah;
+        return (a.principal||'').localeCompare(b.principal||'');
+      });
+      if (!recs.length){
+        list.innerHTML = '<em style="color:#7a7a8a;">No principals match this filter.</em>';
+        return;
+      }
+      list.innerHTML = recs.map(function(r){
+        var has = (r.holdings||[]).length > 0;
+        var cls = 'biz-card ' + (has ? 'has' : 'empty');
+        var axesHtml = (r.axes||[]).map(function(a){
+          return '<span class="axis-pill">'+esc(a)+'</span>';
+        }).join('');
+        var body;
+        if (has){
+          body = (r.holdings||[]).map(function(h){
+            var srcs = (h.sources||[]).map(esc).join(' · ');
+            return '<div class="biz-row">' +
+                   '  <div class="entity">'+esc(h.entity)+'</div>' +
+                   '  <div class="role"><span class="type-tag">'+esc(h.type||'?')+'</span>'+esc(h.role||'')+'</div>' +
+                   '  <div class="relevance">'+esc(h.accountability_relevance||'(no relevance note)')+
+                   '<span class="meta">period: '+esc(h.period||'?')+'</span>' +
+                   '<span class="src">src: '+srcs+'</span></div>' +
+                   '</div>';
+          }).join('');
+        } else {
+          body = '<div class="biz-empty">No publicly-disclosed corporate holding, '+
+                 'private trust, numbered company, board seat, or shareholding of '+
+                 'accountability relevance catalogued. (See methodology — empty does '+
+                 'not mean no business interest.)</div>';
+        }
+        return '<div class="'+cls+'">' +
+               '  <h3>'+esc(r.principal)+'</h3>' +
+               '  <div class="axes">'+axesHtml+'</div>' +
+               '  '+body +
+               '</div>';
+      }).join('');
+    }
+
+    function renderReceipts(d){
+      var el = document.getElementById('footer-receipts');
+      var sha = (d.self_sha256||'').slice(0,24);
+      el.innerHTML =
+        '<strong style="color:#34d399;">Receipts:</strong><br>' +
+        'dossier sha256: <code title="'+esc(d.self_sha256||'')+'">'+esc(sha)+'…</code><br>' +
+        'schema: <code>'+esc(d.schema||'?')+'</code> · ' +
+        'SYSTEM_SEED <code>'+esc(d.system_seed||'?')+'</code> · ' +
+        'generated <code>'+esc(d.generated_at||'?')+'</code><br>' +
+        'source: <code>data/business_holdings_dossier.json</code> · ' +
+        'generator: <code>tools/generate_business_holdings_dossier.py</code>';
+    }
+
+    fetch('data/business_holdings_dossier.json', {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        var list = document.getElementById('biz-list');
+        if (!d){
+          list.innerHTML = '<strong style="color:#ef4444;">Business holdings dossier '+
+            'unavailable.</strong> Run <code>tools/generate_business_holdings_dossier.py</code>.';
+          document.getElementById('footer-receipts').textContent = '⚠ Receipts unavailable.';
+          return;
+        }
+        STATE.dossier = d;
+        renderSummary(d);
+        renderTypes(d);
+        renderFilter(d);
+        renderList();
+        renderReceipts(d);
+      })
+      .catch(function(e){
+        document.getElementById('biz-list').innerHTML =
+          '<strong style="color:#ef4444;">Failed to load dossier: '+esc(e.message||e)+'</strong>';
+      });
+  })();
+  </script>
+</body>
+</html>
