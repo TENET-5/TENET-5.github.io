@@ -306,6 +306,50 @@
       </div>
     </section>
 
+    <section id="phase75-actions" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Action Recommender. Generating structured human-reviewable recommendations from composite risk assessments." style="color:#ec4899;">🎯 Action Recommendations [PHASE 75]</h2>
+      <p>All recommendations require human review — no auto-execution. Priority-ranked actions generated from 6-signal risk assessments.</p>
+      <div id="phase75-list">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase76-audit" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Audit Logger. Immutable SHA-256 hash-chained audit trail of all OSINT pipeline operations." style="color:#64748b;">📜 Immutable Audit Trail [PHASE 76]</h2>
+      <p>Every pipeline operation is hash-chained for tamper detection. GENESIS → sequential SHA-256 links verifiable end-to-end.</p>
+      <div id="phase76-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase76-log" style="margin-top:16px;max-height:300px;overflow-y:auto;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase78-registry" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Phase Registry. Complete catalog of all Aurora OSINT modules with domain classification and status." style="color:#38bdf8;">🗂️ Aurora Phase Registry [PHASE 78]</h2>
+      <p>Auto-discovered catalog of all operational phases. Each module classified by ARTSTEM domain with live status tracking.</p>
+      <div id="phase78-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase78-phases" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase79-geo" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Geographic OSINT Analyser. Mapping entity travel networks, foreign exposure, and jurisdictional co-occurrence patterns." style="color:#84cc16;">🌍 Geographic Intelligence [PHASE 79]</h2>
+      <p>Spatial analysis of OSINT data: entity-location clustering, foreign travel ratio scoring, and proximity co-occurrence alerts across 9 jurisdictions.</p>
+      <div id="phase79-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase79-exposure" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+      <div id="phase79-alerts" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
     <section id="corp-intel-feed" style="display:none; margin-top:28px;">
       <h2 data-narrate="Corporate Registry Intelligence. Flagging intersecting nodes between structural corporate governance and federal lobbying registries.">🏢 Corporate Registry Intelligence</h2>
       <p>Data ingested automatically from ISED Corporations Canada. Cross-referenced to identify systemic influence trajectories.</p>
@@ -915,6 +959,129 @@
           });
           el.innerHTML = html;
         }).catch(function(e) { console.error("Phase 74 error", e); });
+
+      // ── PHASE 75 ACTION RECOMMENDER ──
+      fetch('data/osint_action_recommendations.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase75-actions');
+          var el = document.getElementById('phase75-list');
+          if (!el || !d.recommendations) return;
+          feed.style.display = '';
+          var html = '';
+          d.recommendations.forEach(function(rec) {
+            var rc = rec.risk_level === 'CRITICAL' ? '#ef4444' : (rec.risk_level === 'HIGH' ? '#f59e0b' : '#eab308');
+            html += '<div style="margin-bottom:12px;padding:12px;background:rgba(236,72,153,0.05);border:1px solid rgba(236,72,153,0.2);border-left:4px solid ' + rc + ';border-radius:6px;">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                '<h3 style="margin:0;color:#e0e0e6;font-size:0.95rem;">' + rec.entity + '</h3>' +
+                '<span style="font-size:0.65rem;color:' + rc + ';font-weight:700;">' + rec.risk_level + ' (' + (rec.composite_score*100).toFixed(1) + '%)</span>' +
+              '</div>';
+            rec.actions.forEach(function(act) {
+              html += '<div style="display:flex;gap:8px;padding:3px 0;font-size:0.75rem;align-items:center;">' +
+                '<span style="color:#ec4899;min-width:16px;">P' + act.priority + '</span>' +
+                '<span style="color:#d1d5db;font-weight:600;min-width:140px;">' + act.action + '</span>' +
+                '<span style="color:#9ca3af;flex:1;">' + act.description + '</span>' +
+                '<span style="font-size:0.6rem;padding:1px 4px;background:rgba(251,191,36,0.15);color:#fbbf24;border-radius:2px;">' + act.status + '</span>' +
+              '</div>';
+            });
+            html += '</div>';
+          });
+          el.innerHTML = html;
+        }).catch(function(e) { console.error("Phase 75 error", e); });
+
+      // ── PHASE 76 AUDIT LOGGER ──
+      fetch('data/osint_audit_log.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase76-audit');
+          var stats = document.getElementById('phase76-stats');
+          var log = document.getElementById('phase76-log');
+          if (!stats || !d.metadata) return;
+          feed.style.display = '';
+          var vc = d.metadata.chain_valid ? '#22c55e' : '#ef4444';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Audit Entries</h3><div class="dash-big" style="color:#64748b;">' + d.metadata.entry_count + '</div></div>' +
+            '<div class="dash-card"><h3>Chain Integrity</h3><div class="dash-big" style="color:' + vc + ';">' + (d.metadata.chain_valid ? '✓ VALID' : '✗ BROKEN') + '</div></div>';
+          if (d.audit_log) {
+            var lh = '';
+            d.audit_log.forEach(function(e) {
+              lh += '<div style="display:flex;gap:6px;padding:3px 6px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.7rem;">' +
+                '<span style="color:#64748b;font-family:monospace;min-width:50px;">' + e.entry_hash.substring(0,8) + '</span>' +
+                '<span style="color:#94a3b8;min-width:50px;">' + e.actor + '</span>' +
+                '<span style="color:#e0e0e6;min-width:120px;font-weight:600;">' + e.action + '</span>' +
+                '<span style="color:#a1a1aa;flex:1;">' + e.entity + ': ' + e.detail.substring(0,80) + '</span>' +
+              '</div>';
+            });
+            log.innerHTML = lh;
+          }
+        }).catch(function(e) { console.error("Phase 76 error", e); });
+
+      // ── PHASE 78 PHASE REGISTRY ──
+      fetch('data/osint_phase_registry.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase78-registry');
+          var stats = document.getElementById('phase78-stats');
+          var phases = document.getElementById('phase78-phases');
+          if (!stats || !d.registry) return;
+          feed.style.display = '';
+          var reg = d.registry;
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Total Phases</h3><div class="dash-big" style="color:#38bdf8;">' + reg.total + '</div></div>' +
+            '<div class="dash-card"><h3>Online</h3><div class="dash-big" style="color:#22c55e;">' + reg.online + '</div></div>' +
+            '<div class="dash-card"><h3>Planned</h3><div class="dash-big" style="color:#fbbf24;">' + reg.planned + '</div></div>';
+          if (reg.phases) {
+            var ph = '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+            reg.phases.forEach(function(p) {
+              ph += '<div style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;background:' + p.color + '15;border:1px solid ' + p.color + '40;border-radius:3px;font-size:0.6rem;">' +
+                '<span style="font-weight:700;color:' + p.color + ';">P' + p.phase + '</span>' +
+                '<span style="color:#a1a1aa;">' + p.desc.substring(0,30) + '</span>' +
+              '</div>';
+            });
+            ph += '</div>';
+            phases.innerHTML = ph;
+          }
+        }).catch(function(e) { console.error("Phase 78 error", e); });
+
+      // ── PHASE 79 GEO OSINT ──
+      fetch('data/osint_geo_analysis.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase79-geo');
+          var stats = document.getElementById('phase79-stats');
+          var exposure = document.getElementById('phase79-exposure');
+          var alerts = document.getElementById('phase79-alerts');
+          if (!stats || !d.metadata) return;
+          feed.style.display = '';
+          var st = d.metadata.statistics;
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Geo Events</h3><div class="dash-big" style="color:#84cc16;">' + st.events + '</div></div>' +
+            '<div class="dash-card"><h3>Foreign Contacts</h3><div class="dash-big red">' + st.foreign_contacts + '</div></div>' +
+            '<div class="dash-card"><h3>Proximity Alerts</h3><div class="dash-big yellow">' + d.proximity_alerts.length + '</div></div>';
+          if (d.foreign_exposure) {
+            var eh = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Foreign Exposure Ranking</h3>';
+            d.foreign_exposure.forEach(function(ex) {
+              eh += '<div style="display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.78rem;">' +
+                '<span style="color:#d1d5db;">' + ex.entity + '</span>' +
+                '<span style="color:#ef4444;">' + ex.foreign_locations.join(', ') + ' (' + (ex.exposure_score*100).toFixed(0) + '%)</span>' +
+              '</div>';
+            });
+            exposure.innerHTML = eh;
+          }
+          if (d.proximity_alerts && d.proximity_alerts.length) {
+            var ah = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Proximity Co-occurrence Alerts</h3>';
+            d.proximity_alerts.forEach(function(a) {
+              var ac = a.alert_level === 'HIGH' ? '#ef4444' : '#eab308';
+              ah += '<div style="padding:6px 8px;border-left:3px solid ' + ac + ';margin-bottom:4px;background:rgba(255,255,255,0.02);font-size:0.78rem;">' +
+                '<span style="color:#e0e0e6;font-weight:600;">' + a.entity_a + '</span> ↔ ' +
+                '<span style="color:#e0e0e6;font-weight:600;">' + a.entity_b + '</span>' +
+                ' @ <span style="color:' + ac + ';">' + a.shared_locations.join(', ') + '</span>' +
+                (a.foreign_overlap.length ? ' <span style="color:#ef4444;font-size:0.65rem;">🚨 FOREIGN</span>' : '') +
+              '</div>';
+            });
+            alerts.innerHTML = ah;
+          }
+        }).catch(function(e) { console.error("Phase 79 error", e); });
   </script>
 
 <div style="max-width:900px;margin:2rem auto;">
