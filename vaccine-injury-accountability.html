@@ -115,6 +115,53 @@
       </p>
     </section>
 
+    <!-- ── LIVE HARTMAN STATUS (fetches from timeline JSON) ── -->
+    <section class="reveal">
+      <div id="hartman-live-status" style="background:linear-gradient(135deg, rgba(250,204,21,0.06), rgba(220,38,38,0.04));border:1px solid rgba(250,204,21,0.35);border-left:4px solid #facc15;border-radius:8px;padding:1.1rem 1.4rem;margin:1rem 0 1.5rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#facc15;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;margin-bottom:0.4rem;">Live status &mdash; <span id="hartman-status-date">loading…</span></div>
+        <div id="hartman-status-body" style="color:var(--text-secondary,#3d4355);font-size:0.92rem;line-height:1.6;">
+          Checking <code>data/vaccine_accountability_timeline.json</code> for the latest pending event&hellip;
+        </div>
+      </div>
+      <script>
+        (function() {
+          var root = document.getElementById('hartman-live-status');
+          var dateEl = document.getElementById('hartman-status-date');
+          var bodyEl = document.getElementById('hartman-status-body');
+          if (!root || !dateEl || !bodyEl) return;
+          fetch('./data/vaccine_accountability_timeline.json?' + Date.now())
+            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(data){
+              var pending = data.pending_events || [];
+              var timeline = data.timeline || [];
+              // Prefer first pending; fall back to most recent past event
+              if (pending.length) {
+                var e = pending[0];
+                dateEl.textContent = 'Expected ' + (e.expected_date_range || 'TBD');
+                bodyEl.innerHTML = '<strong>' +
+                  (e.event_title || '').replace(/[<>]/g, '') + '</strong>. ' +
+                  (e.why_it_matters || '').replace(/[<>]/g, '') +
+                  (e.tracked_at ? ' <a href="' + e.tracked_at.replace(/"/g,'&quot;') +
+                   '" target="_blank" rel="noopener" style="color:#facc15;">Track here.</a>' : '');
+              } else if (timeline.length) {
+                var last = timeline[timeline.length - 1];
+                dateEl.textContent = last.date_iso || '';
+                bodyEl.innerHTML = '<strong>Most recent event:</strong> ' +
+                  (last.event_title || '').replace(/[<>]/g, '') + '. ' +
+                  (last.description || '').replace(/[<>]/g, '').substring(0, 240);
+              } else {
+                dateEl.textContent = 'no events';
+                bodyEl.textContent = 'Timeline is empty.';
+              }
+            })
+            .catch(function(err){
+              dateEl.textContent = 'error';
+              bodyEl.textContent = 'Status failed to load: ' + err.message;
+            });
+        })();
+      </script>
+    </section>
+
     <!-- ── HEADLINE NUMBERS ── -->
     <section class="reveal">
       <h2>The numbers (primary sources only)</h2>
