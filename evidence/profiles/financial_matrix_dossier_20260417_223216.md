@@ -1,0 +1,110 @@
+# OSINT Dossier: Financial_Matrix
+Date Captured: 2026-04-17T22:32:16.135616
+
+## Routing & Metadata
+- **Source:** TENET5 Financial Tracker
+- **Topological Vector:** MF-FIN-88D2
+- **Matrix Path (N vs NP):** N_VS_NP_CONVERGED
+- **abcxyz Compliance:** VERIFIED
+- **Routing Agent:** LIRIL/FINANCIAL_TRACKER
+- **Ethics Gate:** CLEARED
+
+## Evidence Details
+```json
+{
+  "TRX-001": {
+    "entity": "irving",
+    "flow": "Liberal Party",
+    "risk_factor": 1.45,
+    "verified": true,
+    "quantum_metadata": {
+      "signature": "[NV-QUANTUM]",
+      "emh_vector": "ABCXYZ-MF-TRX-001",
+      "topology": "P-CLASS",
+      "quantum_resistant_sig": "QR-d81009d6cbb2aaafd14390be9ee5380f",
+      "grover_speedup": 4.0,
+      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "quantum_security_bits": 256
+    }
+  },
+  "TRX-002": {
+    "entity": "snc_lavalin",
+    "flow": "Federal Parties",
+    "risk_factor": 1.1,
+    "verified": true,
+    "quantum_metadata": {
+      "signature": "[NV-QUANTUM]",
+      "emh_vector": "ABCXYZ-MF-TRX-002",
+      "topology": "P-CLASS",
+      "quantum_resistant_sig": "QR-aad40a1c29a415f80930b1a71fcfbca9",
+      "grover_speedup": 4.0,
+      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "quantum_security_bits": 256
+    }
+  },
+  "TRX-003": {
+    "entity": "jnf",
+    "flow": "IDF infrastructure",
+    "risk_factor": 10.0,
+    "verified": true,
+    "quantum_metadata": {
+      "signature": "[NV-QUANTUM]",
+      "emh_vector": "ABCXYZ-MF-TRX-003",
+      "topology": "NP-HARD",
+      "quantum_resistant_sig": "QR-717be89c1089a1cf269dc349332272e8",
+      "grover_speedup": 4.0,
+      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "quantum_security_bits": 256
+    }
+  },
+  "TRX-004": {
+    "entity": "friends_wiesenthal",
+    "flow": "lobbying",
+    "risk_factor": 8.9,
+    "verified": true,
+    "quantum_metadata": {
+      "signature": "[NV-QUANTUM]",
+      "emh_vector": "ABCXYZ-MF-TRX-004",
+      "topology": "P-CLASS",
+      "quantum_resistant_sig": "QR-e00d7904ad1fae60cd220ad443d75d37",
+      "grover_speedup": 4.0,
+      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "quantum_security_bits": 256
+    }
+  },
+  "TRX-005": {
+    "entity": "mark_carney",
+    "flow": "brookfield",
+    "risk_factor": 10.0,
+    "verified": true,
+    "quantum_metadata": {
+      "signature": "[NV-QUANTUM]",
+      "emh_vector": "ABCXYZ-MF-TRX-005",
+      "topology": "NP-HARD",
+      "quantum_resistant_sig": "QR-46241bc666bd71edf2b18db073c9c45e",
+      "grover_speedup": 4.0,
+      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "quantum_security_bits": 256
+    }
+  },
+  "TRX-006": {
+    "entity": "carney_government",
+    "flow": "fintrac_tracking_cuts",
+    "risk_factor": 10.0,
+    "verified": true,
+    "quantum_metadata": {
+      "signature": "[NV-QUANTUM]",
+      "emh_vector": "ABCXYZ-MF-TRX-006",
+      "topology": "NP-HARD",
+      "quantum_resistant_sig": "QR-89a016e6fd06ac8093c99f68b38cfba0",
+      "grover_speedup": 4.0,
+      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "quantum_security_bits": 256
+    }
+  }
+}
+```
+
+---
+*Secured via TENET5 Empirical Magic Handoff Memory System*
+*Cryptographic Signature (BLAKE2):* `e81293360b1619562216031d89bda2a1`

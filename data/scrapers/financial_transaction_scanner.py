@@ -16,7 +16,7 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.dirname(SCRIPT_DIR)
 OUTPUT_FILE = os.path.join(DATA_DIR, 'financial_transaction_analysis.json')
-TOOLS_DIR = os.path.join(os.path.dirname(DATA_DIR), 'tools')
+TOOLS_DIR = r'E:\S.L.A.T.E\tenet5\tools'
 
 # Attempt to load TENET5 ABCXYZ Tracking (lightweight Millennial Falcon only)
 try:
@@ -161,7 +161,7 @@ def main():
         
     # SECURE NATS BROADCAST - ABCXYZ EMH ZERO-ORPHAN POLICY
     try:
-        sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'tools'))
+        sys.path.append(r'E:\S.L.A.T.E\tenet5\tools')
         from empirical_magic_handoff import EmpiricalMagicHandoff
         import asyncio
         emh = EmpiricalMagicHandoff(output_dir=os.path.join(DATA_DIR, '..', 'evidence', 'profiles'))
