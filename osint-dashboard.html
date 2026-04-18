@@ -402,6 +402,17 @@
       </div>
     </section>
 
+    <section id="phase85-autoscaler" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Agent Autoscaler. Reactive KAYAK orchestrator optimizing GPU workload distribution." style="color:#fbbf24;">⚖️ Agent Autoscaler [PHASE 85]</h2>
+      <p>KAYAK lifecycle manager automatically scaling inference workers based on NemoClaw queue depths and NATS backpressure.</p>
+      <div id="phase85-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase85-agents" style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
     <section id="corp-intel-feed" style="display:none; margin-top:28px;">
       <h2 data-narrate="Corporate Registry Intelligence. Flagging intersecting nodes between structural corporate governance and federal lobbying registries.">🏢 Corporate Registry Intelligence</h2>
       <p>Data ingested automatically from ISED Corporations Canada. Cross-referenced to identify systemic influence trajectories.</p>
@@ -1254,6 +1265,31 @@
           }
           domains.innerHTML = dh;
         }).catch(function(e) { console.error("Phase 84 error", e); });
+
+      // ── PHASE 85 AUTOSCALER ──
+      fetch('data/osint_phase85_autoscaler.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase85-autoscaler');
+          var stats = document.getElementById('phase85-stats');
+          var agents = document.getElementById('phase85-agents');
+          if (!stats || !d.agent_states) return;
+          feed.style.display = '';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Poll Cycles</h3><div class="dash-big" style="color:#64748b;">' + d.cycles.toLocaleString() + '</div></div>' +
+            '<div class="dash-card"><h3>Scale Ups</h3><div class="dash-big" style="color:#ef4444;">' + d.scale_ups.toLocaleString() + '</div><div style="font-size:0.6rem;color:#a1a1aa;">Q > ' + d.high_water + ' triggers</div></div>' +
+            '<div class="dash-card"><h3>Scale Downs</h3><div class="dash-big" style="color:#22c55e;">' + d.scale_downs.toLocaleString() + '</div><div style="font-size:0.6rem;color:#a1a1aa;">Q < ' + d.low_water + ' triggers</div></div>';
+          var ah = '';
+          for (var k in d.agent_states) {
+            var st = d.agent_states[k];
+            var ac = st === 'online' ? '#22c55e' : (st === 'suspended' ? '#f59e0b' : '#9ca3af');
+            ah += '<div style="flex:1;min-width:150px;background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.2);padding:8px 12px;border-radius:4px;display:flex;justify-content:space-between;align-items:center;">' +
+              '<span style="color:#fbd38d;font-weight:600;font-size:0.85rem;">' + k + '</span>' +
+              '<span style="font-size:0.65rem;padding:2px 6px;border-radius:3px;background:' + ac + '20;color:' + ac + ';text-transform:uppercase;">' + st + '</span>' +
+            '</div>';
+          }
+          agents.innerHTML = ah;
+        }).catch(function(e) { console.error("Phase 85 error", e); });
 
   </script>
 
