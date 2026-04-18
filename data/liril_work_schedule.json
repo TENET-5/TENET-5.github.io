@@ -29,6 +29,45 @@
   "in_progress": [],
   "backlog": [
     {
+      "id": "WS-010",
+      "title": "Add LIRIL audit badge to enforcement-followthrough.html cards",
+      "axis_domain": "ETHICS",
+      "priority": "high",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "designer",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/enforcement_followthrough.json"
+      ],
+      "acceptance": "Each finding in data/enforcement_followthrough.json gains a top-level note field 'audit_visible: true' so the rendering code in enforcement-followthrough.html can gate whether to show the LIRIL verdict badge.",
+      "context": "Layer-4 officer findings already show LIRIL verdict badges. Layer-5 does not. First fully six-role autonomous task to prove cross-page consistency.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-011",
+      "title": "Add reader_guidance to data/officer_of_parliament_findings.json",
+      "axis_domain": "ETHICS",
+      "priority": "high",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/officer_of_parliament_findings.json"
+      ],
+      "acceptance": "Add a top-level key reader_guidance (dict) with how_to_read and what_to_verify string fields — matching the pattern already added to data/enforcement_followthrough.json by WS-009. Parallel enrichment for consistency between layers.",
+      "context": "WS-009 shipped this pattern for Layer 5. Replicating for Layer 4 keeps the two layers symmetrical.",
+      "status": "pending"
+    },
+    {
       "id": "WS-004",
       "title": "Audit + fix of sibling visualization pages identified by the explore agent",
       "axis_domain": "TECHNOLOGY",
@@ -91,6 +130,120 @@
       "status": "pending"
     },
     {
+      "id": "WS-012",
+      "title": "Add reader_guidance to data/accountability_inflections.json",
+      "axis_domain": "ETHICS",
+      "priority": "medium",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/accountability_inflections.json"
+      ],
+      "acceptance": "Add a top-level key reader_guidance (dict) with how_to_read and what_to_verify string fields. Same shape as WS-009 and WS-011.",
+      "context": "Layer-3 parallel enrichment.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-013",
+      "title": "Add reader_guidance to data/temporal_overlap.json",
+      "axis_domain": "ETHICS",
+      "priority": "medium",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/temporal_overlap.json"
+      ],
+      "acceptance": "Add a top-level reader_guidance dict. Same shape as WS-009 / WS-011 / WS-012.",
+      "context": "Layer-2 parallel enrichment. When all five layers have reader_guidance, every data file tells a reviewer how to read it.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-014",
+      "title": "Add reader_guidance to data/actor_tenures.json",
+      "axis_domain": "ETHICS",
+      "priority": "medium",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/actor_tenures.json"
+      ],
+      "acceptance": "Add a top-level reader_guidance dict.",
+      "context": "Layer-1 parallel enrichment.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-015",
+      "title": "Add cross_layer_references to Layer 5 summary",
+      "axis_domain": "ETHICS",
+      "priority": "medium",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/enforcement_followthrough.json"
+      ],
+      "acceptance": "Add summary.cross_layer_references dict with four fields: layer_1_meta_grover (URL), layer_2_temporal_overlap (URL), layer_3_inflections (URL), layer_4_officer_findings (URL). Values are the canonical page URLs.",
+      "context": "Programmatic cross-layer linking enables automated layer-chain verification.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-018",
+      "title": "Add net_outcome_rationale field to each Layer-5 finding",
+      "axis_domain": "ETHICS",
+      "priority": "medium",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/enforcement_followthrough.json"
+      ],
+      "acceptance": "For each finding in data/enforcement_followthrough.json, add a net_outcome_rationale string field (one sentence) explaining WHY that finding was categorized as no_enforcement / regulatory_change / civil_suit / criminal_investigation / judicial_review.",
+      "context": "Makes the net_outcome categorization transparent to reviewers rather than opaque.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-019",
+      "title": "Backfill primary_source URL on each enforcement chronology entry",
+      "axis_domain": "ETHICS",
+      "priority": "medium",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/enforcement_followthrough.json"
+      ],
+      "acceptance": "Every chronology entry within every finding gains a source_url field pointing to the specific court judgment, committee report, or news-of-record URL underpinning that event. If a source is not confidently available, set source_url to null and source_pending to true.",
+      "context": "Raises the evidentiary density of Layer 5 — every dated event becomes independently verifiable.",
+      "status": "pending"
+    },
+    {
       "id": "WS-007",
       "title": "Migrate enhancement bar features (speed, autoplay, captions, transcript) into liril-walkthrough.js",
       "axis_domain": "TECHNOLOGY",
@@ -129,6 +282,79 @@
       "acceptance": "Each page that presents factual findings shows the LIRIL audit verdict (PASS/WATCH/FAIL) inline on each claim or a summary block linking to the audit JSON. Users can see at-a-glance whether the on-GPU gate signed off.",
       "context": "officer-of-parliament-findings.html already does this after commit c34550bf. Extending the pattern to the other fact-heavy pages makes the entire investigation auditable.",
       "status": "pending"
+    },
+    {
+      "id": "WS-016",
+      "title": "Add generated_at_utc to data/liril_work_schedule.json",
+      "axis_domain": "TECHNOLOGY",
+      "priority": "low",
+      "role_pipeline": [
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/liril_work_schedule.json"
+      ],
+      "acceptance": "Ensure generated_at_utc (int epoch seconds) is present at top level alongside updated_at. If missing, add with current timestamp; if present, leave alone.",
+      "context": "Minor schema uniformity — other data files have both generated_at and updated_at; the work schedule only has updated_at.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-017",
+      "title": "Add a schema_version field to liril_coders.json",
+      "axis_domain": "TECHNOLOGY",
+      "priority": "low",
+      "role_pipeline": [
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/liril_coders.json"
+      ],
+      "acceptance": "Add top-level schema_version field set to the string '1.0'. Enables future migrations without breaking existing consumers.",
+      "context": "Schema-version hygiene for forward compatibility.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-020",
+      "title": "Add sprint.sprint_review_notes to data/liril_work_schedule.json",
+      "axis_domain": "TECHNOLOGY",
+      "priority": "low",
+      "role_pipeline": [
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/liril_work_schedule.json"
+      ],
+      "acceptance": "Add sprint.sprint_review_notes (list of strings, initially empty) so the dev team can append per-sprint reflections.",
+      "context": "Retrospective-ledger pattern. Notes accumulate over sprints; review cadence is sprint-boundary.",
+      "status": "pending"
+    },
+    {
+      "id": "WS-021",
+      "title": "Add axes_index_in_scope to Layer 5 summary",
+      "axis_domain": "ETHICS",
+      "priority": "low",
+      "role_pipeline": [
+        "researcher",
+        "architect",
+        "engineer",
+        "editor",
+        "gatekeeper"
+      ],
+      "target_files": [
+        "data/enforcement_followthrough.json"
+      ],
+      "acceptance": "Add summary.axes_in_scope (list of axis-id strings) enumerating which of the 19 Grover accountability axes are referenced across the chronology entries.",
+      "context": "Enables programmatic cross-reference with the 19-axis index page.",
+      "status": "pending"
     }
   ],
   "done_today": [
@@ -165,10 +391,10 @@
   ],
   "recent_rejections": [],
   "stats": {
-    "total_backlog": 9,
+    "total_backlog": 21,
     "high_priority": 2,
-    "medium_priority": 4,
-    "low_priority": 2,
+    "medium_priority": 9,
+    "low_priority": 6,
     "completed_today": 4,
     "commit_pass_rate_pct": 100.0,
     "current_sprint_progress_pct": 33.3
