@@ -454,6 +454,80 @@
       </p>
     </section>
 
+    <!-- ── MASTER TIMELINE (JSON-driven) ── -->
+    <section class="reveal">
+      <h2>Master timeline — every datestamped event in one place</h2>
+      <p class="tl-body">
+        Every event below is primary-source cited and renders from
+        <a href="./data/vaccine_accountability_timeline.json" target="_blank" rel="noopener">/data/vaccine_accountability_timeline.json</a>.
+        Machine-readable; any downstream page or app can consume the same feed.
+      </p>
+
+      <div id="vax-timeline-render" style="margin-top:1.5rem;">
+        <p style="color:var(--text-tertiary);font-size:0.85rem;font-style:italic;">Loading timeline…</p>
+      </div>
+
+      <style>
+        .vax-tl { position:relative; padding-left:1.8rem; }
+        .vax-tl::before { content:''; position:absolute; left:0.55rem; top:0.3rem; bottom:0.3rem; width:2px; background:linear-gradient(180deg, rgba(220,38,38,0.6), rgba(139,92,246,0.4)); }
+        .vax-tl-entry { position:relative; padding:0 0 1.4rem 0; }
+        .vax-tl-entry::before { content:''; position:absolute; left:-1.55rem; top:0.2rem; width:12px; height:12px; border-radius:50%; background:#dc2626; border:2px solid var(--bg-card,#0b0b12); box-shadow:0 0 0 1px rgba(220,38,38,0.4); }
+        .vax-tl-entry.pending::before { background:#facc15; box-shadow:0 0 0 1px rgba(250,204,21,0.4); }
+        .vax-tl-date { font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--accent,#dc2626); font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
+        .vax-tl-title { font-size:1rem; font-weight:800; color:#fff; margin:0.2rem 0 0.4rem; }
+        .vax-tl-desc { color:var(--text-secondary); font-size:0.88rem; line-height:1.55; margin:0 0 0.4rem; }
+        .vax-tl-src { font-size:0.78rem; color:var(--text-tertiary); font-style:italic; }
+        .vax-tl-src a { color:var(--accent,#dc2626); text-decoration:none; word-break:break-all; }
+        .vax-tl-src a:hover { text-decoration:underline; }
+        .vax-tl-pending-hdr { color:#facc15; font-size:0.75rem; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; margin:1.5rem 0 0.6rem; border-top:1px dashed rgba(250,204,21,0.3); padding-top:1.2rem; }
+      </style>
+
+      <script>
+        (function() {
+          function fmtDate(iso) {
+            if (!iso) return '';
+            if (/^\d{4}$/.test(iso)) return iso;
+            if (/^\d{4}-\d{2}$/.test(iso)) return iso;
+            var d = new Date(iso + 'T00:00:00Z');
+            if (isNaN(d.getTime())) return iso;
+            return d.toLocaleDateString('en-CA', { timeZone: 'UTC', year:'numeric', month:'short', day:'numeric' });
+          }
+          function esc(s) { return String(s || '').replace(/[<>&"']/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]; }); }
+          var root = document.getElementById('vax-timeline-render');
+          if (!root) return;
+          fetch('./data/vaccine_accountability_timeline.json?' + Date.now())
+            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(data){
+              var html = '<div class="vax-tl">';
+              (data.timeline || []).forEach(function(e){
+                html += '<div class="vax-tl-entry">' +
+                  '<div class="vax-tl-date">' + esc(fmtDate(e.date_iso)) + '</div>' +
+                  '<div class="vax-tl-title">' + esc(e.event_title) + '</div>' +
+                  '<div class="vax-tl-desc">' + esc(e.description) + '</div>' +
+                  (e.primary_source ? '<div class="vax-tl-src">Source: <a href="' + esc(e.primary_source) + '" target="_blank" rel="noopener">' + esc(e.primary_source) + '</a></div>' : '') +
+                  '</div>';
+              });
+              if ((data.pending_events || []).length) {
+                html += '<div class="vax-tl-pending-hdr">Pending events</div>';
+                data.pending_events.forEach(function(e){
+                  html += '<div class="vax-tl-entry pending">' +
+                    '<div class="vax-tl-date">expected ' + esc(e.expected_date_range || '') + '</div>' +
+                    '<div class="vax-tl-title">' + esc(e.event_title) + '</div>' +
+                    '<div class="vax-tl-desc">' + esc(e.why_it_matters || '') + '</div>' +
+                    (e.tracked_at ? '<div class="vax-tl-src">Tracked at: <a href="' + esc(e.tracked_at) + '" target="_blank" rel="noopener">' + esc(e.tracked_at) + '</a></div>' : '') +
+                    '</div>';
+                });
+              }
+              html += '</div>';
+              root.innerHTML = html;
+            })
+            .catch(function(err){
+              root.innerHTML = '<p style="color:#dc2626;">Timeline failed to load: ' + esc(err.message) + '</p>';
+            });
+        })();
+      </script>
+    </section>
+
     <!-- ── THE ACCOUNTABILITY LOOP ── -->
     <section class="reveal">
       <h2>The accountability loop is closed</h2>
