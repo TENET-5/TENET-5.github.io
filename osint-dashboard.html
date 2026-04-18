@@ -271,6 +271,41 @@
       </div>
     </section>
 
+    <section id="phase70-alerts" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Real-time Alert Feed. Aggregating CRITICAL and HIGH severity anomalies, FIIS scores, and foreign influence flags." style="color:#dc2626;">🚨 Real-Time OSINT Alert Feed [PHASE 70]</h2>
+      <p>Live alert stream aggregating statistical anomalies, FIIS threshold breaches, and foreign influence flags sorted by severity.</p>
+      <div id="phase70-feed" style="max-height:400px;overflow-y:auto;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase71-network" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Influence Network Graph. D3-compatible political influence topology mapping entities, parties, and foreign organizations." style="color:#8b5cf6;">🕸️ Political Influence Network [PHASE 71]</h2>
+      <p>Graph topology: politicians, parties, foreign organizations, and corporations connected by funding, co-occurrence, and membership edges.</p>
+      <div id="phase71-stats" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+      <div id="phase71-edges" style="margin-top:16px;">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase73-evidence" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Evidence Chain Builder. Cryptographically hash-chained evidence trails linking claims to verified sources." style="color:#14b8a6;">🔗 Cryptographic Evidence Chains [PHASE 73]</h2>
+      <p>Each claim is linked to source evidence via SHA-256 hash chains. Tamper-detectable provenance from GENESIS through every corroborating document.</p>
+      <div id="phase73-chains">
+        <!-- JS populates -->
+      </div>
+    </section>
+
+    <section id="phase74-risk" style="display:none; margin-top:28px;">
+      <h2 data-narrate="Composite Risk Scorer. Weighted multi-signal aggregation from all OSINT phases producing final risk classifications." style="color:#f59e0b;">⚖️ Composite Risk Assessment [PHASE 74]</h2>
+      <p>Six-signal weighted risk computation: corroboration (25%), influence exposure (20%), anomaly severity (15%), evidence depth (15%), FIIS scores (15%), sentiment (10%).</p>
+      <div id="phase74-scores" class="dash-grid">
+        <!-- JS populates -->
+      </div>
+    </section>
+
     <section id="corp-intel-feed" style="display:none; margin-top:28px;">
       <h2 data-narrate="Corporate Registry Intelligence. Flagging intersecting nodes between structural corporate governance and federal lobbying registries.">🏢 Corporate Registry Intelligence</h2>
       <p>Data ingested automatically from ISED Corporations Canada. Cross-referenced to identify systemic influence trajectories.</p>
@@ -769,6 +804,117 @@
           cards.innerHTML = html;
         })
         .catch(function(e) { console.error("Phase 69 load error", e); });
+
+      // ── PHASE 70 ALERT FEED ──
+      fetch('data/osint_alert_feed.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase70-alerts');
+          var el = document.getElementById('phase70-feed');
+          if (!el || !d.alerts) return;
+          feed.style.display = '';
+          var html = '';
+          d.alerts.forEach(function(a) {
+            var sc = a.severity === 'CRITICAL' ? '#ef4444' : (a.severity === 'HIGH' ? '#f59e0b' : '#6b7280');
+            var icon = a.type === 'anomaly' ? '⚡' : (a.type === 'fiis_score' ? '📊' : '🚨');
+            html += '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border-left:3px solid ' + sc + ';margin-bottom:4px;background:rgba(255,255,255,0.02);">' +
+                      '<span style="font-size:1.1rem;">' + icon + '</span>' +
+                      '<div style="flex:1;"><div style="font-size:0.85rem;color:#e0e0e6;">' + a.title + '</div>' +
+                      '<div style="font-size:0.65rem;color:#6b7280;margin-top:2px;">' + a.type.toUpperCase() + ' | ' + a.severity + '</div></div>' +
+                      '<span style="font-size:0.7rem;padding:2px 6px;background:' + sc + '20;color:' + sc + ';border-radius:3px;font-weight:700;">' + a.severity + '</span>' +
+                    '</div>';
+          });
+          el.innerHTML = html;
+        }).catch(function(e) { console.error("Phase 70 error", e); });
+
+      // ── PHASE 71 NETWORK GRAPH ──
+      fetch('data/osint_network_graph.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase71-network');
+          var stats = document.getElementById('phase71-stats');
+          var edges = document.getElementById('phase71-edges');
+          if (!stats) return;
+          feed.style.display = '';
+          stats.innerHTML =
+            '<div class="dash-card"><h3>Nodes</h3><div class="dash-big" style="color:#8b5cf6;">' + d.node_count + '</div><div class="dash-sub">Entities mapped</div></div>' +
+            '<div class="dash-card"><h3>Edges</h3><div class="dash-big" style="color:#a78bfa;">' + d.edge_count + '</div><div class="dash-sub">Influence connections</div></div>';
+          if (d.nodes) {
+            var nh = '<h3 style="color:#a1a1aa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Network Nodes</h3>';
+            d.nodes.forEach(function(n) {
+              nh += '<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;margin:2px;background:' + n.color + '15;border:1px solid ' + n.color + '40;border-radius:4px;font-size:0.72rem;">' +
+                '<span style="width:8px;height:8px;border-radius:50%;background:' + n.color + ';display:inline-block;"></span>' +
+                '<span style="color:#d1d5db;">' + n.label + '</span>' +
+                '<span style="color:#6b7280;font-size:0.6rem;">(' + n.category + ')</span></div>';
+            });
+            edges.innerHTML = nh;
+          }
+        }).catch(function(e) { console.error("Phase 71 error", e); });
+
+      // ── PHASE 73 EVIDENCE CHAINS ──
+      fetch('data/osint_evidence_chains.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase73-evidence');
+          var el = document.getElementById('phase73-chains');
+          if (!el || !d.chains) return;
+          feed.style.display = '';
+          var html = '';
+          d.chains.forEach(function(ch) {
+            var vc = ch.valid ? '#22c55e' : '#ef4444';
+            html += '<div style="margin-bottom:16px;padding:12px;background:rgba(20,184,166,0.05);border:1px solid rgba(20,184,166,0.2);border-radius:8px;">' +
+                      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+                        '<h3 style="margin:0;color:#e0e0e6;font-size:1rem;">' + ch.entity + ' — ' + ch.claim_type.replace(/_/g, ' ') + '</h3>' +
+                        '<span style="font-size:0.7rem;color:' + vc + ';font-weight:700;">' + (ch.valid ? '✓ VERIFIED' : '✗ BROKEN') + ' (' + ch.link_count + ' links)</span>' +
+                      '</div>';
+            ch.chain.forEach(function(link, i) {
+              html += '<div style="display:flex;gap:8px;align-items:flex-start;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">' +
+                        '<span style="font-size:0.65rem;color:#14b8a6;font-family:monospace;min-width:55px;">' + (i === 0 ? 'GENESIS→' : link.prev_hash.substring(0,6) + '→') + '</span>' +
+                        '<span style="font-size:0.65rem;color:#0d9488;font-family:monospace;min-width:55px;">' + link.link_hash.substring(0,8) + '</span>' +
+                        '<span style="font-size:0.65rem;padding:1px 4px;background:rgba(255,255,255,0.08);border-radius:2px;min-width:50px;text-align:center;">' + link.source.toUpperCase() + '</span>' +
+                        '<span style="font-size:0.75rem;color:#a1a1aa;flex:1;">' + link.text.substring(0, 120) + '</span>' +
+                        '<span style="font-size:0.6rem;color:#22c55e;">' + (link.confidence * 100).toFixed(0) + '%</span>' +
+                      '</div>';
+            });
+            html += '</div>';
+          });
+          el.innerHTML = html;
+        }).catch(function(e) { console.error("Phase 73 error", e); });
+
+      // ── PHASE 74 RISK SCORER ──
+      fetch('data/osint_risk_scores.json', {cache:'no-store'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feed = document.getElementById('phase74-risk');
+          var el = document.getElementById('phase74-scores');
+          if (!el || !d.scores) return;
+          feed.style.display = '';
+          var html = '';
+          d.scores.forEach(function(s) {
+            var rc = s.risk_level === 'CRITICAL' ? '#ef4444' : (s.risk_level === 'HIGH' ? '#f59e0b' : (s.risk_level === 'MEDIUM' ? '#eab308' : '#22c55e'));
+            var bars = '';
+            Object.keys(s.breakdown).forEach(function(sig) {
+              var b = s.breakdown[sig];
+              var pw = Math.round(b.raw * 100);
+              bars += '<div style="display:flex;align-items:center;gap:6px;margin-top:3px;">' +
+                        '<span style="font-size:0.6rem;color:#6b7280;min-width:90px;">' + sig + '</span>' +
+                        '<div style="flex:1;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">' +
+                          '<div style="width:' + pw + '%;height:100%;background:' + rc + ';border-radius:3px;"></div>' +
+                        '</div>' +
+                        '<span style="font-size:0.55rem;color:#9ca3af;min-width:28px;text-align:right;">' + pw + '%</span>' +
+                      '</div>';
+            });
+            html += '<div class="dash-card" style="border:1px solid ' + rc + '40;border-top:3px solid ' + rc + ';">' +
+                      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                        '<h3 style="margin:0;color:#e0e0e6;font-size:1rem;">' + s.entity + '</h3>' +
+                        '<span style="font-size:0.75rem;padding:2px 8px;background:' + rc + '20;color:' + rc + ';border-radius:4px;font-weight:700;">' + s.risk_level + '</span>' +
+                      '</div>' +
+                      '<div style="font-size:2rem;font-weight:800;color:' + rc + ';margin:8px 0;">' + (s.composite * 100).toFixed(1) + '%</div>' +
+                      bars +
+                    '</div>';
+          });
+          el.innerHTML = html;
+        }).catch(function(e) { console.error("Phase 74 error", e); });
   </script>
 
 <div style="max-width:900px;margin:2rem auto;">
