@@ -452,6 +452,13 @@
     // ── Narrative / Content blocks ──
     '.narrative-intro', '.credibility-card', '.case-card', '.person-card', '.country-card',
 
+    // ── Cards & callouts (ADDED 2026-04-18 — pages like
+    //   covid-accountability.html use these instead of <section>) ──
+    '.program-card', '.stat-card', '.stat-row',
+    '.source-block', '.callout', '.call-out', '.callout-box',
+    '.loop-diagram', '.loop-step', '.finding-box',
+    '.timeline-item', '.timeline-node',
+
     // ── Financial & accountability ──
     '.purchase-callout', '.record', '.crpd-card', '.crpd-cards',
 

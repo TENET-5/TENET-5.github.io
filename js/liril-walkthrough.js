@@ -406,13 +406,41 @@
     }
 
     // Slide = a narratable section of content. Outer-wins for nesting.
+    // Comprehensive selector list covers the ~30+ card/section patterns
+    // used across different investigation pages on TENET5. Pages that
+    // use <div class="program-card"> or <div class="callout"> instead
+    // of <section> still get full narration coverage.
     var SLIDE_SELECTORS = [
-      '.page-hero', '.hero', '.tl-hero', '.stat-hero-banner',
+      // Explicit data-narrate — always a slide, regardless of tag
+      '[data-narrate]',
+      // Semantic sections
       'section', 'article',
-      '.timeline-section', '.tl-timeline', '.timeline',
-      '.finding-box', '.case-card', '.evidence-block',
-      '.loop-diagram', '.loop-step',
-      '.narrative-intro', '.credibility-card'
+      // Hero variants
+      '.page-hero', '.hero', '.tl-hero', '.stat-hero-banner',
+      '.bloggins-hero', '.cca-hero', '.cm-hero', '.conv-hero',
+      '.cra-hero', '.crown-hero', '.debt-hero', '.ge-hero',
+      '.imm-hero', '.infra-hero', '.news-hero', '.pattern-hero',
+      '.pdd-hero', '.prov-hero', '.records-hero', '.ta-hero', '.vr-hero',
+      // Timeline variants
+      '.timeline-section', '.tl-timeline', '.timeline', '.timeline-item',
+      '.timeline-entry', '.timeline-node',
+      // Card patterns (vast majority of investigation-page content)
+      '.finding-box', '.case-card', '.evidence-block', '.program-card',
+      '.stat-card', '.stat-row', '.source-block',
+      '.callout', '.call-out', '.callout-box',
+      '.person-card', '.country-card', '.credibility-card',
+      '.purchase-callout', '.record', '.crpd-card',
+      '.evidence-box', '.finding-card', '.verdict-box',
+      '.alert-card', '.anomaly-card',
+      // Named page sections
+      '.narrative-intro', '.hero-section',
+      '.dnd-section', '.cc-section', '.cg-section', '.ge-section',
+      '.ph-section', '.se-section', '.ta-section', '.war-section',
+      '.charge-section', '.corp-section', '.data-section',
+      '.entity-section', '.networks-section', '.pattern-section',
+      '.section-block', '.section-head',
+      // Loop / diagram blocks
+      '.loop-diagram', '.loop-step'
     ];
 
     var points = [];
