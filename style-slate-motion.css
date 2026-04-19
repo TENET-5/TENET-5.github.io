@@ -1,0 +1,233 @@
+/* ─────────────────────────────────────────────────────────────
+   TENET5 — SLATE MOTION SYSTEM
+   Awwwards-style micro-interactions, applied to the slate palette.
+   Modified: 2026-04-19
+
+   Research notes (for future maintainers):
+   Survey of award-winning design sites (Awwwards 2024-2026, FWA,
+   CSSDA) reveals a consistent motion grammar that feels premium:
+
+   1. SCROLL-TRIGGERED REVEAL — elements fade/slide into place
+      as they enter the viewport. IntersectionObserver gated.
+      Duration 600-900ms with custom easing. Often combined with
+      a subtle 20-40px translate.
+
+   2. CHARACTER-SPLIT HEADINGS — split a heading into spans per
+      character/word, stagger each with 40-80ms delay. Each span
+      gets opacity 0 → 1 + translateY 30px → 0. Looks cinematic;
+      costs almost nothing.
+
+   3. CURSOR-FOLLOWING HIGHLIGHTS — large pointer-tracking blur
+      gradient follows the cursor on dark sections. Subtle
+      (radial 300-400px, low opacity). Adds life without noise.
+
+   4. HOVER-SHIFT WITH EASING — cards scale 1.02 + translateY(-3px)
+      on hover with 400ms cubic-bezier. Longer duration than
+      default feels more luxurious.
+
+   5. SVG STROKE DRAW — critical for technical-looking diagrams.
+      Use stroke-dasharray + stroke-dashoffset animation from
+      path length to 0.
+
+   6. SCAN-LINE OVERLAYS — horizontal 2-4px line that sweeps
+      down then disappears on initial reveal. Dates a design as
+      1990s-terminal inspired, fits our 1950s field-watch base.
+
+   7. MAGNETIC BUTTONS — button content (not the button box)
+      shifts a few pixels toward the cursor on hover. Uses
+      transform + delay.
+
+   8. NUMBER ROLL-UP — stat counters count up from 0 to target
+      over 1-2s on first viewport entry.
+
+   9. CURVE-EASED PAGE TRANSITIONS — full-page sweep overlay with
+      cubic-bezier(.86, 0, .07, 1) (InOutExpo) on nav events.
+
+   10. NOISE GRAIN OVERLAY — static 2-3% opacity PNG texture
+       fixed to viewport. We already have .grain-overlay.
+
+   All effects below are SCOPED to .ts-motion so they're opt-in
+   per page. Honour prefers-reduced-motion: reduce by reducing
+   durations to ~1ms and removing translate/scale, preserving
+   visibility.
+   ───────────────────────────────────────────────────────────── */
+
+.ts-motion { --ts-ease-premium: cubic-bezier(.16, .84, .44, 1);
+             --ts-ease-expo:    cubic-bezier(.86, 0, .07, 1);
+             --ts-motion-d:     700ms;
+}
+
+/* === 1. Reveal on scroll (IntersectionObserver hooks these) === */
+.ts-motion .ts-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--ts-motion-d) var(--ts-ease-premium),
+              transform var(--ts-motion-d) var(--ts-ease-premium);
+  will-change: opacity, transform;
+}
+.ts-motion .ts-reveal.ts-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Variant: horizontal reveal */
+.ts-motion .ts-reveal-x   { transform: translateX(-30px); }
+.ts-motion .ts-reveal-x.ts-in { transform: translateX(0); }
+
+/* Variant: scale-up reveal */
+.ts-motion .ts-reveal-scale      { transform: scale(0.96); }
+.ts-motion .ts-reveal-scale.ts-in { transform: scale(1); }
+
+/* === 2. Character-split heading (no JS required — uses CSS vars) === */
+.ts-motion .ts-split-chars { display: inline-flex; flex-wrap: wrap; gap: 0.01em; }
+.ts-motion .ts-split-chars > span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: ts-char-in 800ms var(--ts-ease-premium) forwards;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+@keyframes ts-char-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === 3. Cursor-following highlight (on body with JS hook) === */
+.ts-motion::before {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  width: 340px; height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(181,131,90,0.10) 0%, transparent 65%);
+  left: var(--ts-cursor-x, 50%);
+  top:  var(--ts-cursor-y, 50%);
+  transform: translate(-50%, -50%);
+  transition: left 400ms var(--ts-ease-premium), top 400ms var(--ts-ease-premium);
+  mix-blend-mode: screen;
+}
+
+/* === 4. Hover shift — cards === */
+.ts-motion .ts-card,
+.ts-motion .mpa-card,
+.ts-motion .cta-card {
+  transition: transform 420ms var(--ts-ease-premium),
+              border-color 420ms var(--ts-ease-premium),
+              box-shadow 420ms var(--ts-ease-premium);
+}
+.ts-motion .ts-card:hover,
+.ts-motion .mpa-card:hover,
+.ts-motion .cta-card:hover {
+  transform: translateY(-3px) scale(1.012);
+  box-shadow: var(--slate-shadow-lg);
+}
+
+/* === 5. SVG stroke-draw (apply class to <path>/<line>) === */
+.ts-motion .ts-stroke {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: ts-draw 2400ms var(--ts-ease-expo) forwards;
+}
+@keyframes ts-draw { to { stroke-dashoffset: 0; } }
+
+/* === 6. Scan line overlay on reveal === */
+.ts-motion .ts-scan {
+  position: relative;
+  overflow: hidden;
+}
+.ts-motion .ts-scan::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--slate-brass-hi) 50%,
+    transparent 100%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+  animation: ts-scanline 1400ms var(--ts-ease-premium) forwards;
+}
+.ts-motion .ts-scan.ts-in::after { animation-play-state: running; }
+@keyframes ts-scanline {
+  0%   { top: 0;    opacity: 0; }
+  15%  {             opacity: 0.8; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* === 7. Magnetic buttons (class + JS hook sets --ts-mx / --ts-my) === */
+.ts-motion .ts-magnetic {
+  display: inline-block;
+  transition: transform 200ms var(--ts-ease-premium);
+  transform: translate(var(--ts-mx, 0px), var(--ts-my, 0px));
+}
+
+/* === 8. Number roll-up — container gets .ts-rollup, number span gets .ts-n === */
+.ts-motion .ts-rollup .ts-n {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  display: inline-block;
+  min-width: 1.5ch;
+}
+
+/* === 9. Page transition overlay (fires on nav click w/ JS hook) === */
+.ts-motion .ts-page-sweep {
+  position: fixed; inset: 0; z-index: 9998;
+  background: linear-gradient(135deg, var(--slate-overlay), var(--slate-bg));
+  transform: translateY(100%);
+  transition: transform 650ms var(--ts-ease-expo);
+  pointer-events: none;
+}
+.ts-motion .ts-page-sweep.ts-active {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* === 10. Brass cursor-dot for hover on interactive elements === */
+.ts-motion a:hover, .ts-motion button:hover {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%23b5835a'/%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%23b5835a' stroke-width='1'/%3E%3C/svg%3E") 10 10, pointer;
+}
+
+/* === 11. Text underline — brass ink draw on hover === */
+.ts-motion .ts-slate a:not(.ts-magnetic) {
+  position: relative;
+  border-bottom: 0;
+  background-image: linear-gradient(90deg, var(--slate-brass), var(--slate-brass));
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  transition: background-size 400ms var(--ts-ease-premium);
+}
+.ts-motion .ts-slate a:hover {
+  background-size: 100% 1px;
+}
+
+/* === 12. Contour drift — topo background slowly drifts horizontally === */
+.ts-motion.ts-slate::before {
+  animation: ts-contour-drift 60s linear infinite;
+}
+@keyframes ts-contour-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 240px 0; }
+}
+
+/* === Reduced-motion respect === */
+@media (prefers-reduced-motion: reduce) {
+  .ts-motion, .ts-motion * {
+    animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001s !important;
+  }
+  .ts-motion .ts-reveal,
+  .ts-motion .ts-reveal-x,
+  .ts-motion .ts-reveal-scale,
+  .ts-motion .ts-split-chars > span {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .ts-motion::before,
+  .ts-motion .ts-scan::after { display: none; }
+  .ts-motion.ts-slate::before { animation: none; }
+}
