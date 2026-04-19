@@ -99,6 +99,49 @@
       <p><strong>What 'thinking' means in this version.</strong> CPU-heuristic classification: keyword matching against the 19-axis vocabulary, git subject-line pattern check, schema-validation of every transcript. <em>Not</em> full-neural reasoning yet — that's what happens when a signal escalates to a backlog task and the dev-team daemon picks it up. The heuristics filter the firehose; the neural model does the hard thinking on the survivors.</p>
     </div>
 
+    <!-- ── P-vs-NP TELEMETRY CARD (WS-040) ─────────────────────────── -->
+    <div id="pvsnp-telemetry" style="background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(167,139,250,0.02));border:1px solid rgba(167,139,250,0.3);border-left:4px solid #a78bfa;border-radius:8px;padding:1.2rem 1.4rem;margin:1.5rem 0;">
+      <h3 style="font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:#a78bfa;font-family:'JetBrains Mono',monospace;margin:0 0 0.6rem;">P-vs-NP telemetry &mdash; tools/pvsnp_bench.py</h3>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin:0 0 0.9rem;line-height:1.5;">Scaling exponents from the latest benchmark. Green &lt;1.5 = sub-quadratic (LLM handling it well). Yellow 1.5&ndash;2.5 = polynomial. Red &gt;2.5 = steep / intractable with current model. Data source: <code>data/pvsnp_bench_results.jsonl</code>.</p>
+      <div id="pvsnp-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.7rem;">
+        <div style="opacity:0.6;font-size:0.8rem;color:var(--text-tertiary);">loading&hellip;</div>
+      </div>
+      <p id="pvsnp-ts" style="font-size:0.7rem;color:var(--text-tertiary);margin:0.7rem 0 0;font-family:'JetBrains Mono',monospace;"></p>
+    </div>
+    <script>
+    (async function() {
+      const grid = document.getElementById('pvsnp-grid');
+      const ts = document.getElementById('pvsnp-ts');
+      try {
+        const r = await fetch('data/pvsnp_bench_results.jsonl');
+        if (!r.ok) throw new Error('fetch failed ' + r.status);
+        const text = await r.text();
+        const lines = text.trim().split('\n').filter(Boolean);
+        if (!lines.length) { grid.innerHTML = '<div style="color:var(--text-tertiary);">no data yet &mdash; run <code>python tools/pvsnp_bench.py</code></div>'; return; }
+        const latest = JSON.parse(lines[lines.length - 1]);
+        const scaling = latest.scaling || {};
+        const colourFor = e => (e == null ? '#6b7280' : e < 1.5 ? '#22c55e' : e < 2.5 ? '#facc15' : '#ef4444');
+        const labelFor = e => (e == null ? '—' : e < 1.5 ? 'sub-quadratic' : e < 2.5 ? 'polynomial' : 'steep');
+        const cards = Object.keys(scaling).map(k => {
+          const s = scaling[k] || {};
+          const e = typeof s === 'number' ? s : s.exponent;
+          const note = s.note || '';
+          const col = colourFor(e);
+          return `<div style="background:rgba(5,10,20,0.4);border:1px solid ${col}55;border-radius:6px;padding:0.7rem 0.9rem;">
+            <div style="font-size:0.65rem;color:${col};letter-spacing:0.08em;text-transform:uppercase;font-weight:700;">${k}</div>
+            <div style="font-size:1.4rem;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;margin-top:0.1rem;">${e == null ? '—' : e.toFixed(2)}</div>
+            <div style="font-size:0.7rem;color:${col};">${labelFor(e)}</div>
+            <div style="font-size:0.66rem;color:var(--text-tertiary);margin-top:0.4rem;">${note}</div>
+          </div>`;
+        });
+        grid.innerHTML = cards.join('') || '<div style="color:var(--text-tertiary);">no scaling metrics in latest entry</div>';
+        ts.textContent = 'latest bench: ' + (latest.timestamp || '?') + '  ·  host: ' + (latest.host || '?');
+      } catch (e) {
+        grid.innerHTML = `<div style="color:var(--text-tertiary);">data fetch failed: ${e.message}</div>`;
+      }
+    })();
+    </script>
+
     <!-- Faculty cards -->
     <div class="faculty-grid">
       <div class="faculty sees">
