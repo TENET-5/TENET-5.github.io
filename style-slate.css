@@ -1,0 +1,313 @@
+/* ─────────────────────────────────────────────────────────────
+   TENET5 — SLATE DESIGN SYSTEM
+   1950s field watch × contourography × modern typography
+   Neither dark nor light: mid-tone base at L*≈45 LAB
+   Modified: 2026-04-19
+   ─────────────────────────────────────────────────────────────
+
+   Design rationale (for future maintainers):
+   - User rejected both dark- and light-theme conventions.
+   - Target base luminance is LAB L*≈45, chroma ≤20 (muted).
+   - Hue centre: cool blue-grey (H≈220), with warm accents at H≈40
+     (aged brass) for primary-source citations.
+   - Reference objects: Benrus/Hamilton field watches c.1953, USGS
+     topographic line shading, Patagonia workwear catalog.
+   - Zero pure black (#000), zero pure white (#fff), zero neon.
+   - All hues within the "trustworthy archival document" visual
+     band — adult reader who wants verifiable facts.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* === SURFACES (mid-tone base, not dark/not light) === */
+  --slate-bg:         #5c6773;  /* primary background, slate blue-grey */
+  --slate-raised:     #68737f;  /* lifted card surface */
+  --slate-sunken:     #4f5965;  /* sunken data-block / quote boxes */
+  --slate-overlay:    #3b434d;  /* modal / drawer */
+
+  /* === INK (warm off-whites on slate, never pure white) === */
+  --slate-ink:        #e8eae6;  /* primary text on slate, warm cream */
+  --slate-ink-strong: #f4f5ef;  /* emphasized headings */
+  --slate-ink-dim:    #b0b4b0;  /* secondary text */
+  --slate-ink-muted:  #8a8f8a;  /* tertiary / timestamps */
+
+  /* === ACCENTS (steel-blue, no neon) === */
+  --slate-accent:     #8fa2b3;  /* primary accent, desaturated steel blue */
+  --slate-accent-hi:  #a8bac9;  /* hover / emphasis */
+  --slate-accent-lo:  #6e8090;  /* pressed / subdued */
+  --slate-link:       #aec0d0;  /* hyperlink on slate */
+  --slate-link-hover: #c8d5df;
+
+  /* === FIELD-WATCH BRASS (primary-source / archival accents) === */
+  --slate-brass:      #b5835a;  /* aged brass — for citations + source badges */
+  --slate-brass-hi:   #c99870;  /* brass hover */
+  --slate-brass-lo:   #8f6645;  /* brass deep / border */
+
+  /* === TOPOGRAPHIC / CONTOUR === */
+  --slate-contour:    #7d8a95;  /* topo line overlay hue */
+  --slate-contour-dim: #6a7782; /* faint contour */
+  --slate-grid:       #565e68;  /* subtle grid background */
+
+  /* === SEMANTIC (muted, not alarm-bright) === */
+  --slate-critical:   #a45a52;  /* muted brick red — critical findings */
+  --slate-critical-dim: #7a4540;
+  --slate-warning:    #b79352;  /* muted amber — warnings */
+  --slate-verified:   #6e8f68;  /* muted field green — verified facts */
+  --slate-verified-dim: #567154;
+  --slate-info:       #7b9bb3;  /* muted info blue */
+
+  /* === BORDERS === */
+  --slate-border:     #4a525c;  /* hairline border */
+  --slate-border-hi:  #5d6772;  /* hover border */
+  --slate-border-lo:  #3d444d;  /* recessed border */
+
+  /* === GEOMETRY === */
+  --slate-radius-sm:  3px;   /* hairline details */
+  --slate-radius-md:  6px;   /* cards */
+  --slate-radius-lg:  10px;  /* panels */
+
+  /* === TYPOGRAPHY === */
+  --slate-font-body:  'Inter', 'Segoe UI', -apple-system, sans-serif;
+  --slate-font-mono:  'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --slate-font-head:  'Inter', 'Helvetica Neue', sans-serif;
+
+  /* === SHADOWS (subtle, field-watch crystal suggestion) === */
+  --slate-shadow-sm:  0 1px 2px rgba(20, 25, 32, 0.25);
+  --slate-shadow-md:  0 2px 6px rgba(20, 25, 32, 0.30), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  --slate-shadow-lg:  0 8px 24px rgba(20, 25, 32, 0.35), 0 0 0 1px rgba(255,255,255,0.05) inset;
+
+  /* === CONTOURGRAPHY SVG (tiled background) === */
+  --slate-contour-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%237d8a95' stroke-width='0.4' stroke-opacity='0.18'%3E%3Cpath d='M0,40 Q60,20 120,40 T240,40' /%3E%3Cpath d='M0,80 Q60,60 120,80 T240,80' /%3E%3Cpath d='M0,120 Q60,100 120,120 T240,120' /%3E%3Cpath d='M0,160 Q60,140 120,160 T240,160' /%3E%3Cpath d='M0,200 Q60,180 120,200 T240,200' /%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TENET5-SLATE CLASSES
+   These don't override the existing style.css variables — they
+   introduce a new, opt-in design layer. Use .ts- prefix so pages
+   can incrementally migrate without breaking the old theme.
+   ───────────────────────────────────────────────────────────── */
+
+.ts-slate {
+  background: var(--slate-bg);
+  color: var(--slate-ink);
+  font-family: var(--slate-font-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ts-slate::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: var(--slate-contour-svg);
+  background-size: 240px 240px;
+  opacity: 0.6;
+}
+
+.ts-slate > * { position: relative; z-index: 1; }
+
+/* === Typography === */
+.ts-slate h1, .ts-slate h2, .ts-slate h3, .ts-slate h4 {
+  font-family: var(--slate-font-head);
+  color: var(--slate-ink-strong);
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+.ts-slate h1 { font-size: 2.1rem; margin: 0 0 1rem; letter-spacing: -0.015em; }
+.ts-slate h2 {
+  font-size: 0.78rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--slate-accent);
+  font-family: var(--slate-font-mono);
+  border-bottom: 1px solid var(--slate-border);
+  padding-bottom: 0.5rem;
+  margin: 2rem 0 1rem;
+}
+.ts-slate h3 { font-size: 1.05rem; color: var(--slate-ink-strong); margin: 1.3rem 0 0.5rem; }
+
+.ts-slate p { color: var(--slate-ink); font-size: 0.95rem; }
+.ts-slate .muted { color: var(--slate-ink-dim); font-size: 0.88rem; }
+
+.ts-slate a {
+  color: var(--slate-link);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--slate-link);
+}
+.ts-slate a:hover {
+  color: var(--slate-link-hover);
+  border-bottom-color: var(--slate-link-hover);
+}
+
+/* === Field-watch card — the signature element === */
+.ts-card {
+  background: var(--slate-raised);
+  border: 1px solid var(--slate-border);
+  border-radius: var(--slate-radius-md);
+  padding: 1.3rem 1.5rem;
+  margin: 1rem 0;
+  box-shadow: var(--slate-shadow-sm);
+  position: relative;
+}
+.ts-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; height: 100%; width: 3px;
+  background: var(--slate-brass);
+  border-radius: var(--slate-radius-md) 0 0 var(--slate-radius-md);
+}
+
+.ts-card-head {
+  font-family: var(--slate-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate-ink-dim);
+  margin-bottom: 0.5rem;
+}
+
+/* === Primary-source citation — brass finish === */
+.ts-cite {
+  display: inline-block;
+  background: rgba(181, 131, 90, 0.10);
+  border: 1px solid rgba(181, 131, 90, 0.35);
+  color: var(--slate-brass-hi);
+  font-family: var(--slate-font-mono);
+  font-size: 0.78rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--slate-radius-sm);
+  letter-spacing: 0.03em;
+}
+
+/* === Fact record — flat factual statement, no editorial voice === */
+.ts-fact {
+  background: var(--slate-sunken);
+  border-left: 3px solid var(--slate-verified);
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+  border-radius: 0 var(--slate-radius-sm) var(--slate-radius-sm) 0;
+}
+.ts-fact::before {
+  content: 'Per record';
+  display: block;
+  font-family: var(--slate-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate-verified);
+  margin-bottom: 0.3rem;
+}
+
+.ts-critical {
+  background: var(--slate-sunken);
+  border-left: 3px solid var(--slate-critical);
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+  border-radius: 0 var(--slate-radius-sm) var(--slate-radius-sm) 0;
+}
+.ts-critical::before {
+  content: 'Critical finding';
+  display: block;
+  font-family: var(--slate-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate-critical);
+  margin-bottom: 0.3rem;
+}
+
+/* === Numerical statistic — field-watch dial === */
+.ts-stat {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--slate-sunken);
+  border: 1px solid var(--slate-border);
+  border-radius: var(--slate-radius-md);
+  padding: 0.9rem 1.2rem;
+  margin: 0.3rem;
+  min-width: 120px;
+}
+.ts-stat .n {
+  font-family: var(--slate-font-mono);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--slate-brass);
+  letter-spacing: -0.02em;
+}
+.ts-stat .l {
+  font-family: var(--slate-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate-ink-dim);
+  margin-top: 0.3rem;
+}
+
+/* === Hairline divider — topo-line aesthetic === */
+.ts-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--slate-contour), transparent);
+  margin: 2rem 0;
+}
+
+/* === Reveal section spacing === */
+.ts-section {
+  max-width: 880px;
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+}
+
+/* === Button — solid field-watch crown === */
+.ts-btn {
+  display: inline-block;
+  background: var(--slate-brass);
+  color: #2b1c10;
+  font-family: var(--slate-font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--slate-radius-sm);
+  border: 0;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid transparent;
+}
+.ts-btn:hover { background: var(--slate-brass-hi); border-bottom-color: transparent; }
+
+.ts-btn-ghost {
+  background: transparent;
+  color: var(--slate-ink);
+  border: 1px solid var(--slate-border-hi);
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--slate-radius-sm);
+  font-family: var(--slate-font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.ts-btn-ghost:hover { border-color: var(--slate-accent); color: var(--slate-accent-hi); }
+
+/* === Media query === */
+@media (max-width: 640px) {
+  .ts-slate h1 { font-size: 1.55rem; }
+  .ts-slate h2 { font-size: 0.7rem; }
+  .ts-card { padding: 1rem 1.1rem; }
+}
+
+/* === Reduced-motion respect === */
+@media (prefers-reduced-motion: reduce) {
+  .ts-slate *, .ts-slate *::before, .ts-slate *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}

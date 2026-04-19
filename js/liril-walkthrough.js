@@ -754,12 +754,64 @@
           margin-top: 10px; text-align: right;
           font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.5px;
         }
-        /* Active narration point highlight */
+        /* Active narration point highlight — Jurassic-Park style:
+           brass aperture + directional arrow + mild pulse. The
+           element being read gets a scoped spotlight; everything
+           else fades slightly so the reader's eye is drawn to
+           the current text, the way the fossil dig sequence in
+           the 1993 film pulls the viewer through reconstruction
+           stage by stage. */
         .liril-narrating-point {
-          outline: 2px solid rgba(14,165,233,0.3) !important;
-          outline-offset: 8px !important;
-          box-shadow: 0 0 30px rgba(14,165,233,0.06);
-          transition: outline 0.4s ease, box-shadow 0.4s ease;
+          position: relative;
+          outline: 2px solid rgba(181,131,90,0.7) !important;
+          outline-offset: 6px !important;
+          box-shadow:
+            0 0 0 4px rgba(181,131,90,0.10),
+            0 0 42px rgba(181,131,90,0.18),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+          border-radius: 6px;
+          transition: outline 0.35s ease, box-shadow 0.6s ease, transform 0.5s ease;
+          animation: liril-aperture-pulse 3.2s ease-in-out infinite;
+        }
+        .liril-narrating-point::before {
+          content: '';
+          position: absolute;
+          left: -22px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 0; height: 0;
+          border-top: 8px solid transparent;
+          border-bottom: 8px solid transparent;
+          border-left: 12px solid #b5835a;
+          opacity: 0.85;
+          pointer-events: none;
+          animation: liril-arrow-bob 1.6s ease-in-out infinite;
+        }
+        @keyframes liril-aperture-pulse {
+          0%, 100% {
+            outline-color: rgba(181,131,90,0.7);
+            box-shadow: 0 0 0 4px rgba(181,131,90,0.10), 0 0 42px rgba(181,131,90,0.18), inset 0 0 0 1px rgba(255,255,255,0.04);
+          }
+          50% {
+            outline-color: rgba(181,131,90,0.95);
+            box-shadow: 0 0 0 5px rgba(181,131,90,0.15), 0 0 62px rgba(181,131,90,0.28), inset 0 0 0 1px rgba(255,255,255,0.06);
+          }
+        }
+        @keyframes liril-arrow-bob {
+          0%, 100% { transform: translate(0, -50%); }
+          50%      { transform: translate(3px, -50%); }
+        }
+        /* Defocus everything else during narration */
+        body.liril-narrating .liril-narrating-point { opacity: 1; filter: none; }
+        body.liril-narrating .content > section:not(:has(.liril-narrating-point)) {
+          opacity: 0.35;
+          filter: saturate(0.75);
+          transition: opacity 0.8s ease, filter 0.8s ease;
+        }
+        /* Reader-respect: skip animations if user has reduced-motion on */
+        @media (prefers-reduced-motion: reduce) {
+          .liril-narrating-point, .liril-narrating-point::before { animation: none !important; }
+          body.liril-narrating .content > section { opacity: 1 !important; filter: none !important; }
         }
 
         /* Mobile Optimization */
@@ -1003,11 +1055,14 @@
 
       point.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Highlight via CSS class
+      // Highlight via CSS class — also toggle body.liril-narrating so
+      // the surrounding sections dim (Jurassic-Park-style attention
+      // draw). Cleared when narration stops (below + in hideSubtitle).
       points.forEach(function(p) {
         p.el.classList.remove('liril-narrating-point');
       });
       point.el.classList.add('liril-narrating-point');
+      document.body.classList.add('liril-narrating');
 
       // Subtitle
       subtitleText.innerHTML = '';
@@ -1249,6 +1304,7 @@
       startBtn.style.background = '';
       startBtn.setAttribute('aria-expanded', 'false');
       points.forEach(function(p) { p.el.classList.remove('liril-narrating-point'); });
+      document.body.classList.remove('liril-narrating');
       currentPoint = -1;
       hideTourProgress();
     }
