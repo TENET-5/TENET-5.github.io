@@ -26,44 +26,58 @@
   <meta name="dc.source" content="TENET5 mp_criminal_ethics_dossier.json (generated 2026-04-07); Ethics Commissioner public reports; CBC News; Global News; Canada Elections Act court decisions">
 
   <style>
-    /* Clean, readable rebuild — no overlapping labels, no red-bubble soup. */
+    /* 2026-04-19: rebound mpa-* colour tokens onto slate palette so
+       this page becomes the first visible demonstration of the
+       new 1950s field-watch × contourography design system. Card
+       shape unchanged; chroma shifts from purple/red to slate +
+       brass. Existing JS (renderCriminal etc.) keeps working. */
+
+    /* Page background: slate base + tiled contour topo lines */
+    body.topo {
+      background: var(--slate-bg) !important;
+      background-image: var(--slate-contour-svg) !important;
+      background-size: 240px 240px !important;
+      color: var(--slate-ink);
+    }
+
     .mpa-hero {
-      background: linear-gradient(135deg, rgba(167,139,250,0.10), rgba(167,139,250,0.02));
-      border: 1px solid rgba(167,139,250,0.25);
-      border-left: 5px solid #a78bfa;
-      border-radius: var(--r-md);
+      background: linear-gradient(135deg, rgba(143,162,179,0.12), rgba(143,162,179,0.03));
+      border: 1px solid rgba(143,162,179,0.28);
+      border-left: 5px solid var(--slate-brass);
+      border-radius: var(--slate-radius-md);
       padding: 1.6rem 1.8rem;
       margin: 1.5rem 0 2rem;
     }
-    .mpa-hero h1 { color: #fff; font-size: 1.8rem; margin: 0 0 0.5rem; }
-    .mpa-hero .tag { font-family: 'JetBrains Mono',monospace; font-size: 0.75rem;
-      color: #a78bfa; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
-    .mpa-hero p { color: var(--text-secondary); line-height: 1.65; margin: 0.6rem 0 0; }
-    .mpa-liril-note { background: rgba(14,165,233,0.06); border: 1px solid rgba(14,165,233,0.25);
-      border-radius: 6px; padding: 0.8rem 1rem; margin-top: 1rem; font-size: 0.85rem;
-      color: var(--text-secondary); }
-    .mpa-liril-note strong { color: #38bdf8; }
+    .mpa-hero h1 { color: var(--slate-ink-strong); font-size: 1.8rem; margin: 0 0 0.5rem; font-family: var(--slate-font-head); }
+    .mpa-hero .tag { font-family: var(--slate-font-mono); font-size: 0.75rem;
+      color: var(--slate-brass-hi); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .mpa-hero p { color: var(--slate-ink-dim); line-height: 1.65; margin: 0.6rem 0 0; }
+    .mpa-liril-note { background: rgba(143,162,179,0.08); border: 1px solid rgba(143,162,179,0.28);
+      border-radius: var(--slate-radius-sm); padding: 0.8rem 1rem; margin-top: 1rem; font-size: 0.85rem;
+      color: var(--slate-ink-dim); }
+    .mpa-liril-note strong { color: var(--slate-accent-hi); }
 
     .mpa-summary {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 0.9rem; margin: 1.5rem 0 2rem;
     }
     .mpa-stat {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+      background: var(--slate-sunken); border: 1px solid var(--slate-border); border-radius: var(--slate-radius-md);
       padding: 1rem 1.1rem; text-align: center;
     }
-    .mpa-stat .n { font-size: 1.9rem; font-weight: 800; color: #fff;
-      font-family: 'JetBrains Mono',monospace; display: block; }
-    .mpa-stat .l { font-size: 0.72rem; color: var(--text-tertiary);
-      text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.3rem; display: block; }
+    .mpa-stat .n { font-size: 1.9rem; font-weight: 800; color: var(--slate-brass);
+      font-family: var(--slate-font-mono); display: block; letter-spacing: -0.02em; }
+    .mpa-stat .l { font-size: 0.72rem; color: var(--slate-ink-muted);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.3rem; display: block;
+      font-family: var(--slate-font-mono); }
 
     .mpa-section { margin: 2.5rem 0 1rem; }
     .mpa-section h2 {
       font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase;
-      color: #6ea8f7; border-bottom: 1px solid var(--border); padding-bottom: 0.6rem;
-      margin-bottom: 1.2rem; font-family: 'JetBrains Mono', monospace;
+      color: var(--slate-accent); border-bottom: 1px solid var(--slate-border); padding-bottom: 0.6rem;
+      margin-bottom: 1.2rem; font-family: var(--slate-font-mono);
     }
-    .mpa-section-desc { color: var(--text-secondary); font-size: 0.9rem;
+    .mpa-section-desc { color: var(--slate-ink-dim); font-size: 0.9rem;
       line-height: 1.6; margin: -0.5rem 0 1.5rem; }
 
     .mpa-grid {
@@ -72,50 +86,60 @@
     }
 
     .mpa-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 1.2rem 1.4rem; position: relative; transition: border-color 0.2s;
+      background: var(--slate-raised); border: 1px solid var(--slate-border); border-radius: var(--slate-radius-md);
+      padding: 1.2rem 1.4rem; position: relative; transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: var(--slate-shadow-sm);
     }
-    .mpa-card:hover { border-color: rgba(167,139,250,0.4); }
-    .mpa-card.sev-criminal { border-left: 4px solid #dc2626; }
-    .mpa-card.sev-ethics   { border-left: 4px solid #f59e0b; }
-    .mpa-card.sev-foreign  { border-left: 4px solid #a78bfa; }
-    .mpa-card.sev-expelled { border-left: 4px solid #fb923c; }
-    .mpa-card.sev-other    { border-left: 4px solid #6ea8f7; }
+    .mpa-card:hover { border-color: var(--slate-border-hi); box-shadow: var(--slate-shadow-md); }
+    /* Severity stripes — muted slate semantic tokens, not alarm-bright */
+    .mpa-card.sev-criminal { border-left: 4px solid var(--slate-critical); }
+    .mpa-card.sev-ethics   { border-left: 4px solid var(--slate-warning); }
+    .mpa-card.sev-foreign  { border-left: 4px solid var(--slate-accent); }
+    .mpa-card.sev-expelled { border-left: 4px solid var(--slate-brass); }
+    .mpa-card.sev-other    { border-left: 4px solid var(--slate-info); }
 
-    .mpa-card .name { color: #fff; font-size: 1.05rem; font-weight: 700;
-      margin: 0 0 0.2rem; }
-    .mpa-card .meta { font-family: 'JetBrains Mono',monospace; font-size: 0.72rem;
-      color: var(--text-tertiary); letter-spacing: 0.04em; margin-bottom: 0.9rem; }
-    .mpa-card .offence { color: var(--text-secondary); font-size: 0.88rem;
+    .mpa-card .name { color: var(--slate-ink-strong); font-size: 1.05rem; font-weight: 700;
+      margin: 0 0 0.2rem; font-family: var(--slate-font-head); }
+    .mpa-card .meta { font-family: var(--slate-font-mono); font-size: 0.72rem;
+      color: var(--slate-ink-muted); letter-spacing: 0.04em; margin-bottom: 0.9rem; }
+    .mpa-card .offence { color: var(--slate-ink-dim); font-size: 0.88rem;
       line-height: 1.6; margin: 0.5rem 0; }
-    .mpa-card .offence strong { color: #fff; }
-    .mpa-card .sentence { background: rgba(220,38,38,0.06); border-left: 3px solid #dc2626;
-      padding: 0.5rem 0.8rem; font-size: 0.82rem; color: var(--text-secondary);
-      border-radius: 4px; margin: 0.6rem 0; }
+    .mpa-card .offence strong { color: var(--slate-ink-strong); }
+    .mpa-card .sentence { background: rgba(164,90,82,0.10); border-left: 3px solid var(--slate-critical);
+      padding: 0.5rem 0.8rem; font-size: 0.82rem; color: var(--slate-ink-dim);
+      border-radius: var(--slate-radius-sm); margin: 0.6rem 0; }
     .mpa-card .source { display: inline-block; margin-top: 0.7rem; font-size: 0.78rem; }
-    .mpa-card .source a { color: #38bdf8; text-decoration: none; word-break: break-all; }
-    .mpa-card .source a:hover { text-decoration: underline; }
+    .mpa-card .source a { color: var(--slate-brass-hi); text-decoration: none; word-break: break-all;
+      font-family: var(--slate-font-mono); border-bottom: 1px dotted var(--slate-brass-lo); }
+    .mpa-card .source a:hover { color: var(--slate-brass-hi); border-bottom-color: var(--slate-brass-hi); }
 
+    /* Party pills — all tones shifted toward muted slate-compatible
+       hues. Intentionally NOT bright primary colours; keeps the page
+       readable as an archival document rather than a campaign poster.
+       Each party remains visually distinguishable by hue (critical/
+       accent/warning/info/verified/brass) but none shout. */
     .mpa-pill { display: inline-block; font-size: 0.68rem; font-weight: 700;
-      padding: 0.15rem 0.55rem; border-radius: 10px; margin-right: 0.3rem; letter-spacing: 0.04em; }
-    .mpa-pill.p-lib  { background: rgba(211,47,47,0.15); color: #ef5350; }
-    .mpa-pill.p-con  { background: rgba(21,101,192,0.15); color: #5c9dff; }
-    .mpa-pill.p-ndp  { background: rgba(245,124,0,0.15); color: #ffb74d; }
-    .mpa-pill.p-bq   { background: rgba(41,182,246,0.15); color: #4dd0e1; }
-    .mpa-pill.p-gpc  { background: rgba(46,125,50,0.15); color: #66bb6a; }
-    .mpa-pill.p-ind  { background: rgba(120,144,156,0.15); color: #b0bec5; }
-    .mpa-pill.year   { background: rgba(255,255,255,0.06); color: #c9d1d9;
-      font-family: 'JetBrains Mono',monospace; }
+      padding: 0.15rem 0.55rem; border-radius: 10px; margin-right: 0.3rem; letter-spacing: 0.04em;
+      font-family: var(--slate-font-mono); }
+    .mpa-pill.p-lib  { background: rgba(164,90,82,0.18);  color: #d88b82; }  /* muted brick */
+    .mpa-pill.p-con  { background: rgba(123,155,179,0.18); color: #b5cde0; } /* muted info */
+    .mpa-pill.p-ndp  { background: rgba(183,147,82,0.18); color: #d7b477; }  /* muted amber */
+    .mpa-pill.p-bq   { background: rgba(143,162,179,0.18); color: #b8c9d6; } /* slate accent */
+    .mpa-pill.p-gpc  { background: rgba(110,143,104,0.18); color: #9bb591; } /* muted verified */
+    .mpa-pill.p-ind  { background: rgba(120,144,156,0.15); color: var(--slate-ink-dim); }
+    .mpa-pill.year   { background: rgba(232,234,230,0.06); color: var(--slate-ink);
+      font-family: var(--slate-font-mono); }
 
     .mpa-viol-list { margin: 0.6rem 0 0; padding-left: 1.2rem; font-size: 0.84rem; }
-    .mpa-viol-list li { color: var(--text-secondary); line-height: 1.55;
+    .mpa-viol-list li { color: var(--slate-ink-dim); line-height: 1.55;
       margin-bottom: 0.5rem; }
-    .mpa-viol-list li strong { color: #fff; }
+    .mpa-viol-list li strong { color: var(--slate-ink-strong); }
 
     .mpa-footer { margin-top: 3rem; padding: 1.2rem 1.4rem;
-      background: rgba(5,10,20,0.4); border: 1px solid var(--border); border-radius: 8px;
-      font-size: 0.82rem; color: var(--text-secondary); line-height: 1.65; }
-    .mpa-footer strong { color: #fff; }
+      background: var(--slate-sunken); border: 1px solid var(--slate-border); border-radius: var(--slate-radius-md);
+      font-size: 0.82rem; color: var(--slate-ink-dim); line-height: 1.65; }
+    .mpa-footer strong { color: var(--slate-ink-strong); }
+    .mpa-footer p { margin: 0.5rem 0; }
   </style>
 </head>
 <body class="topo">
