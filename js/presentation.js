@@ -144,6 +144,8 @@
     'maid-economics.html',
     'maid-provincial.html',
     'maid-mental-health.html',
+    'camap.html',
+    'canadian-blood-services.html',
 
     // ── MILITARY & VETERANS ──
     'veterans.html',
@@ -365,6 +367,8 @@
     'maid-policy-evolution.html': 'How They Legislated Death',
     'maid-voting-record.html': 'MAID Voting Record \u2014 173 MPs',
     'maid-exterminators.html': 'MAID Exterminator Tracing',
+    'camap.html': 'CAMAP \u2014 MAiD Assessors & Providers',
+    'canadian-blood-services.html': 'Canadian Blood Services \u2014 Blood, Plasma, Organs, MAiD',
     'disability-genocide.html': 'Canada\u2019s War on the Disabled',
     'genocide-evidence.html': 'Genocide Evidence \u2014 Legal Analysis',
     'cija-maid-pipeline.html': 'The CIJA-IHRA-MAID Pipeline',
@@ -493,7 +497,7 @@
     var groups = {
       'Opening': ['home.html'],
       'The Investigation': ['findings.html', 'evidence-index.html', 'evidence.html', 'convergence-matrix.html', 'conspiracy-board.html', 'timeline.html'],
-      'MAID & Genocide': ['maid-accountability.html', 'maid-policy-evolution.html', 'maid-voting-record.html', 'maid-exterminators.html', 'disability-genocide.html', 'genocide-evidence.html', 'cija-maid-pipeline.html', 't4-comparison.html'],
+      'MAID & Genocide': ['maid-accountability.html', 'maid-policy-evolution.html', 'maid-voting-record.html', 'maid-exterminators.html', 'camap.html', 'canadian-blood-services.html', 'disability-genocide.html', 'genocide-evidence.html', 'cija-maid-pipeline.html', 't4-comparison.html'],
       'Military & Veterans': ['veterans.html', 'veterans-betrayal.html', 'ppcli-lawsuit.html', 'caf-recruitment.html', 'caf-recruitment-crisis.html', 'dnd-procurement.html', 'arms-pipeline.html', 'arms-exports.html', 's504-covey-bae.html', 'the-boot.html', 'bloggins.html'],
       'RCMP & Law Enforcement': ['rcmp-commissioners.html', 'rcmp-complicity.html', 'rcmp-maid-accountability.html', 'rcmp-reform.html', 'cfnis.html', 'cfnis-proxy.html', 'charges-sheet.html', 'criminal-code-analysis.html', 'mp-brief.html'],
       'Government Corruption': ['accountability.html', 'scandals.html', 'corruption-map.html', 'crown-corporations.html', 'senate-expenses.html', 'procurement-analysis.html', 'procurement-deep-dive.html', 'procurement-registry.html', 'phoenix-pay.html', 'debt-fiscal.html', 'ag-findings.html'],
