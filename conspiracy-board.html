@@ -245,6 +245,55 @@ body {
 .type-event  { border-left: 3px solid var(--yellow); }
 .type-evidence { border-left: 3px solid var(--green); }
 .type-navigate { border-left: 3px solid var(--cyan); }
+
+/* ── LIST VIEW (clean fallback / default) ──
+   Replaces the force-directed board which piled nodes into an illegible
+   cluster of overlapping labels. Cards render left-to-right on a clean
+   grid, fully readable, same filters apply. */
+.list-view {
+  display: none; padding: 1rem 1.2rem 4rem; background: var(--bg);
+  min-height: calc(100vh - 200px);
+}
+.list-view.on { display: block; }
+.list-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.8rem; max-width: 1600px; margin: 0 auto;
+}
+.list-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.9rem 1rem; cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.list-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
+.list-card.type-person { border-left: 3px solid var(--pink); }
+.list-card.type-org    { border-left: 3px solid var(--purple); }
+.list-card.type-event  { border-left: 3px solid var(--yellow); }
+.list-card.type-evidence { border-left: 3px solid var(--green); }
+.list-card.type-navigate { border-left: 3px solid var(--cyan); background: linear-gradient(135deg, rgba(0,180,216,0.05) 0%, var(--card) 100%); }
+.list-card .badge {
+  display: inline-block; font-size: 0.6rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 1px 6px; border-radius: 3px; margin-bottom: 4px;
+}
+.list-card.type-person .badge { background: rgba(255,0,110,0.15); color: var(--pink); }
+.list-card.type-org .badge    { background: rgba(131,56,236,0.15); color: var(--purple); }
+.list-card.type-event .badge  { background: rgba(255,214,10,0.15); color: var(--yellow); }
+.list-card.type-evidence .badge { background: rgba(6,214,160,0.15); color: var(--green); }
+.list-card.type-navigate .badge { background: rgba(0,180,216,0.2); color: var(--cyan); }
+.list-card .name { font-size: 0.9rem; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.list-card .sub  { font-size: 0.72rem; color: var(--text-dim); margin-top: 3px; }
+.list-card .info { font-size: 0.75rem; color: var(--text-dim); margin-top: 7px; line-height: 1.5; }
+.list-card.dim   { opacity: 0.22; }
+.view-toggle {
+  display: inline-flex; margin-left: 8px; background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.view-toggle button {
+  background: transparent; color: var(--text-dim); border: none;
+  padding: 4px 10px; font-size: 0.78rem; cursor: pointer;
+  font-family: var(--mono);
+}
+.view-toggle button.on { background: rgba(0,180,216,0.2); color: var(--cyan); }
 .type-person .badge { background: rgba(255,0,110,0.15); color: var(--pink); }
 .type-org .badge    { background: rgba(131,56,236,0.15); color: var(--purple); }
 .type-event .badge  { background: rgba(255,214,10,0.15); color: var(--yellow); }
@@ -581,8 +630,13 @@ body {
 })();
 </script>
 
+<!-- LIST VIEW (default — clean, legible) -->
+<div class="list-view on" id="listView">
+  <div class="list-grid" id="listGrid"></div>
+</div>
+
 <!-- CANVAS -->
-<div class="canvas-wrap tnt-style-816" id="wrap">
+<div class="canvas-wrap tnt-style-816" id="wrap" style="display:none;">
   <div class="canvas" id="board">
     <div class="canvas-grid"></div>
     <canvas id="lines"></canvas>
@@ -908,6 +962,71 @@ body {
 
     board.appendChild(el);
     nodeEls[n.id] = el;
+  });
+
+  // ── LIST VIEW: render same nodes as a flat, legible grid ──
+  // 2026-04-18: user flagged the force-directed board as "garbage"
+  // (overlapping labels, unreadable). This list is the default view;
+  // users can still toggle back to the board via the controls bar.
+  const listGrid = document.getElementById('listGrid');
+  const listCardEls = {};
+  nodes.forEach(n => {
+    const c = document.createElement('div');
+    c.className = `list-card type-${n.type || 'org'}`;
+    c.dataset.id = n.id;
+    const typeLabel = (n.type || 'org').toUpperCase();
+    const pageLink = n.page || (n.url ? n.url : null);
+    const conn = n._connCount || 0;
+    c.innerHTML = `
+      <span class="badge">${typeLabel}${conn > 0 ? ' · ' + conn + ' links' : ''}</span>
+      <div class="name">${n.label || n.name || n.id}</div>
+      <div class="sub">${n.subtitle || ''}</div>
+      <div class="info">${n.detail || ''}</div>
+      ${pageLink ? `<a class="nav-btn" style="display:inline-block;margin-top:6px;font-size:0.72rem;color:#38bdf8;text-decoration:none;" href="${pageLink}" onclick="event.stopPropagation()">Open →</a>` : ''}
+    `;
+    c.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectNode(n.id);
+    });
+    listGrid.appendChild(c);
+    listCardEls[n.id] = c;
+  });
+
+  // Mirror dim state from the board nodes into the list cards so filter/
+  // search work identically on both views.
+  const origApplyFilter = applyFilter;
+  const listSync = () => {
+    nodes.forEach(n => {
+      const el = nodeEls[n.id];
+      const card = listCardEls[n.id];
+      if (!el || !card) return;
+      card.classList.toggle('dim', el.classList.contains('dim'));
+    });
+  };
+  applyFilter = function() {
+    origApplyFilter.apply(this, arguments);
+    listSync();
+  };
+
+  // View toggle — default is LIST
+  const boardBar = document.querySelector('.board-bar') || document.querySelector('#typePills')?.parentElement;
+  const toggleHost = boardBar || document.body;
+  const toggle = document.createElement('div');
+  toggle.className = 'view-toggle';
+  toggle.innerHTML = '<button data-v="list" class="on">List</button><button data-v="board">Board</button>';
+  toggleHost.appendChild(toggle);
+  toggle.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    toggle.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+    const v = btn.dataset.v;
+    document.getElementById('listView').classList.toggle('on', v === 'list');
+    document.getElementById('wrap').style.display = (v === 'board') ? '' : 'none';
+    if (v === 'board') {
+      listSync();  // ensure filter state is carried
+      // Re-kick force sim so layout settles after board was hidden
+      if (typeof computePositions === 'function') computePositions();
+    }
   });
 
   // ── Draw lines (two-pass: batch non-highlighted, then highlighted) ──
