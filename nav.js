@@ -59,6 +59,7 @@
             '<a href="/network-analysis.html" id="nav-network">Network</a>' +
             '<a href="/state-of-investigation.html" id="nav-soi" style="color:#fbbf24;">State</a>' +
             '<a href="/political-business-influence.html" id="nav-influence" style="color:#f97316;">Influence</a>' +
+            '<a href="/information-architecture.html" id="nav-ia" style="color:#2dd4bf;">IA</a>' +
             '<a href="/sitemap.html" id="nav-sitemap" style="color:#22d3ee;">All Pages</a>' +
           '</div>' +
           '<div class="nav-auth" id="nav-auth"></div>' +
