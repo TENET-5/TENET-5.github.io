@@ -215,12 +215,20 @@ runs only when the user explicitly clicks).
 
 In order of traffic / visibility:
 
-- [x] `index.html` — reference implementation (2026-04-19)
-- [ ] `about.html`
+- [ ] `index.html` — iframe frame, migration has a shell.js consideration (see below)
+- [x] `about.html` — first reference implementation (2026-04-19, +4 lines)
 - [ ] `accountability.html`
 - [ ] `records.html`
 - [ ] `search.html`
 - [ ] Remaining 303 pages (batched; ~60 per pass)
+
+### index.html caveat
+
+`index.html` is the iframe FRAME (loads content pages via `shell.js`).
+Its relationship to the unified stack is different: the content pages
+inside the iframe use the bootstrap; the frame itself only needs the
+unified CSS so the nav/footer rendered by `shell.js` can reference
+`--liril-*` tokens. Migration of `index.html` is one CSS swap, no JS.
 
 ---
 
