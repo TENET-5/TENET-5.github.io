@@ -2594,6 +2594,29 @@
 
     if (isInteractive) {
       console.log('[PRESENTATION] Interactive page detected (' + pageName + ') — slide engine disabled, canvas preserved');
+      /* 2026-04-19 walkfix #2: tell the walkthrough engine this page
+         is interactive so it doesn't auto-skip to the next page via
+         __TENET5_NEXT_PAGE when collectPoints returns <2 slides.
+         Previous bug: user landed on conspiracy-board.html with
+         autopilot active, walkthrough saw 0 points, fired
+         __TENET5_NEXT_PAGE after 2s, user was swept away before
+         they could interact with the canvas. */
+      try {
+        window.__TENET5_INTERACTIVE_PAGE = true;
+        /* Also clear any pending autopilot from sessionStorage so a
+           refresh or in-page navigation doesn't re-trigger the skip. */
+        var _ap = sessionStorage.getItem('liril_autopilot');
+        if (_ap) {
+          try {
+            var apObj = JSON.parse(_ap);
+            if (apObj) {
+              apObj.autostart = false;
+              apObj.paused_on_interactive = pageName;
+              sessionStorage.setItem('liril_autopilot', JSON.stringify(apObj));
+            }
+          } catch(e) {}
+        }
+      } catch(e) {}
       return;
     }
 
