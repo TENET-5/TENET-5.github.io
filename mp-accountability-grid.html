@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP Accountability Grid | TENET5</title>
+  <meta name="description" content="Clean, legible grid of Canadian MPs named in criminal convictions, Ethics Commissioner violations, foreign-interference flags, and caucus expulsions. Rebuilt with LIRIL AI so every record is readable — no overlapping labels, no colour-collapsed bubble soup. Primary sources linked.">
+  <meta property="og:title" content="MP Accountability Grid | TENET5">
+  <meta property="og:description" content="Every named Canadian parliamentarian with a criminal conviction, ethics violation, foreign-interference flag, or caucus expulsion — indexed in plain text with primary sources.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/mp-accountability-grid.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tenet-5.github.io/mp-accountability-grid.html">
+  <link rel="stylesheet" href="style.css?v=22">
+  <meta name="theme-color" content="#2E3440">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta name="dc.source" content="TENET5 mp_criminal_ethics_dossier.json (generated 2026-04-07); Ethics Commissioner public reports; CBC News; Global News; Canada Elections Act court decisions">
+
+  <style>
+    /* Clean, readable rebuild — no overlapping labels, no red-bubble soup. */
+    .mpa-hero {
+      background: linear-gradient(135deg, rgba(167,139,250,0.10), rgba(167,139,250,0.02));
+      border: 1px solid rgba(167,139,250,0.25);
+      border-left: 5px solid #a78bfa;
+      border-radius: var(--r-md);
+      padding: 1.6rem 1.8rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .mpa-hero h1 { color: #fff; font-size: 1.8rem; margin: 0 0 0.5rem; }
+    .mpa-hero .tag { font-family: 'JetBrains Mono',monospace; font-size: 0.75rem;
+      color: #a78bfa; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .mpa-hero p { color: var(--text-secondary); line-height: 1.65; margin: 0.6rem 0 0; }
+    .mpa-liril-note { background: rgba(14,165,233,0.06); border: 1px solid rgba(14,165,233,0.25);
+      border-radius: 6px; padding: 0.8rem 1rem; margin-top: 1rem; font-size: 0.85rem;
+      color: var(--text-secondary); }
+    .mpa-liril-note strong { color: #38bdf8; }
+
+    .mpa-summary {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.9rem; margin: 1.5rem 0 2rem;
+    }
+    .mpa-stat {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.1rem; text-align: center;
+    }
+    .mpa-stat .n { font-size: 1.9rem; font-weight: 800; color: #fff;
+      font-family: 'JetBrains Mono',monospace; display: block; }
+    .mpa-stat .l { font-size: 0.72rem; color: var(--text-tertiary);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.3rem; display: block; }
+
+    .mpa-section { margin: 2.5rem 0 1rem; }
+    .mpa-section h2 {
+      font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: #6ea8f7; border-bottom: 1px solid var(--border); padding-bottom: 0.6rem;
+      margin-bottom: 1.2rem; font-family: 'JetBrains Mono', monospace;
+    }
+    .mpa-section-desc { color: var(--text-secondary); font-size: 0.9rem;
+      line-height: 1.6; margin: -0.5rem 0 1.5rem; }
+
+    .mpa-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 1rem;
+    }
+
+    .mpa-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1.2rem 1.4rem; position: relative; transition: border-color 0.2s;
+    }
+    .mpa-card:hover { border-color: rgba(167,139,250,0.4); }
+    .mpa-card.sev-criminal { border-left: 4px solid #dc2626; }
+    .mpa-card.sev-ethics   { border-left: 4px solid #f59e0b; }
+    .mpa-card.sev-foreign  { border-left: 4px solid #a78bfa; }
+    .mpa-card.sev-expelled { border-left: 4px solid #fb923c; }
+    .mpa-card.sev-other    { border-left: 4px solid #6ea8f7; }
+
+    .mpa-card .name { color: #fff; font-size: 1.05rem; font-weight: 700;
+      margin: 0 0 0.2rem; }
+    .mpa-card .meta { font-family: 'JetBrains Mono',monospace; font-size: 0.72rem;
+      color: var(--text-tertiary); letter-spacing: 0.04em; margin-bottom: 0.9rem; }
+    .mpa-card .offence { color: var(--text-secondary); font-size: 0.88rem;
+      line-height: 1.6; margin: 0.5rem 0; }
+    .mpa-card .offence strong { color: #fff; }
+    .mpa-card .sentence { background: rgba(220,38,38,0.06); border-left: 3px solid #dc2626;
+      padding: 0.5rem 0.8rem; font-size: 0.82rem; color: var(--text-secondary);
+      border-radius: 4px; margin: 0.6rem 0; }
+    .mpa-card .source { display: inline-block; margin-top: 0.7rem; font-size: 0.78rem; }
+    .mpa-card .source a { color: #38bdf8; text-decoration: none; word-break: break-all; }
+    .mpa-card .source a:hover { text-decoration: underline; }
+
+    .mpa-pill { display: inline-block; font-size: 0.68rem; font-weight: 700;
+      padding: 0.15rem 0.55rem; border-radius: 10px; margin-right: 0.3rem; letter-spacing: 0.04em; }
+    .mpa-pill.p-lib  { background: rgba(211,47,47,0.15); color: #ef5350; }
+    .mpa-pill.p-con  { background: rgba(21,101,192,0.15); color: #5c9dff; }
+    .mpa-pill.p-ndp  { background: rgba(245,124,0,0.15); color: #ffb74d; }
+    .mpa-pill.p-bq   { background: rgba(41,182,246,0.15); color: #4dd0e1; }
+    .mpa-pill.p-gpc  { background: rgba(46,125,50,0.15); color: #66bb6a; }
+    .mpa-pill.p-ind  { background: rgba(120,144,156,0.15); color: #b0bec5; }
+    .mpa-pill.year   { background: rgba(255,255,255,0.06); color: #c9d1d9;
+      font-family: 'JetBrains Mono',monospace; }
+
+    .mpa-viol-list { margin: 0.6rem 0 0; padding-left: 1.2rem; font-size: 0.84rem; }
+    .mpa-viol-list li { color: var(--text-secondary); line-height: 1.55;
+      margin-bottom: 0.5rem; }
+    .mpa-viol-list li strong { color: #fff; }
+
+    .mpa-footer { margin-top: 3rem; padding: 1.2rem 1.4rem;
+      background: rgba(5,10,20,0.4); border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.82rem; color: var(--text-secondary); line-height: 1.65; }
+    .mpa-footer strong { color: #fff; }
+  </style>
+</head>
+<body class="topo">
+  <a href="#main" class="skip-link">Skip to main content</a>
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+
+<div id="site-header-frame"></div>
+<div class="content" id="main" role="main">
+
+  <section class="reveal" data-narrate="MP Accountability Grid. A clean, searchable index of Canadian members of parliament named in criminal convictions, Ethics Commissioner violations, foreign interference flags, and caucus expulsions. Rebuilt with LIRIL AI to replace an earlier illegible bubble visualisation. Every record is a card with name, party, riding, allegation, sentence where applicable, and a primary-source link.">
+    <div class="mpa-hero">
+      <div class="tag">📋 Accountability Index — Canadian Parliamentarians</div>
+      <h1>MP Accountability Grid</h1>
+      <p>Every Canadian parliamentarian named in the TENET5 criminal / ethics / foreign-interference dossier — in a single legible grid. One card per record: name, party, riding, the offence pleaded or found, the sentence imposed where applicable, and a primary-source link for corroboration. No overlapping labels, no colour-collapsed bubble soup.</p>
+      <div class="mpa-liril-note">
+        <strong>Rebuilt with LIRIL.</strong> This page replaces an earlier bubble visualisation where MP names overlapped into illegibility. LIRIL's recommendation: grid of cards beats force-directed blob for roster data where every record needs to be readable on first scroll. Data source: <code>data/mp_criminal_ethics_dossier.json</code> (generated 2026-04-07). Classifications: OPERATIONAL — enrichment layer for MP scorecards + email campaign.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SUMMARY STATS ─────────────────────────────────────────── -->
+  <section class="reveal">
+    <div class="mpa-summary" id="mpa-summary">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+  <!-- ── CRIMINAL CONVICTIONS ──────────────────────────────────── -->
+  <section class="reveal mpa-section" id="sec-criminal">
+    <h2>Criminal convictions</h2>
+    <p class="mpa-section-desc">MPs found guilty of a criminal offence by a court of competent jurisdiction. Convictions stand where appeals are exhausted or leave refused at the Supreme Court.</p>
+    <div class="mpa-grid" id="grid-criminal"></div>
+  </section>
+
+  <!-- ── ETHICS COMMISSIONER VIOLATIONS ────────────────────────── -->
+  <section class="reveal mpa-section" id="sec-ethics">
+    <h2>Ethics Commissioner violations</h2>
+    <p class="mpa-section-desc">Findings by the federal Conflict of Interest and Ethics Commissioner. These are administrative findings under the Conflict of Interest Act, not criminal determinations. Sanction power is limited: the Commissioner can find a violation but cannot impose fines beyond a $500 late-filing penalty.</p>
+    <div class="mpa-grid" id="grid-ethics"></div>
+  </section>
+
+  <!-- ── FOREIGN INTERFERENCE FLAGS ────────────────────────────── -->
+  <section class="reveal mpa-section" id="sec-foreign">
+    <h2>Foreign-interference flags</h2>
+    <p class="mpa-section-desc">Parliamentarians flagged in CSIS briefings, NSICOP reports, or the Hogue Commission as connected to foreign-state interference operations. These are allegations or intelligence assessments — not criminal charges. Some remain classified.</p>
+    <div class="mpa-grid" id="grid-foreign"></div>
+  </section>
+
+  <!-- ── CAUCUS EXPULSIONS / RESIGNATIONS ──────────────────────── -->
+  <section class="reveal mpa-section" id="sec-expelled">
+    <h2>Caucus expulsions &amp; forced resignations</h2>
+    <p class="mpa-section-desc">MPs expelled from their party caucus or forced to resign over misconduct. Caucus expulsion does not remove them from the House — they continue to sit as independent until the next election — but it signals that the party has publicly disowned the conduct.</p>
+    <div class="mpa-grid" id="grid-expelled"></div>
+  </section>
+
+  <!-- ── OTHER MISCONDUCT ──────────────────────────────────────── -->
+  <section class="reveal mpa-section" id="sec-other">
+    <h2>Other documented misconduct</h2>
+    <p class="mpa-section-desc">Allegations and findings that don't fit the categories above: sexual harassment findings, lobbying-rule breaches, procurement-integrity issues, social-media threats investigated by RCMP.</p>
+    <div class="mpa-grid" id="grid-other"></div>
+  </section>
+
+  <!-- ── PATTERNS FOOTER ───────────────────────────────────────── -->
+  <section class="reveal">
+    <div class="mpa-footer" id="mpa-footer">
+      <!-- populated by JS with key_patterns summary -->
+    </div>
+  </section>
+
+  <section class="reveal" style="margin-top:2rem;">
+    <p style="font-size:0.8rem; color:var(--text-tertiary); line-height:1.6;">
+      <strong style="color:var(--text-secondary);">Primary sources.</strong> Every card links to its origin (court decision, Ethics Commissioner public report, CBC/Global News coverage, Hogue Commission filing, or NSICOP press release). The <code>mp_criminal_ethics_dossier.json</code> file on this site is the machine-readable form of this page. Corrections via <a href="/about.html">about.html</a> within 48 hours of verified notice from the named person's counsel.
+    </p>
+  </section>
+
+</div>
+<div id="site-footer-frame"></div>
+<script src="footer.js?v=2"></script>
+<script src="nav.js?v=8"></script>
+<script src="js/ux.js?v=1" defer></script>
+
+<script>
+// MP Accountability Grid — stdlib-only JS (no d3, no external chart libs).
+// Loads mp_criminal_ethics_dossier.json, renders clean cards with no overlap.
+(async function() {
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  const partyPill = p => {
+    const key = (p || '').toLowerCase();
+    let cls = 'p-ind', label = p || 'Independent';
+    if (key.includes('liberal'))      { cls = 'p-lib'; label = 'LPC'; }
+    else if (key.includes('conservative')) { cls = 'p-con'; label = 'CPC'; }
+    else if (key.includes('ndp'))     { cls = 'p-ndp'; label = 'NDP'; }
+    else if (key.includes('bloc'))    { cls = 'p-bq';  label = 'BQ'; }
+    else if (key.includes('green'))   { cls = 'p-gpc'; label = 'GPC'; }
+    return `<span class="mpa-pill ${cls}">${esc(label)}</span>`;
+  };
+
+  const sourceLink = s => {
+    if (!s) return '';
+    const url = (s.match(/https?:\/\/\S+/) || [])[0];
+    if (url) {
+      const host = (new URL(url)).hostname.replace(/^www\./,'');
+      return `<div class="source"><a href="${esc(url)}" target="_blank" rel="noopener">${esc(host)}</a></div>`;
+    }
+    return `<div class="source" style="color:var(--text-tertiary);">Source: ${esc(s)}</div>`;
+  };
+
+  const renderCriminal = rec => {
+    const parts = [];
+    parts.push(`<div class="mpa-card sev-criminal">`);
+    parts.push(`<div class="name">${esc(rec.name)}</div>`);
+    parts.push(`<div class="meta">${partyPill(rec.party)}${rec.riding ? ` · ${esc(rec.riding)}` : ''}${rec.year ? ` <span class="mpa-pill year">${esc(rec.year)}</span>` : ''}${rec.status ? ` · ${esc(rec.status)}` : ''}</div>`);
+    parts.push(`<div class="offence"><strong>Offence:</strong> ${esc(rec.offence)}</div>`);
+    if (rec.sentence) parts.push(`<div class="sentence"><strong>Sentence:</strong> ${esc(rec.sentence)}</div>`);
+    if (rec.appeals)  parts.push(`<div class="offence" style="font-size:0.82rem;"><strong>Appeals:</strong> ${esc(rec.appeals)}</div>`);
+    parts.push(sourceLink(rec.source));
+    parts.push(`</div>`);
+    return parts.join('');
+  };
+
+  const renderEthics = rec => {
+    const parts = [`<div class="mpa-card sev-ethics">`,
+      `<div class="name">${esc(rec.name)}</div>`,
+      `<div class="meta">${partyPill(rec.party)}${rec.role ? ` · ${esc(rec.role)}` : ''}</div>`];
+    const violations = rec.violations || [];
+    if (violations.length) {
+      parts.push(`<ul class="mpa-viol-list">`);
+      for (const v of violations) {
+        parts.push(`<li><strong>${esc(v.case || v.name || '?')}${v.year ? ` (${v.year})` : ''}:</strong> ${esc(v.finding || v.outcome || '')}</li>`);
+      }
+      parts.push(`</ul>`);
+    } else if (rec.finding) {
+      parts.push(`<div class="offence">${esc(rec.finding)}</div>`);
+    }
+    parts.push(sourceLink(rec.source));
+    parts.push(`</div>`);
+    return parts.join('');
+  };
+
+  const renderForeign = rec => {
+    const parts = [`<div class="mpa-card sev-foreign">`,
+      `<div class="name">${esc(rec.name)}</div>`,
+      `<div class="meta">${partyPill(rec.party)}${rec.riding ? ` · ${esc(rec.riding)}` : ''}${rec.status ? ` · ${esc(rec.status)}` : ''}</div>`,
+      `<div class="offence"><strong>Flagged:</strong> ${esc(rec.allegations || rec.finding || '')}</div>`,
+      sourceLink(rec.source),
+      `</div>`];
+    return parts.join('');
+  };
+
+  const renderExpelled = rec => [`<div class="mpa-card sev-expelled">`,
+    `<div class="name">${esc(rec.name)}</div>`,
+    `<div class="meta">${partyPill(rec.party)}${rec.riding ? ` · ${esc(rec.riding)}` : ''}${rec.year ? ` <span class="mpa-pill year">${esc(rec.year)}</span>` : ''}</div>`,
+    `<div class="offence"><strong>Reason:</strong> ${esc(rec.reason || rec.cause || rec.allegations || '')}</div>`,
+    sourceLink(rec.source),
+    `</div>`].join('');
+
+  const renderOther = rec => [`<div class="mpa-card sev-other">`,
+    `<div class="name">${esc(rec.name)}</div>`,
+    `<div class="meta">${partyPill(rec.party)}${rec.year ? ` <span class="mpa-pill year">${esc(rec.year)}</span>` : ''}</div>`,
+    `<div class="offence"><strong>${esc(rec.category || 'Finding')}:</strong> ${esc(rec.finding || rec.allegations || '')}</div>`,
+    sourceLink(rec.source),
+    `</div>`].join('');
+
+  try {
+    const resp = await fetch('data/mp_criminal_ethics_dossier.json');
+    const d = await resp.json();
+    const sum = d.summary || {};
+    document.getElementById('mpa-summary').innerHTML = [
+      ['total_entries', 'Total records'],
+      ['criminal_convictions', 'Criminal convictions'],
+      ['ethics_commissioner_violations', 'Ethics violations'],
+      ['foreign_interference_flagged', 'Foreign-interference flags'],
+      ['caucus_expulsions', 'Caucus expulsions']
+    ].map(([k, l]) => `<div class="mpa-stat"><span class="n">${sum[k] ?? '—'}</span><span class="l">${l}</span></div>`).join('');
+
+    document.getElementById('grid-criminal').innerHTML = (d.criminal_convictions || []).map(renderCriminal).join('');
+    document.getElementById('grid-ethics').innerHTML   = (d.ethics_commissioner_violations || []).map(renderEthics).join('');
+    document.getElementById('grid-foreign').innerHTML  = (d.foreign_interference_flagged || []).map(renderForeign).join('');
+    document.getElementById('grid-expelled').innerHTML = (d.caucus_expulsions_resignations || []).map(renderExpelled).join('');
+    document.getElementById('grid-other').innerHTML    = (d.other_misconduct || []).map(renderOther).join('');
+
+    // Key patterns footer
+    const kp = d.key_patterns || {};
+    const rows = [];
+    if (kp.liberal_pattern)   rows.push(`<p><strong>Liberal pattern:</strong> ${esc(kp.liberal_pattern)}</p>`);
+    if (kp.conservative_pattern) rows.push(`<p><strong>Conservative pattern:</strong> ${esc(kp.conservative_pattern)}</p>`);
+    if (kp.structural_problem) rows.push(`<p><strong>Structural problem:</strong> ${esc(kp.structural_problem)}</p>`);
+    if (kp['45th_parliament_notes']) rows.push(`<p><strong>45th Parliament notes:</strong> ${esc(kp['45th_parliament_notes'])}</p>`);
+    document.getElementById('mpa-footer').innerHTML = rows.join('') || '<p>Patterns block not yet populated in dossier.</p>';
+  } catch (e) {
+    document.querySelectorAll('.mpa-grid').forEach(g => g.innerHTML = `<div class="mpa-card">Data load failed: ${esc(e.message)}</div>`);
+  }
+})();
+</script>
+</body>
+</html>
