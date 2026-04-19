@@ -55,6 +55,7 @@
           '</div>' +
           '<div class="nav-group nav-tools">' +
             '<a href="/accountability.html" id="nav-504">504</a>' +
+            '<a href="/mp-accountability-grid.html" id="nav-mpgrid" style="color:#a78bfa;">MP Grid</a>' +
             '<a href="/network-analysis.html" id="nav-network">Network</a>' +
             '<a href="/state-of-investigation.html" id="nav-soi" style="color:#fbbf24;">State</a>' +
             '<a href="/political-business-influence.html" id="nav-influence" style="color:#f97316;">Influence</a>' +
