@@ -25,6 +25,84 @@
     if (window.__TENET5_LIRIL_STOP_INTERNAL) window.__TENET5_LIRIL_STOP_INTERNAL();
   };
 
+  /* ─── EARLY FALLBACK (2026-04-19): keep cross-page tour alive on ANY page ───
+     The full slide engine BAILS OUT in two places:
+       (1) Interactive pages list — conspiracy-board / network-analysis /
+           canada-map — force `return` at line ~2515 to protect their
+           canvas renderers.
+       (2) detectSlides() finding no slide-worthy elements returns early
+           at line ~2520 on content-light pages.
+     When liril-walkthrough's autopilot arrives on either, the real
+     __TENET5_LIRIL_NARRATE_ALL is never assigned (it only gets created
+     inside initNarrationControls). The bridge polls for 5s, falls back
+     to __TENET5_LIRIL_NARRATE (also unassigned), and the walkthrough
+     FREEZES mid-tour — which is what the user kept reporting.
+     This stub narrates the page's <h1> / data-narrate / <title>,
+     then auto-advances via __TENET5_NEXT_PAGE so the full-site tour
+     ALWAYS reaches the end of PAGE_SEQUENCE. initNarrationControls()
+     OVERWRITES this with the real slide-by-slide impl when slides
+     are actually present on the page. */
+  window.__TENET5_LIRIL_NARRATE_ALL = function () {
+    var text = '';
+    try {
+      var narrEl = document.querySelector('[data-narrate]');
+      var h1 = document.querySelector('h1');
+      text = (narrEl && narrEl.getAttribute('data-narrate')) ||
+             (h1 && (h1.textContent || '').trim()) ||
+             (document.title || '').replace(/\s*\|\s*TENET5\s*$/, '').trim() ||
+             'Continuing the investigation tour.';
+      text = String(text).replace(/\s+/g, ' ').substring(0, 500);
+    } catch (e) { text = 'Continuing.'; }
+
+    var advanced = false;
+    var advance = function () {
+      if (advanced) return;
+      advanced = true;
+      try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+      if (window.__TENET5_NEXT_PAGE) window.__TENET5_NEXT_PAGE();
+    };
+
+    /* Minimal on-screen acknowledgment so the user sees the tour is
+       alive on interactive pages (the full HUD isn't available). */
+    try {
+      var toast = document.createElement('div');
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      toast.textContent = text.length > 120 ? text.substring(0, 117) + '…' : text;
+      toast.style.cssText = 'position:fixed;left:50%;bottom:88px;transform:translateX(-50%);' +
+        'max-width:min(640px,92vw);background:rgba(12,14,20,0.92);color:#eceff4;' +
+        'border:1px solid rgba(139,92,246,0.35);border-radius:10px;padding:10px 18px;' +
+        'font-family:Inter,system-ui,sans-serif;font-size:0.85rem;line-height:1.5;' +
+        'z-index:10001;box-shadow:0 12px 32px rgba(0,0,0,0.5);pointer-events:none;';
+      document.body.appendChild(toast);
+      setTimeout(function () { try { toast.remove(); } catch(e){} }, 16000);
+    } catch (e) {}
+
+    /* Try speech first so the user hears SOMETHING on bailout pages. */
+    try {
+      if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined' && text) {
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-GB';
+        u.rate = 1.08;
+        u.pitch = 0.92;
+        u.onend = function () { setTimeout(advance, 2000); };
+        u.onerror = function () { setTimeout(advance, 10000); };
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+        /* Hard ceiling so a silent failure can't freeze the tour. */
+        setTimeout(advance, 20000);
+        return;
+      }
+    } catch (e) {}
+
+    /* No speech available — just advance after a readable pause. */
+    setTimeout(advance, 12000);
+  };
+
+  /* __TENET5_NEXT_PAGE is assigned synchronously at line ~1502 within
+     this same IIFE (well before the fallback above can ever be invoked
+     — callers fire after DOMContentLoaded). No placeholder needed. */
+
   var prefersReducedMotion = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
