@@ -51,7 +51,6 @@
             '<a href="/foreign-interference.html" id="nav-foreign">Foreign</a>' +
             '<a href="/follow-the-money.html" id="nav-money" style="color:#facc15;">Follow $</a>' +
             '<a href="/cfnis.html" id="nav-cfnis">CFNIS</a>' +
-            '<a href="/cfnis-hartman-parallel.html" id="nav-cfnis-hartman" style="color:#a78bfa;">CFNIS&times;Hartman</a>' +
             '<a href="/corruption.html" id="nav-corruption" style="color:#c9a84c;">Corruption</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +
