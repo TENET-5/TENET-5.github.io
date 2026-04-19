@@ -530,7 +530,17 @@
     collectPoints();
     tryLoadAudio();
     if (points.length < 2) {
-      // In auto-walk mode, skip to next page if this page has no walkthrough points
+      // In auto-walk mode, skip to next page if this page has no walkthrough points.
+      // 2026-04-19 walkfix #2: but NOT if the page is interactive
+      // (conspiracy-board / network-analysis / canada-map / canvas pages).
+      // presentation.js sets window.__TENET5_INTERACTIVE_PAGE on bailout.
+      // Landing on an interactive page is almost always an intentional
+      // destination — the user wants to use the canvas, not watch it flash
+      // by on the way to the next walkthrough slide.
+      if (window.__TENET5_INTERACTIVE_PAGE) {
+        console.log('[LIRIL-WALK] Interactive page detected — suspending autopilot so user can interact');
+        return;
+      }
       try {
         var _ap = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
         if (_ap && _ap.autostart && window.__TENET5_NEXT_PAGE) {
