@@ -68,15 +68,27 @@
     const state = load();
     apply(state);
 
-    // Edge trigger (invisible strip at top; reveals on hover)
-    const edge = document.createElement('div');
-    edge.className = 'liril-slider-edge-trigger';
-    edge.setAttribute('aria-hidden', 'true');
+    // Check for a mount slot — pages can include a
+    // <div class="liril-theme-slider-mount"></div> anywhere in their
+    // banner/masthead. If present, the slider becomes an inline
+    // permanent control instead of a floating edge-reveal overlay.
+    const mountPoint = document.querySelector('.liril-theme-slider-mount');
+    const isMounted = !!mountPoint;
+
+    // Edge trigger (only when floating — invisible strip at top reveals on hover)
+    let edge = null;
+    if (!isMounted) {
+      edge = document.createElement('div');
+      edge.className = 'liril-slider-edge-trigger';
+      edge.setAttribute('aria-hidden', 'true');
+    }
 
     // Shell
     const shell = document.createElement('div');
     shell.id = 'liril-theme-slider-shell';
-    shell.className = 'liril-theme-slider-shell liril-glass liril-slider-hidden';
+    shell.className = 'liril-theme-slider-shell' +
+                      (isMounted ? ' liril-slider-mounted'
+                                 : ' liril-glass liril-slider-hidden');
     shell.setAttribute('role', 'toolbar');
     shell.setAttribute('aria-label', 'Theme controls');
 
@@ -152,36 +164,43 @@
     shell.appendChild(hueChip);
     shell.appendChild(hueRange);
 
-    // Reveal logic: show when mouse is near top 40px OR focus is on slider
-    let hideTimer = null;
-    const show = () => {
-      shell.classList.remove('liril-slider-hidden');
-      if (hideTimer) clearTimeout(hideTimer);
-    };
-    const scheduleHide = () => {
-      if (hideTimer) clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => {
-        shell.classList.add('liril-slider-hidden');
-      }, 1500);
-    };
+    // Reveal logic: only active for the floating-overlay variant.
+    // Mounted variant stays permanently visible as a banner control.
+    if (!isMounted) {
+      let hideTimer = null;
+      const show = () => {
+        shell.classList.remove('liril-slider-hidden');
+        if (hideTimer) clearTimeout(hideTimer);
+      };
+      const scheduleHide = () => {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          shell.classList.add('liril-slider-hidden');
+        }, 1500);
+      };
 
-    edge.addEventListener('mouseenter', show);
-    shell.addEventListener('mouseenter', show);
-    shell.addEventListener('mouseleave', scheduleHide);
-    range.addEventListener('focus', show);
-    range.addEventListener('blur', scheduleHide);
-    hueRange.addEventListener('focus', show);
-    hueRange.addEventListener('blur', scheduleHide);
+      edge.addEventListener('mouseenter', show);
+      shell.addEventListener('mouseenter', show);
+      shell.addEventListener('mouseleave', scheduleHide);
+      range.addEventListener('focus', show);
+      range.addEventListener('blur', scheduleHide);
+      hueRange.addEventListener('focus', show);
+      hueRange.addEventListener('blur', scheduleHide);
 
-    // Keyboard: Alt+T toggles visibility persistently
-    document.addEventListener('keydown', (e) => {
-      if (e.altKey && (e.key === 't' || e.key === 'T')) {
-        shell.classList.toggle('liril-slider-hidden');
-      }
-    });
+      // Keyboard: Alt+T toggles visibility persistently
+      document.addEventListener('keydown', (e) => {
+        if (e.altKey && (e.key === 't' || e.key === 'T')) {
+          shell.classList.toggle('liril-slider-hidden');
+        }
+      });
+    }
 
-    document.body.appendChild(edge);
-    document.body.appendChild(shell);
+    if (isMounted) {
+      mountPoint.appendChild(shell);
+    } else {
+      document.body.appendChild(edge);
+      document.body.appendChild(shell);
+    }
 
     // Emit an event so other scripts can react to theme readiness
     window.dispatchEvent(new CustomEvent('liril-theme-ready', { detail: state }));
