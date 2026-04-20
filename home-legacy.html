@@ -1,0 +1,1444 @@
+﻿<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf("index.html") === -1) {
+          window.location.replace("index.html?load=" + window.location.pathname.split("/").pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TENET5 — State Accountability Investigation</title>
+  <meta name="description" content="An interactive, objective presentation of government data measuring the scale of state-administered euthanasia and related institutional shifts.">
+  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="css/metaverse.css">
+  <link rel="stylesheet" href="style-slate.css?v=2">
+  <link rel="stylesheet" href="style-slate-motion.css?v=1">
+  <style>
+    /* Objective, Professional Typography & Colors — TENET5 Dark Theme */
+    :root {
+      --bg: #09090b;
+      --text: #f3f4f6;
+      --accent: #0ea5e9; /* HUD Teal */
+      --secondary: #8b949e;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg);
+      font-family: 'Inter', 'Space Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      color: var(--text);
+    }
+    #cinematic-engine {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+    /* Scene Transitions */
+    .scene {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 10;
+      animation: sceneEnter 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .scene.exiting {
+      opacity: 1;
+      visibility: visible;
+      z-index: 5;
+      animation: sceneExit 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes sceneEnter {
+      0% {
+        opacity: 0;
+        transform: translateX(30px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes sceneExit {
+      0% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+    }
+    /* Cinematic Image Backgrounds — Ken Burns + sepia archival */
+    .scene-bg {
+      position: absolute;
+      top: -2%; left: -2%;
+      width: 104%; height: 104%;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.35) contrast(1.15) sepia(0.25) saturate(0.7);
+      transform: scale(1.08);
+      transition: transform 25s ease-out, filter 2s ease;
+      z-index: -1;
+    }
+    .scene.active .scene-bg {
+      transform: scale(1);
+      filter: brightness(0.3) contrast(1.1) sepia(0.2) saturate(0.75);
+    }
+    /* Professional Vignette to aid legibility */
+    .vignette {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to top, rgba(9,9,11,1) 0%, rgba(9,9,11,0.7) 30%, rgba(9,9,11,0.3) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Content Styling */
+    .scene-content {
+      position: relative;
+      z-index: 2;
+      text-align: left;
+      max-width: 900px;
+      width: 90%;
+      padding: 3rem 3rem 2.5rem;
+      background: linear-gradient(135deg, rgba(6,8,16,0.88) 0%, rgba(26,22,16,0.85) 100%);
+      border: 1px solid rgba(212, 197, 169, 0.08);
+      border-left: 3px solid rgba(196, 30, 58, 0.6);
+      box-shadow:
+        0 12px 50px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(212,197,169,0.03),
+        inset 0 0 60px rgba(196,30,58,0.01);
+      transform: translateY(20px) scale(0.98);
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s ease;
+      opacity: 0;
+      backdrop-filter: blur(20px) saturate(130%);
+      -webkit-backdrop-filter: blur(20px) saturate(130%);
+    }
+    .scene.active .scene-content {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    /* Evidence stamp on content cards */
+    .scene-content::after {
+      content: 'EVIDENCE';
+      position: absolute;
+      top: 10px; right: 16px;
+      font-family: 'Special Elite', 'Courier New', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 3px;
+      color: rgba(196, 30, 58, 0.25);
+      border: 1px solid rgba(196, 30, 58, 0.15);
+      padding: 1px 6px;
+      transform: rotate(-2deg);
+      pointer-events: none;
+    }
+    .title-text {
+      font-family: 'Cinzel', 'Space Grotesk', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: #f3f4f6;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .subtitle-text {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      font-size: 1.2rem;
+      color: #8b949e;
+      font-weight: 400;
+      margin-top: 0;
+      line-height: 1.6;
+      letter-spacing: 0.01em;
+    }
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196, 30, 58, 0.18);
+      background: rgba(196, 30, 58, 0.08);
+      color: #cfc7bb;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .hero-meta-ribbon {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-top: 1.2rem;
+    }
+    .hero-meta-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.38rem 0.68rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #c8c2b8;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    /* Subtitles - highly legible for documentary mode */
+    #subtitles-container {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 1000px;
+      text-align: center;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .subtitle-cue {
+      font-family: 'Crimson Text', 'Inter', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: #e8e4dc;
+      background: rgba(6, 8, 16, 0.94);
+      padding: 0.8rem 2rem;
+      border-radius: 2px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      line-height: 1.5;
+      border: 1px solid rgba(196, 30, 58, 0.12);
+      border-left: 3px solid rgba(196, 30, 58, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      letter-spacing: 0.01em;
+    }
+    .subtitle-cue.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Interface HUD — War Room Command Console */
+    #hud-controls {
+      position: absolute;
+      bottom: 0; left: 0; width: 100%;
+      height: 90px;
+      background: linear-gradient(180deg, rgba(5,5,10,0.90) 0%, rgba(10,8,4,0.98) 100%);
+      border-top: 1px solid rgba(196, 30, 58, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4rem;
+      box-sizing: border-box;
+      z-index: 100;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,197,169,0.04);
+      backdrop-filter: blur(16px) saturate(130%);
+      -webkit-backdrop-filter: blur(16px) saturate(130%);
+    }
+    /* Progress — film strip indicator */
+    .scene-progress {
+      display: flex;
+      gap: 4px;
+    }
+    .progress-node {
+      width: 32px; height: 3px;
+      background: rgba(212, 197, 169, 0.08);
+      transition: background 0.4s ease, transform 0.3s ease, box-shadow 0.4s ease;
+      transform-origin: center left;
+      border-radius: 0;
+    }
+    .progress-node.active {
+      background: #c41e3a;
+      animation: pulseNode 2.5s infinite ease-in-out;
+    }
+    .progress-node.visited {
+      background: rgba(196, 30, 58, 0.3);
+    }
+    .audio-nodes { display: none; }
+
+    @keyframes pulseNode {
+      0% { box-shadow: 0 0 4px rgba(196, 30, 58, 0.3); transform: scaleY(1); }
+      50% { box-shadow: 0 0 10px rgba(196, 30, 58, 0.6); transform: scaleY(2); }
+      100% { box-shadow: 0 0 4px rgba(196, 30, 58, 0.3); transform: scaleY(1); }
+    }
+
+    .btn-cinematic {
+      background: transparent;
+      border: 1px solid rgba(212, 197, 169, 0.15);
+      color: #b8b4aa;
+      font-size: 0.8rem;
+      padding: 0.7rem 2rem;
+      border-radius: 2px;
+      cursor: pointer;
+      font-family: 'Cinzel', 'Rajdhani', serif;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-cinematic::before {
+      content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+      background: rgba(196, 30, 58, 0.06); border-radius: 50%; transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    .btn-cinematic:hover::before {
+      width: 300px; height: 300px;
+    }
+    .btn-cinematic:hover {
+      background: rgba(196, 30, 58, 0.08);
+      color: #e8e4dc;
+      border-color: rgba(196, 30, 58, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5), 0 0 15px rgba(196, 30, 58, 0.1);
+    }
+    .btn-cinematic:disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      border-color: #0ea5e9;
+      color: #fff;
+      font-size: 1rem;
+      padding: 1rem 3rem;
+      letter-spacing: 0.12em;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+      box-shadow: 0 0 24px rgba(14, 165, 233, 0.25), 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .btn-primary:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+    }
+    /* LIRIL Narrate Button */
+    #btn-liril-narrate {
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      min-width: 70px;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    #btn-liril-narrate:hover:not(:disabled) {
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.3), inset 0 0 10px rgba(14, 165, 233, 0.08);
+      border-color: rgba(14, 165, 233, 0.3);
+    }
+    #btn-liril-narrate:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    @media (max-width: 768px) {
+      .title-text { font-size: 2rem; }
+      .subtitle-cue { font-size: 1.2rem; padding: 0.5rem 1rem; }
+      .scene-content { padding: 1.5rem; }
+      #hud-controls { padding: 0 1rem; }
+      .progress-node { width: 15px; }
+      .btn-cinematic { padding: 0.6rem 1.5rem; }
+    }
+  </style>
+<!-- TENET5 SEO INJECT -->
+  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
+  <meta property="og:title" content="TENET5 — State Accountability Investigation">
+  <meta property="og:url" content="https://tenet-5.github.io/home.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TENET5 — State Accountability Investigation">
+  <link rel="canonical" href="https://tenet-5.github.io/home.html">
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "TENET5 — State Accountability Investigation",
+  "url": "https://tenet-5.github.io/home.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "TENET5",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+    }
+  }
+}
+  </script>
+<!-- /TENET5 SEO INJECT -->
+  <meta property="og:description" content="An interactive, objective presentation of government data measuring the scale of state-administered euthanasia and related institutional shifts.">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
+<meta name="dc.source" content="Criminal Code of Canada (R.S.C., 1985, c. C-46)">
+<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
+<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
+<link rel="stylesheet" href="/css/liril-theme.css?v=1">
+<script src="/js/liril-theme-slider.js?v=1" defer></script>
+<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
+</head>
+<body class="topo ts-motion">
+<a href="#cinematic-engine" class="skip-link">Skip to main content</a>
+<h1 class="sr-only">TENET5 — State Accountability Investigation</h1>
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+  <!-- Audio Contexts -->
+  <div class="audio-nodes">
+    <audio id="audio-hero" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-hero.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-hero.vtt" srclang="en" default></audio>
+    <audio id="audio-carter" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-carter.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-carter.vtt" srclang="en" default></audio>
+    <audio id="audio-c14" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-c14.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-c14.vtt" srclang="en" default></audio>
+    <audio id="audio-truchon" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-truchon.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-truchon.vtt" srclang="en" default></audio>
+    <audio id="audio-c7" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-c7.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-c7.vtt" srclang="en" default></audio>
+    <audio id="audio-veterans" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-veterans.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-veterans.vtt" srclang="en" default></audio>
+    <audio id="audio-deaths-2023" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-deaths-2023.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-deaths-2023.vtt" srclang="en" default></audio>
+    <audio id="audio-deaths-2024" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-deaths-2024.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-deaths-2024.vtt" srclang="en" default></audio>
+    <audio id="audio-investigation" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-investigation.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-investigation.vtt" srclang="en" default></audio>
+    <audio id="audio-stats" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-stats.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-stats.vtt" srclang="en" default></audio>
+    <audio id="audio-narrative" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-narrative.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-narrative.vtt" srclang="en" default></audio>
+    <!-- Extended Findings -->
+    <audio id="audio-s504" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-s504.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-s504.vtt" srclang="en" default></audio>
+    <audio id="audio-scorecard" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-scorecard.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-scorecard.vtt" srclang="en" default></audio>
+    <audio id="audio-lobbying" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-lobbying.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-lobbying.vtt" srclang="en" default></audio>
+    <audio id="audio-cfnis" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-cfnis.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-cfnis.vtt" srclang="en" default></audio>
+    <audio id="audio-municipal" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-municipal.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-municipal.vtt" srclang="en" default></audio>
+    <audio id="audio-archive" preload="auto" crossorigin="anonymous"><source src="audio/sections/home-archive.mp3" type="audio/mpeg"><track kind="subtitles" src="audio/sections/home-archive.vtt" srclang="en" default></audio>
+  </div>
+
+  <div id="cinematic-engine" role="main">
+    
+    <div id="subtitles-container">
+      <div id="subtitle-text" class="subtitle-cue"></div>
+    </div>
+
+    <!-- 0: Title Stage — CLEAN, CINEMATIC, HUGE -->
+    <div class="scene active" id="scene-0">
+      <div class="scene-bg" style="background: radial-gradient(ellipse at 50% 40%, #1a0505 0%, #09090b 70%);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="text-align: center; border: none; background: transparent; box-shadow: none; max-width: 1000px;">
+        <div class="hero-kicker">Live evidence chain • LIRIL guided mode</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(4rem,12vw,8rem);font-weight:900;line-height:0.9;margin-bottom:1rem;" id="n-a32bf08b" data-narrate="97,764 Canadians are estimated dead. Killed by their own government through a program called Medical Assistance in Dying. The last confirmed count was 76,475 in December 2024. At 45.2 deaths per day, the estimated total today is 97,764. The government stopped publishing. The Prime Minister holds 6.8 million dollars in Brookfield Asset Management stock options. Brookfield is one of the largest owners of seniors housing globally. This is the investigation. Click begin.">
+          <span style="color:#dc2626;text-shadow:0 0 40px rgba(220,38,38,0.5);" data-count="97764" data-suffix="">97,764</span>
+        </div>
+        <div style="font-size:clamp(1.2rem,3vw,2rem);font-weight:300;color:#c7beb1;letter-spacing:0.15em;text-transform:uppercase;">Canadians Killed by MAID</div>
+        <div style="font-size:0.82rem;color:#8e877d;margin-bottom:1.3rem;max-width:760px;margin-left:auto;margin-right:auto;">Confirmed: Health Canada 6th Annual Report (Dec 2024). Estimated today: ~97,764 at 45.2 per day. <strong style="color:#d2cbc0;">The government stopped publishing.</strong></div>
+        <div style="font-size:clamp(0.95rem,2vw,1.3rem);color:#f3d9d9;font-weight:700;margin-bottom:2rem;">PM holds <span style="color:#facc15;">$6.8M</span> in Brookfield options • Government saves <span style="color:#facc15;">$20,685</span> per death</div>
+        <button class="btn-cinematic btn-primary" id="btn-start" style="border-radius:30px;font-size:1.1rem;padding:1rem 3rem;">Begin Investigation &rarr;</button>
+        <button class="btn-cinematic" id="btn-liril-fullsite" style="border-radius:30px;font-size:1rem;padding:0.85rem 2.4rem;margin-left:0.6rem;background:linear-gradient(135deg,#7c3aed,#a855f7);border:1px solid rgba(168,85,247,0.5);color:#fff;font-weight:700;" title="Start narrated walkthrough across all pages">&#9654; LIRIL Full-Site Walkthrough</button>
+        <div class="hero-meta-ribbon">
+          <span class="hero-meta-pill">TENET5 edition desk</span>
+          <span class="hero-meta-pill">LIRIL narration</span>
+          <span class="hero-meta-pill">Autopilot enabled</span>
+          <span class="hero-meta-pill">7M public records</span>
+          <span class="hero-meta-pill">NVIDIA • Intel</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1: ARREST THEM — BOLD, DIRECT -->
+    <div class="scene" id="scene-1" data-audio="audio-hero">
+      <div class="scene-bg" style="background: #09090b;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="text-align:center; border:none; background:transparent; box-shadow:none;">
+          <h2 class="title-text" style="font-size:clamp(2.5rem,7vw,5rem);font-weight:900;line-height:1;" data-narrate="Arrest them. Stop the killing. Every 32 minutes another Canadian is killed. The government saves 20,685 dollars per death. 102 doctors killed 373 people each. The Rome Statute criminalises crimes against humanity. Canada was the first country to implement it. These people must be arrested and put on trial immediately."><span style="color:#dc2626;text-shadow:0 0 30px rgba(220,38,38,0.4);">ARREST THEM.</span><br><span style="color:#f3f4f6;">STOP THE KILLING.</span></h2>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;margin-top:2rem;">
+          <div style="text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:900;color:#dc2626;">32 min</div>
+            <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;">Between Deaths</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:900;color:#facc15;">$20,685</div>
+            <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;">Saved Per Death</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:900;color:#dc2626;">373</div>
+            <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;">Avg Kills Per Doctor</div>
+          </div>
+        </div>
+        <p style="margin-top:1.5rem;font-size:0.9rem;color:#6b7280;line-height:1.6;">Kiano Vafaeian, age 26 &mdash; <strong style="color:#dc2626;">coached into death</strong> by his doctor. Roger Foley &mdash; <strong style="color:#dc2626;">food and water withheld</strong>, offered MAID 4 times. Heather Hancock &mdash; called <strong style="color:#dc2626;">&ldquo;selfish&rdquo;</strong> for choosing to live. 428 violations &mdash; <strong style="color:#dc2626;">zero referred to police.</strong></p>
+        <p style="margin-top:1rem;font-size:1rem;color:#dc2626;font-weight:700;">Rome Statute &bull; Nuremberg Code &bull; Criminal Code s.504</p>
+      </div>
+    </div>
+
+    <!-- 2: THE MONEY — WHO PROFITS -->
+    <div class="scene" id="scene-2">
+      <div class="scene-bg" style="background: radial-gradient(ellipse at 50% 50%, #0a0a1a 0%, #09090b 70%);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="text-align:center; border:none; background:transparent; box-shadow:none;">
+          <h2 class="title-text" style="font-size:clamp(1.5rem,4vw,2.5rem);color:#facc15;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;" data-narrate="Who profits from the killing? Brookfield Asset Management. 1 trillion dollars. Largest seniors housing owner globally. The Prime Minister holds 6.8 million in Brookfield options. BlackRock owns 308 million in Brookfield shares — a 1,373 percent increase. Combined: 14.5 trillion dollars. MAID reduces demand for seniors care. The PM's financial wellbeing is connected to the program that kills. The government stopped publishing the death count. We didn't.">Who Profits From The Killing?</h2>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;margin-top:2rem;">
+          <div style="text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:900;color:#facc15;">$6.8M</div>
+            <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;">PM&rsquo;s Brookfield Options</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:900;color:#facc15;">$308M</div>
+            <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;">BlackRock &rarr; Brookfield</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:900;color:#facc15;">$14.5T</div>
+            <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;">Combined AUM</div>
+          </div>
+        </div>
+        <p style="margin-top:2rem;font-size:1rem;color:#6b7280;">Brookfield owns seniors housing. MAID reduces demand. <strong style="color:#dc2626;">PM holds $6.8M in Brookfield options.</strong></p>
+      </div>
+    </div>
+
+    <!-- 3: ZERO ACCOUNTABILITY — THE PROOF -->
+    <div class="scene" id="scene-3">
+      <div class="scene-bg" style="background: #09090b;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="text-align:center; border:none; background:transparent; box-shadow:none;">
+          <h2 class="title-text" style="font-size:clamp(3rem,8vw,6rem);font-weight:900;line-height:0.9;" data-narrate="Zero. That is the number of people held accountable. Zero arrests. Zero charges. Zero Ethics Commissioner investigations into Carney-Brookfield. Zero RCMP charges in ArriveCAN after two years. Zero criminal charges against any RCMP Commissioner. Zero registrations in the Foreign Influence Transparency Registry after 658 days. Zero government action on the UN repeal recommendation. 428 legal violations — zero referred to police. 100,000 dead and not one person has been held accountable. That is not a failure of the system. That IS the system. The absence of accountability is itself the evidence of institutional capture. When the people who kill are the same people who investigate, prosecute, and judge — nobody goes to prison. That is why section 504 exists. Any Canadian citizen can lay charges. The state won't prosecute itself. So we will."><span style="color:#dc2626;text-shadow:0 0 40px rgba(220,38,38,0.5);">0</span></h2>
+        <div style="font-size:clamp(1rem,2.5vw,1.5rem);font-weight:300;color:#6b7280;letter-spacing:0.1em;text-transform:uppercase;margin:1rem 0 2rem;">People Held Accountable</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;max-width:700px;margin:0 auto;">
+          <div style="border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:0.8rem;"><div style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900;color:#dc2626;">0</div><div style="font-size:0.6rem;color:#6b7280;text-transform:uppercase;">Arrests</div></div>
+          <div style="border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:0.8rem;"><div style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900;color:#dc2626;">0</div><div style="font-size:0.6rem;color:#6b7280;text-transform:uppercase;">Ethics Investigations</div></div>
+          <div style="border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:0.8rem;"><div style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900;color:#dc2626;">0</div><div style="font-size:0.6rem;color:#6b7280;text-transform:uppercase;">RCMP Charges</div></div>
+          <div style="border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:0.8rem;"><div style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900;color:#dc2626;">0</div><div style="font-size:0.6rem;color:#6b7280;text-transform:uppercase;">Foreign Agent Registrations</div></div>
+          <div style="border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:0.8rem;"><div style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900;color:#dc2626;">428</div><div style="font-size:0.6rem;color:#6b7280;text-transform:uppercase;">Violations Found</div></div>
+          <div style="border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:0.8rem;"><div style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900;color:#dc2626;">0</div><div style="font-size:0.6rem;color:#6b7280;text-transform:uppercase;">Referred to Police</div></div>
+        </div>
+        <p style="margin-top:2rem;font-size:1.1rem;color:#dc2626;font-weight:700;">The absence of accountability IS the evidence.<br>The state won&rsquo;t prosecute itself. <a href="s504-court-filing.html" style="color:#facc15;">So we will. &rarr;</a></p>
+      </div>
+    </div>
+
+    <!-- 4: Carter -->
+    <div class="scene" id="scene-4" data-audio="audio-carter">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_court.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Carter versus Canada. February 2015. The Supreme Court of Canada unanimously struck down the criminal prohibition on physician-assisted death. The ruling gave Parliament twelve months to draft new legislation. This single decision opened the door to everything that followed.">Carter v. Canada</h2>
+        <p class="subtitle-text">February 2015 — Supreme Court of Canada</p>
+      </div>
+    </div>
+
+    <!-- 3: C14 -->
+    <div class="scene" id="scene-5" data-audio="audio-c14">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_parliament.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Bill C-14 passes. June 2016. Parliament legalised medical assistance in dying with strict safeguards: terminal illness only, reasonably foreseeable natural death, two independent medical opinions, ten-day reflection period. These safeguards would be stripped within five years.">Bill C-14 Passes</h2>
+        <p class="subtitle-text">June 2016 — Parliament of Canada</p>
+      </div>
+    </div>
+
+    <!-- 4: Truchon -->
+    <div class="scene" id="scene-6" data-audio="audio-truchon">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_court.png'); background-position: left center;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Truchon versus Attorney General. September 2019. A Quebec Superior Court judge struck down the reasonably foreseeable natural death requirement. The federal government chose not to appeal. Instead it used the ruling to justify Bill C-7, expanding MAID to people who were not dying.">Truchon v. Attorney General</h2>
+        <p class="subtitle-text">September 2019 — Quebec Superior Court</p>
+      </div>
+    </div>
+
+    <!-- 5: C7 -->
+    <div class="scene" id="scene-7" data-audio="audio-c7">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_parliament.png'); background-position: right center;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Bill C-7 Track Two. March 2021. Parliament removed the requirement that death be reasonably foreseeable. Track Two opened MAID to people whose only condition is a disability, chronic illness, or mental suffering. The ten-day reflection period was eliminated for Track One. 173 MPs voted yes.">Bill C-7 (Track Two)</h2>
+        <p class="subtitle-text">March 2021 — Parliament of Canada</p>
+      </div>
+    </div>
+
+    <!-- 5.5: Institutional Influence (Carney/Brookfield OSINT) -->
+    <div class="scene" id="scene-7b">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 18% 26%, rgba(196,30,58,0.20) 0%, transparent 24%), radial-gradient(circle at 74% 40%, rgba(201,168,76,0.16) 0%, transparent 22%), linear-gradient(135deg, rgba(12,18,28,0.94), rgba(28,36,52,0.82)); background-position: center;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="Institutional architecture and regulatory capture. Prime Minister Mark Carney and Brookfield Asset Management. Opponents point to an administration defending enhanced safeguards while pushing MAID as a substitute for systemic social support. Two thousand two hundred and six Criminal Code Form 2 notifications dispatched via LIRIL in 24 hours.">Regulatory Capture</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>Mark Carney / Brookfield Asset Management</strong>. OSINT Vector: Systemic expansion of MAID Track 2 over structural social support frameworks.</p>
+      </div>
+    </div>
+
+    <!-- 5.6: Andrew Bailey (Bank of England OSINT) -->
+    <div class="scene" id="scene-7c">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 22% 22%, rgba(196,30,58,0.16) 0%, transparent 22%), radial-gradient(circle at 68% 32%, rgba(37,99,235,0.18) 0%, transparent 24%), linear-gradient(180deg, rgba(14,20,30,0.96), rgba(23,31,46,0.82)); background-position: top; filter: saturate(1.05) brightness(0.9);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="Central banking correlation node. Andrew Bailey, Governor of the Bank of England. The system highlights interlocking monetary policies intersecting with federal fiscal expansion. Connection tracking confirmed to former Governor Mark Carney structure.">Bank of England</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>Andrew Bailey</strong>. Connection Parameter: Bank of England (2013-2020) institutional continuity.</p>
+      </div>
+    </div>
+
+    <!-- 5.7: Chrystia Freeland / WEF Institutional Convergence -->
+    <div class="scene" id="scene-7d">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 24% 30%, rgba(201,168,76,0.18) 0%, transparent 24%), radial-gradient(circle at 72% 76%, rgba(196,30,58,0.15) 0%, transparent 22%), linear-gradient(160deg, rgba(18,22,36,0.96), rgba(38,32,44,0.82)); background-position: center bottom; filter: saturate(1.1) brightness(0.85);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="Foreign institutional influence node. Chrystia Freeland, former Deputy Prime Minister and Minister of Finance. Board of Trustees, World Economic Forum. The system maps a direct institutional corridor from WEF policy frameworks to federal fiscal architecture during the period of accelerated MAID expansion and pandemic emergency spending.">WEF Institutional Corridor</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>Chrystia Freeland</strong>. Connection Parameter: World Economic Forum Board of Trustees (2019-2024), Deputy PM / Finance Minister concurrent with Track Two expansion.</p>
+      </div>
+    </div>
+
+    <!-- 5.8: Christine Lagarde / ECB Quantitative Easing Convergence -->
+    <div class="scene" id="scene-7e">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 76% 34%, rgba(201,168,76,0.16) 0%, transparent 22%), radial-gradient(circle at 32% 66%, rgba(37,99,235,0.16) 0%, transparent 22%), linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,34,48,0.80)); background-position: right center; filter: hue-rotate(10deg) brightness(0.9);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="Central banking convergence node. Christine Lagarde, President of the European Central Bank. The TENET5 cross-reference pipeline identifies a direct institutional corridor linking ECB quantitative easing policy to coordinated G7 fiscal expansion frameworks. Lagarde, Carney, and Bailey occupied three of the world's most powerful central banking positions simultaneously between 2019 and 2020.">ECB Convergence Node</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>Christine Lagarde</strong>. Connection Parameter: ECB President (2019-present). Concurrent G7 central banking overlap with Carney (BoC/BoE) and Bailey (BoE). Quantitative easing alignment with TCFD-driven green finance architecture.</p>
+      </div>
+    </div>
+
+    <!-- 5.9: Tiff Macklem / Bank of Canada — Domestic Convergence Anchor -->
+    <div class="scene" id="scene-7f">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 20% 44%, rgba(196,30,58,0.18) 0%, transparent 24%), radial-gradient(circle at 66% 34%, rgba(201,168,76,0.14) 0%, transparent 22%), linear-gradient(145deg, rgba(18,24,40,0.94), rgba(24,30,40,0.82)); background-position: left center; filter: hue-rotate(-8deg) brightness(0.88) contrast(1.1);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="Domestic convergence anchor. Tiff Macklem, Governor of the Bank of Canada. Appointed 2020. The TENET5 cross-reference pipeline closes the central banking loop. Macklem was Carney's Senior Deputy Governor at the Bank of Canada from 2010 to 2014. He now controls Canadian monetary policy during the period of accelerated MAID expansion, housing crisis, and the Brookfield Maple Fund deployment. The G7 coordination chain is now complete: Carney to Macklem at BoC, Carney to Bailey at BoE, Lagarde at ECB.">Domestic Anchor Node</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>Tiff Macklem</strong>. Connection Parameter: Bank of Canada Governor (2020-present). Former Senior Deputy Governor under Carney (2010-2014). G7 monetary coordination chain closed: BoC → BoE → ECB.</p>
+      </div>
+    </div>
+
+    <!-- 5.10: Canada Infrastructure Bank — Fiscal Deployment Mechanism -->
+    <div class="scene" id="scene-7g">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 50% 18%, rgba(201,168,76,0.18) 0%, transparent 20%), radial-gradient(circle at 30% 72%, rgba(37,99,235,0.16) 0%, transparent 22%), linear-gradient(180deg, rgba(14,20,28,0.96), rgba(30,38,52,0.80)); background-position: center top; filter: hue-rotate(18deg) brightness(0.85) saturate(1.12);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="Fiscal deployment mechanism. The Canada Infrastructure Bank. Created 2017 with a 35 billion dollar mandate. CEO Tamara Vrooman. The CIB is the exact instrument through which the Brookfield Maple Fund thesis becomes operational policy. It co-invests federal capital alongside private asset managers in infrastructure, clean energy, and transit — the identical sectors targeted by Brookfield's 50 billion dollar pitch. The policy-to-profit corridor is now fully mapped from WEF governance through central banking through domestic fiscal architecture to public-private co-investment.">Fiscal Deployment Mechanism</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>Canada Infrastructure Bank</strong> (CEO: Tamara Vrooman). $35B federal mandate. Co-investment vehicle for infrastructure, clean energy, transit — identical to Brookfield Maple Fund thesis. Policy-to-profit corridor complete.</p>
+      </div>
+    </div>
+
+    <!-- LIRIL Scene 7h: BlackRock / Larry Fink -->
+    <div class="scene" id="scene-7h">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 22% 26%, rgba(37,99,235,0.20) 0%, transparent 22%), radial-gradient(circle at 74% 68%, rgba(196,30,58,0.15) 0%, transparent 22%), linear-gradient(135deg, rgba(10,18,30,0.96), rgba(24,34,48,0.80)); background-position: center; filter: hue-rotate(185deg) brightness(0.8) saturate(1.08);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:#facc15;" data-narrate="The asset convergence. BlackRock. Larry Fink. The world's largest asset manager holds 308 million dollars in Brookfield shares — a 1,373 percent increase filed with the SEC in November 2025. Fink and Carney served together on the WEF Board of Trustees. Fink became WEF interim co-chair in August 2025. Combined assets under management: 14.5 trillion dollars. BlackRock's ESG mandates create demand for green infrastructure. Brookfield supplies it. The CIB funds it with federal capital. One network. One thesis. One corridor.">The Asset Convergence</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>BlackRock / Larry Fink</strong>. $308M Brookfield stake (+1,373% SEC 13F-HR). WEF Board with Carney. Combined AUM: $14.5T. ESG mandates → green infrastructure demand → Brookfield supply → CIB federal capital.</p>
+      </div>
+    </div>
+
+    <!-- 6: Veterans -->
+    <div class="scene" id="scene-8" data-audio="audio-veterans">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_data.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Veterans Affairs investigations. 2022. Twenty veterans have documented proof of being offered MAID when they called Veterans Affairs asking for mental health support. A Veterans Affairs employee was caught actively recommending MAID to callers. The department called it an isolated incident. It was not.">Veterans Affairs Investigations</h2>
+        <p class="subtitle-text">2022 — Structural Failure</p>
+      </div>
+    </div>
+
+    <!-- 7: Deaths 2023 -->
+    <div class="scene" id="scene-9" data-audio="audio-deaths-2023">
+      <div class="scene-bg" style="background: linear-gradient(to right, #09090b, #18181b);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Fifteen thousand three hundred forty three MAID deaths in 2023. The growth rate has not slowed. Each number is a Canadian citizen."><span data-count="15343" data-suffix=" Deaths">15,343 Deaths</span></h2>
+        <p class="subtitle-text">2023 — Health Canada 6th Annual Report. Growth rate: 15.8% year-over-year.</p>
+      </div>
+    </div>
+
+    <!-- 8: Deaths 2024 -->
+    <div class="scene" id="scene-10" data-audio="audio-deaths-2024">
+      <div class="scene-bg" style="background: linear-gradient(to right, #18181b, #27272a);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Sixteen thousand four hundred ninety nine MAID deaths in 2024. Five point one percent of all Canadian deaths. One in twenty. The program has killed 76,475 people since legalization."><span data-count="16499" data-suffix=" Deaths">16,499 Deaths</span></h2>
+        <p class="subtitle-text">2024 — <strong>5.1% of all Canadian deaths.</strong> One in twenty. Cumulative: 76,475.</p>
+      </div>
+    </div>
+
+    <!-- 9: Investigation -->
+    <div class="scene" id="scene-11" data-audio="audio-investigation">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_data.png'); background-position: right top;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Data architecture. Seven million public records cross-referenced across six structured databases. Hansard transcripts, Elections Canada filings, lobbying registry contacts, federal procurement contracts, Auditor General reports, and court records. Every claim on this site links back to a government source.">Data Architecture</h2>
+        <p class="subtitle-text">7 million public records cross-referenced across 6 structured databases.</p>
+      </div>
+    </div>
+
+    <!-- 10: Stats -->
+    <div class="scene" id="scene-12" data-audio="audio-stats">
+      <div class="scene-bg" style="background: #09090b;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="One point two billion dollars in government spending anomalies tracked. 93 million for ArriveCAN. 9.3 billion for Phoenix Pay. 350,000 lobbying contacts documented. 1.13 million federal procurement contracts analysed. The money trail connects every scandal on this site.">$1.2 Billion Tracked</h2>
+        <p class="subtitle-text">Financial Mapping & Lobbying Metrics</p>
+      </div>
+    </div>
+
+    <!-- 11: Narrative -->
+    <div class="scene" id="scene-13" data-audio="audio-narrative">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_data.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="The objective. Strict accountability through empirical transparency. Every official is named. Every vote is recorded. Every dollar is traced. No editorials. No opinions. Government records only. 143 pages of evidence. One question: why has nobody been arrested?">The Objective</h2>
+        <p class="subtitle-text">Strict accountability, empirical transparency, and institutional mapping.</p>
+      </div>
+    </div>
+
+    <!-- 12: S504 -->
+    <div class="scene" id="scene-14" data-audio="audio-s504">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_court.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="The section 504 prosecution. Twenty-eight criminal counts filed against Captain Rebecca Covey and Crown Prosecutor Vicky Jahye Bae. Obstruction of justice, breach of trust, and evidence tampering."><span data-count="28" data-suffix=" Counts">28 Counts</span></h2>
+        <p class="subtitle-text">Criminal Code s.504 — private prosecution against Capt. Rebecca Covey (16 counts) and Vicky Jahye Bae (4 counts). Obstruction, breach of trust, evidence tampering.</p>
+      </div>
+    </div>
+
+    <!-- 13: Scorecard -->
+    <div class="scene" id="scene-15" data-audio="audio-scorecard">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_parliament.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="The MP scorecard. Three hundred forty Members of Parliament computationally scored against their voting records, lobbying exposure, and financial declarations. One hundred seventy three voted to expand MAID under Bill C-7 in 2021. Fifty six percent of all MPs received at least one lobbying contact from CIJA during their tenure. These are two independent facts from separate government registries; the site does not claim a causal link between them. Every vote is on the public record. Every MP is named.">The MP Scorecard</h2>
+        <p class="subtitle-text">340 Members of Parliament computationally scored.</p>
+      </div>
+    </div>
+
+    <!-- 14: Lobbying -->
+    <div class="scene" id="scene-16" data-audio="audio-lobbying">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_data.png'); background-position: left bottom;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Three hundred fifty thousand registered lobbying contacts with federal officials. 9,000 active lobbyists. CIJA alone made 2,138 contacts reaching 56 percent of all MPs. The Commissioner of Lobbying has never laid a single criminal charge.">350,000 Lobbying Contacts</h2>
+        <p class="subtitle-text">Tracking the direct pipeline of specialized influence.</p>
+      </div>
+    </div>
+
+    <!-- 15: CFNIS -->
+    <div class="scene" id="scene-17" data-audio="audio-cfnis">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_court.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Military failure. CFNIS Captain Rebecca Covey turned a misconduct investigation against the whistleblower who filed it. Crown Prosecutor Vicky Jahye Bae escalated fabricated charges. The Military Police Complaints Commission documented multiple obstruction indicators but enforcement stalled.">Military Failure</h2>
+        <p class="subtitle-text">Misconduct mapping within the Canadian Forces National Investigation Service.</p>
+      </div>
+    </div>
+
+    <!-- 15.5: CFNIS Proxy Node -->
+    <div class="scene" id="scene-17b">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 28% 28%, rgba(196,30,58,0.18) 0%, transparent 24%), radial-gradient(circle at 72% 36%, rgba(201,168,76,0.14) 0%, transparent 22%), linear-gradient(135deg, rgba(16,20,32,0.95), rgba(28,34,46,0.82)); background-position: center; filter: brightness(1.02) contrast(1.08);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:var(--accent);" data-narrate="Internal oversight tampering mapping. The TENET5 documented timeline detects an active CFNIS proxy node generating internal blockades. Documented in CFNIS proceedings (see Arbour IECR 2022) spanning lobbying connections and documented cross-referencing patterns. No accountability has been leveraged.">Proxy Node Architecture</h2>
+        <p class="subtitle-text">LIRIL Target: <strong>CFNIS Proxy Node</strong>. Vector: Internal oversight evasion and cross-reference interference tracing.</p>
+      </div>
+    </div>
+
+    <!-- 16: Municipal -->
+    <div class="scene" id="scene-18" data-audio="audio-municipal">
+      <div class="scene-bg" style="background-image: url('images/cinematic/prof_data.png');"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Municipal intelligence. Tracking civic property taxation, administrative salaries, and governance waste across every major Canadian city. Council votes, integrity commissioner findings, and spending data linked to the national accountability network.">Municipal Intelligence</h2>
+        <p class="subtitle-text">Tracking civic property taxation, administrative salaries, and unchecked waste.</p>
+      </div>
+    </div>
+
+    <!-- 17: ArriveCAN -->
+    <div class="scene" id="scene-19">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 18% 20%, rgba(201,168,76,0.16) 0%, transparent 22%), radial-gradient(circle at 74% 72%, rgba(196,30,58,0.18) 0%, transparent 24%), linear-gradient(145deg, rgba(14,18,26,0.96), rgba(34,28,36,0.82)); background-position: left top; filter: hue-rotate(10deg) brightness(0.82) contrast(1.12);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:#f59e0b;" data-narrate="Ninety three million dollars for a COVID questionnaire. Original estimate: eighty thousand dollars. Two-person contractor. Zero code written. Seventy-six percent of subcontractors did no work. Every Liberal MP voted against recovering the money."><span data-count="93" data-prefix="$" data-suffix="M">$93M</span></h2>
+        <p class="subtitle-text">ArriveCAN. Original estimate: $80,000. Two-person contractor. Zero code written. 76% of subcontractors did no work. Parliament voted 172-165 to recover the money — every Liberal MP voted against.</p>
+      </div>
+    </div>
+
+    <!-- 18: Phoenix Pay -->
+    <div class="scene" id="scene-20">
+      <div class="scene-bg" style="background-image: radial-gradient(circle at 78% 74%, rgba(37,99,235,0.18) 0%, transparent 22%), radial-gradient(circle at 24% 30%, rgba(196,30,58,0.18) 0%, transparent 24%), linear-gradient(135deg, rgba(18,22,32,0.96), rgba(30,36,50,0.80)); background-position: right bottom; filter: hue-rotate(-10deg) brightness(0.9) contrast(1.1);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:#dc2626;" data-narrate="Nine point three billion dollars. The Phoenix Pay System was estimated at 309 million. It became a 9.3 billion dollar disaster. 216,000 transactions still backlogged. 133,000 public servants still affected. Won't be fixed until 2031 — fifteen years after it broke."><span data-count="9300" data-prefix="$" data-suffix="M">$9,300M</span></h2>
+        <p class="subtitle-text">Phoenix Pay System. Estimated: $309M. Actual: $9.3B. 216,000 transactions backlogged. 133,000 public servants affected. Won't be fixed until 2031 — <strong>fifteen years</strong> after it broke.</p>
+      </div>
+    </div>
+
+    <!-- 19: Foreign Interference -->
+    <div class="scene" id="scene-21">
+      <div class="scene-bg" style="background: var(--bg);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Foreign interference. The Hogue Commission confirmed the PRC is the most active perpetrator of foreign interference in Canada. CIJA lobbied 56 percent of all MPs. The Foreign Influence Transparency Registry has been law for over 658 days with zero registrations. The RCMP closed the Chinese police station investigation without charges.">Foreign Interference</h2>
+        <p class="subtitle-text">The Hogue Commission confirmed the PRC is the most active perpetrator of foreign interference in Canada. CIJA lobbied 56% of all MPs. The Foreign Influence Transparency Registry has been law for 658+ days with zero registrations. The RCMP closed the Chinese police station investigation without charges.</p>
+      </div>
+    </div>
+
+    <!-- 20: The 504 -->
+    <div class="scene" id="scene-22">
+      <div class="scene-bg" style="background: var(--bg);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" data-narrate="Twenty eight criminal charges. Section 504 Criminal Code private prosecution filed against CFNIS Captain Rebecca Covey and Crown Prosecutor Vicky Jahye Bae. Charges include party to murder, mutiny, institutional hate crime, and obstructing justice. The investigation was turned against the whistleblower.">28 Criminal Charges</h2>
+        <p class="subtitle-text">s.504 Criminal Code private prosecution filed against CFNIS Captain Rebecca Covey and Crown prosecutor Vicky Jahye Bae. Charges include party to murder, mutiny, institutional hate crime, and obstructing justice. The investigation was turned against the whistleblower.</p>
+      </div>
+    </div>
+
+    <!-- 21: THE INCENTIVE — Step 1 -->
+    <div class="scene" id="scene-23">
+      <div class="scene-bg" style="background: linear-gradient(135deg, #09090b 0%, #1a0505 100%);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="border-left-color:#dc2626;">
+          <h2 class="title-text" style="color:#dc2626;font-size:2rem;" data-narrate="Step one. The government calculated MAID would save 149 million dollars per year. The Parliamentary Budget Officer published this cost estimate in October 2020 — BEFORE Parliament voted to expand MAID with Bill C-7. Every MP who voted yes knew the government had a financial incentive to kill its citizens. Projected savings by 2047: 1.273 trillion dollars. This document was public. This was not hidden.">The Government Calculated the Savings</h2>
+        <p class="subtitle-text" style="font-size:1.1rem;"><strong style="color:#dc2626;font-size:2.5rem;">$149M/year</strong><br>The PBO published a cost estimate <strong>BEFORE</strong> Parliament voted to expand MAID. Every MP who voted yes knew the government had a financial incentive to end lives. Projected savings by 2047: <strong style="color:#dc2626;">$1.273 TRILLION.</strong></p>
+        <p style="font-size:0.8rem;color:#6b7280;margin-top:1rem;">Source: Parliamentary Budget Officer, &ldquo;Cost Estimate for Bill C-7&rdquo; (Oct 2020)</p>
+      </div>
+    </div>
+
+    <!-- 21b: THE INCENTIVE — Step 2 -->
+    <div class="scene" id="scene-24">
+      <div class="scene-bg" style="background: linear-gradient(135deg, #1a0505 0%, #0a0a1a 100%);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="border-left-color:#facc15;">
+          <h2 class="title-text" style="color:#facc15;font-size:2rem;" data-narrate="Step two. The Prime Minister came from Brookfield Asset Management. Brookfield describes itself as one of the largest owners and managers of senior housing globally. Over 1 trillion dollars in managed assets. Carney holds 6.8 million dollars in Brookfield stock options while serving as PM. MAID reduces demand for long-term seniors care. Fewer seniors in care means different economics for the company whose stock the PM holds. His blind trust is not blind — he knows what he put in, he chose his own trustee, and the trustee gives regular updates.">The PM Profits From the Deaths</h2>
+        <p class="subtitle-text" style="font-size:1.1rem;"><strong style="color:#facc15;font-size:2.5rem;">$6.8M</strong> in Brookfield options<br>Brookfield is <strong>one of the largest owners of seniors housing globally</strong>. Over $1 trillion in managed assets. MAID reduces demand for long-term seniors care. Fewer seniors in care = different economics for the company whose stock the PM holds.</p>
+        <p class="subtitle-text" style="font-size:0.95rem;margin-top:1rem;">His blind trust is <strong>not blind</strong> &mdash; he knows what he put in, he chose his own trustee, and the trustee gives regular updates. The Ethics Commissioner has not launched an investigation.</p>
+        <p style="font-size:0.8rem;color:#6b7280;margin-top:1rem;">Sources: brookfield.com; CBC; The Walrus; Democracy Watch</p>
+      </div>
+    </div>
+
+    <!-- 21c: THE INCENTIVE — Step 3: The Chain -->
+    <div class="scene" id="scene-25">
+      <div class="scene-bg" style="background: linear-gradient(135deg, #0a0a1a 0%, #09090b 100%);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="border-left-color:#dc2626;">
+          <h2 class="title-text" style="color:#dc2626;font-size:1.8rem;" data-narrate="The chain. MAID saves the government 149 million per year. MAID reduces demand for seniors care. Brookfield owns seniors housing. The PM holds 6.8 million in Brookfield options. The PBO published the savings estimate before the expansion vote. 76,475 Canadians are dead. The PM's financial wellbeing is connected to the program that killed them. 102 doctors performed 38 percent of all MAID deaths. Quebec has the highest rate in the world at 7.9 percent. 10 provinces oppose expansion. The UN called for repeal. The government says no plans to act. Every dollar saved is a citizen eliminated. This is not healthcare. This is fiscal extermination with a medical mask.">The Evidence Chain</h2>
+        <p class="subtitle-text" style="font-size:1rem;line-height:1.8;">
+          MAID saves <strong style="color:#dc2626;">$149M/year</strong> &rarr;
+          MAID reduces demand for seniors care &rarr;<br>
+          Brookfield owns seniors housing (<strong style="color:#facc15;">$1T+ AUM</strong>) &rarr;
+          PM holds <strong style="color:#facc15;">$6.8M</strong> in Brookfield options &rarr;<br>
+          PBO published savings estimate <strong>BEFORE</strong> expansion vote &rarr;
+          <strong style="color:#dc2626;">76,475 dead</strong> &rarr;<br>
+          <strong style="color:#dc2626;">102 doctors killed 38,000</strong> (~373 each) &rarr;
+          Quebec: <strong style="color:#dc2626;">7.9%</strong> of all deaths (world record) &rarr;<br>
+          UN calls for repeal &rarr; 10 provinces oppose &rarr;
+          Government: <strong style="color:#dc2626;">no plans to act.</strong>
+        </p>
+        <p class="subtitle-text" style="font-size:1.1rem;margin-top:1.5rem;color:#dc2626;font-weight:700;">76,475 dead. PM holds $6.8M in Brookfield options. Brookfield owns seniors housing globally. 428 legal violations &mdash; zero referred to police. Patients told they&rsquo;re &ldquo;selfish&rdquo; for declining death. BlackRock owns $308M in Brookfield. Government saves $149M per year.</p>
+      </div>
+    </div>
+
+    <!-- 24: THE LAW -->
+    <div class="scene" id="scene-26">
+      <div class="scene-bg" style="background: linear-gradient(135deg, #09090b 0%, #0a0a1a 100%);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="border-left-color:#3b82f6;">
+          <h2 class="title-text" style="color:#3b82f6;font-size:1.8rem;" data-narrate="The law they are breaking. The Rome Statute. Canada ratified July 7, 2000 — the first country in the world to pass implementing legislation. The Crimes Against Humanity and War Crimes Act criminalises genocide and crimes against humanity on Canadian soil. Article 7 of the Rome Statute defines crimes against humanity as a widespread or systematic attack directed against a civilian population. 76,475 deaths. Systematic. Directed by legislation. Against the most vulnerable civilians. The Nuremberg Code. Principle one: voluntary consent without coercion. When a veteran calls asking for help and is offered death instead, that is coercion by deprivation. When a disabled person requests MAID because the state refuses to provide housing or support, the consent is manufactured by government failure. And Canada's own history. In 1976, Parliament voted 130 to 124 to abolish the death penalty for convicted murderers, traitors, and pirates. The last execution was December 11, 1962. Canada decided it was immoral to execute a convicted killer. Then in 2016, it legalised the execution of the disabled, the elderly, the depressed, and the veteran — and called it compassion.">The Law They Are Breaking</h2>
+        <p class="subtitle-text" style="font-size:0.95rem;line-height:1.9;">
+          <strong style="color:#3b82f6;">Rome Statute</strong> &mdash; Canada ratified July 7, 2000. <strong>First country</strong> to pass implementing legislation. Crimes Against Humanity and War Crimes Act criminalises genocide and crimes against humanity. Article 7: a <em>widespread or systematic attack directed against a civilian population</em>. <strong style="color:#dc2626;">76,475 deaths. Systematic. Directed by legislation.</strong><br><br>
+          <strong style="color:#3b82f6;">Nuremberg Code</strong> &mdash; Principle 1: voluntary consent <em>without coercion</em>. When a veteran is offered death instead of care, that is coercion by deprivation. When a disabled person requests MAID because the state refuses housing or support, the consent is manufactured by government failure.<br><br>
+          <strong style="color:#3b82f6;">Canada&rsquo;s Own History</strong> &mdash; In 1976, Parliament voted 130&ndash;124 to abolish the death penalty for <em>convicted murderers</em>. Last execution: December 11, 1962. Canada decided it was immoral to execute a convicted killer. <strong style="color:#dc2626;">Then in 2016, it legalised the execution of the disabled, the elderly, the depressed, and the veteran &mdash; and called it compassion.</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- 25: The World Is Watching -->
+    <div class="scene" id="scene-27">
+      <div class="scene-bg" style="background: var(--bg);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:#dc2626;" data-narrate="The world is watching. The United Nations has called on Canada to repeal Track 2 entirely. 10 provinces oppose expansion. Two Charter challenges before the courts. 20 veterans have documented proof of being offered MAID when asking for help. And the federal government says it has no plans to act on any of it.">The World Is Watching</h2>
+        <p class="subtitle-text">The UN called Canada's MAID program an &ldquo;extreme concern&rdquo; and demanded Track 2 be repealed. 10 provinces oppose expansion. Two Charter challenges in court. 20 veterans have documented proof of being offered death when they asked for help. <strong>Canada&rsquo;s response: no plans to act.</strong></p>
+      </div>
+    </div>
+
+    <!-- 26: CDS Accountability -->
+    <div class="scene" id="scene-28">
+      <div class="scene-bg" style="background: var(--bg);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content">
+          <h2 class="title-text" style="color:#a855f7;" data-narrate="The Chief of the Defence Staff. 88,715 actual strength against 101,500 authorised. 76 percent of occupations at shortfalls exceeding 10 percent. The retention program — defunded. 12 NATO nations conducting live-agent chemical weapons training on Canadian soil. The CDS says Canada has five years to prepare. At 6,400 recruits per year, her mobilisation target of 400,000 would take 62 years. Every public statement is contradicted by the subsequent action. This is not incompetence. This is a pattern."><span data-count="88715" data-suffix=" Troops">88,715 Troops</span></h2>
+        <p class="subtitle-text">CAF actual strength — against 101,500 authorised. 12,785 short. 76% of occupations at 10%+ shortfall. Retention program defunded. CDS says &ldquo;five years to prepare&rdquo; but mobilisation target would take 62 years at current training capacity. 12 NATO nations train live-agent CBRN on Canadian soil. Every statement contradicted by action. <strong>This is not incompetence. This is a pattern.</strong></p>
+      </div>
+    </div>
+
+    <!-- 26b: CORRUPTION TERRAIN — Topographic Map Overview -->
+    <div class="scene" id="scene-28b">
+      <div class="scene-bg" style="background: radial-gradient(ellipse at 30% 40%, rgba(185,28,28,0.08) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(201,168,76,0.06) 0%, transparent 50%), #09090b;"></div>
+      <div class="vignette"></div>
+      <div class="scene-content terrain-section ts-peak" style="text-align:center; border:none; background:transparent; box-shadow:none; max-width:1000px;">
+        <div class="carto-header" style="justify-content:center;border-bottom-color:rgba(201,168,76,0.25);margin-bottom:2rem;">
+          <h2 style="font-family:'Cinzel',serif;font-size:clamp(1.4rem,3vw,2rem);color:#c9a84c;margin:0;" data-narrate="The corruption terrain. This investigation maps five mountain ranges of institutional failure across the Canadian federal landscape. Each peak represents a nexus of power, money, and policy that connects to the killing. The highest elevation: MAID deaths at 76,475. Brookfield and BlackRock form the financial ridgeline. The lobbying network forms the foothills. Every contour line is a public record. Every connection is documented. This is the map.">The Corruption Terrain</h2>
+          <span class="ch-scale" style="font-size:0.5rem;">Survey: 7M records</span>
+        </div>
+        <div class="isobar isobar-thick" aria-hidden="true"></div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;margin:2rem 0;">
+          <div class="depth-contour dc-lg">
+            <div class="dc-label"><strong style="color:#dc2626;font-size:0.8rem;">76,475</strong><br>MAID Deaths</div>
+          </div>
+          <div class="depth-contour">
+            <div class="dc-label"><strong style="color:#facc15;font-size:0.8rem;">$14.5T</strong><br>AUM Corridor</div>
+          </div>
+          <div class="depth-contour dc-sm">
+            <div class="dc-label"><strong style="color:#60a5fa;font-size:0.7rem;">382</strong><br>Entities</div>
+          </div>
+          <div class="depth-contour dc-sm">
+            <div class="dc-label"><strong style="color:#c084fc;font-size:0.7rem;">6,802</strong><br>Connections</div>
+          </div>
+        </div>
+        <div class="isobar" aria-hidden="true"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:1.5rem 0;">
+          <span class="ridge-label rl-treason">MAID eugenics</span>
+          <span class="ridge-label rl-financial">Brookfield corridor</span>
+          <span class="ridge-label rl-lobbying">CIJA lobbying</span>
+          <span class="ridge-label rl-foreign">PRC interference</span>
+          <span class="ridge-label rl-osint">CAF subversion</span>
+          <span class="ridge-label rl-media">media complicity</span>
+        </div>
+        <div class="trail-path" style="max-width:600px;margin:1.5rem auto;" aria-hidden="true"></div>
+        <a href="corruption-map.html" class="btn-cinematic btn-primary" style="border-radius:30px;font-size:0.9rem;padding:0.8rem 2.5rem;margin-top:1rem;">Open Terrain Map &rarr;</a>
+        <div class="pressure-ridge" aria-hidden="true" style="margin-top:2rem;"></div>
+      </div>
+    </div>
+
+    <!-- 27-NEW: Quantum Accountability Investigation -->
+    <div class="scene" id="scene-28b" data-audio="audio-hero">
+      <div class="scene-bg" style="background: radial-gradient(ellipse at 30% 40%, rgba(168,85,247,0.15) 0%, #09090b 70%);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="text-align:center;max-width:1100px;">
+        <h2 class="title-text" data-narrate="The quantum investigation. TENET5 runs Grover amplitude amplification over six accountability dossiers: corrections, MAID, arms pipeline, foreign interference, CFNIS, and Carney Brookfield. Eighty five unique executive actors. Seventy two in single axes, eight cross axis bridges. Portfolio level Grover reveals four cabinet chairs concentrate every Grover amplified actor across the six axes: National Defence, Foreign Affairs, Public Safety, and Finance. Twelve other portfolios receive zero probability. Each result is Merkle anchored for reproducibility." style="color:#c4b5fd;">Quantum-Amplified Accountability</h2>
+        <p class="subtitle-text" style="margin:1rem 0 2rem;color:#d8b4fe;">8 dossiers · 95+ unique actors · 8 Grover oracles · 5 cabinet chairs concentrate everything (Justice now #1)</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;max-width:900px;margin:0 auto 2rem;">
+          <div style="background:rgba(168,85,247,0.12);border:1px solid #a855f7;border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:1.8rem;font-weight:900;color:#c4b5fd;">5.00×</div>
+            <div style="font-size:0.75rem;color:#d0d0e0;margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">Corrections amp</div>
+            <div style="font-size:0.7rem;color:#a0a0b8;margin-top:0.3rem;">Goodale · Head · Kelly</div>
+          </div>
+          <div style="background:rgba(168,85,247,0.12);border:1px solid #a855f7;border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:1.8rem;font-weight:900;color:#c4b5fd;">5.08×</div>
+            <div style="font-size:0.75rem;color:#d0d0e0;margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">MAID amp</div>
+            <div style="font-size:0.7rem;color:#a0a0b8;margin-top:0.3rem;">Lametti · Virani · Holland</div>
+          </div>
+          <div style="background:rgba(168,85,247,0.12);border:1px solid #a855f7;border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:1.8rem;font-weight:900;color:#c4b5fd;">4.00×</div>
+            <div style="font-size:0.75rem;color:#d0d0e0;margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">Arms amp · 100%</div>
+            <div style="font-size:0.7rem;color:#a0a0b8;margin-top:0.3rem;">Ng · Sajjan · Blair · Joly</div>
+          </div>
+          <div style="background:rgba(168,85,247,0.12);border:1px solid #a855f7;border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:1.8rem;font-weight:900;color:#c4b5fd;">4.00×</div>
+            <div style="font-size:0.75rem;color:#d0d0e0;margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">Foreign amp · 100%</div>
+            <div style="font-size:0.7rem;color:#a0a0b8;margin-top:0.3rem;">Mendicino · Rogers · LeBlanc · Vigneault</div>
+          </div>
+          <div style="background:rgba(168,85,247,0.12);border:1px solid #a855f7;border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:1.8rem;font-weight:900;color:#c4b5fd;">2.19×</div>
+            <div style="font-size:0.75rem;color:#d0d0e0;margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">CFNIS amp</div>
+            <div style="font-size:0.7rem;color:#a0a0b8;margin-top:0.3rem;">Peck · Bernatchez · Sajjan · Anand · Vance · Eyre</div>
+          </div>
+          <div style="background:rgba(168,85,247,0.12);border:1px solid #a855f7;border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:1.8rem;font-weight:900;color:#c4b5fd;">1.55×</div>
+            <div style="font-size:0.75rem;color:#d0d0e0;margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">Carney amp (M=7)</div>
+            <div style="font-size:0.7rem;color:#a0a0b8;margin-top:0.3rem;">Carney · Freeland · Morneau · LeBlanc · Poloz · Macklem · Sabia</div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(40,20,60,0.7),rgba(60,20,40,0.7));border:2px solid #dc2626;border-radius:10px;padding:1.5rem;max-width:900px;margin:0 auto 2rem;">
+          <div style="text-transform:uppercase;letter-spacing:0.08em;color:#fca5a5;font-size:0.85rem;font-weight:700;margin-bottom:0.5rem;">Portfolio-Level Finding · 4.00× @ 100% Success</div>
+          <div style="font-size:1.35rem;font-weight:800;color:#f0f0f0;margin-bottom:0.75rem;">Four cabinet chairs concentrate every Grover-amplified actor</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.5rem;color:#fca5a5;font-weight:700;">
+            <div style="background:rgba(220,38,38,0.15);border:1px solid #dc2626;border-radius:6px;padding:0.5rem;">National Defence<br><span style="font-size:0.8rem;color:#d0d0e0;">8 actors · arms, CFNIS</span></div>
+            <div style="background:rgba(220,38,38,0.15);border:1px solid #dc2626;border-radius:6px;padding:0.5rem;">Foreign Affairs<br><span style="font-size:0.8rem;color:#d0d0e0;">3 actors · arms, Carney, CFNIS</span></div>
+            <div style="background:rgba(220,38,38,0.15);border:1px solid #dc2626;border-radius:6px;padding:0.5rem;">Public Safety<br><span style="font-size:0.8rem;color:#d0d0e0;">9 actors · corrections, foreign, arms, Carney</span></div>
+            <div style="background:rgba(220,38,38,0.15);border:1px solid #dc2626;border-radius:6px;padding:0.5rem;">Finance<br><span style="font-size:0.8rem;color:#d0d0e0;">5 actors · Carney, foreign</span></div>
+          </div>
+          <div style="color:#d0d0e0;font-size:0.9rem;margin-top:1rem;">Twelve other portfolios (Justice, Health, Int'l Trade, Bank of Canada, PMO, Treasury Board, Immigration, Veterans Affairs, Indigenous Services, Environment, Infrastructure, Agriculture) receive <strong>0.00%</strong> quantum amplitude.</div>
+        </div>
+
+        <p style="color:#d0d0e0;font-size:1rem;margin-bottom:1.5rem;">
+          Each claim on every linked page is anchored to a SHA-256 Merkle root over canonical JSON.
+          Every Grover oracle is <em>the investigative claim made precise</em>: mark actors whose
+          tenure overlaps the canonical failure events. The quantum amplification surfaces the
+          structural bridges — including Bill Blair as unique quadruple-axis bridge and Dominic
+          LeBlanc as highest cross-axis-score actor.
+        </p>
+
+        <a href="quantum-accountability.html" class="btn-cinematic btn-primary" style="border-radius:30px;font-size:1rem;padding:0.9rem 2.5rem;background:linear-gradient(135deg,#a855f7,#7e22ce);border:none;">Open the Quantum Investigation &rarr;</a>
+      </div>
+    </div>
+
+    <!-- 27: Continue -->
+    <div class="scene" id="scene-29">
+      <div class="scene-bg" style="background: var(--bg);"></div>
+      <div class="vignette"></div>
+      <div class="scene-content" style="text-align: center;">
+          <h2 class="title-text" data-narrate="The investigation continues. Every page on this site is part of the evidence chain.">The Investigation Continues</h2>
+        <p class="subtitle-text" style="margin-bottom: 2rem;">Every page on this site is part of the evidence chain.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;max-width:800px;margin:0 auto;">
+          <a href="follow-the-money.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;background:rgba(250,204,21,0.15);border-color:rgba(250,204,21,0.4);">Follow $</a>
+          <a href="maid-accountability.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">MAID Deaths</a>
+          <a href="carney-conflicts.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">Carney COI</a>
+          <a href="s504-covey-bae.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">s.504 Charges</a>
+          <a href="cds-accountability.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">CDS</a>
+          <a href="foreign-interference.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">Hogue</a>
+          <a href="arrivecan.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">ArriveCAN</a>
+          <a href="phoenix-pay.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">Phoenix</a>
+          <a href="disability-genocide.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">UN CRPD</a>
+          <a href="veterans-betrayal.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">Veterans</a>
+          <a href="maid-voting-record.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">173 MPs</a>
+          <a href="rcmp-commissioners.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">RCMP</a>
+          <a href="scandals.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;">Scandals</a>
+          <a href="institutional-malice.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#dc2626;color:#dc2626;">Malice</a>
+          <a href="demographics-to-death.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#10b981;color:#10b981;">Demo Death</a>
+          <a href="foreign-influence-alpha.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#facc15;color:#facc15;">Foreign Interference (Hogue)</a>
+          <a href="cija-lobbying.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#facc15;color:#facc15;">CIJA Lobbying</a>
+          <a href="cfnis-proxy.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#facc15;color:#facc15;">CFNIS Proxy</a>
+          <a href="panama-papers.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#ef4444;color:#ef4444;">8 Offshore Leaks</a>
+          <a href="quantum-accountability.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#a855f7;color:#c4b5fd;background:rgba(168,85,247,0.12);font-weight:700;">Quantum 6-Axis</a>
+          <a href="investigation-matrix.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#3b82f6;color:#3b82f6;">Matrix</a>
+          <a href="master-index.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;border-color:#22d3ee;color:#22d3ee;">267 Pages &rarr;</a>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;max-width:600px;margin:1.5rem auto 0;">
+          <a href="media-coverage-gaps.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.4);color:#a78bfa;">10 Hidden Facts</a>
+          <a href="system-architecture.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;background:rgba(220,38,38,0.15);border-color:rgba(220,38,38,0.4);color:#dc2626;">13-Layer Map</a>
+          <a href="citizens-toolkit.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#059669;">Take Action</a>
+          <a href="maid-dossier-index.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;background:rgba(220,38,38,0.15);border-color:rgba(220,38,38,0.4);color:#dc2626;">MAID Dossier</a>
+          <a href="camap.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;background:rgba(181,131,90,0.12);border-color:rgba(181,131,90,0.45);color:#d8b28a;">CAMAP</a>
+          <a href="canadian-blood-services.html" class="btn-cinematic" style="text-decoration:none;padding:0.8rem;text-align:center;font-size:0.75rem;background:rgba(181,131,90,0.12);border-color:rgba(181,131,90,0.45);color:#d8b28a;">Blood Services</a>
+        </div>
+        <p style="margin-top:1.5rem;font-size:0.8rem;color:#6b7280;">267 investigation pages &mdash; <a href="master-index.html" style="color:var(--accent);">Master Index &rarr;</a> | <a href="accountability-scorecard.html" style="color:#dc2626;">Scorecard &rarr;</a></p>
+        <p style="margin-top:0.5rem;font-size:0.65rem;letter-spacing:0.1em;"><span style="color:#76b900;">&#9889; NVIDIA</span> <span style="color:#6b7280;">&bull;</span> <span style="color:#0071c5;">&#9881; Intel</span> <span style="color:#6b7280;">&bull;</span> <span style="color:#c41e3a;">LIRIL AI</span> <span style="color:#6b7280;">&bull;</span> <span style="color:#6b7280;">SEED 118400</span></p>
+      </div>
+    </div>
+
+    <!-- Control HUD -->
+    <div id="hud-controls" style="opacity: 0; pointer-events: none; transition: opacity 0.5s;">
+      <button class="btn-cinematic" id="btn-prev">&larr; Back</button>
+      <div class="scene-progress" id="scene-dots">
+        <!-- nodes injected contextually -->
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="btn-cinematic" id="btn-liril-narrate" title="Narrate current slide" style="opacity: 0.7; font-size: 0.85rem;">♪ Narrate</button>
+        <button class="btn-cinematic" id="btn-next">Next &rarr;</button>
+      </div>
+    </div>
+
+  </div><script>
+    /* ── Voice-safe speak helper: waits for HAZEL specifically, never uses browser default ── */
+    function _lirilSpeak(text, opts, onstart, onend, onerror) {
+      if (!window.speechSynthesis) { if (onerror) onerror(); return; }
+      function go(voice) {
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        var _p = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92 };
+        u.rate = (opts && opts.rate) || _p.rate;
+        u.pitch = (opts && opts.pitch) || _p.pitch;
+        u.lang = 'en-GB';
+        if (voice) u.voice = voice;
+        if (onstart) u.onstart = onstart;
+        if (onend) u.onend = onend;
+        if (onerror) u.onerror = onerror;
+        window.speechSynthesis.speak(u);
+      }
+      var v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+      var isHazel = v && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(v);
+      if (isHazel) { go(v); return; }
+      /* Poll up to 8s for HAZEL specifically (Chrome loads voices async) */
+      var waited = 0;
+      var poll = setInterval(function() {
+        waited += 200;
+        v = window.LIRIL_VOICE ? window.LIRIL_VOICE.get() : null;
+        isHazel = v && window.LIRIL_VOICE.isTargetVoice && window.LIRIL_VOICE.isTargetVoice(v);
+        if (isHazel || waited >= 8000) {
+          clearInterval(poll);
+          if (v) {
+            console.log('[home] LIRIL voice:', v.name, isHazel ? '★ HAZEL' : '⚠ fallback');
+            go(v);
+          }
+          else { console.warn('[home] LIRIL_VOICE: no voice after 8s — suppressing speech'); if (onerror) onerror(); }
+        }
+      }, 200);
+    }
+
+    const engine = {
+      currentScene: 0,
+      currentLogical: 0,
+      totalScenes: 30,
+      // 0-29: Counter + Arrest + Money + ZERO ACCOUNTABILITY + MAID timeline + investigations + law + CDS + continue
+      sceneOrder: [0, 1, 2, 24, 22, 23, 25, 26, 21, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 27, 28, 29],
+      init() {
+        this.scenes = document.querySelectorAll('.scene');
+        this.subtitleBox = document.getElementById('subtitle-text');
+        this.hud = document.getElementById('hud-controls');
+        this.dotContainer = document.getElementById('scene-dots');
+
+        // Build Progress Nodes
+        for (let i=1; i < this.totalScenes; i++) {
+          let n = document.createElement('div');
+          n.className = 'progress-node';
+          this.dotContainer.appendChild(n);
+        }
+        this.dots = document.querySelectorAll('.progress-node');
+        
+        document.getElementById('btn-start').addEventListener('click', () => this.startJourney());
+        document.getElementById('btn-next').addEventListener('click', () => this.nextScene());
+        document.getElementById('btn-prev').addEventListener('click', () => this.prevScene());
+
+        // Animate hero counter on load (scene-0 is active by default, no goToScene fires)
+        this.animateCounters(0);
+
+        // Setup Tracks
+        document.querySelectorAll('audio').forEach(audio => {
+          if (audio.textTracks && audio.textTracks.length > 0) {
+            const tt = audio.textTracks[0];
+            tt.mode = 'hidden';
+            tt.addEventListener('cuechange', () => {
+              const cues = tt.activeCues;
+              if (cues && cues.length > 0) {
+                this.subtitleBox.innerHTML = cues[0].text;
+                this.subtitleBox.classList.add('visible');
+              } else {
+                this.subtitleBox.classList.remove('visible');
+              }
+            });
+          }
+        });
+      },
+      startJourney() {
+        this.hud.style.opacity = '1';
+        this.hud.style.pointerEvents = 'auto';
+        const startBtn = document.getElementById('btn-start');
+        if (startBtn) {
+          startBtn.textContent = 'Autopilot Running';
+          startBtn.style.opacity = '0.75';
+        }
+        this.goToScene(1);
+      },
+      stopAllAudio() {
+        document.querySelectorAll('audio').forEach(audio => {
+          audio.pause();
+          audio.currentTime = 0;
+        });
+        window.speechSynthesis.cancel();
+        if (this._autoTimer) { clearTimeout(this._autoTimer); this._autoTimer = null; }
+        this.subtitleBox.classList.remove('visible');
+      },
+      _autoAdvance(index, delay) {
+        this._autoTimer = setTimeout(() => {
+          this._autoTimer = null;
+          if (this.currentScene === index) this.nextScene();
+        }, delay);
+      },
+      playAudioForScene(index) {
+        this.stopAllAudio();
+        const sceneEl = document.getElementById('scene-' + index);
+        if(!sceneEl) return;
+        // MP3 audio is HIGHEST QUALITY — always prefer pre-rendered neural TTS
+        const audioId = sceneEl.getAttribute('data-audio');
+        if (audioId) {
+          const audio = document.getElementById(audioId);
+          if (audio) {
+            audio.play().catch(e => console.error(e));
+            // Automatically sequence ALL slides
+            audio.onended = () => { this._autoAdvance(index, 1500); };
+            return;
+          }
+        }
+        // Hazel available OR no MP3 — use speechSynthesis (LIRIL voice)
+        const narEl = sceneEl.querySelector('[data-narrate]');
+        if (narEl) {
+          const text = narEl.getAttribute('data-narrate');
+          if (text) {
+            const btn = document.getElementById('btn-liril-narrate');
+            const self = this;
+            _lirilSpeak(text, { rate: 1.08, pitch: 0.92 },
+              () => { if (btn) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; } },
+              () => { if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; } self._autoAdvance(index, 1500); },
+              () => { if (btn) { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; } self._autoAdvance(index, 8000); }
+            );
+            return;
+          }
+        }
+        // No audio and no narrate text — advance after 8 seconds
+        if (this.currentLogical < this.sceneOrder.length - 1) {
+          this._autoAdvance(index, 8000);
+        }
+      },
+      goToScene(logicalIndex) {
+        if (logicalIndex < 0 || logicalIndex >= this.sceneOrder.length) return;
+        var phys = this.sceneOrder[logicalIndex];
+        if (logicalIndex === 0) {
+          this.hud.style.opacity = '0';
+          this.hud.style.pointerEvents = 'none';
+        } else {
+          this.hud.style.opacity = '1';
+          this.hud.style.pointerEvents = 'auto';
+        }
+
+        // Film gate flash — cinematic transition between scenes
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (logicalIndex > 0 && !reduceMotion) {
+          var flash = document.createElement('div');
+          flash.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;background:#fff;opacity:0;';
+          document.body.appendChild(flash);
+          flash.animate([
+            { opacity: 0 },
+            { opacity: 0.12, offset: 0.1 },
+            { opacity: 0.05, offset: 0.3 },
+            { opacity: 0 }
+          ], { duration: 300, easing: 'ease-out' });
+          setTimeout(() => flash.remove(), 400);
+        }
+
+        this.scenes.forEach(s => {
+          if (s.classList.contains('active')) {
+            s.classList.remove('active');
+            s.classList.add('exiting');
+            setTimeout(() => s.classList.remove('exiting'), 800);
+          }
+        });
+        document.getElementById('scene-' + phys).classList.add('active');
+        this.currentScene = phys;
+        this.currentLogical = logicalIndex;
+
+        if (logicalIndex > 0) {
+          this.dots.forEach((d, i) => {
+            if (i <= (logicalIndex - 1)) d.classList.add('active');
+            else d.classList.remove('active');
+          });
+        }
+
+        document.getElementById('btn-prev').disabled = (logicalIndex <= 1);
+        document.getElementById('btn-next').disabled = (logicalIndex >= this.sceneOrder.length - 1);
+        this.playAudioForScene(phys);
+        this.animateCounters(phys);
+        this.updateLirilButtonState();
+      },
+      animateCounters(index) {
+        const scene = document.getElementById('scene-' + index);
+        if (!scene) return;
+        scene.querySelectorAll('[data-count]').forEach(el => {
+          const target = parseInt(el.getAttribute('data-count'), 10);
+          const prefix = el.getAttribute('data-prefix') || '';
+          const suffix = el.getAttribute('data-suffix') || '';
+          const duration = 2000;
+          const start = performance.now();
+          const step = (now) => {
+            const t = Math.max(0, Math.min((now - start) / duration, 1));
+            const ease = 1 - Math.pow(1 - t, 3);
+            el.textContent = prefix + Math.floor(target * ease).toLocaleString() + suffix;
+            if (t < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        });
+      },
+      nextScene() {
+        if (this.currentLogical >= this.sceneOrder.length - 1) {
+          // End of home journey — hand off to PAGE_SEQUENCE via cross-page autopilot
+          try {
+            sessionStorage.setItem('liril_autopilot', JSON.stringify({autostart: true, startedAt: Date.now()}));
+          } catch(e) {}
+          this.stopAllAudio();
+          var nextPage = 'complete-thesis.html';
+          try {
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({type: 'pres-navigate', page: nextPage}, '*');
+              return;
+            }
+          } catch(e) {}
+          window.location.href = nextPage;
+          return;
+        }
+        this.goToScene(this.currentLogical + 1);
+      },
+      prevScene() { this.goToScene(this.currentLogical - 1); },
+      
+      // ── LIRIL Integration ───────────────────────
+      updateLirilButtonState() {
+        const btn = document.getElementById('btn-liril-narrate');
+        const scene = document.getElementById('scene-' + this.currentScene);
+        if (scene && scene.querySelector('[data-narrate]')) {
+          btn.style.opacity = '1';
+          btn.disabled = false;
+        } else {
+          btn.style.opacity = '0.5';
+          btn.disabled = true;
+        }
+      },
+      narrate() {
+        const scene = document.getElementById('scene-' + this.currentScene);
+        if (!scene) return;
+        const btn = document.getElementById('btn-liril-narrate');
+
+        // MP3 audio is HIGHEST QUALITY — always prefer pre-rendered neural TTS
+        const audioId = scene.getAttribute('data-audio');
+        if (audioId) {
+          const audio = document.getElementById(audioId);
+          if (audio) {
+            this.stopAllAudio();
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error(e));
+            btn.style.borderColor = 'var(--accent)';
+            btn.style.background = 'rgba(14, 165, 233, 0.1)';
+            const idx = this.currentScene;
+            audio.onended = () => {
+              btn.style.borderColor = '#27272a';
+              btn.style.background = 'transparent';
+              this._autoAdvance(idx, 1500);
+            };
+            return;
+          }
+        }
+
+        // Fallback: speechSynthesis — LIRIL voice (British female, no drift)
+        const narEl = scene.querySelector('[data-narrate]');
+        if (!narEl) return;
+        const text = narEl.getAttribute('data-narrate');
+        if (!text) return;
+
+        const nIdx = this.currentScene;
+        const self2 = this;
+        _lirilSpeak(text, { rate: 1.08, pitch: 0.92 },
+          () => { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'rgba(14, 165, 233, 0.1)'; },
+          () => { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; self2._autoAdvance(nIdx, 1500); },
+          () => { btn.style.borderColor = '#27272a'; btn.style.background = 'transparent'; }
+        );
+      }
+    };
+
+    // ── LIRIL voice priming — handled by liril-voice.js (no duplicate logic) ──
+
+    // Expose engine for cross-frame test harness (LIRIL walkthrough test).
+    try { window.engine = engine; } catch(e) {}
+
+    document.addEventListener("DOMContentLoaded", () => {
+      engine.init();
+      
+      const lirilBtn = document.getElementById('btn-liril-narrate');
+      if (lirilBtn) {
+        lirilBtn.addEventListener('click', () => engine.narrate());
+      }
+
+      // Full-site LIRIL walkthrough — sets autopilot flag and starts home journey;
+      // when home reaches end-of-sequence, nextScene() hands off to PAGE_SEQUENCE.
+      const fullSiteBtn = document.getElementById('btn-liril-fullsite');
+      if (fullSiteBtn) {
+        fullSiteBtn.addEventListener('click', () => {
+          try {
+            sessionStorage.setItem('liril_autopilot', JSON.stringify({autostart: true, startedAt: Date.now()}));
+          } catch(e) {}
+          fullSiteBtn.textContent = 'Walkthrough Running...';
+          fullSiteBtn.style.opacity = '0.75';
+          fullSiteBtn.disabled = true;
+          if (engine.currentLogical === 0) engine.startJourney();
+        });
+      }
+
+      // Auto-resume home journey if arriving via cross-page autopilot loop-back
+      try {
+        var ap = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
+        if (ap && ap.autostart && (Date.now() - (ap.startedAt || 0)) < 30 * 60 * 1000) {
+          setTimeout(() => { if (engine.currentLogical === 0) engine.startJourney(); }, 2000);
+        }
+      } catch(e) {}
+
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduceMotion) {
+        setTimeout(() => {
+          if (engine.currentLogical === 0) engine.startJourney();
+        }, 1800);
+      }
+    });
+  </script>
+<!-- ═══ INVESTIGATION DOSSIERS — DEEP DIVE ═══ -->
+<div style="max-width:960px;margin:3rem auto;padding:2rem;">
+  <h2 style="text-align:center;font-size:1.8rem;font-weight:900;color:#ECEFF4;margin-bottom:0.5rem;">Deep Dive — Investigation Dossiers</h2>
+  <p style="text-align:center;color:#6b7280;font-size:0.95rem;margin-bottom:2rem;">Every page sourced from official government records. Click to explore the evidence.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+    <a href="institutional-malice.html" style="padding:1rem;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Core Doctrine</div>
+      <div style="font-weight:700;margin-top:0.2rem;">Institutional Malice</div>
+    </a>
+    <a href="prosecution.html" style="padding:1rem;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#8b5cf6;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Legal Framework</div>
+      <div style="font-weight:700;margin-top:0.2rem;">Prosecution &mdash; ICC &amp; s.504</div>
+    </a>
+    <a href="maid-policy-evolution.html" style="padding:1rem;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Legislative Record</div>
+      <div style="font-weight:700;margin-top:0.2rem;">MAID Policy Evolution</div>
+    </a>
+    <a href="vaccine-injury-accountability.html" style="padding:1rem;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.4);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#ef4444;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Hartman Ruling</div>
+      <div style="font-weight:700;margin-top:0.2rem;">Vaccine Injury Accountability</div>
+      <div style="font-size:0.72rem;color:#9ca3af;margin-top:0.25rem;">ONCA no-duty-of-care &middot; 7% VISP approval</div>
+    </a>
+    <a href="carney-conflicts.html" style="padding:1rem;background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#facc15;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Financial</div>
+      <div style="font-weight:700;margin-top:0.2rem;">Carney-Brookfield</div>
+    </a>
+    <a href="follow-the-money.html" style="padding:1rem;background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#facc15;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Procurement Fraud</div>
+      <div style="font-weight:700;margin-top:0.2rem;">Follow the Money</div>
+    </a>
+    <a href="foreign-influence-alpha.html" style="padding:1rem;background:rgba(234,88,12,0.08);border:1px solid rgba(234,88,12,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#ea580c;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Foreign Interference</div>
+      <div style="font-weight:700;margin-top:0.2rem;">Hogue Commission &amp; NSICOP</div>
+    </a>
+    <a href="wef-davos.html" style="padding:1rem;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#a855f7;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Institutional Convergence</div>
+      <div style="font-weight:700;margin-top:0.2rem;">WEF &amp; Davos</div>
+    </a>
+    <a href="phac-mandates-s6.html" style="padding:1rem;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#3b82f6;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Charter Violations</div>
+      <div style="font-weight:700;margin-top:0.2rem;">PHAC S.6 Mandates</div>
+    </a>
+    <a href="cfnis-proxy.html" style="padding:1rem;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#10b981;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Internal Oversight</div>
+      <div style="font-weight:700;margin-top:0.2rem;">CFNIS Proxy Node</div>
+    </a>
+    <a href="cfnis.html" style="padding:1rem;background:rgba(101,163,13,0.08);border:1px solid rgba(101,163,13,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#65a30d;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Military Justice</div>
+      <div style="font-weight:700;margin-top:0.2rem;">CFNIS Failures</div>
+    </a>
+    <a href="cija-lobbying.html" style="padding:1rem;background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#0ea5e9;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Lobbying Pipeline</div>
+      <div style="font-weight:700;margin-top:0.2rem;">Federal Lobbying Registry</div>
+    </a>
+    <a href="nova-scotia-oic.html" style="padding:1rem;background:rgba(185,28,28,0.08);border:1px solid rgba(185,28,28,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#b91c1c;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Policy Exploitation</div>
+      <div style="font-weight:700;margin-top:0.2rem;">NS Mass Casualty &amp; OIC</div>
+    </a>
+    <a href="legislation.html" style="padding:1rem;background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#2dd4bf;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Legislative Reform</div>
+      <div style="font-weight:700;margin-top:0.2rem;">5 Private Members' Bills</div>
+    </a>
+    <a href="information-architecture.html" style="padding:1rem;background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#2dd4bf;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Methodology</div>
+      <div style="font-weight:700;margin-top:0.2rem;">8 IA Pillars</div>
+      <div style="font-size:0.72rem;color:#9ca3af;margin-top:0.25rem;">How TENET5 is structured &mdash; overview-first, provenance chain, transparent AI, audit trail.</div>
+    </a>
+    <a href="sitemap.html" style="padding:1rem;background:rgba(156,163,175,0.08);border:1px solid rgba(156,163,175,0.3);border-radius:10px;text-decoration:none;color:#f3f4f6;">
+      <div style="font-size:0.7rem;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Full Archive</div>
+      <div style="font-weight:700;margin-top:0.2rem;">All 267 Pages &rarr;</div>
+    </a>
+  </div>
+</div>
+
+<!-- liril-voice.js loaded above inline engine -->
+<div id="site-footer-frame"></div>
+<script src="shell.js?v=27"></script>
+<script src="js/i18n.js?v=4"></script>
+<script src="js/metaverse.js?v=1"></script>
+<script src="js/slate-motion.js?v=1" defer></script>
+<script src="js/hallucination-gate.js?v=1" defer></script>
+</body>
+</html>
