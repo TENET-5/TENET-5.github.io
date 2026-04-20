@@ -1,0 +1,194 @@
+/* LIRIL Theme — Clear Glass + Procedural Palette
+   Modified: 2026-04-20 | Cap#12-c3 | Daniel directive: glass aesthetic + procedural slider
+   Reads --liril-phase (0..1) set by js/liril-theme-slider.js and interpolates:
+     phase=0.0  → dark obsidian/carbon
+     phase=0.5  → twilight cobalt (midtone)
+     phase=1.0  → bright paper (light)
+   Plus per-hue axis via --liril-hue (0..360) for the accent color.
+   All colors derive from these two variables — changing the slider
+   updates the ENTIRE site live. */
+
+:root {
+  /* Procedural axes — set by the slider JS, persisted in localStorage */
+  --liril-phase: 0.08;       /* 0=dark .. 1=light; default 0.08 = near-dark */
+  --liril-hue:   210;        /* accent hue, default LIRIL-blue */
+  --liril-saturation: 68%;   /* default saturation */
+  --liril-warmth: 0.0;       /* 0 cool .. 1 warm (shifts hue slightly) */
+
+  /* Derived lightness curves (per-role) */
+  --liril-bg-l:        calc(8% + (var(--liril-phase) * 87%));       /* 8..95 */
+  --liril-panel-l:     calc(12% + (var(--liril-phase) * 80%));      /* 12..92 */
+  --liril-text-l:      calc(92% - (var(--liril-phase) * 80%));      /* 92..12 */
+  --liril-dim-l:       calc(68% - (var(--liril-phase) * 40%));      /* 68..28 */
+  --liril-border-l:    calc(22% + (var(--liril-phase) * 60%));      /* 22..82 */
+  --liril-accent-l:    calc(50% + (var(--liril-phase) * 8%));       /* 50..58 */
+
+  /* Glass alpha values — less transparent at extremes, more in middle */
+  --liril-glass-a:     calc(0.30 + (var(--liril-phase) * 0.42));    /* 0.30..0.72 */
+  --liril-glass-border-a: calc(0.22 + (var(--liril-phase) * 0.18)); /* 0.22..0.40 */
+
+  /* Final color roles (HSL form so phase/hue shifts propagate) */
+  --liril-bg:           hsl(var(--liril-hue), 18%, var(--liril-bg-l));
+  --liril-bg-2:         hsl(var(--liril-hue), 22%, calc(var(--liril-bg-l) + 4%));
+  --liril-panel:        hsla(var(--liril-hue), 26%, var(--liril-panel-l), var(--liril-glass-a));
+  --liril-panel-solid:  hsl(var(--liril-hue), 26%, var(--liril-panel-l));
+  --liril-text:         hsl(var(--liril-hue), 8%,  var(--liril-text-l));
+  --liril-dim:          hsl(var(--liril-hue), 10%, var(--liril-dim-l));
+  --liril-border:       hsla(var(--liril-hue), 38%, var(--liril-border-l), var(--liril-glass-border-a));
+  --liril-border-solid: hsl(var(--liril-hue), 38%, var(--liril-border-l));
+  --liril-accent:       hsl(var(--liril-hue), var(--liril-saturation), var(--liril-accent-l));
+  --liril-accent-dim:   hsl(var(--liril-hue), calc(var(--liril-saturation) - 20%),
+                            calc(var(--liril-accent-l) - 10%));
+
+  /* Glass-backdrop blur strength (scales with phase) */
+  --liril-blur:         blur(calc(10px + (var(--liril-phase) * 12px)));
+  --liril-blur-strong:  blur(calc(18px + (var(--liril-phase) * 22px)));
+
+  /* Shadow (darker in dark mode, softer in light) */
+  --liril-shadow:       0 10px 30px -8px
+                        hsla(var(--liril-hue), 40%,
+                             calc(var(--liril-accent-l) * 0.3),
+                             calc(0.4 - (var(--liril-phase) * 0.25)));
+}
+
+/* Base body + scrollbar */
+body, html.topo body, body.topo {
+  background: var(--liril-bg);
+  color: var(--liril-text);
+  transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              color      0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body::-webkit-scrollbar { width: 10px; }
+body::-webkit-scrollbar-track { background: var(--liril-bg-2); }
+body::-webkit-scrollbar-thumb { background: var(--liril-border-solid);
+                                 border-radius: 5px; }
+
+/* Clear-glass panels — apply anywhere with .liril-glass */
+.liril-glass {
+  background: var(--liril-panel);
+  backdrop-filter: var(--liril-blur);
+  -webkit-backdrop-filter: var(--liril-blur);
+  border: 1px solid var(--liril-border);
+  border-radius: 14px;
+  box-shadow: var(--liril-shadow);
+  transition: background 0.4s, border-color 0.4s, backdrop-filter 0.4s;
+}
+.liril-glass-strong {
+  background: var(--liril-panel);
+  backdrop-filter: var(--liril-blur-strong);
+  -webkit-backdrop-filter: var(--liril-blur-strong);
+  border: 1px solid var(--liril-border);
+  border-radius: 18px;
+  box-shadow: var(--liril-shadow);
+}
+
+/* Accent elements */
+a, .liril-accent-fg { color: var(--liril-accent); }
+a:hover { color: var(--liril-accent-dim); }
+.liril-accent-bg { background: var(--liril-accent); color: var(--liril-bg); }
+.liril-accent-border { border-color: var(--liril-accent); }
+
+/* The procedural theme slider container (injected by JS) */
+.liril-theme-slider-shell {
+  position: fixed; top: 10px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 10px 18px 10px 16px;
+  display: flex; align-items: center; gap: 14px;
+  font-size: 12px; letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--liril-text);
+  transition: transform 0.4s, opacity 0.4s;
+}
+.liril-theme-slider-shell.liril-slider-hidden {
+  transform: translateX(-50%) translateY(-60px);
+  opacity: 0;
+  pointer-events: none;
+}
+.liril-theme-slider-shell label { color: var(--liril-dim); font-size: 10px; }
+.liril-theme-slider-shell input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 170px; height: 4px;
+  background: linear-gradient(90deg,
+     hsl(var(--liril-hue), 18%, 8%) 0%,
+     hsl(var(--liril-hue), 22%, 50%) 50%,
+     hsl(var(--liril-hue), 18%, 95%) 100%);
+  border-radius: 4px;
+  outline: none;
+  transition: background 0.3s;
+}
+.liril-theme-slider-shell input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px;
+  background: var(--liril-accent);
+  border: 2px solid var(--liril-text);
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 0 0 4px hsla(var(--liril-hue), 60%, 50%, 0.15);
+}
+.liril-theme-slider-shell input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  box-shadow: 0 0 0 8px hsla(var(--liril-hue), 60%, 50%, 0.28);
+}
+.liril-theme-slider-shell input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  background: var(--liril-accent);
+  border: 2px solid var(--liril-text);
+  border-radius: 50%;
+  cursor: grab;
+}
+.liril-theme-slider-shell .liril-slider-readout {
+  font-family: "SF Mono", Monaco, Consolas, monospace;
+  color: var(--liril-dim);
+  font-size: 11px; min-width: 70px; text-align: left;
+}
+.liril-theme-slider-shell .liril-hue-chip {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--liril-accent);
+  border: 1px solid var(--liril-border-solid);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.liril-theme-slider-shell .liril-hue-chip:hover { transform: scale(1.15); }
+.liril-theme-slider-shell .liril-hue-chip:active { transform: scale(0.9); }
+
+/* Reveal-on-hover edge (appear when mouse near top 40px) */
+.liril-slider-edge-trigger {
+  position: fixed; top: 0; left: 0; right: 0; height: 40px;
+  z-index: 9998; pointer-events: auto;
+}
+
+/* Hero blocks (Cap#12 hero+CTA pattern) get glass upgrade */
+.hero-section, .accountability-hero {
+  background: linear-gradient(
+     135deg,
+     hsla(var(--liril-hue), 40%,
+          calc(var(--liril-accent-l) * 0.25), var(--liril-glass-a)) 0%,
+     hsla(var(--liril-hue), 35%,
+          calc(var(--liril-accent-l) * 0.4),  var(--liril-glass-a)) 100%
+  ) !important;
+  backdrop-filter: var(--liril-blur-strong);
+  -webkit-backdrop-filter: var(--liril-blur-strong);
+  color: var(--liril-text) !important;
+}
+.hero-hook { color: var(--liril-text) !important; }
+.cta-button {
+  background: var(--liril-accent) !important;
+  color: var(--liril-bg) !important;
+  backdrop-filter: blur(6px);
+}
+.cta-button:hover {
+  background: var(--liril-accent-dim) !important;
+}
+
+/* Focus-ring: accessibility-first (AAA contrast via HSL swap) */
+:focus-visible {
+  outline: 2px solid var(--liril-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduce-motion respect */
+@media (prefers-reduced-motion: reduce) {
+  body, * { transition: none !important; animation: none !important; }
+}
