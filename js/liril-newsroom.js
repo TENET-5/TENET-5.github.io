@@ -14,10 +14,24 @@
   // to /public/feed.json (same schema).
   const SEED_INVESTIGATIONS = [
     {
+      title: "When the Courts Become the Abuse — Family Justice System",
+      excerpt: "First-hand testimony from Canadian detention cross-referenced " +
+               "with CanLII case law and 19th-century historical record. " +
+               "Non-violent detention, coerced plea deals, domestic-call " +
+               "asymmetry, and the 18th-century fiction of crown immunity.",
+      status: "EVIDENCE-SEALED",
+      tags: ["legal", "political"],
+      url: "family-justice-system.html",
+      sources: "testimony + canlii + statcan",
+      when: "Just published",
+      ai: ["LIRIL ✓", "Grok Heavy"]
+    },
+    {
       title: "The CFNIS War-Arrest Pincer: Military Police + Uttering-Threats Charge",
       excerpt: "A documented pattern where CFNIS investigation and criminal " +
                "charges converge to silence whistleblowers. Primary-source " +
-               "timeline, MPCC findings, and NDA-era capital punishment history.",
+               "timeline, MPCC findings, NDA-era capital punishment history, " +
+               "plus Section 9 on detention-conditions accountability gaps.",
       status: "EVIDENCE-SEALED",
       tags: ["military", "legal"],
       url: "geneva-vs-jails.html",
