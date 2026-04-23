@@ -1,0 +1,196 @@
+/* TENET5 OSINT Dashboard Styles */
+
+:root {
+  --osint-bg: #050a14;
+  --osint-panel: rgba(10, 18, 35, 0.7);
+  --osint-border: rgba(64, 128, 255, 0.15);
+  --osint-text: #c8d6e5;
+  --osint-dim: #7a8b9e;
+  --osint-accent: #3b82f6;
+  --osint-amber: #f59e0b;
+  --osint-red: #ef4444;
+  --osint-green: #10b981;
+}
+
+body.liril-dashboard {
+  background: var(--osint-bg);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+  color: var(--osint-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Masthead Tweaks for Dashboard */
+body.in-shell .liril-masthead { display: none !important; }
+.liril-dashboard .liril-masthead {
+  border-bottom: 1px solid var(--osint-border);
+  background: rgba(5, 10, 20, 0.85);
+  backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 100;
+  padding: 12px 24px;
+}
+
+.threat-indicator {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 4px 12px; border-radius: 20px;
+}
+.threat-indicator.level-high {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.threat-indicator.level-low {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.threat-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--osint-amber);
+  box-shadow: 0 0 8px var(--osint-amber);
+  animation: threatPulse 2s infinite;
+}
+.threat-indicator.level-high .threat-dot { background: var(--osint-red); box-shadow: 0 0 8px var(--osint-red); }
+.threat-indicator.level-low .threat-dot { background: var(--osint-green); box-shadow: 0 0 8px var(--osint-green); animation: none; }
+.threat-text {
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--osint-amber);
+}
+.threat-indicator.level-high .threat-text { color: var(--osint-red); }
+.threat-indicator.level-low .threat-text { color: var(--osint-green); }
+
+@keyframes threatPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+/* Layout */
+.dashboard-main {
+  max-width: 1400px; margin: 0 auto; padding: 24px;
+}
+
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--osint-panel);
+  border: 1px solid var(--osint-border);
+  border-radius: 12px; padding: 20px;
+  display: flex; flex-direction: column;
+  backdrop-filter: blur(8px);
+  position: relative; overflow: hidden;
+}
+.metric-card::after {
+  content: ''; position: absolute; top: 0; right: 0; width: 30%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02));
+  transform: skewX(-15deg);
+}
+
+.metric-value {
+  font-size: 2.2rem; font-weight: 800; font-family: "SF Mono", Consolas, monospace;
+  color: #fff; margin-bottom: 4px;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+.metric-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--osint-dim); font-weight: 600;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1000px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+/* Cards */
+.glass-card {
+  background: var(--osint-panel);
+  border: 1px solid var(--osint-border);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.card-title {
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--osint-accent); margin: 0 0 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  padding-bottom: 10px;
+}
+
+.timestamp {
+  font-size: 10px; color: var(--osint-dim);
+}
+
+/* Brief */
+.brief-content {
+  font-size: 15px; line-height: 1.7; color: #e2e8f0;
+}
+.brief-content p { margin-top: 0; margin-bottom: 16px; }
+.brief-content p:last-child { margin-bottom: 0; }
+
+/* Network Canvas */
+.network-minimap {
+  background: #000; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  height: 250px; position: relative; overflow: hidden;
+  margin-bottom: 16px;
+}
+#network-canvas { width: 100%; height: 100%; display: block; }
+.network-overlay-text {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-family: "SF Mono", Consolas, monospace; font-size: 12px; color: var(--osint-dim);
+  pointer-events: none;
+}
+
+/* Anomalies Feed */
+.anomalies-feed {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.anomaly-item {
+  background: rgba(0,0,0,0.3); border-left: 3px solid var(--osint-amber);
+  padding: 12px 16px; border-radius: 0 8px 8px 0;
+  font-size: 13px;
+}
+.anomaly-item.HIGH { border-left-color: var(--osint-red); }
+.anomaly-item .a-cat { font-family: "SF Mono", monospace; font-size: 10px; color: var(--osint-dim); margin-bottom: 4px; display: block;}
+.anomaly-item .a-text { color: #fff; }
+
+/* Links */
+.action-link {
+  color: var(--osint-accent); text-decoration: none; font-size: 13px; font-weight: 600;
+}
+.action-link:hover { text-decoration: underline; }
+
+/* Reports */
+.report-list { list-style: none; margin: 0; padding: 0; }
+.report-list li {
+  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.report-list li:last-child { border-bottom: none; padding-bottom: 0; }
+.report-list a {
+  color: #e2e8f0; text-decoration: none; font-size: 14px; display: block;
+}
+.report-list a:hover { color: var(--osint-accent); }
+.report-date { font-family: "SF Mono", monospace; font-size: 11px; color: var(--osint-dim); display: block; margin-top: 4px; }
+
+/* Skeletons */
+.metric-skeleton { height: 80px; background: rgba(255,255,255,0.05); border-radius: 12px; animation: pulse-bg 1.5s infinite; }
+.text-skeleton { background: rgba(255,255,255,0.05); border-radius: 4px; animation: pulse-bg 1.5s infinite; }
+@keyframes pulse-bg { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
