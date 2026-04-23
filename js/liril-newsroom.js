@@ -14,6 +14,19 @@
   // to /public/feed.json (same schema).
   const SEED_INVESTIGATIONS = [
     {
+      title: "Federal Procurement Anomalies: Benford's Law Violations",
+      excerpt: "AI analysis of 2,114 federal contracts reveals extreme " +
+               "first-digit violations (χ² = 480.7, 31× threshold). " +
+               "Four departments show single vendors capturing >30% of total " +
+               "spending. Parliamentary committee referrals recommended.",
+      status: "VERIFIED",
+      tags: ["political", "financial"],
+      url: "intelligence-report-apr2026.html",
+      sources: "proactive disclosure",
+      when: "April 2026",
+      ai: ["LIRIL ✓", "Jules"]
+    },
+    {
       title: "When the Courts Become the Abuse — Family Justice System",
       excerpt: "First-hand testimony from Canadian detention cross-referenced " +
                "with CanLII case law and 19th-century historical record. " +
@@ -243,13 +256,26 @@
     });
   }
 
+  function debounce(fn, waitMs) {
+    var timer = null;
+    return function () {
+      var args = arguments;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () {
+        timer = null;
+        fn.apply(null, args);
+      }, waitMs);
+    };
+  }
+
   function hotkeys() {
-    document.addEventListener('keydown', (e) => {
+    var onHotkey = debounce(function (e) {
       if (e.altKey && (e.key === 'l' || e.key === 'L')) {
         const live = document.getElementById('live');
         if (live) live.style.display = live.style.display === 'none' ? '' : 'none';
       }
-    });
+    }, 80);
+    document.addEventListener('keydown', onHotkey);
   }
 
   // Progressive enhancement: try fetching real feed first
