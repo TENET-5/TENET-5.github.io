@@ -42,57 +42,28 @@
                   font-feature-settings: "ss01", "ss02"; }
     a { color: inherit; text-decoration: none; }
 
-    /* Nav (Cap#220) — thin, fixed, transparent at top, blurred + hairline border on scroll */
+    /* Nav — minimal, full-width */
     header.t5-nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      position: sticky; top: 0; z-index: 50;
       display: flex; align-items: center; gap: 32px;
-      padding: 14px 40px;
-      background: transparent;
-      border-bottom: 1px solid transparent;
-      transition: background .25s ease, border-color .25s ease, padding .25s ease, backdrop-filter .25s ease;
+      padding: 18px 40px;
+      background: rgba(32,32,32,0.94);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
     }
-    header.t5-nav.is-scrolled {
-      padding: 10px 40px;
-      background: rgba(32,32,32,0.86);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(185,185,185,0.13);
-    }
-    body { padding-top: 58px; }
-    header.t5-nav .logo { display: flex; align-items: center; gap: 12px; font-weight: 500; letter-spacing: 0.06em; }
-    header.t5-nav .logo .crest { width: 22px; height: 22px; flex-shrink: 0; display: block; }
+    header.t5-nav .logo { display: flex; align-items: center; gap: 14px; font-weight: 600; letter-spacing: 0.08em; }
+    header.t5-nav .logo .crest { width: 24px; height: 24px; flex-shrink: 0; display: block; }
     header.t5-nav .logo .crest rect[fill='#c9a44c'] { animation: satorCorePulse 4s ease-in-out infinite; transform-origin: 12px 12px; transform-box: fill-box; }
     @keyframes satorCorePulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
     @media (prefers-reduced-motion: reduce) { header.t5-nav .logo .crest rect[fill='#c9a44c'] { animation: none; } }
-    header.t5-nav .logo .brand-text { font-family: var(--font-mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.18em; }
-    header.t5-nav .logo .brand-text sup { font-size: 0.7em; color: var(--accent-gold); margin-left: 1px; font-weight: 500; }
-    header.t5-nav .logo .tag { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.26em; color: var(--text-dim); font-weight: 400; margin-left: 8px; text-transform: uppercase; }
-    header.t5-nav nav { display: flex; gap: 36px; margin-left: auto; }
-    header.t5-nav nav a {
-      position: relative;
-      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.26em;
-      text-transform: uppercase; color: var(--text-muted);
-      transition: color .2s ease;
-    }
-    header.t5-nav nav a::after {
-      content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
-      background: currentColor; transform: scaleX(0); transform-origin: left center;
-      transition: transform .25s ease;
-    }
+    header.t5-nav .logo .brand-text { font-size: 15px; }
+    header.t5-nav .logo .brand-text sup { font-size: 0.65em; color: var(--accent-gold); margin-left: 1px; font-weight: 500; }
+    header.t5-nav .logo .tag { font-size: 10px; letter-spacing: 0.22em; color: var(--text-dim); font-weight: 400; margin-left: 4px; }
+    header.t5-nav nav { display: flex; gap: 28px; margin-left: auto; font-size: 13px; }
+    header.t5-nav nav a { color: var(--text-muted); transition: color .2s ease; }
     header.t5-nav nav a:hover { color: var(--text); }
-    header.t5-nav nav a:hover::after { transform: scaleX(1); }
-    header.t5-nav .nav-cta {
-      position: relative;
-      padding: 0; border: 0; background: transparent;
-      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.26em;
-      text-transform: uppercase; color: var(--accent-gold);
-      transition: color .2s ease;
-    }
-    header.t5-nav .nav-cta::after {
-      content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
-      background: var(--accent-gold); transform: scaleX(1); transform-origin: left center;
-      transition: transform .25s ease;
-    }
-    header.t5-nav .nav-cta:hover::after { transform: scaleX(0.5); }
+    header.t5-nav .nav-cta { padding: 8px 16px; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; transition: border-color .2s ease, background .2s ease; }
+    header.t5-nav .nav-cta:hover { border-color: var(--text); background: rgba(255,255,255,0.04); color: var(--text); }
 
     /* HERO — centered, stacked, with binary status grid INSIDE */
     .hero-wrap { position: relative; overflow: hidden; }
@@ -328,6 +299,51 @@
       .insight-item { grid-template-columns: 1fr; gap: 6px; }
       footer.t5-foot .row { grid-template-columns: 1fr; gap: 32px; }
     }
+
+    /* Cap#221 slide anchors — compensate for sticky nav height so #slide-N scrolls the section to the top of viewport, not under the nav */
+    .slide-anchor { display: block; position: relative; top: -72px; height: 0; pointer-events: none; }
+
+    /* Cap#221 scene shell — when ?load=<page>.html is present, we hide the
+       landing body, show a full-height iframe with monochrome chrome above
+       and scene-counter below. This restores the pre-Cap#160 behaviour
+       where 300+ interior pages would redirect to index.html?load=X. */
+    body.scene-mode main,
+    body.scene-mode .t5-marquee { display: none !important; }
+    .t5-scene {
+      display: none; position: relative; background: var(--bg-darker);
+      min-height: calc(100vh - 72px);
+    }
+    body.scene-mode .t5-scene { display: block; }
+    .t5-scene-bar {
+      display: flex; align-items: center; gap: 24px;
+      padding: 14px 40px; border-bottom: 1px solid var(--border);
+      background: rgba(22,22,22,0.94);
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em;
+      color: var(--text-muted); text-transform: uppercase;
+      position: sticky; top: 62px; z-index: 40;
+    }
+    .t5-scene-bar .sn { color: var(--accent-gold); font-weight: 500; }
+    .t5-scene-bar .sp { flex: 1; }
+    .t5-scene-bar button {
+      background: transparent; color: var(--text-muted);
+      border: 1px solid var(--border-hot); padding: 8px 14px;
+      font-family: inherit; font-size: 10.5px; letter-spacing: 0.22em;
+      text-transform: uppercase; cursor: pointer;
+      transition: border-color .2s ease, color .2s ease;
+    }
+    .t5-scene-bar button:hover:not(:disabled) { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .t5-scene-bar button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .t5-scene-bar .kbd { font-size: 10px; color: var(--text-dim); letter-spacing: 0.14em; }
+    .t5-scene iframe {
+      display: block; width: 100%; height: calc(100vh - 72px - 58px);
+      border: 0; background: var(--bg-darker);
+      transition: opacity .35s ease;
+    }
+    .t5-scene iframe.loading { opacity: 0.15; }
+    @media (max-width: 640px) {
+      .t5-scene-bar { padding: 12px 20px; gap: 10px; font-size: 10px; }
+      .t5-scene-bar .kbd { display: none; }
+    }
   </style>
 
   <!-- ════════════════════════════════════════════════════════════
@@ -346,7 +362,7 @@
        index.html keeps its existing .reveal mechanism (Cap#160) —
        .s5-* classes are namespaced and do not collide.
        ──────────────────────────────────────────────────────────── -->
-  <!-- Cap#220: motion + ops slate are imported via css/liril-theme.css. -->
+  <link rel="stylesheet" href="/css/slates/operational-anim.css?v=1">
 </head>
 <body>
 
@@ -401,7 +417,7 @@
            later DOM order means canvas overpaints video. -->
       <canvas class="s5-ambient-canvas" aria-hidden="true"></canvas>
 
-      <section class="hero">
+      <section class="hero" id="slide-1">
         <div class="eyebrow reveal s5-pulse">TENET5 &nbsp;·&nbsp; Operational Intelligence &nbsp;·&nbsp; Powered by LIRIL</div>
         <h1 class="reveal s5-display s5-scramble" data-narrate="Operational intelligence for every record, every chamber, every decision.">
           Every record.<br>Every chamber.<br>Every decision.
@@ -442,7 +458,7 @@
     </div>
 
     <!-- NEWS / ACHIEVEMENTS STRIP (3 recent milestones) -->
-    <section class="news-strip">
+    <section class="news-strip" id="slide-2">
       <div class="section-eyebrow reveal" data-sec="§01">RECENT · Operational milestones</div>
       <div class="news-list reveal">
         <a class="news-item" href="accountability.html">
@@ -464,7 +480,7 @@
     </section>
 
     <!-- SOLUTIONS (4-card chapter grid) -->
-    <section class="solutions" id="solutions">
+    <section class="solutions" id="solutions"><a id="slide-3" class="slide-anchor" aria-hidden="true"></a>
       <div class="section-eyebrow reveal" data-sec="§02">THE RECORD · FOUR CHAPTERS</div>
       <h2 class="section-title reveal">Four chapters. One record. Every claim sourced.</h2>
       <div class="cards">
@@ -500,7 +516,7 @@
     </section>
 
     <!-- HOW IT WORKS (operational-intel 3-step pattern) -->
-    <section class="how" id="how-it-works">
+    <section class="how" id="how-it-works"><a id="slide-4" class="slide-anchor" aria-hidden="true"></a>
       <div class="section-eyebrow reveal" data-sec="§03">HOW LIRIL WORKS</div>
       <h2 class="section-title reveal">A local AI that reads every source, quotes every page, and logs every decision.</h2>
       <div class="how-steps">
@@ -523,7 +539,7 @@
     </section>
 
     <!-- INSIGHTS FEED (operational-intel pattern: chronological entries) -->
-    <section class="insights" id="insights">
+    <section class="insights" id="insights"><a id="slide-5" class="slide-anchor" aria-hidden="true"></a>
       <div class="section-eyebrow reveal" data-sec="§04">INSIGHTS · CHRONOLOGICAL RECORD</div>
       <h2 class="section-title reveal">Latest findings from the record.</h2>
       <div class="insights-list">
@@ -556,6 +572,20 @@
     </section>
 
   </main>
+
+  <!-- Cap#221: scene frame — rendered when ?load=<page.html> is present -->
+  <section class="t5-scene" aria-label="Loaded scene">
+    <div class="t5-scene-bar">
+      <span class="sn" id="scene-label">SCENE</span>
+      <span id="scene-title">Loading…</span>
+      <span class="sp"></span>
+      <span class="kbd">← PREV · NEXT →</span>
+      <button type="button" id="scene-prev" aria-label="Previous scene">← Prev</button>
+      <button type="button" id="scene-next" aria-label="Next scene">Next →</button>
+      <button type="button" id="scene-close" aria-label="Exit to landing">Close ✕</button>
+    </div>
+    <iframe id="scene-frame" title="TENET5 scene" loading="eager" referrerpolicy="same-origin"></iframe>
+  </section>
 
   <footer class="t5-foot">
     <div class="row">
@@ -594,8 +624,119 @@
   </footer>
 
   <!-- Cap#219: TENET5 motion layer — reveals/stagger/scramble/canvas/cursor/pip-rail/scrim -->
-  <script src="/js/motion.js?v=3" defer></script>
+  <script src="/js/motion.js?v=2" defer></script>
   <script src="js/liril-narrate.js?v=1" defer></script>
+
+  <!-- Cap#221: shell-loader — if URL has ?load=<page.html>, embed it as a scene
+       with prev/next navigation. Fixes the 300-interior-page regression caused
+       when Cap#160 replaced index.html without preserving the ?load= handler
+       that every interior page's SC_FRAME_BUSTER depends on. -->
+  <script>
+    (function(){
+      var SCENE_LIST = [
+        {f: 'index.html',          t: 'Landing — Operational Intelligence'},
+        {f: 'evidence-index.html', t: 'Evidence Index — 94 Data Files'},
+        {f: 'findings.html',       t: 'Chapter I — Procurement'},
+        {f: 'veterans.html',       t: 'Chapter II — Health · Veterans'},
+        {f: '5gw-subversion.html', t: 'Chapter III — Foreign Influence'},
+        {f: 'accountability.html', t: 'Chapter IV — The 504'},
+        {f: 'timeline.html',       t: 'Timeline — 1945-2026'},
+        {f: 'experience.html',     t: 'Experience — Interactive Documentary'}
+      ];
+      var qs = new URLSearchParams(window.location.search);
+      var load = qs.get('load');
+      var frame = document.getElementById('scene-frame');
+      var lbl = document.getElementById('scene-label');
+      var title = document.getElementById('scene-title');
+      var prevBtn = document.getElementById('scene-prev');
+      var nextBtn = document.getElementById('scene-next');
+      var closeBtn = document.getElementById('scene-close');
+
+      function currentIndex(file) {
+        for (var i = 0; i < SCENE_LIST.length; i++) {
+          if (SCENE_LIST[i].f === file) return i;
+        }
+        return -1;
+      }
+
+      function navTo(idx, pushHistory) {
+        if (idx < 0 || idx >= SCENE_LIST.length) return;
+        var s = SCENE_LIST[idx];
+        if (s.f === 'index.html') {
+          document.body.classList.remove('scene-mode');
+          if (pushHistory) history.pushState({}, '', '/');
+          window.scrollTo({top:0, behavior:'smooth'});
+          return;
+        }
+        document.body.classList.add('scene-mode');
+        lbl.textContent = '§' + String(idx + 1).padStart(2,'0') + ' / ' + String(SCENE_LIST.length).padStart(2,'0');
+        title.textContent = s.t;
+        frame.classList.add('loading');
+        frame.src = s.f + '#shell=1';
+        frame.onload = function(){ frame.classList.remove('loading'); };
+        prevBtn.disabled = (idx <= 0);
+        nextBtn.disabled = (idx >= SCENE_LIST.length - 1);
+        if (pushHistory) history.pushState({}, '', '?load=' + encodeURIComponent(s.f));
+        window.scrollTo({top:0, behavior:'instant'});
+      }
+
+      prevBtn.addEventListener('click', function(){ navTo(currentIndex_fromState() - 1, true); });
+      nextBtn.addEventListener('click', function(){ navTo(currentIndex_fromState() + 1, true); });
+      closeBtn.addEventListener('click', function(){ navTo(0, true); });
+
+      function currentIndex_fromState() {
+        var q = new URLSearchParams(window.location.search);
+        var cur = q.get('load');
+        if (!cur) return 0;
+        var idx = currentIndex(cur);
+        return idx < 0 ? 0 : idx;
+      }
+
+      // Keyboard: N = next, P = prev, Esc = close (when in scene mode)
+      document.addEventListener('keydown', function(e){
+        if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+        if (!document.body.classList.contains('scene-mode')) return;
+        if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'n') {
+          e.preventDefault(); navTo(currentIndex_fromState() + 1, true);
+        } else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'p') {
+          e.preventDefault(); navTo(currentIndex_fromState() - 1, true);
+        } else if (e.key === 'Escape') {
+          e.preventDefault(); navTo(0, true);
+        }
+      });
+
+      // Back/forward support
+      window.addEventListener('popstate', function(){
+        var q = new URLSearchParams(window.location.search);
+        var f = q.get('load');
+        if (!f) { document.body.classList.remove('scene-mode'); return; }
+        navTo(currentIndex(f) < 0 ? 1 : currentIndex(f), false);
+      });
+
+      // Hash-based slide nav on the landing: #slide-N scrolls to section N
+      function hashSlide() {
+        var h = (window.location.hash || '').toLowerCase();
+        var m = h.match(/^#slide-(\d+)$/);
+        if (!m) return;
+        var n = parseInt(m[1], 10);
+        var targets = ['.hero', '.news-strip', '.solutions', '.how', '.insights', '.t5-foot'];
+        var sel = targets[n - 1];
+        if (sel) {
+          var el = document.querySelector(sel);
+          if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      }
+
+      // Boot: if ?load= present, enter scene mode; else handle #slide-N
+      if (load) {
+        var idx = currentIndex(load);
+        navTo(idx < 0 ? 1 : idx, false);
+      } else {
+        hashSlide();
+      }
+      window.addEventListener('hashchange', hashSlide);
+    })();
+  </script>
 
   <!-- Cap#220: live bit-flip animation on the 10 status-grid cells.
        Each cell's .bits text is an 8-char binary string (except SEED = "118400").
