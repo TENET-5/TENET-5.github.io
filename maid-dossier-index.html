@@ -3,8 +3,12 @@
 <head>
     <!-- TENET5 SC_FRAME BUSTER -->
     <script>
-      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
-          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      // Cap#221.2 — exact-match, not substring. Prior check broke for *-index.html.
+      if (window === window.top) {
+        var _last = window.location.pathname.split('/').pop();
+        if (_last !== 'index.html' && _last !== '' && _last.endsWith('.html')) {
+          window.location.replace('index.html?load=' + _last);
+        }
       }
     </script>
 
