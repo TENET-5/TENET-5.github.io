@@ -81,7 +81,12 @@
     /\/intel(ligence)?-overview[^/]*\.html$/i,
     /\/findings\.html$/i,
     /\/state-of-investigation\.html$/i,
-    /\/daily-(report|brief|intel)[^/]*\.html$/i
+    /\/daily-(report|brief|intel)[^/]*\.html$/i,
+    /\/ag-findings\.html$/i,
+    /\/accountability[^/]*\.html$/i,
+    /\/evidence-index\.html$/i,
+    /\/municipal-intelligence\.html$/i,
+    /\/officer-of-parliament-findings\.html$/i
   ];
 
   function getMeta(name) {
