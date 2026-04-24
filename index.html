@@ -2,233 +2,96 @@
 <html lang="en-CA">
 <head>
   <meta charset="UTF-8">
-<!-- Phase 68 Infrastructural Vulnerability Resolution: CSP / XSS Guard -->
-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; frame-ancestors 'none';">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TENET5 — LIRIL Newsroom | Powered by LIRIL AI</title>
-  <link rel="stylesheet" href="style.css?v=22">
-  <!-- polish.css removed — shell.js injectPolishCSS() handles this -->
-  <link rel="stylesheet" href="css/inline_generated.css">
-  <style>
-    html {
-      margin: 0; padding: 0; height: 100%; height: 100dvh;
-    }
-    body {
-      margin: 0; padding: 0; height: 100%; height: 100dvh;
-      display: flex; flex-direction: column; overflow: hidden;
-      background:
-        radial-gradient(circle at top, rgba(196,30,58,0.10), transparent 35%),
-        linear-gradient(180deg, #07101d 0%, #0b1220 100%);
-      color: var(--text-primary);
-      /* fixed prevents iOS elastic bounce on shell while allowing iframe scroll */
-      position: fixed; width: 100%; top: 0; left: 0;
-    }
-    #site-header-frame {
-      min-height: 100px;
-      background: #080e1a;
-      flex-shrink: 0;
-    }
-    .shell-main {
-      flex: 1 1 0;
-      min-height: 0;
-      display: flex;
-    }
-    #content_frame {
-      flex: 1 1 0; min-height: 0; border: none; width: 100%;
-      background: linear-gradient(180deg, rgba(9,14,22,0.96), rgba(7,10,16,0.98));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-      -webkit-overflow-scrolling: touch;
-    }
-    .site-footer { display: none !important; }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>TENET5 — Five Chambers · An Interactive Documentary</title>
+  <meta name="description" content="An interactive 3D documentary into TENET5: walk the SATOR cube, the 5×5×5 Loom, and speak with LIRIL — a frozen LLM that runs entirely on your device.">
 
-    @media (max-width: 1100px) {
-      #site-header-frame { min-height: 100px; }
-    }
-    @media (max-width: 600px) {
-      #site-header-frame { min-height: 80px; }
-    }
-  </style>
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="TENET5 — LIRIL Newsroom">
-  <meta property="og:url" content="https://tenet-5.github.io/index.html">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://esm.sh https://esm.run https://cdn.jsdelivr.net https://unpkg.com;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob:;
+    font-src 'self' data:;
+    connect-src 'self' https://esm.sh https://esm.run https://cdn.jsdelivr.net https://unpkg.com https://huggingface.co https://*.huggingface.co https://raw.githubusercontent.com;
+    worker-src 'self' blob:;
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+  ">
+
+  <link rel="stylesheet" href="css/liril-theme.css">
+  <link rel="stylesheet" href="css/experience.css?v=1">
+
+  <meta property="og:title" content="TENET5 — Five Chambers">
+  <meta property="og:description" content="Walk the SATOR cube. Speak with LIRIL. A 3D documentary that runs entirely in your browser.">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="TENET5 — LIRIL Newsroom">
-  <link rel="canonical" href="https://tenet-5.github.io/index.html">
-  <script type="application/ld+json">
+  <meta property="og:url" content="https://tenet-5.github.io/">
+
+  <script type="importmap">
   {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "TENET5 — LIRIL Newsroom",
-  "url": "https://tenet-5.github.io/index.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+    "imports": {
+      "three":         "https://esm.sh/three@0.166.1",
+      "three/addons/": "https://esm.sh/three@0.166.1/examples/jsm/",
+      "gsap":          "https://esm.sh/gsap@3.12.5",
+      "gsap-st":       "https://esm.sh/gsap@3.12.5/ScrollTrigger.js"
     }
   }
-}
   </script>
-<!-- /TENET5 SEO INJECT -->
-  <meta property="og:description" content="TENET5 — AI-powered Canadian accountability newsroom. Every claim cited, every source vault-sealed. Powered by LIRIL AI.">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-  <meta name="description" content="TENET5 — AI-powered Canadian accountability newsroom. Every claim cited. Every source vault-sealed. Powered by LIRIL AI.">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
 </head>
-<body class="topo">
-<!-- grain-overlay and vignette REMOVED — caused flicker/shake -->
+<body>
+  <div id="xp-boot">
+    <div class="ring" aria-hidden="true"></div>
+    <div class="label">TENET5 — Loading the Cube</div>
+    <div class="progress" id="xp-boot-progress">initialising</div>
+  </div>
 
-<a href="#main" class="skip-link">Skip to main content</a>
-  <div id="site-header-frame" role="banner" aria-label="TENET5 site header"></div>
-<h1 id="site-h1" class="sr-only" data-narrate="TENET5 — LIRIL Newsroom. AI-powered Canadian accountability journalism. Every claim sourced, every source vault-sealed. Powered by LIRIL AI running on local GPU plus NPU hardware — no corporate filters, no advertiser interference.">TENET5 — LIRIL Newsroom</h1>
-<main id="main" class="shell-main" role="main" aria-labelledby="site-h1">
-  <iframe name="content_frame" id="content_frame" src="home.html" title="TENET5 investigation content — Tab to enter frame, arrow keys to navigate slides" aria-label="Active investigation page; content loaded dynamically via iframe"></iframe>
-</main>
+  <canvas id="xp-canvas" aria-label="Three-dimensional documentary scene"></canvas>
 
-    <script>
-      const iframe = document.getElementById('content_frame');
-      const urlParams = new URLSearchParams(window.location.search);
-      const loadPage = urlParams.get('load');
-      const shellBust = '20260415walkfix';
+  <div class="xp-bar top" aria-hidden="true"></div>
+  <div class="xp-bar bottom" aria-hidden="true"></div>
 
-      function withShellBust(url) {
-          if (!url) return url;
-          const joiner = url.includes('?') ? '&' : '?';
-          return url + joiner + 'cb=' + encodeURIComponent(shellBust);
-      }
+  <div id="xp-hud">
+    <span class="dot" aria-hidden="true"></span>
+    <span>TENET5 · OSINT</span>
+  </div>
 
-      if (loadPage) {
-          iframe.src = withShellBust(loadPage);
-      }
+  <nav id="xp-escape" aria-label="Skip the experience">
+    <a href="archive-shell.html">Open Archive</a>
+    <a href="sitemap.html">Sitemap</a>
+  </nav>
 
-      iframe.addEventListener('load', () => {
-          try {
-              let framePath = iframe.contentWindow.location.pathname.split('/').pop() || 'home.html';
-              let frameSearch = iframe.contentWindow.location.search || '';
-              if (framePath !== 'home.html') {
-                  const newUrl = window.location.pathname + "?load=" + encodeURIComponent(framePath + frameSearch);
-                  window.history.replaceState(null, '', newUrl);
-              } else {
-                  window.history.replaceState(null, '', window.location.pathname);
-              }
-          } catch(e) {} // Offline/CORS block fallback
-      });
+  <div id="xp-chapter" aria-live="polite">
+    <span class="num">Chapter I</span>
+    <span class="title">The SATOR Cube</span>
+  </div>
 
-      // Cross-page presentation navigation via postMessage from iframe
-      window.addEventListener('message', function(e) {
-          if (e.data && e.data.type === 'pres-navigate' && e.data.page) {
-              iframe.src = withShellBust(e.data.page);
-          }
-      });
-    </script>
+  <div id="xp-tooltip" role="status"></div>
+  <div id="xp-scroll-cue">scroll · or choose a path</div>
 
-  <div id="site-footer-frame" role="contentinfo" aria-label="TENET5 site footer"></div>
-  <script src="shell.js?v=32"></script>
-  <script src="js/site-chalk.js?v=2"></script>
+  <!-- Choose-your-own-adventure branch dock (left side) -->
+  <aside id="xp-branch" aria-label="Choose your path"></aside>
 
-<!-- cinema/flow/presenter/auto-present/integrity/i18n load INSIDE iframe pages via their own script tags -->
+  <!-- LIRIL frozen-LLM chat dock (right side) -->
+  <aside id="liril-dock" aria-label="Chat with LIRIL"></aside>
 
-<!-- TENET5 SEEK-AND-DESTROY MUSIC STATION ──────────────────────────────────
-     Metallica — Seek and Destroy. Floating bottom-right control panel.
-     Autoplay policy: browsers block first-load audio, so we prime the
-     iframe muted (legal autoplay) then unmute on first user gesture.
-     Click the crest to toggle play/pause; double-click to open YouTube. -->
-<style>
-  #t5-music-station{
-    position:fixed;right:16px;bottom:16px;z-index:9999;
-    width:64px;height:64px;border-radius:50%;
-    background:radial-gradient(circle at 30% 30%,#c41e3a 0%,#7a0e20 100%);
-    box-shadow:0 4px 18px rgba(196,30,58,.45),0 0 0 2px #0b1220,0 0 0 3px #c9a227;
-    cursor:pointer;display:flex;align-items:center;justify-content:center;
-    font-family:ui-monospace,Consolas,monospace;color:#f5d76e;
-    font-size:22px;transition:transform .15s ease, box-shadow .15s ease;
-    user-select:none;
-  }
-  #t5-music-station:hover{transform:scale(1.06);box-shadow:0 6px 22px rgba(196,30,58,.65),0 0 0 2px #0b1220,0 0 0 3px #f5d76e;}
-  #t5-music-station.playing{animation:t5-pulse 1.4s ease-in-out infinite;}
-  #t5-music-station .t5-ms-glyph{line-height:1;pointer-events:none;text-shadow:0 1px 0 rgba(0,0,0,.45);}
-  #t5-music-station .t5-ms-label{
-    position:absolute;bottom:-22px;right:0;font-size:9.5px;letter-spacing:1.2px;
-    color:#c9a227;opacity:.85;white-space:nowrap;pointer-events:none;
-  }
-  #t5-music-frame{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;border:0;opacity:0;pointer-events:none;}
-  @keyframes t5-pulse{
-    0%,100%{box-shadow:0 4px 18px rgba(196,30,58,.45),0 0 0 2px #0b1220,0 0 0 3px #c9a227;}
-    50%   {box-shadow:0 6px 28px rgba(196,30,58,.85),0 0 0 2px #0b1220,0 0 0 4px #f5d76e;}
-  }
-  @media (prefers-reduced-motion: reduce){#t5-music-station.playing{animation:none;}}
-</style>
-<div id="t5-music-station"
-     role="button"
-     tabindex="0"
-     aria-label="TENET5 music station — Seek and Destroy. Click to play or pause."
-     title="Seek and Destroy — click to play / double-click to open in YouTube">
-  <span class="t5-ms-glyph" aria-hidden="true">♪</span>
-  <span class="t5-ms-label">S&amp;D</span>
-</div>
-<iframe id="t5-music-frame"
-        title="TENET5 music — Seek and Destroy (hidden player)"
-        allow="autoplay; encrypted-media"
-        src="about:blank"
-        loading="lazy"
-        aria-hidden="true"></iframe>
-<script>
-(function(){
-  // Seek and Destroy — Metallica. Video ID pinned for reproducibility.
-  var VID = 'FLTchCiC0T0';
-  var btn = document.getElementById('t5-music-station');
-  var frame = document.getElementById('t5-music-frame');
-  var glyph = btn.querySelector('.t5-ms-glyph');
-  var playing = false;
+  <div id="xp-scroll" aria-hidden="true"></div>
 
-  function src(autoplay, mute){
-    return 'https://www.youtube.com/embed/' + VID +
-           '?autoplay=' + (autoplay?1:0) +
-           '&loop=1&playlist=' + VID +
-           '&mute=' + (mute?1:0) +
-           '&modestbranding=1&playsinline=1&rel=0';
-  }
+  <script type="module" src="js/experience/main.js?v=2"></script>
+  <!-- Cap#137 (2026-04-24): LIRIL auto-narration. Daniel directive:
+       "liril should just automatically read to the user ... read all
+       APPLICABLE text in the intelligence overviews". Web Speech API
+       with 5-min dedup + mute toggle. -->
+  <script src="js/liril-narrate.js?v=1" defer></script>
 
-  function toggle(){
-    if(!playing){
-      // Browsers permit unmuted autoplay only after a real user gesture —
-      // this handler IS that gesture, so we ship unmuted directly.
-      frame.src = src(true, false);
-      playing = true;
-      btn.classList.add('playing');
-      glyph.textContent = '❚❚';
-      btn.setAttribute('aria-label','Pause Seek and Destroy');
-    } else {
-      frame.src = 'about:blank';
-      playing = false;
-      btn.classList.remove('playing');
-      glyph.textContent = '♪';
-      btn.setAttribute('aria-label','Play Seek and Destroy');
-    }
-  }
-
-  btn.addEventListener('click', toggle);
-  btn.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
-  });
-  btn.addEventListener('dblclick', function(){
-    window.open('https://music.youtube.com/watch?v=' + VID, '_blank', 'noopener');
-  });
-})();
-</script>
-<!-- /TENET5 SEEK-AND-DESTROY ────────────────────────────────────────────── -->
-
-<!-- TENET5_LAST_UPDATED_BEGIN --><div class="tenet5-last-updated" aria-label="Page last updated" style="text-align:center;font-size:0.72rem;color:#6b7280;padding:0.8rem 0;font-family:ui-monospace,Consolas,monospace;opacity:0.7;">Last updated: 2026-04-22 · TENET5</div><!-- TENET5_LAST_UPDATED_END -->
+  <noscript>
+    <style>
+      #xp-boot, #xp-canvas, #xp-scroll, #xp-chapter, #liril-dock, #xp-branch,
+      #xp-hud, #xp-tooltip, #xp-scroll-cue, .xp-bar { display: none !important; }
+      body { overflow: auto; background: #0a0d14; color: #e8e8ea;
+             font-family: system-ui, sans-serif; padding: 40px; }
+    </style>
+    <h1 id="n-22c73d5c" data-narrate="TENET5 — Five Chambers · An Interactive Documentary. This documentary requires JavaScript and WebGL. Open the archive instead →" >TENET5</h1>
+    <p>This documentary requires JavaScript and WebGL.
+       <a href="archive-shell.html" style="color:#6a8cff">Open the archive instead →</a></p>
+  </noscript>
 </body>
 </html>

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en-CA">
 <head>
     <!-- TENET5 SC_FRAME BUSTER -->
     <script>
       if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
-          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+          window.location.replace('archive-shell.html?load=' + window.location.pathname.split('/').pop());
       }
     </script>
 
@@ -520,14 +520,19 @@ body {
 <meta name="dc.source" content="Canadian Court Records; Elections Canada; House of Commons Hansard; Lobbying Commissioner Registry; RCMP Public Reports; Access to Information Releases; Office of the Auditor General">
 <!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
 <!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
+<link rel="stylesheet" href="/css/liril-theme.css?v=2">
 <script src="/js/liril-theme-slider.js?v=1" defer></script>
 <!-- LIRIL-THEME-SLIDER-INJECTED-END -->
+  <link rel="stylesheet" href="css/quantanium-v2.css">
 </head>
 <body data-narrate="The investigation board. Every connection documented from official records and parliamentary proceedings.">
+<!-- Quantanium V2 interactive data-science aesthetic container -->
+<div class="quantanium-container">
+  <!-- Three.js WebGL network (v2-engine.js) -->
+  <div id="quantanium-network" class="quantanium-network"></div>
+  <!-- Quantanium V2 interactive data-science aesthetic content -->
+  <div class="quantanium-content">
 <a href="#n-611379c7" class="skip-link">Skip to main content</a>
-<div class="grain-overlay"></div>
-<div class="vignette"></div>
 
     
   <div id="site-header-frame"></div>
@@ -721,10 +726,27 @@ body {
     { from: 'fintrac_defunding', to: 'hub_osint', label: 'tracked by OSINT', strength: 1 },
   ];
 
+  // ── Phase 81: Financial Transaction Analysis Integration ──
+  const FINANCIAL_NODES = [
+    { id: 'fin_irving', type: 'org', label: 'Irving Oil', subtitle: 'Financial Flow', detail: 'Liberal Party financial flow mapped. Risk factor: 1.45', categories: ['finance'], x: 50, y: 80 },
+    { id: 'fin_snc', type: 'org', label: 'SNC-Lavalin', subtitle: 'Financial Flow', detail: 'Federal Parties financial flow mapped. Risk factor: 1.1', categories: ['finance'], x: 55, y: 80 },
+    { id: 'fin_jnf', type: 'org', label: 'JNF Canada', subtitle: 'IDF Infrastructure', detail: 'Charitable funds flowing to IDF infrastructure. Risk factor: 10.0', categories: ['finance', 'org'], x: 60, y: 80 },
+    { id: 'fin_fswc', type: 'org', label: 'Friends of Simon Wiesenthal', subtitle: 'Lobbying', detail: 'Lobbying financial flows. Risk factor: 8.9', categories: ['finance', 'org'], x: 65, y: 80 },
+  ];
+
+  const FINANCIAL_THREADS = [
+    { from: 'fin_irving', to: 'hub_crossref', label: 'tracked by OSINT', strength: 1 },
+    { from: 'fin_snc', to: 'hub_crossref', label: 'tracked by OSINT', strength: 1 },
+    { from: 'fin_jnf', to: 'hub_crossref', label: 'tracked by OSINT', strength: 1 },
+    { from: 'fin_fswc', to: 'hub_crossref', label: 'tracked by OSINT', strength: 1 },
+  ];
+
   nodes.push(...HUB_NODES);
   nodes.push(...RD_NODES);
+  nodes.push(...FINANCIAL_NODES);
   threads.push(...HUB_THREADS);
   threads.push(...RD_THREADS);
+  threads.push(...FINANCIAL_THREADS);
 
   const board = document.getElementById('board');
   const cvs = document.getElementById('lines');
@@ -1237,6 +1259,16 @@ body {
             <div><strong>DOMAIN</strong> ${n.falcon_data.domain || 'UNKNOWN'}</div>
           </div>
         ` : ''}
+        ${n.kairos_forecast ? `
+          <div class="falcon-crypto" style="border-color: ${n.kairos_forecast.status === 'STABLE' ? 'rgba(58,134,255,0.3)' : 'rgba(230,57,70,0.3)'}; color: ${n.kairos_forecast.status === 'STABLE' ? '#3a86ff' : '#e63946'}; background: ${n.kairos_forecast.status === 'STABLE' ? 'rgba(58,134,255,0.05)' : 'rgba(230,57,70,0.05)'};">
+            <div class="fc-head" style="color: ${n.kairos_forecast.status === 'STABLE' ? '#3a86ff' : '#e63946'}; border-bottom-color: ${n.kairos_forecast.status === 'STABLE' ? 'rgba(58,134,255,0.2)' : 'rgba(230,57,70,0.2)'}; text-shadow: 0 0 5px ${n.kairos_forecast.status === 'STABLE' ? 'rgba(58,134,255,0.4)' : 'rgba(230,57,70,0.4)'};">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+              KAIROS FORECAST
+            </div>
+            <div style="margin-bottom:2px"><strong style="color: #fff; width: 60px; display: inline-block;">STATUS</strong> ${n.kairos_forecast.status}</div>
+            ${n.kairos_forecast.vector ? `<div style="margin-bottom:2px"><strong style="color: #fff; width: 60px; display: inline-block;">VECTOR</strong> [${n.kairos_forecast.vector.join(', ')}]</div>` : ''}
+          </div>
+        ` : ''}
         ${uniqueLinks.length ? `
           <div class="dp-explore-header">🧭 EXPLORE</div>
           <div class="dp-explore-links">
@@ -1429,5 +1461,8 @@ body {
   </div>
 </div>
 <div style="max-width:900px;margin:2rem auto;padding:1rem 1.5rem;background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.15);border-radius:10px;"><p style="font-size:0.85rem;line-height:1.7;color:var(--text-secondary);">76,475 confirmed dead. 102 doctors killed 373 each. Government saves <strong style="color:#dc2626;">$20,685 per death</strong>. PM holds <strong style="color:#facc15;">$6.8M</strong> in Brookfield. <a href="follow-the-money.html" style="color:#facc15;font-weight:600;">Follow the Money →</a></p></div>
+<script src="js/v2-engine.js"></script>
+  </div>
+</div>
 </body>
 </html>
