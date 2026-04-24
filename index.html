@@ -20,12 +20,13 @@
       --accent-gold: #c9a44c;
       --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --font-mono: "IBM Plex Mono", "Consolas", ui-monospace, monospace;
+      --font-display: "Cinzel", "Crimson Text", Georgia, serif;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
     a { color: inherit; text-decoration: none; }
 
-    /* Shift5-style sticky system-status ribbon */
+    /* Shift5-style sticky status ribbon */
     .t5-ribbon {
       position: sticky; top: 0; z-index: 50;
       display: flex; gap: 24px; align-items: center;
@@ -38,15 +39,17 @@
     .t5-ribbon .brand { color: var(--text); font-weight: 600; letter-spacing: 0.24em; }
     .t5-ribbon .cell { display: inline-flex; gap: 6px; align-items: center; }
     .t5-ribbon .cell .lbl { color: var(--text-dim); }
-    .t5-ribbon .cell .bits { color: var(--text); letter-spacing: 0.2em; font-variant-numeric: tabular-nums; }
+    .t5-ribbon .cell .bits { color: var(--text); letter-spacing: 0.2em; font-variant-numeric: tabular-nums; animation: bitPulse 3.6s infinite; }
     .t5-ribbon .seed { margin-left: auto; color: #444; }
+    @keyframes bitPulse { 0%,100%{opacity:1} 50%{opacity:0.72} }
 
     /* Nav */
     header.t5-nav {
       position: sticky; top: 32px; z-index: 40;
       display: flex; align-items: center; gap: 32px;
-      padding: 20px 32px; background: rgba(10,10,10,0.94);
-      backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
+      padding: 20px 32px; background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
     }
     header.t5-nav .logo { display: flex; align-items: center; gap: 12px; font-weight: 600; letter-spacing: 0.08em; }
     header.t5-nav .logo .crest { width: 28px; height: 28px; display: inline-block;
@@ -57,48 +60,97 @@
     header.t5-nav nav a { color: var(--text-muted); transition: color .2s ease; }
     header.t5-nav nav a:hover { color: var(--text); }
 
-    /* Hero */
-    .hero { max-width: 1280px; margin: 0 auto; padding: 140px 32px 100px; }
+    /* Hero — video background layer */
+    .hero-wrap { position: relative; overflow: hidden; }
+    .hero-video {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+      opacity: 0.14; filter: grayscale(1) contrast(1.05) brightness(0.72);
+      pointer-events: none;
+    }
+    .hero-scrim {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.85) 70%, var(--bg) 100%);
+    }
+    .hero { position: relative; z-index: 2; max-width: 1280px; margin: 0 auto; padding: 160px 32px 120px; }
     .hero .eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.28em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 32px; }
-    .hero h1 { font-size: clamp(2.5rem, 6.2vw, 5.8rem); font-weight: 600; letter-spacing: -0.025em; line-height: 1.02; margin: 0 0 28px; max-width: 1000px; }
+    .hero h1 { font-size: clamp(2.75rem, 6.4vw, 6.2rem); font-weight: 600; letter-spacing: -0.028em; line-height: 1.02; margin: 0 0 28px; max-width: 1040px; }
     .hero h1 em { font-style: normal; color: var(--text-dim); }
     .hero .deck { font-size: clamp(1rem, 1.6vw, 1.25rem); color: var(--text-muted); max-width: 640px; line-height: 1.55; margin: 0 0 48px; }
     .hero .cta-row { display: flex; gap: 16px; flex-wrap: wrap; }
-    .hero .cta-row .cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border: 1px solid var(--border); background: var(--bg-elev); color: var(--text); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: border-color .2s ease, background .2s ease; }
+    .hero .cta-row .cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border: 1px solid var(--border); background: rgba(20,20,20,0.72); backdrop-filter: blur(4px); color: var(--text); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: border-color .2s ease, background .2s ease, transform .2s ease; }
     .hero .cta-row .cta.primary { border-color: var(--text); background: var(--text); color: var(--bg); }
-    .hero .cta-row .cta:hover { border-color: var(--text); }
+    .hero .cta-row .cta:hover { border-color: var(--text); transform: translateY(-2px); }
+
+    /* Metric band */
+    .metrics {
+      position: relative; z-index: 2;
+      max-width: 1280px; margin: 0 auto; padding: 0 32px 80px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border);
+    }
+    .metric { padding: 28px 24px; background: var(--bg); }
+    .metric .num { font-family: var(--font-mono); font-size: clamp(1.75rem, 3vw, 2.75rem); font-weight: 500; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
+    .metric .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.24em; color: var(--text-dim); text-transform: uppercase; margin-top: 10px; }
 
     /* Solutions grid */
-    .solutions { max-width: 1280px; margin: 0 auto; padding: 60px 32px; border-top: 1px solid var(--border); }
+    .solutions { max-width: 1280px; margin: 0 auto; padding: 80px 32px; border-top: 1px solid var(--border); }
     .solutions .section-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.28em; color: var(--text-dim); margin-bottom: 12px; }
-    .solutions .section-title { font-size: clamp(1.5rem, 2.4vw, 2.25rem); font-weight: 600; letter-spacing: -0.015em; margin: 0 0 56px; max-width: 720px; }
+    .solutions .section-title { font-size: clamp(1.75rem, 2.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.02em; margin: 0 0 56px; max-width: 760px; }
     .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); }
-    .card { padding: 40px 32px 48px; background: var(--bg-card); transition: background .25s ease; display: flex; flex-direction: column; min-height: 280px; }
-    .card:hover { background: #1f1f1f; }
+    .card { padding: 40px 32px 48px; background: var(--bg-card); transition: background .25s ease, transform .25s ease; display: flex; flex-direction: column; min-height: 320px; }
+    .card:hover { background: #1f1f1f; transform: translateY(-2px); }
     .card .chapter { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.24em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 20px; }
     .card h3 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 16px; }
     .card p { color: var(--text-muted); line-height: 1.55; font-size: 14px; margin: 0 0 auto; }
     .card .arrow { margin-top: 32px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.24em; color: var(--accent-gold); }
 
+    /* How it works (Shift5-style 3-step) */
+    .how { max-width: 1280px; margin: 0 auto; padding: 100px 32px; border-top: 1px solid var(--border); }
+    .how .section-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.28em; color: var(--text-dim); margin-bottom: 12px; }
+    .how .section-title { font-size: clamp(1.75rem, 2.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.02em; margin: 0 0 56px; max-width: 760px; }
+    .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step { position: relative; padding: 32px 24px; background: var(--bg-elev); border: 1px solid var(--border); }
+    .step:before { content: ""; position: absolute; top: 0; left: 0; width: 48px; height: 2px; background: var(--accent-gold); }
+    .step .n { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.24em; color: var(--accent-gold); margin-bottom: 16px; text-transform: uppercase; }
+    .step h4 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 14px; }
+    .step p { color: var(--text-muted); font-size: 14px; line-height: 1.55; margin: 0; }
+
     /* Principle row */
-    .principles { max-width: 1280px; margin: 0 auto; padding: 80px 32px; border-top: 1px solid var(--border); }
+    .principles { max-width: 1280px; margin: 0 auto; padding: 100px 32px; border-top: 1px solid var(--border); }
+    .principles .section-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.28em; color: var(--text-dim); margin-bottom: 12px; }
+    .principles .section-title { font-size: clamp(1.75rem, 2.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.02em; margin: 0 0 56px; max-width: 760px; }
     .principles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
     .principle .num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.24em; color: var(--text-dim); margin-bottom: 16px; }
     .principle h4 { font-size: 18px; font-weight: 600; margin: 0 0 12px; }
     .principle p { color: var(--text-muted); font-size: 14px; line-height: 1.55; margin: 0; }
 
-    /* Footer */
-    footer.t5-foot { max-width: 1280px; margin: 40px auto 0; padding: 40px 32px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 24px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; color: var(--text-dim); text-transform: uppercase; }
+    /* Pull-quote / closing */
+    .closing { max-width: 1080px; margin: 0 auto; padding: 120px 32px 80px; border-top: 1px solid var(--border); text-align: left; }
+    .closing blockquote { font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 400; letter-spacing: -0.01em; line-height: 1.35; color: var(--text); margin: 0 0 28px; font-style: italic; border-left: 3px solid var(--accent-gold); padding-left: 28px; }
+    .closing cite { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.24em; color: var(--text-dim); text-transform: uppercase; font-style: normal; display: block; padding-left: 32px; }
 
+    /* Footer */
+    footer.t5-foot { max-width: 1280px; margin: 40px auto 0; padding: 40px 32px 80px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 24px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; color: var(--text-dim); text-transform: uppercase; flex-wrap: wrap; }
+
+    /* Scroll-triggered fade-in */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s cubic-bezier(0.16, 1, 0.3, 1), transform .9s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .hero-video { display: none; }
+      .t5-ribbon .cell .bits { animation: none; }
+    }
     @media (max-width: 900px) {
       .cards { grid-template-columns: 1fr 1fr; }
-      .principles-grid { grid-template-columns: 1fr; gap: 32px; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .how-steps, .principles-grid { grid-template-columns: 1fr; gap: 24px; }
       header.t5-nav nav { display: none; }
     }
     @media (max-width: 560px) {
-      .cards { grid-template-columns: 1fr; }
-      .hero { padding: 80px 20px 60px; }
-      .solutions, .principles { padding: 40px 20px; }
+      .cards, .metrics { grid-template-columns: 1fr; }
+      .hero { padding: 100px 20px 60px; }
+      .solutions, .principles, .how, .closing { padding: 60px 20px; }
       .t5-ribbon .cell.optional { display: none; }
     }
   </style>
@@ -133,46 +185,76 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="eyebrow">TENET5 · Operational Intelligence</div>
-      <h1 data-narrate="Operational intelligence for public accountability. TENET5 documents the decisions. LIRIL reads every source. Every claim traces to a primary government or court document.">
-        Operational intelligence<br>
-        for public <em>accountability</em>.
-      </h1>
-      <p class="deck">
-        TENET5 documents the decisions. LIRIL reads every source.
-        Every claim traces to a primary government or court document —
-        Health Canada, Hansard, the Auditor General, sworn testimony.
-      </p>
-      <div class="cta-row">
-        <a class="cta primary" href="experience.html">Enter the documentary →</a>
-        <a class="cta" href="osint-dashboard.html">Live dashboard</a>
-      </div>
-    </section>
 
+    <!-- HERO with video background -->
+    <div class="hero-wrap">
+      <video class="hero-video" autoplay muted loop playsinline poster="media/retro-warroom-poster.jpg">
+        <source src="media/retro-warroom-loop.mp4" type="video/mp4">
+      </video>
+      <div class="hero-scrim" aria-hidden="true"></div>
+
+      <section class="hero">
+        <div class="eyebrow reveal">TENET5 · Operational Intelligence</div>
+        <h1 class="reveal" data-narrate="Operational intelligence for public accountability. TENET5 documents the decisions. LIRIL reads every source. Every claim traces to a primary government or court document.">
+          Operational intelligence<br>
+          for public <em>accountability</em>.
+        </h1>
+        <p class="deck reveal">
+          TENET5 documents the decisions. LIRIL reads every source.
+          Every claim traces to a primary government or court document —
+          Health Canada, Hansard, the Auditor General, sworn testimony.
+        </p>
+        <div class="cta-row reveal">
+          <a class="cta primary" href="experience.html">Enter the documentary →</a>
+          <a class="cta" href="osint-dashboard.html">Live dashboard</a>
+        </div>
+      </section>
+
+      <!-- Metric band — at bottom of hero-wrap so it sits on top of scrim -->
+      <section class="metrics reveal" aria-label="TENET5 key figures">
+        <div class="metric">
+          <div class="num">81</div>
+          <div class="lbl">Years of record · 1945–2026</div>
+        </div>
+        <div class="metric">
+          <div class="num">310+</div>
+          <div class="lbl">Source-cited pages</div>
+        </div>
+        <div class="metric">
+          <div class="num">4</div>
+          <div class="lbl">Investigation chapters</div>
+        </div>
+        <div class="metric">
+          <div class="num">118400</div>
+          <div class="lbl">System seed · deterministic</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- CHAPTERS -->
     <section class="solutions" id="solutions">
-      <div class="section-eyebrow">THE RECORD · FOUR CHAPTERS</div>
-      <h2 class="section-title">Four chapters. One record. Every claim sourced.</h2>
+      <div class="section-eyebrow reveal">THE RECORD · FOUR CHAPTERS</div>
+      <h2 class="section-title reveal">Four chapters. One record. Every claim sourced.</h2>
       <div class="cards">
-        <a class="card" href="findings.html">
+        <a class="card reveal" href="findings.html">
           <span class="chapter">CHAPTER I</span>
           <h3>Procurement</h3>
           <p>Where public money goes when no one is watching. ArriveCAN 238× overrun. McKinsey sole-sources. Phoenix pay system.</p>
           <span class="arrow">READ THE RECORD →</span>
         </a>
-        <a class="card" href="veterans.html">
+        <a class="card reveal" href="veterans.html">
           <span class="chapter">CHAPTER II</span>
           <h3>Health</h3>
           <p>A system that cures by killing. MAID rose to 4.7% of all Canadian deaths. Bill C-7 expanded eligibility.</p>
           <span class="arrow">READ THE RECORD →</span>
         </a>
-        <a class="card" href="5gw-subversion.html">
+        <a class="card reveal" href="5gw-subversion.html">
           <span class="chapter">CHAPTER III</span>
           <h3>Foreign Influence</h3>
           <p>Hogue inquiry. Winnipeg lab removals. Project Sidewinder shelved. Who decides Canadian policy.</p>
           <span class="arrow">READ THE RECORD →</span>
         </a>
-        <a class="card" href="accountability.html">
+        <a class="card reveal" href="accountability.html">
           <span class="chapter">CHAPTER IV</span>
           <h3>The Verdict</h3>
           <p>Every claim sourced to a primary document. No op-ed. No speculation. The record stands.</p>
@@ -181,35 +263,87 @@
       </div>
     </section>
 
+    <!-- HOW IT WORKS (Shift5 "How it works" pattern) -->
+    <section class="how" id="how-it-works">
+      <div class="section-eyebrow reveal">HOW LIRIL WORKS</div>
+      <h2 class="section-title reveal">A local AI that reads every source, quotes every page, and logs every decision.</h2>
+      <div class="how-steps">
+        <div class="step reveal">
+          <div class="n">STEP 01 · INGEST</div>
+          <h4>Read primary records</h4>
+          <p>LIRIL ingests Hansard transcripts, Auditor General reports, Health Canada annual reviews, court dockets, and sworn testimony. Nothing secondhand.</p>
+        </div>
+        <div class="step reveal">
+          <div class="n">STEP 02 · TRACE</div>
+          <h4>Assert with source</h4>
+          <p>Every claim on the site links to the specific document, line, or section. If a source can't be produced, the claim doesn't appear.</p>
+        </div>
+        <div class="step reveal">
+          <div class="n">STEP 03 · PUBLISH</div>
+          <h4>Zero surveillance</h4>
+          <p>Pages are served static from GitHub Pages. No analytics, no reader tracking, no profiling. Readers are readers — not data.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRINCIPLES -->
     <section class="principles">
-      <div class="section-eyebrow">PRINCIPLES</div>
-      <h2 class="section-title">Built to withstand scrutiny.</h2>
+      <div class="section-eyebrow reveal">PRINCIPLES</div>
+      <h2 class="section-title reveal">Built to withstand scrutiny.</h2>
       <div class="principles-grid">
-        <div class="principle">
+        <div class="principle reveal">
           <div class="num">01</div>
           <h4>Primary-source only</h4>
           <p>Every claim cites a specific government record — Hansard line, AG report section, court docket, Health Canada annual report. If a source is absent, the claim does not appear.</p>
         </div>
-        <div class="principle">
+        <div class="principle reveal">
           <div class="num">02</div>
           <h4>Local AI, zero surveillance</h4>
           <p>LIRIL runs entirely on the authoring workstation. No cloud telemetry. No analytics. No reader tracking. What you read, you read — not a profile being built.</p>
         </div>
-        <div class="principle">
+        <div class="principle reveal">
           <div class="num">03</div>
           <h4>Veteran-authored</h4>
           <p>Every editorial decision is made by Daniel Perry — Canadian Forces combat veteran, Afghanistan. Work product of S.L.A.T.E. No funder, no party, no influence operation.</p>
         </div>
       </div>
     </section>
+
+    <!-- PULL-QUOTE -->
+    <section class="closing">
+      <blockquote class="reveal">
+        The record stands. Every number is a body.
+        Every page is evidence. This is operational intelligence
+        for the public that owns it.
+      </blockquote>
+      <cite class="reveal">TENET5 · SEED 118400 · POWERED BY LIRIL AI</cite>
+    </section>
   </main>
 
   <footer class="t5-foot">
-    <span>© 2026 TENET5 · SEED 118400</span>
-    <span>POWERED BY LIRIL AI</span>
+    <span>© 2026 TENET5 · Canadian-authored · GitHub Pages</span>
+    <span>POWERED BY LIRIL AI · SEED 118400</span>
   </footer>
 
   <script src="js/liril-narrate.js?v=1" defer></script>
   <script src="js/tenet5-status-ribbon.js?v=1" defer></script>
+  <script>
+    // Cap#159 scroll-trigger fade-in. IntersectionObserver-based,
+    // zero external deps. `prefers-reduced-motion` already disables
+    // the fade in the CSS — this JS still runs but the class toggle
+    // becomes a no-op visually.
+    (function () {
+      if (!("IntersectionObserver" in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -60px 0px" });
+      document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+    })();
+  </script>
 </body>
 </html>
