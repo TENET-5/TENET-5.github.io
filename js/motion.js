@@ -1,7 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════
+<<<<<<<< HEAD:js/operational-anim.js
    TENET5 — operational-intel Animator (Cap#217, 2026-04-24)
    ═══════════════════════════════════════════════════════════════
    Powers the css/slates/operational-intel-anim.css motion vocabulary.
+========
+   TENET5 — TENET5 Animator (Cap#217, 2026-04-24)
+   ═══════════════════════════════════════════════════════════════
+   Powers the css/slates/motion.css motion vocabulary.
+>>>>>>>> 00178cb (Cap#219: neutralize external-brand references; rename motion + ops slate files; wire motion.js to index.html and home.html):js/motion.js
 
    Boots safely without dependencies. Respects
    prefers-reduced-motion. No-ops gracefully if classes are absent.
