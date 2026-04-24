@@ -85,34 +85,18 @@
 
   function injectBackdrop() {
     if (!document.body || isFrameShell) return;
-    document.body.classList.add('theme-1950s');
-    if (document.querySelector('.retro-film-bg')) return;
-
-    var wrap = document.createElement('div');
-    wrap.className = 'retro-film-bg';
-    wrap.setAttribute('aria-hidden', 'true');
-
-    var spriteStrip = document.createElement('div');
-    spriteStrip.className = 'sprite-strip sprite-strip--evidence';
-
-    var courtLayer = document.createElement('div');
-    courtLayer.className = 'sprite-layer sprite-layer--court';
-
-    var parliamentLayer = document.createElement('div');
-    parliamentLayer.className = 'sprite-layer sprite-layer--parliament';
-
-    var networkLayer = document.createElement('div');
-    networkLayer.className = 'sprite-layer sprite-layer--network';
-
-    var overlay = document.createElement('div');
-    overlay.className = 'retro-film-overlay';
-
-    wrap.appendChild(spriteStrip);
-    wrap.appendChild(courtLayer);
-    wrap.appendChild(parliamentLayer);
-    wrap.appendChild(networkLayer);
-    wrap.appendChild(overlay);
-    document.body.insertBefore(wrap, document.body.firstChild);
+    document.body.classList.add('theme-v2-data-science');
+    
+    // Load Three.js and V2 Engine
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js')
+      .then(function() { return loadScript(BASE + 'js/v2-engine.js?v=2'); })
+      .then(function() {
+        // Load WebLLM Agent as an ES Module
+        var script = document.createElement('script');
+        script.type = 'module';
+        script.src = BASE + 'js/liril-frozen-agent.js?v=1';
+        document.body.appendChild(script);
+      });
   }
 
   // ── Init ────────────────────────────────────────────────────────────────
@@ -139,6 +123,7 @@
         loadScript(BASE + 'share.js?v=2'),
         loadScript(BASE + 'js/share-actions.js?v=2'),
         loadScript(BASE + 'js/liril-voice.js?v=6'),
+        loadScript(BASE + 'js/liril-autoreader.js?v=1'),
         loadScript(BASE + 'js/figures.js?v=1'),
         loadScript(BASE + 'js/breadcrumbs.js?v=1'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
@@ -178,6 +163,7 @@
         .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
+        .then(function() { return loadScript(BASE + 'js/liril-autoreader.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/presentation.js?v=15'); })
         .then(function() { return loadScript(BASE + 'js/perception.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=14'); })
