@@ -259,8 +259,36 @@
       footer.t5-foot .row { grid-template-columns: 1fr; gap: 32px; }
     }
   </style>
+
+  <!-- ════════════════════════════════════════════════════════════
+       Cap#218 (2026-04-24): Shift5 animation layer on the actual
+       served homepage (index.html). The Cap#217 work landed on
+       home.html which is NOT what GitHub Pages serves at /. This
+       commit pulls the same shift5-anim.css + shift5-anim.js onto
+       the real entry surface and adds the missing surface-level
+       motion primitives Shift5 actually ships:
+         • ambient signal-line canvas behind the hero
+         • full-page loading scrim (boots clean)
+         • right-edge pip rail tracking #solutions/#how-it-works/#insights
+         • desktop cursor ring with mix-blend difference
+         • hero entrance scale-in
+         • display-text scramble (one-shot)
+       index.html keeps its existing .reveal mechanism (Cap#160) —
+       .s5-* classes are namespaced and do not collide.
+       ──────────────────────────────────────────────────────────── -->
+  <link rel="stylesheet" href="/css/slates/shift5-anim.css?v=1">
 </head>
 <body>
+
+  <!-- Cap#218: full-page loading scrim — fades on window load + 220ms -->
+  <div class="s5-loading-scrim" aria-hidden="true"></div>
+
+  <!-- Cap#218: right-edge pip rail — IntersectionObserver tracks active section -->
+  <nav class="s5-pip-rail" aria-label="Section navigation">
+    <a href="#solutions" data-pip data-target="solutions" aria-label="Chapters"></a>
+    <a href="#how-it-works" data-pip data-target="how-it-works" aria-label="How it works"></a>
+    <a href="#insights" data-pip data-target="insights" aria-label="Insights feed"></a>
+  </nav>
 
   <header class="t5-nav">
     <a class="logo" href="/">
@@ -289,16 +317,22 @@
 
   <main>
 
-    <!-- HERO: centered, video bg, 10-cell binary status grid embedded -->
-    <div class="hero-wrap">
+    <!-- HERO: centered, video bg, 10-cell binary status grid embedded.
+         Cap#218: + s5-ambient-host (signal canvas) + s5-hero-enter (scale-in). -->
+    <div class="hero-wrap s5-ambient-host s5-hero-enter">
       <video class="hero-video" autoplay muted loop playsinline poster="media/retro-warroom-poster.jpg">
         <source src="media/retro-warroom-loop.mp4" type="video/mp4">
       </video>
       <div class="hero-scrim" aria-hidden="true"></div>
+      <!-- Cap#218: ambient signal canvas — placed AFTER scrim so it
+           paints over video but the scrim's z-index:1 still wins.
+           Canvas is z-index:0 absolute, video is z-index:0 absolute;
+           later DOM order means canvas overpaints video. -->
+      <canvas class="s5-ambient-canvas" aria-hidden="true"></canvas>
 
       <section class="hero">
-        <div class="eyebrow reveal">TENET5 · Operational Intelligence</div>
-        <h1 class="reveal" data-narrate="Operational intelligence for every record, every chamber, every decision.">
+        <div class="eyebrow reveal s5-pulse">TENET5 · Operational Intelligence</div>
+        <h1 class="reveal s5-display s5-scramble" data-narrate="Operational intelligence for every record, every chamber, every decision.">
           Operational intelligence for every record, every chamber, every decision.
         </h1>
         <p class="deck reveal">
@@ -480,6 +514,8 @@
     </div>
   </footer>
 
+  <!-- Cap#218: Shift5 animation driver — reveals/stagger/scramble/canvas/cursor/pip-rail/scrim -->
+  <script src="/js/shift5-anim.js?v=1" defer></script>
   <script src="js/liril-narrate.js?v=1" defer></script>
   <script>
     // Cap#160 IntersectionObserver scroll-reveal. zero deps.

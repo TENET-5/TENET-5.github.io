@@ -125,11 +125,12 @@
 }
 .s5-ambient-host {
   position: relative;
+  isolation: isolate;
 }
-.s5-ambient-host > * {
-  position: relative;
-  z-index: 1;
-}
+/* Cap#218: removed brittle `.s5-ambient-host > * { position: relative }`
+   rule — it broke absolutely-positioned hero children (video, scrim)
+   on index.html. Stacking is now governed by each child's own
+   position/z-index plus the canvas's z-index:0 below. */
 
 /* ── Cursor ring (desktop pointer only) ────────────────────── */
 .s5-cursor {
@@ -213,9 +214,22 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ── Glyph cycle on .s5-eyebrow::before hairline ───────────── */
-.s5-eyebrow.s5-pulse::before {
+/* ── Hairline pulse — works on .s5-eyebrow (Shift5 base) OR
+      standalone via auto-injected ::before pseudo. Cap#218 split
+      so index.html (no shift5.css base) still gets the animation. */
+.s5-eyebrow.s5-pulse::before,
+.s5-pulse:not(.s5-eyebrow)::before {
   animation: s5-hairline-pulse 2.4s ease-in-out infinite;
+}
+.s5-pulse:not(.s5-eyebrow)::before {
+  content: "";
+  display: inline-block;
+  width: 1.25em;
+  height: 1px;
+  background: currentColor;
+  margin-right: 0.6em;
+  vertical-align: middle;
+  opacity: 0.7;
 }
 @keyframes s5-hairline-pulse {
   0%, 100% { width: 1.25em; opacity: 1; }
