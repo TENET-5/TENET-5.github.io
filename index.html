@@ -14,15 +14,15 @@
   <link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
   <style>
     /* ================================================================
-       TENET5 — operational-intelligence.io-matched landing (Cap#160, 2026-04-24)
-       Re-analysed source: operational-intelligence.io uses #202020 base + #B9B9B9 text,
+       TENET5 — operational-intelligence landing (Cap#160, 2026-04-24)
+       Monochrome palette: #202020 base + #B9B9B9 text,
        CENTERED hero with big sentence-case headline, 10-cell binary
        status grid INSIDE the hero (not a sticky ribbon), 3 stacked
        news cards below hero, 4-column solutions grid with icons,
        chronological insights feed. Clinical institutional tone.
        ================================================================ */
     :root {
-      /* operational-intelligence-matched palette */
+      /* operational-intelligence palette */
       --bg:          #202020;
       --bg-elev:     #2a2a2a;
       --bg-card:     #262626;
@@ -42,28 +42,59 @@
                   font-feature-settings: "ss01", "ss02"; }
     a { color: inherit; text-decoration: none; }
 
-    /* Nav — minimal, full-width */
+    /* Nav — Cap#220: thin top bar, scroll-aware. Wordmark left, sparse uppercase tracked links right. */
     header.t5-nav {
-      position: sticky; top: 0; z-index: 50;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
       display: flex; align-items: center; gap: 32px;
-      padding: 18px 40px;
-      background: rgba(32,32,32,0.94);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      padding: 14px 40px;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      transition: background .25s ease, border-color .25s ease, padding .25s ease, backdrop-filter .25s ease;
     }
-    header.t5-nav .logo { display: flex; align-items: center; gap: 14px; font-weight: 600; letter-spacing: 0.08em; }
-    header.t5-nav .logo .crest { width: 24px; height: 24px; flex-shrink: 0; display: block; }
+    header.t5-nav.is-scrolled {
+      padding: 10px 40px;
+      background: rgba(32,32,32,0.86);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(185,185,185,0.13);
+    }
+    /* Body offset so fixed nav doesn't overlap content */
+    body { padding-top: 58px; }
+    header.t5-nav .logo { display: flex; align-items: center; gap: 12px; font-weight: 500; letter-spacing: 0.06em; color: var(--text); }
+    header.t5-nav .logo .crest { width: 22px; height: 22px; flex-shrink: 0; display: block; }
     header.t5-nav .logo .crest rect[fill='#c9a44c'] { animation: satorCorePulse 4s ease-in-out infinite; transform-origin: 12px 12px; transform-box: fill-box; }
-    @keyframes satorCorePulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
+    @keyframes satorCorePulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
     @media (prefers-reduced-motion: reduce) { header.t5-nav .logo .crest rect[fill='#c9a44c'] { animation: none; } }
-    header.t5-nav .logo .brand-text { font-size: 15px; }
-    header.t5-nav .logo .brand-text sup { font-size: 0.65em; color: var(--accent-gold); margin-left: 1px; font-weight: 500; }
-    header.t5-nav .logo .tag { font-size: 10px; letter-spacing: 0.22em; color: var(--text-dim); font-weight: 400; margin-left: 4px; }
-    header.t5-nav nav { display: flex; gap: 28px; margin-left: auto; font-size: 13px; }
-    header.t5-nav nav a { color: var(--text-muted); transition: color .2s ease; }
+    header.t5-nav .logo .brand-text { font-size: 13px; font-family: var(--font-mono); letter-spacing: 0.18em; text-transform: uppercase; }
+    header.t5-nav .logo .brand-text sup { font-size: 0.62em; color: var(--accent-gold); margin-left: 2px; font-weight: 500; }
+    header.t5-nav .logo .tag { font-size: 9px; letter-spacing: 0.28em; color: var(--text-dim); font-weight: 400; margin-left: 6px; text-transform: uppercase; }
+    header.t5-nav nav { display: flex; gap: 36px; margin-left: auto; }
+    header.t5-nav nav a {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 10.5px; letter-spacing: 0.26em; text-transform: uppercase;
+      position: relative; padding: 4px 0;
+      transition: color .2s ease;
+    }
+    header.t5-nav nav a::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -2px;
+      height: 1px; background: var(--text); transform: scaleX(0); transform-origin: left center;
+      transition: transform .3s ease;
+    }
     header.t5-nav nav a:hover { color: var(--text); }
-    header.t5-nav .nav-cta { padding: 8px 16px; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; transition: border-color .2s ease, background .2s ease; }
-    header.t5-nav .nav-cta:hover { border-color: var(--text); background: rgba(255,255,255,0.04); color: var(--text); }
+    header.t5-nav nav a:hover::after { transform: scaleX(1); }
+    header.t5-nav .nav-cta {
+      margin-left: 28px;
+      color: var(--text);
+      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.26em; text-transform: uppercase;
+      padding: 4px 0; border: none; background: none;
+      position: relative;
+    }
+    header.t5-nav .nav-cta::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -2px;
+      height: 1px; background: var(--accent-gold); transform: scaleX(1); transform-origin: left center;
+      transition: transform .3s ease;
+    }
+    header.t5-nav .nav-cta:hover::after { transform: scaleX(0.5); }
 
     /* HERO — centered, stacked, with binary status grid INSIDE */
     .hero-wrap { position: relative; overflow: hidden; }
@@ -92,7 +123,7 @@
       margin: 0 auto 64px; max-width: 720px;
     }
 
-    /* 10-cell binary status grid — operational-intelligence's signature element, INSIDE hero */
+    /* 10-cell binary status grid — TENET5 signature element, INSIDE hero */
     .status-grid {
       display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px;
       background: var(--border); border: 1px solid var(--border);
@@ -181,7 +212,7 @@
     .card p { color: var(--text-muted); line-height: 1.55; font-size: 14px; margin: 0 0 auto; }
     .card .arrow { margin-top: 28px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.26em; color: var(--accent-gold); }
 
-    /* How it works (operational-intelligence 3-step "How it works" pattern) */
+    /* How it works (3-step pattern) */
     .how { max-width: 1240px; margin: 0 auto; padding: 100px 32px; border-top: 1px solid var(--border); }
     .how .section-eyebrow { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.3em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 16px; }
     .how .section-title { font-size: clamp(1.75rem, 2.6vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; margin: 0 0 56px; max-width: 760px; }
@@ -260,23 +291,12 @@
     }
   </style>
 
-  <!-- ════════════════════════════════════════════════════════════
-       Cap#218 (2026-04-24): operational-intel animation layer on the actual
-       served homepage (index.html). The Cap#217 work landed on
-       home.html which is NOT what GitHub Pages serves at /. This
-       commit pulls the same operational-intel-anim.css + operational-intel-anim.js onto
-       the real entry surface and adds the missing surface-level
-       motion primitives operational-intel actually ships:
-         • ambient signal-line canvas behind the hero
-         • full-page loading scrim (boots clean)
-         • right-edge pip rail tracking #solutions/#how-it-works/#insights
-         • desktop cursor ring with mix-blend difference
-         • hero entrance scale-in
-         • display-text scramble (one-shot)
-       index.html keeps its existing .reveal mechanism (Cap#160) —
-       .s5-* classes are namespaced and do not collide.
-       ──────────────────────────────────────────────────────────── -->
-  <link rel="stylesheet" href="/css/slates/operational-anim.css?v=1">
+  <!-- Cap#219/220: motion + ops slate are imported via css/liril-theme.css.
+       The motion layer adds: ambient signal-line canvas behind the hero,
+       full-page loading scrim, right-edge pip rail tracking sections,
+       desktop cursor ring (mix-blend difference), hero scale-in, and
+       a one-shot scramble on display headlines. Existing .reveal
+       mechanism (Cap#160) is untouched; .s5-* classes are namespaced. -->
 </head>
 <body>
 
@@ -341,7 +361,7 @@
           Hansard, the Auditor General, sworn testimony.
         </p>
 
-        <!-- 10-cell binary status grid — operational-intel's signature hero element -->
+        <!-- 10-cell binary status grid — TENET5 signature hero element -->
         <div class="status-grid reveal" role="status" aria-label="TENET5 substrate telemetry">
           <div class="cell"><span class="ix">01</span><span class="lbl">OSINT</span><span class="bits n1">11101110</span></div>
           <div class="cell"><span class="ix">02</span><span class="lbl">NPU</span><span class="bits n2">11111100</span></div>
@@ -362,7 +382,7 @@
       </section>
     </div>
 
-    <!-- NEWS / ACHIEVEMENTS STRIP (operational-intel pattern: 3 recent milestones) -->
+    <!-- NEWS / ACHIEVEMENTS STRIP (3 recent milestones) -->
     <section class="news-strip">
       <div class="section-label reveal">RECENT · Operational milestones</div>
       <div class="news-list reveal">
@@ -420,7 +440,7 @@
       </div>
     </section>
 
-    <!-- HOW IT WORKS (operational-intel 3-step pattern) -->
+    <!-- HOW IT WORKS (3-step pattern) -->
     <section class="how" id="how-it-works">
       <div class="section-eyebrow reveal">HOW LIRIL WORKS</div>
       <h2 class="section-title reveal">A local AI that reads every source, quotes every page, and logs every decision.</h2>
@@ -514,8 +534,8 @@
     </div>
   </footer>
 
-  <!-- Cap#219: TENET5 motion layer — reveals/stagger/scramble/canvas/cursor/pip-rail/scrim -->
-  <script src="/js/motion.js?v=2" defer></script>
+  <!-- Cap#219/220: TENET5 motion layer — reveals/stagger/scramble/canvas/cursor/pip-rail/scrim/scroll-aware nav -->
+  <script src="/js/motion.js?v=3" defer></script>
   <script src="js/liril-narrate.js?v=1" defer></script>
   <script>
     // Cap#160 IntersectionObserver scroll-reveal. zero deps.
