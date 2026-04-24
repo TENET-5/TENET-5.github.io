@@ -1,0 +1,275 @@
+/* ═══════════════════════════════════════════════════════════════
+   TENET5 — SHIFT 5 Animation Layer (Cap#217, 2026-04-24)
+   ═══════════════════════════════════════════════════════════════
+   Companion to css/slates/shift5.css. Adds the motion vocabulary
+   that earned shift5.io the Awwwards SOTD 7.4 / DEV 7.41 score
+   on 2026-03-02:
+
+     • Scroll-reveal fades (.s5-reveal{,-up,-left,-right})
+     • Staggered children (.s5-stagger > * via --i index)
+     • Display-text scramble (.s5-scramble pre-pass class)
+     • Hover line-grow on links (.s5-link-grow)
+     • Slow-mode binary marquee override (90s/120s)
+     • Ambient canvas mount (.s5-ambient-canvas) + glyph cycle
+     • Cursor ring (.s5-cursor) — desktop only
+     • Loading scrim (.s5-loading-scrim) — fades on ready
+     • Section index pip rail (.s5-pip-rail) — Shift5 right-edge
+     • prefers-reduced-motion: hard-disables every animation here
+
+   Driven by js/shift5-anim.js (IntersectionObserver + rAF).
+   Reversibility: remove the @import from liril-theme.css OR
+   delete this file. No other surface depends on these classes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Scroll-reveal base ─────────────────────────────────────── */
+.s5-reveal,
+.s5-reveal-up,
+.s5-reveal-left,
+.s5-reveal-right {
+  opacity: 0;
+  transition:
+    opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+  filter: blur(0.4px);
+}
+.s5-reveal-up    { transform: translate3d(0, 28px, 0); }
+.s5-reveal-left  { transform: translate3d(-28px, 0, 0); }
+.s5-reveal-right { transform: translate3d(28px, 0, 0); }
+
+.s5-reveal.is-in,
+.s5-reveal-up.is-in,
+.s5-reveal-left.is-in,
+.s5-reveal-right.is-in {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+}
+
+/* ── Staggered children. Wrap in .s5-stagger; JS sets --i ─── */
+.s5-stagger > * {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.s5-stagger.is-in > * {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ── Display scramble (post-paint, JS swaps text quickly) ──── */
+.s5-display.s5-scramble {
+  font-variant-numeric: tabular-nums;
+}
+.s5-display.s5-scramble .s5-scramble-char {
+  display: inline-block;
+  min-width: 0.4em;
+}
+
+/* ── Hover line-grow link ──────────────────────────────────── */
+.s5-link-grow {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+}
+.s5-link-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: var(--text-primary);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.s5-link-grow:hover::after,
+.s5-link-grow:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* ── Slow-mode binary marquee (Shift5 actually scrolls slow) ── */
+.s5-binary-marquee.s5-slow > span {
+  animation-duration: 110s !important;
+}
+.s5-binary-marquee.s5-very-slow > span {
+  animation-duration: 180s !important;
+}
+
+/* ── Ambient canvas mount (hero background) ────────────────── */
+.s5-ambient-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+  mask-image: linear-gradient(180deg,
+                              transparent 0%,
+                              #000 22%,
+                              #000 78%,
+                              transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg,
+                                      transparent 0%,
+                                      #000 22%,
+                                      #000 78%,
+                                      transparent 100%);
+}
+.s5-ambient-host {
+  position: relative;
+}
+.s5-ambient-host > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Cursor ring (desktop pointer only) ────────────────────── */
+.s5-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--s5-paper, #b9b9b9);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate3d(-50%, -50%, 0);
+  mix-blend-mode: difference;
+  transition: width 220ms ease, height 220ms ease,
+              border-color 220ms ease, opacity 220ms ease;
+  opacity: 0;
+}
+.s5-cursor.is-active { opacity: 0.85; }
+.s5-cursor.is-grow   { width: 56px; height: 56px; }
+@media (hover: none), (pointer: coarse) {
+  .s5-cursor { display: none !important; }
+}
+
+/* ── Loading scrim ─────────────────────────────────────────── */
+.s5-loading-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: var(--s5-ink-floor, #060606);
+  color: var(--text-tertiary, #6e6e6e);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 2.4rem;
+  font-family: var(--s5-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: opacity 700ms ease 250ms, visibility 0s linear 1200ms;
+}
+.s5-loading-scrim.is-ready {
+  opacity: 0;
+  visibility: hidden;
+}
+.s5-loading-scrim::after {
+  content: "Loading…";
+}
+
+/* ── Right-edge pip rail (Shift5 section nav) ──────────────── */
+.s5-pip-rail {
+  position: fixed;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+}
+.s5-pip-rail > a {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--s5-line-strong, rgba(185,185,185,0.32));
+  border-radius: 50%;
+  display: block;
+  transition: background 240ms ease, transform 240ms ease;
+}
+.s5-pip-rail > a.is-active {
+  background: var(--s5-paper, #b9b9b9);
+  transform: scale(1.35);
+}
+@media (max-width: 900px) { .s5-pip-rail { display: none; } }
+
+/* ── Hero entrance: subtle scale-in on first paint ─────────── */
+.s5-hero-enter {
+  opacity: 0;
+  transform: scale(0.985);
+  animation: s5-hero-in 1300ms cubic-bezier(0.22, 1, 0.36, 1) 120ms forwards;
+}
+@keyframes s5-hero-in {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ── Glyph cycle on .s5-eyebrow::before hairline ───────────── */
+.s5-eyebrow.s5-pulse::before {
+  animation: s5-hairline-pulse 2.4s ease-in-out infinite;
+}
+@keyframes s5-hairline-pulse {
+  0%, 100% { width: 1.25em; opacity: 1; }
+  50%      { width: 2.6em;  opacity: 0.5; }
+}
+
+/* ── Numbered footer cluster cards ─────────────────────────── */
+.s5-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2.5rem 2rem;
+  padding: 3rem 2rem 2rem;
+  border-top: 1px solid var(--s5-line, rgba(185,185,185,0.18));
+}
+.s5-footer-grid .s5-cluster-links a {
+  position: relative;
+}
+.s5-footer-grid .s5-cluster-links li::before {
+  content: "↳ ";
+  color: var(--text-tertiary);
+  margin-right: 0.25em;
+}
+.s5-footer-tag {
+  font-family: var(--s5-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 1.2rem 2rem 2rem;
+  border-top: 1px solid var(--s5-line-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ── Reduced motion: hard-disable everything in this file ──── */
+@media (prefers-reduced-motion: reduce) {
+  .s5-reveal, .s5-reveal-up, .s5-reveal-left, .s5-reveal-right,
+  .s5-stagger > *, .s5-hero-enter {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .s5-eyebrow.s5-pulse::before { animation: none !important; }
+  .s5-link-grow::after { transition: none !important; }
+  .s5-binary-marquee > span { animation: none !important; }
+  .s5-ambient-canvas { display: none !important; }
+  .s5-cursor { display: none !important; }
+  .s5-loading-scrim { transition: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   END SHIFT 5 ANIMATION LAYER — Cap#217
+   ═══════════════════════════════════════════════════════════════ */
