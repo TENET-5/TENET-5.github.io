@@ -42,28 +42,57 @@
                   font-feature-settings: "ss01", "ss02"; }
     a { color: inherit; text-decoration: none; }
 
-    /* Nav — minimal, full-width */
+    /* Nav (Cap#220) — thin, fixed, transparent at top, blurred + hairline border on scroll */
     header.t5-nav {
-      position: sticky; top: 0; z-index: 50;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
       display: flex; align-items: center; gap: 32px;
-      padding: 18px 40px;
-      background: rgba(32,32,32,0.94);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      padding: 14px 40px;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      transition: background .25s ease, border-color .25s ease, padding .25s ease, backdrop-filter .25s ease;
     }
-    header.t5-nav .logo { display: flex; align-items: center; gap: 14px; font-weight: 600; letter-spacing: 0.08em; }
-    header.t5-nav .logo .crest { width: 24px; height: 24px; flex-shrink: 0; display: block; }
+    header.t5-nav.is-scrolled {
+      padding: 10px 40px;
+      background: rgba(32,32,32,0.86);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(185,185,185,0.13);
+    }
+    body { padding-top: 58px; }
+    header.t5-nav .logo { display: flex; align-items: center; gap: 12px; font-weight: 500; letter-spacing: 0.06em; }
+    header.t5-nav .logo .crest { width: 22px; height: 22px; flex-shrink: 0; display: block; }
     header.t5-nav .logo .crest rect[fill='#c9a44c'] { animation: satorCorePulse 4s ease-in-out infinite; transform-origin: 12px 12px; transform-box: fill-box; }
     @keyframes satorCorePulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
     @media (prefers-reduced-motion: reduce) { header.t5-nav .logo .crest rect[fill='#c9a44c'] { animation: none; } }
-    header.t5-nav .logo .brand-text { font-size: 15px; }
-    header.t5-nav .logo .brand-text sup { font-size: 0.65em; color: var(--accent-gold); margin-left: 1px; font-weight: 500; }
-    header.t5-nav .logo .tag { font-size: 10px; letter-spacing: 0.22em; color: var(--text-dim); font-weight: 400; margin-left: 4px; }
-    header.t5-nav nav { display: flex; gap: 28px; margin-left: auto; font-size: 13px; }
-    header.t5-nav nav a { color: var(--text-muted); transition: color .2s ease; }
+    header.t5-nav .logo .brand-text { font-family: var(--font-mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.18em; }
+    header.t5-nav .logo .brand-text sup { font-size: 0.7em; color: var(--accent-gold); margin-left: 1px; font-weight: 500; }
+    header.t5-nav .logo .tag { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.26em; color: var(--text-dim); font-weight: 400; margin-left: 8px; text-transform: uppercase; }
+    header.t5-nav nav { display: flex; gap: 36px; margin-left: auto; }
+    header.t5-nav nav a {
+      position: relative;
+      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.26em;
+      text-transform: uppercase; color: var(--text-muted);
+      transition: color .2s ease;
+    }
+    header.t5-nav nav a::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
+      background: currentColor; transform: scaleX(0); transform-origin: left center;
+      transition: transform .25s ease;
+    }
     header.t5-nav nav a:hover { color: var(--text); }
-    header.t5-nav .nav-cta { padding: 8px 16px; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; transition: border-color .2s ease, background .2s ease; }
-    header.t5-nav .nav-cta:hover { border-color: var(--text); background: rgba(255,255,255,0.04); color: var(--text); }
+    header.t5-nav nav a:hover::after { transform: scaleX(1); }
+    header.t5-nav .nav-cta {
+      position: relative;
+      padding: 0; border: 0; background: transparent;
+      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.26em;
+      text-transform: uppercase; color: var(--accent-gold);
+      transition: color .2s ease;
+    }
+    header.t5-nav .nav-cta::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
+      background: var(--accent-gold); transform: scaleX(1); transform-origin: left center;
+      transition: transform .25s ease;
+    }
+    header.t5-nav .nav-cta:hover::after { transform: scaleX(0.5); }
 
     /* HERO — centered, stacked, with binary status grid INSIDE */
     .hero-wrap { position: relative; overflow: hidden; }
@@ -317,7 +346,7 @@
        index.html keeps its existing .reveal mechanism (Cap#160) —
        .s5-* classes are namespaced and do not collide.
        ──────────────────────────────────────────────────────────── -->
-  <link rel="stylesheet" href="/css/slates/operational-anim.css?v=1">
+  <!-- Cap#220: motion + ops slate are imported via css/liril-theme.css. -->
 </head>
 <body>
 
@@ -565,7 +594,7 @@
   </footer>
 
   <!-- Cap#219: TENET5 motion layer — reveals/stagger/scramble/canvas/cursor/pip-rail/scrim -->
-  <script src="/js/motion.js?v=2" defer></script>
+  <script src="/js/motion.js?v=3" defer></script>
   <script src="js/liril-narrate.js?v=1" defer></script>
 
   <!-- Cap#220: live bit-flip animation on the 10 status-grid cells.
