@@ -1,13 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-<<<<<<<< HEAD:js/operational-anim.js
-   TENET5 — operational-intel Animator (Cap#217, 2026-04-24)
-   ═══════════════════════════════════════════════════════════════
-   Powers the css/slates/operational-intel-anim.css motion vocabulary.
-========
-   TENET5 — TENET5 Animator (Cap#217, 2026-04-24)
+   TENET5 — Motion Animator (Cap#217, 2026-04-24)
    ═══════════════════════════════════════════════════════════════
    Powers the css/slates/motion.css motion vocabulary.
->>>>>>>> 00178cb (Cap#219: neutralize external-brand references; rename motion + ops slate files; wire motion.js to index.html and home.html):js/motion.js
 
    Boots safely without dependencies. Respects
    prefers-reduced-motion. No-ops gracefully if classes are absent.
@@ -29,10 +23,40 @@
 
   if (typeof window === "undefined" || typeof document === "undefined") return;
 
+  try { console.info("[t5-motion] boot"); } catch (e) {}
+
   var REDUCED = window.matchMedia &&
                 window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var COARSE  = window.matchMedia &&
                 window.matchMedia("(pointer: coarse)").matches;
+
+  // ────────────────────────────────────────────────────────────
+  // 0) Scroll-aware nav (Cap#220) — toggles .is-scrolled on .t5-nav
+  // ────────────────────────────────────────────────────────────
+  function initNavScroll() {
+    var nav = document.querySelector("header.t5-nav");
+    if (!nav) return;
+    var ticking = false;
+    function update() {
+      ticking = false;
+      if (window.scrollY > 8) nav.classList.add("is-scrolled");
+      else nav.classList.remove("is-scrolled");
+    }
+    window.addEventListener("scroll", function () {
+      if (!ticking) { window.requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    update();
+  }
+
+  // ────────────────────────────────────────────────────────────
+  // 0b) Loading-scrim failsafe (Cap#221) — force-ready after 1500ms
+  //     even if window 'load' never fires (e.g., stalled video).
+  // ────────────────────────────────────────────────────────────
+  function initScrimFailsafe() {
+    var scrim = document.querySelector(".s5-loading-scrim");
+    if (!scrim) return;
+    setTimeout(function () { scrim.classList.add("is-ready"); }, 1500);
+  }
 
   // ────────────────────────────────────────────────────────────
   // 1) Scroll reveal + stagger
@@ -296,6 +320,8 @@
   // Boot
   // ────────────────────────────────────────────────────────────
   function boot() {
+    try { initNavScroll();     } catch (e) { /* noop */ }
+    try { initScrimFailsafe(); } catch (e) { /* noop */ }
     try { initReveal();   } catch (e) { /* noop */ }
     try { initScramble(); } catch (e) { /* noop */ }
     try { initAmbient();  } catch (e) { /* noop */ }
