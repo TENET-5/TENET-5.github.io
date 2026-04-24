@@ -673,7 +673,35 @@
         title.textContent = s.t;
         frame.classList.add('loading');
         frame.src = s.f + '#shell=1';
-        frame.onload = function(){ frame.classList.remove('loading'); };
+        frame.onload = function(){
+          frame.classList.remove('loading');
+          try {
+            // Same-origin: inject monochrome overlay into the scene's head.
+            var doc = frame.contentDocument;
+            if (!doc) return;
+            if (doc.getElementById('t5-scene-overlay')) return;
+            var st = doc.createElement('style');
+            st.id = 't5-scene-overlay';
+            st.textContent = [
+              ':root{--bg:#202020!important;--bg-card:#262626!important;--border:#333!important;--text-primary:#fff!important;--text-secondary:#b9b9b9!important;--text-tertiary:#7a7a7a!important;--accent:#c9a44c!important;--accent-gold:#c9a44c!important;}',
+              'html,body{background:#202020!important;color:#fff!important;font-family:Inter,Helvetica,sans-serif!important;}',
+              'body.topo,body.topo::before{background-image:none!important;background:#202020!important;}',
+              '.grain-overlay,.vignette{display:none!important;}',
+              '*{color-scheme:dark!important;}',
+              'h1,h2,h3,h4,h5{color:#fff!important;font-family:Inter,sans-serif!important;font-weight:500!important;letter-spacing:-.01em!important;}',
+              'a{color:#c9a44c!important;}',
+              'a:hover{color:#fff!important;}',
+              '.evidence-box,section[style*="border-radius"]{background:#262626!important;border:1px solid #333!important;border-radius:4px!important;box-shadow:none!important;}',
+              'section[style*="gradient"]{background:#262626!important;}',
+              'div[style*="border-radius"]{border-radius:4px!important;}',
+              'button,input,select{background:#262626!important;color:#fff!important;border:1px solid #444!important;border-radius:2px!important;}',
+              '.skip-link{background:#c9a44c!important;color:#202020!important;}',
+              '.page-header,#site-header-frame{border-bottom:1px solid #333!important;}',
+              'code,pre{background:#161616!important;border:1px solid #333!important;color:#b9b9b9!important;}'
+            ].join('');
+            doc.head.appendChild(st);
+          } catch(err) { /* cross-origin, leave scene alone */ }
+        };
         prevBtn.disabled = (idx <= 0);
         nextBtn.disabled = (idx >= SCENE_LIST.length - 1);
         if (pushHistory) history.pushState({}, '', '?load=' + encodeURIComponent(s.f));
