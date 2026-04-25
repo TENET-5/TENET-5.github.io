@@ -463,6 +463,24 @@
             JSON.stringify({ autostart: true, startedAt: Date.now(),
                              sequence: PAGE_SEQUENCE }));
         } catch (e) {}
+        // 2026-04-25: pre-warm speech + audio inside the user gesture so the
+        // downstream walkthrough engine can autoplay MP3 + TTS without being
+        // blocked by browser autoplay policy. Same pattern as presentation.html.
+        try {
+          if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== "undefined") {
+            var _u = new SpeechSynthesisUtterance(" ");
+            _u.volume = 0.01;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(_u);
+          }
+        } catch (e) {}
+        try {
+          var _a = new Audio();
+          _a.muted = true;
+          _a.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+          var _p = _a.play();
+          if (_p && typeof _p.then === "function") _p.catch(function(){});
+        } catch (e) {}
         btn.textContent = "Walkthrough Running...";
         btn.style.opacity = "0.75";
         btn.disabled = true;

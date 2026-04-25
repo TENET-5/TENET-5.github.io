@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TENET5 Presentation — Automated Walkthrough</title>
+  <meta name="description" content="The TENET5 walkthrough — an accountability story narrated scene-by-scene. Automated, with synchronised LIRIL voice-over.">
+  <meta property="og:title" content="TENET5 Presentation">
+  <meta property="og:description" content="Automated scene-by-scene walkthrough of the TENET5 accountability record.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tenet-5.github.io/presentation.html">
+  <meta property="og:site_name" content="TENET5">
+  <link rel="canonical" href="https://tenet-5.github.io/presentation.html">
+
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=archive-shell.html?load=kids-guide.html">
+  </noscript>
+
+  <style>
+    html, body { background: #0b0f19; color: #e8e8ea; margin: 0; padding: 0;
+                 font-family: Inter, system-ui, -apple-system, sans-serif;
+                 min-height: 100vh; }
+    .stage {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2.5rem 1.5rem; gap: 1.6rem; text-align: center;
+      background:
+        radial-gradient(circle at top, rgba(196,30,58,0.10), transparent 35%),
+        linear-gradient(180deg, #07101d 0%, #0b1220 100%);
+    }
+    .badge {
+      font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #b39ddb; border: 1px solid rgba(139,92,246,0.35);
+      padding: 0.4rem 0.85rem; border-radius: 999px;
+      background: rgba(139,92,246,0.08);
+    }
+    h1 { margin: 0; font-size: clamp(1.6rem, 4.5vw, 2.6rem); line-height: 1.2;
+         max-width: 720px; }
+    p.lede { margin: 0; max-width: 560px; color: #b0b3bd;
+             font-size: 1rem; line-height: 1.55; }
+    .play-btn {
+      appearance: none; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #8b5cf6 0%, #c41e3a 100%);
+      color: #fff; font-weight: 600; font-size: 1.05rem; letter-spacing: 0.04em;
+      padding: 1rem 2.2rem; border-radius: 999px;
+      box-shadow: 0 12px 32px rgba(139,92,246,0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      display: inline-flex; align-items: center; gap: 0.6rem;
+    }
+    .play-btn:hover, .play-btn:focus-visible {
+      transform: translateY(-1px); outline: none;
+      box-shadow: 0 16px 40px rgba(139,92,246,0.5);
+    }
+    .play-btn:active { transform: translateY(0); }
+    .play-btn .triangle {
+      width: 0; height: 0;
+      border-left: 12px solid #fff;
+      border-top: 8px solid transparent; border-bottom: 8px solid transparent;
+    }
+    .controls { display: flex; gap: 0.6rem; flex-wrap: wrap;
+                justify-content: center; }
+    .secondary {
+      background: transparent; color: #6a8cff; border: 1px solid rgba(106,140,255,0.4);
+      padding: 0.55rem 1rem; border-radius: 999px; font-size: 0.85rem;
+      text-decoration: none; cursor: pointer;
+    }
+    .secondary:hover { background: rgba(106,140,255,0.08); }
+    .meta {
+      font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: #707380;
+    }
+    .countdown { color: #b39ddb; font-weight: 600; }
+    .ring { width: 28px; height: 28px;
+            border: 2px solid rgba(106,140,255,0.25);
+            border-top-color: #6a8cff; border-radius: 50%;
+            animation: spin 1s linear infinite; display: none; }
+    .stage[data-launching="1"] .ring { display: block; }
+    .stage[data-launching="1"] .play-btn,
+    .stage[data-launching="1"] .controls { opacity: 0.55; pointer-events: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .ring { animation: none; }
+      .play-btn { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" id="stage" role="main" aria-live="polite">
+    <div class="badge">LIRIL Narration · Automated Walkthrough</div>
+    <h1 id="n-40d9a8f1" data-narrate="TENET5 Presentation — Automated Walkthrough. A narrated, scene-by-scene tour of the TENET5 accountability record. Press Begin to start. Use Space to pause, ← / → to skip scenes, Esc to stop." >TENET5 — Automated Walkthrough</h1>
+    <p class="lede">
+      A narrated, scene-by-scene tour of the TENET5 accountability record.
+      Press <strong>Begin</strong> to start. Use <kbd>Space</kbd> to pause,
+      <kbd>←</kbd>/<kbd>→</kbd> to skip scenes, <kbd>Esc</kbd> to stop.
+    </p>
+
+    <button id="begin" class="play-btn" type="button"
+            aria-label="Begin automated walkthrough with voice-over">
+      <span class="triangle" aria-hidden="true"></span>
+      <span id="begin-label">Begin Walkthrough</span>
+    </button>
+
+    <div class="ring" aria-hidden="true"></div>
+
+    <div class="controls">
+      <a class="secondary" href="archive-shell.html?load=kids-guide.html"
+         id="silent-link">Open silently (no voice-over)</a>
+    </div>
+
+    <div class="meta">
+      <span id="auto-msg">Auto-start in <span class="countdown" id="cd">5</span>s · click anywhere to begin now</span>
+    </div>
+  </main>
+
+  <script>
+  /*
+    BUG FIX 2026-04-25 (LIRIL [4,0] CONSIDER / LIRIL_OFFLINE):
+    Previous presentation.html silently redirected to
+      archive-shell.html?load=kids-guide.html
+    which (a) never set the sessionStorage `liril_autopilot` handshake that
+    liril-walkthrough.js:1406 polls for, and (b) navigated without a user
+    gesture, so browser autoplay policies blocked both speechSynthesis
+    AND the pre-rendered audio/kids-guide.mp3 — producing a silent
+    walkthrough.
+
+    This rewrite captures the user gesture on a Begin button, sets the
+    autopilot handshake the walkthrough engine already understands,
+    pre-warms speechSynthesis + a silent <audio> tag (the standard
+    autoplay-unlock pattern), then redirects. Hash + query are preserved.
+
+    Constraints (LIRIL gate):
+      - Local-only TTS (Web Speech API) or repo-local pre-rendered MP3 only.
+      - No third-party CDN, no new external script, CSP unchanged.
+      - Pausable (Space), keyboard nav preserved by downstream engine.
+      - prefers-reduced-motion respected.
+      - Single-file change → single `git revert` rolls back.
+  */
+  (function () {
+    'use strict';
+
+    var TARGET_PAGE = 'kids-guide.html';
+    var SHELL = 'archive-shell.html?load=' + TARGET_PAGE;
+    var AUTOSTART_DELAY_MS = 5000;
+
+    var stage = document.getElementById('stage');
+    var beginBtn = document.getElementById('begin');
+    var beginLabel = document.getElementById('begin-label');
+    var silentLink = document.getElementById('silent-link');
+    var cdEl = document.getElementById('cd');
+    var autoMsg = document.getElementById('auto-msg');
+
+    var hash = window.location.hash || '';
+    var search = window.location.search || '';
+    var params = new URLSearchParams(search);
+    /* Preserve any incoming query (minus our own ?autoplay=1) when handing off. */
+    params.delete('autoplay');
+    var passthrough = params.toString();
+    var TARGET = SHELL + (passthrough ? '&' + passthrough : '') + hash;
+    silentLink.href = TARGET;
+
+    function setAutopilotHandshake() {
+      try {
+        sessionStorage.setItem('liril_autopilot', JSON.stringify({
+          autostart: true,
+          startedAt: Date.now(),
+          source: 'presentation.html',
+          docMode: true
+        }));
+        /* localStorage flag walkthrough-enhancements preserves for prefs */
+        localStorage.setItem('tenet5_wt_autoplay', '1');
+      } catch (e) { /* private mode — proceed anyway, engine has its own fallback */ }
+    }
+
+    /* Audio + speech autoplay unlock — MUST be synchronous inside the
+       click handler. Browsers grant a one-time unlock on user gesture
+       that survives the navigation in the same tab. */
+    function unlockAudioAndSpeech() {
+      try {
+        if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+          /* A near-silent utterance during the gesture unlocks TTS on Chrome,
+             Edge, Safari for the lifetime of the tab. */
+          var u = new SpeechSynthesisUtterance(' ');
+          u.volume = 0.01; u.rate = 1; u.pitch = 1;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(u);
+        }
+      } catch (e) {}
+      try {
+        /* Silent <audio> play() inside the gesture unlocks MP3 autoplay
+           for the same-origin audio/<page>.mp3 the engine will fetch next. */
+        var a = new Audio();
+        a.muted = true;
+        /* 1-frame silent WAV (44 bytes) — no network request, no CSP impact. */
+        a.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+        var p = a.play();
+        if (p && typeof p.then === 'function') p.catch(function(){});
+      } catch (e) {}
+    }
+
+    var launched = false;
+    function launch() {
+      if (launched) return;
+      launched = true;
+      stage.setAttribute('data-launching', '1');
+      beginLabel.textContent = 'Starting…';
+      autoMsg.textContent = 'Loading walkthrough…';
+      setAutopilotHandshake();
+      unlockAudioAndSpeech();
+      /* Tiny delay so the unlock utterance is queued before navigation. */
+      setTimeout(function () { window.location.replace(TARGET); }, 120);
+    }
+
+    beginBtn.addEventListener('click', launch);
+    /* Any click on the page also counts as the gesture. */
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && e.target.closest('#silent-link')) return;
+      launch();
+    }, { once: false });
+    /* Keyboard activation: Space or Enter from anywhere. */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === ' ' || e.key === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
+        launch();
+      }
+    });
+
+    /* If the user passed ?autoplay=1, run a 5s soft countdown then auto-launch.
+       NOTE: without a prior gesture the audio unlock will fail in strict
+       browsers (Safari/iOS); the walkthrough engine will fall back to
+       speechSynthesis which works without gesture in most cases, and the
+       Begin button stays visible for the user to tap if needed. */
+    var wantsAuto = params.get('autoplay') === '1' ||
+                    document.referrer.indexOf(window.location.host) !== -1;
+    if (wantsAuto) {
+      var remaining = Math.ceil(AUTOSTART_DELAY_MS / 1000);
+      cdEl.textContent = String(remaining);
+      var tick = setInterval(function () {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(tick);
+          launch();
+        } else {
+          cdEl.textContent = String(remaining);
+        }
+      }, 1000);
+    } else {
+      autoMsg.textContent = 'Click Begin (or press Space) to start with voice-over.';
+    }
+
+    /* Focus the button so keyboard users land directly on Begin. */
+    try { beginBtn.focus({ preventScroll: true }); } catch (e) { beginBtn.focus(); }
+  })();
+  </script>
+</body>
+</html>
