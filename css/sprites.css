@@ -1,0 +1,241 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   QUANTANIUM SPRITES — class system for /img/sprites/quantanium-atlas.svg
+   v1.0 — 2026-04-27 — see /css/QUANTANIUM.json + /css/tokens.css
+
+   USAGE
+   -----
+       <svg class="q-icon"><use href="#q-engine"/></svg>
+       <svg class="q-icon q-icon-lg"><use href="#q-tier-solvable"/></svg>
+
+   The atlas is auto-injected at the top of <body> by js/sprite-loader.js
+   so #symbol-id references work without a path.
+
+   COLOUR
+   ------
+   Every glyph uses currentColor; set the parent's color to drive fill +
+   stroke. Defaults use canonical --slate-* tokens.
+
+   VIDEO + MEDIA SLOTS
+   -------------------
+   .q-video-slot is a media placeholder that renders as a monochrome
+   pulse ring until a <video> or <img> child is supplied. Drop a
+   <video> inside it and the slot transparently hosts it. See §4.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   §1  ICON BASE
+   ─────────────────────────────────────────────────────────────────── */
+
+.q-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  fill: currentColor;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+.q-icon use { fill: inherit; stroke: inherit; }
+
+/* Size variants */
+.q-icon-sm  { width: 0.875em;  height: 0.875em; }
+.q-icon-md  { width: 1em;      height: 1em; }
+.q-icon-lg  { width: 1.5em;    height: 1.5em; }
+.q-icon-xl  { width: 2em;      height: 2em; }
+.q-icon-2xl { width: 3em;      height: 3em; }
+
+/* Tone variants — use canonical slate tokens */
+.q-tone-default  { color: var(--slate-ink); }
+.q-tone-dim      { color: var(--slate-ink-dim); }
+.q-tone-muted    { color: var(--slate-ink-muted); }
+.q-tone-accent   { color: var(--slate-accent); }
+.q-tone-verified { color: var(--slate-verified); }
+.q-tone-critical { color: var(--slate-critical); }
+.q-tone-warning  { color: var(--slate-warning); }
+.q-tone-info     { color: var(--slate-info); }
+.q-tone-quantum  { color: var(--slate-quantum); }
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   §2  ANIMATED GLYPHS
+   ─────────────────────────────────────────────────────────────────── */
+
+/* Pulse — mimics .quantanium-pulse but as a sprite */
+.q-icon.q-anim-pulse use {
+  transform-origin: center;
+  animation: q-anim-pulse-scale 1.6s ease-out infinite;
+}
+@keyframes q-anim-pulse-scale {
+  0%   { opacity: 1;   transform: scale(0.95); }
+  60%  { opacity: 0.6; transform: scale(1.05); }
+  100% { opacity: 1;   transform: scale(0.95); }
+}
+
+/* Spin — for engine/loading */
+.q-icon.q-anim-spin use {
+  transform-origin: center;
+  animation: q-anim-spin-rotate 3.2s linear infinite;
+}
+@keyframes q-anim-spin-rotate {
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Substrate orbit — slow precession for the engine glyph */
+.q-icon.q-anim-orbit ellipse {
+  transform-origin: center;
+  animation: q-anim-orbit-precess 12s linear infinite;
+}
+@keyframes q-anim-orbit-precess {
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .q-icon.q-anim-pulse use,
+  .q-icon.q-anim-spin use,
+  .q-icon.q-anim-orbit ellipse { animation: none !important; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   §3  TIER-DOT COMPOSITION (sprite + tone in one class)
+   ─────────────────────────────────────────────────────────────────── */
+
+.q-tier-dot               { display: inline-block; line-height: 0; }
+.q-tier-dot.q-pvnp-solvable    { color: var(--quantanium-pvnp-solvable); }
+.q-tier-dot.q-pvnp-np-exposed  { color: var(--quantanium-pvnp-np-exposed); }
+.q-tier-dot.q-pvnp-loom-break  { color: var(--quantanium-pvnp-loom-break); }
+.q-tier-dot.q-pvnp-unknown     { color: var(--quantanium-pvnp-unknown); }
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   §4  VIDEO + MEDIA SLOTS
+   ─────────────────────────────────────────────────────────────────────
+   Drop-in container for documentary-scene media. Renders as a monochrome
+   pulse-ring placeholder until a <video> / <img> / <picture> child is
+   present. The placeholder uses the same QUANTANIUM tokens so it
+   transitions cleanly to the actual media.
+   ─────────────────────────────────────────────────────────────────── */
+
+.q-video-slot {
+  position: relative;
+  display: block;
+  background: var(--slate-overlay);
+  border: 1px solid var(--slate-border);
+  border-radius: var(--slate-radius-md);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  color: var(--slate-ink-muted);
+}
+
+/* Placeholder: visible only when slot has no media child */
+.q-video-slot:not(:has(video, img, picture, iframe))::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    var(--slate-raised) 0%,
+    var(--slate-overlay) 70%);
+}
+.q-video-slot:not(:has(video, img, picture, iframe))::after {
+  content: attr(data-label, "Media pending");
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--slate-font-mono);
+  font-size: var(--slate-text-sm);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate-ink-muted);
+}
+
+/* Active state: real media supplied — make it fill the slot */
+.q-video-slot > video,
+.q-video-slot > img,
+.q-video-slot > picture,
+.q-video-slot > iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--slate-overlay);
+}
+
+/* Variants */
+.q-video-slot.q-aspect-21x9  { aspect-ratio: 21 / 9; }
+.q-video-slot.q-aspect-square { aspect-ratio: 1 / 1; }
+.q-video-slot.q-aspect-portrait { aspect-ratio: 3 / 4; }
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   §5  SCENE CHROME — composed icon buttons for documentary navigation
+   ─────────────────────────────────────────────────────────────────── */
+
+.q-scene-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+  background: var(--slate-raised);
+  border: 1px solid var(--slate-border);
+  color: var(--slate-ink-dim);
+  border-radius: var(--slate-radius-pill);
+  cursor: pointer;
+  transition: background var(--slate-duration-base) var(--slate-ease-out),
+              color var(--slate-duration-base) var(--slate-ease-out),
+              border-color var(--slate-duration-base) var(--slate-ease-out);
+}
+.q-scene-btn:hover,
+.q-scene-btn:focus-visible {
+  background: var(--slate-bg);
+  border-color: var(--slate-accent);
+  color: var(--slate-accent);
+  outline: none;
+}
+.q-scene-btn .q-icon { width: 1.25em; height: 1.25em; }
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   §6  PRE-VIDEO ANIMATION PRIMITIVES
+   ─────────────────────────────────────────────────────────────────────
+   For scenes that are video-pending, these CSS-only animations stand
+   in until a real <video> arrives. Each can be applied to a .q-video-slot
+   without any media child.
+   ─────────────────────────────────────────────────────────────────── */
+
+.q-video-slot.q-anim-scan::before {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(201, 164, 76, 0.06) 50%,
+    transparent 100%);
+  background-size: 100% 200%;
+  animation: q-scan-line 3.6s ease-in-out infinite;
+}
+@keyframes q-scan-line {
+  0%, 100% { background-position: 0 -100%; }
+  50%      { background-position: 0 100%; }
+}
+
+.q-video-slot.q-anim-noise::before {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05) 0%, transparent 1%),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,0.04) 0%, transparent 1%),
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.03) 0%, transparent 1%),
+    var(--slate-overlay);
+  background-size: 7px 7px, 11px 11px, 5px 5px, 100% 100%;
+  animation: q-noise-shift 0.6s steps(4) infinite;
+}
+@keyframes q-noise-shift {
+  0%   { background-position: 0 0, 0 0, 0 0, 0 0; }
+  25%  { background-position: 7px -7px, -11px 11px, 5px 0, 0 0; }
+  50%  { background-position: -7px 7px, 11px -11px, 0 -5px, 0 0; }
+  75%  { background-position: 7px 7px, -11px -11px, -5px 5px, 0 0; }
+  100% { background-position: 0 0, 0 0, 0 0, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .q-video-slot.q-anim-scan::before,
+  .q-video-slot.q-anim-noise::before { animation: none !important; }
+}
