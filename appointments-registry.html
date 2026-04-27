@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments Registry — Captured-Government Era | TENET5</title>
+  <meta name="description" content="Read-only registry of public officeholders and the appointment events that placed them. Every record cites a primary public source. Schema-enforced source-or-omit. No editorial tagging.">
+  <link rel="stylesheet" href="css/tenet5.css?v=5">
+  <link rel="stylesheet" href="css/liril-utilities.css">
+  <link rel="canonical" href="https://tenet-5.github.io/appointments-registry.html">
+  <meta name="theme-color" content="#2E3440">
+  <meta property="og:title" content="Appointments Registry — Captured-Government Era">
+  <meta property="og:description" content="Read-only registry of public officeholders. Schema-enforced primary sources only.">
+  <meta property="og:url" content="https://tenet-5.github.io/appointments-registry.html">
+  <meta property="og:type" content="website">
+  <style>
+    :root { --bg: var(--slate-bg); --accent: var(--slate-brass); --critical: var(--slate-critical); --ink: var(--slate-ink); --ink-mute: var(--slate-ink-muted); --border: var(--slate-border); }
+    body { background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; margin: 0; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 3rem 1.6rem; }
+    header.doc-head { border-bottom: 1px solid var(--border); padding-bottom: 1.8rem; margin-bottom: 2rem; }
+    .classification { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 0.3rem 0.8rem; display: inline-block; border-radius: 3px; margin-bottom: 1rem; }
+    h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; margin: 0 0 0.6rem; }
+    .lede { font-size: 1.1rem; color: var(--ink-mute); max-width: 820px; }
+    .verified { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--ink-mute); margin-top: 1rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1.5rem 0 2rem; align-items: center; }
+    .controls input, .controls select { background: rgba(255,255,255,0.04); color: var(--ink); border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem 0.7rem; font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; }
+    .controls input { min-width: 240px; flex: 1 1 240px; }
+    .controls .count { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--ink-mute); margin-left: auto; }
+    table.reg { width: 100%; border-collapse: collapse; font-size: 0.92rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    table.reg th { background: rgba(196,30,58,0.12); color: var(--ink); padding: 0.7rem 0.9rem; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    table.reg td { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: top; line-height: 1.5; }
+    table.reg tr:last-child td { border-bottom: none; }
+    table.reg .name { font-weight: 700; color: var(--ink); }
+    table.reg .role { color: var(--ink-mute); font-size: 0.86rem; }
+    table.reg .term { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--ink-mute); white-space: nowrap; }
+    table.reg .by { font-size: 0.84rem; color: var(--ink-mute); }
+    table.reg .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.45rem; border-radius: 3px; background: rgba(255,255,255,0.05); color: var(--ink-mute); margin-right: 0.3rem; border: 1px solid var(--border); }
+    table.reg .src { display: block; margin-top: 0.4rem; font-size: 0.76rem; }
+    table.reg .src a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); margin-right: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+    .events { margin-top: 3rem; }
+    .event-row { background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent); padding: 0.8rem 1.1rem; margin-bottom: 0.6rem; border-radius: 0 4px 4px 0; display: grid; grid-template-columns: 130px 1fr; gap: 1rem; align-items: start; }
+    .event-row .when { font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: var(--accent); font-weight: 700; }
+    .event-row .what { font-size: 0.92rem; }
+    .event-row .what .ev-type { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.12rem 0.4rem; border-radius: 3px; background: rgba(255,200,80,0.12); color: var(--accent); margin-right: 0.5rem; border: 1px solid rgba(255,200,80,0.3); }
+    .event-row .what .src { display: block; margin-top: 0.4rem; font-size: 0.76rem; font-family: 'JetBrains Mono', monospace; }
+    .event-row .what .src a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); margin-right: 0.7rem; }
+    h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 2.6vw, 1.9rem); margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    .contract { background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent); padding: 1rem 1.2rem; margin: 2rem 0; border-radius: 0 6px 6px 0; font-size: 0.88rem; color: var(--ink-mute); }
+    .contract strong { color: var(--ink); }
+    .contract code { background: rgba(255,255,255,0.05); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.84rem; color: var(--accent); }
+    .right-of-reply { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.88rem; color: var(--ink-mute); }
+    .right-of-reply a { color: var(--accent); }
+    .empty { padding: 2rem; text-align: center; color: var(--ink-mute); font-style: italic; background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 6px; }
+    .err { padding: 1rem 1.2rem; background: rgba(220,38,38,0.10); border: 1px solid rgba(220,38,38,0.4); border-radius: 6px; color: var(--critical); font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; }
+  </style>
+</head>
+<body class="tnt-theme">
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+  <div id="site-header-frame"></div>
+
+  <div class="container" id="main" role="main">
+    <header class="doc-head">
+      <div class="classification">Read-only registry · Schema-enforced · LIRIL-admitted</div>
+      <h1 id="n-a3e906ec" data-narrate="Appointments Registry — Captured-Government Era. Public officeholders and the appointment events that placed them. Every record cites a primary public source — Order in Council, Gazette, Hansard, or a federal department's own press release. Schema enforces source-or-omit : a record without a verifiable source cannot ship. No editorial tagging. The user draws the conclusions." >Appointments Registry</h1>
+      <p class="lede">Public officeholders and the appointment events that placed them. Every record cites a primary public source — Order in Council, Gazette, Hansard, or a federal department's own press release. Schema enforces <em>source-or-omit</em>: a record without a verifiable source cannot ship. No editorial tagging. The user draws the conclusions.</p>
+      <p class="verified">Data: <a href="data/entities.json" style="color:var(--accent);">entities.json</a> · <a href="data/appointments.json" style="color:var(--accent);">appointments.json</a> · Schema: <a href="data/schema.md" style="color:var(--accent);">schema.md</a> · Provenance: <a href="data/quantum_provenance.jsonl" style="color:var(--accent);">quantum_provenance.jsonl</a> · Last verified: <strong id="lastVerified">—</strong></p>
+    </header>
+
+    <div class="contract">
+      <strong>Contract (M18, M19).</strong> This page renders the JSON facts only. There is no client-side computation of editorial tags such as &ldquo;suspicious&rdquo; or &ldquo;captured&rdquo;. <code>term_end: null</code> is rendered as <code>—</code> (no public end-date on record), never as <em>present</em>. Every linked source opens its primary public publisher. Network requests at runtime: <strong>local files only</strong>.
+    </div>
+
+    <div class="controls">
+      <input id="filter" type="search" placeholder="Filter by name, office, role..." aria-label="Filter registry">
+      <select id="tagFilter" aria-label="Filter by tag">
+        <option value="">All tags</option>
+        <option value="executive">executive</option>
+        <option value="judicial">judicial</option>
+        <option value="oversight">oversight</option>
+        <option value="law_enforcement">law_enforcement</option>
+        <option value="crown">crown</option>
+        <option value="regulator">regulator</option>
+        <option value="foreign_state">foreign_state</option>
+      </select>
+      <span class="count" id="count">0 / 0</span>
+    </div>
+
+    <h2>Officeholders</h2>
+    <div id="entitiesMount">
+      <div class="empty">Loading registry&hellip;</div>
+    </div>
+
+    <section class="events">
+      <h2>Appointment Events</h2>
+      <p style="color:var(--ink-mute);font-size:0.92rem;">Chronological feed of appointments, reappointments, interim placements, resignations, removals, and term extensions. Each event names the entity, the office, the date, and the primary source.</p>
+      <div id="eventsMount">
+        <div class="empty">Loading events&hellip;</div>
+      </div>
+    </section>
+
+    <div class="right-of-reply">
+      <strong>Right of reply.</strong> If you are a named officeholder or office and wish to submit a correction or contextual statement, contact <a href="mailto:corrections@tenet-5.example?subject=appointments-registry.html%20correction">corrections@tenet-5</a>. Verified corrections are appended within 72 hours and the <em>last verified</em> stamp updates.
+      <br><br>
+      <strong>Quantum provenance.</strong> Records on this page are admitted by the LIRIL [4,0] gate on the SATOR 5×5 grid. Mitigations M14–M19 are encoded in the schema itself; see <a href="data/schema.md">schema.md</a>.
+    </div>
+  </div>
+
+  <div id="site-footer-frame"></div>
+
+  <script>
+    // ────────────────────────────────────────────────────────────────────
+    // Appointments Registry — pure consumer of data/*.json under M18/M19.
+    // No editorial tagging. No third-party fetches. Local files only.
+    // ────────────────────────────────────────────────────────────────────
+
+    const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+
+    const fmtTermEnd = (v) => v == null ? '—' : escapeHtml(v);  // M19
+
+    const sourceLink = (src, idx) => {
+      if (!src || !src.url) return '';
+      let host = '';
+      try { host = new URL(src.url).hostname.replace(/^www\./, ''); } catch (_) { host = src.url; }
+      const label = src.type ? `[${escapeHtml(src.type)}]` : '';
+      return `<a href="${escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(src.url)}">${label} ${escapeHtml(host)}</a>`;
+    };
+
+    function renderEntities(list, byId, applicableEvents) {
+      if (!list.length) return '<div class="empty">No officeholders match the current filter.</div>';
+      const rows = list.map((e) => {
+        const apptBy = e.appointed_by && byId[e.appointed_by]
+          ? `${escapeHtml(byId[e.appointed_by].name)}`
+          : (e.appointed_by ? `<span style="color:var(--critical);">UNRESOLVED:${escapeHtml(e.appointed_by)}</span>` : '—');
+        const tags = (e.tags || []).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+        const sources = (e.sources || []).map(sourceLink).filter(Boolean).join(' ');
+        return `
+          <tr>
+            <td>
+              <div class="name">${escapeHtml(e.name)}</div>
+              <div class="role">${escapeHtml(e.role || '')}</div>
+              <div style="margin-top:0.4rem;">${tags}</div>
+            </td>
+            <td>${escapeHtml(e.office || '—')}</td>
+            <td class="term">${escapeHtml(e.term_start || '—')} → ${fmtTermEnd(e.term_end)}</td>
+            <td class="by">${apptBy}</td>
+            <td><span class="src">${sources || '<em style="color:var(--critical);">[no sources — would be omitted by schema]</em>'}</span></td>
+          </tr>`;
+      }).join('');
+      return `
+        <table class="reg" aria-label="Officeholders">
+          <thead><tr>
+            <th>Officeholder</th>
+            <th>Office / Body</th>
+            <th>Term</th>
+            <th>Appointed by</th>
+            <th>Sources</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    function renderEvents(events, byId) {
+      if (!events.length) return '<div class="empty">No appointment events on file.</div>';
+      const sorted = events.slice().sort((a, b) => (b.event_date || '').localeCompare(a.event_date || ''));
+      return sorted.map((ev) => {
+        const ent = byId[ev.entity_id];
+        const apptBy = ev.appointed_by && byId[ev.appointed_by] ? byId[ev.appointed_by].name : null;
+        const sources = (ev.sources || []).map(sourceLink).filter(Boolean).join(' ');
+        const oic = ev.oic_number ? ` · OIC ${escapeHtml(ev.oic_number)}` : '';
+        return `
+          <div class="event-row">
+            <div class="when">${escapeHtml(ev.event_date || '—')}</div>
+            <div class="what">
+              <span class="ev-type">${escapeHtml(ev.event_type || '—')}</span>
+              <strong>${ent ? escapeHtml(ent.name) : `<span style="color:var(--critical);">UNRESOLVED:${escapeHtml(ev.entity_id)}</span>`}</strong>
+              — ${escapeHtml(ev.office || '—')}, ${escapeHtml(ev.body || '—')}${oic}
+              ${apptBy ? `<div style="color:var(--ink-mute);font-size:0.84rem;margin-top:0.2rem;">Appointed by: ${escapeHtml(apptBy)}</div>` : ''}
+              <span class="src">${sources || '<em style="color:var(--critical);">[no sources — would be omitted by schema]</em>'}</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function applyFilter(entities, byId, q, tag) {
+      const qq = (q || '').trim().toLowerCase();
+      return entities.filter((e) => {
+        if (tag && !(e.tags || []).includes(tag)) return false;
+        if (!qq) return true;
+        const blob = `${e.name} ${e.role} ${e.office}`.toLowerCase();
+        return blob.includes(qq);
+      });
+    }
+
+    async function loadJson(path) {
+      const r = await fetch(path, { cache: 'no-cache' });
+      if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+      return r.json();
+    }
+
+    async function loadProvenanceLast(path) {
+      try {
+        const r = await fetch(path, { cache: 'no-cache' });
+        if (!r.ok) return null;
+        const txt = await r.text();
+        const lines = txt.trim().split(/\r?\n/).filter(Boolean);
+        if (!lines.length) return null;
+        return JSON.parse(lines[lines.length - 1]);
+      } catch (_) { return null; }
+    }
+
+    (async () => {
+      const entMount = document.getElementById('entitiesMount');
+      const evtMount = document.getElementById('eventsMount');
+      const countEl = document.getElementById('count');
+      const verEl = document.getElementById('lastVerified');
+      try {
+        const [entitiesDoc, appointmentsDoc, prov] = await Promise.all([
+          loadJson('data/entities.json'),
+          loadJson('data/appointments.json'),
+          loadProvenanceLast('data/quantum_provenance.jsonl'),
+        ]);
+        const entities = entitiesDoc.entities || [];
+        const events = appointmentsDoc.appointments || [];
+        const byId = Object.fromEntries(entities.map((e) => [e.id, e]));
+
+        if (prov && prov.ts_utc) verEl.textContent = prov.ts_utc.replace('T', ' ').replace(/\.\d+Z$/, 'Z');
+        else if (entitiesDoc.generated_utc) verEl.textContent = entitiesDoc.generated_utc;
+
+        const inputEl = document.getElementById('filter');
+        const tagEl = document.getElementById('tagFilter');
+
+        const rerender = () => {
+          const filtered = applyFilter(entities, byId, inputEl.value, tagEl.value);
+          entMount.innerHTML = renderEntities(filtered, byId, events);
+          countEl.textContent = `${filtered.length} / ${entities.length}`;
+        };
+
+        evtMount.innerHTML = renderEvents(events, byId);
+        rerender();
+        inputEl.addEventListener('input', rerender);
+        tagEl.addEventListener('change', rerender);
+      } catch (err) {
+        const msg = `Registry load failed: ${escapeHtml(err.message || String(err))}.<br>If you are viewing this page from the local filesystem (file://), browsers block fetch() of sibling files. Serve over a local HTTP server (e.g. <code>python -m http.server</code>) or via GitHub Pages.`;
+        entMount.innerHTML = `<div class="err">${msg}</div>`;
+        evtMount.innerHTML = '';
+      }
+    })();
+  </script>
+  <script src="shell.js?v=43"></script>
+  <script src="js/ux.js"></script>
+  <script src="js/slate.js"></script>
+  <script src="js/flow.js"></script>
+  <script src="js/integrity.js"></script>
+  <script src="js/i18n.js?v=4"></script>
+</body>
+</html>

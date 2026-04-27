@@ -1,0 +1,354 @@
+{
+  "$schema": "https://tenet-5.github.io/schemas/quantanium-design-contract.json",
+  "name": "TENET5 QUANTANIUM Design Contract",
+  "version": "1.1.0",
+  "revision_date": "2026-04-27",
+  "release_notes": "1.1.0: rebrand SLATE -> QUANTANIUM contract; add --quantanium-* pipeline namespace (engine, pvnp tiers, decoder telemetry); add Atkinson Hyperlegible accessible reading mode toggle ([data-reading=accessible]); add .quantanium-status + .reading-mode-toggle widget styles. Technical --slate-* prefix unchanged for stability.",
+  "owner": "TENET5 / LIRIL site identity gate",
+  "system_seed": 118400,
+  "purpose": "Single canonical design-token contract for tenet-5.github.io. Prevents AI/automation theme drift by giving every agent a machine-readable manifest to read BEFORE editing CSS.",
+  "canonical_source": {
+    "path": "/css/tokens.css",
+    "sha256": "f2ea78b105620e78ce6ef2d35a5907f38dffb18a0c34a6668ba0d70b815de39b",
+    "rule": "Any change to tokens.css MUST recompute this hash. liril_brand_guardian rejects mismatches."
+  },
+  "active_palette": {
+    "id": "monochrome-operational-intel",
+    "label": "Monochrome Operational Intelligence",
+    "rationale": "Migrated 2026-04-24 from oxblood to monochrome (commit 4d3ec9309 — 310 pages). Slate naming retained from earlier 1950s field-watch concept; visible aesthetic is dark monochrome + heraldic gold accent.",
+    "do_not_revert_without_directive": true
+  },
+  "load_order": [
+    "/css/tokens.css",
+    "/style.css",
+    "/css/<feature>.css",
+    "/css/inline_generated.css"
+  ],
+  "load_order_rule": "FIXED. Other layers reference tokens via var(); they do NOT redefine :root. inline_generated.css MUST come last so CI can ship rule additions, never token redefinitions.",
+  "quantanium_pipeline": {
+    "purpose": "Live-substrate UI surface — visible state of the dispatch pipeline (Ising / tensor_journal / pvnp ensemble) on the site. Tokens drive the engine indicator, pvnp-tier glow, decoder telemetry pulse, and overclocker bench badges.",
+    "namespace_prefix": "--quantanium-",
+    "definition_site": "/css/tokens.css §4",
+    "engine_default": "ising_local",
+    "pvnp_tiers": ["solvable", "np_exposed", "loom_break", "unknown"],
+    "telemetry_metrics": [
+      "ising_decode_ms",
+      "tensor_project_ms",
+      "compose_ms",
+      "paste_fire_ms",
+      "throughput_dispatches_per_min"
+    ],
+    "widget": {
+      "css_class": ".quantanium-status",
+      "js": "/js/quantanium-status.js",
+      "data_source": "/data/quantanium-status.json",
+      "poll_interval_ms": 30000,
+      "dom_contract": "see /css/tokens.css §6"
+    },
+    "rev": "1.0.0-2026-04-27"
+  },
+  "accessibility": {
+    "purpose": "Make the record readable for every IQ and reading ability — including dyslexic and low-vision readers — without stigma or visual contortion.",
+    "primary_font_default": "Inter (with Atkinson Hyperlegible fallback for character distinction)",
+    "accessible_reading_mode": {
+      "trigger": "[data-reading=\"accessible\"] on <html>",
+      "primary_font": "Atkinson Hyperlegible (Braille Institute, 2020)",
+      "rationale": "Atkinson Hyperlegible was designed by the Braille Institute via low-vision research to differentiate commonly-misinterpreted characters (I/l/1, 0/O, b/d/p/q). Open-licensed via Google Fonts. Stronger empirical backing than OpenDyslexic for general dyslexia + low-vision readers; doubles as a beautiful reading font, eliminating the 'this is the disability mode' stigma.",
+      "tweaks": "letter-spacing 0.01em, line-height 1.85, word-spacing 0.05em on body text",
+      "toggle_widget": {
+        "css_class": ".reading-mode-toggle",
+        "js": "/js/reading-mode.js",
+        "shortcut": "Alt+R",
+        "persistence": "localStorage key 'tnt-reading' (default | accessible)",
+        "honours_prefers_reduced_motion": true
+      },
+      "definition_site": "/css/tokens.css §5 + §7"
+    },
+    "wcag_targets": ["AA contrast on --slate-bg", "keyboard reachable toggle", "aria-pressed on toggle", "no outline:0 without focus alternative"]
+  },
+  "namespaces": {
+    "canonical": {
+      "prefix": "--slate-",
+      "definition_site": "/css/tokens.css §1",
+      "policy": "Only place :root tokens are defined. !important is enforced.",
+      "groups": [
+        "surface",
+        "ink",
+        "accent",
+        "semantic",
+        "border",
+        "font",
+        "type-scale",
+        "spacing",
+        "radius",
+        "shadow",
+        "motion",
+        "layout",
+        "z-index"
+      ]
+    },
+    "legacy_aliases": {
+      "definition_site": "/css/tokens.css §2",
+      "policy": "Forwarding only. Do NOT extend. Do NOT define new aliases. New code must reference canonical --slate-* names.",
+      "mapped_namespaces": [
+        "--bg / --bg-*",
+        "--text / --text-*",
+        "--accent / --accent-*",
+        "--color-*",
+        "--liril-*",
+        "--hud-*",
+        "--font-{sans,mono,serif,headline,body,hud}",
+        "--text-{xs..6xl}",
+        "--s-{2xs..2xl}",
+        "--r-{sm..xl}",
+        "--shadow-*",
+        "--ease / --ease-*",
+        "--dur / --dur-*"
+      ]
+    }
+  },
+  "tokens": {
+    "surface": {
+      "--slate-bg": {
+        "value": "#202020",
+        "use": "page background"
+      },
+      "--slate-raised": {
+        "value": "#262626",
+        "use": "cards, panels"
+      },
+      "--slate-sunken": {
+        "value": "#1a1a1a",
+        "use": "nested wells"
+      },
+      "--slate-overlay": {
+        "value": "#161616",
+        "use": "modal scrim, hero base"
+      },
+      "--slate-table": {
+        "value": "rgba(38, 38, 38, 0.55)",
+        "use": "table row backdrop"
+      },
+      "--slate-evidence-tint": {
+        "value": "rgba(201, 164, 76, 0.04)",
+        "use": "evidence callout tint"
+      }
+    },
+    "ink": {
+      "--slate-ink": {
+        "value": "#ffffff",
+        "use": "primary text"
+      },
+      "--slate-ink-strong": {
+        "value": "#ffffff",
+        "use": "headings"
+      },
+      "--slate-ink-dim": {
+        "value": "#b9b9b9",
+        "use": "secondary copy"
+      },
+      "--slate-ink-muted": {
+        "value": "#7a7a7a",
+        "use": "tertiary, captions"
+      },
+      "--slate-ink-faint": {
+        "value": "#4a4a4a",
+        "use": "placeholder"
+      }
+    },
+    "accent": {
+      "--slate-accent": {
+        "value": "#c9a44c",
+        "use": "primary accent (heraldic gold)"
+      },
+      "--slate-accent-warm": {
+        "value": "#d4b46a",
+        "use": "hover state"
+      },
+      "--slate-accent-deep": {
+        "value": "#a07c30",
+        "use": "pressed / deep"
+      },
+      "--slate-accent-glow": {
+        "value": "rgba(201, 164, 76, 0.10)",
+        "use": "glow halo"
+      },
+      "--slate-link": {
+        "value": "#c9a44c",
+        "use": "link colour"
+      },
+      "--slate-link-hover": {
+        "value": "#d4b46a",
+        "use": "link hover"
+      },
+      "--slate-brass": {
+        "value": "#c9a44c",
+        "use": "field-watch brass alias"
+      }
+    },
+    "semantic": {
+      "--slate-critical": {
+        "value": "#a45a52",
+        "use": "muted brick — never alarm-red #ef4444"
+      },
+      "--slate-verified": {
+        "value": "#6e8f68",
+        "use": "muted field green"
+      },
+      "--slate-warning": {
+        "value": "#c9a44c",
+        "use": "warn (gold)"
+      },
+      "--slate-info": {
+        "value": "#6c7e91",
+        "use": "info"
+      },
+      "--slate-quantum": {
+        "value": "#8b7ec4",
+        "use": "ising / quantum indicator"
+      }
+    },
+    "border": {
+      "--slate-border": {
+        "value": "#333333",
+        "use": "default border"
+      },
+      "--slate-border-hot": {
+        "value": "#4a4a4a",
+        "use": "hover border"
+      },
+      "--slate-border-accent": {
+        "value": "rgba(201, 164, 76, 0.35)",
+        "use": "accent border"
+      }
+    },
+    "fonts": {
+      "--slate-font-sans": {
+        "value": "Inter, Helvetica Neue, Helvetica, Arial, system-ui, sans-serif",
+        "use": "body + UI"
+      },
+      "--slate-font-mono": {
+        "value": "IBM Plex Mono, Consolas, JetBrains Mono, ui-monospace, monospace",
+        "use": "labels, citations, code"
+      },
+      "--slate-font-serif": {
+        "value": "Iowan Old Style, Palatino, Times New Roman, serif",
+        "use": "long-form editorial"
+      },
+      "--slate-font-display": {
+        "value": "Inter, Space Grotesk, system-ui, sans-serif",
+        "use": "display headings"
+      }
+    },
+    "type_scale": {
+      "policy": "Fluid clamp() for the upper register (3xl–6xl), fixed rem for body sizes (xs–2xl).",
+      "tokens": [
+        "--slate-text-xs   = 0.75rem",
+        "--slate-text-sm   = 0.875rem",
+        "--slate-text-base = 1.0625rem",
+        "--slate-text-lg   = 1.125rem",
+        "--slate-text-xl   = 1.25rem",
+        "--slate-text-2xl  = clamp(1.25rem, 2vw, 1.5rem)",
+        "--slate-text-3xl  = clamp(1.5rem, 3vw, 2rem)",
+        "--slate-text-4xl  = clamp(1.75rem, 3.5vw, 2.5rem)",
+        "--slate-text-5xl  = clamp(2rem, 4vw, 3rem)",
+        "--slate-text-6xl  = clamp(2.5rem, 5vw, 4rem)"
+      ]
+    },
+    "spacing_fixed": [
+      "--slate-pad-2xs = 4px",
+      "--slate-pad-xs  = 8px",
+      "--slate-pad-sm  = 12px",
+      "--slate-pad-md  = 20px",
+      "--slate-pad-lg  = 32px",
+      "--slate-pad-xl  = 48px",
+      "--slate-pad-2xl = 72px"
+    ],
+    "spacing_fluid": [
+      "--slate-s-2xs = clamp(4px,  0.4vw, 6px)",
+      "--slate-s-xs  = clamp(8px,  0.8vw, 12px)",
+      "--slate-s-sm  = clamp(12px, 1.2vw, 20px)",
+      "--slate-s-md  = clamp(20px, 2.5vw, 36px)",
+      "--slate-s-lg  = clamp(36px, 4.5vw, 64px)",
+      "--slate-s-xl  = clamp(56px, 7vw,   100px)",
+      "--slate-s-2xl = clamp(80px, 10vw,  140px)"
+    ],
+    "radius": [
+      "--slate-radius-xs   = 2px",
+      "--slate-radius-sm   = 4px",
+      "--slate-radius-md   = 8px",
+      "--slate-radius-lg   = 12px",
+      "--slate-radius-xl   = 16px",
+      "--slate-radius-pill = 999px"
+    ],
+    "shadow": [
+      "--slate-shadow-sm    = 0 1px 2px rgba(0, 0, 0, 0.25)",
+      "--slate-shadow-md    = 0 4px 12px rgba(0, 0, 0, 0.40)",
+      "--slate-shadow-lg    = 0 12px 32px rgba(0, 0, 0, 0.55)",
+      "--slate-shadow-xl    = 0 24px 64px rgba(0, 0, 0, 0.65)",
+      "--slate-shadow-glass = 0 4px 24px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.04)"
+    ],
+    "motion": [
+      "--slate-ease-out      = cubic-bezier(0.22, 0.61, 0.36, 1)",
+      "--slate-ease-in-out   = cubic-bezier(0.65, 0.05, 0.35, 1)",
+      "--slate-ease-spring   = cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "--slate-duration-fast = 120ms",
+      "--slate-duration-base = 220ms",
+      "--slate-duration-slow = 420ms"
+    ],
+    "layout": {
+      "--slate-max-content": "780px",
+      "--slate-max-data": "960px",
+      "--slate-max-wide": "1200px",
+      "--slate-nav-h": "56px"
+    },
+    "z_index": {
+      "--slate-z-base": 1,
+      "--slate-z-raised": 10,
+      "--slate-z-nav": 100,
+      "--slate-z-dropdown": 200,
+      "--slate-z-overlay": 500,
+      "--slate-z-walkthrough": 900,
+      "--slate-z-toast": 1000,
+      "--slate-z-modal": 1100
+    }
+  },
+  "rules_for_agents": [
+    "READ /css/tokens.css §1 before adding any new :root token.",
+    "DO NOT add :root{} blocks to any file other than /css/tokens.css.",
+    "DO NOT introduce a new namespace prefix. Use --slate-* for canonical, alias forward in §2 if migrating an old name.",
+    "DO NOT remove !important from canonical tokens — it is the brute-force enforcement against auto-generation overwrites.",
+    "DO NOT migrate to oxblood, navy, red-ensign, or any palette other than monochrome-operational-intel without an explicit Daniel directive AND an update to active_palette.id here.",
+    "DO recompute canonical_source.sha256 after every edit to /css/tokens.css. tools/liril_brand_guardian rejects mismatches.",
+    "DO add new feature tokens to /css/tokens.css §1, then reference via var(--slate-...) in the feature's stylesheet."
+  ],
+  "enforcement": {
+    "brand_guardian": {
+      "tool": "tools/liril_brand_guardian.py",
+      "checks": [
+        "live tokens.css sha256 must equal canonical_source.sha256",
+        "no other production CSS file may declare :root tokens (audit pass)",
+        "monochrome palette signature: --slate-bg=#202020 must render in body computed style (live)"
+      ],
+      "alert_subject": "tenet5.liril.brand_guardian.alert",
+      "inbox_directive_kind": "TOKEN_DRIFT_*"
+    },
+    "ci": {
+      "pre_commit_hint": "if /css/tokens.css changed, hash must be updated in this file in the same commit"
+    }
+  },
+  "history": [
+    {
+      "rev": "1.0.0",
+      "date": "2026-04-27",
+      "author": "claude_code",
+      "change": "Initial contract. Consolidates 4 legacy namespaces (--liril-*, --bg/--text, --slate-*, --font-*/--color-*) into single --slate-* canonical with !important. Locks monochrome-operational-intel palette as active."
+    },
+    {
+      "rev": "1.1.0",
+      "date": "2026-04-27",
+      "author": "claude_code",
+      "change": "Rebrand SLATE -> QUANTANIUM contract umbrella. Technical --slate-* prefix unchanged. Added §4 --quantanium-* pipeline namespace (engine, pvnp tiers, decoder telemetry, bench badges). Added §5 accessible reading mode (Atkinson Hyperlegible) + Alt+R toggle. Added §6 .quantanium-status widget + §7 .reading-mode-toggle. Wired tokens.css link + reading-mode.js + quantanium-status.js into all 314 production pages."
+    }
+  ]
+}

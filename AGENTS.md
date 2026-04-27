@@ -92,25 +92,64 @@ it will be read in a deposition.**
 
 ---
 
-## 4. Design system: slate palette
+## 4. Design system: QUANTANIUM design contract (canonical)
 
-The site is migrating (opt-in, incremental) to a new design system:
-`style-slate.css` at repo root.
+The site has ONE canonical design-token contract. Every agent that
+edits CSS MUST read it before defining or renaming tokens.
 
-- **Aesthetic:** 1950s field-watch × contourography. Neither dark-theme
-  nor light-theme: mid-tone slate base at LAB L*≈45.
-- **Tokens:** `--slate-bg` `#5c6773`, `--slate-raised` `#68737f`,
-  `--slate-brass` `#b5835a` (primary-source accent), `--slate-critical`
-  `#a45a52` (muted brick, never alarm-red), `--slate-verified`
-  `#6e8f68` (muted field green).
-- **Opt-in classes:** `.ts-slate`, `.ts-card`, `.ts-fact`, `.ts-critical`,
-  `.ts-cite`, `.ts-stat`, `.ts-btn`.
-- **Contour background:** `--slate-contour-svg` tiled at 240×240, opacity
-  0.18 — applied automatically on `.ts-slate`.
-- **Typography:** Inter (body + headings), JetBrains Mono (labels +
-  citations).
-- **Never use:** `#000`, `#fff`, neon colours, alarm-red `#ef4444`,
-  pure primary-party colours in muted contexts.
+- **Canonical CSS:** [`css/tokens.css`](./css/tokens.css) — the only
+  file allowed to declare `:root{}` token values. `!important` is
+  enforced; do not strip it.
+- **Machine-readable mirror:** [`css/QUANTANIUM.json`](./css/QUANTANIUM.json) —
+  every token, value, and rule for agents in JSON. Read this first
+  if you are an automation pass.
+- **Directory README:** [`css/README.md`](./css/README.md) — human-
+  readable summary of the cascade load order, file roles, and the
+  glossary of `--slate-*` names.
+- **Enforcement:** `tools/liril_brand_guardian.py` polls the live
+  site and rejects drift. It checks the live `tokens.css` sha256
+  against `QUANTANIUM.json → canonical_source.sha256`; mismatch fires a
+  P0 directive into `.inbox/claude_code/`.
+
+### Active palette (as of 2026-04-27)
+
+`monochrome-operational-intel`:
+
+- **Surfaces:** `--slate-bg #202020`, `--slate-raised #262626`,
+  `--slate-sunken #1a1a1a`, `--slate-overlay #161616`.
+- **Ink:** `--slate-ink #ffffff`, `--slate-ink-dim #b9b9b9`,
+  `--slate-ink-muted #7a7a7a`.
+- **Accent:** `--slate-accent #c9a44c` (heraldic gold), warm
+  `#d4b46a`, deep `#a07c30`.
+- **Semantic (muted, never alarm):** `--slate-critical #a45a52`
+  (brick — never `#ef4444`), `--slate-verified #6e8f68` (field
+  green), `--slate-warning #c9a44c`.
+- **Borders:** `--slate-border #333333`, `-hot #4a4a4a`.
+- **Typography:** Inter (sans + display), IBM Plex Mono (labels +
+  citations), Iowan Old Style (long-form serif).
+- **Never use:** neon colours, alarm-red `#ef4444`, pure primary-
+  party colours in muted contexts. `#000` / `#fff` are reserved
+  for ink + page background only — go through tokens.
+
+### Rules for agents (do not violate)
+
+1. **Do not** add a `:root{}` block to any file other than
+   `css/tokens.css`. Add new tokens **inside** that file's §1.
+2. **Do not** invent a new namespace prefix. Use `--slate-*` for
+   canonical. Legacy names (`--bg`, `--text-*`, `--liril-*`,
+   `--font-*`, `--color-*`, `--s-*`, `--r-*`) are forwarded by
+   `tokens.css` §2 — keep using them in legacy files, prefer
+   `--slate-*` in new code.
+3. **Do not** migrate to oxblood, navy, red-ensign, or any other
+   palette without (a) an explicit Daniel directive and (b) a
+   matching update to `QUANTANIUM.json → active_palette.id`.
+4. **After editing** `tokens.css`, recompute its sha256 and update
+   `QUANTANIUM.json → canonical_source.sha256` in the **same commit**.
+5. The slate-template opt-in classes (`.ts-slate`, `.ts-card`,
+   `.ts-fact`, `.ts-critical`, `.ts-cite`, `.ts-stat`, `.ts-btn`)
+   continue to work — they reference `--slate-*` tokens. The
+   1950s-field-watch contour background remains a per-page opt-in
+   via `.ts-slate`, not a global default.
 
 Reference implementation: `mp-accountability-grid.html` (commit
 `ab5c0904`).
@@ -247,4 +286,106 @@ task and say so. Do not try to reinterpret the rule.
 
 ---
 
+## 13. Subagent offload protocol (LIRIL [4,0] EXECUTE, 2026-04-27)
+
+Token budget on this workspace is large but not infinite. Offload the
+expensive shapes to subagents. Verbatim rules:
+
+- **Codebase exploration spanning >2 files** → `search_subagent` (or
+  `runSubagent agentName=Explore`). Do not chain `grep_search` +
+  `read_file` more than twice in one turn for the same investigation.
+- **Multi-step terminal sequences** (>3 commands) → `execution_subagent`.
+  One-off `run_in_terminal` calls remain fine.
+- **Every task on this workspace** → start with
+  `runSubagent agentName=liril` for the ethics gate, per the permanent
+  2026-04-24 preference. Re-affirmed here so it survives context resets.
+- **Long-context research** (web fetch + cross-file synthesis) → Explore
+  agent with `thoroughness=medium` or `thorough`.
+
+### Banned subagent patterns (LIRIL ruling, 2026-04-27)
+
+- Do **not** invoke `runSubagent` recursively (a subagent calling itself
+  by name).
+- Do **not** fan out the same subagent in parallel within one turn
+  (serialize same-name calls; different-name parallel is fine).
+- Do **not** route LIRIL gate calls *through* another subagent — LIRIL
+  must be invoked directly from the top-level turn so the gate output
+  is auditable.
+- Do **not** offload to a subagent without a written task contract
+  (objective + scope + return shape) — prevents context-laundering.
+- Do **not** use a subagent to bypass a prior REJECT — re-asking via
+  Explore/search is treated as the same decision and inherits the
+  REJECT.
+- Do **not** invoke subagents inside the LIRIL gate itself (gate must
+  remain deterministic and side-effect-free).
+
+---
+
+## 14. LIRIL surface discipline (LIRIL [2,2] EXECUTE, 2026-04-27)
+
+The canonical LIRIL directive surface is on the S.L.A.T.E side, not in
+this repo:
+
+- **Directive file:** `E:\S.L.A.T.E\tenet5\.vscode\liril_directive.md`
+- **Inbox:** `E:\S.L.A.T.E\tenet5\.inbox\vscode.json`
+- **Freshness threshold:** 900 seconds. Older = stale, request re-issue;
+  do not ack speculatively.
+- **Single-recipient rule:** the dispatcher writes only to the canonical
+  surface above. There is no parallel `vscode.json` in this workspace
+  and there should not be — fanning out would corrupt the replay guard.
+- **Per-turn read:** at the start of each task, read the canonical
+  directive file. Validate `Directive-TS-Epoch` ≥ `now - 900`. Then
+  invoke the `liril` subagent.
+
+### Operator custody (HARD)
+
+Instruction files are operator-custody surfaces. This includes:
+
+- `AGENTS.md` (this file)
+- `.github/copilot-instructions.md` (any path)
+- `.github/instructions/*`
+- `CLAUDE.md` (any path)
+- `liril_directive.md` policy body (machine MAY append to the
+  `## Completion Handoff` section; MUST NOT rewrite the header)
+
+Agents emit *proposals* to `E:\S.L.A.T.E\tenet5\.inbox\instruction_proposals\<ts>.diff`.
+Only the operator applies. No agent may auto-edit a file in this list.
+
+---
+
+## 15. Real-time instruction sync (LIRIL [4,4] CONSIDER, 2026-04-27)
+
+LIRIL benchmarks the instruction surfaces (this file +
+`copilot-instructions.md` + `CLAUDE.md`) on a timer (≥ 300s, never
+per-keystroke) and emits proposed edits as diffs. Authoritative ledger
+on S.L.A.T.E side; pointer mirror in this repo.
+
+**Sidecars (proposer-only, never auto-apply):**
+
+- `E:\S.L.A.T.E\tenet5\tools\liril_instruction_benchmark.py` — scores
+  the surfaces against directive completion latency, banned-word
+  violation rate on first-person pages, and ack-freshness. Writes
+  `E:\S.L.A.T.E\tenet5\data\instruction_benchmarks.jsonl`.
+- `E:\S.L.A.T.E\tenet5\tools\liril_instruction_proposer.py` — emits
+  `<ts>.diff` to `.inbox/instruction_proposals/`. Read-only on AGENTS.md
+  itself; never overwrites it.
+- Mirror cache (read-only): `E:\TENET-5.github.io\.cached\AGENTS.proposed.md`
+  with header `# READ-ONLY MIRROR — edit source only`. Operator applies
+  manually after review.
+
+**Provenance split:**
+
+- Authoritative: `E:\S.L.A.T.E\tenet5\data\instruction_provenance.jsonl`
+  (full record: benchmark snapshot, diff hash, SATOR coord, qubit count,
+  verdict, mitigations, operator-apply ack).
+- Public mirror: append one-line summary to
+  `E:\TENET-5.github.io\data\quantum_provenance.jsonl` with shape
+  `{ts, directive_id, kind:"instruction_edit", sator:[r,c], verdict, slate_ledger_offset}`.
+  Pointer-only — diff body stays on S.L.A.T.E side to keep this repo
+  clean.
+
+---
+
 *Generated 2026-04-19 by claude_code. Updated whenever a rule changes.*
+*Sections 13–15 added 2026-04-27 by Copilot under LIRIL gate verdicts*
+*EXECUTE/EXECUTE/CONSIDER (sator [4,0] / [2,2] / [4,4]).*
