@@ -1,0 +1,151 @@
+/* ─────────────────────────────────────────────────────────────
+   TENET5 — brand-lock.css (Cap#258, 2026-04-27)
+   PURPOSE: Brand tokens MUST win the cascade against inline_generated.css
+   and any auto-cycle injection. Seed-anchored to SYSTEM_SEED=118400.
+   Per memory:feedback_css_spec_seed_anchored_max_enforcement.md and
+   memory:feedback_css_theme_must_be_unconditional_and_auto_applied.md.
+
+   This file is loaded LAST in css/tenet5.css's @import chain so its
+   declarations cascade after slate-tokens.css, liril-theme.css,
+   inline_generated.css, and anything else.
+
+   RULE: every brand-critical token MUST be !important here, and at
+   plain :root (not :root[data-slate=*]). shell.js may set data-slate
+   as defense-in-depth but the tokens themselves are unconditional.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* === SEED ANCHOR (118400 = 370 × 64 × 5) === */
+  --tnt-seed: 118400 !important;
+  --tnt-tick-ms: 8.45 !important;     /* 1000 / 118.4 Hz */
+  --tnt-loom-cell: 5 !important;      /* SATOR row count */
+
+  /* === BRAND SURFACES (mid-tone slate, L*≈45) === */
+  --slate-bg:         #5c6773 !important;
+  --slate-raised:     #68737f !important;
+  --slate-sunken:     #4f5963 !important;
+  --slate-overlay:    rgba(40, 48, 56, 0.55) !important;
+
+  /* === BRAND INK (cream on slate, WCAG AA) === */
+  --slate-ink:        #e8e3d6 !important;
+  --slate-ink-strong: #f5f1e6 !important;
+  --slate-ink-dim:    #c9c3b3 !important;
+  --slate-ink-muted:  #9aa1a8 !important;
+
+  /* === BRAND ACCENTS (aged brass, primary-source citations) === */
+  --slate-brass:      #b5835a !important;
+  --slate-brass-hi:   #c89a76 !important;
+  --slate-brass-lo:   #8e6644 !important;
+  --slate-accent:     #8fa2b3 !important;
+  --slate-accent-hi:  #a8b8c6 !important;
+  --slate-link:       #c89a76 !important;
+  --slate-link-hover: #e0b58c !important;
+
+  /* === BRAND SEMANTIC === */
+  --slate-critical:   #a45a52 !important;  /* muted brick, NEVER alarm-red */
+  --slate-verified:   #6e8f68 !important;
+  --slate-warn:       #b59a5a !important;
+
+  /* === BRAND STRUCTURE === */
+  --slate-border:     rgba(232, 227, 214, 0.16) !important;
+  --slate-border-hi:  rgba(232, 227, 214, 0.28) !important;
+  --slate-radius-sm:  3px !important;
+  --slate-radius-md:  6px !important;
+  --slate-radius-lg:  10px !important;
+
+  /* === BRAND TYPOGRAPHY (Cap#356 — TWO FONTS ONLY, replaces Cap#223) ===
+     Daniel directive 2026-04-27: site is locked to Atkinson Hyperlegible
+     (body/UI/headlines/links) + IBM Plex Mono (labels/eyebrows/code).
+     Both webfont-loaded via tokens.css §5 @import. No Inter, no JetBrains
+     Mono, no Space Grotesk, no Playfair, no Consolas, no system fallbacks. */
+  --slate-font-head:  'Atkinson Hyperlegible', sans-serif !important;
+  --slate-font-body:  'Atkinson Hyperlegible', sans-serif !important;
+  --slate-font-mono:  'IBM Plex Mono', ui-monospace, monospace !important;
+
+  /* === COMPATIBILITY ALIASES (for legacy --color-* and --font-* used
+     by inline_generated.css) === */
+  --color-critical:   #a45a52 !important;
+  --color-warning:    #b59a5a !important;
+  --color-success:    #6e8f68 !important;
+  --color-accent:     #b5835a !important;
+  --font-mono:        'IBM Plex Mono', ui-monospace, monospace !important;
+  --font-head:        'Atkinson Hyperlegible', sans-serif !important;
+  --font-body:        'Atkinson Hyperlegible', sans-serif !important;
+  /* Legacy liril-* aliases used in older inline styles */
+  --liril-font-display: 'Atkinson Hyperlegible', sans-serif !important;
+  --liril-font-sans:    'Atkinson Hyperlegible', sans-serif !important;
+  --liril-font-mono:    'IBM Plex Mono', ui-monospace, monospace !important;
+  --liril-mono:         'IBM Plex Mono', ui-monospace, monospace !important;
+
+  /* === BRAND BACKGROUND ENFORCEMENT === */
+  /* If anything tries to set body to white or browser-default,
+     these unconditional declarations win the cascade. */
+  color-scheme: dark !important;
+}
+
+/* === BODY-LEVEL ENFORCEMENT (defense-in-depth) ===
+   Even if inline_generated.css redefines body or html backgrounds,
+   these declarations cascade after via brand-lock-load-order. */
+html {
+  background: var(--slate-bg) !important;
+}
+body {
+  background: var(--slate-bg) !important;
+  color: var(--slate-ink) !important;
+  font-family: var(--slate-font-body) !important;
+}
+
+/* === HEAD ELEMENT FONT FAMILY === */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--slate-font-head) !important;
+  color: var(--slate-ink) !important;
+}
+
+/* === LINK COLOR LOCK === */
+a {
+  color: var(--slate-link);
+}
+a:hover {
+  color: var(--slate-link-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CAP#356 — TWO-FONT UNIVERSAL LOCK (replaces Cap#223 Inter + JetBrains)
+   Daniel directive 2026-04-27. Every element renders in Atkinson
+   Hyperlegible, except mono-tagged elements which render in IBM Plex
+   Mono. Wins the cascade against legacy inline font-family declarations.
+   Both faces webfont-loaded via tokens.css §5 @import.
+   ════════════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  font-family: 'Atkinson Hyperlegible', sans-serif !important;
+}
+
+code, pre, kbd, samp, tt, var,
+.mono, .font-mono, .code, .terminal,
+[class*="mono"], [class*="code"], [class*="terminal"],
+[data-font="mono"] {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace !important;
+}
+code *, pre *, kbd *, samp *, tt *, var *,
+.mono *, .font-mono *, .code *, .terminal *,
+[class*="mono"] *, [class*="code"] *, [class*="terminal"] *,
+[data-font="mono"] * {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace !important;
+}
+
+/* Mono-by-token: every element whose computed font-family resolves to
+   --slate-font-mono via the cascade (footer headers, eyebrows, scene
+   bars, status badges) gets the same IBM Plex Mono treatment. The h*
+   inside .t5-foot, .t5-scene-bar, .eyebrow, .label-mono live in this
+   tier. */
+footer.t5-foot h5,
+.t5-scene-bar,
+.t5-scene-bar button,
+.eyebrow,
+.label-mono,
+[data-mono="true"] {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace !important;
+  font-feature-settings: normal !important;
+}
