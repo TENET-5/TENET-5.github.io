@@ -40,9 +40,32 @@ Execute autonomously. Fix problems immediately. Never stop working.
 - nav.js = shared navigation (heraldic crest + two-tier header)
 - footer.js = shared footer
 - shell.js = iframe frame shell (index.html loads content pages in iframe)
-- style.css = Red Ensign Royal Canadian theme (navy + gold + red)
+- **css/tokens.css = CANONICAL design-token contract (the SLATE)**
+- **css/QUANTANIUM.json = machine-readable token manifest + sha256 hash**
+- style.css = global reset + layout primitives (references tokens.css)
 - js/ux.js = reading progress bar, back-to-top, mobile nav toggle
 - tools/build_page.py = markdown-to-HTML page builder
+
+## DESIGN TOKENS (READ BEFORE TOUCHING ANY CSS)
+
+**Single source of truth:** `css/tokens.css`. Every `:root` token lives
+there and nowhere else. Active palette: monochrome operational-intel
+(`--slate-bg #202020`, `--slate-accent #c9a44c`).
+
+**Rules:**
+1. Do NOT add `:root{}` blocks to any other CSS file.
+2. Do NOT invent namespaces. Use `--slate-*` canonical names; legacy
+   `--bg/--text/--liril-*/--font-*/--color-*` forward via the alias
+   layer in `tokens.css` §2.
+3. Do NOT migrate the palette without a Daniel directive AND an update
+   to `QUANTANIUM.json → active_palette.id`.
+4. After editing `tokens.css`, recompute the sha256 and update
+   `QUANTANIUM.json → canonical_source.sha256` in the same commit.
+5. Brand guardian (`tools/liril_brand_guardian.py` in S.L.A.T.E/tenet5)
+   enforces the hash and rejects drift.
+
+Full spec in [`AGENTS.md` §4](./AGENTS.md#4-design-system-slate-design-contract-canonical)
+and [`css/README.md`](./css/README.md).
 
 ## DEPLOYMENT
 
