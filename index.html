@@ -140,53 +140,9 @@
     header.t5-nav nav a { color: var(--ink); opacity: 0.82; transition: opacity .2s ease; }
     header.t5-nav nav a:hover { opacity: 1; }
 
-    /* Pillar dropdowns — 3-pillar IA matches footer (The Record / Explore /
-       About). Hover-on-desktop, focus-on-keyboard, click-on-touch. */
-    header.t5-nav nav .pillar { position: relative; }
-    header.t5-nav nav .pillar > .trigger {
-      background: transparent; border: 0; padding: 0; cursor: pointer;
-      font: inherit; color: var(--ink); opacity: 0.82;
-      letter-spacing: inherit; text-transform: inherit;
-      transition: opacity .2s ease;
-      display: inline-flex; align-items: center; gap: 6px;
-    }
-    header.t5-nav nav .pillar > .trigger::after {
-      content: "▾"; font-size: 9px; opacity: 0.6;
-      transition: transform .18s ease, opacity .18s ease;
-    }
-    header.t5-nav nav .pillar:hover > .trigger,
-    header.t5-nav nav .pillar:focus-within > .trigger,
-    header.t5-nav nav .pillar.open > .trigger { opacity: 1; }
-    header.t5-nav nav .pillar:hover > .trigger::after,
-    header.t5-nav nav .pillar:focus-within > .trigger::after,
-    header.t5-nav nav .pillar.open > .trigger::after {
-      transform: rotate(180deg); opacity: 1;
-    }
-    header.t5-nav nav .pillar > .panel {
-      position: absolute; top: calc(100% + 14px); left: -16px;
-      min-width: 220px;
-      background: var(--bg); border: 1px solid var(--line);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
-      padding: 14px 0; opacity: 0; pointer-events: none;
-      transform: translateY(-4px);
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 70;
-    }
-    header.t5-nav nav .pillar:hover > .panel,
-    header.t5-nav nav .pillar:focus-within > .panel,
-    header.t5-nav nav .pillar.open > .panel {
-      opacity: 1; pointer-events: auto; transform: translateY(0);
-    }
-    header.t5-nav nav .pillar > .panel a {
-      display: block; padding: 10px 22px;
-      font-family: var(--font-sans); font-size: 14px;
-      letter-spacing: 0.02em; text-transform: none; font-weight: 500;
-      opacity: 0.86;
-    }
-    header.t5-nav nav .pillar > .panel a:hover {
-      background: rgba(255,255,255,0.06); opacity: 1;
-    }
-    header.t5-nav nav .pillar > .panel a + a { border-top: 1px solid rgba(255,255,255,0.04); }
+    /* Pillar dropdowns removed — superseded by Cap#356.1 left-edge
+       flyout (single nav system). The 3-pillar IA now lives entirely
+       inside .menu-overlay, triggered by the .menu-btn. */
     header.t5-nav .nav-cta {
       padding: 10px 18px; border: 1.5px solid var(--ink); color: var(--ink);
       font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em;
@@ -338,52 +294,149 @@
       color: #fff; font-weight: 600;
     }
 
-    /* MENU OVERLAY (right-side slide-in, like the reference) */
+    /* ═══════════════════════════════════════════════════════════
+       FLYOUT NAV — Cap#356.1 (Daniel 2026-04-27)
+       Single navigation system replacing the old desktop dropdowns +
+       right-edge mobile drawer. One trigger (MENU), one IA (3 pillars
+       + search + actions), one mental model. Slides in from the LEFT
+       edge with a 0.45s cubic-bezier ease — documentary feel, not
+       corporate dropdown. UX inspiration: NYT app drawer, ProPublica
+       table-of-contents, Netflix browse panel.
+       ═══════════════════════════════════════════════════════════ */
     .menu-overlay {
-      position: fixed; top: 0; right: 0; height: 100vh; width: 440px;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      width: min(720px, 88vw);
       background: var(--bg); color: var(--ink);
-      transform: translateX(100%); transition: transform .45s cubic-bezier(0.16,1,0.3,1);
+      transform: translateX(-100%);
+      transition: transform .45s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 90; display: flex; flex-direction: column;
-      padding: 32px 40px 40px;
-      border-left: 1px solid var(--line-hi);
+      padding: 28px 44px 36px;
+      border-right: 1px solid var(--line-hi);
+      overflow-y: auto;
     }
     .menu-overlay.open { transform: translateX(0); }
+
+    /* Header row — brand + close */
+    .menu-overlay .menu-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .menu-overlay .menu-brand {
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.28em;
+      text-transform: uppercase; font-weight: 600; color: var(--ink);
+      opacity: 0.84;
+    }
+    .menu-overlay .menu-brand strong { font-weight: 800; opacity: 1; letter-spacing: 0.18em; }
     .menu-overlay .close {
-      display: inline-flex; align-items: center; gap: 14px; padding: 10px 14px;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 8px 14px;
       border: 1.5px solid var(--ink); background: transparent;
-      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em;
+      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.22em;
       text-transform: uppercase; font-weight: 700; color: var(--ink); cursor: pointer;
-      align-self: flex-end;
+      transition: background .15s ease, color .15s ease;
     }
     .menu-overlay .close:hover { background: var(--ink); color: var(--bg); }
-    .menu-overlay ul {
-      list-style: none; margin: 72px 0 0; padding: 0;
-      display: flex; flex-direction: column; gap: 14px;
+
+    /* Search — primary affordance for a 338-page site */
+    .menu-overlay .menu-search {
+      margin: 24px 0 8px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: var(--bg-panel, rgba(255,255,255,0.03));
     }
-    .menu-overlay li { display: flex; align-items: baseline; gap: 16px; }
-    .menu-overlay li a {
-      font-family: var(--font-disp); font-weight: 800;
-      font-size: 56px; letter-spacing: -0.028em; line-height: 1.05;
+    .menu-overlay .menu-search::before {
+      content: "⌕"; font-size: 18px; opacity: 0.6;
+    }
+    .menu-overlay .menu-search input {
+      flex: 1; min-width: 0;
+      background: transparent; border: 0; outline: 0;
       color: var(--ink);
-      transition: opacity .2s ease;
+      font-family: var(--font-sans); font-size: 16px;
+      letter-spacing: 0.01em;
     }
-    .menu-overlay li a:hover { opacity: 0.58; }
-    .menu-overlay li sup {
-      font-family: var(--font-mono); font-size: 14px; font-weight: 600;
-      color: var(--ink); letter-spacing: 0.05em; transform: translateY(-0.9em);
+    .menu-overlay .menu-search input::placeholder { color: var(--ink); opacity: 0.5; }
+    .menu-overlay .menu-search kbd {
+      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.16em;
+      padding: 3px 7px; border: 1px solid var(--line); border-radius: 3px;
+      color: var(--ink); opacity: 0.66;
     }
-    .menu-overlay .foot {
-      margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-      padding-top: 28px; border-top: 1px solid var(--line);
-      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em;
-      text-transform: uppercase; color: var(--ink);
+
+    /* Pillars — 3-column grid at desktop, stacks on mobile */
+    .menu-overlay .menu-pillars {
+      margin: 24px 0;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 36px;
     }
-    .menu-overlay .foot a:hover { text-decoration: underline; }
+    .menu-overlay .menu-pillar h6 {
+      margin: 0 0 16px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+      font-family: var(--font-mono); font-size: 10.5px;
+      letter-spacing: 0.32em; text-transform: uppercase; font-weight: 700;
+      color: var(--ink); opacity: 0.74;
+    }
+    .menu-overlay .menu-pillar a {
+      display: block; padding: 8px 0;
+      font-family: var(--font-sans); font-size: 18px;
+      letter-spacing: -0.005em; line-height: 1.3; font-weight: 600;
+      color: var(--ink);
+      transition: padding-left .18s ease, opacity .18s ease;
+    }
+    .menu-overlay .menu-pillar a:hover { padding-left: 8px; opacity: 0.74; }
+    .menu-overlay .menu-pillar a + a { border-top: 1px solid rgba(255,255,255,0.04); }
+    .menu-overlay .menu-pillar small {
+      display: block; margin-top: 2px;
+      font-family: var(--font-mono); font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink); opacity: 0.56; font-weight: 500;
+    }
+
+    /* Primary actions — bottom row */
+    .menu-overlay .menu-actions {
+      margin-top: auto; padding-top: 28px;
+      border-top: 1px solid var(--line);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    }
+    .menu-overlay .menu-actions a {
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px 18px;
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.24em;
+      text-transform: uppercase; font-weight: 700;
+      transition: background .15s ease, color .15s ease;
+    }
+    .menu-overlay .menu-actions a.primary {
+      background: var(--ink); color: var(--bg); border: 1.5px solid var(--ink);
+    }
+    .menu-overlay .menu-actions a.primary:hover { background: transparent; color: var(--ink); }
+    .menu-overlay .menu-actions a.secondary {
+      background: transparent; color: var(--ink); border: 1.5px solid var(--ink);
+    }
+    .menu-overlay .menu-actions a.secondary:hover { background: var(--ink); color: var(--bg); }
+
+    .menu-overlay .menu-foot {
+      margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+      display: flex; gap: 22px;
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--ink); opacity: 0.6;
+    }
+    .menu-overlay .menu-foot a:hover { opacity: 1; text-decoration: underline; }
+
     .menu-scrim {
-      position: fixed; inset: 0; background: rgba(10,7,6,0.6);
+      position: fixed; inset: 0; background: rgba(10, 7, 6, 0.6);
+      backdrop-filter: blur(3px);
       opacity: 0; pointer-events: none; transition: opacity .3s ease; z-index: 80;
     }
     .menu-scrim.open { opacity: 1; pointer-events: auto; }
+
+    /* Mobile — stack pillars vertically, full-width drawer */
+    @media (max-width: 760px) {
+      .menu-overlay {
+        width: 100vw; padding: 24px 24px 32px;
+      }
+      .menu-overlay .menu-pillars { grid-template-columns: 1fr; gap: 24px; }
+      .menu-overlay .menu-pillar a { font-size: 22px; padding: 10px 0; }
+    }
 
     /* NEWS STRIP below photo — 3 operational milestones */
     .news-strip {
@@ -661,60 +714,64 @@
     <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Home</span></div>    <!-- CAP224-NAV-END -->
 
   <header class="t5-nav">
+    <button class="menu-btn" id="menu-open" aria-label="Open navigation menu" aria-haspopup="dialog" aria-controls="menu-overlay">
+      <span class="hx" aria-hidden="true">≡</span> Menu
+    </button>
     <a class="logo" href="/">
       <span class="glyph">&lt;&gt;</span>
       <span class="wordmark">TENET<sup>5</sup></span>
       <span class="tag">Powered by LIRIL AI</span>
     </a>
-    <nav aria-label="Primary">
-      <div class="pillar" data-pillar="record">
-        <button type="button" class="trigger" aria-haspopup="true" aria-expanded="false">The Record</button>
-        <div class="panel" role="menu">
-          <a role="menuitem" href="?load=findings.html">Procurement</a>
-          <a role="menuitem" href="?load=veterans.html">Health · Veterans</a>
-          <a role="menuitem" href="?load=5gw-subversion.html">Foreign Influence</a>
-          <a role="menuitem" href="?load=accountability.html">The Verdict</a>
-        </div>
-      </div>
-      <div class="pillar" data-pillar="explore">
-        <button type="button" class="trigger" aria-haspopup="true" aria-expanded="false">Explore</button>
-        <div class="panel" role="menu">
-          <a role="menuitem" href="?load=osint-dashboard.html">Dashboard</a>
-          <a role="menuitem" href="?load=evidence-index.html">Evidence Vault</a>
-          <a role="menuitem" href="?load=timeline.html">Timeline</a>
-          <a role="menuitem" href="?load=experience.html">Experience</a>
-        </div>
-      </div>
-      <div class="pillar" data-pillar="about">
-        <button type="button" class="trigger" aria-haspopup="true" aria-expanded="false">About</button>
-        <div class="panel" role="menu">
-          <a role="menuitem" href="?load=about.html">Methodology</a>
-          <a role="menuitem" href="?load=legal.html">Legal</a>
-          <a role="menuitem" href="?load=sitemap.html">Sitemap</a>
-          <a role="menuitem" href="feed.xml">RSS Feed</a>
-        </div>
-      </div>
-    </nav>
-    <a class="nav-cta" href="?load=experience.html">Enter the record →</a>
-    <button class="menu-btn" id="menu-open" aria-label="Open menu">
-      Menu <span class="hx">≡</span>
-    </button>
+    <a class="nav-cta" href="?load=experience.html" style="margin-left:auto;">Enter the record →</a>
   </header>
 
   <div class="menu-scrim" id="menu-scrim"></div>
-  <aside class="menu-overlay" id="menu-overlay" aria-label="Main menu">
-    <button class="close" id="menu-close" aria-label="Close menu">Close <span style="font-size:13px">✕</span></button>
-    <ul>
-      <li><a href="?load=findings.html">Chapters<sup>4</sup></a></li>
-      <li><a href="?load=evidence-index.html">Evidence<sup>94</sup></a></li>
-      <li><a href="?load=timeline.html">Timeline<sup>81y</sup></a></li>
-      <li><a href="?load=experience.html">Experience</a></li>
-      <li><a href="?load=accountability.html">The 504</a></li>
-      <li><a href="?load=osint-dashboard.html">Live</a></li>
-    </ul>
-    <div class="foot">
-      <a href="mailto:hello@tenet-5.github.io">CONTACT</a>
-      <a href="feed.xml">FEED</a>
+  <aside class="menu-overlay" id="menu-overlay" aria-label="Main menu" aria-modal="true" role="dialog">
+    <div class="menu-head">
+      <span class="menu-brand"><strong>TENET<sup>5</sup></strong> · Powered by LIRIL AI</span>
+      <button class="close" id="menu-close" aria-label="Close menu">Close <span style="font-size:13px" aria-hidden="true">✕</span></button>
+    </div>
+
+    <label class="menu-search" for="menu-search-input">
+      <input id="menu-search-input" type="search" placeholder="Search the record — 338 pages, primary-source cited"
+             autocomplete="off" spellcheck="false">
+      <kbd>↵</kbd>
+    </label>
+
+    <nav class="menu-pillars" aria-label="Site sections">
+      <div class="menu-pillar">
+        <h6>The Record</h6>
+        <a href="?load=findings.html">Procurement<small>defence + IT contracts</small></a>
+        <a href="?load=veterans.html">Health · Veterans<small>MAID + CAF disclosures</small></a>
+        <a href="?load=5gw-subversion.html">Foreign Influence<small>lobbying + capture</small></a>
+        <a href="?load=accountability.html">The Verdict<small>504 database</small></a>
+      </div>
+      <div class="menu-pillar">
+        <h6>Explore</h6>
+        <a href="?load=osint-dashboard.html">Dashboard<small>live data + OSINT</small></a>
+        <a href="?load=evidence-index.html">Evidence Vault<small>310+ source-cited</small></a>
+        <a href="?load=timeline.html">Timeline<small>81 years of decisions</small></a>
+        <a href="?load=experience.html">Experience<small>2-hr walkthrough</small></a>
+      </div>
+      <div class="menu-pillar">
+        <h6>About</h6>
+        <a href="?load=about.html">Methodology<small>how the record is built</small></a>
+        <a href="?load=legal.html">Legal<small>Charter + criminal code</small></a>
+        <a href="?load=sitemap.html">Sitemap<small>all pages, ranked</small></a>
+        <a href="feed.xml">RSS Feed<small>updates as published</small></a>
+      </div>
+    </nav>
+
+    <div class="menu-actions">
+      <a class="primary" href="?load=experience.html">Enter the record →</a>
+      <a class="secondary" href="?load=osint-dashboard.html">Live dashboard</a>
+    </div>
+
+    <div class="menu-foot">
+      <a href="mailto:hello@tenet-5.github.io">Contact</a>
+      <a href="feed.xml">Feed</a>
+      <a href="?load=press-kit.html">Press kit</a>
+      <a href="?load=class-action-guide.html">Take action</a>
     </div>
   </aside>
 
@@ -939,23 +996,57 @@
 
   <!-- Cap#222 scripts: menu overlay, bit flip, shell loader -->
   <script>
-    // Menu overlay
+    // Flyout nav (Cap#356.1) — single nav system. MENU button opens
+    // a left-edge flyout with brand row + search + 3 pillars + actions.
+    // Auto-focus search on open, keyboard-trap, ESC + scrim + close
+    // button all dismiss. Search submits to a sitemap URL with the
+    // query encoded (no client-side full-text index yet — search is
+    // primary affordance, results are rendered server-side).
     (function(){
-      var btn = document.getElementById('menu-open');
+      var btn   = document.getElementById('menu-open');
       var close = document.getElementById('menu-close');
       var scrim = document.getElementById('menu-scrim');
-      var ov = document.getElementById('menu-overlay');
-      function open(){ ov.classList.add('open'); scrim.classList.add('open'); document.body.style.overflow = 'hidden'; }
-      function shut(){ ov.classList.remove('open'); scrim.classList.remove('open'); document.body.style.overflow = ''; }
-      if (btn) btn.addEventListener('click', open);
+      var ov    = document.getElementById('menu-overlay');
+      var input = document.getElementById('menu-search-input');
+      var lastFocus = null;
+
+      function open(){
+        lastFocus = document.activeElement;
+        ov.classList.add('open');
+        scrim.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        // Focus search after the slide animation begins (prevents iOS
+        // keyboard popping mid-transition).
+        setTimeout(function(){ if (input) input.focus(); }, 220);
+      }
+      function shut(){
+        ov.classList.remove('open');
+        scrim.classList.remove('open');
+        document.body.style.overflow = '';
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      if (btn)   btn.addEventListener('click', open);
       if (close) close.addEventListener('click', shut);
       if (scrim) scrim.addEventListener('click', shut);
-      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') shut(); });
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape' && ov.classList.contains('open')) shut();
+      });
+
+      // Search submit — encode query into sitemap.html URL.
+      if (input) {
+        input.addEventListener('keydown', function(e){
+          if (e.key !== 'Enter') return;
+          var q = input.value.trim();
+          if (!q) return;
+          window.location.href = '?load=sitemap.html#q=' + encodeURIComponent(q);
+        });
+      }
     })();
 
-    // Pillar dropdowns (Cap#356) — keyboard + touch toggle. Hover handled
-    // by CSS :hover for desktop. Click here is for keyboard/touch users
-    // who can't trigger :hover.
+    // Cap#356 desktop pillar dropdowns removed — superseded by the
+    // Cap#356.1 left-edge flyout above. Kept the closeAll helper IIFE
+    // pattern as a no-op for any third-party code that called it.
     (function(){
       var pillars = document.querySelectorAll('header.t5-nav nav .pillar');
       if (!pillars.length) return;
