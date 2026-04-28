@@ -1187,6 +1187,36 @@
 
       function currentIndex(file){ for (var i = 0; i < SCENE_LIST.length; i++) if (SCENE_LIST[i].f === file) return i; return -1; }
 
+      // Cap#406 (2026-04-28): navToFile — load ANY .html page (not just
+      // SCENE_LIST). Pre-fix: ?load=<page> with <page> not in SCENE_LIST
+      // silently fell through to navTo(1) = evidence-index.html, so all
+      // 270+ non-whitelisted nav links served the wrong content. The
+      // SCENE_LIST whitelist is for the prev/next scene-bar UI only;
+      // there is no reason to gate the iframe load behind it.
+      // Safe-name check: basename .html (a-z, 0-9, dash, underscore),
+      // no slashes / dots / queries — prevents path-traversal injection
+      // via crafted ?load= values.
+      var SAFE_FILE_RE = /^[a-z0-9][a-z0-9_-]{0,80}\.html$/i;
+      function navToFile(file, pushHistory){
+        if (!file || !SAFE_FILE_RE.test(file)) return;
+        // If the requested file IS in SCENE_LIST, defer to the typed path.
+        var listIdx = currentIndex(file);
+        if (listIdx >= 0) { return navTo(listIdx, pushHistory); }
+        // Generic load — no prev/next neighbours.
+        document.body.classList.add('scene-mode');
+        if (lbl)   lbl.textContent   = '§ deep-link';
+        if (title) title.textContent = file.replace(/-/g, ' ').replace(/\.html$/, '');
+        if (frame) {
+          frame.classList.add('loading');
+          frame.src = file + '#shell=1';
+          frame.onload = function(){ frame.classList.remove('loading'); };
+        }
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        if (pushHistory) history.pushState({}, '', '?load=' + encodeURIComponent(file));
+        window.scrollTo({top:0, behavior:'instant'});
+      }
+
       function navTo(idx, pushHistory){
         if (idx < 0 || idx >= SCENE_LIST.length) return;
         var s = SCENE_LIST[idx];
@@ -1269,7 +1299,9 @@
         var q = new URLSearchParams(window.location.search);
         var f = q.get('load');
         if (!f) { document.body.classList.remove('scene-mode'); return; }
-        navTo(currentIndex(f) < 0 ? 1 : currentIndex(f), false);
+        // Cap#406: route through navToFile so non-whitelisted ?load=
+        // back/forward navigation reaches the right page.
+        navToFile(f, false);
       });
 
       function hashSlide(){
@@ -1281,7 +1313,9 @@
         if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
       }
 
-      if (load) { var idx = currentIndex(load); navTo(idx < 0 ? 1 : idx, false); }
+      // Cap#406: route via navToFile so any safe .html basename loads,
+      // not just the 8-entry SCENE_LIST whitelist.
+      if (load) { navToFile(load, false); }
       else { hashSlide(); }
       window.addEventListener('hashchange', hashSlide);
     })();
