@@ -1,0 +1,575 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  /* ── TNT Design Token Bridge (Cap#AG-1, 2026-04-26) ─────────
+     index.html inline styles reference --tnt-* vars that were
+     never declared anywhere. Without these, var(--tnt-bg) etc.
+     resolve to initial/transparent → invisible sections.
+     Also maps old style.css vars (--bg-card, --border, --accent)
+     so content pages work under body.tnt-theme too. ─────────── */
+  --tnt-bg:      #050505;
+  --tnt-border:  rgba(255, 255, 255, 0.08);
+  --tnt-white:   #ffffff;
+  --tnt-text:    rgba(255, 255, 255, 0.65);
+  --tnt-red:     #FF2A5F;
+  --tnt-accent:  #c9a44c;
+  --tnt-cyan:    #00E5FF;
+
+  /* ── style.css compatibility (content pages under tnt-theme) ── */
+  --bg:          #050505;
+  --bg-card:     rgba(15, 15, 18, 0.7);
+  --bg-card-h:   rgba(22, 22, 28, 0.85);
+  --bg-surface:  rgba(15, 15, 18, 0.7);
+  --bg-elevated: rgba(25, 25, 30, 0.8);
+  --bg-dark:     #030303;
+  --border:      rgba(255, 255, 255, 0.08);
+  --border-hover:rgba(255, 255, 255, 0.14);
+  --accent:      #FF2A5F;
+  --accent-bright:#FF4D7A;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary:  rgba(255, 255, 255, 0.4);
+  --text-light:  #ffffff;
+  --text-light-muted: rgba(255, 255, 255, 0.7);
+  --color-blue:  #00E5FF;
+  --r-md:        8px;
+  --r-lg:        12px;
+  --font-body:   'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* ── Fluid Typography via clamp() ── */
+  --font-base: clamp(1rem, 0.95vw + 0.8rem, 1.25rem);
+  --font-xs: clamp(0.7rem, 0.8vw + 0.5rem, 0.85rem);
+  --font-sm: clamp(0.85rem, 0.9vw + 0.6rem, 1rem);
+  --font-md: clamp(1.1rem, 1.2vw + 0.9rem, 1.4rem);
+  --font-lg: clamp(1.4rem, 1.8vw + 1.2rem, 2rem);
+  --font-xl: clamp(2.5rem, 4vw + 1.5rem, 4rem);
+  --font-xxl: clamp(3.5rem, 6vw + 2rem, 7rem);
+
+  /* ── Font Families ── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', var(--font-sans);
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* ── Cybernetic Dark Mode Colors ── */
+  --bg-base: #050505;
+  --bg-surface: rgba(15, 15, 18, 0.7);
+  --bg-elevated: rgba(25, 25, 30, 0.8);
+  --bg-glass: rgba(10, 10, 12, 0.4);
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  
+  --accent-neon: #00FF9D;
+  --accent-glow: rgba(0, 255, 157, 0.25);
+  --accent-secondary: #00E5FF;
+  --accent-danger: #FF2A5F;
+  --accent-danger-glow: rgba(255, 42, 95, 0.25);
+  
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(0, 255, 157, 0.15);
+
+  /* ── Spacing ── */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 8rem;
+
+  /* ── Transitions ── */
+  --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.2s var(--ease-snappy);
+  --transition-slow: 0.6s var(--ease-smooth);
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Layout & Containers ── */
+.infinity-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.infinity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-md);
+}
+
+/* ── Glassmorphism Components ── */
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: var(--space-md);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.glass-panel:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: var(--accent-neon);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px var(--accent-glow);
+}
+
+.glass-panel:hover::before {
+  opacity: 1;
+}
+
+/* ── Buttons ── */
+.btn-cyber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--accent-neon);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--accent-neon);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  box-shadow: 0 0 10px transparent;
+}
+
+.btn-cyber::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: var(--accent-neon);
+  transition: transform var(--transition-fast);
+  z-index: -1;
+}
+
+.btn-cyber:hover {
+  color: var(--bg-base);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.btn-cyber:hover::before {
+  transform: translateX(100%);
+}
+
+.btn-cyber-danger {
+  color: var(--accent-danger);
+  border-color: var(--accent-danger);
+}
+.btn-cyber-danger::before {
+  background: var(--accent-danger);
+}
+.btn-cyber-danger:hover {
+  box-shadow: 0 0 20px var(--accent-danger-glow);
+}
+
+/* ── Marquee / Ticker Update ── */
+.infinity-ticker {
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--accent-secondary);
+  padding: 0.5rem 0;
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ── Specific Utility Enhancements ── */
+.text-glow {
+  text-shadow: 0 0 12px var(--accent-glow);
+}
+
+.badge-neon {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: var(--accent-glow);
+  color: var(--accent-neon);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  border: 1px solid var(--accent-neon);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Scrollbar Styling ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
+
+/* ── Data Tables ── */
+.infinity-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  margin-bottom: var(--space-md);
+}
+
+.infinity-table th {
+  text-align: left;
+  padding: var(--space-sm);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.infinity-table td {
+  padding: var(--space-sm);
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background var(--transition-fast);
+}
+
+.infinity-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Glitch Effect (for extreme spec elements) ── */
+.glitch-text {
+  position: relative;
+}
+.glitch-text::before, .glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+.glitch-text::before {
+  left: 2px;
+  text-shadow: -2px 0 #ff00c1;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+  left: -2px;
+  text-shadow: -2px 0 #00fff9;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(77px, 9999px, 83px, 0); }
+  20% { clip: rect(10px, 9999px, 93px, 0); }
+  40% { clip: rect(62px, 9999px, 4px, 0); }
+  60% { clip: rect(15px, 9999px, 46px, 0); }
+  80% { clip: rect(98px, 9999px, 33px, 0); }
+  100% { clip: rect(2px, 9999px, 72px, 0); }
+}
+@keyframes glitch-anim2 {
+  0% { clip: rect(65px, 9999px, 100px, 0); }
+  20% { clip: rect(32px, 9999px, 21px, 0); }
+  40% { clip: rect(81px, 9999px, 59px, 0); }
+  60% { clip: rect(12px, 9999px, 88px, 0); }
+  80% { clip: rect(55px, 9999px, 27px, 0); }
+  100% { clip: rect(92px, 9999px, 40px, 0); }
+}
+
+/* ── TNT TO INFINITY BRIDGE ── */
+/* Cap#197 (2026-04-26): body.tnt-theme is THE canonical design system
+   for tenet-5.github.io. Daniel: "the entire website is scattered" —
+   root cause was 2 design systems coexisting (index.html lean +
+   every other page heavy). shell.js now adds tnt-theme to every
+   non-iframe-shell page. !important on bg/color/font wins against
+   the JS-injected slate stylesheets (monochrome.css, premium-
+   presentation.css, topography.css, tenet5-enhance.css, documentary.css,
+   metaverse.css, polish.css) so the cascade fight ends in tnt-theme's
+   favour deterministically. Per-component overrides still possible
+   via more-specific selectors. */
+body.tnt-theme {
+  background: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+  line-height: 1.55;
+}
+
+html.tnt-theme, html:has(body.tnt-theme) {
+  background: var(--bg-base) !important;
+}
+
+.tnt-nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border-light);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 2.5rem;
+  transition: all var(--transition-fast);
+}
+
+.tnt-nav-logo {
+  font-family: var(--font-mono); font-weight: 700;
+  font-size: var(--font-sm); color: var(--text-primary);
+  letter-spacing: 3px; text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.tnt-nav-links { display: flex; gap: 2rem; font-size: var(--font-xs); text-transform: uppercase; letter-spacing: 1.5px; }
+.tnt-nav-links a { color: var(--text-secondary); transition: color var(--transition-fast); }
+.tnt-nav-links a:hover { color: var(--accent-neon); text-shadow: 0 0 8px var(--accent-glow); }
+
+.tnt-hero {
+  position: relative;
+  padding: 10rem 2.5rem 6rem;
+  max-width: 1600px; margin: 0 auto;
+}
+
+.tnt-hero h1 {
+  font-size: var(--font-xxl);
+  line-height: 1.08; max-width: 900px;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #00FF9D 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(0, 255, 157, 0.2);
+}
+
+.tnt-hero-sub {
+  font-size: var(--font-md); max-width: 600px;
+  color: var(--text-secondary); margin-bottom: 3rem;
+  line-height: 1.7;
+}
+
+.tnt-button {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent;
+  color: var(--accent-neon);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.85rem 2rem;
+  border: 1px solid var(--accent-neon);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+.tnt-button::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: var(--accent-neon);
+  transition: transform var(--transition-fast);
+  z-index: -1;
+}
+.tnt-button:hover {
+  color: var(--bg-base);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
+}
+.tnt-button:hover::before {
+  transform: translateX(100%);
+}
+
+.tnt-marquee-container {
+  width: 100%; overflow: hidden;
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0.5rem 0; display: flex;
+}
+.tnt-marquee {
+  white-space: nowrap; display: inline-block;
+  animation: tnt-scroll 35s linear infinite;
+  font-family: var(--font-mono); font-size: var(--font-xs);
+  color: var(--accent-secondary); text-transform: uppercase; letter-spacing: 2px;
+}
+.tnt-marquee span { padding: 0 2rem; }
+.tnt-marquee .pulse-dot {
+  display: inline-block; width: 6px; height: 6px;
+  background: var(--accent-neon); border-radius: 50%;
+  margin-right: 6px; vertical-align: middle;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+@keyframes tnt-scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+.tnt-status-section {
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 3rem 0; margin-top: 2rem;
+  background: var(--bg-glass);
+}
+.tnt-status-inner { max-width: 1600px; margin: 0 auto; padding: 0 2.5rem; }
+.tnt-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px; background: var(--border-light);
+}
+.tnt-status-cell {
+  background: var(--bg-base); padding: 1.5rem;
+  transition: background var(--transition-fast);
+}
+.tnt-status-cell:hover { background: var(--bg-surface); }
+.tnt-status-value {
+  font-family: var(--font-mono); font-size: var(--font-lg);
+  color: var(--text-primary); font-weight: 600;
+  text-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+.tnt-status-value.green { color: var(--accent-neon); text-shadow: 0 0 12px var(--accent-glow); }
+.tnt-status-value.amber { color: #c9a44c; text-shadow: 0 0 12px rgba(201,164,76,0.4); }
+.tnt-status-value.red { color: var(--accent-danger); text-shadow: 0 0 12px var(--accent-danger-glow); }
+
+.tnt-solutions { padding: 6rem 2.5rem; max-width: 1600px; margin: 0 auto; }
+.tnt-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+  background: transparent;
+}
+.tnt-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 2.5rem;
+  display: flex; flex-direction: column;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative; overflow: hidden;
+}
+.tnt-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: var(--accent-neon);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px var(--accent-glow);
+}
+.tnt-card h3 { font-size: var(--font-md); color: var(--text-primary); }
+.tnt-card p { font-size: var(--font-sm); color: var(--text-secondary); }
+.tnt-card-num { color: var(--accent-secondary); font-family: var(--font-mono); }
+.tnt-card-link { color: var(--accent-neon); }
+
+.tnt-dossier {
+  border-top: 1px solid var(--border-light);
+  padding: 5rem 2.5rem;
+  background: var(--bg-glass);
+}
+.tnt-dossier-inner { max-width: 1600px; margin: 0 auto; }
+.tnt-dossier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-md); margin-top: 3rem;
+}
+.tnt-dossier-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 2rem;
+  transition: all var(--transition-fast);
+}
+.tnt-dossier-card:hover {
+  border-color: var(--accent-danger);
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px var(--accent-danger-glow);
+}
+.tnt-dossier-tag { color: var(--accent-danger); }
+
+.tnt-footer {
+  border-top: 1px solid var(--border-light);
+  padding: 3rem 2.5rem;
+  text-align: center;
+  background: var(--bg-base);
+}
+.tnt-integrity .sig { color: var(--accent-secondary); text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+
+/* ── Missing Index Component Styles (Cap#AG-1, 2026-04-26) ── */
+.tnt-hero-eyebrow {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-family: var(--font-mono); font-size: 0.68rem;
+  text-transform: uppercase; letter-spacing: 2.5px;
+  color: var(--text-muted, rgba(255,255,255,0.4));
+  margin-bottom: 1.5rem;
+}
+.pulse-dot {
+  display: inline-block; width: 8px; height: 8px;
+  background: var(--accent-neon); border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: pulseDot 2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent-glow); }
+  50% { opacity: 0.5; box-shadow: 0 0 16px var(--accent-glow); }
+}
+.tnt-eyebrow {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--text-muted, rgba(255,255,255,0.4));
+  margin-bottom: 0.75rem;
+}
+.tnt-footer-copy {
+  font-size: 0.78rem; color: var(--text-muted, rgba(255,255,255,0.4));
+  margin-top: 0.5rem;
+}
+.tnt-integrity {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text-muted, rgba(255,255,255,0.4));
+  text-align: center; padding: 2rem 2.5rem;
+  border-top: 1px solid var(--border-light);
+}
+.tnt-solutions-header {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  margin-bottom: 0.5rem;
+}
+.tnt-solutions-sub {
+  font-size: 0.9rem; color: var(--text-secondary);
+  max-width: 600px; margin-bottom: 3rem;
+}
+
+/* ── Responsive: mobile nav collapse ── */
+@media (max-width: 768px) {
+  .tnt-nav { padding: 1rem 1.25rem; }
+  .tnt-nav-links { display: none; }
+  .tnt-hero { padding: 6rem 1.25rem 4rem; }
+  .tnt-hero h1 { font-size: clamp(2rem, 8vw, 3.5rem); }
+  .tnt-solutions { padding: 3rem 1.25rem; }
+  .tnt-dossier { padding: 3rem 1.25rem; }
+  .tnt-footer { padding: 2rem 1.25rem; }
+}
