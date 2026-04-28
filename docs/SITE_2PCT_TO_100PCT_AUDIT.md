@@ -1,6 +1,6 @@
 # SITE_2PCT_TO_100PCT — Audit
 
-_Generated 2026-04-28T02:32:45 from `tools/site_2pct_audit.py`._
+_Generated 2026-04-28T04:02:16 from `tools/site_2pct_audit.py`._
 
 
 ## Goal
