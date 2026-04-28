@@ -1,0 +1,81 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TENET·5 — The Argument · Accessibility Hardening
+   Cap#205-07 · skip-link + visible focus + reduced-motion guard
+   Loaded after argument.css so it wins for focus rings.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Skip link (visible only on focus) ─────────────────────────────── */
+.arg-skip {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100000;
+}
+.arg-skip:focus,
+.arg-skip:focus-visible {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  width: auto;
+  height: auto;
+  padding: 10px 16px;
+  background: var(--liril-accent, #c9a44c);
+  color: var(--liril-ink, #0a0805);
+  font-family: var(--liril-font-mono, ui-monospace, monospace);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 2px solid #000;
+  border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7);
+  outline: none;
+}
+
+/* ── Visible focus ring on every interactive element ───────────────── */
+.arg-stage :focus-visible,
+.arg-toc :focus-visible,
+.arg-boot :focus-visible,
+#arg-toast :focus-visible,
+.arg-btn:focus-visible,
+.arg-toc__item:focus-visible,
+[id^="arg-"]:focus-visible {
+  outline: 2px solid var(--liril-accent, #c9a44c);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(201, 164, 76, 0.25);
+}
+
+/* Active TOC item carries aria-current; mark visually too */
+.arg-toc__item[aria-current="true"] {
+  background: rgba(201, 164, 76, 0.12);
+  border-left: 3px solid var(--liril-accent, #c9a44c);
+  padding-left: calc(1rem - 3px);
+}
+
+/* High-contrast preference */
+@media (prefers-contrast: more) {
+  .arg-stage :focus-visible,
+  .arg-btn:focus-visible,
+  .arg-toc__item:focus-visible {
+    outline-width: 3px;
+    outline-color: #ffd24a;
+    box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Reduced-motion guard — kill non-essential transitions */
+@media (prefers-reduced-motion: reduce) {
+  .arg-toast,
+  .arg-toc,
+  .arg-boot,
+  .arg-break,
+  .arg-prog__fill,
+  .arg-center__overlay {
+    transition: none !important;
+    animation: none !important;
+  }
+}
