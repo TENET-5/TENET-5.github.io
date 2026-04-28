@@ -7,9 +7,11 @@
  * <track kind="captions"> for the deaf/HoH narration parity (criterion
  * (b)).
  *
- * Asset contract (cap357):
- *   /captions/<scene>.vtt   — WebVTT subtitle file (UTF-8)
+ * Asset contract (cap357, revised cap358):
+ *   /audio/<scene>.vtt      — WebVTT subtitle file (UTF-8)
  *   /audio/<scene>.opus     — LIRIL-recorded narration (Opus codec)
+ *   (both colocated under /audio/ — 270 of 344 pages have a .vtt
+ *    already; new pages will pick up assets when LIRIL records them)
  *
  * Both are optional. If audio is missing, page renders silent. If
  * captions are missing but audio is present, audio plays without
@@ -31,7 +33,7 @@
   if (!sceneId) return;
 
   const audioUrl = "/audio/" + sceneId + ".opus";
-  const captionUrl = "/captions/" + sceneId + ".vtt";
+  const captionUrl = "/audio/" + sceneId + ".vtt";
 
   // Probe audio existence with HEAD before attaching — cheap miss-skip.
   fetch(audioUrl, { method: "HEAD" }).then(function (r) {
