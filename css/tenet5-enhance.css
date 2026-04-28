@@ -221,3 +221,30 @@ section {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Mobile (Cap#285, ≤768px) ───────────────────────────────
+   Disable expensive ambient effects on small screens for perf
+   + battery. Keep functional transitions, kill decorative ones.
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* kill the fixed-position animated orb backdrop */
+  body::before {
+    animation: none !important;
+    background: none !important;
+  }
+  /* hover transforms are noisy on touch (sticky :hover state) */
+  .glass-card:hover, .card:hover, .pipeline-card:hover,
+  .cta-card:hover, .harm-entry:hover {
+    transform: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+  }
+  /* shorter card transition on mobile */
+  .glass-card, .card, .pipeline-card, .editorial-surface,
+  .cta-card, .harm-entry, [class*="panel"] {
+    transition-duration: 0.2s !important;
+  }
+  /* table row hover noise off on touch */
+  .data-table tbody tr:hover {
+    background: transparent !important;
+  }
+}
