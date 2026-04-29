@@ -706,23 +706,13 @@ body.scene-mode .tnt-breadcrumb{display:none !important}
   .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
 }
 </style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link is-current" href="index.html" aria-current="page">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
-    </nav>
+    <!-- Cap#298d-redux (2026-04-29): pillar-nav block removed permanently.
+         Daniel screenshot 2026-04-29 ("this is redundent") + auto-revert
+         hunt traced the regenerator to tools/cap224_pillar_nav_inject.py;
+         that injector now has "index.html" in SKIP_FILES so this block
+         won't reappear on the next auto-cycle. Single canonical nav is
+         the Cap#356.1 .menu-btn flyout below + related-apparatus footer
+         at end of body. -->
     <!-- CAP298: redundant self-referential "Home / Home" breadcrumb removed on home page -->
     <!-- CAP224-NAV-END -->
 <!-- CAP230-POSTER-BEGIN -->
@@ -1214,7 +1204,26 @@ body.scene-mode .tnt-breadcrumb{display:none !important}
         if (frame) {
           frame.classList.add('loading');
           frame.src = file + '#shell=1';
-          frame.onload = function(){ frame.classList.remove('loading'); };
+          frame.onload = function(){
+            frame.classList.remove('loading');
+            // Cap#298d-shell (2026-04-29) — suppress duplicate chrome on
+            // any iframed content page so the shell-shown nav (Cap#356.1
+            // .menu-btn flyout) is the only nav. Most content pages don't
+            // self-set body.in-shell; do it from the parent so coverage
+            // is uniform across all 270+ pages reachable via ?load=.
+            try {
+              var doc = frame.contentDocument;
+              if (doc && doc.body) {
+                doc.body.classList.add('in-shell');
+                if (!doc.getElementById('t5-shell-chrome-hide')) {
+                  var s = doc.createElement('style');
+                  s.id = 't5-shell-chrome-hide';
+                  s.textContent = 'body.in-shell .tnt-pillar-nav,body.in-shell .tnt-breadcrumb,body.in-shell .liril-masthead{display:none !important}';
+                  doc.head.appendChild(s);
+                }
+              }
+            } catch(e) {}
+          };
         }
         if (prevBtn) prevBtn.disabled = true;
         if (nextBtn) nextBtn.disabled = true;
@@ -1240,6 +1249,19 @@ body.scene-mode .tnt-breadcrumb{display:none !important}
           frame.classList.remove('loading');
           try {
             var doc = frame.contentDocument; if (!doc) return;
+            // Cap#298d-shell (2026-04-29) — paired with navToFile() above.
+            // Add body.in-shell + chrome-suppression CSS so SCENE_LIST
+            // pages (5gw-subversion, evidence-index, ...) suppress their
+            // pillar-nav / breadcrumb / masthead inside the shell iframe.
+            if (doc.body) {
+              doc.body.classList.add('in-shell');
+              if (!doc.getElementById('t5-shell-chrome-hide')) {
+                var sh = doc.createElement('style');
+                sh.id = 't5-shell-chrome-hide';
+                sh.textContent = 'body.in-shell .tnt-pillar-nav,body.in-shell .tnt-breadcrumb,body.in-shell .liril-masthead{display:none !important}';
+                doc.head.appendChild(sh);
+              }
+            }
             if (doc.getElementById('t5-scene-overlay')) return;
             var st = doc.createElement('style');
             st.id = 't5-scene-overlay';
