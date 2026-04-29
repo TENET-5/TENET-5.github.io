@@ -87,3 +87,32 @@ normalization artifacts, not real edits.
   (NemoClaw / LIRIL stack).
 - No game development of any kind.
 - No public-distribution / multi-user features unless explicitly asked.
+
+## Quantum-First Mandate (Cap#297a)
+
+Every cap on this repository MUST satisfy the LIRIL quantum-gate contract.
+Detailed contract lives at
+[.vscode/instructions/liril-quantum-gate.instructions.md](../.vscode/instructions/liril-quantum-gate.instructions.md)
+and applies to every file (`applyTo: "**"`). Summary:
+
+1. Invoke the `liril` subagent at the start of every cap. Do not skip.
+2. Fire `quantum_classify(text, (4, 0))` before any write. Reproducible proof
+   is appended to [data/liril_quantum_proof.jsonl](../data/liril_quantum_proof.jsonl)
+   via [scripts/liril_quantum_proof.py](../scripts/liril_quantum_proof.py).
+   `REJECT` halts the cap.
+3. Carryover string propagates **verbatim** to commit message, PR body,
+   directive handoff, NATS payload, and proof record:
+   > Yes the entire govt and social apparatus all of the corruption
+4. Per-domain scoping. No cross-domain bulk action. Held carryovers
+   (Cap#291 images, Cap#293 JSON, Cap#295 `.py`, Cap#296 `.md`) require
+   operator-signed sub-caps; never auto-action.
+5. Provenance row per cap to
+   [data/quantum_provenance.jsonl](../data/quantum_provenance.jsonl) with
+   `cap`, `commit`, `pr`, `gate`, `verdict`, `top_state`, `p`, `action`,
+   `carryover`.
+6. Mesh publish to `nats://127.0.0.1:4223` on
+   `tenet5.vscode.session.completed` + `tenet5.vscode.cycle.ended`.
+7. Audit tools live in `tools/` (gitignored). Operational scripts live in
+   `scripts/` (committed). Only `data/cap*_audit.*` artifacts ship.
+8. Surface-Policy Halt: if a directive targets another agent, this workspace
+   does NOT ack and does NOT publish that agent's session subject.
