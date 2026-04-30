@@ -183,6 +183,41 @@
   } else {
     init();
   }
+
+  /* ── CAP230 POSTER — Graceful Degradation ──────────────────────────── */
+  /* When walkthrough video/poster assets are missing (404), hide the
+     broken <video> and insert a clean branded fallback message. */
+  function patchPosters() {
+    document.querySelectorAll('.cap230-poster video').forEach(function(video) {
+      var source = video.querySelector('source');
+      if (!source) return;
+
+      function handleError() {
+        video.classList.add('poster-error');
+        var fig = video.closest('figure');
+        if (fig && !fig.querySelector('.poster-fallback')) {
+          var fb = document.createElement('div');
+          fb.className = 'poster-fallback';
+          fb.innerHTML = '<span class="fb-icon">📋</span> Walkthrough preview — generating';
+          fig.insertBefore(fb, video);
+        }
+      }
+
+      source.addEventListener('error', handleError);
+      video.addEventListener('error', handleError);
+
+      /* If video already errored before listener attached */
+      if (video.error || video.networkState === 3) {
+        handleError();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchPosters);
+  } else {
+    setTimeout(patchPosters, 100);
+  }
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════
