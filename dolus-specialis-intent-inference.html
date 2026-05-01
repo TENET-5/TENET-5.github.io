@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+      if (window !== window.top) {
+        document.addEventListener('DOMContentLoaded', function() {
+          document.body.classList.add('in-shell');
+        });
+      }
+    </script>
+    <style>
+      body.in-shell .tnt-pillar-nav,
+      body.in-shell .tnt-breadcrumb { display: none !important; }
+    </style>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dolus Specialis — Inferring Specific Intent | TENET5</title>
+  <meta name="description" content="The specific-intent threshold under the UN Convention on Genocide. Article II requires that the prohibited acts be committed with intent to destroy the protected group as such, in whole or in part. International tribunals — ICTR (Akayesu 1998), ICTY (Krstić 2001 trial / 2004 appeal), and the ICJ (The Gambia v. Myanmar 2022 provisional measures) — have established that specific intent is rarely declared and is therefore inferred from a pattern of conduct. This page is the methodology anchor that maps that inference framework against the Canadian record.">
+  <link rel="canonical" href="https://tenet-5.github.io/dolus-specialis-intent-inference.html">
+  <meta property="og:title" content="Dolus Specialis — Inferring Specific Intent | TENET5">
+  <meta property="og:description" content="Specific-intent threshold under UN Genocide Convention. ICTR/ICTY/ICJ jurisprudence on inferring intent from pattern of conduct, mapped against the Canadian record.">
+  <meta property="og:url" content="https://tenet-5.github.io/dolus-specialis-intent-inference.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:type" content="article">
+  <meta name="theme-color" content="#2E3440">
+  <link rel="stylesheet" href="css/tenet5.css?v=6">
+  <link rel="stylesheet" href="css/liril-utilities.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+  <style>
+    body { font-family: var(--slate-font-body, 'Inter',system-ui,sans-serif);
+           background: var(--slate-bg, #1a1a1a); color: var(--slate-ink, #e8e3d6); }
+    .skip-link { position:absolute; left:-9999px; top:auto; }
+    .skip-link:focus { left:1rem; top:1rem; z-index:9999; padding:.5rem 1rem;
+                      background:var(--slate-accent,#c9a44c); color:var(--slate-bg,#1a1a1a); }
+    .hero-ds { padding: 3rem 1.5rem 2rem; max-width: 1100px; margin: 0 auto;
+                border-bottom: 1px solid var(--slate-border, rgba(232,227,214,.16)); }
+    .hero-ds h1 { font-size: clamp(2rem, 4.5vw, 3.4rem); font-weight: 800;
+                   letter-spacing: -0.02em; line-height: 1.08; margin: 0 0 .8rem;
+                   color: var(--slate-ink-strong, #f5f1e6); }
+    .hero-ds .subtitle { font-size: clamp(1rem, 1.6vw, 1.2rem); line-height: 1.55;
+                         color: var(--slate-ink-dim, #c9c3b3); max-width: 800px; }
+    .hero-ds .legal-cite { margin-top: 1rem; font-family: 'JetBrains Mono',ui-monospace,monospace;
+                            font-size: .78rem; color: var(--slate-brass, #b8835a); letter-spacing: .04em; }
+    .content { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; line-height: 1.65; }
+    .content h2 { font-size: 1.6rem; font-weight: 700; margin: 2.4rem 0 1rem;
+                  color: var(--slate-ink-strong, #f5f1e6);
+                  border-bottom: 1px solid var(--slate-border, rgba(232,227,214,.12));
+                  padding-bottom: .4rem; }
+    .content h3 { font-size: 1.18rem; font-weight: 600; margin: 1.8rem 0 .6rem;
+                   color: var(--slate-ink-strong, #f5f1e6); }
+    .content p { margin: 0 0 1rem; color: var(--slate-ink, #e8e3d6); }
+    .content a { color: var(--slate-link, #c89a76); text-decoration: underline;
+                 text-decoration-color: rgba(200,154,118,.45); }
+    .content a:hover { color: var(--slate-link-hover, #e0b58c); text-decoration-color: currentColor; }
+    .element-box { padding: 1rem 1.2rem; margin: 1.2rem 0;
+                    background: rgba(184,131,90,.08); border-left: 3px solid var(--slate-brass, #b8835a);
+                    border-radius: 4px; }
+    .element-id { font-family: 'JetBrains Mono',ui-monospace,monospace; font-size: .82rem;
+                   color: var(--slate-brass, #b8835a); letter-spacing: .04em; margin-bottom: .2rem; }
+    .element-text { color: var(--slate-ink, #e8e3d6); font-style: italic; }
+    .pull-quote { padding: 1.4rem 1.6rem; margin: 1.6rem 0;
+                   background: rgba(255,255,255,.025);
+                   border-left: 3px solid var(--slate-accent, #c9a44c);
+                   font-size: 1.05rem; line-height: 1.5; font-style: italic;
+                   color: var(--slate-ink-strong, #f5f1e6); }
+    .pull-quote .attribution { display: block; margin-top: .6rem;
+                                font-style: normal; font-size: .82rem;
+                                color: var(--slate-ink-dim, #9b9788);
+                                font-family: 'JetBrains Mono',ui-monospace,monospace; }
+    .case-card { padding: 1.2rem 1.4rem; margin: 1rem 0;
+                  background: rgba(255,255,255,.025);
+                  border: 1px solid var(--slate-border, rgba(232,227,214,.16));
+                  border-radius: 6px; }
+    .case-card .docket { font-family: 'JetBrains Mono',ui-monospace,monospace;
+                         font-size: .72rem; color: var(--slate-brass, #b8835a);
+                         letter-spacing: .06em; margin-bottom: .35rem; }
+    .case-card .case-title { font-weight: 700; color: var(--slate-ink-strong, #f5f1e6);
+                              font-size: 1.05rem; margin-bottom: .55rem; }
+    .case-card p { margin: .4rem 0; }
+    .inference-grid { display: grid; grid-template-columns: 1fr; gap: 1rem;
+                       margin: 1.5rem 0; }
+    @media (min-width: 720px) { .inference-grid { grid-template-columns: 1fr 1fr; } }
+    .inference-card { padding: 1.1rem 1.3rem;
+                       background: rgba(255,255,255,.025);
+                       border: 1px solid var(--slate-border, rgba(232,227,214,.16));
+                       border-radius: 6px; }
+    .inference-card .lbl { font-family: 'JetBrains Mono',ui-monospace,monospace;
+                            font-size: .7rem; color: var(--slate-brass, #b8835a);
+                            letter-spacing: .08em; margin-bottom: .35rem; }
+    .inference-card h4 { font-size: 1.02rem; font-weight: 700; margin: 0 0 .5rem;
+                          color: var(--slate-ink-strong, #f5f1e6); }
+    .inference-card p { margin: .3rem 0; font-size: .94rem; line-height: 1.5; }
+    .related-strip { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 2rem; }
+    .related-strip a { display: inline-block; padding: .3rem .65rem;
+                        font-family: 'JetBrains Mono',ui-monospace,monospace;
+                        font-size: .8rem; color: var(--slate-ink, #e8e3d6);
+                        background: rgba(255,255,255,.03);
+                        border: 1px solid var(--slate-border, rgba(232,227,214,.16));
+                        border-radius: 3px; text-decoration: none; }
+    .related-strip a:hover { color: var(--slate-link-hover, #e0b58c);
+                              border-color: var(--slate-brass, #b8835a); }
+  </style>
+</head>
+<body data-act="ii">
+  <!-- CAP224-NAV-BEGIN -->
+  <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
+    <a class="tnt-pillar-link" href="index.html">Home</a>
+    <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+    <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+    <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+    <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+    <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+    <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+    <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+    <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+    <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+    <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+    <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+    <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+    <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+    <span class="tnt-spacer"></span>
+  </nav>
+  <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Dolus Specialis — Inferring Specific Intent</span></div>
+  <!-- CAP224-NAV-END -->
+
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <section class="hero-ds">
+    <h1>Dolus Specialis — Inferring Specific Intent</h1>
+    <p class="subtitle">
+      Article II of the UN Convention on Genocide requires that the
+      enumerated acts be committed <em>"with intent to destroy, in
+      whole or in part, a national, ethnical, racial or religious
+      group, as such."</em> This is the <em>dolus specialis</em>
+      requirement — specific intent to destroy the group, not merely
+      intent to perform the underlying act. <strong>Specific intent
+      is rarely declared in plain terms by perpetrators</strong>;
+      international tribunals have therefore established that it can
+      be inferred from a pattern of conduct. This page is the
+      methodology anchor: it states the inference framework, points
+      to the leading cases that built it, and shows where on this
+      site the underlying conduct evidence lives.
+    </p>
+    <p class="legal-cite">UN Convention on Genocide (1948) Art. II · Rome Statute (1998) Art. 6 · ICTR Akayesu Trial Judgment (2 Sept 1998, ICTR-96-4-T) · ICTY Krstić Trial Judgment (2 Aug 2001, IT-98-33-T) and Appeals Judgment (19 Apr 2004, IT-98-33-A) · ICJ Application of the Genocide Convention (The Gambia v. Myanmar) Provisional Measures Order (23 Jan 2020) and subsequent Order (22 July 2022)</p>
+  </section>
+
+  <main class="content" id="main" role="main">
+
+    <h2>The element this page anchors</h2>
+    <div class="element-box">
+      <div class="element-id">UN Convention on Genocide Art. II — chapeau</div>
+      <div class="element-text">"…with intent to destroy, in whole or in part, a national, ethnical, racial or religious group, as such…"</div>
+    </div>
+    <p>
+      The Article II elements (a)-(e) — covered by the
+      <a href="article-2a-killing-members.html">II(a) anchor</a>,
+      <a href="providence-care-testimony.html">II(b) anchor</a>,
+      <a href="boil-water-advisories.html">II(c) anchors</a>,
+      <a href="coerced-sterilization-indigenous-women.html">II(d) anchors</a>,
+      and <a href="residential-schools.html">II(e) anchor</a> — are
+      the <em>actus reus</em> (the prohibited acts). They are
+      <strong>necessary but not sufficient</strong> for a finding of
+      genocide. The sufficient condition is the chapeau intent
+      requirement — the <em>dolus specialis</em>. Without intent, the
+      strongest possible finding is crimes against humanity (Rome
+      Statute Art. 7), not genocide (Rome Statute Art. 6).
+    </p>
+
+    <h2>Why intent is normally inferred, not declared</h2>
+    <p>
+      The drafters of the Genocide Convention knew that perpetrators
+      do not generally write down their intent to destroy a group.
+      The standard for proving intent therefore developed through
+      tribunal jurisprudence rather than from explicit confession.
+      Three judicial bodies built the modern inference framework: the
+      International Criminal Tribunal for Rwanda (ICTR), the
+      International Criminal Tribunal for the former Yugoslavia
+      (ICTY), and the International Court of Justice (ICJ). Each
+      contributed to the shape of the test that any contemporary
+      genocide claim must satisfy.
+    </p>
+
+    <h2>The leading cases</h2>
+
+    <div class="case-card">
+      <div class="docket">ICTR-96-4-T · 2 September 1998</div>
+      <div class="case-title">Prosecutor v. Jean-Paul Akayesu (ICTR Trial Chamber)</div>
+      <p>
+        The first conviction for genocide by an international tribunal.
+        Akayesu was bourgmestre (mayor) of Taba commune, Rwanda. The
+        Trial Chamber held that <em>dolus specialis</em> is an
+        essential element of the offence and discussed at length the
+        permissibility of inferring intent from facts. The judgment is
+        the foundational reference for every subsequent intent
+        inference analysis in international criminal law.
+      </p>
+      <p>
+        The Akayesu Chamber accepted that intent could be deduced from
+        the general context of the perpetration of other culpable acts
+        systematically directed against the same group, the scale of
+        the atrocities committed, the targeting of victims based on
+        membership in a particular group, and the repetition of
+        destructive and discriminatory acts.
+      </p>
+    </div>
+
+    <div class="case-card">
+      <div class="docket">IT-98-33-T (Trial 2001) · IT-98-33-A (Appeal 2004)</div>
+      <div class="case-title">Prosecutor v. Radislav Krstić (ICTY)</div>
+      <p>
+        Krstić was a general in the Bosnian Serb Army. The Trial
+        Chamber convicted him of genocide for the Srebrenica massacre;
+        the Appeals Chamber reduced the conviction to aiding and
+        abetting genocide. Both judgments deepened the framework for
+        inferring intent from a pattern of conduct, and the Appeals
+        Chamber's analysis of the "in part" question — what counts as
+        a substantial part of the protected group — has been cited in
+        every subsequent international intent analysis.
+      </p>
+      <p>
+        Krstić matters for any contemporary intent inference because
+        it confirms that intent need not be the sole purpose of the
+        conduct; it can be one of several intents, and it can be
+        inferred when the targeted destruction of a substantial part
+        of the group is a foreseeable consequence of policy choices
+        taken with knowledge of those consequences.
+      </p>
+    </div>
+
+    <div class="case-card">
+      <div class="docket">ICJ General List No. 178 · Provisional Measures 2020 + 2022</div>
+      <div class="case-title">Application of the Genocide Convention (The Gambia v. Myanmar)</div>
+      <p>
+        The ICJ accepted The Gambia's standing to bring a Genocide
+        Convention claim against Myanmar over the treatment of the
+        Rohingya, even though The Gambia is not directly affected.
+        The Court ordered provisional measures requiring Myanmar to
+        prevent genocidal acts and preserve evidence. The 2022 Order
+        rejected Myanmar's preliminary objections, allowing the case
+        to proceed to merits.
+      </p>
+      <p>
+        The Gambia v. Myanmar matters for the contemporary
+        inference framework because the ICJ accepted that policy
+        decisions, the identity-based targeting of a group, and the
+        scale of resulting harm are sufficient to make a plausible
+        case for intent — which is the threshold for provisional
+        measures and a strong indicator of how the merits inference
+        will proceed.
+      </p>
+    </div>
+
+    <h2>The five categories of inference evidence</h2>
+    <p>
+      Drawing the converging analyses from Akayesu, Krstić, and the
+      Rohingya pleadings, contemporary practice recognises (broadly)
+      five overlapping categories of evidence from which specific
+      intent can be inferred. The TENET5 dossier maps each of these
+      categories against the Canadian record.
+    </p>
+
+    <div class="inference-grid">
+      <div class="inference-card">
+        <div class="lbl">Category 1</div>
+        <h4>Scale of the harm</h4>
+        <p>
+          The aggregate magnitude of harm — number of deaths, share
+          of population affected, persistence over time. On the
+          Canadian record: <strong>60,301 cumulative MAID deaths
+          through 2023</strong> (4.7% of all Canadian deaths in 2023);
+          <strong>53,308 opioid-toxicity deaths 2016&ndash;2025</strong>;
+          <strong>combined 129,783</strong> — exceeding Canada's WW1
+          and WW2 dead combined (111,400). See
+          <a href="article-2a-killing-members.html">article-2a-killing-members.html</a>
+          and <a href="body-count.html">body-count.html</a>.
+        </p>
+      </div>
+
+      <div class="inference-card">
+        <div class="lbl">Category 2</div>
+        <h4>Targeting of group members specifically</h4>
+        <p>
+          Acts directed at members of a defined group — disability
+          and age cohort in MAID's Track 2; First Nations in
+          residential schools and on-reserve drinking water; veterans
+          in the VAC-MAID disclosure. See
+          <a href="veterans-maid.html">veterans-maid.html</a>,
+          <a href="residential-schools.html">residential-schools.html</a>,
+          <a href="boil-water-advisories.html">boil-water-advisories.html</a>.
+        </p>
+      </div>
+
+      <div class="inference-card">
+        <div class="lbl">Category 3</div>
+        <h4>Repeated derogatory or dehumanising speech</h4>
+        <p>
+          Public statements that reduce members of the group to less
+          than full personhood. The Canadian Hansard record
+          documents the policy framing of MAID expansion and the
+          reception of disability submissions. See
+          <a href="maid-hansard-record.html">maid-hansard-record.html</a>
+          and the <a href="argument-sources.html">argument-sources page</a>.
+        </p>
+      </div>
+
+      <div class="inference-card">
+        <div class="lbl">Category 4</div>
+        <h4>Discriminatory acts (other Article II elements)</h4>
+        <p>
+          Article II(b)-(e) elements provide circumstantial evidence
+          of intent because they show coordinated harm directed at
+          the same population. On the Canadian record this is the
+          residential-schools / MMIWG / coerced-sterilization /
+          fertility-collapse / safe-supply-diversion / providence-care
+          chain — every Article II element has at least one TENET5
+          anchor page documenting Canadian conduct.
+        </p>
+      </div>
+
+      <div class="inference-card">
+        <div class="lbl">Category 5</div>
+        <h4>Patterns of conduct over time</h4>
+        <p>
+          Not isolated acts but a sequence of policy decisions, each
+          with knowledge of the foreseeable consequences for the
+          group. On the Canadian record: the
+          <a href="legislative-timeline.html">legislative-timeline</a>
+          maps Bill C-14 (2016) → Bill C-7 (2021) → Bills C-39 (2023)
+          and C-62 (2024). Each statutory expansion was passed with
+          published warnings from disability-rights submissions, the
+          PBO, and clinical bodies about the foreseeable harm pattern.
+        </p>
+      </div>
+    </div>
+
+    <h2>What this page does and does not claim</h2>
+    <p>
+      This page <strong>does not</strong> claim that a specific-intent
+      finding has been made by any tribunal against the Government of
+      Canada. No such finding exists; the question has not been
+      adjudicated. This page <strong>does</strong> claim that the
+      international jurisprudential framework for inferring specific
+      intent — built by Akayesu, refined by Krstić, applied at
+      provisional-measures level by the ICJ in The Gambia v. Myanmar
+      — exists, that it is the framework any future tribunal would
+      apply, and that the TENET5 dossier already documents Canadian
+      conduct that would be relevant under each of the five inference
+      categories the framework recognises.
+    </p>
+    <p>
+      The dossier's purpose is to assemble the record so that the
+      inference can be tested. The
+      <a href="file-504.html">private-prosecution pathway page</a>
+      and <a href="504-database.html">the 504 database</a> describe the
+      domestic mechanisms by which Canadian conduct can be brought
+      before a Canadian court. The
+      <a href="article-15-referral.html">Article 15 referral page</a>
+      describes the international mechanism via the International
+      Criminal Court Office of the Prosecutor.
+    </p>
+
+    <h2>Where the rest of the legal-frame record lives on this site</h2>
+    <div class="related-strip">
+      <a href="genocide-evidence.html">genocide-evidence — full legal analysis</a>
+      <a href="intent.html">intent — dossier purpose</a>
+      <a href="article-2a-killing-members.html">II(a) anchor</a>
+      <a href="providence-care-testimony.html">II(b) anchor</a>
+      <a href="boil-water-advisories.html">II(c) anchor — water</a>
+      <a href="safe-supply-diversion.html">II(c) anchor — opioids</a>
+      <a href="coerced-sterilization-indigenous-women.html">II(d) anchor</a>
+      <a href="residential-schools.html">II(e) anchor</a>
+      <a href="article-15-referral.html">Article 15 referral</a>
+      <a href="file-504.html">file s.504</a>
+    </div>
+
+    <h2>Methodology note</h2>
+    <p>
+      Every case docket and every paragraph reference on this page
+      is independently verifiable through the public records of the
+      relevant tribunal. The ICTR, ICTY, and ICJ all publish their
+      judgments in full at no charge through their official archives
+      (the IRMCT for the ICTR/ICTY corpus; the ICJ's Document Library
+      for the ICJ corpus). This page is not legal advice. It is a
+      methodology anchor designed to allow a reader to trace any
+      claim back to a primary source within minutes.
+    </p>
+
+  </main>
+
+  <aside class="liril-stamp" aria-label="Provenance stamp" style="max-width:1100px;margin:2rem auto;padding:.55rem .9rem;border-top:1px dashed var(--slate-border,rgba(232,227,214,.14));font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.7rem;color:var(--slate-ink-dim,#9b9788);display:flex;flex-wrap:wrap;gap:.4rem .9rem;align-items:baseline">
+    <span style="text-transform:uppercase;letter-spacing:.14em;color:var(--slate-brass,#b8835a)">Last updated</span>
+    <time datetime="2026-05-01">2026-05-01</time>
+    <span>Cap#350</span>
+    <span>Dolus specialis methodology anchor</span>
+    <span style="padding:.1rem .35rem;border:1px solid currentColor;border-radius:2px;font-size:.62rem">METHODOLOGY</span>
+  </aside>
+
+</body>
+</html>
