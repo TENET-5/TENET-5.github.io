@@ -205,6 +205,47 @@
       </article>
     </section>
 
+    <!-- LIVE VIGIL FEED — Cap#404 (2026-05-01): surfaces canada_vigil_live.json to readers
+         in real time. Updated every 5 minutes by the canada_news_vigil daemon. -->
+    <section id="vigil-live" aria-label="Live keyword-flagged accountability signals" style="margin:1.4rem 0;padding:1.2rem 1.4rem;background:rgba(255,255,255,.025);border:1px solid var(--slate-border);border-radius:8px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.7rem">
+        <h2 style="margin:0;font-size:1.05rem;font-family:var(--slate-font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--slate-ink-strong,#f5f1e6)">Live Vigil Feed <span id="vigil-live-status" style="font-size:.74rem;color:var(--slate-ink-muted);font-weight:400;letter-spacing:.04em">loading&hellip;</span></h2>
+        <span style="font-size:.78rem;color:var(--slate-ink-dim);font-family:var(--slate-font-mono);letter-spacing:.04em">canada_news_vigil &middot; 5-min cadence</span>
+      </div>
+      <p style="margin:0 0 .7rem;font-size:.86rem;color:var(--slate-ink-dim);line-height:1.55">Real-time keyword-scored signals from 17 Canadian feeds. Items above relevance threshold (corruption / fraud / RCMP / charged-with / money-laundering / etc.) are surfaced here. Clicking a card opens the source.</p>
+      <div id="vigil-live-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:.8rem"></div>
+      <p style="margin:.7rem 0 0;font-size:.78rem;color:var(--slate-ink-muted);font-family:var(--slate-font-mono);letter-spacing:.04em">algorithmic accountability scan &middot; human review required before conclusions</p>
+    </section>
+    <script>
+    (function(){
+      var listEl = document.getElementById('vigil-live-list');
+      var statusEl = document.getElementById('vigil-live-status');
+      function esc(s){return String(s||'').replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});}
+      function fmtTs(iso){ try { var d = new Date(iso); var s = d.toUTCString(); return s.replace(' GMT',' UTC'); } catch(e){ return esc(iso); } }
+      fetch('data/canada_vigil_live.json', {cache: 'no-store'})
+        .then(function(r){ if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+        .then(function(d){
+          var items = (d.top_signals || []).slice(0, 12);
+          if (!items.length) { listEl.innerHTML = '<p style="color:var(--slate-ink-muted);font-size:.86rem">No items above threshold in current window.</p>'; statusEl.textContent = 'idle'; return; }
+          var gen = d.generated_at_utc ? new Date(d.generated_at_utc * 1000).toUTCString().replace(' GMT', ' UTC') : 'recent';
+          statusEl.textContent = '· ' + items.length + '/' + (d.signal_count || items.length) + ' signals · last tick ' + gen;
+          listEl.innerHTML = items.map(function(s){
+            var kw = (s.keywords || []).map(esc).join(' &middot; ');
+            return '<a class="vigil-card" href="' + esc(s.url || '#') + '" target="_blank" rel="noopener noreferrer" style="display:block;padding:.85rem 1rem;background:rgba(0,0,0,.18);border:1px solid var(--slate-border);border-left:3px solid var(--accent,#c9a44c);border-radius:5px;text-decoration:none;color:inherit;transition:border-color .15s">' +
+              '<div style="display:flex;justify-content:space-between;font-family:var(--slate-font-mono);font-size:.7rem;color:var(--slate-ink-muted);letter-spacing:.04em;margin-bottom:.35rem"><span>' + esc(s.source || '') + '</span><span style="color:var(--accent,#c9a44c)">score ' + esc(s.score) + '</span></div>' +
+              '<h3 style="margin:0 0 .35rem;font-size:.95rem;font-weight:600;line-height:1.4;color:var(--slate-ink-strong,#f5f1e6)">' + esc(s.title) + '</h3>' +
+              '<div style="font-family:var(--slate-font-mono);font-size:.7rem;color:var(--slate-ink-dim);letter-spacing:.04em">kw: ' + kw + '</div>' +
+              '<div style="font-family:var(--slate-font-mono);font-size:.66rem;color:var(--slate-ink-muted);letter-spacing:.04em;margin-top:.25rem">' + fmtTs(s.iso) + '</div>' +
+            '</a>';
+          }).join('');
+        })
+        .catch(function(e){
+          listEl.innerHTML = '<p style="color:var(--slate-ink-muted);font-size:.86rem">Live feed unavailable: ' + esc(e.message) + '</p>';
+          statusEl.textContent = 'unavailable';
+        });
+    })();
+    </script>
+
     <div class="news-grid" data-narrate="When a story breaks about lobbying, procurement, or policy failure, this system already knows the names, the numbers, and the history.">
 
     <article class="news-card evidence-stamp">
