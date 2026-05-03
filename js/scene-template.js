@@ -2,24 +2,34 @@
  * scene-template.js — TENET5 scene narration template (audit criterion (a))
  *
  * Reads <meta name="scene-id" content="<scene>">, fetches the matching
- * /captions/<scene>.vtt + /audio/<scene>.opus, attaches them to a hidden
- * <audio>+<track> pair so the page can play LIRIL-narrated audio with
- * <track kind="captions"> for the deaf/HoH narration parity (criterion
- * (b)).
+ * /audio/<scene>.{opus,mp3} + /audio/<scene>.vtt, attaches them to a
+ * hidden <audio>+<track> pair so the page can play LIRIL-narrated audio
+ * with <track kind="captions"> for the deaf/HoH narration parity
+ * (criterion (b)).
  *
- * Asset contract (cap357, revised cap358):
+ * Asset contract (cap357, revised cap358; cap2026-05-03 mp3 fallback):
  *   /audio/<scene>.vtt      — WebVTT subtitle file (UTF-8)
- *   /audio/<scene>.opus     — LIRIL-recorded narration (Opus codec)
- *   (both colocated under /audio/ — 270 of 344 pages have a .vtt
- *    already; new pages will pick up assets when LIRIL records them)
+ *   /audio/<scene>.opus     — preferred: LIRIL-recorded narration (Opus)
+ *   /audio/<scene>.mp3      — fallback: legacy MP3 narration (the on-disk
+ *                             corpus today is .mp3; .opus added going fwd)
  *
- * Both are optional. If audio is missing, page renders silent. If
- * captions are missing but audio is present, audio plays without
- * subtitles. If both are missing, scene-template.js is a no-op.
+ * 2026-05-03 — added .mp3 fallback. Original code only probed .opus, but
+ * 0 .opus assets existed on disk and 349 scene-id pages silently rendered
+ * narration-less. Daniel surfaced the regression via the LIRIL playthrough
+ * at ?load=findings.html (audio/findings.mp3 already exists, just wasn't
+ * being attached). Probing .opus first preserves the upgrade path; .mp3
+ * fallback revives every existing recording.
  *
- * No runtime TTS synthesis. No data-narrate. The two-font lock and
+ * All three (opus, mp3, vtt) are optional. If audio in either format is
+ * missing, page renders silent. If captions are missing but audio is
+ * present, audio plays without subtitles. If both are missing,
+ * scene-template.js is a no-op.
+ *
+ * No runtime TTS synthesis here. No data-narrate. The two-font lock and
  * IP-redaction both forbid robot-voice fallback per Daniel directive
- * 2026-04-27 — narration is pre-recorded LIRIL voice or nothing.
+ * 2026-04-27 — narration is pre-recorded LIRIL voice or nothing. (TTS
+ * walkthrough kicks in separately via liril-autoreader.js for pages
+ * without recordings.)
  */
 (function () {
   "use strict";
@@ -27,30 +37,50 @@
   if (window.__TENET5_SCENE_TEMPLATE_LOADED) return;
   window.__TENET5_SCENE_TEMPLATE_LOADED = true;
 
-  const meta = document.querySelector('meta[name="scene-id"]');
+  var meta = document.querySelector('meta[name="scene-id"]');
   if (!meta) return;
-  const sceneId = (meta.getAttribute("content") || "").trim();
+  var sceneId = (meta.getAttribute("content") || "").trim();
   if (!sceneId) return;
 
-  const audioUrl = "/audio/" + sceneId + ".opus";
-  const captionUrl = "/audio/" + sceneId + ".vtt";
+  var captionUrl = "/audio/" + sceneId + ".vtt";
+  // Probe order: prefer .opus (smaller, modern), fall back to .mp3.
+  var audioCandidates = [
+    "/audio/" + sceneId + ".opus",
+    "/audio/" + sceneId + ".mp3",
+  ];
 
-  // Probe audio existence with HEAD before attaching — cheap miss-skip.
-  fetch(audioUrl, { method: "HEAD" }).then(function (r) {
-    if (!r.ok) {
-      // No narration recorded yet — page stays silent. Criterion (b)
-      // tolerates this; criterion (c) requires NO data-narrate (already
-      // stripped site-wide in fcc03089b).
+  function tryAudio(idx) {
+    if (idx >= audioCandidates.length) {
+      // No narration in any recorded format — silent render. Criterion
+      // (b) tolerates this. liril-autoreader.js handles TTS fallback.
       return;
     }
-    const audio = document.createElement("audio");
+    var audioUrl = audioCandidates[idx];
+    fetch(audioUrl, { method: "HEAD" })
+      .then(function (r) {
+        if (!r.ok) {
+          tryAudio(idx + 1);
+          return;
+        }
+        attachAudio(audioUrl);
+      })
+      .catch(function () {
+        tryAudio(idx + 1);
+      });
+  }
+
+  function attachAudio(audioUrl) {
+    var audio = document.createElement("audio");
     audio.id = "tenet5-scene-audio";
     audio.preload = "metadata";
     audio.src = audioUrl;
     audio.controls = false;
-    audio.setAttribute("aria-label", "LIRIL narration for scene " + sceneId);
+    audio.setAttribute(
+      "aria-label",
+      "LIRIL narration for scene " + sceneId
+    );
 
-    const track = document.createElement("track");
+    var track = document.createElement("track");
     track.kind = "captions";
     track.srclang = "en-CA";
     track.label = "English (Canada) — LIRIL narration";
@@ -58,10 +88,11 @@
     track.default = true;
     audio.appendChild(track);
 
-    // Hide visually but keep accessible. The page chrome owns the play
+    // Hide visually but keep accessible. Page chrome owns the play
     // control; we just expose the element on window for anyone who
     // wants to wire a button.
-    audio.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;";
+    audio.style.cssText =
+      "position:absolute;left:-9999px;width:1px;height:1px;";
     document.body.appendChild(audio);
 
     window.__TENET5_SCENE_AUDIO = audio;
@@ -70,11 +101,10 @@
     // walkthrough, voice toggle) can hook in without polling.
     document.dispatchEvent(
       new CustomEvent("tenet5:scene-audio-ready", {
-        detail: { sceneId: sceneId, audio: audio },
-      }),
+        detail: { sceneId: sceneId, audio: audio, format: audioUrl.slice(-4) },
+      })
     );
-  }).catch(function () {
-    // Network error or invalid URL — silent skip. Page renders as
-    // text-only, which is the documented fallback for criterion (b).
-  });
+  }
+
+  tryAudio(0);
 })();

@@ -128,7 +128,7 @@
         loadScript(BASE + 'js/breadcrumbs.js?v=1'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
       ]).then(function() {
-        return loadScript(BASE + 'js/presentation.js?v=15');
+        return loadScript(BASE + 'js/presentation.js?v=16');
       }).then(function() {
         return loadScript(BASE + 'js/perception.js?v=2');
       }).then(function() {
@@ -164,7 +164,7 @@
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=6'); })
         .then(function() { return loadScript(BASE + 'js/liril-autoreader.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/presentation.js?v=15'); })
+        .then(function() { return loadScript(BASE + 'js/presentation.js?v=16'); })
         .then(function() { return loadScript(BASE + 'js/perception.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=14'); })
         // walkthrough-enhancements.js neutralized — see comment above

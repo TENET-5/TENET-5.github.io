@@ -2621,6 +2621,18 @@
     }
 
     requestAnimationFrame(function () {
+      // 2026-05-02 — slide-mode is OPT-IN. Auto-wrapping every page section
+      // as 100vh slides turned content-heavy dossier pages (accountability.html
+      // with ~581 sections) into 875,000px-tall slide decks with massive
+      // empty space per slide — the "fucked and unprofessional" symptom.
+      // Default = scrollable document. Pages that want slide mode set
+      // <body data-presentation="enabled"> or add class "pres-allow".
+      // The 5-act walkthrough uses tenet5-unified-walkthrough.js instead.
+      if (document.body.dataset.presentation !== 'enabled' &&
+          !document.body.classList.contains('pres-allow')) {
+        console.log('[PRESENTATION] Slide mode skipped — page did not opt in. Add data-presentation="enabled" or .pres-allow to <body> to enable.');
+        return;
+      }
       var elements = detectSlides();
       if (elements.length < 1) return;
 
