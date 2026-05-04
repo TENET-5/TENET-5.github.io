@@ -56,11 +56,9 @@
           '<div class="nav-group nav-tools">' +
             '<a href="/accountability.html" id="nav-504">504</a>' +
             '<a href="/mp-accountability-grid.html" id="nav-mpgrid" style="color:#a78bfa;">MP Grid</a>' +
-            '<a href="/network-analysis.html" id="nav-network">Network</a>' +
             '<a href="/state-of-investigation.html" id="nav-soi" style="color:#fbbf24;">State</a>' +
             '<a href="/nepotism-detector.html" id="nav-nepotism" style="color:#ef4444;">Nepotism</a>' +
             '<a href="/political-business-influence.html" id="nav-influence" style="color:#f97316;">Influence</a>' +
-            '<a href="/information-architecture.html" id="nav-ia" style="color:#2dd4bf;">IA</a>' +
             '<a href="/sitemap.html" id="nav-sitemap" style="color:#22d3ee;">All Pages</a>' +
           '</div>' +
           '<div class="nav-auth" id="nav-auth"></div>' +
