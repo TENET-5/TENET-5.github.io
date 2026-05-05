@@ -1221,6 +1221,22 @@ body.scene-mode .tnt-breadcrumb{display:none !important}
       // no slashes / dots / queries — prevents path-traversal injection
       // via crafted ?load= values.
       var SAFE_FILE_RE = /^[a-z0-9][a-z0-9_-]{0,80}\.html$/i;
+      // 2026-05-04 belt-and-suspenders helpers: even if the
+      // body.scene-mode CSS rule is overridden / dropped by an
+      // autocycle-rewrite of index.html, the inline-style fallback
+      // guarantees the landing header is hidden when an iframe page
+      // is loaded. _hideLandingChrome / _showLandingChrome are
+      // idempotent and cheap (single querySelector each).
+      function _hideLandingChrome(){
+        var hdr = document.querySelector('body > header.t5-nav');
+        if (hdr) hdr.style.cssText = 'display:none !important';
+      }
+      function _showLandingChrome(){
+        var hdr = document.querySelector('body > header.t5-nav');
+        if (hdr) hdr.style.removeProperty('display');
+        if (hdr) hdr.style.cssText = '';
+      }
+
       function navToFile(file, pushHistory){
         if (!file || !SAFE_FILE_RE.test(file)) return;
         // If the requested file IS in SCENE_LIST, defer to the typed path.
@@ -1228,6 +1244,7 @@ body.scene-mode .tnt-breadcrumb{display:none !important}
         if (listIdx >= 0) { return navTo(listIdx, pushHistory); }
         // Generic load — no prev/next neighbours.
         document.body.classList.add('scene-mode');
+        _hideLandingChrome();
         if (lbl)   lbl.textContent   = '§ deep-link';
         if (title) title.textContent = file.replace(/-/g, ' ').replace(/\.html$/, '');
         if (frame) {
@@ -1246,11 +1263,13 @@ body.scene-mode .tnt-breadcrumb{display:none !important}
         var s = SCENE_LIST[idx];
         if (s.f === 'index.html') {
           document.body.classList.remove('scene-mode');
+          _showLandingChrome();
           if (pushHistory) history.pushState({}, '', '/');
           window.scrollTo({top:0, behavior:'smooth'});
           return;
         }
         document.body.classList.add('scene-mode');
+        _hideLandingChrome();
         lbl.textContent = '§' + String(idx + 1).padStart(2,'0') + ' / ' + String(SCENE_LIST.length).padStart(2,'0');
         title.textContent = s.t;
         frame.classList.add('loading');
@@ -1322,7 +1341,11 @@ body.scene-mode .tnt-breadcrumb{display:none !important}
       window.addEventListener('popstate', function(){
         var q = new URLSearchParams(window.location.search);
         var f = q.get('load');
-        if (!f) { document.body.classList.remove('scene-mode'); return; }
+        if (!f) {
+          document.body.classList.remove('scene-mode');
+          _showLandingChrome();
+          return;
+        }
         // Cap#406: route through navToFile so non-whitelisted ?load=
         // back/forward navigation reaches the right page.
         navToFile(f, false);
