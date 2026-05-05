@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <!-- TENET5 SC_FRAME BUSTER -->
+    <script>
+      if (window === window.top && window.location.pathname.indexOf('index.html') === -1) {
+          window.location.replace('index.html?load=' + window.location.pathname.split('/').pop());
+      }
+    </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NGO &amp; Lobbyist Registry — Who Runs Canada's Unelected Influence Layer | TENET5</title>
+  <meta name="description" content="Master registry of Canada's most consequential non-government organisations, foundations, lobbying bodies, and international networks — who runs them, who funds them, and how the connection graph runs back to named cabinet ministers and Bay Street boards. Sourced via Lobbying Commissioner of Canada, Ethics Commissioner findings, Charities Directorate, and public corporate filings.">
+  <link rel="canonical" href="https://tenet-5.github.io/ngo-lobbyist-registry.html">
+  <meta property="og:title" content="NGO &amp; Lobbyist Registry — Canada's Unelected Influence Layer | TENET5">
+  <meta property="og:description" content="Who runs Canada's NGOs, think tanks, foundations, and lobbying organs — and how the connection graph runs back to named ministers and Bay Street boards.">
+  <meta property="og:url" content="https://tenet-5.github.io/ngo-lobbyist-registry.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+  <meta name="theme-color" content="#2E3440">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/tenet5.css?v=6">
+  <link rel="stylesheet" href="css/liril-utilities.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+  <style>
+    body {
+      background: var(--slate-bg);
+      color: var(--slate-ink);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.65;
+      margin: 0;
+    }
+    .nlr-shell { max-width: 1180px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .hero-nlr {
+      padding: 2.5rem 0 1.25rem;
+      border-bottom: 1px solid var(--slate-border);
+    }
+    .hero-nlr h1 {
+      font-size: clamp(1.85rem, 3.4vw, 2.6rem);
+      font-weight: 800; letter-spacing: -0.02em;
+      margin: 0 0 .65rem;
+      color: var(--slate-ink-strong, #f5f1e6);
+    }
+    .hero-nlr .subtitle {
+      max-width: 72ch;
+      font-size: 1.06rem;
+      color: var(--slate-ink-dim);
+      margin: 0 0 1rem;
+    }
+    .hero-nlr .meta {
+      display: flex; flex-wrap: wrap; gap: .6rem 1.4rem;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: .82rem; color: var(--slate-ink-muted);
+    }
+
+    h2 {
+      font-size: 1.45rem; font-weight: 700;
+      margin: 2.6rem 0 .5rem;
+      color: var(--slate-ink-strong, #f5f1e6);
+      border-left: 3px solid var(--slate-brass, #b8835a);
+      padding-left: .85rem;
+    }
+    h2 + .section-lede {
+      max-width: 70ch;
+      color: var(--slate-ink-dim);
+      margin: 0 0 1rem;
+    }
+
+    .method-box {
+      background: var(--slate-sunken);
+      border: 1px solid var(--slate-border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0 1.75rem;
+      font-size: .94rem;
+      color: var(--slate-ink-dim);
+    }
+    .method-box strong { color: var(--slate-ink); }
+
+    .firm-card {
+      padding: 1.1rem 1.3rem;
+      margin: 0 0 .8rem;
+      background: rgba(255,255,255,.025);
+      border: 1px solid var(--slate-border, rgba(232,227,214,.16));
+      border-left: 3px solid var(--slate-brass, #b8835a);
+      border-radius: 4px;
+    }
+    .firm-card .firm-name {
+      font-weight: 800;
+      color: var(--slate-ink-strong, #f5f1e6);
+      font-size: 1.05rem;
+      margin-bottom: .15rem;
+    }
+    .firm-card .firm-meta {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: .78rem;
+      color: var(--slate-ink-muted);
+      margin-bottom: .55rem;
+    }
+    .firm-card .firm-body {
+      font-size: .92rem;
+      color: var(--slate-ink, #e8e3d6);
+      line-height: 1.55;
+    }
+    .firm-card .firm-body strong { color: var(--slate-ink-strong, #f5f1e6); }
+    .firm-card .firm-body a { color: var(--slate-link, #d6b88a); text-decoration: none; border-bottom: 1px dotted currentColor; }
+    .firm-card .firm-body a:hover { color: var(--slate-link-hover, #e0b58c); }
+    .firm-card .firm-numbers {
+      display: flex; flex-wrap: wrap; gap: .65rem;
+      margin-top: .65rem;
+    }
+    .firm-card .firm-numbers span {
+      padding: .15rem .55rem;
+      background: rgba(0,0,0,.18);
+      border: 1px solid var(--slate-border, rgba(232,227,214,.12));
+      border-radius: 3px;
+      font-size: .78rem;
+      color: var(--slate-ink-dim);
+    }
+    .firm-card .firm-numbers strong { color: var(--slate-accent, #c9a44c); }
+
+    .scope-note {
+      background: var(--slate-sunken);
+      border: 1px dashed var(--slate-border);
+      border-radius: 6px;
+      padding: .85rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      font-size: .94rem;
+      color: var(--slate-ink-dim);
+    }
+  </style>
+</head>
+<body>
+
+<div class="nlr-shell">
+
+  <section class="hero-nlr" data-narrate="N G O and lobbyist registry. Who runs Canada's unelected influence layer. The federal government is the visible tier. The think tanks, foundations, lobbying bodies, and international network points are the unelected layer that drafts policy, places officials, and channels money. Power runs through these institutions before it ever reaches a cabinet minister's desk. This page maps the runners, the funders, and the connection graph back to named ministers and Bay Street boards — every entry sourced via Lobbying Commissioner of Canada, Ethics Commissioner findings, Charities Directorate, and public corporate filings.">
+    <h1>NGO &amp; Lobbyist Registry &mdash; Canada's Unelected Influence Layer</h1>
+    <p class="subtitle">
+      Power runs through unelected institutions before it reaches a cabinet minister's desk. Foundations, think tanks, lobbying organs, charities, and international network points draft the policy, place the officials, and channel the money. This page names them, names who runs them, and traces the connection graph back to named ministers and named Bay Street boards.
+    </p>
+    <div class="meta">
+      <span>Sources: Lobbying Commissioner registry &middot; Ethics Commissioner &middot; Charities Directorate &middot; corporate filings</span>
+      <span>Discipline: public-record claims only</span>
+      <span>Filed: 2026-05-04</span>
+    </div>
+  </section>
+
+  <div class="method-box">
+    <strong>Methodology.</strong> Every claim on this page is sourced from one of: <em>(1)</em> the Lobbying Commissioner of Canada public registry (lobbycanada.gc.ca); <em>(2)</em> findings of the Conflict of Interest and Ethics Commissioner (ciec-ccie.parl.gc.ca); <em>(3)</em> the Charities Directorate's public registry (CRA T3010 returns); <em>(4)</em> public corporate filings (SEDAR+, NYSE/TSX disclosures, annual reports); or <em>(5)</em> on-record House of Commons or Senate committee testimony. Where an organisation has its own dedicated TENET5 dossier the entry cross-links to that page; otherwise this entry is the dossier.
+    <br><br>
+    <strong>Posture.</strong> Public-record critique of named officers performing public duties or named board members serving named institutions. Not a charge, not a prosecution memo. See <a href="legal-framing-and-protected-speech.html">legal-framing-and-protected-speech.html</a>.
+  </div>
+
+  <h2>1. Liberal-aligned think tanks &amp; foundations</h2>
+  <p class="section-lede">The institutional spine that drafts white papers, hosts cabinet ministers, and trains the next generation of staffers and political appointees.</p>
+
+  <div class="firm-card">
+    <div class="firm-name">Pierre Elliott Trudeau Foundation</div>
+    <div class="firm-meta">private foundation &middot; 2001 federal endowment &middot; mass-resignation event 2023</div>
+    <div class="firm-body">
+      Created 2001&ndash;2002 with a <strong>$125M federal endowment</strong> in honour of former PM Pierre Elliott Trudeau. Mandate: human rights, governance, peace, and accountability fellowships. Justin Trudeau was on the board until 2014 (resigned before becoming PM). In April 2023, then-chair <strong>Pascale Fournier</strong> and seven other directors resigned in the same week amid disclosure that a 2016 donation traced to two China-based businesspeople had been logged irregularly. The Foundation was the subject of an House of Commons Procedure and House Affairs committee inquiry the same year.
+    </div>
+    <div class="firm-numbers">
+      <span><strong>$125M</strong> federal endowment 2002</span>
+      <span><strong>8</strong> board resignations April 2023</span>
+      <span><strong>$200K</strong> 2016 donation traced to PRC-linked businesspeople</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Canada 2020</div>
+    <div class="firm-meta">Liberal-aligned think tank &middot; Ottawa &middot; founded 2006</div>
+    <div class="firm-body">
+      Independent progressive think tank founded by Tim Barber, Tom Pitfield, Susan Smith and Eugene Lang. <strong>Tom Pitfield</strong> was a senior adviser to the Justin Trudeau Liberal Party leadership campaign and to the 2015 election; he is married to Anna Gainey, former president of the Liberal Party of Canada. Hosts annual conferences at which sitting Liberal cabinet ministers speak. Receives funding from corporate and federal-government sponsors.
+    </div>
+    <div class="firm-numbers">
+      <span>Founder: <strong>Tom Pitfield</strong></span>
+      <span>Spouse: Anna Gainey (ex-Liberal Party president)</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Public Policy Forum (PPF)</div>
+    <div class="firm-meta">policy think tank &middot; Ottawa/Toronto &middot; established 1987</div>
+    <div class="firm-body">
+      Cross-sector policy think tank long led by <strong>Edward Greenspon</strong> (former Globe and Mail editor-in-chief), now run by Sean Speer-era successors. Funded by a mix of federal departments, provincial governments, and corporate sponsors (banks, insurers, energy majors). Ran the federal government's 2017 "Shattered Mirror" study on the Canadian news ecosystem that informed the <strong>$595M media-aid package</strong>. See <a href="?load=media-capture.html">media-capture.html</a>.
+    </div>
+    <div class="firm-numbers">
+      <span>Long-time president: <strong>Edward Greenspon</strong></span>
+      <span>Authored: 2017 "Shattered Mirror"</span>
+      <span>Outcome: $595M media bailout</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Century Initiative</div>
+    <div class="firm-meta">demographic-policy think tank &middot; Toronto &middot; founded 2010</div>
+    <div class="firm-body">
+      Goal: grow Canada's population to <strong>100 million by 2100</strong>. Founded by McKinsey-adjacent figures including <strong>Dominic Barton</strong> (former McKinsey global managing partner; later Trudeau-appointed Ambassador to China). Quoted approvingly by federal immigration policy documents during the IRPA permanent-resident plan ramp-up. Already mapped on <a href="?load=century-initiative.html">century-initiative.html</a>.
+    </div>
+    <div class="firm-numbers">
+      <span>Co-founder: <strong>Dominic Barton</strong></span>
+      <span>Goal: <strong>100M</strong> Canadians by 2100</span>
+      <span>Cross-link: century-initiative.html</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">The Walrus Foundation</div>
+    <div class="firm-meta">registered charity &middot; Toronto &middot; publishes The Walrus magazine</div>
+    <div class="firm-body">
+      Charitable foundation that publishes <em>The Walrus</em> magazine and runs adjacent talks and events programmes. Receives corporate, foundation, and federal-government funding. Editorial pipeline that overlaps with Liberal-aligned policy circles; multiple senior contributors are former Liberal government communications staff. Files annual T3010 with the Charities Directorate.
+    </div>
+    <div class="firm-numbers">
+      <span>Type: registered charity (T3010)</span>
+      <span>Coverage: long-form policy &amp; culture</span>
+    </div>
+  </div>
+
+  <h2>2. Business-axis foundations &amp; boards</h2>
+  <p class="section-lede">Where Bay Street capital meets federal policy through board interlocks and registered lobbying.</p>
+
+  <div class="firm-card">
+    <div class="firm-name">Power Corporation of Canada</div>
+    <div class="firm-meta">holding company &middot; Montreal &middot; Demarais family controlled</div>
+    <div class="firm-body">
+      Major Canadian holding company controlled by the <strong>Demarais family</strong> with historical interests across Pargesa (Europe), Great-West Life, IGM Financial, GBL, and via its subsidiaries Bombardier and others. <strong>André Desmarais</strong> served as long-time chair of the <strong>Canada-China Business Council</strong>. Power Corp's board interlocks span multiple federal Liberal cabinets across decades; both Justin Trudeau and Brian Mulroney have publicly-documented Demarais-family connections (former PM Mulroney was a Power Corp director). See <a href="?load=family-connections.html">family-connections.html</a>.
+    </div>
+    <div class="firm-numbers">
+      <span>Controlling family: <strong>Demarais</strong></span>
+      <span>CCBC chair: <strong>André Desmarais</strong></span>
+      <span>Cross-link: follow-the-money.html</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Brookfield Asset Management</div>
+    <div class="firm-meta">global asset manager &middot; Toronto &middot; NYSE/TSX listed</div>
+    <div class="firm-body">
+      Global asset manager (~$900B AUM as publicly disclosed). <strong>Mark Carney</strong> served as Vice-Chair / Head of Transition Investing 2020&ndash;2024 before becoming Liberal leader. CEO <strong>Bruce Flatt</strong>. Brookfield's portfolio includes infrastructure, real estate, and private-equity holdings whose policy environment is set by the federal-tier ministers Carney now sits inside the cabinet of. See <a href="?load=carney-conflicts.html">carney-conflicts.html</a> and <a href="?load=brookfield-maid.html">brookfield-maid.html</a>.
+    </div>
+    <div class="firm-numbers">
+      <span>Carney role 2020&ndash;2024: <strong>Vice-Chair</strong></span>
+      <span>CEO: <strong>Bruce Flatt</strong></span>
+      <span>AUM: ~$900B</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">C.D. Howe Institute</div>
+    <div class="firm-meta">economic think tank &middot; Toronto &middot; founded 1958</div>
+    <div class="firm-body">
+      Toronto-based economic policy think tank named after the long-serving Liberal cabinet minister C.D. Howe (1935&ndash;1957). Funded by Bay Street banks, insurers, and Canadian-corporate members. Board interlocks span chartered-bank directors and former federal deputy ministers. Outputs feed budget-cycle commentary and influence federal fiscal-policy framing. Files annual T3010 as a registered charity.
+    </div>
+    <div class="firm-numbers">
+      <span>Founded: 1958</span>
+      <span>Funding: Bay Street + corporate members</span>
+      <span>Type: registered charity</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Business Council of Canada (formerly CCCE)</div>
+    <div class="firm-meta">CEO peak body &middot; ~150 member CEOs &middot; Ottawa</div>
+    <div class="firm-body">
+      Lobby and policy organisation representing the chief executives of Canada's largest companies. Renamed from the Canadian Council of Chief Executives. Historically led by <strong>John Manley</strong> (former Liberal Deputy PM) and currently by <strong>Goldy Hyder</strong>. Active on tax, trade, immigration intake, and regulatory-policy briefs filed with cabinet ministers. Prominent on the Lobbying Commissioner registry by communications volume.
+    </div>
+    <div class="firm-numbers">
+      <span>Past president: <strong>John Manley</strong></span>
+      <span>Current CEO: <strong>Goldy Hyder</strong></span>
+      <span>Members: ~150 CEOs</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Canadian Chamber of Commerce</div>
+    <div class="firm-meta">business advocacy &middot; ~200,000 member businesses &middot; Ottawa</div>
+    <div class="firm-body">
+      Federation of Canadian chambers and corporate members. Filed thousands of registered-lobbying communications across regulatory, tax, and trade portfolios. Multiple board members from chartered banks, insurers, and energy majors. Cross-references with <a href="?load=lobbying-ledger.html">lobbying-ledger.html</a> and <a href="?load=sector-lobbying.html">sector-lobbying.html</a>.
+    </div>
+    <div class="firm-numbers">
+      <span>Members: ~200,000 businesses</span>
+      <span>Cross-link: lobbying-ledger.html</span>
+    </div>
+  </div>
+
+  <h2>3. Charity-front controversies</h2>
+  <p class="section-lede">Registered charities where the public record now shows the structure functioned as something other than a neutral charitable channel.</p>
+
+  <div class="firm-card">
+    <div class="firm-name">WE Charity / ME to WE Social Enterprise (Kielburger)</div>
+    <div class="firm-meta">registered charity + commercial arm &middot; Toronto &middot; founded as Free The Children 1995</div>
+    <div class="firm-body">
+      Founded by brothers <strong>Marc</strong> and <strong>Craig Kielburger</strong> as Free The Children, later rebranded WE Charity, with a commercial sister entity <strong>ME to WE Social Enterprise Inc.</strong> In 2020 awarded the federal <strong>Canada Student Service Grant</strong> sole-sourced administration contract (~$900M envelope) before public outcry forced cancellation. Ethics Commissioner found Finance Minister <strong>Bill Morneau</strong> had received family travel paid by WE; Morneau resigned. Members of Justin Trudeau's family had received WE-affiliated speaking fees totalling roughly <strong>$300,000</strong>. Multiple HoC committee testimonies on record.
+    </div>
+    <div class="firm-numbers">
+      <span>Founders: <strong>Kielburger brothers</strong></span>
+      <span>2020 sole-source contract: ~$900M</span>
+      <span>Morneau-resignation finding: confirmed</span>
+      <span>Trudeau-family speaking fees: ~$300K</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Aga Khan Foundation Canada</div>
+    <div class="firm-meta">registered charity &middot; Ottawa &middot; Canadian arm of the Aga Khan Development Network</div>
+    <div class="firm-body">
+      Canadian charitable arm of the global Aga Khan Development Network. Federal government has issued substantial grant funding to the Foundation over multiple years. In 2017 the Conflict of Interest and Ethics Commissioner's <strong>Trudeau II Report</strong> found Justin Trudeau breached the Conflict of Interest Act sections 5, 11, 12 and 21 in connection with a 2016 family vacation to the Aga Khan's private island in the Bahamas. First sitting PM ever found in breach of the Act.
+    </div>
+    <div class="firm-numbers">
+      <span>2017 Ethics Commissioner: <strong>Trudeau II Report</strong></span>
+      <span>Sections breached: COIA 5, 11, 12, 21</span>
+      <span>First PM in breach: confirmed</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Clinton Foundation Canada (historical reference)</div>
+    <div class="firm-meta">cross-border charitable interface &middot; closed Canadian operations 2016</div>
+    <div class="firm-body">
+      Canadian-side charitable channel of the Clinton Foundation; closed Canadian operations in 2016 under regulatory and political scrutiny. Of historical interest as part of the cross-border NGO &harr; political-influence pattern that the Trudeau Foundation chapter (above) and the Aga Khan chapter (above) document in the Canadian-record version.
+    </div>
+    <div class="firm-numbers">
+      <span>Status: Canadian operations closed 2016</span>
+    </div>
+  </div>
+
+  <h2>4. Conservative-aligned think tanks (for balance)</h2>
+  <p class="section-lede">The map is not partisan. Right-of-centre policy infrastructure runs the same playbook with different funders.</p>
+
+  <div class="firm-card">
+    <div class="firm-name">Fraser Institute</div>
+    <div class="firm-meta">free-market think tank &middot; Vancouver &middot; founded 1974</div>
+    <div class="firm-body">
+      Vancouver-based free-market policy think tank founded by economist Michael Walker. Member of the <strong>Atlas Network</strong>, the global federation of free-market think tanks. Funded by Canadian and US-corporate donors and by individual giving. Outputs include annual provincial fiscal-performance rankings, school-quality indices, and tax-policy commentary.
+    </div>
+    <div class="firm-numbers">
+      <span>Atlas Network member: yes</span>
+      <span>Founded: 1974</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Canada Strong &amp; Free Network (formerly Manning Centre)</div>
+    <div class="firm-meta">conservative-policy network &middot; Calgary &middot; founded 2005</div>
+    <div class="firm-body">
+      Conservative-aligned policy and training network founded by former Reform Party leader <strong>Preston Manning</strong>. Trains a substantial share of Conservative Party riding-staff and policy-shop apprentices. Annual networking conference is a cabinet-shadow event for the Conservative Party of Canada when in opposition.
+    </div>
+    <div class="firm-numbers">
+      <span>Founder: <strong>Preston Manning</strong></span>
+      <span>Role: Conservative staffer pipeline</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Atlas Network (international parent of Fraser et al.)</div>
+    <div class="firm-meta">global think-tank federation &middot; Arlington VA &middot; ~500 member orgs worldwide</div>
+    <div class="firm-body">
+      US-based federation of roughly 500 free-market think tanks worldwide; the Fraser Institute and several other Canadian groups are members. Provides funding, training, and political-strategy infrastructure to member institutes. Notable for its role in shaping climate, labour, and tax policy discourse across Anglosphere democracies.
+    </div>
+    <div class="firm-numbers">
+      <span>HQ: Arlington VA</span>
+      <span>Members: ~500 globally</span>
+    </div>
+  </div>
+
+  <h2>5. International network points</h2>
+  <p class="section-lede">The transnational fora at which Canadian political and business elites meet their counterparts away from public view.</p>
+
+  <div class="firm-card">
+    <div class="firm-name">World Economic Forum (WEF) &amp; Young Global Leaders</div>
+    <div class="firm-meta">international NGO &middot; Geneva &middot; annual Davos summit</div>
+    <div class="firm-body">
+      Geneva-based public-private summit organisation. <strong>Mark Carney, Christy Clark, Jagmeet Singh, Chrystia Freeland</strong> and others have been listed publicly as Young Global Leaders alumni or WEF participants. Already mapped at <a href="?load=wef-davos.html">wef-davos.html</a>, <a href="?load=wef-corridor.html">wef-corridor.html</a>, and <a href="?load=carney-wef.html">carney-wef.html</a>.
+    </div>
+    <div class="firm-numbers">
+      <span>HQ: Geneva</span>
+      <span>YGL Canadians (public): Carney, Freeland, Clark, Singh</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Trilateral Commission</div>
+    <div class="firm-meta">elite policy commission &middot; founded 1973 &middot; North America / Europe / Asia-Pacific</div>
+    <div class="firm-body">
+      Founded 1973 by David Rockefeller. Membership rosters are public. <strong>Mark Carney</strong> is a publicly-listed North American member. Other Canadian past and present members include senior bank executives and former cabinet ministers. Hosts closed-door regional meetings; releases task-force reports on cross-border policy questions.
+    </div>
+    <div class="firm-numbers">
+      <span>Carney: <strong>publicly listed member</strong></span>
+      <span>Founded: 1973</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Bilderberg Meeting</div>
+    <div class="firm-meta">annual private conference &middot; founded 1954</div>
+    <div class="firm-body">
+      Annual private conference of European and North American political, business, academic, and media leaders. Attendee lists are released publicly each year. Multiple Canadian past attendees include former PMs, Bay Street CEOs, and senior journalists. No formal decisional outputs but substantial private-relationship capital is built and maintained at each year's session.
+    </div>
+    <div class="firm-numbers">
+      <span>Founded: 1954</span>
+      <span>Format: closed conference, public attendee list</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Asia Pacific Foundation of Canada</div>
+    <div class="firm-meta">public-private foundation &middot; Vancouver &middot; established 1984</div>
+    <div class="firm-body">
+      Federally-chartered foundation focused on Canada-Asia engagement, with substantial programming on Canada-China economic and policy ties. Funded by federal endowment plus corporate and provincial-government partners. Outputs include the annual National Opinion Poll on Canadian Views of Asia and a stream of policy briefs that feed into federal Indo-Pacific framing. See <a href="?load=foreign-interference-deep.html">foreign-interference-deep.html</a>.
+    </div>
+    <div class="firm-numbers">
+      <span>Established: 1984</span>
+      <span>Mandate: Canada-Asia engagement</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Canada-China Business Council</div>
+    <div class="firm-meta">bilateral business council &middot; Toronto &middot; founded 1978</div>
+    <div class="firm-body">
+      Bilateral business council promoting Canadian commerce in China. <strong>André Desmarais</strong> (Power Corporation) was long-time chair. Active during the Meng Wanzhou / Two Michaels period of Canada-China relations. Multiple Canadian board members hold or have held senior positions in chartered banks, energy majors, and federal advisory bodies.
+    </div>
+    <div class="firm-numbers">
+      <span>Long-time chair: <strong>André Desmarais</strong></span>
+      <span>Founded: 1978</span>
+    </div>
+  </div>
+
+  <h2>6. Environmental + ESG-aligned NGOs</h2>
+  <p class="section-lede">The green-policy infrastructure that channels foreign and corporate funding into Canadian energy and climate-policy debates. Mapping the funding paths is not a claim that the policy positions are wrong &mdash; it is the public-record question of <em>who paid for the campaign</em>.</p>
+
+  <div class="firm-card">
+    <div class="firm-name">David Suzuki Foundation</div>
+    <div class="firm-meta">registered charity &middot; Vancouver &middot; founded 1990</div>
+    <div class="firm-body">
+      Vancouver-based environmental charity founded by broadcaster <strong>David Suzuki</strong>. Active on climate, biodiversity, and energy-transition policy. Funded by individual donors plus corporate and foundation grants. Files annual T3010 with Charities Directorate. Co-signs federal-policy briefs alongside the Pembina Institute and Climate Action Network.
+    </div>
+    <div class="firm-numbers">
+      <span>Founder: <strong>David Suzuki</strong></span>
+      <span>Type: registered charity</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Tides Canada / MakeWay</div>
+    <div class="firm-meta">grant-making foundation &middot; Toronto/Vancouver &middot; rebranded MakeWay 2020</div>
+    <div class="firm-body">
+      Canadian grant-making foundation, originally Tides Canada Foundation, now operating as <strong>MakeWay</strong>. Long-standing organisational and funding ties to the US-based <strong>Tides Foundation</strong> (San Francisco). A major distributor of grants to Canadian environmental campaigns. The connection to upstream US-funded networks is documented in CRA charity filings and in cross-border tax-receipted-flow records.
+    </div>
+    <div class="firm-numbers">
+      <span>Rebrand: Tides Canada &rarr; MakeWay (2020)</span>
+      <span>US affiliate: Tides Foundation (SF)</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Pembina Institute</div>
+    <div class="firm-meta">energy/environment think tank &middot; Calgary &middot; founded 1985</div>
+    <div class="firm-body">
+      Calgary-based energy and environment policy think tank. Originally focused on oil-and-gas environmental impact in Alberta; expanded to broader transition-policy work. Funded by Canadian and international foundations plus federal-government project grants. Files briefs on the federal carbon-pricing regime, methane regulations, and clean-electricity rules.
+    </div>
+    <div class="firm-numbers">
+      <span>Founded: 1985</span>
+      <span>Focus: energy &amp; environment</span>
+    </div>
+  </div>
+
+  <div class="firm-card">
+    <div class="firm-name">Climate Action Network Canada (CAN-Rac)</div>
+    <div class="firm-meta">coalition &middot; ~150 member organisations &middot; member of CAN International</div>
+    <div class="firm-body">
+      Coalition of approximately 150 Canadian climate organisations. Member of the global Climate Action Network (CAN-International). Coordinates joint policy briefs to federal departments and parliamentary committees. Cross-membership overlaps Suzuki, Pembina, Greenpeace Canada, and the West Coast Environmental Law Association.
+    </div>
+    <div class="firm-numbers">
+      <span>Members: ~150 orgs</span>
+      <span>Parent: CAN International</span>
+    </div>
+  </div>
+
+  <h2>7. The connection-graph &mdash; how the layer talks to itself</h2>
+  <p class="section-lede">The single repeating pattern across the registry above.</p>
+  <p>
+    Across the seven categories the same handful of <strong>nodes</strong> reappear: <em>Power Corporation / Demarais family</em>, <em>Brookfield / Carney</em>, <em>McKinsey / Barton / Century Initiative</em>, the <em>WEF / Trilateral / Bilderberg</em> international circuit, and the <em>Trudeau Foundation / Aga Khan / WE</em> charitable axis. Cabinet ministers, deputy ministers, ambassadorial appointees, chartered-bank directors, and senior-charity boards rotate through these institutions in identifiable patterns documented in the public registries.
+  </p>
+  <p>
+    The thesis of this page is structural, not personal: <strong>policy decisions in Canada are first negotiated in the unelected layer above</strong> &mdash; the foundations, councils, conferences, and lobbying organs &mdash; and arrive at cabinet pre-shaped. Rebuilding accountability requires making the unelected layer as visible as the elected one.
+  </p>
+
+  <h2>8. What this page does <em>not</em> assert</h2>
+  <p class="scope-note"><strong>Editorial framing.</strong></p>
+  <p>
+    This page does not claim that any named individual has committed a criminal offence within the jurisdiction of the International Criminal Court. It does not claim that any registered NGO is acting outside its lawful charitable purpose. It does not claim that the policy positions advanced by any of the named groups are wrong on the merits. It claims only what the public record shows: <em>who runs the institution</em>, <em>who funds it</em>, <em>who serves on its board</em>, and <em>which other institutions and named officers it interlocks with</em>. The reader is invited to draw their own structural conclusions from those public-record facts.
+  </p>
+
+  <h2>9. Sources &amp; cross-links</h2>
+  <ul>
+    <li><a href="https://lobbycanada.gc.ca/" rel="noopener">Lobbying Commissioner of Canada — Public Registry</a></li>
+    <li><a href="https://ciec-ccie.parl.gc.ca/" rel="noopener">Conflict of Interest and Ethics Commissioner — findings</a></li>
+    <li><a href="https://apps.cra-arc.gc.ca/ebci/hacc/srch/pub/dsplyBscSrch" rel="noopener">CRA Charities Directorate — public registry &amp; T3010 returns</a></li>
+    <li><a href="?load=lobbying-ledger.html">TENET5: lobbying-ledger.html</a></li>
+    <li><a href="?load=lobbying-tracker.html">TENET5: lobbying-tracker.html</a></li>
+    <li><a href="?load=corruption.html">TENET5: corruption.html</a></li>
+    <li><a href="?load=carney-conflicts.html">TENET5: carney-conflicts.html</a></li>
+    <li><a href="?load=brookfield-maid.html">TENET5: brookfield-maid.html</a></li>
+    <li><a href="?load=family-connections.html">TENET5: family-connections.html</a></li>
+    <li><a href="?load=follow-the-money.html">TENET5: follow-the-money.html</a></li>
+    <li><a href="?load=century-initiative.html">TENET5: century-initiative.html</a></li>
+    <li><a href="?load=wef-davos.html">TENET5: wef-davos.html</a></li>
+    <li><a href="?load=carney-wef.html">TENET5: carney-wef.html</a></li>
+    <li><a href="?load=cija-lobbying.html">TENET5: cija-lobbying.html</a></li>
+    <li><a href="?load=foreign-interference-deep.html">TENET5: foreign-interference-deep.html</a></li>
+    <li><a href="?load=institutional-capture.html">TENET5: institutional-capture.html</a></li>
+    <li><a href="?load=legal-framing-and-protected-speech.html">TENET5: legal-framing-and-protected-speech.html</a></li>
+  </ul>
+
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/liril-autoreader.js"></script>
+</body>
+</html>
