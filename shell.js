@@ -139,7 +139,6 @@
       // Speed/autoplay/captions/transcript controls will be migrated into
       // liril-walkthrough.js itself in a follow-up so there is ONE unified UI.
       }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
       .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
       .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
       .then(function() { return loadScript(BASE + 'js/config.js?v=2'); })
@@ -170,7 +169,6 @@
         // walkthrough-enhancements.js neutralized — see comment above
         .then(function() { return loadScript(BASE + 'js/breadcrumbs.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/metaverse.js?v=1'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/share-actions.js?v=2'); })
         .then(function() { return loadScript(BASE + 'readnext.js?v=3'); })
@@ -222,7 +220,7 @@
 
 /* ═══════════════════════════════════════════════════════════════════════
    BUG FLAG — one-click page reporting with automatic validation
-   No text input. Just flag. LIRIL validates via quantum pipeline.
+   No text input. Just flag. Flags are queued for automated review.
    ═══════════════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';

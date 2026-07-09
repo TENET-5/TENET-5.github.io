@@ -18,7 +18,7 @@ Date Captured: 2026-04-16T18:07:51.319078
     "timestamp": "2026-04-16T22:07:51.115097+00:00",
     "vector": "Regional Topology Decay",
     "topological_vector": "MF-116F5F1F7B10-PATH1",
-    "content": "A high-confidence paradox vector exists between regional representation (Ellis/Smith) and the Quinte West infrastructure overhaul timelines. SATOR tensor mapping indicates parallel shifts in funding focus matching the federal CIJA timeline spikes."
+    "content": "A high-confidence paradox vector exists between regional representation (Ellis/Smith) and the Quinte West infrastructure overhaul timelines. MATRIX tensor mapping indicates parallel shifts in funding focus matching the federal CIJA timeline spikes."
   }
 ]
 ```

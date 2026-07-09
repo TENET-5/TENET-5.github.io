@@ -2,7 +2,7 @@
    LIRIL Walkthrough — Guided narration through every page
    Auto-detects sections and provides sequential walk-through
    with subtitle display and section highlighting.
-   TENET5 — Powered by LIRIL AI | SEED 118400
+   TENET5 — Powered by LIRIL AI
    v3.0 — FULL PAGE READING: cap raised to 200 sections, 2000 chars/section
           LIRIL reads the entire page and presentation, not just summaries
           Fixes: Chrome speech cutoff, text sanitization, sentence chunking
@@ -984,12 +984,20 @@
         // Re-resolve voice EVERY chunk to prevent Chrome voice drift
         var currentVoice = resolveVoice() || voice;
         var params = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
+        if (!currentVoice) {
+          // NEVER speak with the OS default voice — end the walkthrough audio.
+          console.warn('[LIRIL-WALK] No acceptable voice — stopping narration.');
+          speakingChunks = false;
+          stopKeepalive();
+          if (onDone) onDone();
+          return;
+        }
         var u = new SpeechSynthesisUtterance(chunk);
-        u.lang = 'en-CA'; // LIRIL is Canadian — angry Canadian woman
+        u.lang = currentVoice.lang || 'en-GB'; // LIRIL speaks British English
         u.rate = params.rate;
         u.pitch = params.pitch;
         u.volume = params.volume;
-        if (currentVoice) u.voice = currentVoice;
+        u.voice = currentVoice;
         u.onend = function() { setTimeout(next, 150); };
         u.onerror = function() { setTimeout(next, 150); };
         // Cancel any lingering speech to force Chrome to re-apply voice

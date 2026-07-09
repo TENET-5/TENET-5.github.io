@@ -436,7 +436,7 @@ Date Captured: 2026-04-17T22:31:17.984566
     "topology": "NP-HARD",
     "quantum_resistant_sig": "eb4f2a2d614ab263d4115742dbe389b36d3f1f6b00ae566efdafe8e3c1c7bdda0bc626e77af24cd03eac23dd62d321808dbdce6f35944934bf4fce248fe08b5c",
     "grover_speedup": 21.33,
-    "gpu_backend": "NVIDIA Blackwell PCIe E8",
+    "gpu_backend": " Blackwell PCIe E8",
     "quantum_security_bits": 256,
     "cib_corridor_hash": "ABCXYZ-7AA7FD00D295772A"
   }

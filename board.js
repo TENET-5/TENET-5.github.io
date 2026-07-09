@@ -31,7 +31,6 @@
       anchor: { x: 160, y: 400 },
       cards: [
         { id: 'home',    emoji: '🇨🇦', title: 'HOME',      desc: 'The numbers. The math. The proof.',    href: 'index.html',    dx: 0,   dy: 0,   rot: -2 },
-        { id: 'story',   emoji: '📖', title: 'MY STORY',    desc: 'Combat veteran. Signals operator.',     href: 'my-story.html', dx: -40, dy: 210, rot: 3 },
         { id: 'history', emoji: '📜', title: 'HISTORY',     desc: '141 years of state violence.',          href: 'history.html',  dx: 60,  dy: 410, rot: -1 },
         { id: 'faq',     emoji: '❓', title: 'FAQ',          desc: 'Common questions answered.',            href: 'faq.html',      dx: -60, dy: 600, rot: 2 },
       ]
@@ -65,7 +64,6 @@
         { id: 'timeline', emoji: '📅', title: 'TIMELINE',           desc: 'Chronological evidence map.',        href: 'timeline.html',            dx: -60, dy: 720, rot: 2 },
         { id: 'cfnis',   emoji: '🎖',  title: 'CFNIS',              desc: 'Military police investigation.',     href: 'cfnis.html',               dx: 200, dy: 140, rot: -3 },
         { id: 'legal',   emoji: '⚖',  title: 'LEGAL PROCEEDINGS',  desc: 'Court filings and framework.',       href: 'legal.html',               dx: 280, dy: 320, rot: 1 },
-        { id: 'lawsuit',  emoji: '📜', title: 'PPCLI LAWSUIT',     desc: 'Statement of claim.',                href: 'ppcli-lawsuit.html',       dx: 340, dy: 500, rot: -2 },
       ]
     },
     {
@@ -87,9 +85,7 @@
       anchor: { x: 1100, y: 1000 },
       cards: [
         { id: 'letter',    emoji: '📢', title: 'OPEN LETTER',        desc: 'Public declaration.',          href: 'open-letter.html',          dx: 0,   dy: 0,   rot: 1 },
-        { id: 'mp',        emoji: '🏛',  title: 'MP BRIEFING',       desc: 'Parliamentary briefing.',       href: 'mp-brief.html',             dx: 200, dy: -40, rot: -2 },
         { id: 'whistle',   emoji: '🛡',  title: 'WHISTLEBLOWER',     desc: 'Protection guide.',             href: 'whistleblower-guide.html',  dx: -60, dy: 180, rot: 3 },
-        { id: 'wardoll',   emoji: '🔗', title: 'WARDOLL',            desc: 'The investigation.',            href: 'acelephius-wardoll.html',   dx: -280, dy: 100, rot: -1 },
         { id: 'bloggins',  emoji: '🦝', title: 'CPL BLOGGINS',       desc: 'Military humour & truth.',      href: 'bloggins.html',             dx: 420, dy: 60,  rot: 2 },
         { id: 'resources', emoji: '📚', title: 'RESOURCES',           desc: 'Further reading.',              href: 'resources.html',            dx: 380, dy: 200, rot: 1 },
         { id: 'osint',     emoji: '📡', title: 'OSINT DASHBOARD',     desc: 'Live intelligence.',            href: 'osint-dashboard.html',      dx: 640, dy: 120, rot: -3 },

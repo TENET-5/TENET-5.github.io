@@ -33,7 +33,7 @@
     :root {
       /* QUANTANIUM-UNIFIED — forward every legacy token to canonical
          /css/tokens.css (see /css/QUANTANIUM.json). Do not hardcode hex
-         values here. Touched by tools/quantanium_unify_root.py —
+         values here. Auto-managed — do not hand-edit;
          re-runnable. */
       /* Surfaces */
       --bg:           var(--slate-bg);
@@ -153,7 +153,7 @@
 <script src="/js/liril-theme-slider.js?v=1" defer></script>
 <!-- LIRIL-THEME-SLIDER-INJECTED-END -->
   <link rel="stylesheet" href="css/tnt-override.css?v=1">
-  <script defer src="js/liril-voice.js?v=1"></script>
+  <script defer src="js/liril-voice.js?v=7"></script>
   <meta name="scene-id" content="instagram-draft-assist">
   <script defer src="js/scene-template.js?v=1"></script>
 </head>
@@ -223,11 +223,11 @@
 
     <!-- Policy box — enforces what the user sees about system behavior -->
     <div class="policy-box">
-      <p><strong>What this page is.</strong> Copy-paste-ready Instagram drafts for the TENET5 accountability campaign. LIRIL reads each campaign in <code>data/grover_target_campaigns.json</code>, drafts the caption via <code>mercury.infer → llama-server</code> (on the RTX 5070 Ti), and stores the drafts in <code>data/instagram_drafts.json</code>. This page loads that JSON and renders it.</p>
+      <p><strong>What this page is.</strong> Copy-paste-ready Instagram drafts for the TENET5 accountability campaign. LIRIL reads each campaign in <code>data/grover_target_campaigns.json</code>, drafts the caption via the local inference engine, and stores the drafts in <code>data/instagram_drafts.json</code>. This page loads that JSON and renders it.</p>
       <p><strong>What this page is not.</strong> There is no posting code anywhere in the system. Specifically:</p>
       <ul>
         <li>No Instagram API client, no browser automation, no clipboard watcher.</li>
-        <li>No credentials are stored, transmitted, or read by any TENET5 daemon. Credentials pasted into chat must be rotated immediately — see <a href="docs/AUTOMATION_DIAGNOSTIC_2026-04-18.md">AUTOMATION_DIAGNOSTIC_2026-04-18.md</a>.</li>
+        <li>No credentials are stored, transmitted, or read by any TENET5 system. Credentials pasted into chat must be rotated immediately.</li>
         <li>You (the human) are the only posting actor. You copy, you open the IG app on your phone, you paste, you hit Share.</li>
       </ul>
       <p><strong>Why manual only.</strong> The prior Instagram account was hacked (see memory file <code>feedback_no_lirilclaw.md</code>). Automating the recovered account would compound the risk: Instagram's anti-automation detection bans accounts within hours to days for scripted activity. Manual posting with LIRIL-drafted content gets the reach without the ban risk.</p>
@@ -284,7 +284,7 @@
           '<div class="axes">' + axes + '</div></div>' +
           '<h3>' + esc(d.subject || d.id) + '</h3>' +
           '<p class="target">' + esc(d.target || '') + '</p>' +
-          '<div class="empty-state">Draft generation failed for this campaign — check <code>data/instagram_drafts.json</code> raw_excerpt for error details. Re-run <code>python tools/liril_ig_draft.py</code> to retry.</div>' +
+          '<div class="empty-state">Draft generation failed for this campaign — check <code>data/instagram_drafts.json</code> raw_excerpt for error details. Drafts regenerate automatically on the next pipeline run.</div>' +
           '</div>';
       }
 
@@ -324,7 +324,7 @@
       var el = document.getElementById('drafts-list');
       var drafts = (data && data.drafts) || [];
       if (!drafts.length) {
-        el.innerHTML = '<div class="empty-state">No drafts yet. Run <code>python tools/liril_ig_draft.py</code> on the host to generate them.</div>';
+        el.innerHTML = '<div class="empty-state">No drafts yet. Drafts are generated automatically on the next pipeline run.</div>';
         return;
       }
       el.innerHTML = drafts.map(draftCard).join('');
@@ -348,12 +348,11 @@
       .catch(function(e){
         document.getElementById('drafts-list').innerHTML =
           '<div class="empty-state">Could not load drafts: ' + esc(e.message) +
-          '<br><br>Generate them with <code>python tools/liril_ig_draft.py</code> on the host.</div>';
+          '<br><br>Drafts are generated automatically on the next pipeline run.</div>';
       });
   })();
   </script>
   <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/quantanium-status.js?v=1" data-tnt-quantanium="quantanium-status"></script>
   <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
 <!-- liril:last-updated:start v1 -->
 <style>

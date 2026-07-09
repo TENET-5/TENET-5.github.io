@@ -2,7 +2,14 @@
    LIRIL Voice Resolver — SINGLE SOURCE OF TRUTH
    All voice engines MUST delegate to window.LIRIL_VOICE.
    DO NOT duplicate voice logic elsewhere.
-   TENET5 — Powered by LIRIL AI | SEED 118400
+
+   HARD RULE (CEO directive 2026-07-09): LIRIL speaks with a
+   high-quality BRITISH FEMALE voice. If no acceptable voice
+   exists on the visitor's system, LIRIL stays SILENT.
+   NEVER let an utterance fall through to the browser/OS
+   default voice — that is how the "robot male" bug happened.
+   Use LIRIL_VOICE.speak() (guarded) instead of calling
+   speechSynthesis.speak() directly.
    ═══════════════════════════════════════════════════════ */
 (function() {
   'use strict';
@@ -10,37 +17,35 @@
 
   var VOICE_STORAGE_KEY = 'liril-voice-name';
 
-  /* ── VOICE PERSONALITY — angry Canadian woman ────────── */
-  /* She's exposing corruption. Not calm. Not neutral. FURIOUS. */
+  /* ── VOICE PERSONALITY — composed British narrator ────── */
   var VOICE_PARAMS = {
     rate: 0.9,     /* Premium narration cadence */
     pitch: 1.1,    /* Clear, natural female lock */
     volume: 1.0    /* Full volume */
   };
 
-  /* ── TARGET VOICE — Clara (Canadian, Natural, highest quality) ── */
-  /* CEO directive: Clara. Angry Canadian. Highest quality.
-     Pre-rendered MP3 audio is ALWAYS preferred (studio quality).
-     SpeechSynthesis Clara is fallback for pages without MP3. */
+  /* ── TARGET VOICES — British neural female, highest quality first ──
+     Edge ships the Microsoft *Online (Natural)* en-GB voices;
+     Chrome ships Google UK English Female. Both are acceptable.
+     Clara (en-CA) is a legacy fallback only — no longer the target. */
   var TARGET_VOICES = [
-    'microsoft clara online (natural)',
-    'microsoft clara online',
-    'microsoft clara',
-    'clara'
-  ];
-  /* Secondary fallbacks ONLY if Clara is completely unavailable on the system */
-  /* All Canadian/high-quality neural female voices */
-  var FALLBACK_VOICES = [
-    'microsoft jenny online (natural)',
-    'microsoft jenny online',
     'microsoft sonia online (natural)',
-    'microsoft sonia online',
-    'microsoft aria online (natural)',
-    'microsoft aria online',
     'microsoft libby online (natural)',
+    'microsoft maisie online (natural)',
+    'microsoft sonia online',
     'microsoft libby online',
     'microsoft hazel online (natural)',
-    'microsoft hazel online'
+    'microsoft hazel online',
+    'google uk english female'
+  ];
+  /* Secondary fallbacks ONLY if no British neural female exists */
+  var FALLBACK_VOICES = [
+    'microsoft clara online (natural)',
+    'microsoft clara online',
+    'microsoft jenny online (natural)',
+    'microsoft jenny online',
+    'microsoft aria online (natural)',
+    'microsoft aria online'
   ];
 
   /* ── CANONICAL BLOCKLIST — maintain here ONLY ────── */
@@ -60,14 +65,24 @@
   ];
   var FEMALE_NAMES = [
     'hazel','clara','libby','sonia','maisie','martha','kate','karen',
-    'moira','fiona','serena','samantha','victoria','jenny',
+    'moira','fiona','serena','samantha','victoria','jenny','zira','eva',
     'aria','sara','emily','emma','amy','natasha','linda','catherine',
+    'google uk english female',
     'microsoft hazel','microsoft clara','microsoft libby','microsoft sonia',
     'microsoft jenny','microsoft aria','microsoft sara','microsoft emily',
     'microsoft catherine','microsoft linda','microsoft natasha'
   ];
 
   function nameOf(v) { return (v.name || '').toLowerCase(); }
+  /* Word-boundary match: a blocklisted token like "ian" must NOT match
+     inside "Gillian"/"Vivian" (which would wrongly reject a female voice). */
+  function nameMatches(v, list) {
+    var n = nameOf(v);
+    return list.some(function(name) {
+      var esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp('\\b' + esc + '\\b').test(n);
+    });
+  }
   function isEnGB(v) {
     var l = (v.lang || '').toLowerCase().replace('_', '-');
     return l === 'en-gb' || l.indexOf('en-gb') === 0;
@@ -80,8 +95,8 @@
     var l = (v.lang || '').toLowerCase().replace('_', '-');
     return l.indexOf('en') === 0;
   }
-  function isFemale(v) { return FEMALE_NAMES.some(function(f) { return nameOf(v).indexOf(f) >= 0; }); }
-  function isMale(v) { return MALE_NAMES.some(function(m) { return nameOf(v).indexOf(m) >= 0; }); }
+  function isFemale(v) { return nameMatches(v, FEMALE_NAMES); }
+  function isMale(v) { return nameMatches(v, MALE_NAMES); }
   function isNeural(v) { return /(natural|online|neural)/i.test(v.name); }
   function isDesktop(v) { return /desktop/i.test(v.name); }
   function scoreVoice(v) {
@@ -89,15 +104,17 @@
     var n = nameOf(v);
     var score = 0;
     if (isFemale(v)) score += 30;
-    if (isEnCA(v)) score += 60;
-    else if (isEnGB(v)) score += 35;
+    if (isEnGB(v)) score += 60;                 /* British first */
+    else if (isEnCA(v)) score += 30;
     else if (isEn(v)) score += 20;
     if (isNeural(v)) score += 90;
     else score -= 140;
     if (v.localService === false) score += 20;
-    if (n.indexOf('clara') >= 0) score += 220;
-    if (/(jenny|sonia|aria|libby)/i.test(n)) score += 120;
-    if (n.indexOf('hazel') >= 0) score += 40;
+    if (/(sonia|libby|maisie)/i.test(n)) score += 220;   /* British neural targets */
+    if (n.indexOf('google uk english female') >= 0) score += 210; /* Chrome's British female */
+    if (n.indexOf('hazel') >= 0 && isNeural(v)) score += 160;
+    if (n.indexOf('clara') >= 0) score += 100;  /* legacy fallback */
+    if (/(jenny|aria)/i.test(n)) score += 80;
     return score;
   }
 
@@ -105,10 +122,18 @@
   var resolved = false;
   var isTarget = false;
 
+  /* Target = a British female voice we consider "the LIRIL voice" */
   function isTargetVoice(v) {
-    if (!v) return false;
+    if (!v || isMale(v)) return false;
     var n = nameOf(v);
-    return n.indexOf('clara') >= 0;
+    if (n.indexOf('google uk english female') >= 0) return true;
+    return isEnGB(v) && isFemale(v) && isNeural(v);
+  }
+
+  /* A voice we will ALLOW to speak at all (target or acceptable fallback).
+     Anything else — including "no voice" — means silence. */
+  function isAcceptable(v) {
+    return !!v && !isMale(v) && !isDesktop(v) && isEn(v) && scoreVoice(v) > 0;
   }
 
   function resolve() {
@@ -116,62 +141,59 @@
     var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
     if (!voices.length) return null;
 
-    /* P0: Restore from sessionStorage — but ONLY if it's Clara */
+    /* P0: Restore from sessionStorage — but ONLY if it's still a target voice */
     try {
       var saved = sessionStorage.getItem(VOICE_STORAGE_KEY);
       if (saved) {
         var restored = voices.find(function(v) { return v.name === saved; });
         if (restored && isTargetVoice(restored)) {
           cached = restored; resolved = true; isTarget = true;
-          console.log('[LIRIL-VOICE] Restored Clara:', cached.name);
+          console.log('[LIRIL-VOICE] Restored British target:', cached.name);
           return cached;
         } else {
-          /* Cached voice is not Clara — clear and re-resolve */
           sessionStorage.removeItem(VOICE_STORAGE_KEY);
-          console.log('[LIRIL-VOICE] Cleared non-Clara cache:', saved);
+          console.log('[LIRIL-VOICE] Cleared non-target cache:', saved);
         }
       }
     } catch(e) {}
 
-    /* P0: CLARA ONLY — exact match on target voice names */
+    /* P0: exact match on target voice names (best quality first) */
     for (var t = 0; t < TARGET_VOICES.length && !cached; t++) {
       var target = TARGET_VOICES[t];
       cached = voices.find(function(v) { return nameOf(v) === target; });
     }
-    /* P0.3: Partial match on Clara target names */
+    /* P0.3: partial match on target names */
     if (!cached) {
       for (var t2 = 0; t2 < TARGET_VOICES.length && !cached; t2++) {
         var partial = TARGET_VOICES[t2];
-        cached = voices.find(function(v) { return nameOf(v).indexOf(partial) >= 0; });
+        cached = voices.find(function(v) { return nameOf(v).indexOf(partial) >= 0 && !isMale(v); });
       }
     }
-    /* P0.5: Any voice with 'clara' in name (catch all Clara variants) */
-    if (!cached) cached = voices.find(function(v) { return nameOf(v).indexOf('clara') >= 0 && !isMale(v); });
+    /* P0.5: any British neural female */
+    if (!cached) {
+      cached = voices.find(function(v) { return isTargetVoice(v); });
+    }
 
-    /* Mark if we found Clara */
     if (cached && isTargetVoice(cached)) {
       isTarget = true;
     } else if (cached) {
-      /* We found a non-Clara voice — DON'T lock, keep looking */
-      console.log('[LIRIL-VOICE] Found non-Clara, not locking:', nameOf(cached));
+      console.log('[LIRIL-VOICE] Found non-target, not locking:', nameOf(cached));
       cached = null;
     }
 
-    /* P1-P6: If Clara is unavailable, use the best acceptable English fallback.
-       Priority order per site voice policy:
-       neural en-GB female → known female en-GB → non-male en-GB →
-       neural en female → known female en → non-male en → silence last. */
+    /* P1+: no British target available — best acceptable English female,
+       else silence. NEVER a male, NEVER a Desktop SAPI voice. */
     if (!cached && voices.length > 0) {
       var rankedFemale = voices
         .filter(function(v) { return isFemale(v) && !isMale(v) && isEn(v) && !isDesktop(v); })
         .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
-      if (rankedFemale.length) cached = rankedFemale[0];
+      if (rankedFemale.length && scoreVoice(rankedFemale[0]) > 0) cached = rankedFemale[0];
     }
     if (!cached && voices.length > 0) {
       var rankedEnglish = voices
         .filter(function(v) { return !isMale(v) && isEn(v) && !isDesktop(v); })
         .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
-      if (rankedEnglish.length) cached = rankedEnglish[0];
+      if (rankedEnglish.length && scoreVoice(rankedEnglish[0]) > 0) cached = rankedEnglish[0];
     }
 
     /* NEVER use Desktop SAPI5 voices — quality is unacceptable */
@@ -183,35 +205,68 @@
     if (cached) {
       isTarget = isTargetVoice(cached);
       try { sessionStorage.setItem(VOICE_STORAGE_KEY, cached.name); } catch(e) {}
-      console.log('[LIRIL-VOICE] Selected:', cached.name, '(' + cached.lang + ')', isTarget ? '★ CLARA' : '⚠ FALLBACK');
+      console.log('[LIRIL-VOICE] Selected:', cached.name, '(' + cached.lang + ')', isTarget ? '★ BRITISH TARGET' : '⚠ FALLBACK');
     }
     resolved = true;
     return cached;
   }
 
+  /* ── GUARDED SPEAK — the ONLY sanctioned way to speak ──
+     Returns true if the utterance was dispatched with an acceptable
+     voice; false means no acceptable voice exists → stay silent. */
+  function speak(text, opts) {
+    if (!text || !window.speechSynthesis) return false;
+    var v = resolve();
+    if (!isAcceptable(v)) {
+      console.warn('[LIRIL-VOICE] speak() suppressed — no acceptable voice (never default).');
+      return false;
+    }
+    var u = new SpeechSynthesisUtterance(text);
+    u.voice = v;
+    u.lang = v.lang || 'en-GB';
+    u.rate = (opts && opts.rate) || VOICE_PARAMS.rate;
+    u.pitch = (opts && opts.pitch) || VOICE_PARAMS.pitch;
+    u.volume = (opts && opts.volume != null) ? opts.volume : VOICE_PARAMS.volume;
+    if (opts) {
+      if (opts.onend) u.onend = opts.onend;
+      if (opts.onerror) u.onerror = opts.onerror;
+      if (opts.onboundary) u.onboundary = opts.onboundary;
+    }
+    window.speechSynthesis.speak(u);
+    return true;
+  }
+
+  /* Guard an existing utterance: attach the resolved voice or refuse.
+     Returns true only when it is safe to call speechSynthesis.speak(u). */
+  function guardUtterance(u) {
+    var v = resolve();
+    if (!isAcceptable(v)) return false;
+    u.voice = v;
+    u.lang = v.lang || 'en-GB';
+    return true;
+  }
+
   /* ── Retry loop for Chrome/Edge async voice loading ── */
-  /* Keep retrying until CLARA is found, not just any female voice */
   var retryCount = 0;
   function retryResolution() {
     cached = null; resolved = false; isTarget = false;
     var v = resolve();
     if (v && isTargetVoice(v)) {
-      console.log('[LIRIL-VOICE] ★ CLARA locked:', v.name, 'after', retryCount, 'retries');
+      console.log('[LIRIL-VOICE] ★ British target locked:', v.name, 'after', retryCount, 'retries');
       return;
     }
     retryCount++;
-    /* Retry up to 40 times (10 seconds) for Clara — she loads late on some systems */
+    /* Retry up to 40 times (10 seconds) — neural voices load late on some systems */
     if (retryCount < 40) {
       setTimeout(retryResolution, 250);
     } else {
-      /* Clara not found after 10s — accept best available or silence */
       cached = null; resolved = false; isTarget = false;
       var v2 = resolve();
       if (v2 && isMale(v2)) {
         console.warn('[LIRIL-VOICE] Rejecting male after 40 retries:', v2.name);
         cached = null; resolved = false;
       } else if (v2) {
-        console.warn('[LIRIL-VOICE] Clara unavailable, using fallback:', v2.name);
+        console.warn('[LIRIL-VOICE] British target unavailable, using fallback:', v2.name);
       } else {
         console.warn('[LIRIL-VOICE] No suitable voice found — silence mode');
       }
@@ -221,17 +276,13 @@
   if (window.speechSynthesis) {
     window.speechSynthesis.addEventListener('voiceschanged', function() {
       var voices = window.speechSynthesis.getVoices();
-      /* Always try to upgrade to Clara when voices change */
       if (cached && isTarget) {
-        /* Already have Clara — only re-resolve if she disappeared */
         var still = voices.find(function(v) { return v.name === cached.name; });
         if (still) return;
       }
-      /* Either no voice, non-Clara voice, or Clara disappeared — re-resolve */
-      /* Check if Clara is now available */
-      var claraNow = voices.find(function(v) { return nameOf(v).indexOf('clara') >= 0; });
-      if (claraNow || !cached) {
-        console.log('[LIRIL-VOICE] voiceschanged: re-resolving', claraNow ? '(Clara detected!)' : '(no voice yet)');
+      var targetNow = voices.some(function(v) { return isTargetVoice(v); });
+      if (targetNow || !cached) {
+        console.log('[LIRIL-VOICE] voiceschanged: re-resolving', targetNow ? '(British target detected)' : '(no voice yet)');
         cached = null; resolved = false; isTarget = false;
         resolve();
       }
@@ -243,6 +294,9 @@
   /* ── PUBLIC API — used by presentation.js, liril-walkthrough.js, home.html ── */
   window.LIRIL_VOICE = {
     get: resolve,
+    speak: speak,
+    guardUtterance: guardUtterance,
+    isAcceptable: isAcceptable,
     params: VOICE_PARAMS,
     isMale: isMale,
     isFemale: isFemale,

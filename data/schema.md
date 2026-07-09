@@ -41,7 +41,7 @@ Allowed primary-source domains (suffix match):
 
 ---
 
-## 1 · `entities.json` — actors (SATOR [1,1] · A)
+## 1 · `entities.json` — actors (MATRIX [1,1] · A)
 
 ```json
 {
@@ -76,7 +76,7 @@ Allowed primary-source domains (suffix match):
 
 ---
 
-## 2 · `appointments.json` — events (SATOR [2,2] · T/N-center)
+## 2 · `appointments.json` — events (MATRIX [2,2] · T/N-center)
 
 ```json
 {
@@ -107,7 +107,7 @@ Allowed primary-source domains (suffix match):
 
 ---
 
-## 3 · `edges.json` — relations (SATOR [3,3] · O)
+## 3 · `edges.json` — relations (MATRIX [3,3] · O)
 
 ```json
 {
@@ -144,7 +144,7 @@ Allowed primary-source domains (suffix match):
 
 ---
 
-## 4 · `quantum_provenance.jsonl` — LIRIL admit ledger (SATOR [4,0] · R)
+## 4 · `quantum_provenance.jsonl` — LIRIL admit ledger (MATRIX [4,0] · R)
 
 Append-only JSONL. Never rewritten or compacted (M17). One line per build pass:
 

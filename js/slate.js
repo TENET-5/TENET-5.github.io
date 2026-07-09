@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════
-   S.L.A.T.E + HYDROGEN Integration
+   SLATE Integration
    Token persistence, context tracking, adaptive navigation
-   TENET5 — Powered by LIRIL AI | SEED 118400
+   TENET5 — Powered by LIRIL AI
    ═══════════════════════════════════════════════════════ */
 
 (function() {
@@ -105,7 +105,6 @@
       { href: 'maid-accountability.html', label: 'MAID Investigation' },
       { href: 'carney-conflicts.html', label: 'Carney COI' },
       { href: 'cds-accountability.html', label: 'CDS Accountability' },
-      { href: 's504-covey-bae.html', label: 's.504 Charges' },
       { href: 'foreign-interference.html', label: 'Foreign Interference' },
       { href: 'disability-genocide.html', label: 'UN CRPD' },
       { href: 'veterans-betrayal.html', label: 'Veterans' },

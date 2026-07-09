@@ -8,7 +8,6 @@
 
   var INVESTIGATIONS = [
     { href: 'maid-accountability.html', num: '76,475', label: 'MAID Deaths' },
-    { href: 's504-covey-bae.html', num: '28', label: 's.504 Counts' },
     { href: 'carney-conflicts.html', num: '$6.8M', label: 'Carney COI' },
     { href: 'foreign-interference.html', num: 'Hogue', label: 'Foreign Interference' },
     { href: 'arrivecan.html', num: '$93M', label: 'ArriveCAN' },

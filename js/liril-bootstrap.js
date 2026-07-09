@@ -147,12 +147,8 @@
       if (window.LIRIL_VOICE && typeof window.LIRIL_VOICE.speak === 'function') {
         return window.LIRIL_VOICE.speak(text);
       }
-      /* Last-resort: fall through to the native speech synth if available */
-      if (typeof window.speechSynthesis !== 'undefined') {
-        var u = new SpeechSynthesisUtterance(String(text || ''));
-        window.speechSynthesis.speak(u);
-        return true;
-      }
+      /* No native fallback: an unvoiced utterance plays with the OS
+         default (male) voice. Silence until the resolver is loaded. */
       return false;
     }
   };

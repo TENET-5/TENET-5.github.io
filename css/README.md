@@ -2,7 +2,7 @@
 
 **Canonical source of truth:** [`tokens.css`](./tokens.css)
 **Machine-readable mirror:** [`QUANTANIUM.json`](./QUANTANIUM.json)
-**Enforcement daemon:** `tools/liril_brand_guardian.py` (in the `S.L.A.T.E/tenet5` repo)
+**Enforcement daemon:** `the brand-guardian tool` (in the `the system /tenet5` repo)
 
 ---
 

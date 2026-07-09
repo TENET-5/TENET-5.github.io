@@ -13,10 +13,9 @@
    YOU ARE READING THE CANONICAL DESIGN-TOKEN CONTRACT FOR THIS SITE.
 
    QUANTANIUM is TENET5's living-architecture name for the unified
-   design + quantum-state pipeline. The technical CSS prefix remains
-   `--slate-*` (widely referenced, stable), with a QUANTANIUM-pipeline
-   namespace `--quantanium-*` for live-substrate UI surfaces (ising
-   engine indicator, pvnp-tier colours, decoder telemetry).
+   design contract. The technical CSS prefix remains `--slate-*`
+   (widely referenced, stable), with a reserved `--quantanium-*`
+   namespace for status-badge styling tokens.
 
    ┌───────────────────────────────────────────────────────────────────────┐
    │  STOP — IF YOU ARE AN AI AGENT ABOUT TO EDIT CSS, READ THIS FIRST     │
@@ -108,7 +107,7 @@
   --slate-verified:     #6e8f68 !important;   /* muted field green */
   --slate-warning:      #c9a44c !important;   /* gold doubles as warn */
   --slate-info:         #6c7e91 !important;
-  --slate-quantum:      #8b7ec4 !important;   /* reserved, ising indicator */
+  --slate-quantum:      #8b7ec4 !important;   /* reserved accent */
 
   /* ── Borders ───────────────────────────────────────────────────────── */
   --slate-border:       #333333 !important;
@@ -201,7 +200,6 @@
   --slate-z-modal:       1100 !important;
 
   /* ── Brand anchor ──────────────────────────────────────────────────── */
-  --slate-system-seed:  118400;            /* public, machine-readable */
   --slate-tokens-rev:   "1.0.0-2026-04-27"; /* update QUANTANIUM.json on bump */
 
   color-scheme: dark !important;
@@ -402,8 +400,7 @@
   --max-wide:           var(--slate-max-wide);
   --nav-h:              var(--slate-nav-h);
 
-  /* ── TENT seed-anchored brand vars (per memory feedback rule) ──────── */
-  --tnt-seed:           118400;
+  /* ── TENT brand rhythm vars ────────────────────────────────────────── */
   --tnt-tick-ms:        7830;        /* 7.83 Hz Schumann anchor */
   --tnt-loom-cell:      var(--slate-radius-sm);
 }
@@ -439,15 +436,8 @@ body::before {
 /* ─────────────────────────────────────────────────────────────────────────
    §4  QUANTANIUM PIPELINE TOKENS  —  --quantanium-*  namespace
    ─────────────────────────────────────────────────────────────────────────
-   Live-substrate UI surface tokens. The QUANTANIUM pipeline runs every
-   dispatch through the Ising / tensor_journal / pvnp ensemble and emits
-   per-dispatch telemetry (q.engine, ising_decode_ms, tensor_project_ms,
-   compose_ms, paste_fire_ms). These tokens drive the visible state of
-   that pipeline on the site — engine indicator colours, pvnp-tier glow,
-   decoder pulse animation. Read by:
-     - js/quantanium-status.js   (live widget)
-     - .quantanium-status        (DOM widget below)
-     - .quantanium-pulse         (decoder heartbeat element)
+   Reserved --quantanium-* namespace: status-badge styling tokens.
+   No live data source.
    ─────────────────────────────────────────────────────────────────────── */
 :root {
   /* ── Engine identity ───────────────────────────────────────────────── */
@@ -474,11 +464,6 @@ body::before {
   --quantanium-bench-efficiency:  #6c7e91 !important;
   --quantanium-bench-speed:       #c9a44c !important;
   --quantanium-bench-artistic:    #8b7ec4 !important;
-
-  /* ── Substrate constants (machine-readable) ────────────────────────── */
-  --quantanium-system-seed:     118400;
-  --quantanium-pipeline-rev:    "1.0.0-2026-04-27";
-  --quantanium-engine-default:  "ising_local";
 }
 
 
@@ -534,68 +519,6 @@ html[data-reading="accessible"] dd {
 /* Always honour prefers-reduced-motion for the toggle transitions */
 @media (prefers-reduced-motion: reduce) {
   html[data-reading="accessible"] * { transition: none !important; }
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────
-   §6  QUANTANIUM STATUS WIDGET  —  DOM contract for js/quantanium-status.js
-   ─────────────────────────────────────────────────────────────────────────
-   Markup the JS expects:
-     <div class="quantanium-status" data-engine="ising_local"
-                                     data-pvnp="solvable">
-       <span class="quantanium-pulse" aria-hidden="true"></span>
-       <span class="quantanium-engine">ising_local</span>
-       <span class="quantanium-tier">solvable</span>
-       <span class="quantanium-bench" title="decode_ms / tensor_ms">— / —</span>
-     </div>
-   ─────────────────────────────────────────────────────────────────────── */
-
-.quantanium-status {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--slate-pad-xs);
-  padding: var(--slate-pad-2xs) var(--slate-pad-sm);
-  background: var(--quantanium-engine-bg);
-  border: 1px solid var(--quantanium-engine-border);
-  border-radius: var(--slate-radius-pill);
-  font-family: var(--slate-font-mono);
-  font-size: var(--slate-text-xs);
-  color: var(--slate-ink-dim);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.quantanium-status .quantanium-pulse {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--quantanium-engine-color);
-  box-shadow: 0 0 0 0 var(--quantanium-decoder-pulse);
-  animation: quantanium-pulse var(--quantanium-tick-ms) ease-out infinite;
-}
-
-.quantanium-status .quantanium-engine {
-  color: var(--quantanium-engine-color);
-  font-weight: 700;
-}
-
-.quantanium-status[data-pvnp="solvable"]    .quantanium-tier { color: var(--quantanium-pvnp-solvable); }
-.quantanium-status[data-pvnp="np_exposed"]  .quantanium-tier { color: var(--quantanium-pvnp-np-exposed); }
-.quantanium-status[data-pvnp="loom_break"]  .quantanium-tier { color: var(--quantanium-pvnp-loom-break); }
-.quantanium-status[data-pvnp="unknown"]     .quantanium-tier { color: var(--quantanium-pvnp-unknown); }
-
-.quantanium-status .quantanium-bench {
-  color: var(--slate-ink-muted);
-  font-size: 0.65rem;
-}
-
-@keyframes quantanium-pulse {
-  0%   { box-shadow: 0 0 0 0    var(--quantanium-decoder-pulse); }
-  70%  { box-shadow: 0 0 0 10px rgba(139, 126, 196, 0); }
-  100% { box-shadow: 0 0 0 0    rgba(139, 126, 196, 0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .quantanium-status .quantanium-pulse { animation: none; }
 }
 
 

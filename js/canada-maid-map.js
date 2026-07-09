@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════
    TENET5 Canada MAID Map — Interactive provincial death rates
    Hover/click provinces to see MAID statistics
-   SEED 118400 | Data: Health Canada 6th Annual Report
+   Data: Health Canada 6th Annual Report
    ═══════════════════════════════════════════════════════ */
 
 (function() {

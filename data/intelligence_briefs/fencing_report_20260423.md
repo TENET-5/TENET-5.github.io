@@ -1,7 +1,7 @@
 # TENET5 Public Figure Fencing Operations Report
 **Generated:** 2026-04-23 17:25 UTC
 **Targets:** 22
-**Engine:** LIRIL OSINT + Nemotron-9B Local AI
+**Engine:** LIRIL OSINT + a local model Local AI
 
 ---
 

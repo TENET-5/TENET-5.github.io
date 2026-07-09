@@ -22,14 +22,13 @@
         '<a href="/index.html" class="brand">' +
           '<div class="brand-text">' +
             '<span class="brand-title">TENET<sup>5</sup></span>' +
-            '<span class="brand-subtitle">Powered by LIRIL AI \u2022 NVIDIA \u2022 Intel</span>' +
+            '<span class="brand-subtitle">Powered by LIRIL AI</span>' +
           '</div>' +
         '</a>' +
         '<div class="nav-status-stack" aria-label="Platform status">' +
           '<span class="nav-status-pill" style="color:#22d3ee;border-color:rgba(34,211,238,0.4);font-weight:700;">[AI]</span>' +
           '<span class="nav-status-pill nav-status-live">Live OSINT</span>' +
           '<span class="nav-status-pill">LIRIL narration</span>' +
-          '<span class="nav-status-pill" style="color:#a855f7;border-color:rgba(168,85,247,0.3);">[NV-QUANTUM]</span>' +
         '</div>' +
       '</div>' +
       '<div class="nav-bar">' +

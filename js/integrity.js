@@ -38,7 +38,7 @@
     });
   }
 
-  /* ── Extract body text (mirrors Python build script logic) ── */
+  /* ── Extract body text (mirrors the build pipeline) ── */
   function extractBodyText() {
     var clone = document.body.cloneNode(true);
     var remove = clone.querySelectorAll('script, style, nav, .pres-indicator, ' +
@@ -152,30 +152,6 @@
     });
   }
 
-  /* ── Build verify button ──────────────────────────────────── */
-  function initIntegrityButton() {
-    if (verifyBtn) return;
-    verifyBtn = document.createElement('button');
-    verifyBtn.className = 'integrity-verify-btn';
-    verifyBtn.setAttribute('aria-label', 'Verify page integrity');
-    verifyBtn.setAttribute('title', 'Verify evidence integrity (SHA-256)');
-    verifyBtn.textContent = '\uD83D\uDD12';
-    verifyBtn.addEventListener('click', function () {
-      verifyBtn.disabled = true;
-      verifyBtn.textContent = '\u23F3';
-      verifyPage().then(function (result) {
-        showVerificationResult(result);
-        verifyBtn.textContent = result.status === 'verified' ? '\u2705' : '\u26A0\uFE0F';
-        verifyBtn.disabled = false;
-      }).catch(function (err) {
-        verifyBtn.textContent = '\u274C';
-        verifyBtn.disabled = false;
-        console.error('[integrity]', err);
-      });
-    });
-    document.body.appendChild(verifyBtn);
-  }
-
   /* ── Format custody date ──────────────────────────────────── */
   function formatCustodyDate(iso) {
     try {
@@ -219,7 +195,6 @@
 
   /* ── Init ─────────────────────────────────────────────────── */
   function init() {
-    initIntegrityButton();
     initCustodyBadge();
   }
   if (document.readyState === 'loading') {

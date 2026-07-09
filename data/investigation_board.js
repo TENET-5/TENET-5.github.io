@@ -2,9 +2,8 @@ window.BOARD_DATA = {
   "meta": {
     "title": "Foreign Influence Investigation Board",
     "updated": "2026-04-03T23:45",
-    "seed": 118400,
     "sources": "Official parliamentary records, court rulings, lobbying registry, NSICOP reports, OSINT dashboard",
-    "layout": "Cluster-organized: Israel(top-left), Media(left), CCP(top-right), CFNIS(center-right), CCFR/wardoll(right), CDA(center), India(bottom), CPC-leadership(center-top)"
+    "layout": "Cluster-organized: Israel(top-left), Media(left), CCP(top-right), CFNIS(center-right), CCFR(right), CDA(center), India(bottom), CPC-leadership(center-top)"
   },
   "nodes": [
     {
@@ -12,7 +11,7 @@ window.BOARD_DATA = {
       "type": "person",
       "label": "Kevin Vuong",
       "subtitle": "Independent MP (2021-2025)",
-      "detail": "237 CCP mentions, only independent NAY on ceasefire, called Daniel Perry 'domestic terrorist'",
+      "detail": "237 CCP mentions, only independent NAY on ceasefire",
       "link": "foreign-influence.html#vuong",
       "categories": [
         "israel",
@@ -90,34 +89,6 @@ window.BOARD_DATA = {
       ],
       "x": 68,
       "y": 50
-    },
-    {
-      "id": "fong",
-      "type": "person",
-      "label": "Wally Fong",
-      "subtitle": "TV-PressPass / Infantry NCO",
-      "detail": "Identified as psychological warfare operator targeting Canadian Forces veterans online. Firearms reporter persona (TV-PressPass). Party to murder of Officer Travis Gillespie (s.21, COUNT 22). Connected to Clemmer-Malm-CDA veteran-labeling pipeline",
-      "link": "gillespie-murder.html",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 90,
-      "y": 48
-    },
-    {
-      "id": "han_zhou",
-      "type": "person",
-      "label": "Han Zhou",
-      "subtitle": "Killer of Officer Gillespie",
-      "detail": "Han Zhou killed Officer Travis Gillespie. Fong, Clemmer, Harder, Lahucik named as parties under s.21. Covey party in totality.",
-      "link": "gillespie-murder.html",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 95,
-      "y": 55
     },
     {
       "id": "wilson",
@@ -267,7 +238,7 @@ window.BOARD_DATA = {
       "type": "org",
       "label": "CCFR",
       "subtitle": "Canadian Coalition for Firearm Rights",
-      "detail": "Tracey Wilson is VP. Wally Fong covers events. Connected to veteran community targeting",
+      "detail": "Tracey Wilson is VP. Connected to veteran community targeting",
       "link": "foreign-influence.html#fong",
       "categories": [
         "cfnis",
@@ -275,20 +246,6 @@ window.BOARD_DATA = {
       ],
       "x": 82,
       "y": 42
-    },
-    {
-      "id": "wardoll",
-      "type": "org",
-      "label": "war-doll.com",
-      "subtitle": "Insurgency merchandise",
-      "detail": "'Support Your Local Insurgency' shirts. Owner lied about veteran status. Quit IG after exposure",
-      "link": "foreign-influence.html#fong",
-      "categories": [
-        "cfnis",
-        "org"
-      ],
-      "x": 92,
-      "y": 58
     },
     {
       "id": "huawei",
@@ -390,25 +347,11 @@ window.BOARD_DATA = {
       "y": 35
     },
     {
-      "id": "s504",
-      "type": "evidence",
-      "label": "s.504 Charges",
-      "subtitle": "Criminal Code",
-      "detail": "Information filed by Daniel Perry against CFNIS officers",
-      "link": "cfnis.html",
-      "categories": [
-        "cfnis",
-        "evidence"
-      ],
-      "x": 62,
-      "y": 75
-    },
-    {
       "id": "malespin",
       "type": "person",
       "label": "Lovie Malespin",
       "subtitle": "IDF instructor / EMTAN Israel",
-      "detail": "IDF firearms instructor. Works for EMTAN Israel (arms manufacturer). Teaches IDF Tavor rifle courses in Canada via TACCOM. Wally Fong wrote article about her course. Bridge: Israel military \u2192 Canadian firearms community",
+      "detail": "IDF firearms instructor. Works for EMTAN Israel (arms manufacturer). Teaches IDF Tavor rifle courses in Canada via TACCOM. Bridge: Israel military \u2192 Canadian firearms community",
       "link": "foreign-influence.html#fong",
       "categories": [
         "cfnis",
@@ -416,34 +359,6 @@ window.BOARD_DATA = {
       ],
       "x": 90,
       "y": 50
-    },
-    {
-      "id": "clemmer",
-      "type": "person",
-      "label": "Stacey Clemmer",
-      "subtitle": "Military Police Officer",
-      "detail": "Military police officer with connection to CDA Institute via Josh Malm. Military-to-policy pipeline",
-      "link": "foreign-influence.html#cfnis",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 55,
-      "y": 60
-    },
-    {
-      "id": "malm",
-      "type": "person",
-      "label": "Josh Malm",
-      "subtitle": "Dir. Research, CDA Institute",
-      "detail": "Director of Research & Analysis at CDA Institute. Queens Uni, journalism background. Defence policy network",
-      "link": "foreign-influence.html#cfnis",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 38,
-      "y": 55
     },
     {
       "id": "cda",
@@ -494,7 +409,7 @@ window.BOARD_DATA = {
       "type": "person",
       "label": "Lovie Malespin",
       "subtitle": "IDF instructor / EMTAN Israel",
-      "detail": "IDF firearms instructor. Works for EMTAN Israel (arms manufacturer). Teaches IDF Tavor rifle courses in Canada via TACCOM. Wally Fong wrote article about her course. Bridge: Israel military \u2192 Canadian firearms community",
+      "detail": "IDF firearms instructor. Works for EMTAN Israel (arms manufacturer). Teaches IDF Tavor rifle courses in Canada via TACCOM. Bridge: Israel military \u2192 Canadian firearms community",
       "link": "foreign-influence.html#fong",
       "categories": [
         "cfnis",
@@ -502,20 +417,6 @@ window.BOARD_DATA = {
       ],
       "x": 85,
       "y": 50
-    },
-    {
-      "id": "clemmer2",
-      "type": "person",
-      "label": "Stacey Clemmer",
-      "subtitle": "Ex-MP officer, Whitecourt AB",
-      "detail": "Military police \u2192 wardoll propaganda. Cousin: Josh Malm (CDA). Half-brother: Kevin Malm (China\u2192Israel). Partner: cs_ginger_actual (ex-PPCLI)",
-      "link": "foreign-influence.html#cfnis",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 48,
-      "y": 65
     },
     {
       "id": "rebel2",
@@ -546,49 +447,6 @@ window.BOARD_DATA = {
       ],
       "x": 18,
       "y": 62
-    },
-    {
-      "id": "vickybae",
-      "type": "person",
-      "label": "Vicky Bae",
-      "subtitle": "Confucius Institute member",
-      "detail": "CCP-linked individual embedded in wardoll/CCFR social network. Chinese national in insurgency network",
-      "link": "foreign-influence.html#ufwd",
-      "categories": [
-        "ccp",
-        "person"
-      ],
-      "x": 90,
-      "y": 30
-    },
-    {
-      "id": "cs_ginger",
-      "type": "person",
-      "label": "cs_ginger_actual",
-      "subtitle": "Ex-PPCLI, Whitecourt AB",
-      "detail": "Ex-Princess Patricias. Partner of Stacey Clemmer. Part of wardoll network",
-      "link": "foreign-influence.html#cfnis",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 88,
-      "y": 65
-    },
-    {
-      "id": "malm_kevin",
-      "type": "person",
-      "label": "Kevin Malm",
-      "subtitle": "China 2020 \u2192 Israel",
-      "detail": "Half-brother of Stacey Clemmer. In China when COVID hit (2020), then traveled to Israel. Dual-state travel pattern",
-      "link": "foreign-influence.html#cfnis",
-      "categories": [
-        "ccp",
-        "israel",
-        "person"
-      ],
-      "x": 55,
-      "y": 58
     },
     {
       "id": "memri",
@@ -632,25 +490,11 @@ window.BOARD_DATA = {
       "y": 15
     },
     {
-      "id": "feeg",
-      "type": "person",
-      "label": "Brandon Feeg",
-      "subtitle": "Network member",
-      "detail": "Identified in wardoll/CCFR network per Daniel Perry",
-      "link": "foreign-influence.html#fong",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 95,
-      "y": 70
-    },
-    {
       "id": "lahucik",
       "type": "person",
       "label": "Tyler Lahucik",
       "subtitle": "Military clothing designer",
-      "detail": "Designed clothing for CAF per Airdrie Echo. Part of wardoll/military network",
+      "detail": "Designed clothing for CAF per Airdrie Echo. Part of military network",
       "link": "foreign-influence.html#fong",
       "categories": [
         "cfnis",
@@ -1307,48 +1151,6 @@ window.BOARD_DATA = {
       "y": 28
     },
     {
-      "id": "perry",
-      "type": "person",
-      "label": "Cpl Daniel Perry (Ret)",
-      "subtitle": "Combat veteran, TENET5 investigator",
-      "detail": "Canadian Forces Signals Operator. Deployed to Afghanistan with PPCLI. Filed s.504 charges against CFNIS officers. Blew the whistle on Israeli and Chinese foreign interference in the CAF. Dr. Zoe Selhi then produced a retaliatory psychiatric assessment labeling him cognitively impaired \u2014 after the Kit Shop already outfitted him for combat. Builder of the TENET-5 investigation.",
-      "link": "my-story.html",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 50,
-      "y": 42
-    },
-    {
-      "id": "ppcli_lawsuit",
-      "type": "event",
-      "label": "PPCLI Lawsuit",
-      "subtitle": "Federal Court of Canada",
-      "detail": "Statement of Claim: Perry v. HMK. Charges breach of duty of care, whistleblower reprisal, Charter violations, systemic discrimination. The CAF trained, armed, and deployed the plaintiff to Afghanistan on active combat signals operations, then — only after he reported suspected foreign interference — diagnosed him as cognitively impaired.",
-      "link": "ppcli-lawsuit.html",
-      "categories": [
-        "cfnis",
-        "event"
-      ],
-      "x": 55,
-      "y": 72
-    },
-    {
-      "id": "selhi",
-      "type": "person",
-      "label": "Dr. Zoe Selhi",
-      "subtitle": "CAF psychiatrist",
-      "detail": "Produced psychiatric assessment labeling Cpl Perry as cognitively impaired \u2014 a diagnosis that appeared only after he blew the whistle on Israeli and Chinese foreign interference. Previously documented in genocide-evidence.html for labeling another veteran 'delusional' for reporting MAID targeting. Pattern: weaponized psychiatric evaluation to silence whistleblowers.",
-      "link": "ppcli-lawsuit.html",
-      "categories": [
-        "cfnis",
-        "person"
-      ],
-      "x": 42,
-      "y": 68
-    },
-    {
       "id": "paulson",
       "type": "person",
       "label": "Bob Paulson",
@@ -1401,29 +1203,6 @@ window.BOARD_DATA = {
       ],
       "x": 60,
       "y": 25
-    },
-    {
-      "id": "falcon_h-ade3dd",
-      "type": "event",
-      "label": "Temporal Wave S99",
-      "subtitle": "Complexity: CHRONOS-P",
-      "detail": "Vector: MF-31EFC2F35DB45ECC. ABCXYZ LIRIL Handoff Sec: H-ade3dd4d4dc4",
-      "link": "index.html",
-      "categories": [
-        "evidence",
-        "temporal_anomaly"
-      ],
-      "x": 65,
-      "y": 69,
-      "falcon_data": {
-        "name": "TEMPORAL_WAVE_S99",
-        "anomaly_score": 0.99,
-        "paradox_events": 13,
-        "spatial_loops": 7,
-        "topological_vector": "MF-31EFC2F35DB45ECC",
-        "matrix_complexity": "CHRONOS-P",
-        "falcon_timestamp": 1776132493.0022185
-      }
     },
     {
       "id": "immigration_policy",
@@ -1619,25 +1398,6 @@ window.BOARD_DATA = {
       ],
       "x": 110,
       "y": 80
-    },
-    {
-      "id": "s504_court_tracker",
-      "type": "evidence",
-      "label": "s.504 Tracking Engine",
-      "subtitle": "Autonomous Legal Dispatch",
-      "detail": "Vector: MF-S504-DISPATCH. Cryptographically hashed S.504 legal notifications filed automatically against target jurisdictions via Empirical Magic Handoff.",
-      "link": "accountability.html",
-      "categories": [
-        "evidence"
-      ],
-      "x": 60,
-      "y": 80,
-      "falcon_data": {
-        "name": "S504_LEGAL_TRACKER",
-        "crypto_signature": "SHA256_LIRIL_SEALED",
-        "symmetry_index": "100%",
-        "domain": "ETHICS"
-      }
     }
   ],
   "threads": [
@@ -1681,12 +1441,6 @@ window.BOARD_DATA = {
       "from": "vuong",
       "to": "vote658",
       "label": "Only indep. NAY",
-      "strength": 3
-    },
-    {
-      "from": "vuong",
-      "to": "s504",
-      "label": "Called whistleblower 'domestic terrorist'",
       "strength": 3
     },
     {
@@ -1780,46 +1534,10 @@ window.BOARD_DATA = {
       "strength": 3
     },
     {
-      "from": "cfnis",
-      "to": "s504",
-      "label": "s.504 charges filed against",
-      "strength": 2
-    },
-    {
-      "from": "fong",
-      "to": "wilson",
-      "label": "Interviews, events",
-      "strength": 2
-    },
-    {
-      "from": "han_zhou",
-      "to": "fong",
-      "label": "s.21 party to murder",
-      "strength": 3
-    },
-    {
-      "from": "han_zhou",
-      "to": "clemmer",
-      "label": "s.21 party to murder",
-      "strength": 3
-    },
-    {
       "from": "wilson",
       "to": "ccfr",
       "label": "VP Public Relations",
       "strength": 2
-    },
-    {
-      "from": "ccfr",
-      "to": "wardoll",
-      "label": "Connected network",
-      "strength": 1
-    },
-    {
-      "from": "fong",
-      "to": "wardoll",
-      "label": "Veteran targeting",
-      "strength": 1
     },
     {
       "from": "nsicop",
@@ -1844,24 +1562,6 @@ window.BOARD_DATA = {
       "to": "malespin",
       "label": "Associate",
       "strength": 2
-    },
-    {
-      "from": "malespin",
-      "to": "fong",
-      "label": "Associate",
-      "strength": 2
-    },
-    {
-      "from": "clemmer",
-      "to": "malm",
-      "label": "MP \u2192 CDA Institute",
-      "strength": 2
-    },
-    {
-      "from": "malm",
-      "to": "cda",
-      "label": "Dir. Research",
-      "strength": 1
     },
     {
       "from": "rebel",
@@ -1894,54 +1594,6 @@ window.BOARD_DATA = {
       "strength": 2
     },
     {
-      "from": "malespin2",
-      "to": "fong",
-      "label": "Associate",
-      "strength": 2
-    },
-    {
-      "from": "clemmer2",
-      "to": "cs_ginger",
-      "label": "Partner",
-      "strength": 2
-    },
-    {
-      "from": "clemmer2",
-      "to": "malm",
-      "label": "Cousin",
-      "strength": 2
-    },
-    {
-      "from": "clemmer2",
-      "to": "malm_kevin",
-      "label": "Half-siblings",
-      "strength": 2
-    },
-    {
-      "from": "clemmer2",
-      "to": "wardoll",
-      "label": "Produced propaganda while MP",
-      "strength": 3
-    },
-    {
-      "from": "malm_kevin",
-      "to": "huawei",
-      "label": "China 2020",
-      "strength": 1
-    },
-    {
-      "from": "vickybae",
-      "to": "wardoll",
-      "label": "Confucius Inst in wardoll network",
-      "strength": 2
-    },
-    {
-      "from": "vickybae",
-      "to": "ufwd",
-      "label": "CCP connection",
-      "strength": 1
-    },
-    {
       "from": "levant2",
       "to": "rebel2",
       "label": "Founded",
@@ -1958,12 +1610,6 @@ window.BOARD_DATA = {
       "to": "ccfr",
       "label": "Media coverage",
       "strength": 2
-    },
-    {
-      "from": "cs_ginger",
-      "to": "wardoll",
-      "label": "Network member",
-      "strength": 1
     },
     {
       "from": "memri",
@@ -1993,24 +1639,6 @@ window.BOARD_DATA = {
       "from": "poilievre",
       "to": "rebel2",
       "label": "Media coverage",
-      "strength": 1
-    },
-    {
-      "from": "feeg",
-      "to": "wardoll",
-      "label": "Network member",
-      "strength": 1
-    },
-    {
-      "from": "lahucik",
-      "to": "wardoll",
-      "label": "Military clothing",
-      "strength": 1
-    },
-    {
-      "from": "lahucik",
-      "to": "cs_ginger",
-      "label": "Veteran network",
       "strength": 1
     },
     {
@@ -2126,18 +1754,6 @@ window.BOARD_DATA = {
       "to": "troll_swarm",
       "label": "Mobilizes accounts",
       "strength": 2
-    },
-    {
-      "from": "wardoll",
-      "to": "troll_swarm",
-      "label": "Network overlap",
-      "strength": 2
-    },
-    {
-      "from": "troll_swarm",
-      "to": "s504",
-      "label": "Targeted whistleblower",
-      "strength": 3
     },
     {
       "from": "poilievre",
@@ -2326,18 +1942,6 @@ window.BOARD_DATA = {
       "strength": 3
     },
     {
-      "from": "bill_c9",
-      "to": "s504",
-      "label": "Enables private prosecution",
-      "strength": 3
-    },
-    {
-      "from": "pawlowski",
-      "to": "wardoll",
-      "label": "Christian nationalist overlap",
-      "strength": 2
-    },
-    {
       "from": "pawlowski",
       "to": "rebel2",
       "label": "Rebel News coverage",
@@ -2402,12 +2006,6 @@ window.BOARD_DATA = {
       "to": "poilievre",
       "label": "Poilievre shook his hand",
       "strength": 2
-    },
-    {
-      "from": "diagolon",
-      "to": "wardoll",
-      "label": "Far-right network overlap",
-      "strength": 1
     },
     {
       "from": "mendicino",
@@ -2614,60 +2212,6 @@ window.BOARD_DATA = {
       "strength": 2
     },
     {
-      "from": "perry",
-      "to": "cfnis",
-      "label": "Filed s.504 charges",
-      "strength": 3
-    },
-    {
-      "from": "perry",
-      "to": "s504",
-      "label": "Plaintiff",
-      "strength": 3
-    },
-    {
-      "from": "perry",
-      "to": "ppcli_lawsuit",
-      "label": "Statement of Claim",
-      "strength": 3
-    },
-    {
-      "from": "perry",
-      "to": "selhi",
-      "label": "Retaliatory diagnosis \u2014 post-whistleblowing",
-      "strength": 3
-    },
-    {
-      "from": "selhi",
-      "to": "cfnis",
-      "label": "Weaponized psychiatric evaluation",
-      "strength": 2
-    },
-    {
-      "from": "ppcli_lawsuit",
-      "to": "cfnis",
-      "label": "Institutional negligence",
-      "strength": 2
-    },
-    {
-      "from": "ppcli_lawsuit",
-      "to": "evidence_tamper",
-      "label": "Documented misconduct",
-      "strength": 2
-    },
-    {
-      "from": "ppcli_lawsuit",
-      "to": "trudeau_bgen",
-      "label": "Command responsibility",
-      "strength": 2
-    },
-    {
-      "from": "perry",
-      "to": "vuong",
-      "label": "Called 'domestic terrorist'",
-      "strength": 3
-    },
-    {
       "from": "paulson",
       "to": "bill_c14",
       "strength": 3,
@@ -2690,12 +2234,6 @@ window.BOARD_DATA = {
       "to": "cfnis",
       "strength": 2,
       "label": "Command Chain"
-    },
-    {
-      "from": "cfnis_proxy",
-      "to": "falcon_h-ade3dd",
-      "label": "MF_CONVERGENCE",
-      "strength": 4
     },
     {
       "from": "immigration_policy",
@@ -2779,12 +2317,6 @@ window.BOARD_DATA = {
       "from": "brookfield_annuity",
       "to": "pension_annuitization",
       "label": "Engine",
-      "strength": 3
-    },
-    {
-      "from": "perry",
-      "to": "s504_court_tracker",
-      "label": "Initiates Dispatch",
       "strength": 3
     }
   ]

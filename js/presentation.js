@@ -78,20 +78,21 @@
       setTimeout(function () { try { toast.remove(); } catch(e){} }, 16000);
     } catch (e) {}
 
-    /* Try speech first so the user hears SOMETHING on bailout pages. */
+    /* Guarded speech on bailout pages: only with an acceptable LIRIL voice.
+       An unvoiced utterance plays with the OS default (male) — never do that. */
     try {
-      if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined' && text) {
-        var u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-GB';
-        u.rate = 1.08;
-        u.pitch = 0.92;
-        u.onend = function () { setTimeout(advance, 2000); };
-        u.onerror = function () { setTimeout(advance, 10000); };
+      if (window.LIRIL_VOICE && window.LIRIL_VOICE.speak && text) {
         window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(u);
-        /* Hard ceiling so a silent failure can't freeze the tour. */
-        setTimeout(advance, 20000);
-        return;
+        var spoke = window.LIRIL_VOICE.speak(text, {
+          rate: 1.08, pitch: 0.92,
+          onend: function () { setTimeout(advance, 2000); },
+          onerror: function () { setTimeout(advance, 10000); }
+        });
+        if (spoke) {
+          /* Hard ceiling so a silent failure can't freeze the tour. */
+          setTimeout(advance, 20000);
+          return;
+        }
       }
     } catch (e) {}
 
@@ -114,7 +115,6 @@
     // ── OPENING ──
     'home.html',
     'complete-thesis.html',
-    'system-architecture.html',
     'who-is-harmed.html',
     'reading-order.html',
 
@@ -150,13 +150,11 @@
     // ── MILITARY & VETERANS ──
     'veterans.html',
     'veterans-betrayal.html',
-    'ppcli-lawsuit.html',
     'caf-recruitment.html',
     'caf-recruitment-crisis.html',
     'dnd-procurement.html',
     'arms-pipeline.html',
     'arms-exports.html',
-    's504-covey-bae.html',
     'the-boot.html',
     'bloggins.html',
     'cds-accountability.html',
@@ -171,8 +169,6 @@
     'cfnis-proxy.html',
     'charges-sheet.html',
     'criminal-code-analysis.html',
-    'mp-brief.html',
-    'gillespie-murder.html',
     'prosecution.html',
 
     // ── GOVERNMENT CORRUPTION ──
@@ -218,7 +214,6 @@
     '5gw-subversion.html',
     'bill-c70-registry.html',
     'foreign-influence-alpha.html',
-    'cda-institute-psyop.html',
 
     // ── LOBBYING & SPECIAL INTERESTS ──
     'lobbying-tracker.html',
@@ -312,8 +307,7 @@
     'ai-research.html',
     'liril-analysis.html',
     'acelephius-report.html',
-    'acelephius-wardoll.html',
-    // architecture.html removed — page doesn't exist; system-architecture.html (line 39) covers this topic
+    // architecture.html removed — page doesn't exist
 
     // ── TOOLS & REFERENCE ──
     'hansard-dashboard.html',
@@ -329,21 +323,18 @@
     'canada-map.html',
     'records.html',
     'search.html',
-    's504-tracker.html',
 
     // ── TAKE ACTION ──
     'take-action.html',
     'open-letter.html',
     'email-campaign.html',
     'email-dispatch.html',
-    's504-court-filing.html',
     'campaign-generator.html',
     'campaign-tracker.html',
     'report-generator.html',
     'kids-guide.html',
 
     // ── ABOUT & CONTEXT ──
-    'my-story.html',
     'history.html',
     'about.html',
     'faq.html',
@@ -375,13 +366,11 @@
     't4-comparison.html': 'How State-Sanctioned Killing Programs Expand',
     'veterans.html': 'How Canada Treats Its Veterans',
     'veterans-betrayal.html': 'Lest We Forget \u2014 Veterans Betrayed',
-    'ppcli-lawsuit.html': 'PPCLI \u2014 Experimenting on Soldiers',
     'caf-recruitment.html': 'CAF Recruitment Degradation',
     'caf-recruitment-crisis.html': 'CAF Recruitment Collapse',
     'dnd-procurement.html': 'The $100 Billion Betrayal',
     'arms-pipeline.html': 'The Arms Pipeline \u2014 Canada to Israel',
     'arms-exports.html': 'Arms Exports',
-    's504-covey-bae.html': 's.504 Private Prosecution \u2014 Covey & Bae',
     'the-boot.html': 'The Boot \u2014 Institutional Power Crushes Accountability',
     'bloggins.html': 'The Bloggins Files',
     'rcmp-commissioners.html': 'RCMP Commissioners \u2014 Systemic Failures',
@@ -392,7 +381,6 @@
     'cfnis-proxy.html': 'CFNIS Proxy Node',
     'charges-sheet.html': '271 Officials, 314 Charges',
     'criminal-code-analysis.html': 'Criminal Code & Rome Statute Analysis',
-    'mp-brief.html': 'Notice to Military Police \u2014 s.504 Filing',
     'accountability.html': 'Government Accountability Database',
     'scandals.html': 'Political Scandals',
     'corruption-map.html': 'Corruption & Influence Map',
@@ -476,12 +464,10 @@
     'open-letter.html': 'Open Letter to Parliament',
     'email-campaign.html': 'MP Email Campaign',
     'email-dispatch.html': 'Daily Evidence Dispatch',
-    's504-court-filing.html': 's.504 Court Filing Dispatch',
     'campaign-generator.html': 'Campaign Launch Dashboard',
     'campaign-tracker.html': 'Campaign Tracker',
     'report-generator.html': 'MP Report Generator',
     'kids-guide.html': 'A Story of Accountability',
-    'my-story.html': 'My Story \u2014 Daniel Perry',
     'history.html': 'Historical Patterns',
     'about.html': 'About This Project',
     'faq.html': 'FAQ \u2014 Answering the Objections',
@@ -498,8 +484,8 @@
       'Opening': ['home.html'],
       'The Investigation': ['findings.html', 'evidence-index.html', 'evidence.html', 'convergence-matrix.html', 'conspiracy-board.html', 'timeline.html'],
       'MAID & Genocide': ['maid-accountability.html', 'maid-policy-evolution.html', 'maid-voting-record.html', 'maid-exterminators.html', 'camap.html', 'canadian-blood-services.html', 'disability-genocide.html', 'genocide-evidence.html', 'cija-maid-pipeline.html', 't4-comparison.html'],
-      'Military & Veterans': ['veterans.html', 'veterans-betrayal.html', 'ppcli-lawsuit.html', 'caf-recruitment.html', 'caf-recruitment-crisis.html', 'dnd-procurement.html', 'arms-pipeline.html', 'arms-exports.html', 's504-covey-bae.html', 'the-boot.html', 'bloggins.html'],
-      'RCMP & Law Enforcement': ['rcmp-commissioners.html', 'rcmp-complicity.html', 'rcmp-maid-accountability.html', 'rcmp-reform.html', 'cfnis.html', 'cfnis-proxy.html', 'charges-sheet.html', 'criminal-code-analysis.html', 'mp-brief.html'],
+      'Military & Veterans': ['veterans.html', 'veterans-betrayal.html', 'caf-recruitment.html', 'caf-recruitment-crisis.html', 'dnd-procurement.html', 'arms-pipeline.html', 'arms-exports.html', 'the-boot.html', 'bloggins.html'],
+      'RCMP & Law Enforcement': ['rcmp-commissioners.html', 'rcmp-complicity.html', 'rcmp-maid-accountability.html', 'rcmp-reform.html', 'cfnis.html', 'cfnis-proxy.html', 'charges-sheet.html', 'criminal-code-analysis.html'],
       'Government Corruption': ['accountability.html', 'scandals.html', 'corruption-map.html', 'crown-corporations.html', 'senate-expenses.html', 'procurement-analysis.html', 'procurement-deep-dive.html', 'procurement-registry.html', 'phoenix-pay.html', 'debt-fiscal.html', 'ag-findings.html'],
       'Democracy & Elections': ['elections-finance.html', 'voting-records.html', 'mp-voting-records.html', 'mp-scorecard.html', 'mp-analysis.html', 'appointments.html', 'judicial-appointments.html'],
       'Foreign Influence': ['foreign-policy-is-foreign.html', 'foreign-interference.html', 'foreign-interference-deep.html', 'foreign-influence.html', 'influence-target-alpha.html', 'wef-davos.html', 'treason-trajectory.html', '5gw-subversion.html'],
@@ -511,8 +497,8 @@
       'Provincial & Municipal': ['provincial-analysis.html', 'municipal-accountability.html', 'municipal-intelligence.html', 'indigenous-accountability.html', 'belleville.html', 'quinte-west.html', 'ottawa.html', 'toronto.html', 'calgary.html', 'vancouver.html'],
       'AI & Research': ['ai-research.html', 'liril-analysis.html', 'acelephius-report.html', 'acelephius-wardoll.html'],
       'Tools & Reference': ['hansard-dashboard.html', 'hansard-evidence.html', 'network-analysis.html', 'osint-dashboard.html', 'entity-viewer.html', 'dossier-viewer.html', 'harm-index.html', 'cross-reference.html', 'ledger-book.html', 'infographics.html', 'canada-map.html', 'records.html', 'search.html'],
-      'Take Action': ['take-action.html', 'open-letter.html', 'email-campaign.html', 'email-dispatch.html', 's504-court-filing.html', 'campaign-generator.html', 'campaign-tracker.html', 'report-generator.html', 'kids-guide.html'],
-      'About & Context': ['my-story.html', 'history.html', 'about.html', 'faq.html', 'news.html', 'publications.html', 'resources.html', 'legal.html']
+      'Take Action': ['take-action.html', 'open-letter.html', 'email-campaign.html', 'email-dispatch.html', 'campaign-generator.html', 'campaign-tracker.html', 'report-generator.html', 'kids-guide.html'],
+      'About & Context': ['history.html', 'about.html', 'faq.html', 'news.html', 'publications.html', 'resources.html', 'legal.html']
     };
     Object.keys(groups).forEach(function (g) {
       groups[g].forEach(function (p) { SECTION_GROUPS[p] = g; });
@@ -2061,12 +2047,21 @@
     // causes voice DRIFT when Chrome async-loads new voices mid-narration
     var currentVoice = voice || resolveNarrationVoice();
     var voiceParams = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
+    if (!currentVoice) {
+      /* NEVER narrate with the OS default voice. */
+      lirilNarration.speaking = false;
+      stopNarrationKeepalive();
+      showSubtitle('LIRIL voice unavailable on this system');
+      setTimeout(hideSubtitle, 3000);
+      updateNarrationButton();
+      return;
+    }
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = 'en-CA';
+    u.lang = currentVoice.lang || 'en-GB';
     u.rate = Math.min(1.45, SPEECH_RATES[lirilNarration.rateIdx].value * voiceParams.rate);
     u.pitch = voiceParams.pitch;
     u.volume = voiceParams.volume;
-    if (currentVoice) u.voice = currentVoice;
+    u.voice = currentVoice;
 
     u.onstart = function () {
       lirilNarration.speaking = true;
@@ -2379,12 +2374,21 @@
     // causes voice DRIFT when Chrome async-loads new voices mid-narration
     var currentVoice = voice || resolveNarrationVoice();
     var voiceParams = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
+    if (!currentVoice) {
+      /* NEVER narrate with the OS default voice. */
+      lirilNarration.speaking = false;
+      stopNarrationKeepalive();
+      showSubtitle('LIRIL voice unavailable on this system');
+      setTimeout(hideSubtitle, 3000);
+      updateNarrationButton();
+      return;
+    }
     var u = new SpeechSynthesisUtterance(chunk);
-    u.lang = 'en-CA';
+    u.lang = currentVoice.lang || 'en-GB';
     u.rate = Math.min(1.45, SPEECH_RATES[lirilNarration.rateIdx].value * voiceParams.rate);
     u.pitch = voiceParams.pitch;
     u.volume = voiceParams.volume;
-    if (currentVoice) u.voice = currentVoice;
+    u.voice = currentVoice;
 
     u.onstart = function () {
       lirilNarration.speaking = true;

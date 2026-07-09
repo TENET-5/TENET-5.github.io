@@ -23,7 +23,7 @@ Date Captured: 2026-04-17T22:32:16.135616
       "topology": "P-CLASS",
       "quantum_resistant_sig": "QR-d81009d6cbb2aaafd14390be9ee5380f",
       "grover_speedup": 4.0,
-      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "gpu_backend": " Blackwell PCIe E8",
       "quantum_security_bits": 256
     }
   },
@@ -38,7 +38,7 @@ Date Captured: 2026-04-17T22:32:16.135616
       "topology": "P-CLASS",
       "quantum_resistant_sig": "QR-aad40a1c29a415f80930b1a71fcfbca9",
       "grover_speedup": 4.0,
-      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "gpu_backend": " Blackwell PCIe E8",
       "quantum_security_bits": 256
     }
   },
@@ -53,7 +53,7 @@ Date Captured: 2026-04-17T22:32:16.135616
       "topology": "NP-HARD",
       "quantum_resistant_sig": "QR-717be89c1089a1cf269dc349332272e8",
       "grover_speedup": 4.0,
-      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "gpu_backend": " Blackwell PCIe E8",
       "quantum_security_bits": 256
     }
   },
@@ -68,7 +68,7 @@ Date Captured: 2026-04-17T22:32:16.135616
       "topology": "P-CLASS",
       "quantum_resistant_sig": "QR-e00d7904ad1fae60cd220ad443d75d37",
       "grover_speedup": 4.0,
-      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "gpu_backend": " Blackwell PCIe E8",
       "quantum_security_bits": 256
     }
   },
@@ -83,7 +83,7 @@ Date Captured: 2026-04-17T22:32:16.135616
       "topology": "NP-HARD",
       "quantum_resistant_sig": "QR-46241bc666bd71edf2b18db073c9c45e",
       "grover_speedup": 4.0,
-      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "gpu_backend": " Blackwell PCIe E8",
       "quantum_security_bits": 256
     }
   },
@@ -98,7 +98,7 @@ Date Captured: 2026-04-17T22:32:16.135616
       "topology": "NP-HARD",
       "quantum_resistant_sig": "QR-89a016e6fd06ac8093c99f68b38cfba0",
       "grover_speedup": 4.0,
-      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "gpu_backend": " Blackwell PCIe E8",
       "quantum_security_bits": 256
     }
   }

@@ -13,7 +13,7 @@ Date Captured: 2026-04-09T00:54:08.027469
 [
   {
     "severity": "CRITICAL",
-    "title": "\u23f1\ufe0f SATOR SWEEP: 350612 Anomalous Engagements",
+    "title": "\u23f1\ufe0f MATRIX SWEEP: 350612 Anomalous Engagements",
     "timestamp": "2026-04-09T04:54:07.822907+00:00",
     "vector": "Transnational Narrative Control",
     "topological_vector": "MF-2F283A0C5E31EE65",

@@ -16,7 +16,6 @@ function generateCampaignEmail(contact, allFlaggedPeople) {
     case 'court':         return generateCourtEmail(contact, allFlaggedPeople);
     case 'lawEnforcement': return generateLawEnforcementEmail(contact, allFlaggedPeople);
     case 'mp':            return generateMPEmail(contact, allFlaggedPeople);
-    case 'courthouse':    return generateCourthouseEmail(contact, allFlaggedPeople);
     default:              return generateGenericEmail(contact);
   }
 }
@@ -440,9 +439,6 @@ function generateLawEnforcementEmail(contact, allFlaggedPeople) {
     '5. OFFSHORE FINANCIAL ROUTING (s.380, s.122)\n' +
     'Eight major document leaks (2014-2023) exposed 268,488 offshore entities. 912 Canadian entities in Panama Papers. CRA identified $76M in unpaid taxes — zero confirmed collected. PM holds $6.8M in Brookfield options while defunding FINTRAC (the offshore monitoring agency) by 12%. Potential s.122 breach of trust and s.380 fraud facilitation.\n' +
     '  Evidence: ' + BASE_URL + 'panama-papers.html\n\n' +
-    '6. s.504 PRIVATE PROSECUTION FILED\n' +
-    '28 counts submitted to courthouses under s.504 Criminal Code.\n' +
-    '  Evidence: ' + BASE_URL + 's504-covey-bae.html\n\n' +
     'REQUEST:\n' +
     'Review the evidence at ' + BASE_URL + 'evidence-index.html and determine whether criminal investigation is warranted.\n\n' +
     '  Evidence index: ' + BASE_URL + 'evidence-index.html\n' +
@@ -476,9 +472,6 @@ function generateMPEmail(contact, allFlaggedPeople) {
     '4. OFFSHORE FINANCIAL EXPOSURE\n' +
     'Eight major offshore leaks (2014-2023) exposed 268,488 entities. $76M in unpaid Canadian taxes identified — zero confirmed collected. PM holds $6.8M in Brookfield options while cutting FINTRAC budget 12%.\n' +
     '  ' + BASE_URL + 'panama-papers.html\n\n' +
-    '5. s.504 CRIMINAL CODE FILINGS\n' +
-    '28 counts filed at courthouses. As a sitting MP you have the authority to ensure these receive attention.\n' +
-    '  ' + BASE_URL + 's504-covey-bae.html\n\n' +
     'ACTION REQUESTED:\n' +
     '1. Review your voting record and its consequences\n' +
     '2. Support s.122 referrals for Ethics Commissioner findings\n' +
@@ -491,33 +484,3 @@ function generateMPEmail(contact, allFlaggedPeople) {
   return { subject: subject, body: body, to: contact.email, category: contact.category };
 }
 
-// ============================================================
-// COURTHOUSE s.504 COVER LETTER
-// ============================================================
-function generateCourthouseEmail(contact, allFlaggedPeople) {
-  var subject = 'Section 504 Criminal Code — Private Information to Compel Appearance of Accused';
-  var body = 'TO THE CLERK OF THE COURT\n' +
-    (contact.name ? contact.name + '\n' : '') +
-    (contact.institution ? contact.institution + '\n' : '') + '\n' +
-    'RE: Private Information under Section 504 of the Criminal Code of Canada\n\n' +
-    'INFORMANT: Daniel Perry, Canadian Forces Combat Veteran, Former Signals Operator\n' +
-    'DATE: ' + new Date().toISOString().slice(0, 10) + '\n\n' +
-    'The enclosed Information alleges offences under the Criminal Code and National Defence Act.\n\n' +
-    'CHARGES:\n' +
-    '  28 counts against named individuals\n' +
-    '  Criminal Code: s.122 (Breach of Trust), s.220 (Criminal Negligence),\n' +
-    '    s.380 (Fraud), s.139 (Obstruction)\n' +
-    '  National Defence Act: s.83 (Mutiny), s.130 (Prejudicial Conduct)\n\n' +
-    'EVIDENCE:\n' +
-    '  Evidence index: ' + BASE_URL + 'evidence-index.html\n' +
-    '  s.504 filing: ' + BASE_URL + 's504-covey-bae.html\n' +
-    '  Legal framework: ' + BASE_URL + 'legal.html\n' +
-    '  Investigation: ' + BASE_URL + 'investigation-matrix.html\n\n' +
-    'Respectfully requesting this Information be received under s.507.1.\n\n' +
-    'Daniel Perry\n' +
-    'Canadian Forces Combat Veteran\n' +
-    'tenet-5.github.io' +
-    CLOSING_FOOTER;
-
-  return { subject: subject, body: body, to: contact.email, category: contact.category };
-}

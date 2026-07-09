@@ -26,7 +26,7 @@ Date Captured: 2026-04-17T22:26:00.204203
     "temporal_decay_score": 1.9713,
     "decay_half_life_hours": 48,
     "quantum_metadata": {
-      "gpu_backend": "NVIDIA Blackwell PCIe E8",
+      "gpu_backend": " Blackwell PCIe E8",
       "qpe_precision_qubits": 8,
       "estimated_phase": 0.1015625,
       "signature": "[NV-QUANTUM]",

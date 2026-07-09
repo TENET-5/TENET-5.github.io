@@ -265,7 +265,16 @@
       ? window.LIRIL_VOICE.get()
       : Promise.resolve(null);
     Promise.resolve(voicePromise).then(function (v) {
-      if (v) u.voice = v;
+      var acceptable = v && (!window.LIRIL_VOICE || !window.LIRIL_VOICE.isAcceptable || window.LIRIL_VOICE.isAcceptable(v));
+      if (!acceptable) {
+        /* Never read with the OS default voice — stop instead. */
+        setStatus('LIRIL voice unavailable on this system — reading paused.');
+        setBtnPlay('▶ Read');
+        playing = false; paused = true;
+        return;
+      }
+      u.voice = v;
+      u.lang = v.lang || 'en-GB';
       u.onend = function () { speakNext(); };
       u.onerror = function (e) {
         // Browser cancelled (tab change, autoplay block, etc.)

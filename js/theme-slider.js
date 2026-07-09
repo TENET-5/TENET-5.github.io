@@ -2,7 +2,7 @@
    TENET5 Procedural Theme Slider — Dark ↔ Light
    HSL colour-science interpolation for perceptually
    smooth transitions. Slider range 0 (dark) → 100 (light).
-   TENET5 — Powered by LIRIL AI | SEED 118400
+   TENET5 — Powered by LIRIL AI
    ═══════════════════════════════════════════════════════ */
 (function () {
   'use strict';

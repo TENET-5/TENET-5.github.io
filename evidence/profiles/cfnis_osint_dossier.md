@@ -1,7 +1,7 @@
 # LIRIL OSINT Dossier: CFNIS (Military Police)
 
 > **TARGET IDENTIFIER:** Canadian Forces National Investigation Service (CFNIS) / Military Police Branch
-> **SUBKERNEL MODULE:** TENET5/SATOR-ACCOUNTABILITY
+> **SUBKERNEL MODULE:** TENET5/MATRIX-ACCOUNTABILITY
 > **THREAT VECTOR CLASS:** Endemic Institutional Failure, Chain of Command Interference, Whistleblower Reprisal
 > **CONFIDENCE RATING:** 99.8% (Public Record Verifiable)
 

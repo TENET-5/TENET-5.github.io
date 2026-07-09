@@ -91,14 +91,6 @@
         { href: 'findings.html', label: 'All 26+ Findings', desc: 'What CAP OSINT found in the data' },
       ]
     },
-    'my-story.html': {
-      current: 'My Story',
-      next: [
-        { href: 'index.html', label: 'The Evidence', desc: '76,475 deaths — the numbers that prove it' },
-        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-        { href: 'about.html', label: 'About & Methodology', desc: 'How the data was collected' },
-      ]
-    },
     'about.html': {
       current: 'About & Methodology',
       next: [
@@ -110,17 +102,7 @@
     'cfnis.html': {
       current: 'CFNIS Investigation',
       next: [
-        { href: 's504-covey-bae.html', label: 's.504 Prosecution: Covey & Bae', desc: 'Information filed against CFNIS under Criminal Code s.504' },
         { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canada holds its own below the standards it owes captured enemy soldiers' },
-        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
-      ]
-    },
-    's504-covey-bae.html': {
-      current: 's.504 Prosecution — Covey & Bae',
-      next: [
-        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
-        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 records of misconduct' },
       ]
     },
     'voting-records.html': {
@@ -238,7 +220,6 @@
     'acelephius-report.html': {
       current: 'Acelephius Report',
       next: [
-        { href: 'acelephius-wardoll.html', label: 'Acelephius Wardoll', desc: 'Follow-up analysis on the Acelephius case' },
         { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data yourself' },
       ]
@@ -248,7 +229,6 @@
       next: [
         { href: 'acelephius-report.html', label: 'Acelephius Report', desc: 'The initial Acelephius investigation' },
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
       ]
     },
     'ag-findings.html': {
@@ -376,7 +356,6 @@
       next: [
         { href: 'campaign-generator.html', label: 'Campaign Generator', desc: 'Create new campaign materials' },
         { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
-        { href: 'mp-brief.html', label: 'MP Brief', desc: 'Brief your MP with the evidence' },
       ]
     },
     'entity-viewer.html': {
@@ -451,22 +430,6 @@
         { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
       ]
     },
-    'ppcli-lawsuit.html': {
-      current: 'PPCLI Lawsuit',
-      next: [
-        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canada\u2019s inmate conditions vs. the treaty floor for PoWs' },
-        { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability' },
-        { href: 'legal.html', label: 'Legal Framework', desc: 'Accountability tools + reform recommendations' },
-      ]
-    },
-    'mp-brief.html': {
-      current: 'MP Brief',
-      next: [
-        { href: 'open-letter.html', label: 'Open Letter', desc: 'Public letter to elected officials' },
-        { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
-        { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
-      ]
-    },
     'municipal-accountability.html': {
       current: 'Municipal Accountability',
       next: [
@@ -502,7 +465,6 @@
     'open-letter.html': {
       current: 'Open Letter',
       next: [
-        { href: 'mp-brief.html', label: 'MP Brief', desc: 'Brief your MP with the evidence' },
         { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
         { href: 'take-action.html', label: 'Take Action', desc: 'All the ways you can make a difference' },
       ]
@@ -631,7 +593,6 @@
     'take-action.html': {
       current: 'Take Action',
       next: [
-        { href: 's504-court-filing.html', label: 's.504 Court Filing', desc: 'Private prosecution — file criminal complaints directly' },
         { href: 'campaign-generator.html', label: 'Campaign Generator', desc: 'Create campaign materials and launch actions' },
         { href: 'email-campaign.html', label: 'Email Campaign', desc: 'Pre-built email templates for MPs' },
       ]
@@ -680,7 +641,6 @@
       current: 'How Canada Treats Its Veterans',
       next: [
         { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'Canadian jails held below the treaty floor Canada owes prisoners of war' },
-        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
         { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
       ]
     },
@@ -689,7 +649,6 @@
       next: [
         { href: 'whistleblower-failures.html', label: 'Whistleblower Failures', desc: 'How Canada punishes truth-tellers — PSDPA, PSIC, and systemic retaliation' },
         { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
-        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
       ]
     },
     'whistleblower-failures.html': {
@@ -920,14 +879,12 @@
       current: 'CDS Accountability — Defence Staff Record',
       next: [
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability failures' },
-        { href: 'ppcli-lawsuit.html', label: 'PPCLI Lawsuit', desc: 'The legal action against the regiment' },
         { href: 'military-procurement-failures.html', label: 'Military Procurement Failures', desc: 'Decades late, billions over budget' },
       ]
     },
     'complete-thesis.html': {
       current: 'The Complete Thesis — What 267 Pages Prove',
       next: [
-        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
         { href: 'who-is-harmed.html', label: 'Who Is Harmed', desc: 'Every affected population mapped with data' },
         { href: 'reading-order.html', label: 'Reading Order', desc: 'How to navigate all 267 investigation pages' },
       ]
@@ -975,7 +932,6 @@
     'failure-timeline.html': {
       current: 'The Decade of Institutional Failure',
       next: [
-        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
         { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
       ]
@@ -984,7 +940,6 @@
       current: 'The Institutional Malice Doctrine',
       next: [
         { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
-        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
         { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'How every system was compromised' },
       ]
     },
@@ -1035,7 +990,6 @@
       next: [
         { href: 'veterans.html', label: 'How Canada Treats Its Veterans', desc: 'Veterans advocacy and the full betrayal record' },
         { href: 'maid-accountability.html', label: 'MAID Accountability', desc: '~98,000 deaths and zero prosecutions' },
-        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
       ]
     },
 
@@ -1101,7 +1055,6 @@
     'cabinet-confidence.html': {
       current: 'Cabinet Confidence',
       next: [
-        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
         { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'How every system was compromised' },
         { href: 'ag-findings.html', label: 'AG Findings', desc: 'Auditor General investigation results' },
       ]
@@ -1196,7 +1149,6 @@
       current: 'CFNIS & Military Justice Failures',
       next: [
         { href: 'cfnis.html', label: 'CFNIS Investigation', desc: 'Military police accountability failures' },
-        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
         { href: 'cds-accountability.html', label: 'CDS Accountability', desc: 'Chief of the Defence Staff record of failure' },
       ]
     },
@@ -1333,7 +1285,6 @@
     's504-tracker.html': {
       current: 's.504 Extraction Interface',
       next: [
-        { href: 's504-covey-bae.html', label: 's.504 Prosecution', desc: 'Criminal Code s.504 information against CFNIS' },
         { href: 'prosecution.html', label: 'Prosecution Framework', desc: 'ICC and domestic legal escalation paths' },
         { href: 'institutional-malice.html', label: 'Institutional Malice', desc: 'The doctrine of deliberate institutional harm' },
       ]
@@ -1361,7 +1312,6 @@
       next: [
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
         { href: 'complete-thesis.html', label: 'The Complete Thesis', desc: 'What 267 pages prove' },
-        { href: 'system-architecture.html', label: 'System Architecture', desc: 'How institutional capture works at every level' },
       ]
     },
     'caf-recruitment.html': {
@@ -1381,7 +1331,7 @@
       ]
     },
     'investigation-matrix.html': {
-      current: 'SATOR Investigation Matrix',
+      current: 'Investigation Matrix',
       next: [
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
         { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Full index of sourced evidence' },

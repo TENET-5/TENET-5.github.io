@@ -1,6 +1,5 @@
 /**
  * TENET5 Site Configuration — Powered by LIRIL AI
- * SEED 118400
  */
 
 // ── Feature Flags ─────────────────────────────────────────────────────────────

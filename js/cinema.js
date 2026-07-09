@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════
    TENET5 Cinematic Engine — Scroll-Driven Storytelling
    Hollywood-grade scroll animations + parallax + reveals
-   SEED 118400 | Powered by LIRIL AI
+   Powered by LIRIL AI
    ═══════════════════════════════════════════════════════ */
 
 (function() {

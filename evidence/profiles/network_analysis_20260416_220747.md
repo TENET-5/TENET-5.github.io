@@ -25,7 +25,7 @@
 | 13 | **Ron Duhamel** | 369.8 | 2 | osint_target |
 | 14 | **Joseph William Burton** | 365.2 | 1 |  |
 | 15 | **Gabriel Ste-Marie** | 361.9 | 1 |  |
-| 16 | **Han Zhou** | 360.8 | 2 | cfnis, osint_target |
+| 16 | **[redacted]** | 360.8 | 2 | cfnis, osint_target |
 | 17 | **Brent St. Denis** | 358.0 | 2 | osint_target |
 | 18 | **Melissa Lantsman** | 356.8 | 3 | israel, osint_target |
 | 19 | **Dick Harris** | 353.4 | 1 |  |

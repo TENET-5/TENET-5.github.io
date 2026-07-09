@@ -28,7 +28,7 @@ Date Captured: 2026-04-17T10:31:04.685244
     "emh_vector": "ABCXYZ-MF-CORP_ORG",
     "topology": "P-CLASS",
     "quantum_security_bits": 256,
-    "gpu_backend": "NVIDIA Blackwell PCIe E8",
+    "gpu_backend": " Blackwell PCIe E8",
     "qpe_precision_qubits": 8,
     "estimated_phase": 0.16015625,
     "quantum_resistant_sig": "QR-ce1f7e70c9f82463a9a0fdf67197a71e",

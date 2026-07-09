@@ -1,6 +1,6 @@
 /* search-suggest.js — Cap#402
  * Live search-suggest dropdown attached to #search-input.
- * Source: /search-index.json (built by tools/build_search_index.py from
+ * Source: /search-index.json (generated at build time from
  * <title>, <h1>, meta description, and data-narrate attributes across all *.html).
  * Pure-vanilla, no external deps. Idempotent: safe to load multiple times.
  */

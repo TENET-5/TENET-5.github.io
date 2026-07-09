@@ -1,7 +1,7 @@
 // LIRIL Newsroom — investigation feed + filters + modal
 // Modified: 2026-04-20 | Cap#12-c3 + Grok Round 6 blueprint
 // Populates #feed-grid with investigation cards pulled from a static
-// seed list (Grok-curated) until the build_feed.py aggregator lands.
+// seed list until the automated aggregator lands.
 // Each card is a .liril-card.liril-glass with status badge, AI byline
 // icons, primary-source chip, and a click-through to the dossier page.
 // No deps. Vanilla JS. Graceful fail if DOM missing.
@@ -10,7 +10,7 @@
   'use strict';
 
   // Seed investigations — Grok-curated from existing site pages.
-  // When build_feed.py ships, this array gets replaced by a fetch
+  // When the automated aggregator ships, this array gets replaced by a fetch
   // to /public/feed.json (same schema).
   const SEED_INVESTIGATIONS = [
     {
