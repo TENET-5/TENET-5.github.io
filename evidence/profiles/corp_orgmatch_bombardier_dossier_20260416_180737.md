@@ -27,5 +27,5 @@ Date Captured: 2026-04-16T18:07:37.032074
 ```
 
 ---
-*Secured via TENET5 Empirical Magic Handoff Memory System*
+*Secured via TENET5 integrity-checked archival*
 *Cryptographic Signature (BLAKE2):* `b69e4c3f7b5b239b74cb13198189a1bb`

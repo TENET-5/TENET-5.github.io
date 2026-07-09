@@ -5,7 +5,7 @@ Date Captured: 2026-04-14T16:31:54.044532
 - **Source:** Hansard Vol 144
 - **Topological Vector:** MF-58FBC49BF6E5-PATH1
 - **Matrix Path (N vs NP):** NP-HARD (Depth: 9438)
-- **abcxyz Compliance:** SECURED (Millennial Falcon)
+- **abcxyz Compliance:** SECURED ()
 - **Routing Agent:** LIRIL/MINIM
 - **Ethics Gate:** CLEARED
 
@@ -18,5 +18,5 @@ Date Captured: 2026-04-14T16:31:54.044532
 ```
 
 ---
-*Secured via TENET5 Empirical Magic Handoff Memory System*
+*Secured via TENET5 integrity-checked archival*
 *Cryptographic Signature (BLAKE2):* `e08305a59847770837bf1f067b9a1e31`

@@ -5,7 +5,7 @@ Date Captured: 2026-04-14T15:04:58.064840
 - **Source:** ISED Corporations Canada / Lobbying Registry / Elections Canada
 - **Topological Vector:** MF-1e395b0a3143b6d5
 - **Matrix Path (N vs NP):** NP-CLASS (TRIPLE_VECTOR)
-- **abcxyz Compliance:** VERIFIED (Millennial Falcon)
+- **abcxyz Compliance:** VERIFIED ()
 - **Routing Agent:** LIRIL/SEMES [SCIENCE]
 - **Ethics Gate:** CLEARED
 
@@ -25,5 +25,5 @@ Date Captured: 2026-04-14T15:04:58.064840
 ```
 
 ---
-*Secured via TENET5 Empirical Magic Handoff Memory System*
+*Secured via TENET5 integrity-checked archival*
 *Cryptographic Signature (BLAKE2):* `8b68b8c59ae07bc6d15deb1a3e7aac31`

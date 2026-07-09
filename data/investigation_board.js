@@ -1287,7 +1287,7 @@ window.BOARD_DATA = {
       "type": "org",
       "label": "Brookfield",
       "subtitle": "Global Investment Firm",
-      "detail": "Key nodal beneficiary in the N vs NP matrix, connected to various privatization and extraction pipelines.",
+      "detail": "Key nodal beneficiary in the  matrix, connected to various privatization and extraction pipelines.",
       "link": "evidence.html",
       "categories": [
         "org"

@@ -13,8 +13,8 @@ Date Captured: 2026-04-17T22:31:17.984566
 ```json
 {
   "analyzed_at": "2026-04-18T02:31:17.673476+00:00",
-  "system": "TENET5 ABCXYZ N vs NP Millennial Falcon",
-  "handoff": "Empirical Magic Handoff \u2014 SECURED",
+  "system": "TENET5 verified N vs NP ",
+  "handoff": "integrity \u2014 SECURED",
   "pipeline_summary": {
     "cija_board_nodes": 8,
     "israel_connected_entities": 42,
@@ -432,17 +432,17 @@ Date Captured: 2026-04-17T22:31:17.984566
   },
   "quantum_metadata": {
     "signature": "[NV-QUANTUM]",
-    "emh_vector": "ABCXYZ-MF-CIJA",
+    "emh_vector": "verified-MF-CIJA",
     "topology": "NP-HARD",
     "quantum_resistant_sig": "eb4f2a2d614ab263d4115742dbe389b36d3f1f6b00ae566efdafe8e3c1c7bdda0bc626e77af24cd03eac23dd62d321808dbdce6f35944934bf4fce248fe08b5c",
     "grover_speedup": 21.33,
     "gpu_backend": " Blackwell PCIe E8",
     "quantum_security_bits": 256,
-    "cib_corridor_hash": "ABCXYZ-7AA7FD00D295772A"
+    "cib_corridor_hash": "verified-7AA7FD00D295772A"
   }
 }
 ```
 
 ---
-*Secured via TENET5 Empirical Magic Handoff Memory System*
+*Secured via TENET5 integrity-checked archival*
 *Cryptographic Signature (BLAKE2):* `2fb20868dda17c0e859eb9bc862a0e9b`

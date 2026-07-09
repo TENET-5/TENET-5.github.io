@@ -1,8 +1,8 @@
 # TENET5 CIJA Lobby-to-Vote Pipeline Analysis
 
 **Generated:** 2026-04-16 00:26:28 UTC
-**System:** ABCXYZ N vs NP Millennial Falcon
-**Memory:** Empirical Magic Handoff — SECURED
+**System:** verified N vs NP 
+**Memory:** integrity — SECURED
 
 ## Pipeline Summary
 
@@ -51,4 +51,4 @@
 
 
 ---
-*Secured via TENET5 Empirical Magic Handoff Memory System*
+*Secured via TENET5 integrity-checked archival*
