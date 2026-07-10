@@ -13,13 +13,16 @@ and **LIRIL as the system/user guide on the homepage**.
 
 1. **One theme:** `css/press-theme.css` only (WordPress model).
 2. **Press rebuild:** `tools/press.py` owns index + evidence + story surfaces.
-3. **LIRIL guide home (permanent):** dock always visible, **Guide me**, cover CTA,
+3. **CSS quantum precision (permanent):** exact `:root` tokens vs screenshot anchors,
+   sRGB luminance, WCAG contrast, ice cyan bias, Ising ground-state over match spins,
+   plus C++ `prism_quantum_coding_bench.exe` on full laps (`tools/prism_css_quantum_precision.py`).
+4. **LIRIL guide home (permanent):** dock always visible, **Guide me**, cover CTA,
    `js/liril-voice.js` + `js/liril-home-guide.js`, timeline rail, chapter `#now`.
    Self-heal via press rebuild if any marker missing.
-4. **Capture:** JPG screenshots of key URLs at **PC (1440×900)** and **mobile (390×844)**.
-5. **Validate:** visual acuity metrics (not blank, dark void theme, ice/structure present).
-6. **Self-work:** PRISM improves theme/content/enforcement while it watches — still this project.
-7. **Never stop** until Daniel creates a STOP flag or says stop.
+5. **Capture:** JPG screenshots of key URLs at **PC (1440×900)** and **mobile (390×844)**.
+6. **Validate:** visual acuity metrics (not blank, dark void theme, ice/structure present).
+7. **Self-work:** PRISM improves theme/content/enforcement while it watches — still this project.
+8. **Never stop** until Daniel creates a STOP flag or says stop.
 
 ## LIRIL on main page = PRISM job
 
@@ -55,6 +58,8 @@ Or Daniel says stop in chat.
 | Artifact | Path |
 |----------|------|
 | Duty | `C:\PRISM\log\prism_site_duty_last.json` |
+| CSS quantum precision | `C:\PRISM\log\prism_css_quantum_precision_last.json` |
+| C++ quantum coding bench | `C:\PRISM\log\quantum_coding_pipeline_bench_last.json` |
 | LIRIL guide | `C:\PRISM\log\prism_liril_guide_last.json` |
 | Visual acuity | `C:\PRISM\log\prism_visual_acuity_last.json` |
 | JPGs | `E:\tenet-5.github.io\data\visual_acuity\` and `C:\PRISM\log\visual_acuity\` |

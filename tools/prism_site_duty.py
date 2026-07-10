@@ -61,8 +61,10 @@ PROJECT = {
     "jobs": [
         "one_theme_press",
         "press_rebuild",
+        "css_quantum_precision",
         "liril_guide_home",
         "visual_acuity_pc_mobile",
+        "cpp_quantum_coding_bench",
         "self_heal",
     ],
     "stop_only_via": [str(p) for p in STOP_FILES] + ["Daniel verbal stop"],
@@ -271,12 +273,40 @@ def lap() -> dict:
         interior_ok = interior_ok and ok
     steps.append({"name": "interiors", "ok": interior_ok, "samples": samples})
 
-    # 7) PC + mobile JPG capture + visual acuity (core permanent mission)
-    # --fast / PRISM_SITE_DUTY_FAST=1: pre-commit path — theme + LIRIL only (skip live CDN lag)
+    # 6b) CSS quantum precision — exact tokens, WCAG, Ising ground state (+ C++ bench when not fast)
     fast = (
         "--fast" in sys.argv
         or os.environ.get("PRISM_SITE_DUTY_FAST", "").strip() in {"1", "true", "yes"}
     )
+    qcss = TOOLS / "prism_css_quantum_precision.py"
+    if qcss.exists():
+        qargs = [sys.executable, str(qcss)]
+        if fast:
+            qargs.append("--no-cpp")
+        code, out = _run(qargs, timeout=240)
+        q_ok = code == 0
+        steps.append(
+            {
+                "name": "css_quantum_precision",
+                "ok": q_ok,
+                "exit": code,
+                "tail": (out or "")[-600:],
+                "proof": r"C:\PRISM\log\prism_css_quantum_precision_last.json",
+                "job": "PRISM permanent — mathematical CSS token precision + quantum bench",
+                "fast_math_only": fast,
+            }
+        )
+    else:
+        steps.append(
+            {
+                "name": "css_quantum_precision",
+                "ok": False,
+                "detail": "missing prism_css_quantum_precision.py",
+            }
+        )
+
+    # 7) PC + mobile JPG capture + visual acuity (core permanent mission)
+    # --fast / PRISM_SITE_DUTY_FAST=1: pre-commit path — theme + LIRIL + CSS math only
     vis = TOOLS / "prism_visual_acuity.py"
     if fast:
         steps.append(
