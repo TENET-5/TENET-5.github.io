@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -199,6 +200,18 @@ def css() -> str:
   .thesis .links a:hover{color:var(--ice);border-color:var(--ice)}
   .thesis-title{font-weight:300;font-size:clamp(30px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em}
   .thesis-title em{font-style:italic;color:var(--red);font-weight:400}
+
+  /* catalog — the whole book, A to Z */
+  .catalog{border-top:1px solid var(--hair);padding:9vh 0}
+  .catalog .cat-grid{margin-top:4vh;columns:3;column-gap:38px}
+  @media(max-width:1000px){.catalog .cat-grid{columns:2}}
+  @media(max-width:680px){.catalog .cat-grid{columns:1}}
+  .cat-letter{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--ice);
+    margin:20px 0 6px;break-inside:avoid}
+  a.cat-item{display:block;break-inside:avoid;padding:9px 0;border-bottom:1px solid var(--hair)}
+  a.cat-item .t{display:block;color:var(--ivory);font-size:14.5px;line-height:1.35}
+  a.cat-item .d{display:block;color:var(--ivory-faint);font-size:11.5px;line-height:1.5;margin-top:2px}
+  a.cat-item:hover .t{color:var(--ice)}
 
   /* chapters */
   .ch{border-bottom:1px solid var(--hair);padding:0 0 10vh}
@@ -504,7 +517,7 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=67">
+<link rel="stylesheet" href="css/press-theme.css?v=69">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -652,6 +665,55 @@ def render_dossiers(posts: list[dict]) -> str:
     return "".join(out)
 
 
+CATALOG_SKIP = re.compile(
+    r"^(index|404|auth-callback|archive-shell|index_backup|index_legacy|"
+    r"index-legacy-cap222-shell|chalkboard|campaign-generator|search)", re.I)
+
+def render_catalog() -> str:
+    """The whole book — every public file, A to Z, from each page's own
+    title and description. LIRIL narrates entries via data-narrate."""
+    entries = []
+    for p in sorted(ROOT.glob("*.html")):
+        if CATALOG_SKIP.match(p.name):
+            continue
+        html = p.read_text(encoding="utf-8", errors="replace")
+        tm = re.search(r"<title>(.*?)</title>", html, re.I | re.S)
+        if not tm:
+            continue
+        title = re.sub(r"\s*\|\s*TENET5\s*$", "", tm.group(1).strip())
+        dm = re.search(r'name="description"\s+content="([^"]*)"', html, re.I)
+        desc = (dm.group(1).strip() if dm else "")[:150]
+        if not title:
+            continue
+        entries.append((title, p.name, desc))
+    entries.sort(key=lambda e: e[0].upper())
+    items, letter = [], ""
+    for title, href, desc in entries:
+        first = title[0].upper()
+        if not first.isalpha():
+            first = "#"
+        if first != letter:
+            letter = first
+            items.append(f'<div class="cat-letter">{letter}</div>')
+        items.append(
+            f'<a class="cat-item" href="{esc(href)}" data-narrate="{esc(title)}. {esc(desc)}">'
+            f'<span class="t">{esc(title)}</span>'
+            + (f'<span class="d">{esc(desc)}</span>' if desc else "")
+            + "</a>")
+    return f"""
+<section class="catalog field" id="book" data-line="The whole book — {len(entries)} files, A to Z, federal to municipal. Choose any page and I will read it with you.">
+  <div class="wrapx rv">
+    <span class="kick">The Whole Book · {len(entries)} Files · Updated Daily</span>
+    <h2 class="thesis-title" style="margin-top:2vh">Everything, <em>listed.</em></h2>
+    <p style="margin-top:2vh;max-width:720px;color:var(--ivory-dim);font-size:15px;line-height:1.7">
+    Every investigation, editorial, dossier and dataset on this site — federal, provincial,
+    municipal — in one table of contents. Each entry is a sourced file. LIRIL can read any of
+    them to you.</p>
+    <div class="cat-grid">{''.join(items)}</div>
+  </div>
+</section>"""
+
+
 def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     buckets: dict[str, list[dict]] = {k: [] for k, *_ in BUCKETS}
     for p in sorted(posts, key=lambda x: x.get("date", ""), reverse=True):
@@ -714,7 +776,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <h3>One agent. The <em>entire</em> public record.</h3>
     <p>{esc(site["era_blurb"])}</p>
     <div class="stats" id="film-stats">Agentic walkthrough · guided by LIRIL</div>
-    <a class="go-film" href="liril-film.html">&#9654; Enter the record</a>
+    <a class="go-film" href="liril-film.html">&#9654; Read the book aloud</a>
     <span class="alt">or take today only: <a href="daily-briefing.html">the daily briefing</a> ·
     <a href="osint-dashboard.html">the live dashboard</a> · <a href="evidence-index.html">the evidence shelf</a></span>
   </div>
@@ -723,8 +785,12 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     thesis = f"""
 <section class="thesis field">
   <div class="wrapx rv">
-    <span class="kick red">The Thesis</span>
-    <h2 class="thesis-title" style="margin-top:2vh">A quiet war,<br>and its <em>antidote.</em></h2>
+    <span class="kick red">The Thesis · Documented From The Public Record</span>
+    <h2 class="thesis-title" style="margin-top:2vh">The charge: <em>genocide,</em><br>by policy.</h2>
+    <p style="margin-top:2.5vh;max-width:760px;color:var(--ivory-dim);font-size:16px;line-height:1.7">
+    A quiet, fifth-generation war — waged by the Government of Canada under Justin Trudeau
+    through policy, procurement, capture and silence. The record of intent is parliamentary,
+    public, and filed here, act by act.</p>
     <div class="thesis-grid">
       <div class="panel glass dx">
         <h4>Diagnosis</h4>
@@ -736,6 +802,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       </div>
     </div>
     <div class="links">
+      <a href="act-i.html">Open the case: Acts I&ndash;V</a>
       <a href="5gw-subversion.html">Read the full thesis</a>
       <a href="axes-index.html">The axes of capture</a>
       <a href="accountability.html">The findings</a>
@@ -756,7 +823,8 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <h1>The record,<br>read <em>backwards.</em></h1>
     <div class="fr">&laquo; Le dossier public du Canada, lu &agrave; rebours. &raquo;</div>
     <p class="stand"><b>Begin at this hour.</b> Walk back through the week, the month, the year —
-    to the beginning. Machines read everything public. People verify.
+    to the beginning. This is a book written daily on everything the Canadian government does,
+    federal to municipal. Machines read everything public. People verify.
     Every line you will see carries its source.</p>
   </div>
   <div class="cover-foot">
@@ -773,7 +841,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
 
     return (head("The Record, Read Backwards",
                  "Begin at this hour. Walk backwards through the public record of Canada — guided by LIRIL, every line cited.")
-            + cover + thesis + "".join(chapters) + era + footer_html(site)
+            + cover + thesis + "".join(chapters) + era + render_catalog() + footer_html(site)
             + dock_and_script(site, with_rail=True))
 
 
