@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════
    TENET5 Page Shell v1.0 — Single Entry Point for All Shared Components
    ═══════════════════════════════════════════════════════════════════════
-   Every page includes ONE script:  <script src="shell.js?v=41"></script>
+   Every page includes ONE script:  <script src="shell.js?v=42"></script>
    Shell detects context and loads appropriate components:
 
    TOP-LEVEL (index.html frame shell):
@@ -311,4 +311,28 @@
     });
     if (window.__TENET5_JS_ERRORS.length > 20) window.__TENET5_JS_ERRORS.shift();
   });
+
+  // ── Self-healing "Last updated" stamp ────────────────────────────────
+  // The visible stamp is baked in statically at publish time, but the
+  // process that refreshes it can stall (as it did April–July 2026),
+  // leaving every page reading a frozen date. Re-derive it at runtime from
+  // the server's Last-Modified header (document.lastModified) so the stamp
+  // always reflects the actual deploy date and can never silently freeze.
+  function healLastUpdated() {
+    try {
+      var els = document.querySelectorAll('[data-t5-last-updated]');
+      if (!els.length) return;
+      var lm = document.lastModified ? new Date(document.lastModified) : null;
+      if (!lm || isNaN(lm.getTime()) || lm.getFullYear() < 2020) return; // keep static fallback
+      var iso = lm.getFullYear() + '-' +
+        ('0' + (lm.getMonth() + 1)).slice(-2) + '-' + ('0' + lm.getDate()).slice(-2);
+      for (var i = 0; i < els.length; i++) {
+        var t = els[i].querySelector('time');
+        if (t) { t.setAttribute('datetime', iso); t.textContent = iso; }
+        else { els[i].textContent = 'Last updated: ' + iso; }
+      }
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', healLastUpdated);
+  else healLastUpdated();
 })();
