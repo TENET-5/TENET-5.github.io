@@ -1,17 +1,27 @@
 #!/usr/bin/env python3
-"""PRISM site duty — continuous guardian for tenet-5.github.io.
+"""PRISM site duty — LOCKED project: TENET5 public site (visual + theme).
 
-Runs forever (or once): rebuild press content, enforce ONE theme, write proof.
-PRISM / agents / GitHub Actions call this on a short interval so the public site
-never drifts off the screenshot press design.
+Daniel permanent mission (do not digress unless he says stop):
+  - One theme: css/press-theme.css
+  - Rebuild press content
+  - Capture PC + mobile JPGs and validate visual acuity
+  - Work on PRISM/site tools that serve THIS project
+  - Run around the clock until STOP flag or Daniel says stop
 
-    python tools/prism_site_duty.py           # one lap
-    python tools/prism_site_duty.py --loop 60 # every 60s
-    PRISM_SITE_AUTO_PUSH=1 ...               # commit+push when dirty (CI only)
+    python tools/prism_site_duty.py              # one lap
+    python tools/prism_site_duty.py --loop 90    # every 90s (bounded 24h)
+    python tools/prism_site_duty.py --forever    # until STOP file
+    PRISM_SITE_AUTO_PUSH=1 ...                   # commit+push when dirty
+
+STOP files (only way to halt --forever without killing PID):
+  C:/PRISM/log/PRISM_SITE_DUTY_STOP
+  <site>/data/.PRISM_SITE_DUTY_STOP
 
 Artifacts:
   C:/PRISM/log/prism_site_duty_last.json
-  data/prism_site_duty_last.json (if writable under site)
+  C:/PRISM/log/prism_visual_acuity_last.json
+  C:/PRISM/log/visual_acuity/*.jpg
+  data/visual_acuity/*.jpg
 """
 from __future__ import annotations
 
@@ -29,7 +39,19 @@ PROOF_PATHS = [
     Path(r"C:\PRISM\log\prism_site_duty_last.json"),
     ROOT / "data" / "prism_site_duty_last.json",
 ]
+STOP_FILES = [
+    Path(r"C:\PRISM\log\PRISM_SITE_DUTY_STOP"),
+    ROOT / "data" / ".PRISM_SITE_DUTY_STOP",
+]
+PROJECT_LOCK = Path(r"C:\PRISM\log\PRISM_PROJECT_LOCK_TENET5_SITE.json")
 _CNW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+PROJECT = {
+    "id": "TENET5_PUBLIC_SITE_VISUAL_ACUITY",
+    "priority": "CRITICAL_PERMANENT",
+    "digress": False,
+    "stop_only_via": [str(p) for p in STOP_FILES] + ["Daniel verbal stop"],
+}
 
 
 def _run(cmd: list[str], timeout: int = 600) -> tuple[int, str]:
@@ -99,16 +121,42 @@ def lap() -> dict:
         interior_ok = interior_ok and ok
     steps.append({"name": "interiors", "ok": interior_ok, "samples": samples})
 
-    # 6) optional auto-push (CI / explicit only)
+    # 6) PC + mobile JPG capture + visual acuity (core permanent mission)
+    vis = TOOLS / "prism_visual_acuity.py"
+    if vis.exists():
+        code, out = _run([sys.executable, str(vis), "--base", "https://tenet-5.github.io"], timeout=600)
+        vis_ok = code == 0
+        # self-heal: if visuals fail, re-enforce theme once and note
+        if not vis_ok and apply.exists():
+            _run([sys.executable, str(apply)], timeout=300)
+            code2, out2 = _run(
+                [sys.executable, str(vis), "--base", "https://tenet-5.github.io"], timeout=600
+            )
+            vis_ok = code2 == 0
+            out = (out or "") + "\nREHEAL\n" + (out2 or "")
+            code = code2
+        steps.append(
+            {
+                "name": "visual_acuity_pc_mobile",
+                "ok": vis_ok,
+                "exit": code,
+                "tail": (out or "")[-500:],
+                "proof": r"C:\PRISM\log\prism_visual_acuity_last.json",
+                "jpgs": r"C:\PRISM\log\visual_acuity\ + data/visual_acuity/",
+            }
+        )
+    else:
+        steps.append({"name": "visual_acuity_pc_mobile", "ok": False, "detail": "missing prism_visual_acuity.py"})
+
+    # 7) optional auto-push (CI / explicit only)
     auto = os.environ.get("PRISM_SITE_AUTO_PUSH", "").strip() in {"1", "true", "yes"}
     if auto:
         _run(["git", "add", "-A"])
         st, diff = _run(["git", "status", "--porcelain"])
         dirty = bool(diff.strip())
         if dirty:
-            msg = f"prism(site-duty): enforce press theme + rebuild {ts[:19]}"
+            msg = f"prism(site-duty): theme+visual acuity {ts[:19]}"
             c1, _ = _run(["git", "commit", "-m", msg])
-            # skip hooks thrash if needed
             if c1 != 0:
                 c1, _ = _run(["git", "-c", "core.hooksPath=/dev/null", "commit", "-m", msg, "--no-verify"])
             c2, pout = _run(["git", "push", "origin", "HEAD"], timeout=120)
@@ -130,10 +178,32 @@ def lap() -> dict:
     return _finish(ts, steps, verdict)
 
 
+def _stop_requested() -> bool:
+    if os.environ.get("PRISM_SITE_DUTY_STOP", "").strip() in {"1", "true", "yes"}:
+        return True
+    return any(p.exists() for p in STOP_FILES)
+
+
+def _write_project_lock() -> None:
+    doc = {
+        **PROJECT,
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "theme": "css/press-theme.css",
+        "site": "https://tenet-5.github.io/",
+        "doc": str(ROOT / "PRISM_PROJECT_LOCK.md"),
+    }
+    try:
+        PROJECT_LOCK.parent.mkdir(parents=True, exist_ok=True)
+        PROJECT_LOCK.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+    except OSError:
+        pass
+
+
 def _finish(ts: str, steps: list[dict], verdict: str) -> dict:
     doc = {
         "ts": ts,
         "doctrine": "prism_site_duty_continuous",
+        "project": PROJECT,
         "site_root": str(ROOT),
         "theme": "css/press-theme.css",
         "verdict": verdict,
@@ -147,20 +217,44 @@ def _finish(ts: str, steps: list[dict], verdict: str) -> dict:
             path.write_text(payload, encoding="utf-8")
         except OSError:
             pass
-    print(json.dumps({"verdict": verdict, "ok": doc["ok"], "ts": ts}, indent=2))
+    _write_project_lock()
+    print(json.dumps({"verdict": verdict, "ok": doc["ok"], "ts": ts, "project": PROJECT["id"]}, indent=2))
     return doc
 
 
 def main() -> int:
-    loop = None
     args = sys.argv[1:]
+    forever = "--forever" in args
+    loop = None
     if "--loop" in args:
         i = args.index("--loop")
-        loop = int(args[i + 1]) if i + 1 < len(args) else 60
+        loop = int(args[i + 1]) if i + 1 < len(args) else 90
+    if forever:
+        loop = loop or 90
+        n = 0
+        print(
+            f"[prism_site_duty] FOREVER project={PROJECT['id']} interval={loop}s "
+            f"stop_files={[str(p) for p in STOP_FILES]}",
+            flush=True,
+        )
+        while not _stop_requested():
+            n += 1
+            doc = lap()
+            print(f"[prism_site_duty] lap={n} {doc['verdict']}", flush=True)
+            # sleep in slices so STOP is noticed quickly
+            for _ in range(max(1, loop)):
+                if _stop_requested():
+                    print("[prism_site_duty] STOP flag detected — exiting", flush=True)
+                    return 0
+                time.sleep(1)
+        print("[prism_site_duty] STOP flag present at start — exiting", flush=True)
+        return 0
     if loop:
-        # bounded duty: max 24h of loops then exit (supervisor restarts)
         max_laps = max(1, (24 * 3600) // max(loop, 1))
         for n in range(max_laps):
+            if _stop_requested():
+                print("[prism_site_duty] STOP flag — exiting", flush=True)
+                return 0
             doc = lap()
             print(f"[prism_site_duty] lap={n+1}/{max_laps} {doc['verdict']}", flush=True)
             time.sleep(loop)
@@ -171,3 +265,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
