@@ -274,13 +274,12 @@ def apply_page(path: Path) -> bool:
             flags=re.I | re.S,
         )
 
-        # Footers → one press-foot
-        if RE_FOOTER_P.search(text):
-            text = RE_FOOTER_P.sub(FOOT, text, count=1)
+        # Footers → exactly one press-foot (replace any <footer>…</footer>)
+        if RE_FOOTER_ANY.search(text):
+            text = RE_FOOTER_ANY.sub(FOOT, text, count=1)
             # remove any additional footers
             parts = list(RE_FOOTER_ANY.finditer(text))
             if len(parts) > 1:
-                # keep first press-foot only
                 for m in reversed(parts[1:]):
                     text = text[: m.start()] + text[m.end() :]
         elif 'class="press-foot' not in text:
