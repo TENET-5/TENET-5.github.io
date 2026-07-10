@@ -57,7 +57,7 @@
 
   /* Canonical script manifest. The order of this array IS the load order. */
   var MANIFEST = [
-    { key: 'nav',          src: '/nav.js?v=17' },
+    { key: 'nav',          src: '/nav.js?v=50' },
     { key: 'footer',       src: '/footer.js?v=2' },
     { key: 'ux',           src: '/js/ux.js?v=1' },
     { key: 'i18n',         src: '/js/i18n.js?v=4' },
@@ -128,11 +128,17 @@
     },
 
     startWalkthrough: function () {
+      /* Prefer full documentary tour (A→B film) when available */
+      if (window.LIRIL_DOCUMENTARY && typeof window.LIRIL_DOCUMENTARY.start === 'function') {
+        window.LIRIL_DOCUMENTARY.start();
+        return true;
+      }
       if (typeof window.__LIRIL_WALKTHROUGH_START === 'function') {
         return window.__LIRIL_WALKTHROUGH_START();
       }
       /* Fallback: synthesize a click on the canonical CTA if present */
-      var cta = document.querySelector('.liril-walkthrough-cta');
+      var cta = document.querySelector('.liril-walkthrough-cta') ||
+                document.getElementById('liril-doc-start');
       if (cta) { cta.click(); return true; }
       return false;
     },

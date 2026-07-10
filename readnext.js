@@ -17,22 +17,54 @@
   if (window.__TENET5_READNEXT_LOADED) return;
   window.__TENET5_READNEXT_LOADED = true;
 
-  // Investigation flow — each page knows what comes next
+  // Investigation flow — A→B first, then deep tracks
   var FLOW = {
     'index.html': {
-      current: 'The Numbers',
+      current: 'Home',
       next: [
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
-        { href: 'arms-pipeline.html', label: 'The Arms Pipeline', desc: '$229M+ flowing to Israel despite the "pause"' },
-        { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 confirmed records of government misconduct' },
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'What Ottawa is doing now + future plans map' },
+        { href: 'experience.html', label: 'A to B Paths', desc: 'Five ways into the record' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Live findings seal' },
+      ]
+    },
+    'daily-briefing.html': {
+      current: 'Daily Briefing',
+      next: [
+        { href: 'griffon-glle-procurement.html', label: 'Griffon GLLE', desc: 'Primary defence procurement file' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Full findings vault' },
+        { href: 'experience.html', label: 'A to B Paths', desc: 'Choose depth: film, thesis, 504' },
+      ]
+    },
+    'experience.html': {
+      current: 'A to B Paths',
+      next: [
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'Start here every day' },
+        { href: 'reading-order.html', label: 'Reading Order', desc: 'Ordered checklist' },
+        { href: '504-database.html', label: '504 Database', desc: 'Named record package' },
+      ]
+    },
+    'reading-order.html': {
+      current: 'Reading Order',
+      next: [
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'Step 01' },
+        { href: 'intent.html', label: 'Thesis spine', desc: 'Why the dossier exists' },
+        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Source vault' },
       ]
     },
     'findings.html': {
       current: 'Cross-Reference Findings',
       next: [
-        { href: 'arms-pipeline.html', label: 'The Arms Pipeline', desc: 'See where the weapons money goes' },
-        { href: 'charity-pipeline.html', label: 'Charity Pipeline', desc: '$276M from Canadian charities to Israel' },
-        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'What is happening now' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Live seal' },
+        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Primary sources' },
+      ]
+    },
+    'griffon-glle-procurement.html': {
+      current: 'Griffon GLLE',
+      next: [
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'Cluster context' },
+        { href: 'dnd-procurement.html', label: 'DND Procurement', desc: 'Wider defence pattern' },
+        { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'All findings' },
       ]
     },
     'arms-pipeline.html': {
@@ -86,16 +118,17 @@
     'osint-dashboard.html': {
       current: 'OSINT Dashboard',
       next: [
-        { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
-        { href: 'findings.html', label: 'All 26+ Findings', desc: 'What CAP OSINT found in the data' },
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'What Ottawa is doing' },
+        { href: 'griffon-glle-procurement.html', label: 'Griffon GLLE', desc: 'Primary active file' },
+        { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Source vault' },
       ]
     },
     'about.html': {
       current: 'About & Methodology',
       next: [
-        { href: 'index.html', label: 'The Evidence', desc: 'Start with the numbers' },
-        { href: 'findings.html', label: 'Cross-Reference Findings', desc: '21 investigation panels' },
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'Start with today' },
+        { href: 'experience.html', label: 'A to B Paths', desc: 'How to navigate' },
+        { href: 'findings.html', label: 'Cross-Reference Findings', desc: 'Investigation panels' },
       ]
     },
 

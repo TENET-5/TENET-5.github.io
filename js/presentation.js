@@ -112,13 +112,14 @@
      ═══════════════════════════════════════════════════════════════════ */
 
   var PAGE_SEQUENCE = [
-    // ── OPENING + DAILY INTELLIGENCE ──
-    'home.html',
+    // ── OPENING + A→B (site_intent_contract canonical order) ──
     'daily-briefing.html',
     'osint-dashboard.html',
+    'experience.html',
+    'reading-order.html',
+    'intent.html',
     'complete-thesis.html',
     'who-is-harmed.html',
-    'reading-order.html',
 
     // ── THE INVESTIGATION ──
     'findings.html',

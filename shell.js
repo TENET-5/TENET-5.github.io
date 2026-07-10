@@ -172,7 +172,7 @@
     if (isFrameShell) {
       // INDEX.HTML — frame shell: only load nav for the top bar
       ensureFrame('site-header-frame', 'div', 'prepend');
-      loadScript(BASE + 'nav.js?v=41')
+      loadScript(BASE + 'nav.js?v=50')
         .then(function() { return loadScript(BASE + 'js/theme-slider.js?v=41'); })
         .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
         .then(function() { return loadScript(BASE + 'js/config.js?v=41'); })
@@ -191,7 +191,7 @@
         loadScript(BASE + 'js/liril-voice.js?v=41'),
         loadScript(BASE + 'js/liril-autoreader.js?v=41'),
         loadScript(BASE + 'js/figures.js?v=1'),
-        loadScript(BASE + 'js/breadcrumbs.js?v=1'),
+        loadScript(BASE + 'js/breadcrumbs.js?v=2'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
       ]).then(function() {
         return loadScript(BASE + 'js/presentation.js?v=41');
@@ -221,7 +221,7 @@
       ensureFrame('site-footer-frame', 'div', null);
 
       loadScript(BASE + 'js/video-bg.js?v=2');
-      loadScript(BASE + 'nav.js?v=41')
+      loadScript(BASE + 'nav.js?v=50')
         .then(function() { return loadScript(BASE + 'js/theme-slider.js?v=41'); })
         .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
         .then(function() { return loadScript(BASE + 'js/config.js?v=41'); })

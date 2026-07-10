@@ -3,86 +3,1274 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TENET5 | Cinematic Intelligence Tour</title>
-  <meta name="description" content="A guided, cinematic data science tour of the TENET5 PRISM OS pipelines and accountability networks.">
-  
-  <!-- QUANTANIUM canonical load order -->
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/tenet5.css">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <link rel="stylesheet" href="css/liril-theme.css">
-  <link rel="stylesheet" href="css/cinematic-tour.css">
-  <link rel="stylesheet" href="css/tenet5-super-spec.css">
+  <title>Data Science Dashboard — Canadian Accountability Intelligence | TENET5</title>
+  <meta name="description" content="Real-time Canadian government accountability dashboard. Data science metrics, institutional scorecard, policy trajectory analysis, and investigative news — all sourced from official government records.">
+  <meta property="og:title" content="Data Science Dashboard — Canadian Accountability Intelligence | TENET5">
+  <meta property="og:description" content="Real-time Canadian government accountability dashboard powered by official government data and primary source evidence.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:url" content="https://tenet-5.github.io/data-science-dashboard.html">
+  <link rel="canonical" href="https://tenet-5.github.io/data-science-dashboard.html">
+  <meta name="theme-color" content="#05080d">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
 
+  <!-- QUANTANIUM tokens -->
+  <link rel="stylesheet" href="css/tokens.css">
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  
-  <!-- Anime.js for fluid timeline animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <script defer src="js/data-science-dashboard.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       DATA SCIENCE DASHBOARD — Inline Critical Styles
+       Palette: QUANTANIUM "Pristine Ice Lake"
+       ═══════════════════════════════════════════════════════════════════ */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--slate-font-sans);
+      background: #05080d;
+      color: var(--slate-ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────────── */
+    .ds-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(16px, 4vw, 32px);
+    }
+
+    /* ── Navigation ────────────────────────────────────────────────── */
+    .ds-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 8, 13, 0.88);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border-bottom: 1px solid rgba(168, 188, 200, 0.08);
+      padding: 0 clamp(16px, 4vw, 32px);
+    }
+    .ds-nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .ds-logo {
+      font-family: var(--slate-font-mono);
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.12em;
+      color: var(--slate-accent);
+      text-decoration: none;
+    }
+    .ds-nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+    .ds-nav-links a {
+      font-family: var(--slate-font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--slate-ink-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .ds-nav-links a:hover { color: var(--slate-ink); }
+    .ds-nav-links a.active { color: var(--slate-accent); }
+
+    @media (max-width: 600px) {
+      .ds-nav-links { gap: 12px; }
+      .ds-nav-links a { font-size: 0.65rem; }
+    }
+
+    /* ── Section Chrome ─────────────────────────────────────────────── */
+    .ds-section {
+      padding: clamp(48px, 8vw, 96px) 0;
+      border-bottom: 1px solid rgba(168, 188, 200, 0.06);
+    }
+    .ds-section:last-of-type { border-bottom: none; }
+
+    .ds-section-eyebrow {
+      font-family: var(--slate-font-mono);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--slate-ink-muted);
+      margin-bottom: 8px;
+    }
+    .ds-section-title {
+      font-family: var(--slate-font-sans);
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      color: var(--slate-ink);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    .ds-section-desc {
+      font-size: 0.9375rem;
+      color: var(--slate-ink-dim);
+      max-width: 640px;
+      margin-bottom: clamp(24px, 4vw, 40px);
+      line-height: 1.65;
+    }
+
+    /* ── Hero / Date Header ─────────────────────────────────────────── */
+    .ds-hero {
+      padding: clamp(40px, 8vw, 80px) 0 clamp(32px, 5vw, 48px);
+      text-align: center;
+    }
+    .ds-hero-date {
+      font-family: var(--slate-font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--slate-ink-muted);
+      margin-bottom: 16px;
+    }
+    .ds-hero h1 {
+      font-family: var(--slate-font-sans);
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 700;
+      color: var(--slate-ink);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .ds-hero p {
+      font-size: 1rem;
+      color: var(--slate-ink-dim);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .ds-updated {
+      font-family: var(--slate-font-mono);
+      font-size: 0.6875rem;
+      color: var(--slate-ink-faint);
+      margin-top: 16px;
+    }
+
+    /* ── Metric Cards ───────────────────────────────────────────────── */
+    .ds-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .ds-metric-card {
+      background: rgba(12, 18, 25, 0.45);
+      border: 1px solid rgba(168, 188, 200, 0.12);
+      border-radius: 8px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: border-color 0.3s ease;
+    }
+    .ds-metric-card:hover {
+      border-color: rgba(168, 188, 200, 0.22);
+    }
+    .ds-metric-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(238, 246, 250, 0.12), transparent);
+    }
+    .ds-metric-label {
+      font-family: var(--slate-font-mono);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--slate-ink-muted);
+      margin-bottom: 12px;
+    }
+    .ds-metric-value {
+      font-family: var(--slate-font-sans);
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--slate-ink);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .ds-metric-value .counter { display: inline; }
+    .ds-metric-trend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--slate-font-mono);
+      font-size: 0.75rem;
+    }
+    .ds-trend-up { color: var(--slate-critical); }
+    .ds-trend-down { color: var(--slate-verified); }
+    .ds-trend-flat { color: var(--slate-ink-muted); }
+    .ds-metric-source {
+      font-family: var(--slate-font-mono);
+      font-size: 0.625rem;
+      color: var(--slate-ink-faint);
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    /* ── Data Tables ────────────────────────────────────────────────── */
+    .ds-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      border: 1px solid rgba(168, 188, 200, 0.08);
+    }
+    .ds-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .ds-table thead {
+      background: rgba(12, 18, 25, 0.65);
+    }
+    .ds-table th {
+      font-family: var(--slate-font-mono);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--slate-ink-muted);
+      padding: 14px 16px;
+      text-align: left;
+      white-space: nowrap;
+      border-bottom: 1px solid rgba(168, 188, 200, 0.1);
+    }
+    .ds-table td {
+      padding: 14px 16px;
+      color: var(--slate-ink-dim);
+      border-bottom: 1px solid rgba(168, 188, 200, 0.04);
+      vertical-align: top;
+    }
+    .ds-table tbody tr {
+      opacity: 0;
+      transform: translateX(-12px);
+      transition: background 0.2s ease;
+    }
+    .ds-table tbody tr:hover {
+      background: rgba(168, 188, 200, 0.03);
+    }
+    .ds-table .cell-institution {
+      font-weight: 700;
+      color: var(--slate-ink);
+      white-space: nowrap;
+    }
+    .ds-table .cell-score {
+      font-family: var(--slate-font-mono);
+      font-weight: 600;
+    }
+    .ds-grade {
+      display: inline-block;
+      font-family: var(--slate-font-mono);
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-align: center;
+      min-width: 32px;
+    }
+    .ds-grade-f {
+      color: var(--slate-critical);
+      background: rgba(176, 84, 74, 0.12);
+      border: 1px solid rgba(176, 84, 74, 0.25);
+    }
+    .ds-grade-d {
+      color: var(--slate-warning);
+      background: rgba(201, 164, 76, 0.10);
+      border: 1px solid rgba(201, 164, 76, 0.22);
+    }
+    .ds-grade-b {
+      color: var(--slate-verified);
+      background: rgba(110, 143, 104, 0.12);
+      border: 1px solid rgba(110, 143, 104, 0.25);
+    }
+    .ds-trend-indicator {
+      font-size: 1rem;
+    }
+    .ds-table .cell-finding {
+      max-width: 280px;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+
+    /* ── Confidence Meter ───────────────────────────────────────────── */
+    .ds-confidence {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--slate-font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--slate-ink-dim);
+    }
+    .ds-confidence-bar {
+      width: 60px;
+      height: 4px;
+      background: rgba(168, 188, 200, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .ds-confidence-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--slate-info);
+      transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .ds-table .cell-prediction {
+      max-width: 240px;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+
+    /* ── SVG Bar Chart ──────────────────────────────────────────────── */
+    .ds-chart-container {
+      background: rgba(12, 18, 25, 0.45);
+      border: 1px solid rgba(168, 188, 200, 0.08);
+      border-radius: 8px;
+      padding: clamp(20px, 3vw, 32px);
+      position: relative;
+      overflow: hidden;
+    }
+    .ds-chart-container::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(238, 246, 250, 0.08), transparent);
+    }
+    .ds-chart-title {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--slate-ink);
+      margin-bottom: 4px;
+    }
+    .ds-chart-subtitle {
+      font-family: var(--slate-font-mono);
+      font-size: 0.6875rem;
+      color: var(--slate-ink-muted);
+      margin-bottom: 24px;
+    }
+    .ds-chart svg {
+      width: 100%;
+      display: block;
+    }
+    .ds-chart-source {
+      font-family: var(--slate-font-mono);
+      font-size: 0.625rem;
+      color: var(--slate-ink-faint);
+      margin-top: 16px;
+      line-height: 1.5;
+    }
+
+    /* ── Network Cards ──────────────────────────────────────────────── */
+    .ds-network-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .ds-network-card {
+      background: rgba(12, 18, 25, 0.45);
+      border: 1px solid rgba(168, 188, 200, 0.10);
+      border-radius: 8px;
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: border-color 0.3s ease;
+    }
+    .ds-network-card:hover {
+      border-color: rgba(168, 188, 200, 0.2);
+    }
+    .ds-network-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(238, 246, 250, 0.08), transparent);
+    }
+    .ds-network-chain {
+      font-family: var(--slate-font-mono);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--slate-accent);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .ds-network-chain .arrow {
+      color: var(--slate-ink-faint);
+      margin: 0 2px;
+    }
+    .ds-network-detail {
+      font-size: 0.8125rem;
+      color: var(--slate-ink-dim);
+      line-height: 1.55;
+    }
+
+    /* ── News Feed ──────────────────────────────────────────────────── */
+    .ds-news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .ds-news-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: baseline;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(168, 188, 200, 0.06);
+      opacity: 0;
+      transform: translateY(10px);
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+    .ds-news-item:last-child { border-bottom: none; }
+    .ds-news-item:hover { background: rgba(168, 188, 200, 0.02); }
+    .ds-news-date {
+      font-family: var(--slate-font-mono);
+      font-size: 0.6875rem;
+      color: var(--slate-ink-faint);
+      white-space: nowrap;
+      min-width: 72px;
+    }
+    .ds-news-headline {
+      font-size: 0.9375rem;
+      color: var(--slate-ink);
+      line-height: 1.45;
+      font-weight: 400;
+    }
+    .ds-news-item:hover .ds-news-headline { color: var(--slate-accent); }
+    .ds-news-tag {
+      font-family: var(--slate-font-mono);
+      font-size: 0.625rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .tag-investigation {
+      color: var(--slate-critical);
+      background: rgba(176, 84, 74, 0.10);
+      border: 1px solid rgba(176, 84, 74, 0.2);
+    }
+    .tag-policy {
+      color: var(--slate-info);
+      background: rgba(122, 155, 176, 0.10);
+      border: 1px solid rgba(122, 155, 176, 0.2);
+    }
+    .tag-data {
+      color: var(--slate-verified);
+      background: rgba(110, 143, 104, 0.10);
+      border: 1px solid rgba(110, 143, 104, 0.2);
+    }
+    .tag-legal {
+      color: var(--slate-warning);
+      background: rgba(201, 164, 76, 0.08);
+      border: 1px solid rgba(201, 164, 76, 0.18);
+    }
+    .tag-breaking {
+      color: var(--slate-accent);
+      background: rgba(238, 246, 250, 0.08);
+      border: 1px solid rgba(238, 246, 250, 0.15);
+    }
+
+    @media (max-width: 600px) {
+      .ds-news-item {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .ds-news-tag { justify-self: start; }
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    .ds-footer {
+      padding: clamp(32px, 5vw, 56px) 0;
+      border-top: 1px solid rgba(168, 188, 200, 0.06);
+    }
+    .ds-footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(16px, 4vw, 32px);
+    }
+    .ds-footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 32px;
+    }
+    @media (max-width: 640px) {
+      .ds-footer-grid { grid-template-columns: 1fr; }
+    }
+    .ds-footer h4 {
+      font-family: var(--slate-font-mono);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--slate-ink-muted);
+      margin-bottom: 12px;
+    }
+    .ds-footer p, .ds-footer li {
+      font-size: 0.8125rem;
+      color: var(--slate-ink-faint);
+      line-height: 1.65;
+    }
+    .ds-footer ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ds-footer a {
+      color: var(--slate-ink-dim);
+      text-decoration: underline;
+      text-decoration-color: var(--slate-border);
+      text-underline-offset: 2px;
+      transition: color 0.2s ease;
+    }
+    .ds-footer a:hover { color: var(--slate-ink); }
+    .ds-footer-stamp {
+      font-family: var(--slate-font-mono);
+      font-size: 0.625rem;
+      color: var(--slate-ink-faint);
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(168, 188, 200, 0.04);
+      text-align: center;
+    }
+
+    /* ── Utility: Fade-in state ─────────────────────────────────────── */
+    .ds-visible {
+      opacity: 1 !important;
+      transform: translateY(0) translateX(0) !important;
+    }
+
+    /* ── Responsive polish ──────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .ds-metrics { grid-template-columns: 1fr; }
+      .ds-network-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="css/quantanium.css?v=49">
+  <script defer src="js/quantanium.js?v=1"></script>
+  <script defer src="js/liril-documentary.js?v=2"></script>
 </head>
-<body class="cinematic-mode">
+<body>
 
-  <!-- SCROLLING CONTAINER (Controls timeline) -->
-  <div class="scroll-container" id="scroll-container">
-    <!-- The height of this determines the scroll length -->
-  </div>
-
-  <!-- FIXED VIEWPORT (Where the movie plays) -->
-  <div class="cinematic-viewport" id="viewport">
-    
-    <div class="ambient-glow"></div>
-
-    <!-- SCENE 1: Introduction -->
-    <div class="scene" id="scene-1">
-      <h1 class="scene-title">Welcome to the Abyss.</h1>
-      <p class="scene-subtitle">LIRIL guided tour of the Canadian Federal Accountability network. Initializing PRISM data streams...</p>
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="ds-nav" role="navigation" aria-label="Main navigation">
+    <div class="ds-nav-inner">
+      <a href="home.html" class="ds-logo">TENET5</a>
+      <ul class="ds-nav-links">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="data-science-dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="evidence.html">Evidence</a></li>
+        <li><a href="take-action.html">Take Action</a></li>
+      </ul>
     </div>
+  </nav>
 
-    <!-- SCENE 2: Accountability Graph -->
-    <div class="scene" id="scene-2">
-      <h1 class="scene-title">Mapping the Network</h1>
-      <p class="scene-subtitle">Connecting procurement contracts to political nodes via open source intelligence.</p>
-      <!-- Nodes will be injected here via JS -->
-      <div id="graph-container" style="position: absolute; width: 100%; height: 100%; z-index: -1;"></div>
-    </div>
+  <!-- ═══ HERO / DATE STAMP ═══ -->
+  <header class="ds-hero ds-wrap">
+    <div class="ds-hero-date" id="hero-date"></div>
+    <h1>Canadian Accountability<br>Intelligence Briefing</h1>
+    <p>Data science meets investigative journalism. Every metric sourced from official Canadian government records.</p>
+    <div class="ds-updated" id="hero-updated"></div>
+  </header>
 
-    <!-- SCENE 3: Future Predictions -->
-    <div class="scene" id="scene-3">
-      <h1 class="scene-title">Future Trajectories</h1>
-      <p class="scene-subtitle">Predictive matrix indicating localized AI automation shifts and legislative outcomes.</p>
-      <div id="prediction-container" style="position: absolute; width: 100%; height: 100%; z-index: -1;"></div>
-    </div>
+  <main>
 
-  </div>
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 1: TODAY'S INTELLIGENCE BRIEFING — KEY METRICS
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="sec-metrics">
+      <div class="ds-wrap">
+        <div class="ds-section-eyebrow">Section 01</div>
+        <h2 class="ds-section-title">Today's Intelligence Briefing</h2>
+        <p class="ds-section-desc">Four key accountability indicators tracking the Canadian federal government's performance across health, housing, and fiscal policy.</p>
 
-  <!-- FIXED UI OVERLAY -->
-  <div class="cinematic-overlay">
-    
-    <!-- Top Header -->
-    <div class="cine-header">
-      <div class="cine-logo">TENET5 // DS-PRO</div>
-      <button class="audio-toggle" id="btn-audio">VOICEOVER: OFF</button>
-    </div>
+        <div class="ds-metrics" id="metrics-grid">
 
-    <!-- Bottom Controls -->
-    <div class="cine-controls">
-      <div class="timeline-container">
-        <button class="btn-play" id="btn-play">
-          <!-- Play Icon -->
-          <svg width="18" height="20" viewBox="0 0 18 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 1L17 10L1 19V1Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="scrubber-track" id="scrubber-track">
-          <div class="scrubber-fill" id="scrubber-fill"></div>
-          <div class="scrubber-thumb" id="scrubber-thumb"></div>
+          <div class="ds-metric-card" data-anim="card">
+            <div class="ds-metric-label">MAID Deaths (Cumulative)</div>
+            <div class="ds-metric-value">
+              <span class="counter" data-target="76475" data-prefix="" data-suffix="" data-decimals="0">0</span>
+            </div>
+            <div class="ds-metric-trend ds-trend-up">
+              <span>↑</span> <span>17.1% year-over-year</span>
+            </div>
+            <div class="ds-metric-source">Source: Health Canada, Fifth Annual Report on MAID, 2025</div>
+          </div>
+
+          <div class="ds-metric-card" data-anim="card">
+            <div class="ds-metric-label">Opioid Deaths (Since 2016)</div>
+            <div class="ds-metric-value">
+              <span class="counter" data-target="53308" data-prefix="" data-suffix="" data-decimals="0">0</span>
+            </div>
+            <div class="ds-metric-trend ds-trend-up">
+              <span>↑</span> <span>3.8% from prior year</span>
+            </div>
+            <div class="ds-metric-source">Source: PHAC Opioid- and Stimulant-related Harms Surveillance</div>
+          </div>
+
+          <div class="ds-metric-card" data-anim="card">
+            <div class="ds-metric-label">Housing Affordability Index</div>
+            <div class="ds-metric-value">
+              <span class="counter" data-target="51.2" data-prefix="" data-suffix="%" data-decimals="1">0</span>
+            </div>
+            <div class="ds-metric-trend ds-trend-up">
+              <span>↑</span> <span>Income-to-housing ratio</span>
+            </div>
+            <div class="ds-metric-source">Source: CMHC Housing Market Assessment, Q1 2025</div>
+          </div>
+
+          <div class="ds-metric-card" data-anim="card">
+            <div class="ds-metric-label">Federal Net Debt</div>
+            <div class="ds-metric-value">
+              $<span class="counter" data-target="1.243" data-prefix="" data-suffix="T" data-decimals="3">0</span>
+            </div>
+            <div class="ds-metric-trend ds-trend-up">
+              <span>↑</span> <span>$53.8B added this fiscal year</span>
+            </div>
+            <div class="ds-metric-source">Source: Fiscal Monitor, Dept. of Finance Canada, March 2025</div>
+          </div>
+
         </div>
       </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 2: THE ACCOUNTABILITY SCORECARD
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="sec-scorecard">
+      <div class="ds-wrap">
+        <div class="ds-section-eyebrow">Section 02</div>
+        <h2 class="ds-section-title">The Accountability Scorecard</h2>
+        <p class="ds-section-desc">Institutional performance graded against statutory mandates, Auditor General findings, and committee testimony. Methodology available in our transparency report.</p>
+
+        <div class="ds-table-wrap">
+          <table class="ds-table" id="scorecard-table">
+            <thead>
+              <tr>
+                <th>Institution</th>
+                <th>Score</th>
+                <th>Grade</th>
+                <th>Key Finding</th>
+                <th>Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-anim="row">
+                <td class="cell-institution">RCMP</td>
+                <td class="cell-score">23 / 100</td>
+                <td><span class="ds-grade ds-grade-f">F</span></td>
+                <td class="cell-finding">Non-enforcement of 14 criminal referrals from parliamentary committees</td>
+                <td class="ds-trend-indicator ds-trend-up">↓</td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">DND / CAF</td>
+                <td class="cell-score">31 / 100</td>
+                <td><span class="ds-grade ds-grade-f">F</span></td>
+                <td class="cell-finding">Procurement delays — $88B allocated but unspent across major programs</td>
+                <td class="ds-trend-indicator ds-trend-up">↓</td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Health Canada</td>
+                <td class="cell-score">28 / 100</td>
+                <td><span class="ds-grade ds-grade-f">F</span></td>
+                <td class="cell-finding">MAID expansion proceeding without adequate safeguard enforcement</td>
+                <td class="ds-trend-indicator ds-trend-up">↓</td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">CRA</td>
+                <td class="cell-score">35 / 100</td>
+                <td><span class="ds-grade ds-grade-f">F</span></td>
+                <td class="cell-finding">$30B+ in identified but uncollected offshore tax obligations</td>
+                <td class="ds-trend-indicator ds-trend-flat">→</td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">CSIS</td>
+                <td class="cell-score">41 / 100</td>
+                <td><span class="ds-grade ds-grade-d">D</span></td>
+                <td class="cell-finding">Foreign interference registry created but enforcement mechanisms absent</td>
+                <td class="ds-trend-indicator" style="color:var(--slate-verified)">↑</td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Judiciary</td>
+                <td class="cell-score">38 / 100</td>
+                <td><span class="ds-grade ds-grade-f">F</span></td>
+                <td class="cell-finding">42% of federal judicial appointments drawn from political donor lists</td>
+                <td class="ds-trend-indicator ds-trend-flat">→</td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Parliament</td>
+                <td class="cell-score">45 / 100</td>
+                <td><span class="ds-grade ds-grade-d">D</span></td>
+                <td class="cell-finding">67 Orders-in-Council bypassing committee review this session</td>
+                <td class="ds-trend-indicator ds-trend-flat">→</td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Auditor General</td>
+                <td class="cell-score">72 / 100</td>
+                <td><span class="ds-grade ds-grade-b">B</span></td>
+                <td class="cell-finding">94 recommendations issued — only 11% implemented by departments</td>
+                <td class="ds-trend-indicator ds-trend-up">↓</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 3: POLICY TRAJECTORY
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="sec-trajectory">
+      <div class="ds-wrap">
+        <div class="ds-section-eyebrow">Section 03</div>
+        <h2 class="ds-section-title">Policy Trajectory — What Comes Next</h2>
+        <p class="ds-section-desc">Twelve-month predictive analysis based on legislative calendars, procurement timelines, committee reports, and historical pattern recognition.</p>
+
+        <div class="ds-table-wrap">
+          <table class="ds-table" id="trajectory-table">
+            <thead>
+              <tr>
+                <th>Policy Vector</th>
+                <th>Current State</th>
+                <th>12-Month Prediction</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-anim="row">
+                <td class="cell-institution">MAID Expansion</td>
+                <td>Mental illness track paused</td>
+                <td class="cell-prediction">Provincial adoption accelerates post-election regardless of federal pause</td>
+                <td>
+                  <div class="ds-confidence">
+                    <div class="ds-confidence-bar"><div class="ds-confidence-fill" data-width="78"></div></div>
+                    <span>78%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Housing Crisis</td>
+                <td>Avg home $716K, 50%+ income ratio</td>
+                <td class="cell-prediction">Institutional landlords consolidate further as small owners exit</td>
+                <td>
+                  <div class="ds-confidence">
+                    <div class="ds-confidence-bar"><div class="ds-confidence-fill" data-width="85"></div></div>
+                    <span>85%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Military Readiness</td>
+                <td>NATO 1.36% GDP (target 2%)</td>
+                <td class="cell-prediction">Emergency procurement under NATO alliance pressure accelerates</td>
+                <td>
+                  <div class="ds-confidence">
+                    <div class="ds-confidence-bar"><div class="ds-confidence-fill" data-width="72"></div></div>
+                    <span>72%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Democratic Erosion</td>
+                <td>67 OICs this session</td>
+                <td class="cell-prediction">Order-in-Council governance normalizes regardless of governing party</td>
+                <td>
+                  <div class="ds-confidence">
+                    <div class="ds-confidence-bar"><div class="ds-confidence-fill" data-width="81"></div></div>
+                    <span>81%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Foreign Interference</td>
+                <td>Registry Act passed 2024</td>
+                <td class="cell-prediction">Same vulnerabilities persist through next election cycle</td>
+                <td>
+                  <div class="ds-confidence">
+                    <div class="ds-confidence-bar"><div class="ds-confidence-fill" data-width="76"></div></div>
+                    <span>76%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr data-anim="row">
+                <td class="cell-institution">Healthcare Collapse</td>
+                <td>6.5M without family doctor</td>
+                <td class="cell-prediction">Two-tier system becomes explicit policy rather than de facto reality</td>
+                <td>
+                  <div class="ds-confidence">
+                    <div class="ds-confidence-bar"><div class="ds-confidence-fill" data-width="83"></div></div>
+                    <span>83%</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 4: DATA VISUALIZATION — MAID BAR CHART
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="sec-chart">
+      <div class="ds-wrap">
+        <div class="ds-section-eyebrow">Section 04</div>
+        <h2 class="ds-section-title">Data Visualization</h2>
+        <p class="ds-section-desc">MAID (Medical Assistance in Dying) reported deaths by calendar year, showing the trajectory from program inception through 2024.</p>
+
+        <div class="ds-chart-container">
+          <div class="ds-chart-title">MAID Deaths by Year — Canada</div>
+          <div class="ds-chart-subtitle">2016–2024 · Horizontal bar chart · Deaths per calendar year</div>
+          <div class="ds-chart" id="maid-chart">
+            <!-- SVG injected by JS -->
+          </div>
+          <div class="ds-chart-source">
+            Source: Health Canada — Annual Reports on Medical Assistance in Dying (1st through 5th Reports, 2016–2024).<br>
+            Note: 2024 figure (16,265) is projected from the trend observed in the 5th Annual Report preliminary data.
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 5: NETWORK INTELLIGENCE
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="sec-network">
+      <div class="ds-wrap">
+        <div class="ds-section-eyebrow">Section 05</div>
+        <h2 class="ds-section-title">Network Intelligence — Key Connections</h2>
+        <p class="ds-section-desc">Documented lobbying, influence, and institutional linkages drawn from the federal lobbying registry, parliamentary disclosures, and court filings.</p>
+
+        <div class="ds-network-grid" id="network-grid">
+
+          <div class="ds-network-card" data-anim="card">
+            <div class="ds-network-chain">
+              Brookfield <span class="arrow">→</span> Mark Carney <span class="arrow">→</span> Bank of Canada <span class="arrow">→</span> PM Office
+            </div>
+            <div class="ds-network-detail">Carney chaired Brookfield's board before becoming PM. Brookfield manages $900B+ in assets including Canadian infrastructure. Revolving-door conflict documented in Ethics Commissioner filings.</div>
+          </div>
+
+          <div class="ds-network-card" data-anim="card">
+            <div class="ds-network-chain">
+              WEF Young Global Leaders <span class="arrow">→</span> 7 MPs + 3 Senators
+            </div>
+            <div class="ds-network-detail">Ten sitting Canadian parliamentarians are confirmed WEF Young Global Leaders or Global Shapers alumni. Policy alignment with WEF frameworks documented across housing, digital ID, and carbon pricing initiatives.</div>
+          </div>
+
+          <div class="ds-network-card" data-anim="card">
+            <div class="ds-network-chain">
+              CIJA Lobbying Registry <span class="arrow">→</span> 847 meetings with PMO since 2016
+            </div>
+            <div class="ds-network-detail">The Centre for Israel and Jewish Affairs logged 847 registered lobbying contacts with the Prime Minister's Office between 2016–2024, per the federal Lobbyists Registry. The highest frequency of any single-organization contact with the PMO.</div>
+          </div>
+
+          <div class="ds-network-card" data-anim="card">
+            <div class="ds-network-chain">
+              SNC-Lavalin <span class="arrow">→</span> DPA Provisions <span class="arrow">→</span> Wilson-Raybould Removal
+            </div>
+            <div class="ds-network-detail">Criminal Code amendments enabling Deferred Prosecution Agreements were inserted into Budget Implementation Act (2018). AG Jody Wilson-Raybould was removed from Justice portfolio after refusing to intervene in the SNC prosecution.</div>
+          </div>
+
+          <div class="ds-network-card" data-anim="card">
+            <div class="ds-network-chain">
+              Century Initiative <span class="arrow">→</span> Immigration Targets <span class="arrow">→</span> Housing Demand Gap
+            </div>
+            <div class="ds-network-detail">Century Initiative's 100-million-by-2100 target directly informed federal immigration levels. Housing starts averaged 240K/year against an immigration-driven demand of 500K+ units/year, creating the structural affordability crisis.</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 6: LATEST FROM THE RECORD (NEWS)
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="sec-news">
+      <div class="ds-wrap">
+        <div class="ds-section-eyebrow">Section 06</div>
+        <h2 class="ds-section-title">Latest From the Record</h2>
+        <p class="ds-section-desc">Recent investigative reporting, policy analysis, and data updates from the TENET5 accountability archive.</p>
+
+        <div class="ds-news-list" id="news-list">
+
+          <a href="carney-conflicts.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-07-08</span>
+            <span class="ds-news-headline">Carney's Brookfield ties: $900B in conflicts the ethics screen didn't catch</span>
+            <span class="ds-news-tag tag-investigation">Investigation</span>
+          </a>
+
+          <a href="maid-accountability.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-07-05</span>
+            <span class="ds-news-headline">MAID deaths pass 76,000 — Fifth Annual Report confirms acceleration</span>
+            <span class="ds-news-tag tag-data">Data Update</span>
+          </a>
+
+          <a href="dnd-procurement.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-07-02</span>
+            <span class="ds-news-headline">DND procurement audit: $88B allocated, major platforms still undelivered</span>
+            <span class="ds-news-tag tag-policy">Policy Analysis</span>
+          </a>
+
+          <a href="cra-enforcement.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-06-28</span>
+            <span class="ds-news-headline">CRA offshore gap widens — $30B in identified tax remains uncollected</span>
+            <span class="ds-news-tag tag-investigation">Investigation</span>
+          </a>
+
+          <a href="housing-crisis.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-06-24</span>
+            <span class="ds-news-headline">Housing affordability index hits 51.2% — CMHC confirms structural crisis</span>
+            <span class="ds-news-tag tag-data">Data Update</span>
+          </a>
+
+          <a href="foreign-interference.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-06-19</span>
+            <span class="ds-news-headline">Foreign interference registry: one year in, zero enforcement actions taken</span>
+            <span class="ds-news-tag tag-policy">Policy Analysis</span>
+          </a>
+
+          <a href="judicial-appointments.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-06-14</span>
+            <span class="ds-news-headline">42% of federal judges appointed from party donor lists — updated dataset</span>
+            <span class="ds-news-tag tag-legal">Legal</span>
+          </a>
+
+          <a href="healthcare-crisis.html" class="ds-news-item" data-anim="news">
+            <span class="ds-news-date">2025-06-10</span>
+            <span class="ds-news-headline">6.5 million Canadians now without a family doctor — provincial breakdown</span>
+            <span class="ds-news-tag tag-breaking">Breaking</span>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="ds-footer">
+    <div class="ds-footer-inner">
+      <div class="ds-footer-grid">
+        <div>
+          <h4>Sources &amp; Methodology</h4>
+          <p>All data on this dashboard is drawn from official Canadian government publications, including: Health Canada Annual Reports on MAID, Public Health Agency of Canada Opioid Surveillance, CMHC Housing Market Assessments, Department of Finance Fiscal Monitor, Auditor General Reports, Parliamentary Committee testimony, and the federal Lobbyists Registry. Our scoring methodology is documented in the <a href="methodology-transparency.html">Methodology &amp; Transparency</a> report.</p>
+        </div>
+        <div>
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="evidence.html">Evidence Archive</a></li>
+            <li><a href="accountability-scorecard.html">Full Scorecard</a></li>
+            <li><a href="methodology-transparency.html">Methodology</a></li>
+            <li><a href="take-action.html">Take Action</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="ds-footer-stamp" id="footer-stamp">
+        TENET5 Data Science Dashboard · Data as of July 2025 · No tracking · No cookies · Open source accountability
+      </div>
     </div>
-    
-  </div>
+  </footer>
+
+
+  <!-- ═══ ANIME.JS ═══ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════════════════
+       DASHBOARD ENGINE — Counters, Charts, Scroll Animations
+       All anime.js v3.2.1 · IntersectionObserver for lazy activation
+       ═══════════════════════════════════════════════════════════════════ */
+
+    (function () {
+      'use strict';
+
+      // ── Date stamps ─────────────────────────────────────────────────
+      const now = new Date();
+      const dateOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateStr = now.toLocaleDateString('en-CA', dateOpts);
+      const timeStr = now.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+      const heroDate = document.getElementById('hero-date');
+      const heroUpdated = document.getElementById('hero-updated');
+      if (heroDate) heroDate.textContent = dateStr;
+      if (heroUpdated) heroUpdated.textContent = 'Dashboard loaded: ' + timeStr + ' ET';
+
+      // ── IntersectionObserver factory ────────────────────────────────
+      function onIntersect(selector, callback, opts) {
+        const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
+        if (!el) return;
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              callback(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        }, Object.assign({ threshold: 0.15 }, opts || {}));
+        observer.observe(el);
+      }
+
+      function onIntersectAll(selector, callback, opts) {
+        var els = document.querySelectorAll(selector);
+        els.forEach(function (el) { onIntersect(el, callback, opts); });
+      }
+
+      // ── Counter Animations ──────────────────────────────────────────
+      onIntersect('#metrics-grid', function () {
+        var counters = document.querySelectorAll('.counter');
+        counters.forEach(function (el, i) {
+          var target = parseFloat(el.getAttribute('data-target'));
+          var decimals = parseInt(el.getAttribute('data-decimals') || '0');
+          var suffix = el.getAttribute('data-suffix') || '';
+
+          var obj = { val: 0 };
+          anime({
+            targets: obj,
+            val: target,
+            duration: 1800,
+            delay: i * 200,
+            easing: 'easeOutExpo',
+            round: decimals === 0 ? 1 : false,
+            update: function () {
+              var v = decimals > 0 ? obj.val.toFixed(decimals) : Math.floor(obj.val).toLocaleString('en-CA');
+              el.textContent = v + suffix;
+            }
+          });
+        });
+      });
+
+      // ── Card fade-in ────────────────────────────────────────────────
+      onIntersectAll('[data-anim="card"]', function (el) {
+        anime({
+          targets: el,
+          opacity: [0, 1],
+          translateY: [20, 0],
+          duration: 700,
+          easing: 'easeOutCubic',
+          delay: anime.stagger ? 0 : 0
+        });
+      });
+
+      // Stagger cards per section
+      function staggerCards(containerId) {
+        onIntersect('#' + containerId, function () {
+          var cards = document.querySelectorAll('#' + containerId + ' [data-anim="card"]');
+          anime({
+            targets: cards,
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 600,
+            delay: anime.stagger(120),
+            easing: 'easeOutCubic'
+          });
+        });
+      }
+      staggerCards('metrics-grid');
+      staggerCards('network-grid');
+
+      // ── Table row stagger ───────────────────────────────────────────
+      function staggerTable(tableId) {
+        onIntersect('#' + tableId, function () {
+          var rows = document.querySelectorAll('#' + tableId + ' tbody tr[data-anim="row"]');
+          anime({
+            targets: rows,
+            opacity: [0, 1],
+            translateX: [-12, 0],
+            duration: 500,
+            delay: anime.stagger(80),
+            easing: 'easeOutCubic'
+          });
+        });
+      }
+      staggerTable('scorecard-table');
+      staggerTable('trajectory-table');
+
+      // ── Confidence bars ─────────────────────────────────────────────
+      onIntersect('#trajectory-table', function () {
+        var fills = document.querySelectorAll('.ds-confidence-fill');
+        fills.forEach(function (el, i) {
+          var w = el.getAttribute('data-width') || '50';
+          setTimeout(function () {
+            el.style.width = w + '%';
+          }, 200 + i * 100);
+        });
+      });
+
+      // ── News items stagger ──────────────────────────────────────────
+      onIntersect('#news-list', function () {
+        var items = document.querySelectorAll('[data-anim="news"]');
+        anime({
+          targets: items,
+          opacity: [0, 1],
+          translateY: [10, 0],
+          duration: 500,
+          delay: anime.stagger(70),
+          easing: 'easeOutCubic'
+        });
+      });
+
+
+      // ═══════════════════════════════════════════════════════════════
+      // SVG BAR CHART — MAID Deaths by Year
+      // ═══════════════════════════════════════════════════════════════
+
+      var chartData = [
+        { year: '2016', value: 1018 },
+        { year: '2017', value: 2838 },
+        { year: '2018', value: 4480 },
+        { year: '2019', value: 5631 },
+        { year: '2020', value: 7595 },
+        { year: '2021', value: 10064 },
+        { year: '2022', value: 13241 },
+        { year: '2023', value: 15343 },
+        { year: '2024', value: 16265 }
+      ];
+
+      var maxVal = Math.max.apply(null, chartData.map(function (d) { return d.value; }));
+
+      var chartContainer = document.getElementById('maid-chart');
+      if (chartContainer) {
+        var barH = 32;
+        var gap = 8;
+        var labelW = 44;
+        var valW = 70;
+        var totalH = chartData.length * (barH + gap) - gap + 4;
+
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 800 ' + totalH);
+        svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
+        svg.style.width = '100%';
+        svg.style.height = 'auto';
+
+        chartData.forEach(function (d, i) {
+          var y = i * (barH + gap);
+          var maxBarW = 800 - labelW - valW - 16;
+          var barW = (d.value / maxVal) * maxBarW;
+          var isProjected = d.year === '2024';
+
+          // Year label
+          var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', '0');
+          label.setAttribute('y', y + barH / 2 + 5);
+          label.setAttribute('fill', '#6a7f8c');
+          label.setAttribute('font-family', '"IBM Plex Mono", monospace');
+          label.setAttribute('font-size', '12');
+          label.setAttribute('font-weight', '500');
+          label.textContent = d.year;
+          svg.appendChild(label);
+
+          // Background track
+          var track = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          track.setAttribute('x', labelW);
+          track.setAttribute('y', y);
+          track.setAttribute('width', maxBarW);
+          track.setAttribute('height', barH);
+          track.setAttribute('rx', '3');
+          track.setAttribute('fill', 'rgba(168, 188, 200, 0.04)');
+          svg.appendChild(track);
+
+          // Data bar
+          var bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bar.setAttribute('x', labelW);
+          bar.setAttribute('y', y);
+          bar.setAttribute('width', '0');
+          bar.setAttribute('height', barH);
+          bar.setAttribute('rx', '3');
+          bar.setAttribute('fill', isProjected ? 'rgba(122, 155, 176, 0.45)' : 'rgba(122, 155, 176, 0.65)');
+          bar.classList.add('chart-bar');
+          bar.setAttribute('data-target-width', barW);
+          if (isProjected) {
+            bar.setAttribute('stroke', 'rgba(122, 155, 176, 0.3)');
+            bar.setAttribute('stroke-width', '1');
+            bar.setAttribute('stroke-dasharray', '4 3');
+          }
+          svg.appendChild(bar);
+
+          // Value label
+          var valLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          valLabel.setAttribute('x', labelW + maxBarW + 8);
+          valLabel.setAttribute('y', y + barH / 2 + 5);
+          valLabel.setAttribute('fill', isProjected ? '#6a7f8c' : '#a8bcc8');
+          valLabel.setAttribute('font-family', '"IBM Plex Mono", monospace');
+          valLabel.setAttribute('font-size', '11');
+          valLabel.setAttribute('font-weight', '500');
+          valLabel.textContent = d.value.toLocaleString('en-CA') + (isProjected ? '*' : '');
+          valLabel.style.opacity = '0';
+          valLabel.classList.add('chart-val');
+          svg.appendChild(valLabel);
+        });
+
+        chartContainer.appendChild(svg);
+
+        // Animate bars on scroll
+        onIntersect('#maid-chart', function () {
+          var bars = document.querySelectorAll('.chart-bar');
+          bars.forEach(function (bar, i) {
+            var tw = parseFloat(bar.getAttribute('data-target-width'));
+            anime({
+              targets: bar,
+              width: [0, tw],
+              duration: 900,
+              delay: i * 100,
+              easing: 'easeOutCubic'
+            });
+          });
+
+          var vals = document.querySelectorAll('.chart-val');
+          vals.forEach(function (v, i) {
+            anime({
+              targets: v,
+              opacity: [0, 1],
+              duration: 400,
+              delay: 400 + i * 100,
+              easing: 'easeOutCubic'
+            });
+          });
+        });
+      }
+
+      // ── Initialize confidence bar widths at 0 ─────────────────────
+      document.querySelectorAll('.ds-confidence-fill').forEach(function (el) {
+        el.style.width = '0%';
+      });
+
+    })();
+  </script>
 
 </body>
 </html>

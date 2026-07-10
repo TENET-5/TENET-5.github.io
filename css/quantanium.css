@@ -1,0 +1,258 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   QUANTANIUM.CSS — v1.5 editorial/data layer (2026-07-10)
+   ═══════════════════════════════════════════════════════════════════════
+   The award-calibre craft layer from the QUANTANIUM 1.5 design contract
+   (docs/QUANTANIUM-1.5.md). Loads after tokens.css + standard.css.
+   Sections: type scale · eyebrows · article grid · reveals · plates ·
+   redaction · links · grain · duotone · stat lede · evidence tables ·
+   bar rows · chart tokens · progress rail.
+   Rules: ice-lake palette only; colour = data semantics; zero animation
+   under prefers-reduced-motion; content readable with JS off.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── MOTION + TYPE + CHART TOKENS (1.5 additions) ─────────────────────── */
+:root {
+  --ease-out-expo: cubic-bezier(.16, 1, .3, 1);
+  --ease-out-quart: cubic-bezier(.25, 1, .5, 1);
+  --ease-inout: cubic-bezier(.65, 0, .35, 1);
+  --dur-1: 120ms; --dur-2: 240ms; --dur-3: 480ms; --dur-4: 800ms;
+
+  /* Utopia two-slope fluid scale (1.2 @320 → 1.333 @1440) */
+  --step--1: clamp(.8333rem, .81rem + .12vw, .9rem);
+  --step-0: clamp(1rem, .96rem + .18vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.11rem + .43vw, 1.5rem);
+  --step-2: clamp(1.44rem, 1.28rem + .8vw, 2rem);
+  --step-3: clamp(1.7281rem, 1.46rem + 1.33vw, 2.6663rem);
+  --step-4: clamp(2.0738rem, 1.65rem + 2.11vw, 3.5525rem);
+  --step-5: clamp(2.4881rem, 1.85rem + 3.2vw, 4.7331rem);
+  --display: clamp(3rem, 1.86rem + 5.71vw, 7rem);
+  --display-stat: clamp(4rem, 2rem + 10vw, 11rem);
+
+  /* chart tokens — every chart obeys these */
+  --ch-ground: #05080d;
+  --ch-grid: rgba(238, 246, 250, .08);
+  --ch-domain: rgba(238, 246, 250, .22);
+  --ch-tick: rgba(238, 246, 250, .55);
+  --ch-label: #eef6fa;
+  --ch-context: rgba(238, 246, 250, .14);
+  --ch-s1: hsl(205 52% 68%);   /* glacial blue — primary series */
+  --ch-s2: hsl(28 60% 66%);    /* amber — comparison            */
+  --ch-s3: hsl(350 48% 66%);   /* muted red — deaths/deficit    */
+  --ch-s4: hsl(150 38% 62%);   /* sage — surplus/ok             */
+  --ch-up: var(--ch-s4); --ch-down: var(--ch-s3);
+}
+html { font-synthesis: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ── DISPLAY TYPE ─────────────────────────────────────────────────────── */
+.display {
+  font-family: var(--slate-font-display, "Atkinson Hyperlegible", sans-serif);
+  font-size: var(--display); line-height: .98; letter-spacing: -.02em;
+  font-weight: 700; text-wrap: balance; color: var(--slate-ink-strong, #fff);
+}
+h1 { font-size: var(--step-5); }
+h2 { font-size: var(--step-3); }
+h3 { font-size: var(--step-1); }
+h1, h2, h3 { text-wrap: balance; }
+
+/* ── MONO EYEBROW / INDEX LAYER — auto-numbered section metadata ──────── */
+body { counter-reset: sec fig; }
+section.chapter, .content > section, main > section { counter-increment: sec; }
+.eyebrow, .q-eyebrow {
+  display: flex; align-items: center; gap: .75rem;
+  font: 500 .75rem/1 "IBM Plex Mono", monospace;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--slate-ink-dim, #a8bcc8);
+}
+.q-eyebrow::before {
+  content: counter(sec, decimal-leading-zero) " /";
+  color: var(--slate-ink-muted, #6a7f8c);
+}
+.eyebrow::after, .q-eyebrow::after {
+  content: ""; flex: 1; height: 1px; background: rgba(238, 246, 250, .14);
+}
+
+/* ── NAMED-LINES EDITORIAL GRID — opt-in via .article ─────────────────── */
+.article {
+  display: grid; row-gap: var(--flow, 1.5rem);
+  grid-template-columns:
+    [full-start] minmax(clamp(1.25rem, 5vw, 6rem), 1fr)
+    [wide-start] minmax(0, 1fr)
+    [content-start] min(66ch, 100% - 2*clamp(1.25rem, 5vw, 6rem)) [content-end]
+    minmax(0, 2fr) [wide-end]
+    minmax(clamp(1.25rem, 5vw, 6rem), 1fr) [full-end];
+}
+.article > * { grid-column: content; }
+.article > .breakout { grid-column: wide; }
+.article > .full-bleed { grid-column: full; }
+.chapter { padding-block: clamp(5rem, 4rem + 8vw, 11rem); }
+
+/* ── A3 · MASKED LINE-REVEAL (scroll) — js/quantanium.js adds .is-inview ─ */
+.reveal { overflow: clip; }
+.reveal .line {
+  display: block; transform: translateY(110%);
+  transition: transform var(--dur-4) var(--ease-out-expo);
+}
+.reveal.is-inview .line { transform: none; }
+.reveal .line:nth-child(2) { transition-delay: 80ms; }
+.reveal .line:nth-child(3) { transition-delay: 160ms; }
+/* generic fade-rise for cards/figures marked .q-rise */
+.q-rise { opacity: 0; transform: translateY(14px);
+  transition: opacity var(--dur-4) var(--ease-out-expo), transform var(--dur-4) var(--ease-out-expo); }
+.q-rise.is-inview { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal .line, .q-rise { transform: none !important; opacity: 1 !important; }
+}
+
+/* ── ARCHIVE PLATE — every chart/scan/table framed as a numbered plate ── */
+.plate {
+  counter-increment: fig; position: relative;
+  border: 1px solid rgba(238, 246, 250, .14); padding: 1rem;
+  background: rgba(200, 230, 245, .02);
+}
+.plate::before, .plate::after {
+  content: ""; position: absolute; width: 9px; height: 9px;
+  border: 0 solid rgba(238, 246, 250, .45);
+}
+.plate::before { top: -5px; left: -5px; border-width: 1px 0 0 1px; }
+.plate::after { bottom: -5px; right: -5px; border-width: 0 1px 1px 0; }
+.plate figcaption {
+  margin-top: .75rem; font: 500 .6875rem/1.5 "IBM Plex Mono", monospace;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--slate-ink-dim, #a8bcc8);
+}
+.plate figcaption::before { content: "FIG. " counter(fig, decimal-leading-zero) " \2014  "; }
+
+/* ── REDACTION-REVEAL — 1-2 per page max; hover/focus/scroll reveals ──── */
+.redact {
+  background: var(--slate-accent, #eef6fa); color: transparent;
+  box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  padding-inline: .15em;
+  transition: background-color var(--dur-3) var(--ease-out-quart), color var(--dur-3) var(--ease-out-quart);
+}
+.redact:hover, .redact:focus-visible, .redact.is-revealed {
+  background: transparent; color: inherit;
+}
+
+/* ── DIRECTIONAL UNDERLINE-DRAW LINKS — opt-in .link / nav usage ──────── */
+.q-link {
+  text-decoration: none; color: inherit;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px; background-position: 100% 100%; background-repeat: no-repeat;
+  transition: background-size .35s var(--ease-out-quart);
+}
+.q-link:hover, .q-link:focus-visible { background-size: 100% 1px; background-position: 0% 100%; }
+.q-link:focus-visible { outline: 1px solid var(--slate-accent, #eef6fa); outline-offset: 3px; }
+
+/* ── FILM GRAIN — ONE static fixed layer, never animated ──────────────── */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none;
+  opacity: .04; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── ICE DUOTONE IMAGERY — no image imports foreign colour ────────────── */
+.fig-duotone { position: relative; background: #0d1826; overflow: clip; border-radius: 10px; }
+.fig-duotone img {
+  display: block; width: 100%;
+  filter: grayscale(1) contrast(1.08) brightness(.92);
+  mix-blend-mode: luminosity;
+}
+.fig-duotone::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(93, 138, 168, .16), rgba(5, 8, 13, .5));
+  mix-blend-mode: multiply;
+}
+
+/* ── STAT LEDE — one number, huge; one per chapter max ────────────────── */
+figure.stat { margin: clamp(2rem, 5vw, 4rem) auto; text-align: center; }
+.stat__claim {
+  font-size: 1rem; letter-spacing: .08em; text-transform: uppercase;
+  color: rgba(238, 246, 250, .62); margin-bottom: .5rem;
+}
+.stat__num {
+  font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums;
+  font-size: var(--display-stat); line-height: 1;
+  color: var(--slate-accent, #eef6fa); letter-spacing: -.02em; margin: 0;
+}
+.stat__src {
+  font-family: "IBM Plex Mono", monospace; font-size: .72rem;
+  color: rgba(238, 246, 250, .45); margin-top: .6rem;
+}
+
+/* ── EVIDENCE TABLE — sticky header, tabular numerals, inline bars ────── */
+.tbl-wrap { max-height: 70vh; overflow: auto; border: 1px solid rgba(238, 246, 250, .08); border-radius: 8px; }
+table.evidence { border-collapse: collapse; width: 100%; font-size: .875rem; }
+.evidence th {
+  position: sticky; top: 0; z-index: 2; background: #05080d;
+  text-align: left; font: 600 .72rem/1 "IBM Plex Mono", monospace;
+  letter-spacing: .08em; text-transform: uppercase; color: rgba(238, 246, 250, .6);
+  padding: .65rem .75rem; box-shadow: 0 1px 0 rgba(238, 246, 250, .14);
+}
+.evidence td { padding: .55rem .75rem; border-top: 1px solid rgba(238, 246, 250, .06); color: #eef6fa; }
+.evidence td.num { text-align: right; font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+.evidence td.bar { background: linear-gradient(to right, rgba(122, 168, 204, .22) calc(var(--v) * 100%), transparent 0); }
+.evidence .src-chip {
+  opacity: 0; transition: opacity .15s;
+  font: .68rem "IBM Plex Mono", monospace; color: rgba(238, 246, 250, .55);
+  border: 1px solid rgba(238, 246, 250, .18); border-radius: 999px; padding: .1rem .5rem;
+}
+.evidence tr:hover .src-chip, .evidence tr:focus-within .src-chip { opacity: 1; }
+
+/* ── CSS BAR ROWS — chart-less magnitude comparison, zero JS ──────────── */
+.bars { display: grid; gap: .45rem; padding: 0; margin: 1.2rem 0; }
+.bars li { display: grid; grid-template-columns: 12ch 1fr 8ch; align-items: center; gap: .75rem; list-style: none; }
+.bars__lbl { font-size: .8rem; color: rgba(238, 246, 250, .75); }
+.bars__bar { height: .9rem; border-radius: 2px; background: var(--ch-s1); transform-origin: left; transform: scaleX(var(--v)); opacity: .85; }
+.bars__val { font: 400 .8rem "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; text-align: right; color: #eef6fa; }
+@media (prefers-reduced-motion: no-preference) {
+  .bars__bar { animation: q-grow .6s var(--ease-out-expo) both; }
+  @keyframes q-grow { from { transform: scaleX(0); } to { transform: scaleX(var(--v)); } }
+}
+
+/* ── SPARKLINES ───────────────────────────────────────────────────────── */
+.spark { width: 9ch; height: 1.1em; color: rgba(238, 246, 250, .7); vertical-align: -0.15em; }
+
+/* ── CHART BASE — generated SVGs obey the tokens ──────────────────────── */
+.chart text { font: .72rem "IBM Plex Mono", monospace; fill: var(--ch-tick); }
+.chart .annot text { font: 600 .8rem "Atkinson Hyperlegible", sans-serif; fill: var(--ch-label); }
+.chart .annot line { stroke: var(--ch-tick); stroke-dasharray: 2 3; }
+.chart .grid line { stroke: var(--ch-grid); shape-rendering: crispEdges; }
+.chart .domain { stroke: var(--ch-domain); }
+/* solid = established fact · dashed = projection/allegation (house rule) */
+.chart .projection { stroke-dasharray: 5 4; }
+
+/* ── READING PROGRESS RAIL (CSS scroll-driven; graceful without) ──────── */
+@supports (animation-timeline: scroll()) {
+  .q-progress {
+    position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 900;
+    background: var(--slate-accent, #eef6fa); transform-origin: left;
+    transform: scaleX(0); animation: q-progress linear both;
+    animation-timeline: scroll(root);
+  }
+  @keyframes q-progress { to { transform: scaleX(1); } }
+}
+
+/* ── SCROLLY SCENES (canonical engine hooks; js adds .is-active) ──────── */
+.scrolly { display: grid; grid-template-columns: minmax(28ch, 38ch) 1fr; gap: 3rem; }
+.scrolly__graphic {
+  position: sticky; top: var(--header-h, 0px);
+  height: calc(100vh - var(--header-h, 0px));
+  grid-column: 2; grid-row: 1; display: flex; align-items: center;
+}
+.scrolly__steps { grid-column: 1; grid-row: 1; }
+.scrolly__steps section { min-height: 85vh; opacity: .35; transition: opacity .4s ease-out; }
+.scrolly__steps section.is-active { opacity: 1; }
+.scrolly__steps section:last-child { margin-bottom: 40vh; }
+.annot { opacity: 0; transform: translateY(4px); transition: opacity .35s ease-out, transform .35s ease-out; }
+[data-state="1"] .annot[data-reveal="1"],
+[data-state="2"] .annot[data-reveal="1"],
+[data-state="2"] .annot[data-reveal="2"],
+[data-state="3"] .annot { opacity: 1; transform: none; }
+@media (max-width: 700px) {
+  .scrolly { grid-template-columns: 1fr; }
+  .scrolly__graphic { position: relative; height: auto; grid-column: 1; }
+  .scrolly__steps { grid-column: 1; grid-row: auto; }
+  .scrolly__steps section { min-height: 0; opacity: 1; }
+}

@@ -112,14 +112,14 @@ function buildMetricCards(metrics, data) {
         tone: "high",
       },
       {
-        value: m.theme_contract ?? m.feeds_polled ?? 0,
-        label: "Theme Contract",
+        value: m.documentary_chapters ?? m.theme_contract ?? 0,
+        label: m.documentary_chapters != null ? "Doc Chapters" : "Theme Contract",
         tone: "verified",
       },
       {
-        value: m.headlines_reviewed ?? m.unique_stories ?? 0,
-        label: "Feed Headlines",
-        tone: null,
+        value: m.cinematic_surfaces ?? m.headlines_reviewed ?? m.unique_stories ?? 0,
+        label: m.cinematic_surfaces != null ? "Cinematic Surfaces" : "Feed Headlines",
+        tone: m.cinematic_surfaces != null ? "verified" : null,
       },
     ];
   }

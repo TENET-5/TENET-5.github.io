@@ -15,8 +15,9 @@
   if (window.__TENET5_NAV_LOADED) return;
   window.__TENET5_NAV_LOADED = true;
 
+  /* QUANTANIUM ice — no neon rainbow. A→B primary: Daily Brief + Paths. */
   var headerHTML =
-    '<nav class="site-nav" id="site-nav">' +
+    '<nav class="site-nav" id="site-nav" data-quantanium="1">' +
       '<div class="nav-ensign-stripe"></div>' +
       '<div class="nav-identity">' +
         '<a href="/index.html" class="brand">' +
@@ -25,40 +26,38 @@
             '<span class="brand-subtitle">Powered by LIRIL AI</span>' +
           '</div>' +
         '</a>' +
-        '<div class="nav-status-stack" aria-label="Platform status">' +
-          '<span class="nav-status-pill" style="color:#22d3ee;border-color:rgba(34,211,238,0.4);font-weight:700;">[AI]</span>' +
-          '<span class="nav-status-pill nav-status-live">Live OSINT</span>' +
-          '<span class="nav-status-pill">LIRIL narration</span>' +
+        '<div class="nav-status-stack" aria-label="Record status">' +
+          '<span class="nav-status-pill">Primary sources</span>' +
+          '<span class="nav-status-pill nav-status-live">OSINT</span>' +
+          '<span class="nav-status-pill">LIRIL guide</span>' +
         '</div>' +
       '</div>' +
       '<div class="nav-bar">' +
         '<div class="nav-content">' +
           '<div class="nav-group nav-primary">' +
             '<a href="/index.html" id="nav-home">Home</a>' +
-            '<a href="/search.html" id="nav-search">Search</a>' +
-            '<a href="/records.html" id="nav-records">Records</a>' +
+            '<a href="/daily-briefing.html" id="nav-daily">Daily Brief</a>' +
+            '<a href="/experience.html" id="nav-paths">A to B</a>' +
+            '<a href="/osint-dashboard.html" id="nav-osint">OSINT</a>' +
             '<a href="/findings.html" id="nav-findings">Findings</a>' +
           '</div>' +
           '<div class="nav-group">' +
             '<a href="/maid-accountability.html" id="nav-maid">MAID</a>' +
-            '<a href="/vaccine-injury-accountability.html" id="nav-vaccine" style="color:#ef4444;">Vaccine Injury</a>' +
-            '<a href="/geneva-vs-jails.html" id="nav-geneva" style="color:#c9a84c;">Geneva vs Jails</a>' +
-            '<a href="/genocide-evidence.html" id="nav-genocide" style="color:#ef4444;">Genocide</a>' +
+            '<a href="/genocide-evidence.html" id="nav-genocide">Article II</a>' +
+            '<a href="/griffon-glle-procurement.html" id="nav-glle">Griffon</a>' +
+            '<a href="/dnd-procurement.html" id="nav-dnd">Procurement</a>' +
             '<a href="/disability-genocide.html" id="nav-disability">Disability</a>' +
           '</div>' +
           '<div class="nav-group">' +
             '<a href="/foreign-interference.html" id="nav-foreign">Foreign</a>' +
-            '<a href="/follow-the-money.html" id="nav-money" style="color:#facc15;">Follow $</a>' +
-            '<a href="/cfnis.html" id="nav-cfnis">CFNIS</a>' +
-            '<a href="/corruption.html" id="nav-corruption" style="color:#c9a84c;">Corruption</a>' +
+            '<a href="/follow-the-money.html" id="nav-money">Follow $</a>' +
+            '<a href="/corruption.html" id="nav-corruption">Corruption</a>' +
+            '<a href="/evidence-index.html" id="nav-evidence">Evidence</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +
             '<a href="/accountability.html" id="nav-504">504</a>' +
-            '<a href="/mp-accountability-grid.html" id="nav-mpgrid" style="color:#a78bfa;">MP Grid</a>' +
-            '<a href="/state-of-investigation.html" id="nav-soi" style="color:#fbbf24;">State</a>' +
-            '<a href="/nepotism-detector.html" id="nav-nepotism" style="color:#ef4444;">Nepotism</a>' +
-            '<a href="/political-business-influence.html" id="nav-influence" style="color:#f97316;">Influence</a>' +
-            '<a href="/sitemap.html" id="nav-sitemap" style="color:#22d3ee;">All Pages</a>' +
+            '<a href="/mp-accountability-grid.html" id="nav-mpgrid">MP Grid</a>' +
+            '<a href="/sitemap.html" id="nav-sitemap">All Pages</a>' +
           '</div>' +
           '<div class="nav-auth" id="nav-auth"></div>' +
         '</div>' +

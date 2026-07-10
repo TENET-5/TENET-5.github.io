@@ -17,6 +17,17 @@
     },
     columns: [
       {
+        heading: 'Start here',
+        links: [
+          { label: 'Daily Briefing', href: 'daily-briefing.html' },
+          { label: 'A to B Paths', href: 'experience.html' },
+          { label: 'Reading Order', href: 'reading-order.html' },
+          { label: 'OSINT Dashboard', href: 'osint-dashboard.html' },
+          { label: 'Griffon GLLE file', href: 'griffon-glle-procurement.html' },
+          { label: 'Evidence Index', href: 'evidence-index.html' },
+        ]
+      },
+      {
         heading: 'Investigation',
         links: [
           { label: 'The 504 Database', href: 'accountability.html' },
@@ -24,19 +35,8 @@
           { label: 'Cross-Reference Findings', href: 'findings.html' },
           { label: 'Arms Pipeline', href: 'arms-pipeline.html' },
           { label: 'Evidence Archive', href: 'evidence.html' },
-          { label: 'Evidence Index', href: 'evidence-index.html' },
           { label: 'Criminal Code Analysis', href: 'criminal-code-analysis.html' },
-        ]
-      },
-      {
-        heading: 'OSINT Tools',
-        links: [
-          { label: 'OSINT Dashboard', href: 'osint-dashboard.html' },
-          { label: 'Network Analysis', href: 'network-analysis.html' },
-          { label: 'Dossier Viewer', href: 'dossier-viewer.html' },
           { label: 'MP Scorecard', href: 'mp-scorecard.html' },
-          { label: 'Voting Records', href: 'voting-records.html' },
-          { label: 'Charity Pipeline', href: 'charity-pipeline.html' },
         ]
       },
       {
