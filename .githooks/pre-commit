@@ -1,0 +1,45 @@
+#!/bin/sh
+# TENET5 pre-commit — protect press homepage; QUANTANIUM interiors
+set -e
+ROOT="$(git rev-parse --show-toplevel)"
+
+PY=""
+for candidate in \
+  "C:/Users/Xbxac/AppData/Roaming/uv/python/cpython-3.14.3-windows-x86_64-none/python.exe" \
+  "E:/S.L.A.T.E/.venv/Scripts/python.exe"
+do
+  if [ -f "$candidate" ]; then PY="$candidate"; break; fi
+done
+if [ -z "$PY" ]; then
+  command -v python >/dev/null 2>&1 && PY=python || { echo "no python"; exit 1; }
+fi
+
+# Hard fail: never commit product-only strip of press homepage
+if git diff --cached --name-only | grep -E '^index\.html$' >/dev/null 2>&1; then
+  if ! grep -q 'backwards' "$ROOT/index.html" 2>/dev/null; then
+    echo "[pre-commit] BLOCKED: index.html lost press 'read backwards' cover"
+    echo "  Restore via: python tools/press.py"
+    exit 1
+  fi
+  if ! grep -q 'Fraunces' "$ROOT/index.html" 2>/dev/null; then
+    echo "[pre-commit] BLOCKED: index.html lost Fraunces (screenshot theme)"
+    exit 1
+  fi
+fi
+
+MIGRATION="$ROOT/tools/slate_css_migration.py"
+if [ -f "$MIGRATION" ]; then
+  echo "[pre-commit] CSS migration (press protected)..."
+  "$PY" "$MIGRATION" || exit 1
+  changed=$(git diff --name-only -- '*.html' 2>/dev/null || true)
+  if [ -n "$changed" ]; then
+    echo "$changed" | xargs git add -- 2>/dev/null || true
+  fi
+fi
+
+GUARD="$ROOT/tools/brand_guard.py"
+if [ -f "$GUARD" ]; then
+  echo "[pre-commit] brand guard..."
+  "$PY" "$GUARD" || exit 1
+fi
+exit 0

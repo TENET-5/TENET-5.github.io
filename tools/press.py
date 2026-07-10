@@ -1,19 +1,79 @@
-<!doctype html>
-<html lang="en-CA" data-press="1" data-quantanium="press">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Network | TENET5</title>
-<meta property="og:site_name" content="TENET5">
-<meta property="og:title" content="The Network | TENET5">
-<meta property="og:description" content="Documented connections across the public record — every edge cites its file. Centrality is not guilt; open the sources.">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-<meta name="theme-color" content="#050708">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
+#!/usr/bin/env python3
+"""TENET5 PRESS — the site's content system. WordPress for the local AI.
+
+The AI (or a human) manages CONTENT ONLY — small JSON files in content/.
+This builder renders them through ONE locked design system (glass /
+Canada / linear-backwards / LIRIL-guided). Markup is never hand-edited,
+so no page can go off-brand or leak internals.
+
+    Publish flow:
+      1. drop/edit JSON in content/posts/   (schema: tools/PRESS.md)
+      2. python tools/press.py
+      3. git add index.html evidence-index.html story content && commit
+
+Owns and overwrites: index.html, evidence-index.html, story/*.html.
+Touches nothing else. Brand guard (pre-commit) remains the safety net.
+"""
+from __future__ import annotations
+
+import html
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+CONTENT = ROOT / "content"
+POSTS = CONTENT / "posts"
+STORY_DIR = ROOT / "story"
+
+# ── time buckets: the linear-backwards spine ─────────────────────────────
+BUCKETS = [
+    ("now",   2 * 24 * 3600,        "I",   "This <em>hour.</em>",
+     "The wire · updated continuously"),
+    ("week",  14 * 24 * 3600,       "II",  "Seven days <em>back.</em>",
+     "The week's investigations"),
+    ("month", 62 * 24 * 3600,       "III", "The claims<br>v. the <em>record.</em>",
+     "Claim check · verdicts cite documents, never opinions"),
+    ("year",  366 * 24 * 3600,      "IV",  "The year's<br><em>case files.</em>",
+     "Published dossiers"),
+]
+
+
+def esc(s: str) -> str:
+    return html.escape(str(s), quote=True)
+
+
+def load_json(p: Path):
+    with open(p, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def post_age_s(post: dict, now: datetime) -> float:
+    try:
+        d = datetime.fromisoformat(post["date"])
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=timezone.utc)
+        return (now - d).total_seconds()
+    except Exception:
+        return float("inf")
+
+
+def sources_line(post: dict) -> str:
+    out = []
+    for s in post.get("sources", []):
+        lab = esc(s.get("label", "source"))
+        url = s.get("url", "")
+        out.append(f'<a href="{esc(url)}" rel="noopener">{lab}</a>' if url else lab)
+    return " · ".join(out)
+
+
+# ══ SHARED CHROME ══════════════════════════════════════════════════════════
+
+def css() -> str:
+    # LOCKED visual: Daniel screenshot 2026-07-10 042513 — Fraunces + ice + red rails
+    # Do NOT flatten to product-only Atkinson shell.
+    return """
   :root{
     --void:#050708;--ink:#0b0e10;
     --ivory:#ece7dc;--ivory-dim:#a89f90;--ivory-faint:#6b6459;
@@ -177,7 +237,7 @@
     padding:6px 12px 0 0;color:var(--ice)}
   .feature .body-t{margin-top:20px;font-size:15px;color:var(--ivory-dim)}
   .pull{padding:30px 34px;margin-bottom:18px;position:relative}
-  .pull::before{content:"\201C";position:absolute;top:-26px;left:6px;font-size:130px;line-height:1;
+  .pull::before{content:"\\201C";position:absolute;top:-26px;left:6px;font-size:130px;line-height:1;
     color:rgba(154,219,232,.10);font-style:italic;pointer-events:none}
   .pull p{font-style:italic;font-weight:300;font-size:clamp(20px,2.3vw,27px);line-height:1.32;position:relative}
   .pull p b{color:var(--ice);font-weight:400}
@@ -411,10 +471,558 @@
   footer .fm sup{font-size:.5em;color:var(--ice);position:relative;top:-.65em;vertical-align:baseline}
   footer .origin{margin-top:5vh;border-top:1px solid var(--hair);padding-top:22px;
     font-family:var(--mono);font-size:10px;letter-spacing:.05em;line-height:1.9}
-</style>
+"""
+
+
+def head(title: str, desc: str) -> str:
+    # Screenshot-locked QUANTANIUM press surface (Fraunces + ice + red rails)
+    return f"""<!doctype html>
+<html lang="en-CA" data-press="1" data-quantanium="press">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{esc(title)} | TENET5</title>
+<meta property="og:site_name" content="TENET5">
+<meta property="og:title" content="{esc(title)} | TENET5">
+<meta property="og:description" content="{esc(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+<meta name="theme-color" content="#050708">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>{css()}</style>
 </head>
 <body>
+"""
 
+
+def footer_html(site: dict) -> str:
+    links = "".join(
+        f'<a href="{esc(u)}">{esc(t)}</a>'
+        for t, u in [("About & Method", "about.html"), ("Findings", "accountability.html"),
+                     ("Daily Briefing", "daily-briefing.html"), ("The Film", "liril-film.html"),
+                     ("Evidence", "evidence-index.html")]
+    )
+    return f"""
+<footer>
+  <div class="rowf">
+    <span class="fm">TENET<sup>5</sup></span>
+    <span>{links}</span>
+  </div>
+  <div class="origin">{esc(site["origin_line"])}</div>
+</footer>
+"""
+
+
+def dock_and_script(site: dict, with_rail: bool) -> str:
+    rail = """
+<nav class="rail" aria-label="Timeline">
+  <a class="seg" href="#now" data-ch="now"><span class="lbl">This Hour</span><span class="dot"></span></a>
+  <a class="seg" href="#week" data-ch="week"><span class="lbl">This Week</span><span class="dot"></span></a>
+  <a class="seg" href="#month" data-ch="month"><span class="lbl">This Month</span><span class="dot"></span></a>
+  <a class="seg" href="#year" data-ch="year"><span class="lbl">This Year</span><span class="dot"></span></a>
+  <a class="seg" href="#era" data-ch="era"><span class="lbl">The Era</span><span class="dot"></span></a>
+</nav>""" if with_rail else ""
+    return rail + f"""
+<div class="dock" id="dock">
+  <div class="dock-in">
+    <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="say"><b>LIRIL</b><span id="liril-line">{esc(site["liril_default"])}</span></div>
+    <button id="voice-btn" type="button" title="LIRIL speaks each chapter aloud">Voice · Off</button>
+  </div>
+</div>
+<script src="js/liril-voice.js"></script>
+<script>
+  document.documentElement.classList.add('js');
+  (function(){{
+    var el=document.getElementById('dateline');
+    if(el){{var d=new Date();
+      var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var mons=['January','February','March','April','May','June','July','August','September','October','November','December'];
+      el.textContent=days[d.getDay()]+', '+mons[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}}
+    var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){{
+      es.forEach(function(e){{ if(e.isIntersecting){{ e.target.classList.add('in'); io.unobserve(e.target);}} }});
+    }},{{threshold:.1}}):null;
+    document.querySelectorAll('.rv').forEach(function(el){{ io?io.observe(el):el.classList.add('in'); }});
+    var dock=document.getElementById('dock');
+    var lineEl=document.getElementById('liril-line');
+    var voiceBtn=document.getElementById('voice-btn');
+    var voiceOn=false,lastCh=null;
+    voiceBtn&&voiceBtn.addEventListener('click',function(){{
+      voiceOn=!voiceOn;
+      voiceBtn.textContent='Voice · '+(voiceOn?'On':'Off');
+      voiceBtn.classList.toggle('on',voiceOn);
+      if(voiceOn) say("Voice on. I will read each chapter as you arrive.");
+    }});
+    function say(text){{
+      if(lineEl) lineEl.textContent=text;
+      if(voiceOn&&window.LIRIL_VOICE&&typeof window.LIRIL_VOICE.speak==='function'){{
+        dock.classList.add('speaking');
+        window.LIRIL_VOICE.speak(text);
+        setTimeout(function(){{ dock.classList.remove('speaking'); }},Math.min(9000,90*text.length));
+      }}
+    }}
+    var chapters=document.querySelectorAll('section.ch');
+    var segs={{}};
+    document.querySelectorAll('.rail .seg').forEach(function(s){{ segs[s.getAttribute('data-ch')]=s; }});
+    if('IntersectionObserver' in window && chapters.length){{
+      var chIO=new IntersectionObserver(function(es){{
+        es.forEach(function(e){{
+          if(!e.isIntersecting) return;
+          var id=e.target.id;
+          if(id===lastCh) return;
+          lastCh=id;
+          Object.keys(segs).forEach(function(k){{ segs[k].classList.toggle('on',k===id); }});
+          say(e.target.getAttribute('data-line')||'');
+        }});
+      }},{{threshold:.25}});
+      chapters.forEach(function(c){{ chIO.observe(c); }});
+      var cover=document.querySelector('.cover');
+      if(cover){{
+        var coverIO=new IntersectionObserver(function(es){{
+          dock.classList.toggle('up',!es[0].isIntersecting);
+        }},{{threshold:.3}});
+        coverIO.observe(cover);
+      }} else dock.classList.add('up');
+    }} else dock.classList.add('up');
+    var fs=document.getElementById('film-stats');
+    if(fs) fetch('data/film/manifest.json',{{cache:'no-cache'}})
+      .then(function(r){{ if(!r.ok) throw 0; return r.json(); }})
+      .then(function(m){{
+        var t=m.totals||{{}};
+        fs.textContent=(t.acts||'—')+' acts · '+(t.segments||'—')+' beats · '+
+          (t.duration_label||'multi-hour')+' · narrated by LIRIL';
+      }}).catch(function(){{}});
+  }})();
+</script>
+</body>
+</html>"""
+
+
+# ══ INDEX ═══════════════════════════════════════════════════════════════════
+
+def render_wire(posts: list[dict]) -> str:
+    cards = []
+    for i, p in enumerate(posts):
+        lead = " lead-card" if i == 0 else ""
+        t = ""
+        try:
+            t = datetime.fromisoformat(p["date"]).strftime("%H:%M ET")
+        except Exception:
+            pass
+        body = f'<p>{esc(p.get("dek",""))}</p>' if p.get("dek") else ""
+        cards.append(f"""
+      <article class="glass{lead}">
+        <time>{esc(t)}</time>
+        <span class="kick">{esc(p.get("kicker",""))}</span>
+        <h3>{esc(p["title"])}</h3>
+        {body}
+        <div class="meta">{sources_line(p)}{" · sample" if p.get("sample") else ""}</div>
+      </article>""")
+    return f'<div class="wire">{"".join(cards)}</div>'
+
+
+def render_features(posts: list[dict]) -> str:
+    if not posts:
+        return ""
+    main, rest = posts[0], posts[1:]
+    body = "".join(f'<p class="body-t">{esc(b)}</p>' for b in main.get("body", [])[:1])
+    pull = ""
+    if main.get("pull_quote"):
+        pull = f"""<div class="pull glass"><p>{main["pull_quote"]}</p>
+        <div class="meta" style="margin-top:14px">From the case file{" · sample" if main.get("sample") else ""}</div></div>"""
+    side = "".join(f"""
+        <div class="glass"><span class="kick">{esc(p.get("kicker",""))}</span>
+        <h4>{esc(p["title"])}</h4><p>{esc(p.get("dek",""))}</p></div>""" for p in rest[:3])
+    link = f'story/{esc(main["slug"])}.html' if main.get("body") else "#"
+    return f"""
+    <div class="feature">
+      <article class="main glass">
+        <span class="kick">{esc(main.get("kicker",""))}</span>
+        <h3><a href="{link}">{esc(main["title"])}</a></h3>
+        <p class="lede">{esc(main.get("dek",""))}</p>
+        {body}
+        <div class="meta" style="margin-top:20px">{sources_line(main)} · LIRIL reads this file aloud</div>
+      </article>
+      <div class="side">{pull}{side}</div>
+    </div>"""
+
+
+def render_claims(posts: list[dict]) -> str:
+    stamp = {"unsupported": ("bad", "Unsupported"), "supported": ("ok", "Supported"),
+             "context": ("warn", "Needs context")}
+    out = []
+    for i, p in enumerate(posts[:6]):
+        cls, lab = stamp.get(p.get("verdict", "context"), ("warn", "Needs context"))
+        views = f' — {esc(p["views"])} views' if p.get("views") else ""
+        out.append(f"""
+      <div class="exhibit glass">
+        <span class="tag">Exhibit {chr(65+i)}</span>
+        <span class="stamp {cls}">{lab}</span>
+        <p class="claim-q">&ldquo;{esc(p["title"])}&rdquo;{views}</p>
+        <p class="finding">{p.get("finding_html") or esc(p.get("dek",""))}</p>
+      </div>""")
+    return f'<div class="exhibits">{"".join(out)}</div>'
+
+
+def render_dossiers(posts: list[dict]) -> str:
+    out = []
+    for i, p in enumerate(posts[:6]):
+        href = p.get("link") or (f'story/{esc(p["slug"])}.html' if p.get("body") else "#")
+        out.append(f"""
+    <a class="dossier glass" href="{href}">
+      <span class="no">{i+1:03d}</span>
+      <div><h3>{esc(p["title"])}</h3><p>{esc(p.get("dek",""))}</p></div>
+      <span class="meta">{esc(p.get("status","Published"))}</span>
+    </a>""")
+    return "".join(out)
+
+
+def build_index(site: dict, posts: list[dict], now: datetime) -> str:
+    buckets: dict[str, list[dict]] = {k: [] for k, *_ in BUCKETS}
+    for p in sorted(posts, key=lambda x: x.get("date", ""), reverse=True):
+        age = post_age_s(p, now)
+        for key, horizon, *_ in BUCKETS:
+            if age <= horizon or (key == "year" and age > BUCKETS[2][1]):
+                if key == "month" and p.get("type") != "claim":
+                    continue
+                if key == "year" and p.get("type") != "dossier":
+                    continue
+                if key == "now" and p.get("type") not in ("wire",):
+                    continue
+                if key == "week" and p.get("type") != "feature":
+                    continue
+                buckets[key].append(p)
+                break
+    # types route regardless of bucket miss
+    for p in posts:
+        t = p.get("type")
+        if t == "claim" and p not in buckets["month"]:
+            buckets["month"].append(p)
+        if t == "dossier" and p not in buckets["year"]:
+            buckets["year"].append(p)
+        if t == "feature" and p not in buckets["week"]:
+            buckets["week"].append(p)
+        if t == "wire" and p not in buckets["now"]:
+            buckets["now"].append(p)
+
+    for k in buckets:
+        buckets[k].sort(key=lambda x: x.get("date", ""), reverse=True)
+
+    ch_bodies = {
+        "now": render_wire(buckets["now"][:6]),
+        "week": render_features(buckets["week"]),
+        "month": render_claims(buckets["month"]),
+        "year": render_dossiers(buckets["year"]),
+    }
+    chapters = []
+    for key, _h, roman, title_html, when in BUCKETS:
+        chapters.append(f"""
+<section class="ch field" id="{key}" data-line="{esc(site["liril_lines"][key])}">
+  <div class="ch-head rv">
+    <span class="ghost" aria-hidden="true">{roman}</span>
+    <div class="ch-no">Chapter<span class="roman">{roman}</span></div>
+    <h2 class="ch-title">{title_html}</h2>
+    <div class="ch-when">{esc(when)} · sample content pending live ingest</div>
+  </div>
+  <div class="wrapx rv">{ch_bodies[key]}</div>
+</section>""")
+
+    era = f"""
+<section class="ch field" id="era" style="border-bottom:none" data-line="{esc(site["liril_lines"]["era"])}">
+  <div class="ch-head rv" style="padding-bottom:2vh">
+    <span class="ghost" aria-hidden="true">V</span>
+    <div class="ch-no">Chapter<span class="roman">V</span></div>
+    <h2 class="ch-title">And back to the<br><em>beginning.</em></h2>
+    <div class="ch-when">1867 &larr; {now.year} · the deep record</div>
+  </div>
+  <div class="era rv">
+    <h3>One film. The <em>entire</em> public record.</h3>
+    <p>{esc(site["era_blurb"])}</p>
+    <div class="stats" id="film-stats">The documentary · narrated by LIRIL</div>
+    <a class="go-film" href="liril-film.html">&#9654; Enter the record</a>
+    <span class="alt">or take today only: <a href="daily-briefing.html">the daily briefing</a> ·
+    <a href="osint-dashboard.html">the live dashboard</a> · <a href="evidence-index.html">the evidence shelf</a></span>
+  </div>
+</section>"""
+
+    thesis = f"""
+<section class="thesis field">
+  <div class="wrapx rv">
+    <span class="kick red">The Thesis</span>
+    <h2 class="thesis-title" style="margin-top:2vh">A quiet war,<br>and its <em>antidote.</em></h2>
+    <div class="thesis-grid">
+      <div class="panel glass dx">
+        <h4>Diagnosis</h4>
+        <p>{site["diagnosis_html"]}</p>
+      </div>
+      <div class="panel glass rx">
+        <h4>Treatment</h4>
+        <p>{site["treatment_html"]}</p>
+      </div>
+    </div>
+    <div class="links">
+      <a href="5gw-subversion.html">Read the full thesis</a>
+      <a href="axes-index.html">The axes of capture</a>
+      <a href="accountability.html">The findings</a>
+    </div>
+  </div>
+</section>"""
+
+    cover = f"""
+<header class="cover" id="top">
+  <span class="ghost5" aria-hidden="true">5</span>
+  <div class="cover-bar">
+    <span class="brand"><span class="wm">TENET<sup>5</sup></span></span>
+    <span id="dateline">&mdash;</span>
+    <span>Sample Edition · Prototype</span>
+  </div>
+  <div class="cover-core">
+    <div class="cover-kick">The Public Record of Canada · Guided by LIRIL</div>
+    <h1>The record,<br>read <em>backwards.</em></h1>
+    <div class="fr">&laquo; Le dossier public du Canada, lu &agrave; rebours. &raquo;</div>
+    <p class="stand"><b>Begin at this hour.</b> Walk back through the week, the month, the year —
+    to the beginning. Machines read everything public. People verify.
+    Every line you will see carries its source.</p>
+  </div>
+  <div class="cover-foot">
+    <div class="liril-intro">
+      <div class="who">LIRIL · Your Guide</div>
+      <p>&ldquo;{esc(site["liril_cover"])}&rdquo;</p>
+    </div>
+    <a class="begin" href="#now"><span>Begin</span><span class="arrow"></span></a>
+  </div>
+</header>"""
+
+    return (head("The Record, Read Backwards",
+                 "Begin at this hour. Walk backwards through the public record of Canada — guided by LIRIL, every line cited.")
+            + cover + thesis + "".join(chapters) + era + footer_html(site)
+            + dock_and_script(site, with_rail=True))
+
+
+# ══ EVIDENCE SHELF ══════════════════════════════════════════════════════════
+
+CAT_LABELS = {"government": "Government of Canada · primary records",
+              "derived": "Derived analyses · mined from primary data",
+              "osint": "Open-source intelligence · public reporting"}
+
+
+def build_evidence(site: dict, evidence: list[dict]) -> str:
+    groups: dict[str, list[dict]] = {}
+    for e in evidence:
+        groups.setdefault(e.get("category", "osint"), []).append(e)
+    sections = []
+    for cat in ("government", "derived", "osint"):
+        rows = []
+        for e in groups.get(cat, []):
+            vb = ('<span class="vbadge v">&#9679; Verified</span>' if e.get("verified")
+                  else '<span class="vbadge sv">&#9675; Single source</span>')
+            data = (f'<a class="vbadge data" href="data/{esc(e["file"])}" download>data &darr;</a>'
+                    if e.get("file") else "")
+            src = esc(e.get("source", ""))
+            if e.get("source_url"):
+                src = f'<a href="{esc(e["source_url"])}" rel="noopener">{src}</a>'
+            note = f'<p class="note">{esc(e["note"])}</p>' if e.get("note") else ""
+            rows.append(f"""
+    <article class="src-card glass" data-cat="{esc(cat)}"
+      data-q="{esc((e.get('title','')+' '+e.get('contains','')+' '+e.get('source','')).lower())}">
+      <h3>{esc(e.get("title",""))}</h3>
+      <div class="badges">{vb}{data}</div>
+      <p class="what">{esc(e.get("contains",""))}</p>
+      <p class="attr">{src} · {esc(e.get("records",""))}</p>
+      {note}
+    </article>""")
+        if rows:
+            sections.append(f'<div class="shelf-cat">{esc(CAT_LABELS[cat])}</div>' + "".join(rows))
+
+    body = f"""
+<header class="cover" style="min-height:52vh">
+  <div class="cover-bar">
+    <span class="brand"><a href="index.html" style="display:flex;align-items:center;gap:14px">
+      <span class="wm">TENET<sup>5</sup></span></a></span>
+    <span id="dateline">&mdash;</span>
+    <span><a href="index.html">&larr; The Record</a></span>
+  </div>
+  <div class="cover-core" style="justify-content:flex-end;padding-bottom:6vh">
+    <div class="cover-kick">Every document we cite · nothing you can't check</div>
+    <h1 style="font-size:clamp(40px,6.4vw,92px)">The evidence <em>shelf.</em></h1>
+    <p class="stand">Each entry below is a source this newsroom relies on — what it is,
+    what it establishes, who published it, and the link to read it yourself.
+    The underlying data files are downloadable beside each entry.</p>
+  </div>
+</header>
+<main class="wrapx field" style="padding-top:4vh;padding-bottom:10vh">
+  <div class="shelf-controls rv">
+    <input id="ev-q" type="search" placeholder="Search the shelf&hellip;" aria-label="Search evidence">
+    <select id="ev-cat" aria-label="Filter by category">
+      <option value="">All categories</option>
+      <option value="government">Government primary</option>
+      <option value="derived">Derived analyses</option>
+      <option value="osint">Open-source</option>
+    </select>
+  </div>
+  <div id="shelf">{''.join(sections)}</div>
+</main>
+<script>
+  (function(){{
+    var q=document.getElementById('ev-q'),c=document.getElementById('ev-cat');
+    function apply(){{
+      var qq=(q.value||'').toLowerCase(),cc=c.value;
+      document.querySelectorAll('.src-card').forEach(function(el){{
+        var okQ=!qq||el.getAttribute('data-q').indexOf(qq)>=0;
+        var okC=!cc||el.getAttribute('data-cat')===cc;
+        el.style.display=(okQ&&okC)?'':'none';
+      }});
+      document.querySelectorAll('.shelf-cat').forEach(function(h){{
+        var any=false,n=h.nextElementSibling;
+        while(n&&!n.classList.contains('shelf-cat')){{
+          if(n.style.display!=='none')any=true;n=n.nextElementSibling;}}
+        h.style.display=any?'':'none';
+      }});
+    }}
+    q.addEventListener('input',apply);c.addEventListener('change',apply);
+  }})();
+</script>"""
+    return (head("The Evidence Shelf",
+                 "Every source this newsroom cites — what it establishes, who published it, and the link to check it yourself.")
+            + body + footer_html(site) + dock_and_script(site, with_rail=False))
+
+
+# ══ DAILY BRIEFING ══════════════════════════════════════════════════════════
+
+def build_briefing(site: dict) -> str:
+    """Press-designed shell; content populates at runtime from the daily JSONs
+    (the automation refreshes those without needing a press rebuild)."""
+    body = """
+<header class="cover" style="min-height:58vh">
+  <div class="cover-bar">
+    <span class="brand"><a href="index.html" style="display:flex;align-items:center;gap:14px">
+      <span class="wm">TENET<sup>5</sup></span></a></span>
+    <span id="dateline">&mdash;</span>
+    <span><a href="index.html">&larr; The Record</a></span>
+  </div>
+  <div class="cover-core" style="justify-content:flex-end;padding-bottom:6vh">
+    <div class="cover-kick">The Daily Briefing · every line cited · read by LIRIL</div>
+    <h1 style="font-size:clamp(40px,6.4vw,92px)">Today, in the <em>record.</em></h1>
+    <p class="stand" id="brief-oneline">Loading today's briefing from the record&hellip;</p>
+    <div style="margin-top:3vh;display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+      <button class="read-brief" id="read-brief" type="button">&#9654; LIRIL reads the briefing</button>
+      <span class="threat" id="brief-threat" hidden></span>
+      <span class="meta" id="brief-date"></span>
+    </div>
+  </div>
+</header>
+<main class="wrapx field" style="padding-top:6vh;padding-bottom:10vh">
+  <div id="brief-err"></div>
+
+  <div class="shelf-cat rv">Happening now</div>
+  <div class="brief-grid rv" id="brief-now"></div>
+
+  <div class="shelf-cat rv" style="margin-top:8vh">The numbers</div>
+  <div class="tiles rv" id="brief-metrics"></div>
+
+  <div class="shelf-cat rv" style="margin-top:8vh">The horizon</div>
+  <div class="horizon rv">
+    <div class="h-col stated"><h3>Stated plans · on the record</h3><div id="brief-stated"></div></div>
+    <div class="h-col inferred"><h3>Inferred trajectories · labeled inference</h3><div id="brief-inferred"></div></div>
+  </div>
+
+  <div class="glass contract rv" style="margin-top:8vh" id="brief-contract" hidden></div>
+</main>
+<script>
+  (function(){
+    function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;
+      if(text!=null)e.textContent=text;return e;}
+    function err(msg){document.getElementById('brief-err').innerHTML=
+      '<p class="brief-err">'+msg+' The rest of the record is on the <a href="index.html" style="color:inherit;text-decoration:underline">front page</a>.</p>';}
+    var BRIEF=null;
+    fetch('data/govt_daily_briefing.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw 0;return r.json();})
+      .then(function(d){
+        BRIEF=d;
+        document.getElementById('brief-oneline').textContent=d.one_line||d.subtitle||'';
+        var th=document.getElementById('brief-threat');
+        if(d.threat_level){th.hidden=false;th.textContent='Threat · '+d.threat_level;
+          th.className='threat '+d.threat_level;}
+        if(d.date)document.getElementById('brief-date').textContent='Briefing for '+d.date;
+        var now=document.getElementById('brief-now');
+        (d.happening_now||[]).forEach(function(h){
+          var c=el('article','brief-item glass');
+          c.appendChild(el('span','kick red',h.domain||''));
+          c.appendChild(el('h3',null,h.headline||''));
+          c.appendChild(el('p',null,h.body||''));
+          if(h.status)c.appendChild(el('span','meta','status: '+h.status));
+          now.appendChild(c);
+        });
+        var mt=document.getElementById('brief-metrics');
+        (d.metrics||[]).forEach(function(m){
+          var t=el('div','tile glass '+(m.tone||''));
+          t.appendChild(el('div','v',m.value||''));
+          t.appendChild(el('div','l',(m.label||'')+(m.unit?' · '+m.unit:'')));
+          if(m.note)t.appendChild(el('div','n',m.note));
+          mt.appendChild(t);
+        });
+      })
+      .catch(function(){err('Today\\u2019s briefing data could not be loaded.');});
+    fetch('data/govt_future_plans_map.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw 0;return r.json();})
+      .then(function(d){
+        var st=document.getElementById('brief-stated');
+        (d.stated_plans||[]).forEach(function(p){
+          var c=el('div','glass');
+          c.appendChild(el('span','conf',p.confidence||'STATED'));
+          c.appendChild(el('h4',null,p.label||''));
+          if(p.near)c.appendChild(el('p',null,p.near));
+          st.appendChild(c);
+        });
+        var inf=document.getElementById('brief-inferred');
+        (d.inferred_trajectories||[]).forEach(function(p){
+          var c=el('div','glass');
+          c.appendChild(el('span','conf',p.confidence||'INFERENCE'));
+          c.appendChild(el('h4',null,p.label||''));
+          if(p.claim)c.appendChild(el('p',null,p.claim));
+          inf.appendChild(c);
+        });
+        var ct=document.getElementById('brief-contract');
+        var wk=(d.daily_reader_contract&&d.daily_reader_contract.what_you_should_know)||[];
+        if(wk.length||d.disclaimer){
+          ct.hidden=false;
+          var b=el('b',null,'The reader contract');ct.appendChild(b);
+          wk.forEach(function(w){ct.appendChild(el('div',null,'\\u2014 '+w));});
+          if(d.disclaimer)ct.appendChild(el('div','n',d.disclaimer));
+        }
+      }).catch(function(){});
+    document.getElementById('read-brief').addEventListener('click',function(){
+      if(!(window.LIRIL_VOICE&&typeof window.LIRIL_VOICE.speak==='function'))return;
+      if(!BRIEF)return;
+      var parts=['The daily briefing.'];
+      if(BRIEF.date)parts.push('For '+BRIEF.date+'.');
+      if(BRIEF.threat_level)parts.push('Threat level '+BRIEF.threat_level+'.');
+      if(BRIEF.one_line)parts.push(BRIEF.one_line);
+      (BRIEF.happening_now||[]).slice(0,7).forEach(function(h,i){
+        parts.push('Item '+(i+1)+'. '+(h.headline||'')+'. '+(h.body||''));
+      });
+      parts.push('End of briefing. Every item is cited in the record below.');
+      window.LIRIL_VOICE.speak(parts.join(' '));
+      var dock=document.getElementById('dock');
+      if(dock){dock.classList.add('up','speaking');
+        var line=document.getElementById('liril-line');
+        if(line)line.textContent='Reading the briefing \\u2014 every line cited.';}
+    });
+  })();
+</script>"""
+    return (head("The Daily Briefing",
+                 "Today in the public record — happening now, the numbers, stated plans versus labeled inference. Read aloud by LIRIL, every line cited.")
+            + body + footer_html(site) + dock_and_script(site, with_rail=False))
+
+
+# ══ NETWORK BOARD ═══════════════════════════════════════════════════════════
+
+def build_network(site: dict) -> str:
+    """Documented-connections board rendered at runtime from
+    data/investigation_board.json (curated nodes/threads with sources)."""
+    body = """
 <header class="cover" style="min-height:52vh">
   <div class="cover-bar">
     <span class="brand"><a href="index.html" style="display:flex;align-items:center;gap:14px">
@@ -515,7 +1123,7 @@
         });
         d.appendChild(box);
       }
-      if(n.link){var a=el('a','open','Open the file \u2192');a.href=n.link;d.appendChild(a);}
+      if(n.link){var a=el('a','open','Open the file \\u2192');a.href=n.link;d.appendChild(a);}
     }
     function applyFilter(){
       var f=state.filter;
@@ -563,85 +1171,64 @@
           'The board data could not be loaded — the case files remain on the front page.';
       });
   })();
-</script>
-<footer>
-  <div class="rowf">
-    <span class="fm">TENET<sup>5</sup></span>
-    <span><a href="about.html">About &amp; Method</a><a href="accountability.html">Findings</a><a href="daily-briefing.html">Daily Briefing</a><a href="liril-film.html">The Film</a><a href="evidence-index.html">Evidence</a></span>
-  </div>
-  <div class="origin">TENET5 is an independent Canadian public-interest newsroom, created amid an ongoing political prosecution by the Canadian Forces military police for identifying foreign interference in the military. Public record only — no private data. Machines read. People verify. LIRIL speaks. · © 2026 TENET5</div>
-</footer>
+</script>"""
+    return (head("The Network",
+                 "Documented connections across the public record — every edge cites its file. Centrality is not guilt; open the sources.")
+            + body + footer_html(site) + dock_and_script(site, with_rail=False))
 
-<div class="dock" id="dock">
-  <div class="dock-in">
-    <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="say"><b>LIRIL</b><span id="liril-line">We begin at this hour.</span></div>
-    <button id="voice-btn" type="button" title="LIRIL speaks each chapter aloud">Voice · Off</button>
+
+# ══ ARTICLE PAGES ═══════════════════════════════════════════════════════════
+
+def build_article(site: dict, p: dict) -> str:
+    paras = "".join(f'<p class="bodyp">{esc(b)}</p>' for b in p.get("body", []))
+    srcs = "".join(f'<div class="meta" style="margin-bottom:8px">{sources_line(p)}</div>')
+    sample = ' · sample content' if p.get("sample") else ''
+    body = f"""
+<header class="cover" style="min-height:0">
+  <div class="cover-bar">
+    <span class="brand"><a href="../index.html" style="display:flex;align-items:center;gap:14px">
+      <span class="wm">TENET<sup>5</sup></span></a></span>
+    <span>{esc(p.get("kicker",""))}</span>
+    <span><a href="../index.html">&larr; The Record</a></span>
   </div>
-</div>
-<script src="js/liril-voice.js"></script>
-<script>
-  document.documentElement.classList.add('js');
-  (function(){
-    var el=document.getElementById('dateline');
-    if(el){var d=new Date();
-      var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      var mons=['January','February','March','April','May','June','July','August','September','October','November','December'];
-      el.textContent=days[d.getDay()]+', '+mons[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}
-    var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-    },{threshold:.1}):null;
-    document.querySelectorAll('.rv').forEach(function(el){ io?io.observe(el):el.classList.add('in'); });
-    var dock=document.getElementById('dock');
-    var lineEl=document.getElementById('liril-line');
-    var voiceBtn=document.getElementById('voice-btn');
-    var voiceOn=false,lastCh=null;
-    voiceBtn&&voiceBtn.addEventListener('click',function(){
-      voiceOn=!voiceOn;
-      voiceBtn.textContent='Voice · '+(voiceOn?'On':'Off');
-      voiceBtn.classList.toggle('on',voiceOn);
-      if(voiceOn) say("Voice on. I will read each chapter as you arrive.");
-    });
-    function say(text){
-      if(lineEl) lineEl.textContent=text;
-      if(voiceOn&&window.LIRIL_VOICE&&typeof window.LIRIL_VOICE.speak==='function'){
-        dock.classList.add('speaking');
-        window.LIRIL_VOICE.speak(text);
-        setTimeout(function(){ dock.classList.remove('speaking'); },Math.min(9000,90*text.length));
-      }
-    }
-    var chapters=document.querySelectorAll('section.ch');
-    var segs={};
-    document.querySelectorAll('.rail .seg').forEach(function(s){ segs[s.getAttribute('data-ch')]=s; });
-    if('IntersectionObserver' in window && chapters.length){
-      var chIO=new IntersectionObserver(function(es){
-        es.forEach(function(e){
-          if(!e.isIntersecting) return;
-          var id=e.target.id;
-          if(id===lastCh) return;
-          lastCh=id;
-          Object.keys(segs).forEach(function(k){ segs[k].classList.toggle('on',k===id); });
-          say(e.target.getAttribute('data-line')||'');
-        });
-      },{threshold:.25});
-      chapters.forEach(function(c){ chIO.observe(c); });
-      var cover=document.querySelector('.cover');
-      if(cover){
-        var coverIO=new IntersectionObserver(function(es){
-          dock.classList.toggle('up',!es[0].isIntersecting);
-        },{threshold:.3});
-        coverIO.observe(cover);
-      } else dock.classList.add('up');
-    } else dock.classList.add('up');
-    var fs=document.getElementById('film-stats');
-    if(fs) fetch('data/film/manifest.json',{cache:'no-cache'})
-      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-      .then(function(m){
-        var t=m.totals||{};
-        fs.textContent=(t.acts||'—')+' acts · '+(t.segments||'—')+' beats · '+
-          (t.duration_label||'multi-hour')+' · narrated by LIRIL';
-      }).catch(function(){});
-  })();
-</script>
-</body>
-</html>
+</header>
+<main class="article field">
+  <span class="kick red">{esc(p.get("kicker",""))}{sample}</span>
+  <h1>{esc(p["title"])}</h1>
+  <p class="dek">{esc(p.get("dek",""))}</p>
+  {paras}
+  <div class="srcs glass"><h4>Sources in this file</h4>{srcs}</div>
+</main>"""
+    page = (head(p["title"], p.get("dek", ""))
+            + body + footer_html(site) + dock_and_script(site, with_rail=False))
+    # article pages live in story/ — fix relative asset paths
+    return page.replace('src="js/liril-voice.js"', 'src="../js/liril-voice.js"') \
+               .replace("fetch('data/film", "fetch('../data/film")
+
+
+# ══ MAIN ════════════════════════════════════════════════════════════════════
+
+def main() -> int:
+    site = load_json(CONTENT / "site.json")
+    posts = [load_json(p) for p in sorted(POSTS.glob("*.json"))]
+    evidence = load_json(CONTENT / "evidence.json")
+    now = datetime.now(timezone.utc).astimezone()
+
+    (ROOT / "index.html").write_text(build_index(site, posts, now), encoding="utf-8")
+    (ROOT / "evidence-index.html").write_text(build_evidence(site, evidence), encoding="utf-8")
+    (ROOT / "daily-briefing.html").write_text(build_briefing(site), encoding="utf-8")
+    (ROOT / "network-analysis.html").write_text(build_network(site), encoding="utf-8")
+    STORY_DIR.mkdir(exist_ok=True)
+    n_stories = 0
+    for p in posts:
+        if p.get("body") and p.get("slug"):
+            (STORY_DIR / f'{p["slug"]}.html').write_text(build_article(site, p), encoding="utf-8")
+            n_stories += 1
+
+    print(f"[press] built index.html ({len(posts)} posts), evidence-index.html "
+          f"({len(evidence)} sources), {n_stories} story pages")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
