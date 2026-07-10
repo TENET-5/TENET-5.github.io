@@ -1,131 +1,481 @@
-<!DOCTYPE html>
-<html lang="en-CA" data-product="1">
+<!doctype html>
+<html lang="en-CA">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TENET5 — Public record of Canada</title>
-  <meta name="description" content="Primary-source operational intelligence on Canadian government. Daily briefing, multi-hour LIRIL documentary, evidence vault. Powered by LIRIL AI.">
-  <link rel="canonical" href="https://tenet-5.github.io/">
-  <meta property="og:title" content="TENET5 — Public record of Canada">
-  <meta property="og:description" content="Know what Ottawa is doing. Primary sources. Daily briefing + multi-hour film.">
-  <meta property="og:url" content="https://tenet-5.github.io/">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta name="theme-color" content="#05080d">
-  <!-- QUANTANIUM load order: tokens → product → page -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/tokens.css?v=15">
-  <link rel="stylesheet" href="css/product.css?v=3">
-  <link rel="stylesheet" href="css/cinematic-slate.css?v=2">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TENET5 — Canada's Intelligent-Automation Newsroom</title>
+<style>
+  :root{
+    --paper:#ffffff;
+    --paper-2:#f6f7f8;
+    --ink:#111417;
+    --ink-2:#3c454d;
+    --ink-3:#707a83;
+    --rule:#e2e5e8;
+    --rule-dark:#111417;
+    --accent:#0b6e8f;        /* tenet ice, deepened for white ground */
+    --accent-bright:#0f8db5;
+    --live:#c62828;          /* breaking red */
+    --ok:#1e7d46;
+    --warn:#b26a00;
+    --bad:#c62828;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+    --mono:Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  a{color:inherit;text-decoration:none}
+  a:hover{text-decoration:underline;text-decoration-color:var(--accent)}
+  img{max-width:100%}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+
+  /* ── prototype notice ─────────────────────────── */
+  .proto{background:#fff8e6;border-bottom:1px solid #eadfbe;color:#6b5310;font-family:var(--mono);
+    font-size:10.5px;letter-spacing:.08em;text-align:center;padding:4px 10px;text-transform:uppercase}
+
+  /* ── utility bar ──────────────────────────────── */
+  .util{border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-3)}
+  .util .wrap{display:flex;justify-content:space-between;align-items:center;height:36px}
+  .util .r a{margin-left:18px;font-weight:600;color:var(--ink-2)}
+  .util .r a.sub{color:#fff;background:var(--accent);padding:5px 12px;border-radius:3px}
+  .util .r a.sub:hover{background:var(--accent-bright);text-decoration:none}
+
+  /* ── masthead ─────────────────────────────────── */
+  .masthead{text-align:center;padding:26px 0 18px}
+  .masthead h1{font-family:var(--serif);font-weight:700;font-size:clamp(44px,6vw,64px);
+    letter-spacing:.01em;line-height:1}
+  .masthead h1 span{color:var(--accent)}
+  .masthead .tag{font-family:var(--mono);font-size:11px;letter-spacing:.28em;color:var(--ink-3);
+    text-transform:uppercase;margin-top:8px}
+
+  /* ── section nav ──────────────────────────────── */
+  .nav{border-top:2px solid var(--rule-dark);border-bottom:1px solid var(--rule);
+    position:sticky;top:0;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);z-index:60}
+  .nav .wrap{display:flex;justify-content:center;gap:0;overflow-x:auto}
+  .nav a{font-size:13px;font-weight:700;padding:12px 16px;white-space:nowrap;color:var(--ink)}
+  .nav a:hover{color:var(--accent);text-decoration:none}
+  .nav a.hot{color:var(--live)}
+
+  /* ── breaking / ticker ────────────────────────── */
+  .breaking{border-bottom:1px solid var(--rule);background:var(--paper-2)}
+  .breaking .wrap{display:flex;align-items:center;gap:14px;height:40px;overflow:hidden}
+  .breaking .chip{background:var(--live);color:#fff;font-size:11px;font-weight:800;
+    letter-spacing:.12em;padding:3px 10px;border-radius:2px;text-transform:uppercase;flex-shrink:0}
+  .breaking .items{display:flex;gap:44px;white-space:nowrap;animation:tick 38s linear infinite;
+    font-size:13px;color:var(--ink-2)}
+  .breaking .items b{color:var(--ink)}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ── story art (self-contained duotone plates) ── */
+  .art{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#123;border-radius:2px}
+  .art::after{content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 4px)}
+  .art.a1{background:linear-gradient(118deg,#0b2231 20%,#0b6e8f 78%,#7fd8ec 120%)}
+  .art.a2{background:linear-gradient(200deg,#101820 10%,#28506b 70%,#0f8db5 115%)}
+  .art.a3{background:linear-gradient(150deg,#1a1208 0%,#7a5210 65%,#e0b25a 120%)}
+  .art.a4{background:linear-gradient(160deg,#161a1e 0%,#3d4a55 60%,#93a7b5 115%)}
+  .art.a5{background:linear-gradient(135deg,#0e1f16 0%,#1e7d46 75%,#8fd8b0 120%)}
+  .art.a6{background:linear-gradient(210deg,#20101c 0%,#6b2f52 70%,#c98ab2 120%)}
+  .art .glyph{position:absolute;right:14px;bottom:8px;font-family:var(--serif);font-size:64px;
+    color:rgba(255,255,255,.16);line-height:1}
+  .cap{font-size:11px;color:var(--ink-3);margin-top:6px}
+
+  /* ── kickers / meta ───────────────────────────── */
+  .kick{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  .kick.live{color:var(--live)}
+  .meta{font-size:11.5px;color:var(--ink-3);margin-top:6px}
+  .meta b{color:var(--ink-2);font-weight:600}
+
+  /* ── front grid ───────────────────────────────── */
+  .front{display:grid;grid-template-columns:1fr 300px;gap:28px;padding:26px 0 8px}
+  @media(max-width:960px){.front{grid-template-columns:1fr}}
+  .front-main{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+  @media(max-width:720px){.front-main{grid-template-columns:1fr}}
+
+  .lead h2{font-family:var(--serif);font-size:clamp(26px,3.4vw,38px);line-height:1.12;
+    font-weight:800;margin:12px 0 10px}
+  .lead .dek{font-size:16px;color:var(--ink-2);line-height:1.55}
+  .story h3{font-family:var(--serif);font-size:19px;line-height:1.22;font-weight:700;margin:9px 0 6px}
+  .story p{font-size:13.5px;color:var(--ink-2)}
+  .stack .story{padding:16px 0;border-top:1px solid var(--rule)}
+  .stack .story:first-child{border-top:none;padding-top:0}
+
+  /* ── latest rail ──────────────────────────────── */
+  .rail{border-left:1px solid var(--rule);padding-left:24px}
+  @media(max-width:960px){.rail{border-left:none;padding-left:0;border-top:2px solid var(--rule-dark);padding-top:14px}}
+  .rail-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+  .rail-h .pulse{width:8px;height:8px;border-radius:50%;background:var(--live);
+    animation:pulse 2s ease infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .rail ul{list-style:none}
+  .rail li{padding:11px 0;border-bottom:1px solid var(--rule)}
+  .rail time{font-family:var(--mono);font-size:10.5px;color:var(--accent);display:block;margin-bottom:3px}
+  .rail a{font-size:13.5px;font-weight:600;line-height:1.35;display:block}
+
+  /* ── section blocks ───────────────────────────── */
+  .sec{padding:26px 0 30px;border-top:2px solid var(--rule-dark);margin-top:8px}
+  .sec-bar{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px}
+  .sec-bar h2{font-family:var(--serif);font-size:22px;font-weight:800}
+  .sec-bar a{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+  .cols-4{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  @media(max-width:960px){.cols-4{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:1fr}}
+  @media(max-width:560px){.cols-4{grid-template-columns:1fr}}
+
+  /* ── two-lane band: media watch / claim check ─── */
+  .band{display:grid;grid-template-columns:1.4fr 1fr;gap:28px}
+  @media(max-width:960px){.band{grid-template-columns:1fr}}
+  .verdict{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.1em;
+    text-transform:uppercase;padding:2px 8px;border-radius:2px;color:#fff}
+  .verdict.ok{background:var(--ok)}
+  .verdict.warn{background:var(--warn)}
+  .verdict.bad{background:var(--bad)}
+  .claim{padding:14px 0;border-top:1px solid var(--rule)}
+  .claim:first-of-type{border-top:none;padding-top:4px}
+  .claim .q{font-family:var(--serif);font-size:15.5px;font-weight:700;line-height:1.3;margin:6px 0 4px}
+  .claim .cite{font-size:12px;color:var(--ink-3)}
+  .claim .cite b{color:var(--accent);font-weight:600}
+
+  /* ── numbers strip (data desk) ────────────────── */
+  .numbers{background:var(--ink);color:#eef3f6;padding:26px 0;margin-top:8px}
+  .numbers .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  @media(max-width:860px){.numbers .wrap{grid-template-columns:repeat(2,1fr)}}
+  .numbers .kick{color:#8fd8ec}
+  .num{font-family:var(--serif);font-size:34px;font-weight:800;margin:4px 0 2px}
+  .numbers p{font-size:12.5px;color:#aebcc6}
+  .numbers .foot{grid-column:1/-1;font-family:var(--mono);font-size:10px;color:#6c7d89;
+    letter-spacing:.1em;text-transform:uppercase;border-top:1px solid #2a3540;padding-top:12px}
+
+  /* ── most read ────────────────────────────────── */
+  .most ul{list-style:none;counter-reset:mr}
+  .most li{counter-increment:mr;display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule)}
+  .most li::before{content:counter(mr);font-family:var(--serif);font-size:26px;font-weight:800;
+    color:var(--rule);line-height:1;min-width:26px}
+  .most li:hover::before{color:var(--accent)}
+  .most a{font-size:13.5px;font-weight:600;line-height:1.35}
+
+  /* ── footer ───────────────────────────────────── */
+  footer{border-top:2px solid var(--rule-dark);margin-top:34px;padding:30px 0 46px;
+    color:var(--ink-3);font-size:12.5px}
+  footer .cols{display:flex;gap:48px;flex-wrap:wrap;justify-content:space-between}
+  footer .fm{font-family:var(--serif);font-size:24px;font-weight:800;color:var(--ink)}
+  footer .fm span{color:var(--accent)}
+  footer ul{list-style:none;line-height:2.2;font-size:12px}
+  footer ul a{font-weight:600;color:var(--ink-2)}
+  footer .origin{margin-top:26px;border-top:1px solid var(--rule);padding-top:16px;font-size:11.5px}
+</style>
 </head>
-<body class="product" data-product="1">
-  <header class="p-top">
-    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
-    <nav class="p-nav" aria-label="Primary">
-      <a class="is-on" href="index.html">Home</a>
-      <a href="daily-briefing.html">Daily Brief</a>
-      <a href="liril-film.html">Film</a>
-      <a href="experience.html">A to B</a>
-      <a href="osint-dashboard.html">OSINT</a>
-      <a href="evidence-index.html">Evidence</a>
-      <a href="accountability.html">Findings</a>
-    </nav>
-  </header>
+<body>
 
-  <main class="p-wrap">
-    <p class="p-kicker">Powered by LIRIL AI · primary sources only</p>
-    <h1 class="p-display">Know what the Canadian government is doing.</h1>
-    <p class="p-lede">
-      Operational intelligence for public accountability.
-      Open the daily sheet, watch the multi-hour public-record film, or open the evidence vault.
-      Every FACT traces to a government or court document.
-    </p>
-    <div class="p-row">
-      <a class="p-btn primary" href="daily-briefing.html">Start: daily briefing</a>
-      <a class="p-btn" href="liril-film.html">Play full LIRIL film</a>
-      <a class="p-btn" href="experience.html">All A→B paths</a>
+<div class="proto">Design prototype — headlines, figures and timestamps are sample content for layout review</div>
+
+<div class="util">
+  <div class="wrap">
+    <div id="dateline">—</div>
+    <div class="r">
+      <a href="#">Corrections</a><a href="#">About</a><a href="#" class="sub">Get the Briefing</a>
     </div>
-    <p class="p-note">
-      <strong style="color:var(--slate-ink-dim,#a8bcc8)">A→B:</strong>
-      cold land → you can state what Ottawa is doing this cycle, which files are active,
-      what the multi-year path claims, and where the sources live.
-    </p>
+  </div>
+</div>
 
-    <div class="p-metrics" id="gw-metrics" aria-live="polite">
-      <div class="m"><span class="l">Film runtime</span><strong id="m-film">—</strong><span class="s" id="m-beats">beats</span></div>
-      <div class="m"><span class="l">Briefing threat</span><strong id="m-threat">—</strong><span class="s" id="m-date">daily sheet</span></div>
-      <div class="m"><span class="l">Default path</span><strong>P0</strong><span class="s">~5 min briefing</span></div>
-      <div class="m"><span class="l">Chrome</span><strong>ICE</strong><span class="s">two-tone only</span></div>
+<header class="masthead wrap">
+  <h1>TENET<span>5</span></h1>
+  <div class="tag">Canada's Intelligent-Automation Newsroom · Public Record Only</div>
+</header>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="#" class="hot">Top Stories</a>
+    <a href="#">Politics</a>
+    <a href="#documents">Documents</a>
+    <a href="#">Courts</a>
+    <a href="#">Spending</a>
+    <a href="#mediawatch">Media Watch</a>
+    <a href="#claimcheck">Claim Check</a>
+    <a href="#">Investigations</a>
+    <a href="#">Data Desk</a>
+  </div>
+</nav>
+
+<div class="breaking">
+  <div class="wrap">
+    <span class="chip">Developing</span>
+    <div class="items">
+      <span><b>ATIP backlog:</b> average response time hits 187 days across 24 departments</span>
+      <span><b>Gazette watch:</b> 17 new regulations published this week — 3 without cost analysis</span>
+      <span><b>Docket:</b> 12 new judicial-review filings added in Federal Court this morning</span>
+      <span><b>Claim check:</b> viral procurement figure traced to a misread 2024 table</span>
+      <span><b>ATIP backlog:</b> average response time hits 187 days across 24 departments</span>
+      <span><b>Gazette watch:</b> 17 new regulations published this week — 3 without cost analysis</span>
+      <span><b>Docket:</b> 12 new judicial-review filings added in Federal Court this morning</span>
+      <span><b>Claim check:</b> viral procurement figure traced to a misread 2024 table</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FRONT PAGE ══════════════════════════════════ -->
+<div class="front wrap">
+  <div class="front-main">
+
+    <!-- lead -->
+    <article class="lead">
+      <div class="art a1"><span class="glyph">¶</span></div>
+      <div class="cap">Cross-referenced: 44 contract entries in the proactive-disclosure registry. (Illustration)</div>
+      <span class="kick">Investigation · Spending</span>
+      <h2><a href="#">Promised in the House, missing on paper: a $2.1-billion commitment
+      leaves a 44-contract trail — and three disclosures</a></h2>
+      <p class="dek">TENET5 traced a single spending pledge from Question Period through the
+      Canada Gazette, the contracts registry and committee evidence. The documents agree with
+      the podium — until the money moves. Then the paper trail goes quiet.</p>
+      <div class="meta">By <b>TENET5 Investigations Desk</b> · 6 min read · Every source linked in the file</div>
+    </article>
+
+    <!-- secondary stack -->
+    <div class="stack">
+      <article class="story">
+        <div class="art a2"><span class="glyph">§</span></div>
+        <span class="kick">Access to Information</span>
+        <h3><a href="#">Departments now take an average of 187 days to answer a 30-day request,
+        release logs show</a></h3>
+        <p>An index of every published ATIP release date against its statutory deadline —
+        the widest gap on record.</p>
+        <div class="meta"><b>Documents Desk</b> · 4 min read</div>
+      </article>
+      <article class="story">
+        <div class="art a3"><span class="glyph">†</span></div>
+        <span class="kick">Committees</span>
+        <h3><a href="#">The committee heard one number. The department's own results report
+        says another.</a></h3>
+        <p>Testimony transcripts, diffed line-by-line against departmental data tables.</p>
+        <div class="meta"><b>Politics Desk</b> · 5 min read</div>
+      </article>
+      <article class="story">
+        <span class="kick">Courts</span>
+        <h3><a href="#">Federal Court docket adds 12 judicial-review filings against two
+        departments in one week</a></h3>
+        <p>What the public docket shows — and which filings the press hasn't touched.</p>
+        <div class="meta"><b>Courts Desk</b> · 3 min read</div>
+      </article>
+      <article class="story">
+        <span class="kick">Regulation</span>
+        <h3><a href="#">Gazette watch: three of this week's 17 new regulations shipped without
+        a cost-benefit analysis attached</a></h3>
+        <p>Weekly sweep of Canada Gazette Parts I and II, item by item.</p>
+        <div class="meta"><b>Documents Desk</b> · 3 min read</div>
+      </article>
+    </div>
+  </div>
+
+  <!-- latest rail -->
+  <aside class="rail">
+    <div class="rail-h"><span class="pulse"></span> Latest</div>
+    <ul>
+      <li><time>14:22 ET</time><a href="#">Order-in-council published 11 days after signature — the longest lag this quarter</a></li>
+      <li><time>13:05 ET</time><a href="#">Contract amendment pushes IT project 340% over its original award value</a></li>
+      <li><time>12:41 ET</time><a href="#">Hansard: minister cites report that has not yet been tabled</a></li>
+      <li><time>11:58 ET</time><a href="#">Coverage gap: story ran in 12 of 187 monitored outlets on day one</a></li>
+      <li><time>11:12 ET</time><a href="#">Claim with 2.1M views traced to a misread StatCan table</a></li>
+      <li><time>10:33 ET</time><a href="#">Lobbying registry logs 41 meetings on one bill in five sitting days</a></li>
+      <li><time>09:47 ET</time><a href="#">Public accounts: $86M in writeoffs listed under a single line item</a></li>
+      <li><time>09:02 ET</time><a href="#">Committee evidence posted 6 weeks late for third consecutive meeting</a></li>
+    </ul>
+    <div class="rail-h" style="margin-top:26px">Most Read</div>
+    <div class="most">
+      <ul>
+        <li><a href="#">The disclosure scoreboard: which departments answer access requests on time — and which never do</a></li>
+        <li><a href="#">One chart: every federal contract amendment over 100% this year</a></li>
+        <li><a href="#">Anatomy of a viral number: how a false figure crossed 1,300 accounts in 48 hours</a></li>
+        <li><a href="#">What 44,000 pages of committee evidence say about one program</a></li>
+        <li><a href="#">The story 134 outlets never ran</a></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<!-- ══ DOCUMENTS ═══════════════════════════════════ -->
+<section class="sec wrap" id="documents">
+  <div class="sec-bar"><h2>The Record — today's public documents</h2><a href="#">All documents →</a></div>
+  <div class="cols-4">
+    <article class="story">
+      <div class="art a4"><span class="glyph">≡</span></div>
+      <span class="kick">Gazette</span>
+      <h3><a href="#">Part II: new firearms-marking regulation takes effect without transition period</a></h3>
+      <div class="meta"><b>Filed today</b> · SOR entry indexed</div>
+    </article>
+    <article class="story">
+      <div class="art a2"><span class="glyph">✦</span></div>
+      <span class="kick">Hansard</span>
+      <h3><a href="#">Yesterday in the House: 3 commitments made on the record, now tracked</a></h3>
+      <div class="meta"><b>Sitting day</b> · transcript diffed</div>
+    </article>
+    <article class="story">
+      <div class="art a5"><span class="glyph">▤</span></div>
+      <span class="kick">Disclosures</span>
+      <h3><a href="#">Contracts registry: 212 new entries this week, 9 flagged for amendment patterns</a></h3>
+      <div class="meta"><b>Weekly sweep</b> · registry indexed</div>
+    </article>
+    <article class="story">
+      <div class="art a6"><span class="glyph">¶</span></div>
+      <span class="kick">Court Dockets</span>
+      <h3><a href="#">Docket day: Charter challenges, judicial reviews, and one certified class action</a></h3>
+      <div class="meta"><b>Daily docket</b> · public filings only</div>
+    </article>
+  </div>
+</section>
+
+<!-- ══ MEDIA WATCH / CLAIM CHECK ═══════════════════ -->
+<section class="sec wrap">
+  <div class="band">
+    <div id="mediawatch">
+      <div class="sec-bar"><h2>Media Watch</h2><a href="#">All coverage analysis →</a></div>
+      <article class="story">
+        <div class="art a4"><span class="glyph">≋</span></div>
+        <span class="kick">Coverage Gap</span>
+        <h3><a href="#">One story, 187 front pages: 12 outlets ran it on day one, 41 within the
+        week — 134 never did</a></h3>
+        <p>The same verified story, tracked across every monitored Canadian outlet. Which
+        newsrooms covered it, when, and how the framing shifted between them. Silence is
+        measurable — and this week it clustered.</p>
+        <div class="meta"><b>Media Desk</b> · 7 min read · outlet-by-outlet table in the file</div>
+      </article>
+      <div class="cols-3" style="margin-top:18px">
+        <article class="story">
+          <span class="kick">Framing</span>
+          <h3><a href="#">Headline says "soars," body says 4%: where framing drifts from sourcing</a></h3>
+        </article>
+        <article class="story">
+          <span class="kick">Corrections</span>
+          <h3><a href="#">Six outlets corrected the same wire error — three quietly edited it instead</a></h3>
+        </article>
+        <article class="story">
+          <span class="kick">Attribution</span>
+          <h3><a href="#">"Sources say": tracking anonymous sourcing rates across the press gallery</a></h3>
+        </article>
+      </div>
     </div>
 
-    <section class="p-grid" aria-label="Paths">
-      <a class="p-card" href="daily-briefing.html">
-        <span class="ord">P0 · default · ~5 min</span>
-        <h2>Daily intelligence</h2>
-        <p>Happening-now, metrics, future horizons. If you open one page, open this.</p>
-        <span class="go">Open briefing →</span>
-      </a>
-      <a class="p-card" href="liril-film.html">
-        <span class="ord">P1 · film · ~12 h</span>
-        <h2>Full record of Canada</h2>
-        <p>Watchable + navigable documentary of open government records and public social evidence.</p>
-        <span class="go">Start film →</span>
-      </a>
-      <a class="p-card" href="experience.html">
-        <span class="ord">P2 · map</span>
-        <h2>A to B paths</h2>
-        <p>Thesis spine, five-act record, 504 package — pick by time budget.</p>
-        <span class="go">Choose path →</span>
-      </a>
-      <a class="p-card" href="osint-dashboard.html">
-        <span class="ord">Ops</span>
-        <h2>OSINT dashboard</h2>
-        <p>Signals, briefs, public social graphs tied to open files.</p>
-        <span class="go">Open OSINT →</span>
-      </a>
-      <a class="p-card" href="evidence-index.html">
-        <span class="ord">Vault</span>
-        <h2>Evidence index</h2>
-        <p>Primary-source archive. Built to be checked, not believed.</p>
-        <span class="go">Open vault →</span>
-      </a>
-      <a class="p-card" href="accountability.html">
-        <span class="ord">P4 · findings</span>
-        <h2>504 / scorecard</h2>
-        <p>Named, sourced accountability records for public officials.</p>
-        <span class="go">Open findings →</span>
-      </a>
-    </section>
-  </main>
+    <div id="claimcheck">
+      <div class="sec-bar"><h2>Claim Check</h2><a href="#">All checks →</a></div>
+      <div class="claim">
+        <span class="verdict bad">Unsupported</span>
+        <div class="q">"Canada imports 90% of its supply" — post with 2.1M views</div>
+        <div class="cite">Checked against <b>StatCan trade table 990-0001</b> — the figure is 41%.
+        Origin traced to a misread 2024 column header.</div>
+      </div>
+      <div class="claim">
+        <span class="verdict warn">Needs context</span>
+        <div class="q">"The department spent $86M and got nothing" — 840K views</div>
+        <div class="cite">Writeoff is real (<b>Public Accounts, Vol. III</b>) but spans 14 programs
+        over 6 years, not one project.</div>
+      </div>
+      <div class="claim">
+        <span class="verdict ok">Supported</span>
+        <div class="q">"Committee evidence was posted six weeks late" — 120K views</div>
+        <div class="cite">Confirmed against <b>committee publication timestamps</b> — third
+        consecutive late posting.</div>
+      </div>
+      <div class="claim">
+        <span class="verdict bad">Unsupported</span>
+        <div class="q">"No public consultation was held" — 410K views</div>
+        <div class="cite"><b>Gazette Part I</b> shows a 30-day comment period; 212 submissions
+        logged in the consultation record.</div>
+      </div>
+      <div class="meta" style="margin-top:10px">Claims are checked against primary documents,
+      not opinions. Verdicts cite the record — claims, not people.</div>
+    </div>
+  </div>
+</section>
 
-  <footer class="p-foot">
-    <span>TENET5 · Powered by LIRIL AI</span>
-    <a href="methodology-transparency.html">Methodology</a>
-    <a href="legal.html">Legal</a>
-    <a href="take-action.html">Take action</a>
-    <a href="contact.html">Contact</a>
-  </footer>
+<!-- ══ DATA DESK STRIP ═════════════════════════════ -->
+<div class="numbers">
+  <div class="wrap">
+    <div><span class="kick">Data Desk</span><div class="num">187</div><p>days — average ATIP response
+      time against a 30-day statutory clock</p></div>
+    <div><span class="kick">Data Desk</span><div class="num">340%</div><p>largest single contract
+      amendment over original award value this quarter</p></div>
+    <div><span class="kick">Data Desk</span><div class="num">134</div><p>monitored outlets that never
+      ran this week's most-corroborated story</p></div>
+    <div><span class="kick">Data Desk</span><div class="num">48 hrs</div><p>for one unsupported claim
+      to cross 1,300 tracked accounts</p></div>
+    <div class="foot">Prototype figures — sample data · in production every number links to its dataset and query</div>
+  </div>
+</div>
 
-  <script>
-  (function () {
-    function set(id, t) { var n = document.getElementById(id); if (n) n.textContent = t; }
-    fetch('data/documentary_chapters.json', { cache: 'no-cache' })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-      .then(function (j) {
-        var t = j.totals || {};
-        set('m-film', t.duration_label || '—');
-        set('m-beats', (t.segments || (j.chapters && j.chapters.length) || '—') + ' beats');
-      })
-      .catch(function () { set('m-film', '—'); set('m-beats', 'offline'); });
-    fetch('data/govt_daily_briefing.json', { cache: 'no-cache' })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-      .then(function (j) {
-        set('m-threat', j.threat_level || '—');
-        set('m-date', j.date ? ('sheet ' + j.date) : 'daily sheet');
-      })
-      .catch(function () { set('m-threat', '—'); set('m-date', 'offline'); });
+<!-- ══ INVESTIGATIONS ══════════════════════════════ -->
+<section class="sec wrap">
+  <div class="sec-bar"><h2>Investigations</h2><a href="#">All case files →</a></div>
+  <div class="cols-3">
+    <article class="story">
+      <div class="art a1"><span class="glyph">01</span></div>
+      <span class="kick">Case File</span>
+      <h3><a href="#">The disclosure scoreboard: a year of access requests, graded department
+      by department</a></h3>
+      <p>Every published release measured against its legal deadline. The pattern isn't
+      random — it follows the file's subject matter.</p>
+      <div class="meta"><b>Published</b> · full dataset downloadable</div>
+    </article>
+    <article class="story">
+      <div class="art a3"><span class="glyph">02</span></div>
+      <span class="kick">Case File</span>
+      <h3><a href="#">Amendment nation: the contracts that doubled after they were awarded</a></h3>
+      <p>A sweep of the open contracts registry for post-award amendments — who amends,
+      how often, and how far past the original value.</p>
+      <div class="meta"><b>Published</b> · methodology in the file</div>
+    </article>
+    <article class="story">
+      <div class="art a6"><span class="glyph">03</span></div>
+      <span class="kick">Case File</span>
+      <h3><a href="#">Anatomy of a viral number: 48 hours, 1,300 accounts, one misread table</a></h3>
+      <p>Tracing a false statistic from first post to national radio — and the correction
+      that reached 2% of the audience the error did.</p>
+      <div class="meta"><b>Published</b> · spread graph interactive</div>
+    </article>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <div class="fm">TENET<span>5</span></div>
+        <p style="max-width:330px;margin-top:8px">Canada's intelligent-automation newsroom.
+        The machines read everything public. People verify. The record decides.</p>
+      </div>
+      <ul>
+        <li><a href="#">Top Stories</a></li>
+        <li><a href="#documents">Documents</a></li>
+        <li><a href="#">Courts</a></li>
+        <li><a href="#">Spending</a></li>
+      </ul>
+      <ul>
+        <li><a href="#mediawatch">Media Watch</a></li>
+        <li><a href="#claimcheck">Claim Check</a></li>
+        <li><a href="#">Investigations</a></li>
+        <li><a href="#">Data Desk</a></li>
+      </ul>
+      <ul>
+        <li><a href="#">About & Method</a></li>
+        <li><a href="#">Corrections Log</a></li>
+        <li><a href="#">Source Index</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="origin">TENET5 is an independent Canadian public-interest newsroom. Public record
+    only — no private data. · © 2026 TENET5</div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var d=new Date();
+    var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var mon=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('dateline').textContent=
+      days[d.getDay()]+', '+mon[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()+' · Ottawa Edition';
   })();
-  </script>
+</script>
+
 </body>
 </html>
