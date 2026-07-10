@@ -2,6 +2,13 @@
 
 **Status: LOCKED — do not digress unless Daniel says so.**
 
+## HARD STOP (2026-07-10)
+
+**PRISM OS executes everything.** Grok only queues jobs and reads proof artifacts.  
+No Grok hand-execution of site rebuilds, theme thrash, or “quick fixes.”  
+Job queue: `C:/PRISM/data/prism_work_loop_jobs/site_full_unfuck_quantum.json`  
+Rule: `C:/Users/Xbxac/.grok/rules/08-prism-os-executes-everything.md`
+
 ## Project
 
 **Name:** `TENET5_PUBLIC_SITE_VISUAL_ACUITY`  

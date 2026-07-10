@@ -507,6 +507,7 @@ def head(title: str, desc: str) -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)} | TENET5</title>
+<meta name="description" content="{esc(desc)}">
 <meta property="og:site_name" content="TENET5">
 <meta property="og:title" content="{esc(title)} | TENET5">
 <meta property="og:description" content="{esc(desc)}">
@@ -667,7 +668,8 @@ def render_dossiers(posts: list[dict]) -> str:
 
 CATALOG_SKIP = re.compile(
     r"^(index|404|auth-callback|archive-shell|index_backup|index_legacy|"
-    r"index-legacy-cap222-shell|chalkboard|campaign-generator|search)", re.I)
+    r"index-legacy-cap222-shell|chalkboard|campaign-generator|search|"
+    r"test-|layout\.|gateway|permalink)", re.I)
 
 def render_catalog() -> str:
     """The whole book — every public file, A to Z, from each page's own
@@ -1211,7 +1213,8 @@ def build_article(site: dict, p: dict) -> str:
     page = (head(p["title"], p.get("dek", ""))
             + body + footer_html(site).replace('href="', 'href="../')
             + dock_and_script(site, with_rail=False))
-    return page.replace('src="js/liril-voice.js"', 'src="../js/liril-voice.js"') \
+    # version-agnostic: emitted tags carry ?v=N, so match on the path prefix
+    return page.replace('src="js/liril-', 'src="../js/liril-') \
                .replace("fetch('data/film", "fetch('../data/film")
 
 
