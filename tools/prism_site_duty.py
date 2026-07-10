@@ -246,8 +246,21 @@ def lap() -> dict:
     steps.append({"name": "interiors", "ok": interior_ok, "samples": samples})
 
     # 7) PC + mobile JPG capture + visual acuity (core permanent mission)
+    # --fast / PRISM_SITE_DUTY_FAST=1: pre-commit path — theme + LIRIL only (skip live CDN lag)
+    fast = (
+        "--fast" in sys.argv
+        or os.environ.get("PRISM_SITE_DUTY_FAST", "").strip() in {"1", "true", "yes"}
+    )
     vis = TOOLS / "prism_visual_acuity.py"
-    if vis.exists():
+    if fast:
+        steps.append(
+            {
+                "name": "visual_acuity_pc_mobile",
+                "ok": True,
+                "detail": "skipped (--fast / pre-commit); forever loop still runs full acuity",
+            }
+        )
+    elif vis.exists():
         code, out = _run([sys.executable, str(vis), "--base", "https://tenet-5.github.io"], timeout=600)
         vis_ok = code == 0
         if not vis_ok and apply.exists():

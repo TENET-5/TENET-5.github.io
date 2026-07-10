@@ -1,45 +1,43 @@
 #!/bin/sh
-# TENET5 pre-commit — protect press homepage; QUANTANIUM interiors
+# PRISM site duty on every commit — one theme forever
 set -e
 ROOT="$(git rev-parse --show-toplevel)"
-
 PY=""
-for candidate in \
+for c in \
   "C:/Users/Xbxac/AppData/Roaming/uv/python/cpython-3.14.3-windows-x86_64-none/python.exe" \
-  "E:/S.L.A.T.E/.venv/Scripts/python.exe"
+  "python"
 do
-  if [ -f "$candidate" ]; then PY="$candidate"; break; fi
+  if [ -f "$c" ] || command -v "$c" >/dev/null 2>&1; then PY="$c"; break; fi
 done
-if [ -z "$PY" ]; then
-  command -v python >/dev/null 2>&1 && PY=python || { echo "no python"; exit 1; }
+[ -n "$PY" ] || { echo "no python"; exit 1; }
+
+if [ -f "$ROOT/tools/prism_site_duty.py" ]; then
+  echo "[pre-commit] PRISM site duty (fast: theme + LIRIL guide)..."
+  # Full visual acuity runs in --forever; pre-commit must not fail on Pages CDN lag.
+  PRISM_SITE_AUTO_PUSH=0 PRISM_SITE_DUTY_FAST=1 "$PY" "$ROOT/tools/prism_site_duty.py" --fast || exit 1
+  # restage theme-fixed HTML
+  git add -u -- '*.html' 'css/press-theme.css' 2>/dev/null || true
 fi
 
-# Hard fail: never commit product-only strip of press homepage
-if git diff --cached --name-only | grep -E '^index\.html$' >/dev/null 2>&1; then
-  if ! grep -q 'backwards' "$ROOT/index.html" 2>/dev/null; then
-    echo "[pre-commit] BLOCKED: index.html lost press 'read backwards' cover"
-    echo "  Restore via: python tools/press.py"
-    exit 1
-  fi
-  if ! grep -q 'Fraunces' "$ROOT/index.html" 2>/dev/null; then
-    echo "[pre-commit] BLOCKED: index.html lost Fraunces (screenshot theme)"
-    exit 1
-  fi
+# hard fail if homepage lost press cover / LIRIL guide (PRISM permanent jobs)
+if ! grep -q 'backwards' "$ROOT/index.html" 2>/dev/null; then
+  echo "[pre-commit] BLOCKED: index lost 'read backwards' cover"
+  exit 1
 fi
-
-MIGRATION="$ROOT/tools/slate_css_migration.py"
-if [ -f "$MIGRATION" ]; then
-  echo "[pre-commit] CSS migration (press protected)..."
-  "$PY" "$MIGRATION" || exit 1
-  changed=$(git diff --name-only -- '*.html' 2>/dev/null || true)
-  if [ -n "$changed" ]; then
-    echo "$changed" | xargs git add -- 2>/dev/null || true
-  fi
+if ! grep -q 'press-theme.css' "$ROOT/index.html" 2>/dev/null; then
+  echo "[pre-commit] BLOCKED: index not on one theme (press-theme.css)"
+  exit 1
 fi
-
-GUARD="$ROOT/tools/brand_guard.py"
-if [ -f "$GUARD" ]; then
-  echo "[pre-commit] brand guard..."
-  "$PY" "$GUARD" || exit 1
+if ! grep -q 'liril-home-guide.js' "$ROOT/index.html" 2>/dev/null; then
+  echo "[pre-commit] BLOCKED: LIRIL home guide script missing (PRISM job)"
+  exit 1
+fi
+if ! grep -q 'id="dock"' "$ROOT/index.html" 2>/dev/null; then
+  echo "[pre-commit] BLOCKED: LIRIL dock missing (PRISM job)"
+  exit 1
+fi
+if ! grep -q 'liril-guide-btn' "$ROOT/index.html" 2>/dev/null; then
+  echo "[pre-commit] BLOCKED: Guide me control missing (PRISM job)"
+  exit 1
 fi
 exit 0
