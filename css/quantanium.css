@@ -145,10 +145,15 @@ section.chapter, .content > section, main > section { counter-increment: sec; }
 .q-link:hover, .q-link:focus-visible { background-size: 100% 1px; background-position: 0% 100%; }
 .q-link:focus-visible { outline: 1px solid var(--slate-accent, #eef6fa); outline-offset: 3px; }
 
-/* ── FILM GRAIN — ONE static fixed layer, never animated ──────────────── */
+/* ── FILM GRAIN — ONE static fixed layer, never animated ────────────────
+   PERF (2026-07-10 shake fix): NO mix-blend-mode here. A blend on a fixed
+   full-viewport layer defeats layerization and re-rasterizes the entire
+   page every frame (measured ~1fps). Plain low-opacity grain composites
+   as its own cached GPU layer at ~zero cost. */
 body::after {
   content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none;
-  opacity: .04; mix-blend-mode: overlay;
+  opacity: .05;
+  transform: translateZ(0);              /* own compositor layer */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -233,6 +238,37 @@ table.evidence { border-collapse: collapse; width: 100%; font-size: .875rem; }
   }
   @keyframes q-progress { to { transform: scaleX(1); } }
 }
+
+/* ── PERFORMANCE GUARDS (2026-07-10 shake fix) ──────────────────────────
+   Measured on live pages: rAF ~1fps with an idle main thread = GPU raster
+   storm. Three causes, all killed here (this file loads last, so these
+   overrides win the cascade):
+   1. background-attachment:fixed on <body> repaints the full page every
+      scroll frame on Windows — force scroll.
+   2. backdrop-filter on EVERY card multiplies blur surfaces; the glass
+      look survives via translucent gradient fills. Blur stays ONLY on
+      small fixed chrome (nav/footer/tour bar).
+   3. iframe/canvas must never get height:auto — JS owns canvas sizing;
+      the shell owns iframe sizing (prevents resize feedback loops). */
+body { background-attachment: scroll !important; }
+/* 4. SHAKE FIX — presentation pages use scroll-snap (body.pres-active in
+      css/presentation.css). Animated reveal transforms MOVE snap targets
+      while the snap engine is settling → viewport oscillation ("shake").
+      On snap pages: reveals render final-state instantly, and CSS-level
+      smooth scrolling is disabled (cinema.js still passes smooth per
+      scrollIntoView call, so slide navigation stays smooth). */
+body.pres-active { scroll-behavior: auto !important; }
+body.pres-active .q-rise, body.pres-active .reveal .line {
+  opacity: 1 !important; transform: none !important; transition: none !important;
+}
+.card, .panel, .data-card, .evidence-box, .finding-card, .info-box,
+.metric-card, .stat-card, .evidence-entry, .ts-card, .ice-panel,
+.glass-card, .liril-glass, .sm-cat, section[style*="gradient"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+canvas, iframe { height: revert-layer; }
+canvas { max-width: 100%; }
 
 /* ── SCROLLY SCENES (canonical engine hooks; js adds .is-active) ──────── */
 .scrolly { display: grid; grid-template-columns: minmax(28ch, 38ch) 1fr; gap: 3rem; }

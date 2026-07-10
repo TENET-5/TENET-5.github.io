@@ -67,6 +67,22 @@
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'All findings' },
       ]
     },
+    'cbc-5gw-media-vector.html': {
+      current: 'CBC 5GW Vector',
+      next: [
+        { href: 'media-capture.html', label: 'Media Capture', desc: 'Concentration + bailout stack' },
+        { href: '5gw-subversion.html', label: '5GW Overview', desc: 'Cognitive domain framing' },
+        { href: 'genocide-evidence.html', label: 'Article II', desc: 'Policy harm map' },
+      ]
+    },
+    'media-capture.html': {
+      current: 'Media Capture',
+      next: [
+        { href: 'cbc-5gw-media-vector.html', label: 'CBC 5GW Vector', desc: 'Tax-dollar narrative amplifier' },
+        { href: 'media-concentration.html', label: 'Media Concentration', desc: 'Ownership map' },
+        { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'What Ottawa is doing' },
+      ]
+    },
     'arms-pipeline.html': {
       current: 'Arms Pipeline',
       next: [

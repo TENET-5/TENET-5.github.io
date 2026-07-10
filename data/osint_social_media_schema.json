@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0.0",
+  "title": "TENET5 Social Media OSINT Collection Schema",
+  "description": "Data structure for tracking social media coordination patterns across Facebook, X (Twitter), and Bluesky in relation to CBC coverage",
+  "updated": "2026-07-10",
+  "platforms": {
+    "x_twitter": {
+      "status": "ACTIVE",
+      "collection_method": "Public API + manual archival",
+      "legal_basis": "Publicly posted content, no TOS violation",
+      "data_points": [
+        "account_handle",
+        "account_created_date",
+        "post_timestamp",
+        "post_content_hash",
+        "reply_to_handle",
+        "reply_chain_depth",
+        "hashtags_used",
+        "urls_shared",
+        "engagement_count",
+        "is_quote_tweet",
+        "quoted_source"
+      ]
+    },
+    "facebook": {
+      "status": "ACTIVE",
+      "collection_method": "Public pages and groups only",
+      "legal_basis": "Publicly accessible content",
+      "data_points": [
+        "page_or_profile_name",
+        "post_timestamp",
+        "post_content_hash",
+        "comment_thread_id",
+        "group_name",
+        "share_source_url",
+        "reaction_type_counts",
+        "is_public_page"
+      ]
+    },
+    "bluesky": {
+      "status": "ACTIVE",
+      "collection_method": "AT Protocol public firehose + manual archival",
+      "legal_basis": "Publicly posted content on open protocol",
+      "data_points": [
+        "handle",
+        "did",
+        "post_timestamp",
+        "post_content_hash",
+        "reply_to_handle",
+        "labels_applied",
+        "hashtags_used",
+        "urls_shared",
+        "follows_list_public",
+        "migration_date_from_x"
+      ]
+    }
+  },
+  "analysis_modules": {
+    "temporal_correlation": {
+      "description": "Measures time delta between CBC article publication and social media activity spikes",
+      "metrics": [
+        {
+          "name": "cbc_to_social_latency_minutes",
+          "description": "Minutes between CBC story publish timestamp and first coordinated social media response",
+          "threshold_suspicious": 30,
+          "threshold_coordinated": 15
+        },
+        {
+          "name": "attack_velocity_posts_per_hour",
+          "description": "Number of negative posts targeting a specific individual per hour after CBC coverage",
+          "threshold_organic": 5,
+          "threshold_coordinated": 20
+        },
+        {
+          "name": "cross_platform_spread_minutes",
+          "description": "Minutes for narrative to appear on second platform after first",
+          "threshold_organic": 120,
+          "threshold_coordinated": 30
+        }
+      ]
+    },
+    "network_analysis": {
+      "description": "Graph-based analysis of account relationships and coordination",
+      "metrics": [
+        {
+          "name": "coordination_score",
+          "description": "0-100 score measuring how synchronized account behavior is",
+          "calculation": "Weighted combination of temporal clustering, content similarity, and target overlap"
+        },
+        {
+          "name": "hub_centrality",
+          "description": "Betweenness centrality score identifying key amplifier accounts",
+          "calculation": "NetworkX betweenness_centrality on follow/reply graph"
+        },
+        {
+          "name": "cluster_density",
+          "description": "Density of connections within identified coordinated groups",
+          "threshold_organic": 0.15,
+          "threshold_coordinated": 0.45
+        }
+      ]
+    },
+    "linguistic_fingerprinting": {
+      "description": "Identifying shared language patterns suggesting coordinated messaging",
+      "metrics": [
+        {
+          "name": "phrase_overlap_ratio",
+          "description": "Percentage of identical multi-word phrases across accounts",
+          "threshold_organic": 0.05,
+          "threshold_coordinated": 0.25
+        },
+        {
+          "name": "talking_point_velocity",
+          "description": "Speed at which new talking points propagate through the network",
+          "unit": "accounts_per_hour"
+        },
+        {
+          "name": "sentiment_uniformity",
+          "description": "Standard deviation of sentiment scores — low deviation suggests coordination",
+          "threshold_organic_std": 0.3,
+          "threshold_coordinated_std": 0.08
+        }
+      ]
+    },
+    "media_social_loop": {
+      "description": "Detecting the feedback loop between CBC coverage and social media harassment",
+      "pattern_sequence": [
+        "1. CBC publishes story featuring individual X as source/expert",
+        "2. Individual X is observed conducting social media attacks on critics of the CBC narrative",
+        "3. Accounts connected to X amplify the attacks across platforms",
+        "4. CBC never covers the harassment pattern",
+        "5. CBC features individual X again in subsequent coverage"
+      ],
+      "evidence_requirements": [
+        "CBC story URL with publication timestamp",
+        "Archived social media posts with timestamps (Wayback Machine / archive.today)",
+        "Network graph showing connection between CBC-featured individual and attacking accounts",
+        "Temporal correlation showing attacks spiking within 24 hours of CBC coverage",
+        "Documentation that CBC has not covered the harassment pattern"
+      ]
+    }
+  },
+  "influencer_tracking": {
+    "description": "Framework for identifying primary players in the coordination network",
+    "tiers": [
+      {
+        "tier": 1,
+        "label": "PRIMARY_AMPLIFIERS",
+        "criteria": "Accounts that appear in CBC stories AND conduct social media coordination",
+        "minimum_evidence": "3 documented CBC appearances + 5 documented coordinated social media actions"
+      },
+      {
+        "tier": 2,
+        "label": "SECONDARY_AMPLIFIERS",
+        "criteria": "Accounts that amplify Tier 1 content and participate in pile-ons",
+        "minimum_evidence": "10 documented amplification events + temporal correlation with Tier 1"
+      },
+      {
+        "tier": 3,
+        "label": "NETWORK_NODES",
+        "criteria": "Accounts that connect Tier 1 and Tier 2 through cross-platform sharing",
+        "minimum_evidence": "Cross-platform presence + documented sharing chains"
+      }
+    ],
+    "evidence_threshold": {
+      "naming_public": "Tier 1 only, with 5+ documented instances, publicly available evidence",
+      "analysis_internal": "All tiers tracked internally for pattern analysis",
+      "legal_review_required": true
+    }
+  },
+  "data_sources_integration": {
+    "commissioner_of_lobbying": {
+      "description": "Cross-reference social media actors with registered lobbying activity",
+      "url": "https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/clntSmmry"
+    },
+    "cbc_byline_database": {
+      "description": "Track which CBC journalists quote which sources — map to social media presence",
+      "collection": "Public CBC articles with bylines"
+    },
+    "hansard_cross_reference": {
+      "description": "Check if social media talking points mirror Hansard committee testimony",
+      "source": "ourcommons.ca"
+    },
+    "crtc_filings": {
+      "description": "Public broadcasting regulatory filings showing CBC content obligations",
+      "source": "crtc.gc.ca"
+    }
+  },
+  "reporting_schedule": {
+    "frequency": "Monthly",
+    "output": "OSINT report published on tenet-5.github.io",
+    "format": "Data visualization + narrative analysis + source citations",
+    "review": "Legal review before any individual is named"
+  }
+}

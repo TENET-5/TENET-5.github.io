@@ -1,10 +1,13 @@
 /**
- * TENET5 Daily Briefing renderer
+ * TENET5 Daily Briefing — live data engine v3
  * Loads govt_daily_briefing.json + govt_future_plans_map.json
- * Organized cinematic displays for "what govt is doing" + future map.
+ * Renders §00 Happening Now, live metrics strip, threat pill, honest note.
+ * Complements static scorecard/charts already in daily-briefing.html.
  */
 (function () {
   'use strict';
+  if (window.__TENET5_DAILY_BRIEFING_V3) return;
+  window.__TENET5_DAILY_BRIEFING_V3 = true;
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -14,169 +17,132 @@
       .replace(/"/g, '&quot;');
   }
 
-  function toneClass(t) {
-    if (t === 'critical') return ' is-critical';
-    if (t === 'high') return ' is-high';
-    if (t === 'verified') return ' is-verified';
-    return '';
+  function pageHref(page) {
+    if (!page) return '#';
+    try {
+      if (window !== window.top) {
+        return '/index.html?load=' + encodeURIComponent(page);
+      }
+    } catch (e) {}
+    /* Prefer shell when available from top-level site */
+    if (document.referrer && document.referrer.indexOf('index.html') !== -1) {
+      return 'index.html?load=' + encodeURIComponent(page);
+    }
+    return page;
   }
 
-  function revealOnScroll() {
-    var nodes = document.querySelectorAll('.cin-reveal');
-    if (!nodes.length) return;
-    if (!('IntersectionObserver' in window)) {
-      nodes.forEach(function (n) { n.classList.add('is-in'); });
+  function toneClass(t) {
+    if (t === 'critical') return ' up';
+    if (t === 'high') return ' flat';
+    if (t === 'verified') return ' down';
+    return ' flat';
+  }
+
+  function renderHappening(items) {
+    var root = document.getElementById('happening-now');
+    if (!root) return;
+    if (!items || !items.length) {
+      root.innerHTML = '<p style="color:#6a7f8c">No happening-now items in briefing data.</p>';
       return;
     }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) {
-          en.target.classList.add('is-in');
-          io.unobserve(en.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-    nodes.forEach(function (n) { io.observe(n); });
-  }
-
-  function renderMetrics(metrics) {
-    var root = document.getElementById('brief-metrics');
-    if (!root || !metrics) return;
-    root.innerHTML = metrics.map(function (m) {
-      return (
-        '<div class="cin-metric cin-reveal' + toneClass(m.tone) + '">' +
-        '<div class="m-label">' + esc(m.label) + '</div>' +
-        '<div class="m-value">' + esc(m.value) + '</div>' +
-        '<div class="m-unit">' + esc(m.unit || '') + '</div>' +
-        '<div class="m-note">' + esc(m.note || '') + '</div>' +
-        '</div>'
-      );
-    }).join('');
-  }
-
-  function renderNow(items) {
-    var root = document.getElementById('brief-now');
-    if (!root || !items) return;
     root.innerHTML = items.map(function (it) {
-      var href = it.page ? ('?load=' + encodeURIComponent(it.page)) : '#';
-      if (window.location.pathname && window.location.pathname.indexOf('index.html') === -1 &&
-          window === window.top) {
-        href = it.page || '#';
-      }
+      var href = pageHref(it.page);
       var src = (it.sources || []).slice(0, 2).map(function (s) {
         return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>';
       }).join(' · ');
       return (
-        '<a class="cin-event cin-reveal" href="' + esc(href) + '">' +
-        '<div class="ev-domain">' + esc(it.domain) + '</div>' +
-        '<div>' +
-        '<h3 class="ev-head">' + esc(it.headline) + '</h3>' +
-        '<p class="ev-body">' + esc(it.body) + '</p>' +
-        (src ? '<p class="cin-sources" style="margin-top:8px">' + src + '</p>' : '') +
-        '</div>' +
-        '<span class="ev-sev ' + esc(it.severity || '') + '">' + esc(it.severity || it.status || '') + '</span>' +
+        '<a class="happen-card" href="' + esc(href) + '">' +
+          '<div class="happen-domain">' + esc(it.domain || '') + '</div>' +
+          '<div>' +
+            '<h3>' + esc(it.headline || '') + '</h3>' +
+            '<p>' + esc(it.body || '') + '</p>' +
+            (src ? '<div class="happen-src">' + src + '</div>' : '') +
+          '</div>' +
+          '<span class="happen-sev">' + esc(it.severity || it.status || '') + '</span>' +
         '</a>'
       );
     }).join('');
   }
 
-  function renderFuture(summary) {
-    var root = document.getElementById('brief-future');
-    if (!root || !summary) return;
-    root.innerHTML = summary.map(function (h) {
-      var lis = (h.items || []).map(function (i) {
-        return '<li>' + esc(i) + '</li>';
-      }).join('');
+  function renderLiveMetrics(metrics) {
+    var root = document.getElementById('brief-metrics-live');
+    if (!root || !metrics || !metrics.length) return;
+    root.innerHTML = metrics.map(function (m) {
       return (
-        '<div class="cin-horizon cin-reveal">' +
-        '<div class="hz-label">' + esc(h.horizon) + '</div>' +
-        '<ul>' + lis + '</ul>' +
+        '<div class="metric-card visible" data-anim="card">' +
+          '<div class="metric-label">' + esc(m.label) + '</div>' +
+          '<div class="metric-value" style="font-size:clamp(22px,3vw,34px)">' + esc(m.value) + '</div>' +
+          '<span class="metric-delta' + toneClass(m.tone) + '">' + esc(m.unit || '') + '</span>' +
+          '<div class="metric-source">' + esc(m.note || '') + '</div>' +
         '</div>'
       );
     }).join('');
   }
 
-  function renderCluster(cluster) {
-    var root = document.getElementById('cluster-map');
-    if (!root || !cluster) return;
-    var points = cluster.points || [];
-    root.innerHTML = points.map(function (p) {
-      var primary = (p.status || '').toUpperCase() === 'PRIMARY';
-      return (
-        '<div class="cin-node cin-reveal' + (primary ? ' is-primary' : '') + '">' +
-        '<div class="n-status">' + esc(p.status || 'OPEN') + '</div>' +
-        '<div class="n-label">' + esc(p.label) + '</div>' +
-        '</div>'
-      );
-    }).join('');
-  }
-
-  function renderPlansDetail(plans) {
-    var root = document.getElementById('plans-detail');
-    if (!root || !plans) return;
+  function renderFutureDetail(plans) {
+    var host = document.getElementById('future-plans-detail');
+    if (!host || !plans) return;
     var stated = plans.stated_plans || [];
     var inf = plans.inferred_trajectories || [];
-    var html = '<div class="cin-stagger">';
+    var html = '';
     stated.forEach(function (p) {
       html +=
-        '<article class="cin-sheet cin-reveal" style="margin-bottom:14px">' +
-        '<div class="cin-kicker">' + esc(p.confidence) + ' · STATED</div>' +
-        '<h3 class="cin-title" style="font-size:1.15rem">' + esc(p.label) + '</h3>' +
-        '<p class="cin-deck" style="max-width:none;font-size:0.92rem"><strong>Near:</strong> ' + esc(p.near) + '</p>' +
-        '<p class="cin-deck" style="max-width:none;font-size:0.92rem;margin-top:8px"><strong>Mid:</strong> ' + esc(p.mid) + '</p>' +
-        '<p class="cin-deck" style="max-width:none;font-size:0.92rem;margin-top:8px"><strong>Long:</strong> ' + esc(p.long) + '</p>' +
-        '<p class="cin-honest" style="margin-top:12px">Watch: ' + esc(p.watch || '') + '</p>' +
-        '</article>';
+        '<div class="conn-card visible" style="opacity:1;transform:none">' +
+          '<div class="conn-label">STATED · ' + esc(p.confidence || '') + '</div>' +
+          '<div class="conn-chain">' + esc(p.label) + '</div>' +
+          '<div class="conn-detail"><strong>Near:</strong> ' + esc(p.near) + '</div>' +
+          '<div class="conn-detail" style="margin-top:6px"><strong>Mid:</strong> ' + esc(p.mid) + '</div>' +
+          '<div class="conn-detail" style="margin-top:6px"><strong>Long:</strong> ' + esc(p.long) + '</div>' +
+          '<div class="conn-detail" style="margin-top:8px;color:#6a7f8c">Watch: ' + esc(p.watch || '') + '</div>' +
+        '</div>';
     });
     inf.forEach(function (p) {
       html +=
-        '<article class="cin-sheet cin-reveal" style="margin-bottom:14px;border-style:dashed">' +
-        '<div class="cin-kicker">' + esc(p.confidence) + ' · INFERENCE</div>' +
-        '<h3 class="cin-title" style="font-size:1.15rem">' + esc(p.label) + '</h3>' +
-        '<p class="cin-deck" style="max-width:none;font-size:0.92rem">' + esc(p.claim) + '</p>' +
-        '<p class="cin-deck" style="max-width:none;font-size:0.88rem;margin-top:8px"><strong>If true:</strong> ' + esc(p.if_true_then) + '</p>' +
-        '<p class="cin-deck" style="max-width:none;font-size:0.88rem;margin-top:6px"><strong>Falsifiable by:</strong> ' + esc(p.falsifiable_by) + '</p>' +
-        '</article>';
+        '<div class="conn-card visible" style="opacity:1;transform:none;border-style:dashed">' +
+          '<div class="conn-label">INFERENCE · ' + esc(p.confidence || '') + '</div>' +
+          '<div class="conn-chain">' + esc(p.label) + '</div>' +
+          '<div class="conn-detail">' + esc(p.claim) + '</div>' +
+          '<div class="conn-detail" style="margin-top:6px"><strong>If true:</strong> ' + esc(p.if_true_then) + '</div>' +
+          '<div class="conn-detail" style="margin-top:6px"><strong>Falsifiable by:</strong> ' + esc(p.falsifiable_by) + '</div>' +
+        '</div>';
     });
-    html += '</div>';
-    root.innerHTML = html;
+    host.innerHTML = html || '';
   }
 
-  function setHero(data) {
+  function applyHero(brief) {
     var t = document.getElementById('brief-title');
-    var s = document.getElementById('brief-subtitle');
     var o = document.getElementById('brief-oneline');
-    var th = document.getElementById('brief-threat');
-    var d = document.getElementById('brief-date');
-    if (t) t.textContent = data.title || 'Daily briefing';
-    if (s) s.textContent = data.subtitle || '';
-    if (o) o.textContent = data.one_line || '';
-    if (th) th.textContent = 'Threat ' + (data.threat_level || '—');
-    if (d) d.textContent = data.date || '';
-    var note = document.getElementById('brief-honest');
-    if (note && data.honest_note) note.textContent = data.honest_note;
+    var h = document.getElementById('brief-honest');
+    var thr = document.getElementById('threat-pill');
+    if (t && brief.title) t.textContent = brief.title;
+    if (o && brief.one_line) o.textContent = brief.one_line;
+    if (h && brief.honest_note) h.textContent = brief.honest_note;
+    if (thr && brief.threat_level) thr.textContent = 'Threat ' + String(brief.threat_level).toUpperCase();
   }
 
   function boot() {
     Promise.all([
-      fetch('/data/govt_daily_briefing.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
-      fetch('/data/govt_future_plans_map.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).catch(function () { return null; })
+      fetch('/data/govt_daily_briefing.json', { cache: 'no-cache' }).then(function (r) {
+        if (!r.ok) throw new Error('brief ' + r.status);
+        return r.json();
+      }),
+      fetch('/data/govt_future_plans_map.json', { cache: 'no-cache' }).then(function (r) {
+        return r.ok ? r.json() : null;
+      }).catch(function () { return null; })
     ]).then(function (pair) {
       var brief = pair[0];
       var plans = pair[1];
-      setHero(brief);
-      renderMetrics(brief.metrics);
-      renderNow(brief.happening_now);
-      renderFuture(brief.future_plans_summary);
-      renderCluster(brief.cluster_map);
-      if (plans) renderPlansDetail(plans);
-      revealOnScroll();
+      applyHero(brief);
+      renderHappening(brief.happening_now);
+      renderLiveMetrics(brief.metrics);
+      if (plans) renderFutureDetail(plans);
     }).catch(function (err) {
-      var root = document.getElementById('brief-now');
+      var root = document.getElementById('happening-now');
       if (root) {
-        root.innerHTML = '<p class="cin-deck">Could not load briefing data. Check /data/govt_daily_briefing.json</p>';
+        root.innerHTML =
+          '<p style="color:#b0544a;font-size:14px">Could not load /data/govt_daily_briefing.json — static sections below still render. (' +
+          esc(String(err && err.message || err)) + ')</p>';
       }
-      console.warn('[daily-briefing]', err);
     });
   }
 

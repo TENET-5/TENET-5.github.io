@@ -174,6 +174,12 @@
     'criminal-code-analysis.html',
     'prosecution.html',
 
+    // ── 5GW / MEDIA VECTOR ──
+    '5gw-subversion.html',
+    'cbc-5gw-media-vector.html',
+    'media-capture.html',
+    'media-concentration.html',
+
     // ── GOVERNMENT CORRUPTION ──
     'accountability.html',
     'scandals.html',

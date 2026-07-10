@@ -24,6 +24,7 @@
           { label: 'Reading Order', href: 'reading-order.html' },
           { label: 'OSINT Dashboard', href: 'osint-dashboard.html' },
           { label: 'Griffon GLLE file', href: 'griffon-glle-procurement.html' },
+          { label: 'CBC 5GW vector', href: 'cbc-5gw-media-vector.html' },
           { label: 'Evidence Index', href: 'evidence-index.html' },
         ]
       },

@@ -43,8 +43,13 @@
   }
 
   onReady(function () {
-    /* ── auto-enhance: give content blocks editorial rise without markup ── */
-    if (!rm) {
+    /* ── auto-enhance: give content blocks editorial rise without markup ──
+       SKIPPED on scroll-snap presentation pages: animated transforms move
+       snap targets while the snap engine settles → viewport oscillation
+       (the "shake"). Slides get their own choreography from cinema.js. */
+    var snapPage = document.body.classList.contains('pres-active') ||
+                   document.querySelector('.pres-slide') !== null;
+    if (!rm && !snapPage) {
       var autoSel = [
         'main h2', '.content h2', 'article h2',
         '.card', '.data-card', '.evidence-box', '.finding-card', '.metric-card',

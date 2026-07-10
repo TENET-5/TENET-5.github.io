@@ -10,7 +10,7 @@
   window.__LIRIL_DOCUMENTARY_LOADED = true;
 
   var CHAPTERS_URL = '/data/documentary_chapters.json';
-  var CSS_HREF = '/css/documentary-tour.css?v=1';
+  var CSS_HREF = '/css/documentary-tour.css?v=2';
   var state = {
     data: null,
     index: 0,
@@ -346,11 +346,15 @@
     btn.id = 'liril-doc-start';
     btn.type = 'button';
     btn.setAttribute('aria-label', 'Start LIRIL documentary tour of the website');
-    btn.innerHTML = '▶ Documentary';
+    btn.innerHTML = 'Documentary';
+    btn.setAttribute('title', 'Watchable + navigable guided tour of the record');
     btn.addEventListener('click', function () {
       start(true);
     });
-    document.body.appendChild(btn);
+    /* Avoid double CTA on pages that already ship their own documentary button */
+    if (!document.getElementById('btn-doc') && !document.querySelector('.doc-cta')) {
+      document.body.appendChild(btn);
+    }
   }
 
   function start(fromUser) {
