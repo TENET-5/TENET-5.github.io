@@ -312,6 +312,12 @@ def apply_page(path: Path) -> bool:
         NAV = _nav(prefix)
         if RE_HEADER.search(text):
             text = RE_HEADER.sub(NAV, text, count=1)
+            # kill duplicate/stale headers left behind (mirror_reports carried
+            # a second unprefixed press-bar whose links 404 from subdirs)
+            extras = list(RE_HEADER.finditer(text))
+            if len(extras) > 1:
+                for m in reversed(extras[1:]):
+                    text = text[: m.start()] + text[m.end() :]
         elif 'class="press-bar' not in text:
             text = re.sub(r"(<body\b[^>]*>)", r"\1\n" + NAV, text, count=1, flags=re.I)
 
