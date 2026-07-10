@@ -39,6 +39,17 @@ BUCKETS = [
      "Published dossiers"),
 ]
 
+FUTURE_BUCKETS = [
+    ("future-now",   0, "I",   "The immediate<br><em>anticipation.</em>",
+     "Live ingestion · projecting the next 48 hours"),
+    ("future-week",  0, "II",  "Seven days<br><em>forward.</em>",
+     "Anticipated maneuvers"),
+    ("future-month", 0, "III", "The coming<br><em>month.</em>",
+     "Predictive modeling · policy fallout"),
+    ("future-year",  0, "IV",  "The year<br><em>unfolding.</em>",
+     "Structural consequences"),
+]
+
 
 def esc(s: str) -> str:
     return html.escape(str(s), quote=True)
