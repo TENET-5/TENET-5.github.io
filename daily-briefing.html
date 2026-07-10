@@ -15,6 +15,7 @@
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
 <meta name="theme-color" content="#050708">
+<!-- theme: css/quantanium-spec.css only — edit that file to restyle the site -->
 </head>
 <body>
   <header class="press-bar">
@@ -154,77 +155,17 @@
   <div class="origin">TENET5 is an independent Canadian public-interest newsroom, created amid an ongoing political prosecution by the Canadian Forces military police for identifying foreign interference in the military. Public record only — no private data. Machines read. People verify. LIRIL speaks. · © 2026 TENET5</div>
 </footer>
 
-<div class="dock" id="dock">
+<div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
   <div class="dock-in">
-    <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     <div class="say"><b>LIRIL</b><span id="liril-line">We begin at this hour.</span></div>
-    <button id="voice-btn" type="button" title="LIRIL speaks each chapter aloud">Voice · Off</button>
+    <button id="liril-guide-btn" type="button" title="Start LIRIL as your guide through the record">Guide me</button>
+    <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice narration">Voice · Off</button>
+    <div class="liril-status" id="liril-status">LIRIL loading…</div>
   </div>
 </div>
-<script src="js/liril-voice.js"></script>
-<script>
-  document.documentElement.classList.add('js');
-  (function(){
-    var el=document.getElementById('dateline');
-    if(el){var d=new Date();
-      var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      var mons=['January','February','March','April','May','June','July','August','September','October','November','December'];
-      el.textContent=days[d.getDay()]+', '+mons[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}
-    var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-    },{threshold:.1}):null;
-    document.querySelectorAll('.rv').forEach(function(el){ io?io.observe(el):el.classList.add('in'); });
-    var dock=document.getElementById('dock');
-    var lineEl=document.getElementById('liril-line');
-    var voiceBtn=document.getElementById('voice-btn');
-    var voiceOn=false,lastCh=null;
-    voiceBtn&&voiceBtn.addEventListener('click',function(){
-      voiceOn=!voiceOn;
-      voiceBtn.textContent='Voice · '+(voiceOn?'On':'Off');
-      voiceBtn.classList.toggle('on',voiceOn);
-      if(voiceOn) say("Voice on. I will read each chapter as you arrive.");
-    });
-    function say(text){
-      if(lineEl) lineEl.textContent=text;
-      if(voiceOn&&window.LIRIL_VOICE&&typeof window.LIRIL_VOICE.speak==='function'){
-        dock.classList.add('speaking');
-        window.LIRIL_VOICE.speak(text);
-        setTimeout(function(){ dock.classList.remove('speaking'); },Math.min(9000,90*text.length));
-      }
-    }
-    var chapters=document.querySelectorAll('section.ch');
-    var segs={};
-    document.querySelectorAll('.rail .seg').forEach(function(s){ segs[s.getAttribute('data-ch')]=s; });
-    if('IntersectionObserver' in window && chapters.length){
-      var chIO=new IntersectionObserver(function(es){
-        es.forEach(function(e){
-          if(!e.isIntersecting) return;
-          var id=e.target.id;
-          if(id===lastCh) return;
-          lastCh=id;
-          Object.keys(segs).forEach(function(k){ segs[k].classList.toggle('on',k===id); });
-          say(e.target.getAttribute('data-line')||'');
-        });
-      },{threshold:.25});
-      chapters.forEach(function(c){ chIO.observe(c); });
-      var cover=document.querySelector('.cover');
-      if(cover){
-        var coverIO=new IntersectionObserver(function(es){
-          dock.classList.toggle('up',!es[0].isIntersecting);
-        },{threshold:.3});
-        coverIO.observe(cover);
-      } else dock.classList.add('up');
-    } else dock.classList.add('up');
-    var fs=document.getElementById('film-stats');
-    if(fs) fetch('data/film/manifest.json',{cache:'no-cache'})
-      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-      .then(function(m){
-        var t=m.totals||{};
-        fs.textContent=(t.acts||'—')+' acts · '+(t.segments||'—')+' beats · '+
-          (t.duration_label||'multi-hour')+' · narrated by LIRIL';
-      }).catch(function(){});
-  })();
-</script>
+<script src="js/liril-voice.js?v=42" defer></script>
+<script src="js/liril-home-guide.js?v=3" defer></script>
   <footer class="press-foot">
     <span>TENET5 · Powered by LIRIL AI</span>
     <a href="methodology-transparency.html">Methodology</a>

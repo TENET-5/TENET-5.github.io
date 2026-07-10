@@ -491,8 +491,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=64">
-<!-- theme: css/press-theme.css only — edit that file to restyle the site -->
+<link rel="stylesheet" href="css/quantanium-spec.css?v=60">
+<!-- theme: css/quantanium-spec.css only — edit that file to restyle the site -->
 </head>
 <body>
 """
@@ -517,6 +517,7 @@ def footer_html(site: dict) -> str:
 
 
 def dock_and_script(site: dict, with_rail: bool) -> str:
+    """LIRIL system guide chrome: rail + always-on dock + voice/guide scripts."""
     rail = """
 <nav class="rail" aria-label="Timeline">
   <a class="seg" href="#now" data-ch="now"><span class="lbl">This Hour</span><span class="dot"></span></a>
@@ -525,78 +526,19 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
   <a class="seg" href="#year" data-ch="year"><span class="lbl">This Year</span><span class="dot"></span></a>
   <a class="seg" href="#era" data-ch="era"><span class="lbl">The Era</span><span class="dot"></span></a>
 </nav>""" if with_rail else ""
+    # Cover inject: Guide me button inside liril-intro (patched after build if needed)
     return rail + f"""
-<div class="dock" id="dock">
+<div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
   <div class="dock-in">
-    <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="say"><b>LIRIL</b><span id="liril-line">{esc(site["liril_default"])}</span></div>
-    <button id="voice-btn" type="button" title="LIRIL speaks each chapter aloud">Voice · Off</button>
+    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="say"><b>LIRIL</b><span id="liril-line">{esc(site.get("liril_default", "We begin at this hour."))}</span></div>
+    <button id="liril-guide-btn" type="button" title="Start LIRIL as your guide through the record">Guide me</button>
+    <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice narration">Voice · Off</button>
+    <div class="liril-status" id="liril-status">LIRIL loading…</div>
   </div>
 </div>
-<script src="js/liril-voice.js"></script>
-<script>
-  document.documentElement.classList.add('js');
-  (function(){{
-    var el=document.getElementById('dateline');
-    if(el){{var d=new Date();
-      var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      var mons=['January','February','March','April','May','June','July','August','September','October','November','December'];
-      el.textContent=days[d.getDay()]+', '+mons[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}}
-    var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){{
-      es.forEach(function(e){{ if(e.isIntersecting){{ e.target.classList.add('in'); io.unobserve(e.target);}} }});
-    }},{{threshold:.1}}):null;
-    document.querySelectorAll('.rv').forEach(function(el){{ io?io.observe(el):el.classList.add('in'); }});
-    var dock=document.getElementById('dock');
-    var lineEl=document.getElementById('liril-line');
-    var voiceBtn=document.getElementById('voice-btn');
-    var voiceOn=false,lastCh=null;
-    voiceBtn&&voiceBtn.addEventListener('click',function(){{
-      voiceOn=!voiceOn;
-      voiceBtn.textContent='Voice · '+(voiceOn?'On':'Off');
-      voiceBtn.classList.toggle('on',voiceOn);
-      if(voiceOn) say("Voice on. I will read each chapter as you arrive.");
-    }});
-    function say(text){{
-      if(lineEl) lineEl.textContent=text;
-      if(voiceOn&&window.LIRIL_VOICE&&typeof window.LIRIL_VOICE.speak==='function'){{
-        dock.classList.add('speaking');
-        window.LIRIL_VOICE.speak(text);
-        setTimeout(function(){{ dock.classList.remove('speaking'); }},Math.min(9000,90*text.length));
-      }}
-    }}
-    var chapters=document.querySelectorAll('section.ch');
-    var segs={{}};
-    document.querySelectorAll('.rail .seg').forEach(function(s){{ segs[s.getAttribute('data-ch')]=s; }});
-    if('IntersectionObserver' in window && chapters.length){{
-      var chIO=new IntersectionObserver(function(es){{
-        es.forEach(function(e){{
-          if(!e.isIntersecting) return;
-          var id=e.target.id;
-          if(id===lastCh) return;
-          lastCh=id;
-          Object.keys(segs).forEach(function(k){{ segs[k].classList.toggle('on',k===id); }});
-          say(e.target.getAttribute('data-line')||'');
-        }});
-      }},{{threshold:.25}});
-      chapters.forEach(function(c){{ chIO.observe(c); }});
-      var cover=document.querySelector('.cover');
-      if(cover){{
-        var coverIO=new IntersectionObserver(function(es){{
-          dock.classList.toggle('up',!es[0].isIntersecting);
-        }},{{threshold:.3}});
-        coverIO.observe(cover);
-      }} else dock.classList.add('up');
-    }} else dock.classList.add('up');
-    var fs=document.getElementById('film-stats');
-    if(fs) fetch('data/film/manifest.json',{{cache:'no-cache'}})
-      .then(function(r){{ if(!r.ok) throw 0; return r.json(); }})
-      .then(function(m){{
-        var t=m.totals||{{}};
-        fs.textContent=(t.acts||'—')+' acts · '+(t.segments||'—')+' beats · '+
-          (t.duration_label||'multi-hour')+' · narrated by LIRIL';
-      }}).catch(function(){{}});
-  }})();
-</script>
+<script src="js/liril-voice.js?v=42" defer></script>
+<script src="js/liril-home-guide.js?v=3" defer></script>
 </body>
 </html>"""
 
@@ -791,8 +733,11 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <div class="liril-intro">
       <div class="who">LIRIL · Your Guide</div>
       <p>&ldquo;{esc(site["liril_cover"])}&rdquo;</p>
+      <div class="guide-actions">
+        <button type="button" class="guide-cta" id="liril-guide-btn-cover">Guide me</button>
+        <a class="begin" href="#now" id="begin-record"><span>Begin the record</span><span class="arrow"></span></a>
+      </div>
     </div>
-    <a class="begin" href="#now"><span>Begin</span><span class="arrow"></span></a>
   </div>
 </header>"""
 

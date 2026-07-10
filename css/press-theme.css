@@ -4,14 +4,7 @@
    Every public page loads ONLY this file (+ Fraunces/IBM fonts).
    Changing this file changes the whole site. WordPress-style.
    ═══════════════════════════════════════════════════════════════════════ */
-:root{
-  --void:#050708;--ink:#0b0e10;
-  --ivory:#ece7dc;--ivory-dim:#a89f90;--ivory-faint:#6b6459;
-  --hair:#26221c;--hair-lit:#3a342b;
-  --ice:#9adbe8;--ice-deep:#3f7c8c;
-  --red:#c8102e;--red-deep:#8f0f24;--gold:#d3a625;
-  --serif:'Fraunces',Georgia,serif;--mono:'IBM Plex Mono',Consolas,monospace;
-}
+
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{background:var(--void);color:var(--ivory);font-family:var(--serif);
@@ -236,14 +229,16 @@ a{color:inherit;text-decoration:none}a:hover{color:var(--ice)}
 .rail .seg.on .dot{background:var(--ice);border-color:var(--ice);box-shadow:0 0 10px rgba(238,246,250,.4)}
 .rail .seg.on .lbl{opacity:1;transform:none;color:var(--ivory)}
 @media(max-width:900px){.rail{display:none}}
+/* LIRIL guide dock — always visible on home (guide chrome, not a footer afterthought) */
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:95;
   background:linear-gradient(180deg,transparent,rgba(5,7,8,.88) 30%,rgba(5,7,8,.97));
   border-top:1px solid var(--hair);backdrop-filter:blur(10px);
   box-shadow:0 -24px 48px -18px rgba(0,0,0,.7);
-  transform:translateY(110%);transition:transform .6s ease}
-.dock.up{transform:none}
-.dock-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:18px;
-  padding:12px clamp(20px,4vw,56px)}
+  transform:none;transition:transform .6s ease}
+.dock:not(.up):not(.guide-ready){transform:translateY(110%)}
+.dock.up,.dock.guide-ready{transform:none}
+.dock-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px;
+  padding:12px clamp(20px,4vw,56px);flex-wrap:wrap}
 .dock .eq{display:flex;align-items:flex-end;gap:2.5px;height:18px;flex-shrink:0;opacity:.4;transition:opacity .3s}
 .dock.speaking .eq{opacity:1}
 .dock .eq i{display:block;width:3px;background:var(--ice);border-radius:1px;height:30%}
@@ -253,15 +248,31 @@ a{color:inherit;text-decoration:none}a:hover{color:var(--ice)}
 .dock .eq i:nth-child(4){height:90%;animation-delay:.36s}
 .dock .eq i:nth-child(5){height:55%;animation-delay:.48s}
 @keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
-.dock .say{flex:1;font-style:italic;font-size:14px;color:var(--ivory-dim);
+.dock .say{flex:1;min-width:min(100%,220px);font-style:italic;font-size:14px;color:var(--ivory-dim);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dock .say b{color:var(--ice);font-style:normal;font-family:var(--mono);font-size:10px;
   letter-spacing:.24em;text-transform:uppercase;margin-right:12px}
+.dock .liril-status{width:100%;order:5;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ivory-faint);margin-top:2px}
 .dock button{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
   background:none;border:1px solid var(--hair-lit);color:var(--ivory-dim);padding:7px 14px;
   border-radius:2px;cursor:pointer;flex-shrink:0}
 .dock button:hover{border-color:var(--ice);color:var(--ice)}
 .dock button.on{border-color:var(--ice);color:var(--void);background:var(--ice)}
+.dock #liril-guide-btn{border-color:var(--ice);color:var(--ice)}
+.dock #liril-guide-btn.on{background:var(--ice);color:var(--void)}
+/* Cover guide CTA */
+.liril-intro .guide-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.liril-intro .guide-cta{
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  background:var(--ice);color:var(--void);border:1px solid var(--ice);padding:10px 16px;
+  border-radius:2px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.liril-intro .guide-cta:hover{filter:brightness(1.06);color:var(--void)}
+body{padding-bottom:88px} /* room for LIRIL dock */
+@media(max-width:640px){
+  .dock .say{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .dock-in{padding:10px 14px}
+}
 
 /* evidence shelf */
 .shelf-controls{display:flex;gap:14px;margin:4vh 0;flex-wrap:wrap}
@@ -476,3 +487,55 @@ footer .origin{margin-top:5vh;border-top:1px solid var(--hair);padding-top:22px;
     .tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.brand-crest,
     img[src*="crest"],.ambient-glow,.grain-overlay,.vignette{display:none!important}
   
+
+
+/* TIMELINE SYSTEM (Chronology of Genocide) */
+.timeline-grid {
+  position: relative;
+  max-width: 900px;
+  margin: 40px auto;
+  padding-left: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.timeline-grid::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 10px;
+  width: 1px;
+  background: var(--slate-ice-edge, rgba(154,219,232,0.16));
+}
+.timeline-node {
+  position: relative;
+}
+.timeline-marker {
+  position: absolute;
+  left: -24px;
+  top: 14px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--slate-ice, #9adbe8);
+  box-shadow: 0 0 10px var(--slate-ice);
+  z-index: 2;
+}
+.timeline-marker.critical {
+  background: var(--slate-red, #c8102e);
+  box-shadow: 0 0 12px var(--slate-red);
+}
+.timeline-date {
+  font-family: var(--mono, 'IBM Plex Mono', monospace);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--slate-ice, #9adbe8);
+  display: block;
+  margin-bottom: 8px;
+}
+.timeline-date.critical {
+  color: var(--slate-red, #c8102e);
+}
+.timeline-content {
+  padding: 24px;
+}
+
