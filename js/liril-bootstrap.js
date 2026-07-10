@@ -68,6 +68,7 @@
     { key: 'voice',        src: '/js/liril-voice.js' },
     { key: 'walkthrough',  src: '/js/liril-walkthrough.js' },
     { key: 'presentation', src: '/js/presentation.js' },
+    { key: 'documentary',  src: '/js/liril-documentary.js?v=1' },
     { key: 'readnext',     src: '/readnext.js' }
   ];
 

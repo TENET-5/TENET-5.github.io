@@ -70,9 +70,9 @@
       toast.setAttribute('aria-live', 'polite');
       toast.textContent = text.length > 120 ? text.substring(0, 117) + '…' : text;
       toast.style.cssText = 'position:fixed;left:50%;bottom:88px;transform:translateX(-50%);' +
-        'max-width:min(640px,92vw);background:rgba(12,14,20,0.92);color:#eceff4;' +
-        'border:1px solid rgba(139,92,246,0.35);border-radius:10px;padding:10px 18px;' +
-        'font-family:Inter,system-ui,sans-serif;font-size:0.85rem;line-height:1.5;' +
+        'max-width:min(640px,92vw);background:rgba(2,4,8,0.92);color:#f5fafc;' +
+        'border:1px solid rgba(238,246,250,0.22);border-radius:6px;padding:10px 18px;' +
+        'font-family:"Atkinson Hyperlegible",sans-serif;font-size:0.85rem;line-height:1.5;' +
         'z-index:10001;box-shadow:0 12px 32px rgba(0,0,0,0.5);pointer-events:none;';
       document.body.appendChild(toast);
       setTimeout(function () { try { toast.remove(); } catch(e){} }, 16000);
@@ -112,8 +112,10 @@
      ═══════════════════════════════════════════════════════════════════ */
 
   var PAGE_SEQUENCE = [
-    // ── OPENING ──
+    // ── OPENING + DAILY INTELLIGENCE ──
     'home.html',
+    'daily-briefing.html',
+    'osint-dashboard.html',
     'complete-thesis.html',
     'who-is-harmed.html',
     'reading-order.html',

@@ -376,3 +376,25 @@ li::marker { color: #a8bcc8 !important; }
     background: rgba(12,20,28,0.9) !important;
   }
 }
+
+/* ═══ RESPONSIVE HARDENING (2026-07-10) — resolution-aware mobile → ultrawide ═══
+   Universally-safe rules only: prevent overflow, fluid media, collapse dense grids on
+   small screens, give prose a fluid reading measure that GROWS on wide screens instead
+   of ribboning. Loaded last so it corrects the cascade without touching scene designs. */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, svg, video, canvas, iframe, table, pre, blockquote { max-width: 100%; }
+img, svg, video, canvas { height: auto; }
+table { display: block; overflow-x: auto; }              /* wide tables scroll, never overflow the page */
+/* prose reading measure: never a fixed narrow ribbon; scales up to ~78ch on wide screens */
+.prose, .arg-body, .doc-body, .chapter, .entry__body, .tl-entry, .card p, article p, main p {
+  max-width: min(78ch, 92vw) !important;
+}
+/* dense 2-up grids collapse to a single column on phones */
+@media (max-width: 760px) {
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+/* ultrawide: let centered content breathe instead of stranding it in a tiny column */
+@media (min-width: 1600px) {
+  .container, main, .content, .doc, .scene__inner { margin-inline: auto; }
+}

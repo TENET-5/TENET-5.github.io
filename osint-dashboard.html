@@ -23,17 +23,18 @@
   <title>OSINT Intelligence Dashboard | TENET5</title>
   <meta name="description" content="The TENET5 OSINT intelligence dashboard — signals and analysis across the Canadian federal accountability investigation, sourced to public government and court records.">
   <!-- QUANTANIUM load order: tokens FIRST (contract rule 4) -->
-  <link rel="stylesheet" href="/css/tokens.css?v=46-ice-lake">
+  <link rel="stylesheet" href="/css/tokens.css?v=49">
   <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
+  <link rel="stylesheet" href="css/tenet5.css?v=7">
   <link rel="stylesheet" href="css/liril-utilities.css">
   <link rel="stylesheet" href="css/liril-theme.css?v=1">
-  <link rel="stylesheet" href="css/osint-dashboard.css?v=3">
-  <link rel="stylesheet" href="css/tnt-override.css?v=46">
+  <link rel="stylesheet" href="css/report-presentation.css?v=1">
+  <link rel="stylesheet" href="css/osint-dashboard.css?v=4">
+  <link rel="stylesheet" href="css/tnt-override.css?v=49">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
   <script defer src="js/liril-voice.js?v=41"></script>
-  <script defer src="js/osint-dashboard.js?v=2"></script>
+
   <meta name="scene-id" content="osint-dashboard">
   <script defer src="js/scene-template.js?v=1"></script>
 <meta property="og:image" content="https://tenet-5.github.io/img/tenet5_royal_crest.png">
@@ -41,13 +42,15 @@
   <meta property="og:description" content="TENET5 OSINT Intelligence Dashboard — TENET5 accountability investigation.">
   <meta property="og:url" content="https://tenet-5.github.io/osint-dashboard.html">
   <meta property="og:site_name" content="TENET5">
+<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
+  <link rel="stylesheet" href="css/standard.css?v=49">
 </head>
 <body class="topo liril-dashboard" data-act="sup">
     <!-- CAP224-NAV-BEGIN -->
 <style>
 /* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
 .tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
+  background:var(--slate-overlay,#03050a);border-bottom:1px solid var(--slate-border,#1a2833);
   padding:.4rem .75rem;font-family:var(--slate-font-sans,"Atkinson Hyperlegible",sans-serif);font-size:.86rem;
   align-items:center}
 .tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#ffffff);text-decoration:none;
@@ -58,9 +61,9 @@
   background:rgba(255,255,255,.08);font-weight:700}
 .tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
 .tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,#161616);border-bottom:1px solid var(--slate-border,#333333);
-  font-family:var(--slate-font-mono,"IBM Plex Mono",ui-monospace,monospace);font-size:.78rem;color:var(--slate-ink-dim,#b9b9b9)}
-.tnt-breadcrumb a{color:var(--slate-link,#e4e2dc);text-decoration:none}
+  background:var(--slate-sunken,#080c11);border-bottom:1px solid var(--slate-border,#1a2833);
+  font-family:var(--slate-font-mono,"IBM Plex Mono",ui-monospace,monospace);font-size:.72rem;letter-spacing:.06em;color:var(--slate-ink-dim,#a8bcc8)}
+.tnt-breadcrumb a{color:var(--slate-link,#eef6fa);text-decoration:none}
 .tnt-breadcrumb a:hover{color:var(--slate-link-hover,#ffffff);text-decoration:underline}
 .tnt-bc-sep{opacity:.5}
 .tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
@@ -129,10 +132,10 @@
       <div class="dashboard-card glass-card prime-brief">
         <h2 class="card-title">
           <span class="pulse-icon"></span>
-          Daily Intelligence Brief
-          <span class="timestamp" id="brief-timestamp">Loading...</span>
+          Intelligence brief
+          <span class="timestamp" id="brief-timestamp">Loading…</span>
         </h2>
-        <div class="brief-content" id="brief-content">
+        <div class="brief-content rpt-body" id="brief-content">
           <div class="text-skeleton" style="width:100%;height:14px;margin-bottom:8px"></div>
           <div class="text-skeleton" style="width:90%;height:14px;margin-bottom:8px"></div>
           <div class="text-skeleton" style="width:95%;height:14px;margin-bottom:8px"></div>
@@ -143,8 +146,8 @@
       </div>
       <hr class="s5-rule">
       <div class="dashboard-card glass-card" id="anomalies">
-        <h2 class="card-title">Procurement Anomalies</h2>
-        <div class="anomalies-feed" id="anomalies-feed">
+        <h2 class="card-title">Active findings</h2>
+        <div class="anomalies-feed rpt-findings" id="anomalies-feed">
           <!-- Populated by JS -->
         </div>
       </div>
@@ -167,8 +170,8 @@
       <hr class="s5-rule">
 
       <div class="dashboard-card glass-card recent-reports">
-        <h2 class="card-title">Latest Intelligence Reports</h2>
-        <ul class="report-list" id="report-list">
+        <h2 class="card-title">Report vault</h2>
+        <ul class="report-list rpt-list" id="report-list">
           <!-- Populated by JS -->
         </ul>
       </div>
@@ -176,7 +179,8 @@
   </div>
 </main>
 
-<script src="shell.js?v=42"></script>
+<script src="shell.js?v=48"></script>
+  <script defer src="js/osint-dashboard.js?v=4"></script>
   <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
   <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
 <!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->

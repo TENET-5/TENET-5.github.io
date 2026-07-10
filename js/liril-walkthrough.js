@@ -128,62 +128,63 @@
     if (!document.getElementById('liril-styles')) {
       var styleEl = document.createElement('style');
       styleEl.id = 'liril-styles';
+      /* QUANTANIUM ice — no purple/cyan (Awwwards two-tone discipline) */
       styleEl.textContent =
         '.liril-start-btn {' +
         '  position: fixed !important; top: 84px !important; right: 20px !important; bottom: auto !important;' +
         '  z-index: 10002 !important;' +
-        '  background: rgba(14, 165, 233, 0.92); color: white;' +
-        '  border: 1px solid rgba(34, 211, 238, 0.38);' +
+        '  background: rgba(12, 18, 25, 0.92); color: #f5fafc;' +
+        '  border: 1px solid rgba(235, 248, 255, 0.28);' +
         '  border-radius: 999px; padding: 10px 16px;' +
-        '  font-size: 0.75rem; font-weight: 700; cursor: pointer;' +
-        '  font-family: Rajdhani, Inter, sans-serif; letter-spacing: 0.08em;' +
+        '  font-size: 0.72rem; font-weight: 600; cursor: pointer;' +
+        '  font-family: "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.12em;' +
         '  text-transform: uppercase; transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;' +
-        '  box-shadow: 0 6px 18px rgba(14,165,233,0.28);' +
+        '  box-shadow: 0 8px 28px rgba(0, 8, 16, 0.45);' +
         '}' +
         '.liril-start-btn:hover {' +
-        '  background: rgba(14, 165, 233, 1); border-color: #22d3ee;' +
-        '  box-shadow: 0 0 24px rgba(14,165,233,0.5);' +
+        '  background: rgba(238, 246, 250, 0.1); border-color: rgba(235, 248, 255, 0.55);' +
+        '  box-shadow: 0 12px 32px rgba(0, 8, 16, 0.55);' +
         '  transform: translateY(-1px);' +
         '}' +
         '.liril-start-btn.liril-active {' +
-        '  background: rgba(100,100,100,0.9);' +
+        '  background: rgba(8, 12, 17, 0.95);' +
         '}' +
         '.liril-tour-progress {' +
         '  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;' +
-        '  background: rgba(5, 5, 10, 0.92);' +
+        '  background: rgba(2, 4, 8, 0.92);' +
         '  padding: 6px 20px; display: flex; align-items: center; gap: 12px;' +
-        '  border-bottom: 1px solid rgba(139, 92, 246, 0.2);' +
-        '  backdrop-filter: blur(12px);' +
+        '  border-bottom: 1px solid rgba(168, 188, 200, 0.12);' +
+        '  backdrop-filter: blur(16px);' +
         '  box-shadow: 0 2px 12px rgba(0,0,0,0.4);' +
-        '  font-family: IBM Plex Mono, monospace;' +
+        '  font-family: "IBM Plex Mono", ui-monospace, monospace;' +
         '}' +
         '.liril-tour-label {' +
-        '  font-size: 0.6rem; color: #8b5cf6;' +
+        '  font-size: 0.6rem; color: #eef6fa;' +
         '  letter-spacing: 2px; text-transform: uppercase; white-space: nowrap;' +
         '}' +
         '.liril-tour-track {' +
-        '  flex: 1; height: 3px; background: rgba(139, 92, 246, 0.12);' +
+        '  flex: 1; height: 3px; background: rgba(168, 188, 200, 0.12);' +
         '  border-radius: 2px; overflow: hidden;' +
         '}' +
         '.liril-tour-fill {' +
-        '  height: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);' +
+        '  height: 100%; background: linear-gradient(90deg, #a8bcc8, #eef6fa);' +
         '  border-radius: 2px; transition: width 0.8s ease;' +
         '}' +
         '.liril-tour-count {' +
-        '  font-size: 0.6rem; color: rgba(139, 92, 246, 0.6);' +
+        '  font-size: 0.6rem; color: #6a7f8c;' +
         '  letter-spacing: 1px; white-space: nowrap;' +
         '}' +
         '.liril-tour-stop {' +
-        '  background: none; border: 1px solid rgba(139, 92, 246, 0.3);' +
-        '  color: #a78bfa; padding: 2px 10px; border-radius: 3px;' +
+        '  background: none; border: 1px solid rgba(168, 188, 200, 0.3);' +
+        '  color: #a8bcc8; padding: 2px 10px; border-radius: 3px;' +
         '  font-size: 0.55rem; cursor: pointer; font-family: inherit;' +
         '  letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s;' +
         '}' +
         '.liril-tour-stop:hover {' +
-        '  background: rgba(139, 92, 246, 0.15); border-color: #8b5cf6;' +
+        '  background: rgba(238, 246, 250, 0.08); border-color: #eef6fa; color: #fff;' +
         '}' +
         '@media (max-width: 768px) {' +
-        '  .liril-start-btn { top: 72px !important; right: 12px !important; padding: 7px 12px; font-size: 0.72rem; }' +
+        '  .liril-start-btn { top: 72px !important; right: 12px !important; padding: 7px 12px; font-size: 0.62rem; }' +
         '  .liril-tour-progress { padding: 4px 12px; gap: 8px; }' +
         '  .liril-tour-label { font-size: 0.5rem; }' +
         '}';

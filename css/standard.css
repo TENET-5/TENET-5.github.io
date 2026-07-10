@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   STANDARD.CSS — TENET5 cross-page layout law (QUANTANIUM 1.4+)
+   ═══════════════════════════════════════════════════════════════════════
+   Loaded LAST on every page (after tokens.css → style.css → feature css →
+   tnt-override.css). One layout standard for all 345 pages.
+
+   Fixes the systemic breakage classes observed in the field (2026-07-10):
+     A. edge-to-edge prose walls (no reading column)
+     B. unbreakable URLs crushing grid/flex siblings into ~30ch slivers
+     C. body prose rendering in mono (data-dump look)
+     D. neon category colours on listings (off-contract)
+     E. numbers that don't align (non-tabular)
+     F. no vertical rhythm between sections
+
+   Values mirror the canonical contract in css/tokens.css + QUANTANIUM.json.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* A · READING RAIL — every page gets a centered content rail; prose lines
+   cap at a readable measure while tables/figures/grids use the full rail. */
+main, article, .content, .page-content, [role="main"] {
+  max-width: var(--slate-max-wide, 1200px) !important;
+  margin-inline: auto !important;
+  padding-inline: clamp(18px, 4vw, 44px) !important;
+  box-sizing: border-box;
+}
+main p, main li, main dd, main blockquote,
+.content p, .content li, .content dd, .content blockquote,
+article p, article li, article dd, article blockquote {
+  max-width: 74ch;               /* readable measure, never edge-to-edge */
+  line-height: 1.72 !important;
+}
+/* hero/lede copy centers with the hero */
+.page-hero { text-align: center; padding-block: clamp(28px, 6vw, 64px); }
+.page-hero p, .hero-sub {
+  max-width: 62ch !important;
+  margin-inline: auto !important;
+  color: var(--slate-ink-dim, #a8bcc8) !important;
+}
+
+/* B · OVERFLOW ARMOR — long URLs / hashes may never crush a layout.
+   min-width:0 restores shrinkability to every grid/flex child; anywhere-
+   wrapping breaks unbreakable strings instead of the layout. */
+main *, .content *, article * { min-width: 0; }
+a, td, code, kbd, .detail, .src, .source, .citation, .cite, .url {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+pre { white-space: pre-wrap !important; overflow-x: auto !important; }
+img, svg, video, canvas, iframe { max-width: 100% !important; height: auto; }
+
+/* C · PROSE IS SANS — body copy always reads in the humanist face.
+   Mono is reserved for labels, code, tabular data, and chrome. */
+p, li, dd, dt, blockquote {
+  font-family: var(--slate-font-sans, "Atkinson Hyperlegible", sans-serif) !important;
+}
+p code, li code, pre, code, .mono, .stamp, .eyebrow, .kicker,
+.timeline-date, .metric-value, .stat-value, th {
+  font-family: var(--slate-font-mono, "IBM Plex Mono", monospace) !important;
+}
+
+/* D · LISTING PANELS — sitemap/category cards read as glass index drawers.
+   Neon category hexes are remapped to the muted data palette. */
+.sm-cat {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.01) 100%),
+    var(--slate-raised, #0c1219) !important;
+  border: 1px solid var(--slate-border, #1a2833) !important;
+  border-radius: 6px !important;
+  padding: 1.4rem 1.5rem 1.5rem !important;
+}
+.sm-cat h3 {
+  font-family: var(--slate-font-mono, "IBM Plex Mono", monospace) !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.18em !important;
+  border-bottom-width: 1px !important;
+  padding-bottom: 0.65rem !important;
+  margin-bottom: 0.9rem !important;
+}
+.sm-cat.red h3    { color: #c76a5f !important; border-color: rgba(176,84,74,0.55) !important; }
+.sm-cat.gold h3   { color: #c9a44c !important; border-color: rgba(201,164,76,0.55) !important; }
+.sm-cat.blue h3   { color: #93b0c2 !important; border-color: rgba(122,155,176,0.55) !important; }
+.sm-cat.purple h3 { color: #a99fce !important; border-color: rgba(139,126,196,0.55) !important; }
+.sm-cat.green h3  { color: #86a880 !important; border-color: rgba(110,143,104,0.55) !important; }
+.sm-cat.gray h3   { color: #8a9ba8 !important; border-color: rgba(138,155,168,0.45) !important; }
+.sm-cat li { margin: 0 !important; }
+.sm-cat a {
+  color: var(--slate-ink-dim, #a8bcc8) !important;
+  padding: 0.34rem 0.5rem !important;
+  margin-inline: -0.5rem !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+  transition: background .14s ease, color .14s ease !important;
+  display: block;
+}
+.sm-cat a:hover {
+  color: var(--slate-ink-strong, #ffffff) !important;
+  background: rgba(200,230,245,0.07) !important;
+}
+.sm-cat a strong { color: var(--slate-ink, #f5fafc) !important; }
+
+/* E · NUMBERS ARE DATA — statistics align and read as instrumentation. */
+td, .metric-value, .stat-value, .count, .num {
+  font-variant-numeric: tabular-nums !important;
+}
+.metric-value, .stat-value {
+  font-size: clamp(1.6rem, 3vw, 2.4rem) !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* F · SECTION RHYTHM — consistent vertical cadence between blocks. */
+main > section, .content > section, article > section {
+  margin-block: clamp(34px, 6vw, 72px) !important;
+}
+
+/* G · MOBILE — the rail collapses gracefully. */
+@media (max-width: 640px) {
+  main, article, .content, .page-content, [role="main"] {
+    padding-inline: 16px !important;
+  }
+}

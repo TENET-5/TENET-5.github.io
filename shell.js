@@ -73,21 +73,84 @@
     return;
   }
 
+  // QUANTANIUM-first: ensure tokens + brand-lock win on every content page,
+  // even when HTML head forgot load order (agentic website maintenance).
+  function injectQuantaniumContract() {
+    var head = document.head || document.documentElement;
+    if (!head) return;
+    if (!document.querySelector('link[href*="tokens.css"]')) {
+      var t = document.createElement('link');
+      t.rel = 'stylesheet';
+      t.href = '/css/tokens.css?v=48-quantum';
+      t.setAttribute('data-quantanium', 'tokens');
+      head.insertBefore(t, head.firstChild);
+    }
+    if (!document.querySelector('link[href*="brand-lock.css"]')) {
+      var b = document.createElement('link');
+      b.rel = 'stylesheet';
+      b.href = '/css/brand-lock.css?v=48-quantum';
+      b.setAttribute('data-quantanium', 'brand-lock');
+      head.appendChild(b);
+    }
+    // Signal active palette for agents / diagnostics
+    try {
+      document.documentElement.setAttribute('data-quantanium', 'pristine-ice-lake');
+      document.documentElement.setAttribute('data-theme', 'quantanium');
+    } catch (e) { /* ignore */ }
+  }
+
   // Inject polish.css on all pages (shell + content)
   function injectPolishCSS() {
     if (document.querySelector('link[href*="polish"]')) return;
     var link = document.createElement('link');
     link.rel = 'stylesheet';
     // Use root-relative path so it works in both shell and iframe contexts
-    link.href = '/css/polish.css?v=1';
+    link.href = '/css/polish.css?v=2';
     (document.head || document.documentElement).appendChild(link);
+  }
+
+  // Shared report presentation (ice report sheets) for dashboard + dossiers
+  function injectReportPresentationCSS() {
+    if (document.querySelector('link[href*="report-presentation"]')) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/css/report-presentation.css?v=2';
+    link.setAttribute('data-quantanium', 'report-presentation');
+    (document.head || document.documentElement).appendChild(link);
+  }
+
+  // Awwwards-informed cinematic display system + documentary HUD
+  function injectCinematicCSS() {
+    var head = document.head || document.documentElement;
+    if (!document.querySelector('link[href*="cinematic-slate"]')) {
+      var c = document.createElement('link');
+      c.rel = 'stylesheet';
+      c.href = '/css/cinematic-slate.css?v=1';
+      c.setAttribute('data-quantanium', 'cinematic-slate');
+      head.appendChild(c);
+    }
+    if (!document.querySelector('link[href*="documentary-tour"]')) {
+      var d = document.createElement('link');
+      d.rel = 'stylesheet';
+      d.href = '/css/documentary-tour.css?v=1';
+      d.setAttribute('data-quantanium', 'documentary-tour');
+      head.appendChild(d);
+    }
   }
 
   function injectBackdrop() {
     if (!document.body || isFrameShell) return;
-    document.body.classList.add('theme-v2-data-science');
+    // Prefer QUANTANIUM ice substrate over legacy "data-science" theme class
+    document.body.classList.add('theme-quantanium-ice');
+    document.body.classList.remove('theme-v2-data-science');
     
-    // Load Three.js and V2 Engine
+    // Load Three.js and V2 Engine only when not reduced-motion
+    var reduce = false;
+    try {
+      reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) { /* ignore */ }
+    if (reduce) return;
+
     loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js')
       .then(function() { return loadScript(BASE + 'js/v2-engine.js?v=2'); })
       .then(function() {
@@ -101,6 +164,9 @@
 
   // ── Init ────────────────────────────────────────────────────────────────
   function init() {
+    injectQuantaniumContract();
+    injectReportPresentationCSS();
+    injectCinematicCSS();
     injectBackdrop();
     injectPolishCSS();
     if (isFrameShell) {
@@ -138,6 +204,8 @@
       // producing two visible walkthrough UIs. The file is now a no-op shim.
       // Speed/autoplay/captions/transcript controls will be migrated into
       // liril-walkthrough.js itself in a follow-up so there is ONE unified UI.
+      }).then(function() {
+        return loadScript(BASE + 'js/liril-documentary.js?v=1');
       }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
       .then(function() { return loadScript(BASE + 'readnext.js?v=41'); })
       .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })

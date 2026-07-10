@@ -5,7 +5,8 @@
  * (investigative_threads / feeds_polled / …) and older shapes
  * (contracts_scanned / anomalies_detected / …).
  *
- * Theme: QUANTANIUM monochrome — colour only for severity/data meaning.
+ * Theme: QUANTANIUM pristine-ice-lake — colour only for severity/data.
+ * Supports agentic_seal metrics (max_spec, agentic_acts, theme_contract).
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -39,12 +40,90 @@ function normalizeThreat(level) {
   return { cls, label: raw };
 }
 
-/** Pick metric cards from whichever schema the brief carries */
-function buildMetricCards(metrics) {
+function formatMetric(n) {
+  const num = Number(n) || 0;
+  try {
+    return num.toLocaleString("en-CA");
+  } catch (_) {
+    return String(num);
+  }
+}
+
+function toneClass(tone) {
+  if (tone === "high") return " is-high";
+  if (tone === "critical") return " is-critical";
+  if (tone === "verified") return " is-verified";
+  return "";
+}
+
+function renderBriefHtml(data) {
+  const parts = [];
+  if (data.title) {
+    parts.push(`<p class="brief-title rpt-body-title">${escapeHtml(data.title)}</p>`);
+  }
+  const metaBits = [];
+  if (data.date) metaBits.push(escapeHtml(data.date));
+  if (data.threat_level) {
+    metaBits.push(
+      `<span class="rpt-chip ${escapeHtml(String(data.threat_level).toUpperCase())}">` +
+        `THREAT ${escapeHtml(String(data.threat_level).toUpperCase())}</span>`
+    );
+  }
+  if (data.agentic_seal) metaBits.push(`<span class="rpt-chip verified">AGENTIC SEAL</span>`);
+  if (metaBits.length) {
+    parts.push(`<p class="brief-meta rpt-body-meta">${metaBits.join(" ")}</p>`);
+  }
+  const summary = String(data.summary || "").trim();
+  if (!summary) {
+    parts.push(`<p class="brief-empty">No summary text in this brief cycle.</p>`);
+  } else {
+    const paras = summary.split(/\n\s*\n/).filter(Boolean);
+    paras.forEach((p) => {
+      parts.push(`<p>${escapeHtml(p.replace(/\n/g, " "))}</p>`);
+    });
+  }
+  return parts.join("");
+}
+
+function isStale(generatedAt, maxDays) {
+  if (!generatedAt) return true;
+  const t = Date.parse(generatedAt);
+  if (Number.isNaN(t)) return true;
+  const ageMs = Date.now() - t;
+  return ageMs > (maxDays || 14) * 24 * 60 * 60 * 1000;
+}
+
+/** Prefer agentic seal metrics when present (site-health + carry-forward intel) */
+function buildMetricCards(metrics, data) {
   if (!metrics || typeof metrics !== "object") return [];
   const m = metrics;
+  const seal = data && data.agentic_seal;
 
-  // Preferred modern brief schema (2026-06+)
+  if (seal || m.agentic_acts != null || m.max_spec_score != null) {
+    return [
+      {
+        value: m.max_spec_score ?? m.investigative_threads ?? 0,
+        label: "Max Spec / Threads",
+        tone: (m.max_spec_score || 0) >= 90 ? "verified" : null,
+      },
+      {
+        value: m.agentic_acts ?? m.high_threads ?? 0,
+        label: "Agentic Acts",
+        tone: "high",
+      },
+      {
+        value: m.theme_contract ?? m.feeds_polled ?? 0,
+        label: "Theme Contract",
+        tone: "verified",
+      },
+      {
+        value: m.headlines_reviewed ?? m.unique_stories ?? 0,
+        label: "Feed Headlines",
+        tone: null,
+      },
+    ];
+  }
+
   if (
     m.investigative_threads != null ||
     m.headlines_reviewed != null ||
@@ -74,77 +153,12 @@ function buildMetricCards(metrics) {
     ];
   }
 
-  // Legacy schema
   return [
-    {
-      value: m.contracts_scanned ?? 0,
-      label: "Contracts Scanned",
-      tone: null,
-    },
-    {
-      value: m.anomalies_detected ?? 0,
-      label: "Anomalies Detected",
-      tone: "high",
-    },
-    {
-      value: m.entities_tracked ?? 0,
-      label: "Entities Tracked",
-      tone: null,
-    },
-    {
-      value: m.evidence_entries ?? 0,
-      label: "Evidence Sealed",
-      tone: "verified",
-    },
+    { value: m.contracts_scanned ?? 0, label: "Contracts Scanned", tone: null },
+    { value: m.anomalies_detected ?? 0, label: "Anomalies Detected", tone: "high" },
+    { value: m.entities_tracked ?? 0, label: "Entities Tracked", tone: null },
+    { value: m.evidence_entries ?? 0, label: "Evidence Sealed", tone: "verified" },
   ];
-}
-
-function formatMetric(n) {
-  const num = Number(n) || 0;
-  try {
-    return num.toLocaleString("en-CA");
-  } catch (_) {
-    return String(num);
-  }
-}
-
-function toneClass(tone) {
-  if (tone === "high") return " is-high";
-  if (tone === "critical") return " is-critical";
-  if (tone === "verified") return " is-verified";
-  return "";
-}
-
-function renderBriefHtml(data) {
-  const parts = [];
-  if (data.title) {
-    parts.push(`<p class="brief-title">${escapeHtml(data.title)}</p>`);
-  }
-  const metaBits = [];
-  if (data.date) metaBits.push(escapeHtml(data.date));
-  if (data.threat_level) metaBits.push("THREAT " + escapeHtml(String(data.threat_level).toUpperCase()));
-  if (metaBits.length) {
-    parts.push(`<p class="brief-meta">${metaBits.join(" · ")}</p>`);
-  }
-  const summary = String(data.summary || "").trim();
-  if (!summary) {
-    parts.push(`<p class="brief-empty">No summary text in this brief cycle.</p>`);
-  } else {
-    // Split on blank lines; also tolerate single-newline paragraphs
-    const paras = summary.split(/\n\s*\n/).filter(Boolean);
-    paras.forEach((p) => {
-      parts.push(`<p>${escapeHtml(p.replace(/\n/g, " "))}</p>`);
-    });
-  }
-  return parts.join("");
-}
-
-function isStale(generatedAt, maxDays) {
-  if (!generatedAt) return true;
-  const t = Date.parse(generatedAt);
-  if (Number.isNaN(t)) return true;
-  const ageMs = Date.now() - t;
-  return ageMs > (maxDays || 14) * 24 * 60 * 60 * 1000;
 }
 
 async function fetchDashboardData() {
@@ -186,20 +200,22 @@ function renderDashboard(data) {
   // 2. Metrics (schema-tolerant)
   const metricsContainer = document.getElementById("metrics-container");
   if (metricsContainer) {
-    const cards = buildMetricCards(data.metrics);
+    const cards = buildMetricCards(data.metrics, data);
     if (cards.length === 0) {
       metricsContainer.innerHTML =
         `<div class="metric-card"><div class="metric-value">—</div>` +
         `<div class="metric-label">No metrics in brief</div></div>`;
     } else {
       metricsContainer.innerHTML = cards
-        .map(
-          (c) =>
-            `<div class="metric-card">` +
-            `<div class="metric-value${toneClass(c.tone)}">${formatMetric(c.value)}</div>` +
-            `<div class="metric-label">${escapeHtml(c.label)}</div>` +
+        .map((c) => {
+          const tone = c.tone ? ` tone-${escapeHtml(c.tone)}` : "";
+          return (
+            `<div class="metric-card rpt-metric${tone}">` +
+            `<div class="metric-value rpt-metric-value${toneClass(c.tone)}">${formatMetric(c.value)}</div>` +
+            `<div class="metric-label rpt-metric-label">${escapeHtml(c.label)}</div>` +
             `</div>`
-        )
+          );
+        })
         .join("");
     }
   }
@@ -210,18 +226,20 @@ function renderDashboard(data) {
     briefContent.innerHTML = renderBriefHtml(data);
   }
 
-  // Stale-banner when generated_at is old (operational honesty)
-  if (isStale(data.generated_at, 14)) {
+  // Feed-stale honesty: agentic seal can be fresh while RSS is not
+  const feedsZero = data.metrics && Number(data.metrics.feeds_polled) === 0;
+  if (feedsZero || (isStale(data.generated_at, 14) && !data.agentic_seal)) {
     const main = document.querySelector(".dashboard-main");
     if (main && !document.getElementById("brief-stale-banner")) {
       const ban = document.createElement("div");
       ban.id = "brief-stale-banner";
       ban.className = "brief-stale-banner";
       ban.setAttribute("role", "status");
-      ban.textContent =
-        "Brief is stale — last sealed " +
-        (data.generated_at || data.date || "unknown") +
-        ". Overnight LIRIL scan may need a cycle.";
+      ban.textContent = feedsZero
+        ? "Honest seal: feeds_polled=0 — last full RSS overnight remains 2026-06-28. Research + agentic site work may still be current."
+        : "Brief is stale — last sealed " +
+          (data.generated_at || data.date || "unknown") +
+          ". Overnight LIRIL scan may need a cycle.";
       main.insertBefore(ban, main.firstChild);
     }
   }
@@ -245,24 +263,25 @@ function renderDashboard(data) {
     }
   }
 
-  // 4. Anomalies Feed
+  // 4. Findings feed (investigation + agentic + carry-forward)
   const anomaliesFeed = document.getElementById("anomalies-feed");
   if (anomaliesFeed) {
     const findings = Array.isArray(data.top_findings) ? data.top_findings : [];
     if (findings.length === 0) {
       anomaliesFeed.innerHTML =
-        `<div class="anomaly-item"><span class="a-text">No critical anomalies flagged in the current cycle.</span></div>`;
+        `<div class="anomaly-item rpt-finding"><span class="a-text">No critical anomalies flagged in the current cycle.</span></div>`;
     } else {
       anomaliesFeed.innerHTML = findings
         .map((f) => {
           const sev = escapeHtml(f.severity || "MEDIUM");
           const cat = escapeHtml(f.category || "SIGNAL");
           const finding = escapeHtml(f.finding || "");
+          const catClass = cat === "AGENTIC" ? " AGENTIC" : "";
           return (
-            `<div class="anomaly-item ${sev}">` +
-            `<span class="a-cat">[${sev}] ${cat}</span>` +
-            `<span class="a-text">${finding}</span>` +
-            `</div>`
+            `<article class="anomaly-item rpt-finding ${sev}${catClass}">` +
+            `<span class="a-cat rpt-finding-cat"><span class="rpt-chip ${sev}">${sev}</span> ${cat}</span>` +
+            `<span class="a-text rpt-finding-text">${finding}</span>` +
+            `</article>`
           );
         })
         .join("");
@@ -311,15 +330,25 @@ function renderDashboard(data) {
       live: false,
     });
 
+    // Prefer investigation + agentic pages when present
+    if (data.primary_new_dossier || data.agentic_seal) {
+      items.unshift({
+        href: "griffon-glle-procurement.html",
+        title: "Griffon GLLE investigation (active)",
+        date: date || "live",
+        live: true,
+      });
+      // (internal systems page removed 2026-07-10 — zero internals on the public site)
+    }
     reportList.innerHTML = items
       .map((it) => {
         const live = it.live
-          ? `<span class="report-live">sealed</span>`
+          ? `<span class="report-live rpt-list-live">sealed</span>`
           : "";
         return (
           `<li><a href="${escapeHtml(it.href)}">` +
-          `${escapeHtml(it.title)}${live}` +
-          `<span class="report-date">${escapeHtml(it.date)}</span>` +
+          `<span class="rpt-list-title">${escapeHtml(it.title)}${live}</span>` +
+          `<span class="report-date rpt-list-date">${escapeHtml(it.date)}</span>` +
           `</a></li>`
         );
       })

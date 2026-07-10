@@ -1,0 +1,217 @@
+/* =========================================================================
+   TENET5 — Cinematic Tour & Predictive Mapping (Awwwards Tier)
+   ========================================================================= */
+
+body.cinematic-mode {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: var(--slate-bg, #020408);
+  font-family: var(--slate-font-sans, "Atkinson Hyperlegible", sans-serif);
+  color: var(--slate-ink, #ffffff);
+}
+
+/* ── Scroll Container ── */
+.scroll-container {
+  height: 400vh; /* 4 scenes = 400vh of scrolling */
+  position: relative;
+}
+
+/* ── Fixed Viewport (The Canvas) ── */
+.cinematic-viewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass to controls */
+}
+
+/* ── Background Elements ── */
+.ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80vw;
+  height: 80vh;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* ── Scenes ── */
+.scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0; /* Hidden by default, Anime.js handles opacity */
+  z-index: 20;
+  padding: 0 10vw;
+  box-sizing: border-box;
+}
+
+.scene.active {
+  pointer-events: auto;
+}
+
+/* Typography for Scenes */
+.scene-title {
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.5) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.scene-subtitle {
+  font-size: 1.5rem;
+  font-family: var(--slate-font-mono, "IBM Plex Mono", monospace);
+  color: var(--aurora-blue, #38bdf8);
+  max-width: 800px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── Predictive Mapping Nodes ── */
+.pred-node {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--aurora-blue, #38bdf8);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
+  opacity: 0;
+}
+
+.pred-line {
+  position: absolute;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.5), transparent);
+  height: 2px;
+  transform-origin: left center;
+  opacity: 0;
+}
+
+/* ── UI Overlay (Controls) ── */
+.cinematic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Top Header */
+.cine-header {
+  padding: 30px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: auto;
+}
+
+.cine-logo {
+  font-family: var(--slate-font-mono, "IBM Plex Mono", monospace);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Bottom Controls */
+.cine-controls {
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  pointer-events: auto;
+  background: linear-gradient(0deg, rgba(2,4,8,0.9) 0%, transparent 100%);
+}
+
+.timeline-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn-play {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-play:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: white;
+  transform: scale(1.05);
+}
+
+.scrubber-track {
+  flex-grow: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+
+.scrubber-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--aurora-blue, #38bdf8);
+  border-radius: 2px;
+  width: 0%;
+  pointer-events: none;
+}
+
+.scrubber-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+
+.audio-toggle {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-family: var(--slate-font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  transition: color 0.3s ease;
+}
+
+.audio-toggle:hover {
+  color: white;
+}
