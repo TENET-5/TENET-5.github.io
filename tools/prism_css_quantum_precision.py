@@ -153,6 +153,50 @@ def brute_ising_min(n: int) -> float:
     return best
 
 
+def check_site_chrome() -> dict:
+    """Structural quantum gate: interiors must share press-bar chrome, not product soup."""
+    issues: list[str] = []
+    interior = 0
+    press_bar = 0
+    product = 0
+    cover_bar = 0
+    skip_names = {
+        "index_legacy.html",
+        "index_backup.html",
+        "index-legacy-cap222-shell.html",
+    }
+    for path in sorted(ROOT.glob("*.html")):
+        if path.name in skip_names:
+            continue
+        t = path.read_text(encoding="utf-8", errors="replace")
+        home = path.name == "index.html" and (
+            "ghost5" in t or "read <em>backwards" in t or 'class="cover"' in t
+        )
+        if home:
+            continue
+        interior += 1
+        if 'class="press-bar' in t or "class='press-bar" in t:
+            press_bar += 1
+        else:
+            issues.append(f"no_press_bar:{path.name}")
+        if "data-product" in t or re.search(r'class=["\'][^"\']*\bproduct\b', t):
+            product += 1
+            issues.append(f"product_soup:{path.name}")
+        if "cover-bar" in t:
+            cover_bar += 1
+            issues.append(f"cover_bar_interior:{path.name}")
+    ok = interior > 0 and press_bar == interior and product == 0 and cover_bar == 0
+    return {
+        "ok": ok,
+        "interior": interior,
+        "press_bar": press_bar,
+        "product_left": product,
+        "cover_bar_interior": cover_bar,
+        "issues": issues[:40],
+        "coverage": round(press_bar / interior, 4) if interior else 0.0,
+    }
+
+
 def check_math(css: str) -> dict:
     issues: list[str] = []
     checks: list[dict] = []
@@ -427,9 +471,10 @@ def run(no_cpp: bool = False) -> dict:
 
     css = THEME.read_text(encoding="utf-8", errors="replace")
     math = check_math(css)
+    chrome = check_site_chrome()
     cpp = {"ok": True, "skipped": True, "detail": "skipped --no-cpp"} if no_cpp else run_cpp_quantum()
 
-    ok = bool(math.get("ok")) and bool(cpp.get("ok"))
+    ok = bool(math.get("ok")) and bool(chrome.get("ok")) and bool(cpp.get("ok"))
     verdict = "CSS_QUANTUM_PASS" if ok else "CSS_QUANTUM_FAIL"
     doc = {
         "ts": ts,
@@ -440,8 +485,9 @@ def run(no_cpp: bool = False) -> dict:
         "verdict": verdict,
         "ok": ok,
         "math": math,
+        "chrome": chrome,
         "cpp_quantum": cpp,
-        "rule": "C++_AND_MATH_PRECISION_FOR_CSS_TOKENS",
+        "rule": "C++_AND_MATH_PRECISION_FOR_CSS_TOKENS_AND_SITE_CHROME",
         "ground_truth": "Screenshot 2026-07-10 042513 The record, read backwards",
     }
     _write(doc)
@@ -451,11 +497,14 @@ def run(no_cpp: bool = False) -> dict:
                 "verdict": verdict,
                 "ok": ok,
                 "math_ok": math.get("ok"),
+                "chrome_ok": chrome.get("ok"),
+                "press_bar": f"{chrome.get('press_bar')}/{chrome.get('interior')}",
+                "product_left": chrome.get("product_left"),
                 "ising_E": (math.get("ising") or {}).get("energy"),
                 "ising_ground": (math.get("ising") or {}).get("ground_state"),
                 "cpp_ok": cpp.get("ok"),
                 "cpp_verdict": cpp.get("verdict"),
-                "issues": math.get("issues", [])[:12],
+                "issues": (math.get("issues", []) + chrome.get("issues", []))[:12],
             },
             indent=2,
         )

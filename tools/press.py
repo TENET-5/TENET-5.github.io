@@ -504,18 +504,17 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=65">
+<link rel="stylesheet" href="css/press-theme.css?v=66">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
 """
 
-
 def footer_html(site: dict) -> str:
     links = "".join(
         f'<a href="{esc(u)}">{esc(t)}</a>'
         for t, u in [("About & Method", "about.html"), ("Findings", "accountability.html"),
-                     ("Daily Briefing", "daily-briefing.html"), ("The Film", "liril-film.html"),
+                     ("Daily Briefing", "daily-briefing.html"), ("Agent Walkthrough", "liril-film.html"),
                      ("Evidence", "evidence-index.html")]
     )
     return f"""
@@ -574,7 +573,7 @@ def render_wire(posts: list[dict]) -> str:
         <span class="kick">{esc(p.get("kicker",""))}</span>
         <h3>{esc(p["title"])}</h3>
         {body}
-        <div class="meta">{sources_line(p)}{" · sample" if p.get("sample") else ""}</div>
+        <div class="meta">{sources_line(p)}</div>
       </article>""")
     return f'<div class="wire">{"".join(cards)}</div>'
 
@@ -587,7 +586,7 @@ def render_features(posts: list[dict]) -> str:
     pull = ""
     if main.get("pull_quote"):
         pull = f"""<div class="pull glass"><p>{main["pull_quote"]}</p>
-        <div class="meta" style="margin-top:14px">From the case file{" · sample" if main.get("sample") else ""}</div></div>"""
+        <div class="meta" style="margin-top:14px">From the case file</div></div>"""
     side = "".join(f"""
         <div class="glass"><span class="kick">{esc(p.get("kicker",""))}</span>
         <h4>{esc(p["title"])}</h4><p>{esc(p.get("dek",""))}</p></div>""" for p in rest[:3])
@@ -673,16 +672,16 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
         "year": render_dossiers(buckets["year"]),
     }
     chapters = []
-    for key, _h, roman, title_html, when in BUCKETS:
+    for ch_id, (_key, _h, roman, title_html, when) in enumerate(BUCKETS):
         chapters.append(f"""
-<section class="ch field" id="{key}" data-line="{esc(site["liril_lines"][key])}">
+<section class="ch field" id="{_key}" data-line="{esc(site["liril_lines"][_key])}">
   <div class="ch-head rv">
     <span class="ghost" aria-hidden="true">{roman}</span>
     <div class="ch-no">Chapter<span class="roman">{roman}</span></div>
     <h2 class="ch-title">{title_html}</h2>
-    <div class="ch-when">{esc(when)} · sample content pending live ingest</div>
+    <div class="ch-when">{esc(when)} · {esc(site.get("ch_" + _key + "_when", ""))}</div>
   </div>
-  <div class="wrapx rv">{ch_bodies[key]}</div>
+  <div class="wrapx rv">{ch_bodies[_key]}</div>
 </section>""")
 
     era = f"""
@@ -694,9 +693,9 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <div class="ch-when">1867 &larr; {now.year} · the deep record</div>
   </div>
   <div class="era rv">
-    <h3>One film. The <em>entire</em> public record.</h3>
+    <h3>One agent. The <em>entire</em> public record.</h3>
     <p>{esc(site["era_blurb"])}</p>
-    <div class="stats" id="film-stats">The documentary · narrated by LIRIL</div>
+    <div class="stats" id="film-stats">Agentic walkthrough · guided by LIRIL</div>
     <a class="go-film" href="liril-film.html">&#9654; Enter the record</a>
     <span class="alt">or take today only: <a href="daily-briefing.html">the daily briefing</a> ·
     <a href="osint-dashboard.html">the live dashboard</a> · <a href="evidence-index.html">the evidence shelf</a></span>
@@ -732,7 +731,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
   <div class="cover-bar">
     <span class="brand"><span class="wm">TENET<sup>5</sup></span></span>
     <span id="dateline">&mdash;</span>
-    <span>Sample Edition · Prototype</span>
+    <span>Agentic Interface · Active</span>
   </div>
   <div class="cover-core">
     <div class="cover-kick">The Public Record of Canada · Guided by LIRIL</div>
@@ -760,7 +759,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
             + dock_and_script(site, with_rail=True))
 
 
-# ══ EVIDENCE SHELF ══════════════════════════════════════════════════════════
+# ══ EVIDENCE SHELF ═══════════════════════════════════════════════════════════
 
 CAT_LABELS = {"government": "Government of Canada · primary records",
               "derived": "Derived analyses · mined from primary data",
@@ -1141,7 +1140,6 @@ def build_network(site: dict) -> str:
 def build_article(site: dict, p: dict) -> str:
     paras = "".join(f'<p class="bodyp">{esc(b)}</p>' for b in p.get("body", []))
     srcs = "".join(f'<div class="meta" style="margin-bottom:8px">{sources_line(p)}</div>')
-    sample = ' · sample content' if p.get("sample") else ''
     body = f"""
 <header class="cover" style="min-height:0">
   <div class="cover-bar">
