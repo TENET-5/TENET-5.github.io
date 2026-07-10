@@ -1,337 +1,93 @@
 /* ═══════════════════════════════════════════════════════════════
-   TENET5 — Operational Slate (Cap#208, 2026-04-24)
+   TENET5 — Operational Slate (Cap#208) · QUANTANIUM consumer
    ═══════════════════════════════════════════════════════════════
-   TENET5 internal design reference.
+   Component vocabulary for Op/Intelligence chrome (eyebrows, slash
+   display, status lists, binary marquee). 
 
-   Defense-grade operational-intelligence aesthetic that maps 1:1
-   onto the TENET5 OSINT mission (fleet/threat/RF/serial-bus
-   monitoring → accountability/lobbying/MAID/procurement
-   monitoring — same posture, same voice, same numerals).
+   QUANTANIUM RULE: this file MUST NOT redefine surface/ink/accent
+   palette tokens. Those live only in /css/tokens.css. This layer
+   maps --s5-* component aliases → --slate-* and defines class
+   chrome only.
 
-   Reference vocabulary (2026-04-24):
-
-     - Pure 2-colour palette: #202020 ink + #B9B9B9 paper
-     - Categories: Business, Technology, Animation, Retro,
-       Data Visualization, 3D, WebGL, Sanity, Astro
-     - Display: sentence-case "Op /Intelligence" with slash-prefix
-       sub-word; eyebrow & UI labels are ALL-CAPS, tracked +60
-     - Numbered status grid:
-         01. GPS    02. RADAR    03. ENGINES    04. ELECTRICAL
-         05. FUEL   06. ELECTRONIC WARFARE   07. COUNTERMEASURES
-         08. ENVIRONMENTAL   09. COMMUNICATIONS   10. FLIGHT DATA LINKS
-     - Binary marquee strip: 00000000 00000000 00000000 …
-     - Numbered solution sections (Solutions4, About2)
-
-   This SLATE chains AFTER css/slates/monochrome.css so its token
-   deltas win the cascade. It is loaded by css/liril-theme.css (a
-   single @import line, identical to how monochrome was wired in
-   Cap#131). Every page that links liril-theme.css inherits the
-   conversion on first paint.
-
-   Reversibility: comment out the one @import line in
-   liril-theme.css to revert to the prior monochrome-only theme.
-
-   Per Daniel branding lock (CLAUDE.md): the heraldic crest SVG
-   (Crown / Red Shield / Gold Maple Leaf) is a LOGO and is NOT
-   touched by this slate. Semantic accents (success/warn/danger/
-   info) inherited from monochrome are untouched as well —
-   meaning, not decoration.
+   Loaded via liril-theme.css after monochrome slate.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── TENET5 monochrome palette ─────────────────── */
-  /* tenet5 motion reference → "This website uses a colour
-     palette of 2 colors:  HEX #202020 / HEX #B9B9B9". We keep
-     the deeper #060606 body floor from monochrome for OLED
-     contrast and use #202020 for elevated panels / headers /
-     cards (the TENET5 ink), with #B9B9B9 as the canonical
-     mid-paper text/border tone. */
-  --s5-ink:        #202020;   /* primary surface ink */
-  --s5-ink-deep:   #141414;   /* card depth */
-  --s5-ink-floor:  #060606;   /* body floor */
-  --s5-paper:      #b9b9b9;   /* canonical mid-paper */
-  --s5-paper-hi:   #ededed;   /* high-emphasis text */
-  --s5-paper-lo:   #6e6e6e;   /* tertiary text */
-  --s5-line:       rgba(185, 185, 185, 0.18);  /* hairlines */
-  --s5-line-soft:  rgba(185, 185, 185, 0.08);
-  --s5-line-strong:rgba(185, 185, 185, 0.32);
+  /* Component aliases → QUANTANIUM (pristine ice lake) */
+  --s5-ink:         var(--slate-raised, #0c1219);
+  --s5-ink-deep:    var(--slate-sunken, #080c11);
+  --s5-ink-floor:   var(--slate-bg, #05080d);
+  --s5-paper:       var(--slate-ink-dim, #a8bcc8);
+  --s5-paper-hi:    var(--slate-ink-strong, #ffffff);
+  --s5-paper-lo:    var(--slate-ink-muted, #6a7f8c);
+  --s5-line:        rgba(168, 188, 200, 0.18);
+  --s5-line-soft:   rgba(168, 188, 200, 0.08);
+  --s5-line-strong: rgba(168, 188, 200, 0.32);
 
-  /* ── Override monochrome tokens to land on TENET5 ink ── */
-  --bg:          var(--s5-ink-floor);
-  --bg-elevated: var(--s5-ink);
-  --bg-card:     rgba(32, 32, 32, 0.88);
-  --bg-card-h:   rgba(40, 40, 40, 0.94);
-  --bg-surface:  rgba(20, 20, 20, 0.78);
-  --bg-table:    rgba(14, 14, 14, 0.55);
-  --bg-dark:     #060606;
+  /* Type — two-font lock only (Atkinson + IBM Plex Mono) */
+  --s5-font-display:  var(--slate-font-display, "Atkinson Hyperlegible", sans-serif);
+  --s5-font-mono:     var(--slate-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  --s5-font-ui:       var(--slate-font-sans, "Atkinson Hyperlegible", sans-serif);
 
-  --text-primary:    var(--s5-paper-hi);
-  --text-secondary:  var(--s5-paper);
-  --text-tertiary:   var(--s5-paper-lo);
-  --text-quaternary: #4a4a4a;
-  --text-light:      #f5f5f5;
-  --text-light-muted:#cfcfcf;
-
-  /* Accent stays neutral paper — TENET5 has no chromatic accent.
-     Semantic colors (success/warn/danger/info) from monochrome
-     remain untouched and continue to read as deliberate signal. */
-  --accent:        var(--s5-paper);
-  --accent-bright: var(--s5-paper-hi);
-  --accent-glow:   rgba(185, 185, 185, 0.10);
-  --accent-soft:   rgba(185, 185, 185, 0.04);
-  --accent-med:    rgba(185, 185, 185, 0.07);
-
-  /* ── TENET5 type system tokens ──────────────────────── */
-  /* Display = sentence-case heavy serif/grotesk; Eyebrow & UI
-     labels = ALL-CAPS, mono, tight tracking. The site already
-     loads Space Grotesk + IBM Plex Mono via style.css so we
-     reuse them here (no extra font fetch). */
-  --s5-font-display:  'Space Grotesk', 'Inter', system-ui, sans-serif;
-  --s5-font-mono:     'IBM Plex Mono', 'Consolas', ui-monospace, monospace;
-  --s5-font-ui:       'Inter', 'Space Grotesk', system-ui, sans-serif;
-
-  --s5-track-eyebrow: 0.18em;   /* ALL-CAPS micro labels */
-  --s5-track-ui:      0.08em;   /* nav, buttons, tags     */
-  --s5-track-display: -0.015em; /* sentence-case display  */
-
+  --s5-track-eyebrow: 0.18em;
+  --s5-track-ui:      0.08em;
+  --s5-track-display: -0.015em;
   --s5-weight-display: 600;
   --s5-weight-eyebrow: 500;
   --s5-weight-ui:      500;
 }
 
-/* ── Body surface (override monochrome's body background) ──
-   the TENET5 home is solid ink with a top-of-page subtle wash.
-   Replace the radial paper-tint from monochrome with a quieter
-   ink-only base. */
-body {
-  background:
-    radial-gradient(circle at 50% -10%,
-                    rgba(185, 185, 185, 0.025),
-                    transparent 45%),
-    linear-gradient(180deg, var(--s5-ink-floor) 0%,
-                            #020202 100%) !important;
-  color: var(--text-primary);
-  font-family: var(--s5-font-ui);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* ── Component classes (no palette ownership) ─────────────── */
 
-/* ═══════════════════════════════════════════════════════════════
-   OPT-IN COMPONENT VOCABULARY (.s5-*)
-   ═══════════════════════════════════════════════════════════════
-   These classes are additive — they only apply to elements that
-   explicitly opt in. Existing pages render unchanged except for
-   the token swap above. New pages (or surgical retrofits) use
-   the .s5-* primitives below to adopt the TENET5 layout idioms.
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ── Eyebrow: ALL-CAPS micro-label (e.g. "SYSTEM STATUS") ── */
-.s5-eyebrow {
-  font-family: var(--s5-font-mono);
-  font-size: 0.72rem;
-  font-weight: var(--s5-weight-eyebrow);
-  letter-spacing: var(--s5-track-eyebrow);
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-}
-.s5-eyebrow::before {
-  content: "";
-  display: inline-block;
-  width: 1.25em;
-  height: 1px;
-  background: var(--s5-line-strong);
-}
-
-/* ── Display heading: sentence-case + slash sub-word ──────
-   Usage:  <h1 class="s5-display">Op <span class="s5-slash">Intelligence</span></h1>
-   Renders as:  Op /Intelligence  (TENET5 home-page treatment) */
 .s5-display {
   font-family: var(--s5-font-display);
   font-weight: var(--s5-weight-display);
   letter-spacing: var(--s5-track-display);
-  line-height: 0.95;
-  color: var(--text-primary);
-  font-size: clamp(2.4rem, 6.5vw, 6.5rem);
-  margin: 0 0 0.6em;
+  color: var(--s5-paper-hi);
 }
 .s5-slash {
-  color: var(--text-secondary);
-  font-weight: var(--s5-weight-display);
+  opacity: 0.72;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
-.s5-slash::before {
-  content: "/";
-  display: inline;
-  margin-right: 0.05em;
-  color: var(--text-tertiary);
-  font-weight: 400;
+.s5-eyebrow {
+  font-family: var(--s5-font-mono);
+  font-size: var(--slate-text-xs, 0.75rem);
+  font-weight: var(--s5-weight-eyebrow);
+  letter-spacing: var(--s5-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--s5-paper-lo);
 }
-
-/* ── Numbered status grid (TENET5 home "01. GPS  02. RADAR…") ──
-   Usage:
-     <ol class="s5-status-list">
-       <li>Foreign Interference</li>
-       <li>Procurement Capture</li>
-       ...
-     </ol>
-   Auto-numbers 01..NN with monospace counters. */
 .s5-status-list {
   list-style: none;
-  counter-reset: s5;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.25rem 1.5rem;
-  border-top: 1px solid var(--s5-line);
-  border-bottom: 1px solid var(--s5-line);
-  padding: 0.75rem 0;
-}
-.s5-status-list > li {
-  counter-increment: s5;
   font-family: var(--s5-font-mono);
-  font-size: 0.82rem;
-  letter-spacing: var(--s5-track-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  padding: 0.45rem 0;
+  color: var(--s5-paper);
+}
+.s5-status-list li {
   display: flex;
-  align-items: baseline;
-  gap: 0.85rem;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
   border-bottom: 1px solid var(--s5-line-soft);
 }
-.s5-status-list > li::before {
-  content: counter(s5, decimal-leading-zero) ".";
-  color: var(--text-tertiary);
-  font-weight: 500;
-  flex: 0 0 2.4em;
+.s5-status-list .n {
+  color: var(--slate-ink-muted, #6a7f8c);
+  min-width: 2ch;
 }
-
-/* ── Binary marquee strip (TENET5 home: 00000000 00000000 …) ──
-   Usage:
-     <div class="s5-binary-marquee" aria-hidden="true">
-       <span></span>
-     </div>
-   The inner span is auto-filled via ::before/::after with a
-   hardcoded binary string and animated horizontally. Pure CSS,
-   no JS, respects prefers-reduced-motion. */
 .s5-binary-marquee {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  height: 1.6rem;
-  border-top: 1px solid var(--s5-line);
-  border-bottom: 1px solid var(--s5-line);
-  background: var(--s5-ink-floor);
   font-family: var(--s5-font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
-  color: var(--text-tertiary);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  color: var(--s5-paper-lo);
   white-space: nowrap;
-  user-select: none;
+  overflow: hidden;
+  opacity: 0.55;
 }
-.s5-binary-marquee > span {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  display: inline-block;
-  padding-left: 100%;
-  animation: s5-marquee 42s linear infinite;
-}
-.s5-binary-marquee > span::before {
-  content:
-    "00000000 00000000 00000000 00000000 00000000 00000000 "
-    "00000000 00000000 00000000 00000000 00000000 00000000 "
-    "00000000 00000000 00000000 00000000 00000000 00000000 "
-    "00000000 00000000 00000000 00000000 00000000 00000000 "
-    "00000000 00000000 00000000";
-}
-@keyframes s5-marquee {
-  from { transform: translate(0, -50%); }
-  to   { transform: translate(-100%, -50%); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .s5-binary-marquee > span { animation: none; padding-left: 0; }
-}
-
-/* ── Numbered link clusters (TENET5 footer "Solutions4 / About2") ──
-   Usage:
-     <h4 class="s5-cluster" data-count="4">Solutions</h4>
-     <ul class="s5-cluster-links">
-       <li>↳ <a href="#">Foreign Interference</a></li>
-       ...
-     </ul> */
 .s5-cluster {
-  font-family: var(--s5-font-ui);
-  font-weight: var(--s5-weight-ui);
-  font-size: 0.95rem;
-  letter-spacing: var(--s5-track-ui);
-  color: var(--text-primary);
-  margin: 0 0 0.6rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.4em;
-}
-.s5-cluster::after {
-  content: attr(data-count);
-  font-family: var(--s5-font-mono);
-  font-size: 0.8em;
-  color: var(--text-tertiary);
-}
-.s5-cluster-links {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
-.s5-cluster-links > li {
-  font-family: var(--s5-font-mono);
-  font-size: 0.82rem;
-  letter-spacing: var(--s5-track-ui);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.s5-cluster-links a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color 120ms linear, border-color 120ms linear;
-}
-.s5-cluster-links a:hover {
-  color: var(--text-primary);
-  border-bottom-color: var(--s5-line-strong);
-}
-
-/* ── Hairline rule (TENET5 sections separated by 1px paper line) ── */
-.s5-rule {
-  border: 0;
-  border-top: 1px solid var(--s5-line);
-  margin: 2.5rem 0;
-}
-
-/* ── Section label row: eyebrow on left, count on right ──────
-   Usage:
-     <div class="s5-section-head">
-       <span class="s5-eyebrow">System Status</span>
-       <span class="s5-eyebrow s5-count">10</span>
-     </div> */
-.s5-section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--s5-line);
-  margin-bottom: 1.25rem;
-}
-.s5-count {
-  color: var(--text-secondary);
-}
-.s5-count::before { display: none; }
-
-/* ═══════════════════════════════════════════════════════════════
-   END TENET5 OPERATIONAL SLATE — Cap#208
-   ═══════════════════════════════════════════════════════════════ */
