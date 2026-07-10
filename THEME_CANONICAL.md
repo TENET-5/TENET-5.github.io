@@ -27,6 +27,8 @@ No `product.css`, `quantanium.css`, `tokens.css`, `tenet5.css`, or Cap stacks.
 
 ## Continuous PRISM duty
 
+Jobs every lap: one theme · press rebuild · **LIRIL guide home** · visual acuity · self-heal.
+
 ```bash
 # one lap
 python tools/prism_site_duty.py
@@ -34,10 +36,13 @@ python tools/prism_site_duty.py
 # local continuous (supervisor)
 python tools/prism_site_duty.py --loop 60
 
+# until STOP flag
+python tools/prism_site_duty.py --forever
+
 # GitHub Actions: .github/workflows/prism-site-duty.yml every 15 minutes
 ```
 
-Proof: `C:/PRISM/log/prism_site_duty_last.json` · `data/prism_site_duty_last.json`
+Proof: `C:/PRISM/log/prism_site_duty_last.json` · `prism_liril_guide_last.json` · `data/prism_*_last.json`
 
 ## Forward development rule
 

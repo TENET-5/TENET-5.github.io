@@ -6,7 +6,8 @@ Every HTML page may load only:
   2) css/press-theme.css?v=N
 
 Edit css/press-theme.css to change the whole site.
-Homepage body is owned by tools/press.py (cover + linear-backwards).
+Homepage body is owned by tools/press.py (cover + linear-backwards + LIRIL guide).
+LIRIL guide chrome on index is a permanent PRISM job — never strip those scripts.
 """
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
+SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab", "data"}
 THEME_VER = "64"
 THEME_HREF = f"css/press-theme.css?v={THEME_VER}"
 
@@ -49,7 +50,7 @@ FOOT = """  <footer class="press-foot">
 # Strip any stylesheet / font / preconnect clutter
 RE_LINK = re.compile(r"[ \t]*<link\b[^>]*>\s*\n?", re.I)
 RE_THEME_COMMENT = re.compile(
-    r"[ \t]*<!--\s*(ONE THEME|theme:\s*css/press-theme|QUANTANIUM|ONE system)[^>]*-->\s*\n?",
+    r"[ \t]*<!--\s*(ONE THEME|theme:\s*css/(?:press-theme|quantanium-spec)|QUANTANIUM|ONE system)[^>]*-->\s*\n?",
     re.I,
 )
 RE_DEFENSE = re.compile(
@@ -58,6 +59,19 @@ RE_DEFENSE = re.compile(
 )
 
 PRESS_HOME_MARKERS = ("read <em>backwards", 'class="cover"', "ghost5")
+
+# Banned alternate theme stacks (product thrash)
+BANNED_HREF = re.compile(
+    r'href=["\']css/(?:tokens|standard|tenet5|product|quantanium|quantanium-spec|liril-theme|tnt-override|award-home|home)\.css',
+    re.I,
+)
+
+LIRIL_HOME_REQUIRED = (
+    'id="dock"',
+    'id="liril-guide-btn"',
+    "js/liril-home-guide.js",
+    "js/liril-voice.js",
+)
 
 
 def is_press_home(name: str, text: str) -> bool:
@@ -77,7 +91,7 @@ def apply_page(path: Path) -> bool:
     text = RE_THEME_COMMENT.sub("", text)
     text = RE_DEFENSE.sub("", text)
 
-    # Drop full-theme <style> blocks everywhere (theme lives in press-theme.css only)
+    # Drop full-theme <style> blocks (theme lives in press-theme.css only)
     def _strip_theme_style(m: re.Match[str]) -> str:
         body = m.group(0)
         if (
@@ -123,19 +137,13 @@ def apply_page(path: Path) -> bool:
             flags=re.I,
         )
 
+    # Interiors only: light chrome if missing (never rewrite press home body)
     if not home:
-        if 'class="press-bar"' not in text:
+        if 'class="press-bar' not in text and 'class="cover-bar' not in text:
             text = re.sub(r"(<body\b[^>]*>)", r"\1\n" + NAV, text, count=1, flags=re.I)
-        if 'class="press-foot"' not in text:
-            text = re.sub(r"</body>", FOOT + "\n</body>", text, count=1, flags=re.I)
-        if re.search(r"<main\b", text, re.I) and "press-main" not in text:
-            text = re.sub(
-                r"<main\b([^>]*)>",
-                r'<main class="press-main"\1>',
-                text,
-                count=1,
-                flags=re.I,
-            )
+        if 'class="press-foot' not in text and 'class="p-foot' not in text:
+            if re.search(r"</body>", text, re.I):
+                text = re.sub(r"</body>", FOOT + "\n</body>", text, count=1, flags=re.I)
 
     if text != original:
         path.write_text(text, encoding="utf-8", newline="\n")
@@ -154,19 +162,23 @@ def validate() -> dict:
         if n != 1:
             issues.append(f"{path.name}: press-theme links={n}")
             continue
-        if re.search(r'href=["\']css/(?:product|quantanium|tokens|standard|tenet5)\.css', t, re.I):
+        if BANNED_HREF.search(t):
             issues.append(f"{path.name}: old stack still linked")
             continue
         ok += 1
     home = (ROOT / "index.html").read_text(encoding="utf-8", errors="replace")
     if "backwards" not in home or "ghost5" not in home:
         issues.append("index.html: missing press cover markers")
+    liril_ok = all(m in home for m in LIRIL_HOME_REQUIRED)
+    if not liril_ok:
+        issues.append("index.html: LIRIL guide chrome incomplete (PRISM job)")
     return {
         "pages": pages,
         "ok": ok,
         "issues": issues[:40],
         "issue_count": len(issues),
-        "home_ok": "backwards" in home and "press-theme.css" in home,
+        "home_ok": "backwards" in home and "press-theme.css" in home and liril_ok,
+        "liril_guide_ok": liril_ok,
     }
 
 
@@ -180,7 +192,8 @@ def main() -> int:
     report = validate()
     print(
         f"apply_one_theme: changed={changed} pages={report['pages']} "
-        f"ok={report['ok']} issues={report['issue_count']} home_ok={report['home_ok']}"
+        f"ok={report['ok']} issues={report['issue_count']} "
+        f"home_ok={report['home_ok']} liril_ok={report.get('liril_guide_ok')}"
     )
     for i in report["issues"][:15]:
         print(" ", i)

@@ -475,9 +475,10 @@ def css() -> str:
 
 
 def head(title: str, desc: str) -> str:
-    # Screenshot-locked QUANTANIUM press surface (Fraunces + ice + red rails)
+    # Screenshot-locked press surface (Fraunces + ice + red rails). LIRIL guide is
+    # part of the homepage chrome (dock_and_script) — PRISM site duty enforces it.
     return f"""<!doctype html>
-<html lang="en-CA" data-press="1" data-quantanium="press">
+<html lang="en-CA" data-press="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -488,11 +489,12 @@ def head(title: str, desc: str) -> str:
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
 <meta name="theme-color" content="#050708">
+<meta name="liril-role" content="system-guide">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/quantanium-spec.css?v=60">
-<!-- theme: css/quantanium-spec.css only — edit that file to restyle the site -->
+<link rel="stylesheet" href="css/press-theme.css?v=64">
+<!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
 """
