@@ -28,7 +28,7 @@ SKIP_NAMES = {
     "index_backup.html",
     "index-legacy-cap222-shell.html",
 }
-THEME_VER = "69"
+THEME_VER = "70"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -102,6 +102,17 @@ RE_LEGACY_CHROME_JS = re.compile(
     r'\s*<script\b[^>]*src="[^"]*(?:nav\.js|footer\.js|liril-bootstrap\.js)(?:\?[^"]*)?"[^>]*>\s*</script>',
     re.I,
 )
+# Era-specific floating-widget systems (progress bars, cursor glow, chapter
+# dots, subtitle bars, read-next rails…) — the reason "every page has different
+# systems". Interiors carry ONE canonical set instead: voice + walkthrough +
+# reading-mode. Pages whose CONTENT is rendered by these engines are exempt.
+RE_WIDGET_JS = re.compile(
+    r'\s*<script\b[^>]*src="[^"]*\b(?:ux|slate|cinema|flow|integrity|i18n|presentation|'
+    r"sprite-loader|x-ai-glow|quantanium|theme-slider|auth-nav|hallucination-gate|"
+    r"readnext|shell|scene-template|liril-documentary)\.js(?:\?[^\"]*)?\"[^>]*>\s*</script>",
+    re.I,
+)
+WIDGET_KEEP = {"liril-film.html", "argument.html", "argument-sources.html", "argument-transcript.html"}
 
 PRESS_HOME_MARKERS = ("read <em>backwards", 'class="cover"', "ghost5")
 
@@ -201,6 +212,40 @@ def _normalize_main_open(tag: str) -> str:
     if rest:
         return f'<main class="{" ".join(merged)}" {rest}>'
     return f'<main class="{" ".join(merged)}">'
+
+
+RE_STRIP_TAGS = re.compile(r"<[^>]+>")
+
+def _canonical_hero(text: str) -> str:
+    """Rewrite the page's first h1 (plus adjacent hero-tag kicker and hero-sub
+    dek when present) into the canonical .press-hero masthead."""
+    if 'class="press-hero"' in text:
+        return text
+    m = re.search(r"<h1\b([^>]*)>(.*?)</h1>", text, re.I | re.S)
+    if not m:
+        return text
+    # press-authored surfaces already open with a kick — leave them alone
+    if re.search(r'class="kick', text[:m.start()]):
+        return text
+    attrs, inner = m.group(1), m.group(2)
+    start, end = m.start(), m.end()
+    pre = text[max(0, start - 400):start]
+    tag_m = re.search(
+        r'<(?:div|span|p)\b[^>]*class="[^"]*(?:hero-tag|inv-tag|eyebrow|kicker)[^"]*"[^>]*>'
+        r"(.*?)</(?:div|span|p)>\s*$", pre, re.I | re.S)
+    if tag_m:
+        start -= len(pre) - tag_m.start()
+    post = text[end:end + 600]
+    sub_m = re.match(
+        r'\s*<p\b[^>]*class="[^"]*(?:hero-sub|dek|subtitle|lede|stand)[^"]*"[^>]*>(.*?)</p>',
+        post, re.I | re.S)
+    if sub_m:
+        end += sub_m.end()
+    kick = RE_STRIP_TAGS.sub("", tag_m.group(1)).strip() if tag_m else "The Record · TENET5"
+    dek = f'\n  <p class="dek">{RE_STRIP_TAGS.sub("", sub_m.group(1)).strip()}</p>' if sub_m else ""
+    block = (f'<header class="press-hero">\n  <span class="kick">{kick}</span>\n'
+             f"  <h1{attrs}>{inner}</h1>{dek}\n</header>")
+    return text[:start] + block + text[end:]
 
 
 def apply_page(path: Path) -> bool:
@@ -307,6 +352,37 @@ def apply_page(path: Path) -> bool:
         text = RE_SOUP_NODES.sub("\n", text)
         text = RE_SKIP.sub("\n", text)
         text = RE_LEGACY_CHROME_JS.sub("", text)
+
+        # ONE widget system: strip era-specific floating-UI scripts (each page
+        # had a different set — progress bars, cursor glow, subtitle bars),
+        # then guarantee the canonical trio on every interior.
+        if path.name not in WIDGET_KEEP:
+            text = RE_WIDGET_JS.sub("", text)
+        canon = []
+        if "js/liril-voice.js" not in text:
+            canon.append(f'<script src="{prefix}js/liril-voice.js?v=42"></script>')
+        if "liril-walkthrough.js" not in text:
+            canon.append(f'<script src="{prefix}js/liril-walkthrough.js?v=3"></script>')
+        if "reading-mode.js" not in text:
+            canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
+        if canon:
+            text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
+
+        # data-heal styles yield to the theme: relocate them BEFORE the theme
+        # <link> so press-theme.css wins every tie — page CSS only fills
+        # classes the theme doesn't define. That is the inheritance model.
+        heal_blocks = re.findall(r"<style [^>]*data-heal[^>]*>.*?</style>\n?", text, re.I | re.S)
+        if heal_blocks and re.search(r'<link rel="stylesheet" href="[^"]*press-theme', text):
+            for hb in heal_blocks:
+                text = text.replace(hb, "")
+            text = re.sub(
+                r'([ \t]*<link rel="stylesheet" href="[^"]*press-theme[^>]*>)',
+                lambda m: "".join(heal_blocks) + m.group(1),
+                text, count=1)
+
+        # Canonical masthead: every interior opens the same way — kick, h1,
+        # dek — regardless of which era authored its hero. One design language.
+        text = _canonical_hero(text)
 
         # Replace ANY existing header with canonical press-bar
         NAV = _nav(prefix)

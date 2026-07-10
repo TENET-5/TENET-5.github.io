@@ -1,0 +1,432 @@
+{
+  "id": "subagent_framework_map_last",
+  "ts": "2026-07-10T24:30:00Z",
+  "purpose": "Existing-tool map for CPC-CBC 5GW investigation — no new product Python",
+  "scope_roots": [
+    "E:/tenet-5.github.io/data",
+    "E:/S.L.A.T.E/prism/distill_tools"
+  ],
+  "claim_level": "PATH_MAP_ARTIFACT_NOT_EXECUTION_PROOF",
+  "doctrine": {
+    "reuse_only": true,
+    "no_new_product_python": true,
+    "prism_isolation": "prism_work_pollution_guard defaults OSINT OUT of tenet5-prism rotation (PRISM_ALLOW_OSINT=1 or PRISM_ISOLATED=0 required to allow). Investigation tools live under distill_tools/lirilclaw; site corpus under tenet-5.github.io/data.",
+    "grok_role": "orchestrate flags + read artifacts only"
+  },
+
+  "1_foreign_influence_and_lirilclaw": {
+    "primary": {
+      "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/foreign_influence_osint.py",
+      "role": "Full FI public-record scan: Hansard, lobbying, EC donor keyword web search, social via Nitter, NSICOP page",
+      "cli_flags": {
+        "default_full": "(no flags) → hansard + lobbying + social + elections + nsicop",
+        "--hansard": "Hansard-only",
+        "--lobbying": "Lobbying registry only",
+        "--social": "Politician social (Nitter) only",
+        "--status": "Print latest scan summary from DATA_DIR"
+      },
+      "data_dir": "E:/S.L.A.T.E/prism/data/foreign_influence",
+      "outputs": [
+        "scan_YYYYMMDD_HHMMSS.json (sources + summary)",
+        "scan_state.json (declared STATE_FILE; status uses scan_*.json)"
+      ],
+      "output_schema_summary": {
+        "ts": "unix",
+        "seed": 118400,
+        "sources.federal_hansard": "flagged quotes with israel/ccp/criminal/legislation keyword scores",
+        "sources.lobbying": "term → registration count",
+        "sources.social_media": "handles flagged with keyword scores",
+        "sources.elections": "EC contribution-search term matches (web scrape, not local CSV)",
+        "sources.nsicop": "landing-page keyword hits",
+        "summary": "sources_scanned, total_flagged, saved_to"
+      },
+      "keyword_axes": ["ISRAEL_KEYWORDS", "CCP_KEYWORDS", "CRIMINAL_KEYWORDS", "LEGISLATION_KEYWORDS"],
+      "scheduler_id": "foreign_influence_osint",
+      "scheduler_default_args": ["--hansard"],
+      "scheduler_source": "E:/S.L.A.T.E/prism/distill_tools/liril_investigation_scheduler.py"
+    },
+    "related_lirilclaw": [
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/analyze_influence.py",
+        "role": "Party + politician FI keyword aggregate from OpenParliament Hansard API scans",
+        "inputs": "data/foreign_influence/hansard_api_*.json (latest)",
+        "outputs": "data/foreign_influence/analysis_30day.json",
+        "flags": "none (main only)",
+        "cpc_names_seeded": ["Michael Barrett", "Michael Chong", "Melissa Lantsman", "Pierre Poilievre", "Shuv Majumdar", "..."]
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/openparliament_scanner.py",
+        "role": "Reliable Hansard via api.openparliament.ca (feeds analyze_influence)",
+        "flags": ["(default last 7d)", "--days N", "--keyword \"...\""],
+        "outputs": "data/foreign_influence/hansard_api_*.json",
+        "scheduler_id": "openparliament_scan"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/mass_mp_scanner.py",
+        "role": "All ~340 MPs foreign-keyword ranking via OpenParliament",
+        "flags": ["(full)", "--top N", "--party NAME", "--report"],
+        "outputs": "data/foreign_influence/* (ranked reports)",
+        "scheduler_id": "mass_mp_scanner"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/network_mapper.py",
+        "role": "Social network map (Vuong/CCFR/wardoll/Rebel/CIJA/CPC seed set)",
+        "flags": ["--seed", "--expand", "--analyze", "--report"],
+        "data_dir": "E:/S.L.A.T.E/prism/data/foreign_influence/network",
+        "scheduler_id": "network_mapper",
+        "note": "Overlaps Domain-B amplifiers; not CBC-specific"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/deep_hansard_scan.py",
+        "role": "Federal + provincial Hansard depth",
+        "scheduler_ids": ["deep_hansard_federal", "deep_hansard_ontario"],
+        "data_dir": "E:/S.L.A.T.E/prism/data/foreign_influence"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/osint_engine.py",
+        "role": "Generic OSINT primitives (holehe email footprint, DNS/WHOIS, entity extract)",
+        "data_dir_env": "TENET5_WORKSPACE/data/osint"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/osint.py",
+        "role": "LirilClaw OSINT CLI surface (bundled with dist)"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/cfnis_investigation.py",
+        "role": "CFNIS-specific investigation path; shares foreign_influence DATA_DIR"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/build_legal_case.py",
+        "role": "Legal-case assembly from foreign_influence vault"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/cbc_funding_pitch.py",
+        "role": "CBC funding narrative helper (legacy campaign class)"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/fetch_all_mps.py",
+        "role": "Wikidata MP roster refresh",
+        "scheduler_id": "fetch_all_mps"
+      }
+    ],
+    "related_distill_non_claw": [
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/build_foreign_dossier.py",
+        "role": "Static 16-actor foreign interference dossier builder",
+        "site_out": "E:/tenet-5.github.io/data/foreign_interference_dossier.json"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/grover_foreign_decisionmakers.py",
+        "role": "Grover oracle over foreign_interference_dossier (PS ministers + CSIS directors tenure×events)",
+        "site_out": "E:/tenet-5.github.io/data/foreign_grover_decisionmakers.json"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/osint_lookup.py",
+        "role": "Username/domain multi-platform public presence"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/osint_daily_bulletin.py",
+        "role": "Daily OSINT bulletin"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/wardoll_osint.py",
+        "role": "Wardoll-linked OSINT"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/fiis/",
+        "role": "FIIS provincial scanners (e.g. ontario_scanner.py donor patterns)"
+      }
+    ],
+    "site_inventory_doc": "E:/tenet-5.github.io/data/osint_framework_inventory.json"
+  },
+
+  "2_quantum_sator_influence_scoring": {
+    "named_tool_sator_influence_propagation": {
+      "exists": false,
+      "note": "No module named sator_influence_propagation found under prism/distill_tools or site data. Do not invent it."
+    },
+    "influence_scores": {
+      "path": "E:/tenet-5.github.io/data/influence_scores.json",
+      "status": "MINIMAL_STUB",
+      "contents": {
+        "foreign_orgs": ["Beijing", "PRC", "United Front", "Foreign Interference Target Alpha", "CCP"],
+        "exposed_entities": [],
+        "total_nodes": 1178,
+        "total_edges": 479166
+      },
+      "usable_for_5gw": "Graph scale metadata only — not CPC-CBC domain scores"
+    },
+    "quantum_osint_envelope_active": {
+      "path": "E:/tenet-5.github.io/data/osint_laps/quantum_osint_decision_envelope.json",
+      "method": "KERNEL_BASE=42 cube42 public-node weighted ranking + Ising priority collapse (analytical, not court physics)",
+      "sator_route_bias": "Prefer high-falsifiability public-record pulls over social pile-on expansion",
+      "ising_collapse_top": [
+        {"rank": 1, "id": "Q1_hard_vault_cpac", "score_42": 40},
+        {"rank": 2, "id": "Q4_maid_n100", "score_42": 36},
+        {"rank": 3, "id": "Q6_ec_donors", "score_42": 32},
+        {"rank": 4, "id": "Q5_oic_board", "score_42": 30},
+        {"rank": 5, "id": "Q8_fitr_watch", "score_42": 24, "gate_date": "2026-08-04"},
+        {"rank": 6, "id": "Q7_t3010_pdfs", "score_42": 20},
+        {"rank": 7, "id": "Q2_bluesky", "score_42": 14}
+      ],
+      "prism_slave_pack": {
+        "spec": "C:/PRISM/data/mesh/osint_5gw_agents.json",
+        "job": "C:/PRISM/data/prism_work_loop_jobs/osint_5gw_quantum_pipeline.json"
+      }
+    },
+    "grover_influence_class": [
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/grover_foreign_decisionmakers.py",
+        "artifact": "E:/tenet-5.github.io/data/foreign_grover_decisionmakers.json",
+        "oracle": "Mark PS ministers + CSIS directors with weighted event-tenure score >= 4.0",
+        "marked_example": ["Marco Mendicino", "Dominic LeBlanc", "David Vigneault", "Dan Rogers"],
+        "fit_to_5gw_matrix": "Domain-C FI accountability — orthogonal to CBC appropriation / CPC mesh Domains A/B"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/grover_portfolio_capture.py",
+        "artifact": "E:/tenet-5.github.io/data/portfolio_capture_grover.json",
+        "role": "Cross-portfolio capture Grover"
+      },
+      {
+        "path": "E:/tenet-5.github.io/data/political_business_influence_grover_decisionmakers.json",
+        "role": "Political-business influence Grover output artifact"
+      },
+      {
+        "path": "E:/tenet-5.github.io/data/grover_network_multi_criteria.json",
+        "role": "Multi-criteria network Grover"
+      },
+      {
+        "path": "E:/S.L.A.T.E/prism/distill_tools/liril_grover_search.py",
+        "role": "Codebase Grover search (engineering), not political influence"
+      }
+    ],
+    "analyze_influence_scoring": {
+      "path": "E:/S.L.A.T.E/prism/distill_tools/lirilclaw/analyze_influence.py",
+      "scores": "per-politician israel/ccp/india/criminal hit counts + pro/anti foreign sentiment proxies",
+      "party_totals": true
+    }
+  },
+
+  "3_ec_contributions_q6": {
+    "queue_id": "Q6",
+    "queue_task": "Elections Canada CPC fundraising returns 2023-2025 top donors",
+    "queue_status": "DONE_PARTIAL",
+    "residual": "EC CSV top-N named donors 2023–2025 network graph",
+    "local_corpus": {
+      "raw_zip": "E:/tenet-5.github.io/data/contributions/od_cntrbtn_audt_e.zip",
+      "raw_csv": "E:/tenet-5.github.io/data/contributions/PoliticalFinance/od_cntrbtn_audt_e.csv",
+      "csv_columns": [
+        "Political Entity",
+        "Recipient ID",
+        "Recipient",
+        "Recipient last name",
+        "Recipient first name",
+        "Recipient middle initial",
+        "Political Party of Recipient",
+        "Electoral District",
+        "Electoral event",
+        "Fiscal/Election date",
+        "Form ID",
+        "Financial Report",
+        "Part Number of Return",
+        "Financial Report part",
+        "Contributor type",
+        "Contributor name",
+        "Contributor last name",
+        "Contributor first name",
+        "Contributor middle initial",
+        "Contributor City",
+        "Contributor Province",
+        "Contributor Postal code",
+        "Contribution Received date",
+        "Monetary amount",
+        "Non-Monetary amount",
+        "Contribution given through",
+        "Leadership contestant"
+      ],
+      "aggregate_analysis": "E:/tenet-5.github.io/data/contributions_analysis.json",
+      "aggregate_stats": {
+        "total_records": 6205703,
+        "cpc_count": 2339040,
+        "cpc_total_amount_cad": 585867238.24,
+        "top_donors_include": "estates + aggregated $200-or-less buckets — multi-year lifetime, not 2023-2025 slice"
+      },
+      "fundraising_snapshot_q6_partial": "E:/tenet-5.github.io/data/cpc_fundraising_snapshot_2025.json"
+    },
+    "tool_note": "foreign_influence_osint.scan_elections_donors() hits EC web ContributionSearch by keyword (embassy/china/israel…) — does NOT parse local od_cntrbtn CSV. Q6 residual needs existing harness parse/filter of local CSV (or site data job), not a new product tool.",
+    "filter_recipe_for_existing_harness": {
+      "party_eq": "Conservative Party of Canada",
+      "date_window": "2023-01-01 .. 2025-12-31 (Fiscal/Election date or Contribution Received date)",
+      "exclude_aggregate_buckets": ["Contributions of $200 or less", "$20 or less", "$25 or less"],
+      "rank": "sum Monetary amount by Contributor name",
+      "emit": "data/osint_laps/q6_cpc_top_donors_2023_2025.json (artifact name suggestion only)"
+    }
+  },
+
+  "4_inject_osint_findings": {
+    "path": "E:/S.L.A.T.E/prism/distill_tools/inject_osint_findings.py",
+    "can_ingest_cpc_cbc_matrix_json": false,
+    "reason": "Hardcoded one-shot: reads investigation_board.js, injects fixed PHAC/ArriveCAN/Tam nodes+threads, writes board back. No CLI, no matrix path arg, no generic JSON merge.",
+    "target": "E:/TENET-5.github.io/data/investigation_board.js (path casing in script)",
+    "matrix_path": "E:/tenet-5.github.io/data/cpc_cbc_5gw_influence_analysis_2026-07-10.json",
+    "recommended_ingest_path": {
+      "do_not": "extend inject_osint_findings.py as new product surface without Daniel say-so",
+      "prefer": [
+        "Keep matrix as first-class site data artifact (already linked from pages/film/docs)",
+        "PRISM site duty / page rebuild tools that read data/*.json",
+        "investigation_threads.json + osint_entity_registry manual merge patterns already on site",
+        "If board needs nodes: hand-edit investigation_board schema via existing board patterns — not this inject script"
+      ]
+    }
+  },
+
+  "path_map_site_5gw_corpus": {
+    "active_matrix": "E:/tenet-5.github.io/data/cpc_cbc_5gw_influence_analysis_2026-07-10.json",
+    "collection_queue": "E:/tenet-5.github.io/data/osint_scrape_queues/cpc_cbc_5gw_collection_queue.json",
+    "laps": [
+      "E:/tenet-5.github.io/data/osint_laps/cpc_cbc_5gw_execute_lap_2026-07-10.json",
+      "E:/tenet-5.github.io/data/osint_laps/cpc_cbc_5gw_continue_lap2_2026-07-10.json",
+      "E:/tenet-5.github.io/data/osint_laps/quantum_osint_decision_envelope.json",
+      "E:/tenet-5.github.io/data/osint_laps/quantum_pipeline_arm_last.json"
+    ],
+    "domain_artifacts": {
+      "A_state_media": [
+        "E:/tenet-5.github.io/data/cbc_5gw_analysis.json",
+        "E:/tenet-5.github.io/data/cbc_board_appointments_seed_2026.json",
+        "E:/tenet-5.github.io/data/cbc_influencer_registry.json"
+      ],
+      "B_cpc_mesh": [
+        "E:/tenet-5.github.io/data/cpc_media_political_graph.json",
+        "E:/tenet-5.github.io/data/cpc_cbc_amplifier_multiplatform_map.json",
+        "E:/tenet-5.github.io/data/cpc_fundraising_snapshot_2025.json",
+        "E:/tenet-5.github.io/data/pierre_poilievre_profile.json"
+      ],
+      "C_foreign_fi": [
+        "E:/tenet-5.github.io/data/foreign_interference_dossier.json",
+        "E:/tenet-5.github.io/data/foreign_interference_commission.json",
+        "E:/tenet-5.github.io/data/foreign_grover_decisionmakers.json",
+        "E:/tenet-5.github.io/data/fitr_public_status_2026-07-10.json",
+        "E:/tenet-5.github.io/data/michael_chong_profile.json"
+      ],
+      "D_social_enforcement": [
+        "E:/tenet-5.github.io/data/cbc_social_graph_last.json",
+        "E:/tenet-5.github.io/data/cbc_social_public_osint_bundle.json",
+        "E:/tenet-5.github.io/data/cbc_northland_tales_production_chain.json",
+        "E:/tenet-5.github.io/data/osint_vault/cbc_poilievre_presser_cutaway_2026-06.json"
+      ],
+      "E_thinktank": [
+        "E:/tenet-5.github.io/data/atlas_fraser_funding_crosswalk_2026-07-10.json"
+      ],
+      "F_maid_frame": [
+        "E:/tenet-5.github.io/data/maid_cbc_framing_content_audit_seed.json"
+      ]
+    },
+    "generic_osint_site": [
+      "E:/tenet-5.github.io/data/osint_entity_registry.json",
+      "E:/tenet-5.github.io/data/osint_network_graph.json",
+      "E:/tenet-5.github.io/data/osint_cross_references.json",
+      "E:/tenet-5.github.io/data/osint_risk_scores.json",
+      "E:/tenet-5.github.io/data/osint_evidence_chains.json",
+      "E:/tenet-5.github.io/data/investigation_threads.json"
+    ]
+  },
+
+  "prism_executable_next_steps_flags_only": {
+    "precondition_isolation": "OSINT is blocked inside tenet5-prism when .prism_no_osint_pollution / PRISM_ISOLATED=1. Use work-loop / mesh / investigation scheduler paths — do not force OSINT into wave rotation.",
+    "recommended_flags_and_job_names": [
+      {
+        "flag_or_job": "C:/PRISM/data/prism_work_loop_jobs/osint_5gw_quantum_pipeline.json",
+        "purpose": "Already-armed 5GW quantum pipeline pickup (matrix references ARMED_AWAITING_PICKUP)"
+      },
+      {
+        "flag_or_job": "C:/PRISM/data/mesh/osint_5gw_agents.json",
+        "purpose": "p256 multi-agent draft pack for residual Qs"
+      },
+      {
+        "flag_or_job": "data/.prism_site_duty",
+        "purpose": "Site duty rebuild after any public page bind of matrix/queue (site tools, not new Python)"
+      },
+      {
+        "flag_or_job": "data/.prism_site_duty_forever",
+        "purpose": "Forever site duty after public HTML touch"
+      },
+      {
+        "flag_or_job": "investigation_scheduler:foreign_influence_osint",
+        "args": ["--status"],
+        "purpose": "Confirm last FI scan; then --hansard or full if vault empty under prism/data/foreign_influence"
+      },
+      {
+        "flag_or_job": "investigation_scheduler:openparliament_scan",
+        "args": ["--days", "30"],
+        "purpose": "Refresh hansard_api_*.json for CPC name keyword surface"
+      },
+      {
+        "flag_or_job": "investigation_scheduler:analyze_influence",
+        "purpose": "Regenerate analysis_30day.json party totals (after openparliament_scan)"
+      },
+      {
+        "flag_or_job": "investigation_scheduler:mass_mp_scanner",
+        "args": ["--party", "Conservative"],
+        "purpose": "CPC-only FI keyword ranking"
+      },
+      {
+        "flag_or_job": "investigation_scheduler:network_mapper",
+        "args": ["--seed"],
+        "purpose": "Refresh Domain-B adjacent seed social map"
+      },
+      {
+        "flag_or_job": "Q6_ec_csv_filter_job",
+        "purpose": "Parse existing od_cntrbtn_audt_e.csv → CPC 2023-2025 top-N; write osint_laps residual artifact (existing harness only — no new product module)"
+      },
+      {
+        "flag_or_job": "Q1_hard_vault_cpac",
+        "purpose": "Ising rank-1 residual: hard SHA256 vault CPAC video"
+      },
+      {
+        "flag_or_job": "Q4_maid_n100",
+        "purpose": "Ising rank-2: N≥100 CBC MAID framing code via local p256 classify when mesh free"
+      },
+      {
+        "flag_or_job": "Q5_oic_board",
+        "purpose": "CBC board OIC numbers + bio crosswalk residual"
+      },
+      {
+        "flag_or_job": "Q8_fitr_watch",
+        "purpose": "Gate after 2026-08-04 only"
+      },
+      {
+        "flag_or_job": "C:/PRISM/bin/prism_grok_ops.exe prove",
+        "purpose": "Mountain prove path if C++/p256 ship needed for OSINT tooling — not for site HTML thrash"
+      },
+      {
+        "flag_or_job": "DO_NOT_USE:inject_osint_findings",
+        "purpose": "Cannot ingest matrix JSON; skip for CPC-CBC 5GW"
+      },
+      {
+        "flag_or_job": "DO_NOT_INVENT:sator_influence_propagation",
+        "purpose": "Does not exist; use quantum_osint_decision_envelope + analyze_influence + grover_foreign"
+      }
+    ],
+    "priority_order_from_ising": [
+      "Q1_hard_vault_cpac",
+      "Q4_maid_n100",
+      "Q6_ec_csv_filter_job",
+      "Q5_oic_board",
+      "openparliament_scan+analyze_influence (Domain-C keyword refresh)",
+      "Q2_bluesky residual",
+      "Q7_t3010_pdfs",
+      "Q8_fitr_watch (post 2026-08-04)"
+    ]
+  },
+
+  "gaps": [
+    "prism/data/foreign_influence not present in prism/data listing (scans may never have run on this host layout)",
+    "inject_osint_findings is legacy board patch — not a general OSINT ingest",
+    "sator_influence_propagation name does not exist",
+    "influence_scores.json is not a usable multi-domain scoreboard for 5GW",
+    "EC web scan in foreign_influence_osint ≠ local CSV Q6 residual",
+    "PRISM isolation blocks OSINT in container rotation by default"
+  ],
+
+  "status": "MAP_COMPLETE"
+}
