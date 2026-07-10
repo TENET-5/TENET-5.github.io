@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab", "data"}
-THEME_VER = "64"
+THEME_VER = "65"
 THEME_HREF = f"css/press-theme.css?v={THEME_VER}"
 
 FONTS_BLOCK = f"""  <link rel="preconnect" href="https://fonts.googleapis.com">

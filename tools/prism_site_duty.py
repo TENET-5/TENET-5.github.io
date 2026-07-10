@@ -170,12 +170,38 @@ def lap() -> dict:
     ts = datetime.now(timezone.utc).isoformat()
     steps: list[dict] = []
 
-    # 1) theme file must exist
+    # 1) theme file must exist AND define :root tokens (missing vars = white page)
     if not THEME_PATH.exists() or THEME_PATH.stat().st_size < 1000:
         steps.append({"name": "theme_file", "ok": False, "detail": f"missing {THEME_REL}"})
         return _finish(ts, steps, "FAIL_NO_THEME")
-
-    steps.append({"name": "theme_file", "ok": True, "bytes": THEME_PATH.stat().st_size, "path": THEME_REL})
+    theme_txt = THEME_PATH.read_text(encoding="utf-8", errors="replace")
+    token_ok = (
+        ":root" in theme_txt
+        and "--void:" in theme_txt
+        and "#050708" in theme_txt
+        and "--ice:" in theme_txt
+        and "#9adbe8" in theme_txt
+        and "--serif:" in theme_txt
+    )
+    if not token_ok:
+        steps.append(
+            {
+                "name": "theme_file",
+                "ok": False,
+                "detail": "press-theme.css missing :root tokens (site paints white without them)",
+                "bytes": THEME_PATH.stat().st_size,
+            }
+        )
+        return _finish(ts, steps, "FAIL_THEME_TOKENS")
+    steps.append(
+        {
+            "name": "theme_file",
+            "ok": True,
+            "bytes": THEME_PATH.stat().st_size,
+            "path": THEME_REL,
+            "tokens": "root_void_ice_serif",
+        }
+    )
 
     # 2) rebuild press surfaces (index + evidence + story) — owns LIRIL dock
     press = TOOLS / "press.py"

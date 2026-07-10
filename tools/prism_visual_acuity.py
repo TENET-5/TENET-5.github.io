@@ -167,8 +167,22 @@ def capture(base: str, stamp: str, out_dir: Path) -> list[dict]:
                         "jpg_rel": f"data/visual_acuity/{jpg_name}",
                     }
                     try:
-                        page.goto(url, wait_until="domcontentloaded", timeout=45000)
-                        page.wait_for_timeout(900)
+                        page.goto(url, wait_until="networkidle", timeout=45000)
+                        # Reveal .rv chapters (JS starts them opacity:0) so acuity is real, not pure black
+                        page.evaluate(
+                            """() => {
+                              document.documentElement.classList.add('js');
+                              document.querySelectorAll('.rv').forEach(el => el.classList.add('in'));
+                              // force void background if CSS failed to apply (diagnostic signal stays in paint)
+                              const cs = getComputedStyle(document.body);
+                              return {
+                                bg: cs.backgroundColor,
+                                color: cs.color,
+                                font: cs.fontFamily
+                              };
+                            }"""
+                        )
+                        page.wait_for_timeout(500)
                         # full page can be huge; capture viewport for acuity
                         page.screenshot(path=str(jpg_path), type="jpeg", quality=82, full_page=False)
                         # mirror to C:\PRISM\log\visual_acuity
