@@ -6,196 +6,288 @@
 <title>TENET5 — Canada's Intelligent-Automation Newsroom</title>
 <style>
   :root{
-    --paper:#ffffff;
-    --paper-2:#f6f7f8;
-    --ink:#111417;
-    --ink-2:#3c454d;
-    --ink-3:#707a83;
-    --rule:#e2e5e8;
-    --rule-dark:#111417;
-    --accent:#0b6e8f;        /* tenet ice, deepened for white ground */
-    --accent-bright:#0f8db5;
-    --live:#c62828;          /* breaking red */
-    --ok:#1e7d46;
-    --warn:#b26a00;
-    --bad:#c62828;
+    --void:#06090d;          /* page ground */
+    --ground:#0a0f15;        /* section ground */
+    --surface:#0f1620;       /* card */
+    --surface-2:#141d29;     /* raised card */
+    --edge:#1c2836;          /* hairline */
+    --edge-lit:#2a3a4d;      /* lit hairline */
+    --ice:#8fd8ec;           /* primary accent */
+    --ice-dim:#4c8ba3;
+    --ice-deep:#0f4c63;
+    --paper:#e9eff4;         /* primary text */
+    --dim:#93a5b4;           /* secondary */
+    --faint:#5a6c7b;         /* labels */
+    --live:#ff4d4d;          /* breaking */
+    --ok:#5fd39a;
+    --warn:#e8b04a;
+    --bad:#ff6b6b;
     --serif:Georgia,'Times New Roman',serif;
     --sans:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
     --mono:Consolas,'Courier New',monospace;
+    --lift:0 18px 40px -18px rgba(0,0,0,.65), 0 1px 0 rgba(143,216,236,.06) inset;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  html{scroll-behavior:smooth}
+  body{background:var(--void);color:var(--paper);font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
-  a:hover{text-decoration:underline;text-decoration-color:var(--accent)}
-  img{max-width:100%}
-  .wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+  a:hover{color:var(--ice)}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+
+  /* reveal-on-scroll */
+  .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .rv.in{opacity:1;transform:none}
 
   /* ── prototype notice ─────────────────────────── */
-  .proto{background:#fff8e6;border-bottom:1px solid #eadfbe;color:#6b5310;font-family:var(--mono);
-    font-size:10.5px;letter-spacing:.08em;text-align:center;padding:4px 10px;text-transform:uppercase}
+  .proto{background:#141007;border-bottom:1px solid #2c2410;color:#c8a24a;font-family:var(--mono);
+    font-size:10px;letter-spacing:.12em;text-align:center;padding:5px 10px;text-transform:uppercase}
 
   /* ── utility bar ──────────────────────────────── */
-  .util{border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-3)}
-  .util .wrap{display:flex;justify-content:space-between;align-items:center;height:36px}
-  .util .r a{margin-left:18px;font-weight:600;color:var(--ink-2)}
-  .util .r a.sub{color:#fff;background:var(--accent);padding:5px 12px;border-radius:3px}
-  .util .r a.sub:hover{background:var(--accent-bright);text-decoration:none}
+  .util{border-bottom:1px solid var(--edge);font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .util .wrap{display:flex;justify-content:space-between;align-items:center;height:38px}
+  .util .dot{color:var(--ok)}
+  .util .r a{margin-left:20px;color:var(--dim);letter-spacing:.06em}
+  .util .r a.sub{color:var(--void);background:var(--ice);padding:5px 14px;border-radius:2px;font-weight:700}
+  .util .r a.sub:hover{background:#b1e5f3;color:var(--void)}
 
-  /* ── masthead ─────────────────────────────────── */
-  .masthead{text-align:center;padding:26px 0 18px}
-  .masthead h1{font-family:var(--serif);font-weight:700;font-size:clamp(44px,6vw,64px);
-    letter-spacing:.01em;line-height:1}
-  .masthead h1 span{color:var(--accent)}
-  .masthead .tag{font-family:var(--mono);font-size:11px;letter-spacing:.28em;color:var(--ink-3);
-    text-transform:uppercase;margin-top:8px}
+  /* ── masthead — oversized cinematic type ──────── */
+  .masthead{padding:54px 0 34px;position:relative;overflow:hidden;
+    background:
+      radial-gradient(1400px 420px at 50% -140px, rgba(15,76,99,.35), transparent 70%),
+      var(--void)}
+  .masthead .kick-line{display:flex;align-items:center;gap:14px;font-family:var(--mono);
+    font-size:11px;letter-spacing:.34em;color:var(--ice-dim);text-transform:uppercase;margin-bottom:10px}
+  .masthead .kick-line::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge-lit),transparent)}
+  .masthead h1{font-family:var(--serif);font-weight:700;font-size:clamp(64px,11vw,148px);
+    line-height:.88;letter-spacing:-.015em}
+  .masthead h1 span{color:var(--ice)}
+  .masthead .row2{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+    margin-top:18px;flex-wrap:wrap}
+  .masthead .tag{font-family:var(--serif);font-style:italic;font-size:clamp(15px,2vw,19px);color:var(--dim);max-width:560px}
+  .masthead .tag b{color:var(--paper);font-style:normal}
+  .masthead .ed{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.14em;
+    text-transform:uppercase;text-align:right;line-height:2}
 
-  /* ── section nav ──────────────────────────────── */
-  .nav{border-top:2px solid var(--rule-dark);border-bottom:1px solid var(--rule);
-    position:sticky;top:0;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);z-index:60}
-  .nav .wrap{display:flex;justify-content:center;gap:0;overflow-x:auto}
-  .nav a{font-size:13px;font-weight:700;padding:12px 16px;white-space:nowrap;color:var(--ink)}
-  .nav a:hover{color:var(--accent);text-decoration:none}
+  /* ── nav ──────────────────────────────────────── */
+  .nav{border-top:1px solid var(--edge-lit);border-bottom:1px solid var(--edge);position:sticky;top:0;
+    background:rgba(6,9,13,.92);backdrop-filter:blur(10px);z-index:80}
+  .nav .wrap{display:flex;gap:0;overflow-x:auto}
+  .nav a{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dim);padding:14px 16px;white-space:nowrap;
+    border-bottom:2px solid transparent}
+  .nav a:hover{color:var(--ice);border-bottom-color:var(--ice)}
+  .nav a em{font-style:normal;color:var(--ice-deep);margin-right:6px}
   .nav a.hot{color:var(--live)}
 
-  /* ── breaking / ticker ────────────────────────── */
-  .breaking{border-bottom:1px solid var(--rule);background:var(--paper-2)}
-  .breaking .wrap{display:flex;align-items:center;gap:14px;height:40px;overflow:hidden}
-  .breaking .chip{background:var(--live);color:#fff;font-size:11px;font-weight:800;
-    letter-spacing:.12em;padding:3px 10px;border-radius:2px;text-transform:uppercase;flex-shrink:0}
-  .breaking .items{display:flex;gap:44px;white-space:nowrap;animation:tick 38s linear infinite;
-    font-size:13px;color:var(--ink-2)}
-  .breaking .items b{color:var(--ink)}
+  /* ── breaking ticker ──────────────────────────── */
+  .breaking{border-bottom:1px solid var(--edge);background:var(--ground)}
+  .breaking .wrap{display:flex;align-items:center;gap:16px;height:42px;overflow:hidden}
+  .breaking .chip{background:var(--live);color:#fff;font-family:var(--mono);font-size:10px;
+    font-weight:800;letter-spacing:.16em;padding:4px 10px;border-radius:2px;text-transform:uppercase;
+    flex-shrink:0;animation:blink 2.6s ease infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.55}}
+  .breaking .items{display:flex;gap:52px;white-space:nowrap;animation:tick 42s linear infinite;
+    font-size:13px;color:var(--dim)}
+  .breaking .items b{color:var(--paper)}
+  .breaking:hover .items{animation-play-state:paused}
   @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-  /* ── story art (self-contained duotone plates) ── */
-  .art{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#123;border-radius:2px}
-  .art::after{content:"";position:absolute;inset:0;
-    background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 4px)}
-  .art.a1{background:linear-gradient(118deg,#0b2231 20%,#0b6e8f 78%,#7fd8ec 120%)}
-  .art.a2{background:linear-gradient(200deg,#101820 10%,#28506b 70%,#0f8db5 115%)}
-  .art.a3{background:linear-gradient(150deg,#1a1208 0%,#7a5210 65%,#e0b25a 120%)}
-  .art.a4{background:linear-gradient(160deg,#161a1e 0%,#3d4a55 60%,#93a7b5 115%)}
-  .art.a5{background:linear-gradient(135deg,#0e1f16 0%,#1e7d46 75%,#8fd8b0 120%)}
-  .art.a6{background:linear-gradient(210deg,#20101c 0%,#6b2f52 70%,#c98ab2 120%)}
-  .art .glyph{position:absolute;right:14px;bottom:8px;font-family:var(--serif);font-size:64px;
-    color:rgba(255,255,255,.16);line-height:1}
-  .cap{font-size:11px;color:var(--ink-3);margin-top:6px}
+  /* ── LIRIL briefing bar ───────────────────────── */
+  .liril-bar{border-bottom:1px solid var(--edge);background:linear-gradient(180deg,var(--surface),var(--ground))}
+  .liril-bar .wrap{display:flex;align-items:center;gap:20px;padding:14px 24px;flex-wrap:wrap}
+  .eq{display:flex;align-items:flex-end;gap:3px;height:26px;flex-shrink:0}
+  .eq i{display:block;width:4px;background:var(--ice);border-radius:1px;animation:eq 1.1s ease-in-out infinite}
+  .eq i:nth-child(1){height:30%;animation-delay:0s}
+  .eq i:nth-child(2){height:75%;animation-delay:.15s}
+  .eq i:nth-child(3){height:50%;animation-delay:.3s}
+  .eq i:nth-child(4){height:95%;animation-delay:.45s}
+  .eq i:nth-child(5){height:60%;animation-delay:.6s}
+  .eq i:nth-child(6){height:38%;animation-delay:.75s}
+  .eq i:nth-child(7){height:82%;animation-delay:.9s}
+  @keyframes eq{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .liril-bar .who{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;color:var(--ice);
+    text-transform:uppercase}
+  .liril-bar .what{font-family:var(--serif);font-size:16.5px;font-weight:700}
+  .liril-bar .len{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .liril-bar .play{margin-left:auto;display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--void);background:var(--ice);padding:9px 20px;border-radius:2px;transition:transform .2s ease}
+  .liril-bar .play:hover{transform:translateY(-1px);color:var(--void);background:#b1e5f3}
 
-  /* ── kickers / meta ───────────────────────────── */
-  .kick{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  /* ── section architecture ─────────────────────── */
+  section{padding:58px 0;border-bottom:1px solid var(--edge)}
+  .sec-bar{display:flex;align-items:baseline;gap:20px;margin-bottom:30px}
+  .sec-bar .no{font-family:var(--mono);font-size:12px;color:var(--ice-dim);letter-spacing:.2em}
+  .sec-bar h2{font-family:var(--serif);font-size:clamp(26px,3.6vw,40px);font-weight:700;letter-spacing:-.01em}
+  .sec-bar .rule{flex:1;height:1px;background:var(--edge);align-self:center}
+  .sec-bar .more{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;
+    color:var(--ice);text-transform:uppercase;white-space:nowrap}
+
+  /* kickers/meta */
+  .kick{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ice)}
   .kick.live{color:var(--live)}
-  .meta{font-size:11.5px;color:var(--ink-3);margin-top:6px}
-  .meta b{color:var(--ink-2);font-weight:600}
+  .meta{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:8px}
+  .meta b{color:var(--dim);font-weight:600}
 
-  /* ── front grid ───────────────────────────────── */
-  .front{display:grid;grid-template-columns:1fr 300px;gap:28px;padding:26px 0 8px}
-  @media(max-width:960px){.front{grid-template-columns:1fr}}
-  .front-main{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+  /* story art */
+  .art{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:3px;
+    border:1px solid var(--edge-lit)}
+  .art::after{content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 5px)}
+  .art.a1{background:linear-gradient(118deg,#0a1c2a 15%,#0f4c63 70%,#8fd8ec 130%)}
+  .art.a2{background:linear-gradient(205deg,#0c1118 5%,#1d3a52 65%,#4c8ba3 120%)}
+  .art.a3{background:linear-gradient(150deg,#150f06 0%,#6b4a12 70%,#e8b04a 130%)}
+  .art.a4{background:linear-gradient(160deg,#10141a 0%,#31404e 65%,#93a7b5 125%)}
+  .art.a5{background:linear-gradient(135deg,#081711 0%,#155c3c 75%,#5fd39a 130%)}
+  .art.a6{background:linear-gradient(210deg,#170b14 0%,#54263f 70%,#c98ab2 130%)}
+  .art .glyph{position:absolute;right:16px;bottom:8px;font-family:var(--serif);font-size:68px;
+    color:rgba(233,239,244,.13);line-height:1}
+  .card-hover{transition:transform .25s ease,box-shadow .25s ease}
+  .card-hover:hover{transform:translateY(-3px);box-shadow:var(--lift)}
+
+  /* ── 01 · front grid ──────────────────────────── */
+  .front{display:grid;grid-template-columns:1fr 320px;gap:32px;padding:34px 0 10px}
+  @media(max-width:980px){.front{grid-template-columns:1fr}}
+  .front-main{display:grid;grid-template-columns:1.55fr 1fr;gap:28px}
   @media(max-width:720px){.front-main{grid-template-columns:1fr}}
-
-  .lead h2{font-family:var(--serif);font-size:clamp(26px,3.4vw,38px);line-height:1.12;
-    font-weight:800;margin:12px 0 10px}
-  .lead .dek{font-size:16px;color:var(--ink-2);line-height:1.55}
-  .story h3{font-family:var(--serif);font-size:19px;line-height:1.22;font-weight:700;margin:9px 0 6px}
-  .story p{font-size:13.5px;color:var(--ink-2)}
-  .stack .story{padding:16px 0;border-top:1px solid var(--rule)}
+  .lead h2{font-family:var(--serif);font-size:clamp(30px,4vw,46px);line-height:1.06;
+    font-weight:700;letter-spacing:-.015em;margin:16px 0 12px}
+  .lead h2 a:hover{color:var(--ice)}
+  .lead .dek{font-size:16.5px;color:var(--dim);line-height:1.6;max-width:600px}
+  .story h3{font-family:var(--serif);font-size:19px;line-height:1.24;font-weight:700;margin:10px 0 6px}
+  .story p{font-size:13.5px;color:var(--dim)}
+  .stack .story{padding:18px 0;border-top:1px solid var(--edge)}
   .stack .story:first-child{border-top:none;padding-top:0}
 
-  /* ── latest rail ──────────────────────────────── */
-  .rail{border-left:1px solid var(--rule);padding-left:24px}
-  @media(max-width:960px){.rail{border-left:none;padding-left:0;border-top:2px solid var(--rule-dark);padding-top:14px}}
-  .rail-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
-    letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
-  .rail-h .pulse{width:8px;height:8px;border-radius:50%;background:var(--live);
-    animation:pulse 2s ease infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  /* latest rail */
+  .rail{border-left:1px solid var(--edge);padding-left:28px}
+  @media(max-width:980px){.rail{border-left:none;padding-left:0;border-top:1px solid var(--edge-lit);padding-top:18px}}
+  .rail-h{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;
+    font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;color:var(--paper)}
+  .rail-h .pulse{width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 2s ease infinite}
   .rail ul{list-style:none}
-  .rail li{padding:11px 0;border-bottom:1px solid var(--rule)}
-  .rail time{font-family:var(--mono);font-size:10.5px;color:var(--accent);display:block;margin-bottom:3px}
-  .rail a{font-size:13.5px;font-weight:600;line-height:1.35;display:block}
+  .rail li{padding:12px 0;border-bottom:1px solid var(--edge)}
+  .rail time{font-family:var(--mono);font-size:10px;color:var(--ice);display:block;margin-bottom:4px;letter-spacing:.08em}
+  .rail li a{font-size:13.5px;font-weight:600;line-height:1.4;display:block;color:var(--paper)}
+  .rail li a:hover{color:var(--ice)}
+  .most{margin-top:30px}
+  .most ol{list-style:none;counter-reset:mr}
+  .most li{counter-increment:mr;display:flex;gap:16px;padding:13px 0;border-bottom:1px solid var(--edge)}
+  .most li::before{content:"0" counter(mr);font-family:var(--mono);font-size:20px;font-weight:700;
+    color:var(--ice-deep);line-height:1.2;min-width:34px}
+  .most li a{font-size:13.5px;font-weight:600;line-height:1.4;color:var(--paper)}
+  .most li a:hover{color:var(--ice)}
 
-  /* ── section blocks ───────────────────────────── */
-  .sec{padding:26px 0 30px;border-top:2px solid var(--rule-dark);margin-top:8px}
-  .sec-bar{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px}
-  .sec-bar h2{font-family:var(--serif);font-size:22px;font-weight:800}
-  .sec-bar a{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
-  .cols-4{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
-  .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-  @media(max-width:960px){.cols-4{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:1fr}}
+  /* ── grids ────────────────────────────────────── */
+  .cols-4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+  .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  @media(max-width:980px){.cols-4{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:1fr}}
   @media(max-width:560px){.cols-4{grid-template-columns:1fr}}
 
-  /* ── two-lane band: media watch / claim check ─── */
-  .band{display:grid;grid-template-columns:1.4fr 1fr;gap:28px}
-  @media(max-width:960px){.band{grid-template-columns:1fr}}
-  .verdict{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.1em;
-    text-transform:uppercase;padding:2px 8px;border-radius:2px;color:#fff}
+  /* ── 03 · accountability band ─────────────────── */
+  .band{display:grid;grid-template-columns:1.45fr 1fr;gap:34px}
+  @media(max-width:980px){.band{grid-template-columns:1fr}}
+  .verdict{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:800;
+    letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:2px;color:var(--void)}
   .verdict.ok{background:var(--ok)}
   .verdict.warn{background:var(--warn)}
   .verdict.bad{background:var(--bad)}
-  .claim{padding:14px 0;border-top:1px solid var(--rule)}
-  .claim:first-of-type{border-top:none;padding-top:4px}
-  .claim .q{font-family:var(--serif);font-size:15.5px;font-weight:700;line-height:1.3;margin:6px 0 4px}
-  .claim .cite{font-size:12px;color:var(--ink-3)}
-  .claim .cite b{color:var(--accent);font-weight:600}
+  .claims{background:var(--surface);border:1px solid var(--edge-lit);border-radius:4px;padding:6px 24px 18px}
+  .claim{padding:16px 0;border-top:1px solid var(--edge)}
+  .claim:first-of-type{border-top:none}
+  .claim .q{font-family:var(--serif);font-size:15.5px;font-weight:700;line-height:1.35;margin:8px 0 5px}
+  .claim .cite{font-size:12px;color:var(--faint);line-height:1.6}
+  .claim .cite b{color:var(--ice-dim);font-weight:600}
 
-  /* ── numbers strip (data desk) ────────────────── */
-  .numbers{background:var(--ink);color:#eef3f6;padding:26px 0;margin-top:8px}
-  .numbers .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
-  @media(max-width:860px){.numbers .wrap{grid-template-columns:repeat(2,1fr)}}
-  .numbers .kick{color:#8fd8ec}
-  .num{font-family:var(--serif);font-size:34px;font-weight:800;margin:4px 0 2px}
-  .numbers p{font-size:12.5px;color:#aebcc6}
-  .numbers .foot{grid-column:1/-1;font-family:var(--mono);font-size:10px;color:#6c7d89;
-    letter-spacing:.1em;text-transform:uppercase;border-top:1px solid #2a3540;padding-top:12px}
+  /* ── 04 · data desk ───────────────────────────── */
+  .numbers{background:var(--ground)}
+  .numbers .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--edge);
+    border:1px solid var(--edge);border-radius:4px;overflow:hidden}
+  @media(max-width:860px){.numbers .grid{grid-template-columns:repeat(2,1fr)}}
+  .num-cell{background:var(--surface);padding:26px 24px}
+  .num-cell .n{font-family:var(--serif);font-size:clamp(34px,4vw,52px);font-weight:700;
+    color:var(--ice);letter-spacing:-.02em;line-height:1}
+  .num-cell p{font-size:12.5px;color:var(--dim);margin-top:10px}
+  .numbers .foot{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.12em;
+    text-transform:uppercase;margin-top:14px}
 
-  /* ── most read ────────────────────────────────── */
-  .most ul{list-style:none;counter-reset:mr}
-  .most li{counter-increment:mr;display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule)}
-  .most li::before{content:counter(mr);font-family:var(--serif);font-size:26px;font-weight:800;
-    color:var(--rule);line-height:1;min-width:26px}
-  .most li:hover::before{color:var(--accent)}
-  .most a{font-size:13.5px;font-weight:600;line-height:1.35}
+  /* ── 06 · LIRIL voice section ─────────────────── */
+  .liril{background:
+    radial-gradient(900px 400px at 15% 0%, rgba(15,76,99,.4), transparent 65%),
+    var(--ground)}
+  .liril-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center}
+  @media(max-width:980px){.liril-grid{grid-template-columns:1fr}}
+  .liril h2.big{font-family:var(--serif);font-size:clamp(34px,5vw,58px);font-weight:700;
+    line-height:1.02;letter-spacing:-.015em;margin:14px 0 16px}
+  .liril h2.big span{color:var(--ice)}
+  .liril .body{font-size:15.5px;color:var(--dim);line-height:1.7;max-width:540px}
+  .liril .body b{color:var(--paper)}
+  .liril .rulebox{margin-top:22px;border-left:2px solid var(--ice);padding:12px 20px;
+    background:rgba(143,216,236,.05);font-family:var(--serif);font-style:italic;color:var(--dim);font-size:14.5px}
+  .liril .rulebox b{color:var(--ice);font-style:normal}
+  .voice-cards{display:flex;flex-direction:column;gap:16px}
+  .vcard{display:flex;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--edge-lit);
+    border-radius:4px;padding:18px 22px}
+  .vcard .ic{width:44px;height:44px;border-radius:50%;border:1px solid var(--ice-dim);flex-shrink:0;
+    display:grid;place-items:center;font-family:var(--mono);color:var(--ice);font-size:15px}
+  .vcard h4{font-family:var(--serif);font-size:16.5px;font-weight:700}
+  .vcard p{font-size:12.5px;color:var(--faint);margin-top:2px}
+  .vcard .go{margin-left:auto;font-family:var(--mono);font-size:16px;color:var(--ice-dim)}
+  .vcard:hover .go{color:var(--ice)}
+  .eq.lg{height:60px;gap:5px;margin-bottom:6px}
+  .eq.lg i{width:7px}
 
   /* ── footer ───────────────────────────────────── */
-  footer{border-top:2px solid var(--rule-dark);margin-top:34px;padding:30px 0 46px;
-    color:var(--ink-3);font-size:12.5px}
+  footer{padding:44px 0 60px;color:var(--faint);font-size:12.5px;background:var(--void)}
   footer .cols{display:flex;gap:48px;flex-wrap:wrap;justify-content:space-between}
-  footer .fm{font-family:var(--serif);font-size:24px;font-weight:800;color:var(--ink)}
-  footer .fm span{color:var(--accent)}
-  footer ul{list-style:none;line-height:2.2;font-size:12px}
-  footer ul a{font-weight:600;color:var(--ink-2)}
-  footer .origin{margin-top:26px;border-top:1px solid var(--rule);padding-top:16px;font-size:11.5px}
+  footer .fm{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--paper)}
+  footer .fm span{color:var(--ice)}
+  footer ul{list-style:none;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;line-height:2.5}
+  footer ul a{color:var(--dim)}
+  footer .origin{margin-top:30px;border-top:1px solid var(--edge);padding-top:18px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.06em}
 </style>
 </head>
 <body>
 
-<div class="proto">Design prototype — headlines, figures and timestamps are sample content for layout review</div>
+<div class="proto">Prototype content — headlines and figures are sample data pending live ingest</div>
 
 <div class="util">
   <div class="wrap">
-    <div id="dateline">—</div>
+    <div><span class="dot">●</span>&nbsp; MONITORING — CONTINUOUS &nbsp;·&nbsp; <span id="dateline">—</span></div>
     <div class="r">
-      <a href="#">Corrections</a><a href="#">About</a><a href="#" class="sub">Get the Briefing</a>
+      <a href="about.html">About</a><a href="accountability.html">Corrections</a><a href="daily-briefing.html" class="sub">Get the Briefing</a>
     </div>
   </div>
 </div>
 
-<header class="masthead wrap">
-  <h1>TENET<span>5</span></h1>
-  <div class="tag">Canada's Intelligent-Automation Newsroom · Public Record Only</div>
+<header class="masthead">
+  <div class="wrap">
+    <div class="kick-line">Intelligent-Automation Newsroom · Canada</div>
+    <h1>TENET<span>5</span></h1>
+    <div class="row2">
+      <p class="tag"><b>Canada's digital watchdog.</b> Every outlet read, every public document
+      indexed, every public claim held to the record — by machine, verified by people,
+      spoken by LIRIL.</p>
+      <div class="ed">Ottawa Edition<br>Public record only</div>
+    </div>
+  </div>
 </header>
 
 <nav class="nav">
   <div class="wrap">
-    <a href="#" class="hot">Top Stories</a>
-    <a href="#">Politics</a>
-    <a href="#documents">Documents</a>
-    <a href="#">Courts</a>
-    <a href="#">Spending</a>
-    <a href="#mediawatch">Media Watch</a>
-    <a href="#claimcheck">Claim Check</a>
-    <a href="#">Investigations</a>
-    <a href="#">Data Desk</a>
+    <a href="#front" class="hot">Top Stories</a>
+    <a href="#record"><em>02</em>The Record</a>
+    <a href="#watch"><em>03</em>Media Watch</a>
+    <a href="#watch"><em>03</em>Claim Check</a>
+    <a href="#data"><em>04</em>Data Desk</a>
+    <a href="#cases"><em>05</em>Investigations</a>
+    <a href="#liril"><em>06</em>LIRIL</a>
+    <a href="evidence-index.html">Evidence</a>
+    <a href="osint-dashboard.html">Dashboard</a>
   </div>
 </nav>
 
@@ -203,235 +295,279 @@
   <div class="wrap">
     <span class="chip">Developing</span>
     <div class="items">
-      <span><b>ATIP backlog:</b> average response time hits 187 days across 24 departments</span>
-      <span><b>Gazette watch:</b> 17 new regulations published this week — 3 without cost analysis</span>
+      <span><b>ATIP backlog:</b> average response hits 187 days against a 30-day statutory clock</span>
+      <span><b>Gazette watch:</b> 17 new regulations this week — 3 with no cost analysis attached</span>
       <span><b>Docket:</b> 12 new judicial-review filings added in Federal Court this morning</span>
       <span><b>Claim check:</b> viral procurement figure traced to a misread 2024 table</span>
-      <span><b>ATIP backlog:</b> average response time hits 187 days across 24 departments</span>
-      <span><b>Gazette watch:</b> 17 new regulations published this week — 3 without cost analysis</span>
+      <span><b>ATIP backlog:</b> average response hits 187 days against a 30-day statutory clock</span>
+      <span><b>Gazette watch:</b> 17 new regulations this week — 3 with no cost analysis attached</span>
       <span><b>Docket:</b> 12 new judicial-review filings added in Federal Court this morning</span>
       <span><b>Claim check:</b> viral procurement figure traced to a misread 2024 table</span>
     </div>
   </div>
 </div>
 
-<!-- ══ FRONT PAGE ══════════════════════════════════ -->
-<div class="front wrap">
-  <div class="front-main">
+<div class="liril-bar">
+  <div class="wrap">
+    <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div>
+      <div class="who">LIRIL · The Briefing</div>
+      <div class="what">Today in the public record — read aloud, every line cited</div>
+    </div>
+    <div class="len">DAILY · AUDIO</div>
+    <a class="play" href="daily-briefing.html">▶ Listen</a>
+  </div>
+</div>
 
-    <!-- lead -->
-    <article class="lead">
-      <div class="art a1"><span class="glyph">¶</span></div>
-      <div class="cap">Cross-referenced: 44 contract entries in the proactive-disclosure registry. (Illustration)</div>
-      <span class="kick">Investigation · Spending</span>
-      <h2><a href="#">Promised in the House, missing on paper: a $2.1-billion commitment
-      leaves a 44-contract trail — and three disclosures</a></h2>
+<!-- ══ 01 · FRONT ══════════════════════════════════ -->
+<div class="front wrap" id="front">
+  <div class="front-main">
+    <article class="lead rv">
+      <div class="art a1 card-hover"><span class="glyph">¶</span></div>
+      <span class="kick" style="display:inline-block;margin-top:16px">Investigation · Spending</span>
+      <h2><a href="accountability.html">Promised in the House, missing on paper: a $2.1-billion
+      commitment leaves a 44-contract trail — and three disclosures</a></h2>
       <p class="dek">TENET5 traced a single spending pledge from Question Period through the
       Canada Gazette, the contracts registry and committee evidence. The documents agree with
       the podium — until the money moves. Then the paper trail goes quiet.</p>
-      <div class="meta">By <b>TENET5 Investigations Desk</b> · 6 min read · Every source linked in the file</div>
+      <div class="meta">By <b>Investigations Desk</b> · 6 min read · every source linked · <b>♪ LIRIL reads this file</b></div>
     </article>
 
-    <!-- secondary stack -->
     <div class="stack">
-      <article class="story">
-        <div class="art a2"><span class="glyph">§</span></div>
-        <span class="kick">Access to Information</span>
-        <h3><a href="#">Departments now take an average of 187 days to answer a 30-day request,
-        release logs show</a></h3>
-        <p>An index of every published ATIP release date against its statutory deadline —
-        the widest gap on record.</p>
-        <div class="meta"><b>Documents Desk</b> · 4 min read</div>
+      <article class="story rv">
+        <div class="art a2 card-hover"><span class="glyph">§</span></div>
+        <span class="kick" style="display:inline-block;margin-top:12px">Access to Information</span>
+        <h3><a href="atip-backlog.html">Departments now average 187 days to answer a 30-day request</a></h3>
+        <p>Every published release date, measured against its statutory deadline.</p>
+        <div class="meta"><b>Documents Desk</b> · 4 min</div>
       </article>
-      <article class="story">
-        <div class="art a3"><span class="glyph">†</span></div>
+      <article class="story rv">
         <span class="kick">Committees</span>
-        <h3><a href="#">The committee heard one number. The department's own results report
-        says another.</a></h3>
-        <p>Testimony transcripts, diffed line-by-line against departmental data tables.</p>
-        <div class="meta"><b>Politics Desk</b> · 5 min read</div>
+        <h3><a href="ag-findings.html">The committee heard one number. The department's own report says another.</a></h3>
+        <p>Testimony transcripts, diffed line-by-line against departmental data.</p>
+        <div class="meta"><b>Politics Desk</b> · 5 min</div>
       </article>
-      <article class="story">
+      <article class="story rv">
         <span class="kick">Courts</span>
-        <h3><a href="#">Federal Court docket adds 12 judicial-review filings against two
-        departments in one week</a></h3>
+        <h3><a href="accountability.html">Federal Court docket adds 12 judicial-review filings in one week</a></h3>
         <p>What the public docket shows — and which filings the press hasn't touched.</p>
-        <div class="meta"><b>Courts Desk</b> · 3 min read</div>
+        <div class="meta"><b>Courts Desk</b> · 3 min</div>
       </article>
-      <article class="story">
+      <article class="story rv">
         <span class="kick">Regulation</span>
-        <h3><a href="#">Gazette watch: three of this week's 17 new regulations shipped without
-        a cost-benefit analysis attached</a></h3>
+        <h3><a href="accountability-scorecard.html">Gazette watch: 3 of 17 new regulations shipped without cost analysis</a></h3>
         <p>Weekly sweep of Canada Gazette Parts I and II, item by item.</p>
-        <div class="meta"><b>Documents Desk</b> · 3 min read</div>
+        <div class="meta"><b>Documents Desk</b> · 3 min</div>
       </article>
     </div>
   </div>
 
-  <!-- latest rail -->
   <aside class="rail">
     <div class="rail-h"><span class="pulse"></span> Latest</div>
     <ul>
-      <li><time>14:22 ET</time><a href="#">Order-in-council published 11 days after signature — the longest lag this quarter</a></li>
-      <li><time>13:05 ET</time><a href="#">Contract amendment pushes IT project 340% over its original award value</a></li>
+      <li><time>14:22 ET</time><a href="#">Order-in-council published 11 days after signature — longest lag this quarter</a></li>
+      <li><time>13:05 ET</time><a href="#">Contract amendment pushes IT project 340% over original award</a></li>
       <li><time>12:41 ET</time><a href="#">Hansard: minister cites report that has not yet been tabled</a></li>
       <li><time>11:58 ET</time><a href="#">Coverage gap: story ran in 12 of 187 monitored outlets on day one</a></li>
       <li><time>11:12 ET</time><a href="#">Claim with 2.1M views traced to a misread StatCan table</a></li>
       <li><time>10:33 ET</time><a href="#">Lobbying registry logs 41 meetings on one bill in five sitting days</a></li>
-      <li><time>09:47 ET</time><a href="#">Public accounts: $86M in writeoffs listed under a single line item</a></li>
-      <li><time>09:02 ET</time><a href="#">Committee evidence posted 6 weeks late for third consecutive meeting</a></li>
+      <li><time>09:47 ET</time><a href="#">Public accounts: $86M in writeoffs under a single line item</a></li>
     </ul>
-    <div class="rail-h" style="margin-top:26px">Most Read</div>
     <div class="most">
-      <ul>
-        <li><a href="#">The disclosure scoreboard: which departments answer access requests on time — and which never do</a></li>
+      <div class="rail-h">Most Read</div>
+      <ol>
+        <li><a href="accountability-scorecard.html">The disclosure scoreboard: which departments answer on time — and which never do</a></li>
         <li><a href="#">One chart: every federal contract amendment over 100% this year</a></li>
-        <li><a href="#">Anatomy of a viral number: how a false figure crossed 1,300 accounts in 48 hours</a></li>
-        <li><a href="#">What 44,000 pages of committee evidence say about one program</a></li>
+        <li><a href="#">Anatomy of a viral number: a false figure, 1,300 accounts, 48 hours</a></li>
+        <li><a href="evidence-index.html">What 44,000 pages of committee evidence say about one program</a></li>
         <li><a href="#">The story 134 outlets never ran</a></li>
-      </ul>
+      </ol>
     </div>
   </aside>
 </div>
 
-<!-- ══ DOCUMENTS ═══════════════════════════════════ -->
-<section class="sec wrap" id="documents">
-  <div class="sec-bar"><h2>The Record — today's public documents</h2><a href="#">All documents →</a></div>
-  <div class="cols-4">
-    <article class="story">
-      <div class="art a4"><span class="glyph">≡</span></div>
-      <span class="kick">Gazette</span>
-      <h3><a href="#">Part II: new firearms-marking regulation takes effect without transition period</a></h3>
-      <div class="meta"><b>Filed today</b> · SOR entry indexed</div>
-    </article>
-    <article class="story">
-      <div class="art a2"><span class="glyph">✦</span></div>
-      <span class="kick">Hansard</span>
-      <h3><a href="#">Yesterday in the House: 3 commitments made on the record, now tracked</a></h3>
-      <div class="meta"><b>Sitting day</b> · transcript diffed</div>
-    </article>
-    <article class="story">
-      <div class="art a5"><span class="glyph">▤</span></div>
-      <span class="kick">Disclosures</span>
-      <h3><a href="#">Contracts registry: 212 new entries this week, 9 flagged for amendment patterns</a></h3>
-      <div class="meta"><b>Weekly sweep</b> · registry indexed</div>
-    </article>
-    <article class="story">
-      <div class="art a6"><span class="glyph">¶</span></div>
-      <span class="kick">Court Dockets</span>
-      <h3><a href="#">Docket day: Charter challenges, judicial reviews, and one certified class action</a></h3>
-      <div class="meta"><b>Daily docket</b> · public filings only</div>
-    </article>
-  </div>
-</section>
-
-<!-- ══ MEDIA WATCH / CLAIM CHECK ═══════════════════ -->
-<section class="sec wrap">
-  <div class="band">
-    <div id="mediawatch">
-      <div class="sec-bar"><h2>Media Watch</h2><a href="#">All coverage analysis →</a></div>
-      <article class="story">
-        <div class="art a4"><span class="glyph">≋</span></div>
-        <span class="kick">Coverage Gap</span>
-        <h3><a href="#">One story, 187 front pages: 12 outlets ran it on day one, 41 within the
-        week — 134 never did</a></h3>
-        <p>The same verified story, tracked across every monitored Canadian outlet. Which
-        newsrooms covered it, when, and how the framing shifted between them. Silence is
-        measurable — and this week it clustered.</p>
-        <div class="meta"><b>Media Desk</b> · 7 min read · outlet-by-outlet table in the file</div>
-      </article>
-      <div class="cols-3" style="margin-top:18px">
-        <article class="story">
-          <span class="kick">Framing</span>
-          <h3><a href="#">Headline says "soars," body says 4%: where framing drifts from sourcing</a></h3>
-        </article>
-        <article class="story">
-          <span class="kick">Corrections</span>
-          <h3><a href="#">Six outlets corrected the same wire error — three quietly edited it instead</a></h3>
-        </article>
-        <article class="story">
-          <span class="kick">Attribution</span>
-          <h3><a href="#">"Sources say": tracking anonymous sourcing rates across the press gallery</a></h3>
-        </article>
-      </div>
-    </div>
-
-    <div id="claimcheck">
-      <div class="sec-bar"><h2>Claim Check</h2><a href="#">All checks →</a></div>
-      <div class="claim">
-        <span class="verdict bad">Unsupported</span>
-        <div class="q">"Canada imports 90% of its supply" — post with 2.1M views</div>
-        <div class="cite">Checked against <b>StatCan trade table 990-0001</b> — the figure is 41%.
-        Origin traced to a misread 2024 column header.</div>
-      </div>
-      <div class="claim">
-        <span class="verdict warn">Needs context</span>
-        <div class="q">"The department spent $86M and got nothing" — 840K views</div>
-        <div class="cite">Writeoff is real (<b>Public Accounts, Vol. III</b>) but spans 14 programs
-        over 6 years, not one project.</div>
-      </div>
-      <div class="claim">
-        <span class="verdict ok">Supported</span>
-        <div class="q">"Committee evidence was posted six weeks late" — 120K views</div>
-        <div class="cite">Confirmed against <b>committee publication timestamps</b> — third
-        consecutive late posting.</div>
-      </div>
-      <div class="claim">
-        <span class="verdict bad">Unsupported</span>
-        <div class="q">"No public consultation was held" — 410K views</div>
-        <div class="cite"><b>Gazette Part I</b> shows a 30-day comment period; 212 submissions
-        logged in the consultation record.</div>
-      </div>
-      <div class="meta" style="margin-top:10px">Claims are checked against primary documents,
-      not opinions. Verdicts cite the record — claims, not people.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ DATA DESK STRIP ═════════════════════════════ -->
-<div class="numbers">
+<!-- ══ 02 · THE RECORD ═════════════════════════════ -->
+<section id="record">
   <div class="wrap">
-    <div><span class="kick">Data Desk</span><div class="num">187</div><p>days — average ATIP response
-      time against a 30-day statutory clock</p></div>
-    <div><span class="kick">Data Desk</span><div class="num">340%</div><p>largest single contract
-      amendment over original award value this quarter</p></div>
-    <div><span class="kick">Data Desk</span><div class="num">134</div><p>monitored outlets that never
-      ran this week's most-corroborated story</p></div>
-    <div><span class="kick">Data Desk</span><div class="num">48 hrs</div><p>for one unsupported claim
-      to cross 1,300 tracked accounts</p></div>
+    <div class="sec-bar rv"><span class="no">02</span><h2>The Record</h2><span class="rule"></span><a class="more" href="evidence-index.html">All documents →</a></div>
+    <div class="cols-4">
+      <article class="story rv">
+        <div class="art a4 card-hover"><span class="glyph">≡</span></div>
+        <span class="kick" style="display:inline-block;margin-top:12px">Gazette</span>
+        <h3><a href="#">Part II: new regulation takes effect with no transition period</a></h3>
+        <div class="meta"><b>Filed today</b> · SOR indexed</div>
+      </article>
+      <article class="story rv">
+        <div class="art a2 card-hover"><span class="glyph">✦</span></div>
+        <span class="kick" style="display:inline-block;margin-top:12px">Hansard</span>
+        <h3><a href="#">Yesterday in the House: 3 commitments made on the record, now tracked</a></h3>
+        <div class="meta"><b>Sitting day</b> · transcript diffed</div>
+      </article>
+      <article class="story rv">
+        <div class="art a5 card-hover"><span class="glyph">▤</span></div>
+        <span class="kick" style="display:inline-block;margin-top:12px">Disclosures</span>
+        <h3><a href="#">Contracts registry: 212 new entries, 9 flagged for amendment patterns</a></h3>
+        <div class="meta"><b>Weekly sweep</b> · registry indexed</div>
+      </article>
+      <article class="story rv">
+        <div class="art a6 card-hover"><span class="glyph">¶</span></div>
+        <span class="kick" style="display:inline-block;margin-top:12px">Court Dockets</span>
+        <h3><a href="504-database.html">Docket day: Charter challenges, judicial reviews, one certified class action</a></h3>
+        <div class="meta"><b>Daily docket</b> · public filings only</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 03 · MEDIA WATCH + CLAIM CHECK ══════════════ -->
+<section id="watch">
+  <div class="wrap">
+    <div class="band">
+      <div>
+        <div class="sec-bar rv"><span class="no">03</span><h2>Media Watch</h2><span class="rule"></span><a class="more" href="#">All analysis →</a></div>
+        <article class="story rv">
+          <div class="art a4 card-hover"><span class="glyph">≋</span></div>
+          <span class="kick" style="display:inline-block;margin-top:14px">Coverage Gap</span>
+          <h3 style="font-size:24px"><a href="#">One story, 187 front pages: 12 ran it day one,
+          41 within the week — 134 never did</a></h3>
+          <p>The same verified story, tracked across every monitored Canadian outlet — who
+          covered it, when, and how the framing shifted between newsrooms. Silence is
+          measurable, and this week it clustered.</p>
+          <div class="meta"><b>Media Desk</b> · 7 min · outlet-by-outlet table in the file</div>
+        </article>
+        <div class="cols-3" style="margin-top:22px">
+          <article class="story rv"><span class="kick">Framing</span>
+            <h3><a href="#">Headline says "soars," body says 4%</a></h3></article>
+          <article class="story rv"><span class="kick">Corrections</span>
+            <h3><a href="#">Six outlets fixed the same wire error — three edited it quietly</a></h3></article>
+          <article class="story rv"><span class="kick">Attribution</span>
+            <h3><a href="#">"Sources say": anonymous sourcing rates across the gallery</a></h3></article>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-bar rv"><span class="no">03</span><h2>Claim Check</h2><span class="rule"></span></div>
+        <div class="claims rv">
+          <div class="claim">
+            <span class="verdict bad">Unsupported</span>
+            <div class="q">"Canada imports 90% of its supply" — post with 2.1M views</div>
+            <div class="cite">Checked against <b>StatCan trade table</b> — the figure is 41%.
+            Origin traced to a misread 2024 column header.</div>
+          </div>
+          <div class="claim">
+            <span class="verdict warn">Needs context</span>
+            <div class="q">"The department spent $86M and got nothing" — 840K views</div>
+            <div class="cite">Writeoff is real (<b>Public Accounts, Vol. III</b>) but spans 14
+            programs over 6 years, not one project.</div>
+          </div>
+          <div class="claim">
+            <span class="verdict ok">Supported</span>
+            <div class="q">"Committee evidence was posted six weeks late" — 120K views</div>
+            <div class="cite">Confirmed against <b>committee publication timestamps</b> — third
+            consecutive late posting.</div>
+          </div>
+          <div class="claim">
+            <span class="verdict bad">Unsupported</span>
+            <div class="q">"No public consultation was held" — 410K views</div>
+            <div class="cite"><b>Gazette Part I</b> shows a 30-day comment period; 212
+            submissions logged.</div>
+          </div>
+        </div>
+        <div class="meta rv" style="margin-top:12px">Verdicts cite the record, not opinions —
+        <b>claims, not people</b>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 04 · DATA DESK ══════════════════════════════ -->
+<section class="numbers" id="data">
+  <div class="wrap">
+    <div class="sec-bar rv"><span class="no">04</span><h2>Data Desk</h2><span class="rule"></span><a class="more" href="osint-dashboard.html">Open dashboard →</a></div>
+    <div class="grid rv">
+      <div class="num-cell"><div class="n">187</div><p>days — average ATIP response against a 30-day statutory clock</p></div>
+      <div class="num-cell"><div class="n">340%</div><p>largest single contract amendment over original award this quarter</p></div>
+      <div class="num-cell"><div class="n">134</div><p>monitored outlets that never ran this week's most-corroborated story</p></div>
+      <div class="num-cell"><div class="n">48h</div><p>for one unsupported claim to cross 1,300 tracked accounts</p></div>
+    </div>
     <div class="foot">Prototype figures — sample data · in production every number links to its dataset and query</div>
   </div>
-</div>
+</section>
 
-<!-- ══ INVESTIGATIONS ══════════════════════════════ -->
-<section class="sec wrap">
-  <div class="sec-bar"><h2>Investigations</h2><a href="#">All case files →</a></div>
-  <div class="cols-3">
-    <article class="story">
-      <div class="art a1"><span class="glyph">01</span></div>
-      <span class="kick">Case File</span>
-      <h3><a href="#">The disclosure scoreboard: a year of access requests, graded department
-      by department</a></h3>
-      <p>Every published release measured against its legal deadline. The pattern isn't
-      random — it follows the file's subject matter.</p>
-      <div class="meta"><b>Published</b> · full dataset downloadable</div>
-    </article>
-    <article class="story">
-      <div class="art a3"><span class="glyph">02</span></div>
-      <span class="kick">Case File</span>
-      <h3><a href="#">Amendment nation: the contracts that doubled after they were awarded</a></h3>
-      <p>A sweep of the open contracts registry for post-award amendments — who amends,
-      how often, and how far past the original value.</p>
-      <div class="meta"><b>Published</b> · methodology in the file</div>
-    </article>
-    <article class="story">
-      <div class="art a6"><span class="glyph">03</span></div>
-      <span class="kick">Case File</span>
-      <h3><a href="#">Anatomy of a viral number: 48 hours, 1,300 accounts, one misread table</a></h3>
-      <p>Tracing a false statistic from first post to national radio — and the correction
-      that reached 2% of the audience the error did.</p>
-      <div class="meta"><b>Published</b> · spread graph interactive</div>
-    </article>
+<!-- ══ 05 · INVESTIGATIONS ═════════════════════════ -->
+<section id="cases">
+  <div class="wrap">
+    <div class="sec-bar rv"><span class="no">05</span><h2>Investigations</h2><span class="rule"></span><a class="more" href="accountability.html">All case files →</a></div>
+    <div class="cols-3">
+      <article class="story rv">
+        <div class="art a1 card-hover"><span class="glyph">01</span></div>
+        <span class="kick" style="display:inline-block;margin-top:14px">Case File</span>
+        <h3><a href="accountability-scorecard.html">The disclosure scoreboard: a year of access requests,
+        graded department by department</a></h3>
+        <p>Every published release measured against its legal deadline. The pattern isn't
+        random — it follows the file's subject matter.</p>
+        <div class="meta"><b>Published</b> · dataset downloadable</div>
+      </article>
+      <article class="story rv">
+        <div class="art a3 card-hover"><span class="glyph">02</span></div>
+        <span class="kick" style="display:inline-block;margin-top:14px">Case File</span>
+        <h3><a href="arrivecan.html">Amendment nation: the contracts that doubled after they were awarded</a></h3>
+        <p>A sweep of the open registry for post-award amendments — who amends, how often,
+        and how far past the original value.</p>
+        <div class="meta"><b>Published</b> · methodology in the file</div>
+      </article>
+      <article class="story rv">
+        <div class="art a6 card-hover"><span class="glyph">03</span></div>
+        <span class="kick" style="display:inline-block;margin-top:14px">Case File</span>
+        <h3><a href="#">Anatomy of a viral number: 48 hours, 1,300 accounts, one misread table</a></h3>
+        <p>Tracing a false statistic from first post to national radio — and the correction
+        that reached 2% of the audience the error did.</p>
+        <div class="meta"><b>Published</b> · spread graph interactive</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 06 · LIRIL — THE VOICE ══════════════════════ -->
+<section class="liril" id="liril">
+  <div class="wrap">
+    <div class="sec-bar rv"><span class="no">06</span><h2>LIRIL</h2><span class="rule"></span></div>
+    <div class="liril-grid">
+      <div class="rv">
+        <div class="eq lg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <h2 class="big">The voice of<br>the <span>record</span>.</h2>
+        <p class="body">LIRIL is TENET5's synthetic anchor — the voice that reads the day's
+        findings aloud. <b>Every sentence LIRIL speaks is drawn from a cited document.</b>
+        No ad-libs, no commentary, no vibes: if a line can't point to the Gazette entry,
+        the transcript, the docket or the dataset behind it, it doesn't get spoken.
+        The result is a daily briefing and a growing documentary record you can listen
+        to — and then verify yourself, source by source.</p>
+        <div class="rulebox"><b>The speaking rule:</b> silence over speculation. LIRIL would
+        rather skip a story than voice an uncited claim.</div>
+      </div>
+      <div class="voice-cards rv">
+        <a class="vcard card-hover" href="daily-briefing.html">
+          <div class="ic">▶</div>
+          <div><h4>The Daily Briefing</h4><p>Today's public record, read in full — audio, every line cited</p></div>
+          <span class="go">→</span>
+        </a>
+        <a class="vcard card-hover" href="liril-film.html">
+          <div class="ic">✦</div>
+          <div><h4>The Documentary</h4><p>The long-form record, narrated by LIRIL across its channels</p></div>
+          <span class="go">→</span>
+        </a>
+        <a class="vcard card-hover" href="evidence-index.html">
+          <div class="ic">≡</div>
+          <div><h4>The Evidence Index</h4><p>Every document LIRIL cites, indexed and downloadable</p></div>
+          <span class="go">→</span>
+        </a>
+        <a class="vcard card-hover" href="osint-dashboard.html">
+          <div class="ic">◉</div>
+          <div><h4>The Dashboard</h4><p>The live monitoring surface behind the voice</p></div>
+          <span class="go">→</span>
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -440,40 +576,50 @@
     <div class="cols">
       <div>
         <div class="fm">TENET<span>5</span></div>
-        <p style="max-width:330px;margin-top:8px">Canada's intelligent-automation newsroom.
-        The machines read everything public. People verify. The record decides.</p>
+        <p style="max-width:330px;margin-top:10px">Canada's intelligent-automation newsroom.
+        The machines read everything public. People verify. LIRIL speaks. The record decides.</p>
       </div>
       <ul>
-        <li><a href="#">Top Stories</a></li>
-        <li><a href="#documents">Documents</a></li>
-        <li><a href="#">Courts</a></li>
-        <li><a href="#">Spending</a></li>
+        <li><a href="#front">Top Stories</a></li>
+        <li><a href="#record">The Record</a></li>
+        <li><a href="#watch">Media Watch</a></li>
+        <li><a href="#cases">Investigations</a></li>
       </ul>
       <ul>
-        <li><a href="#mediawatch">Media Watch</a></li>
-        <li><a href="#claimcheck">Claim Check</a></li>
-        <li><a href="#">Investigations</a></li>
-        <li><a href="#">Data Desk</a></li>
+        <li><a href="#liril">LIRIL</a></li>
+        <li><a href="daily-briefing.html">Daily Briefing</a></li>
+        <li><a href="liril-film.html">Documentary</a></li>
+        <li><a href="osint-dashboard.html">Dashboard</a></li>
       </ul>
       <ul>
-        <li><a href="#">About & Method</a></li>
-        <li><a href="#">Corrections Log</a></li>
-        <li><a href="#">Source Index</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="about.html">About & Method</a></li>
+        <li><a href="evidence-index.html">Evidence Index</a></li>
+        <li><a href="accountability.html">Accountability</a></li>
+        <li><a href="504-database.html">Case Database</a></li>
       </ul>
     </div>
-    <div class="origin">TENET5 is an independent Canadian public-interest newsroom. Public record
-    only — no private data. · © 2026 TENET5</div>
+    <div class="origin">TENET5 is an independent Canadian public-interest newsroom. Public
+    record only — no private data. · © 2026 TENET5</div>
   </div>
 </footer>
 
 <script>
   (function(){
     var d=new Date();
-    var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var mon=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    var mon=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     document.getElementById('dateline').textContent=
-      days[d.getDay()]+', '+mon[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()+' · Ottawa Edition';
+      days[d.getDay()]+' '+mon[d.getMonth()]+' '+d.getDate()+' '+d.getFullYear();
+
+    // scroll reveal
+    if('IntersectionObserver' in window){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+      },{threshold:.12});
+      document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+    } else {
+      document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+    }
   })();
 </script>
 
