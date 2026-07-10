@@ -73,17 +73,13 @@ Execute autonomously. Fix problems immediately. Never stop working.
 ## DESIGN TOKENS (READ BEFORE TOUCHING ANY CSS)
 
 **Single source of truth:** `css/tokens.css`. Every `:root` token lives
-there and nowhere else. Active palette: **PRISTINE ICE LAKE** — deep
-glassy abyssal ground (`--slate-bg #05080d`), crystalline ice-white
-chrome (`--slate-accent #eef6fa`), glacial-silver ink. Monochrome chrome;
-saturated colour reserved for MUTED data semantics only. Panels render as
-frosted glass via `css/tnt-override.css` (the final-cascade deliverer).
+there and nowhere else. Active palette: **QUANTANIUM / FABLE (Cinematic Tour)**.
 
 **Rules:**
 1. Do NOT add `:root{}` blocks to any other CSS file.
 2. Do NOT invent namespaces. Use `--slate-*` canonical names; legacy
    names forward via the alias layer in `tokens.css` §2.
-3. Do NOT migrate the palette without a Daniel directive.
+3. **CRITICAL OWNER DIRECTIVE:** The user has declared "Pristine Ice Lake" / `product.css` to be "fucking garbage". You are **STRICTLY FORBIDDEN** from reverting the theme back to Ice Lake. You must preserve the beautiful Quantanium / Fable theme. Do not run any CSS migrations that override this.
 
 ## DEPLOYMENT
 
