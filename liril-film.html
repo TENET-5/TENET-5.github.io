@@ -72,23 +72,43 @@
 
   <script>
     (function () {
-      function showPlayer(auto) {
-        document.body.classList.add('is-playing');
+      var manifestReady = null; // resolves true when the catalog is loadable
+
+      function backToLanding(msg) {
+        document.body.classList.remove('is-playing');
         var app = document.getElementById('liril-film-app');
-        if (app) app.classList.remove('hidden-until-start');
-        if (auto) {
-          try {
-            var u = new URL(window.location.href);
-            u.searchParams.set('auto', '1');
-            history.replaceState({}, '', u.toString());
-          } catch (e) {}
-        }
-        if (!window.__LIRIL_FILM_BOOTED) {
-          window.__LIRIL_FILM_BOOTED = true;
-          var s = document.createElement('script');
-          s.src = '/js/liril-film-player.js?v=4';
-          document.body.appendChild(s);
-        }
+        if (app) app.classList.add('hidden-until-start');
+        if (msg) document.getElementById('lf-stats').textContent = msg;
+      }
+
+      function showPlayer(auto) {
+        // Never boot into a black screen: require the catalog first.
+        manifestReady.then(function (ok) {
+          if (!ok) {
+            backToLanding('The film is temporarily unavailable — try the Daily Briefing.');
+            return;
+          }
+          document.body.classList.add('is-playing');
+          var app = document.getElementById('liril-film-app');
+          if (app) app.classList.remove('hidden-until-start');
+          if (auto) {
+            try {
+              var u = new URL(window.location.href);
+              u.searchParams.set('auto', '1');
+              history.replaceState({}, '', u.toString());
+            } catch (e) {}
+          }
+          if (!window.__LIRIL_FILM_BOOTED) {
+            window.__LIRIL_FILM_BOOTED = true;
+            var s = document.createElement('script');
+            s.src = '/js/liril-film-player.js?v=4';
+            s.onerror = function () {
+              window.__LIRIL_FILM_BOOTED = false;
+              backToLanding('The film player failed to load — try the Daily Briefing.');
+            };
+            document.body.appendChild(s);
+          }
+        });
       }
       document.getElementById('lf-start').addEventListener('click', function () {
         try {
@@ -100,8 +120,8 @@
       document.getElementById('lf-resume').addEventListener('click', function () {
         showPlayer(false);
       });
-      fetch('/data/film/manifest.json', { cache: 'no-cache' })
-        .then(function (r) { return r.json(); })
+      manifestReady = fetch('/data/film/manifest.json', { cache: 'no-cache' })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (m) {
           var t = m.totals || {};
           document.getElementById('lf-stats').textContent =
@@ -110,9 +130,12 @@
           document.getElementById('lf-hours').textContent = (t.duration_label || 'hours');
           document.getElementById('lf-land-meta').textContent =
             'LIRIL DOCUMENTARY · ' + (t.duration_label || 'MULTI-HOUR') + ' · PUBLIC RECORD';
+          return true;
         })
         .catch(function () {
-          document.getElementById('lf-stats').textContent = 'catalog missing — run tools/build_liril_film_catalog.py';
+          document.getElementById('lf-stats').textContent =
+            'The film is temporarily unavailable — try the Daily Briefing.';
+          return false;
         });
       try {
         var q = new URLSearchParams(window.location.search || '');
