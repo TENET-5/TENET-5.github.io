@@ -73,8 +73,11 @@ Execute autonomously. Fix problems immediately. Never stop working.
 ## DESIGN TOKENS (READ BEFORE TOUCHING ANY CSS)
 
 **Single source of truth:** `css/tokens.css`. Every `:root` token lives
-there and nowhere else. Active palette: monochrome operational-intel
-(`--slate-bg #202020`, `--slate-accent #c9a44c`).
+there and nowhere else. Active palette: **PRISTINE ICE LAKE** — deep
+glassy abyssal ground (`--slate-bg #05080d`), crystalline ice-white
+chrome (`--slate-accent #eef6fa`), glacial-silver ink. Monochrome chrome;
+saturated colour reserved for MUTED data semantics only. Panels render as
+frosted glass via `css/tnt-override.css` (the final-cascade deliverer).
 
 **Rules:**
 1. Do NOT add `:root{}` blocks to any other CSS file.

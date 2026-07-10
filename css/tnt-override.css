@@ -1,330 +1,348 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   TNT-OVERRIDE.CSS — TENET5 Monochrome Operational Intelligence Spec
+   TNT-OVERRIDE.CSS — TENET5 "PRISTINE ICE LAKE" glass theme
    ═══════════════════════════════════════════════════════════════════════
-   Master override stylesheet. Loaded AFTER style.css on every page.
-   Forces the #202020 operational-intel palette system-wide.
-   
-   Design reference: operational-intelligence.io / index.html Cap#160
-   Palette: #202020 base, #c9a44c gold accent, Inter + IBM Plex Mono
-   
-   Created: 2026-04-24  |  grid: ETHICS GATE FIRST
+   Master override stylesheet. Loaded AFTER style.css on every page, so it
+   is the FINAL authority in the cascade. It renders the deep glassy-dark
+   ice aesthetic system-wide:
+     · ground  = deep near-black icy water (cool blue-black), radial depth
+     · panels  = frosted translucent glass (blur + 1px top highlight)
+     · chrome  = crystalline ice-white / cool silver (MONOCHROME)
+     · colour  = spent ONLY on data semantics (critical / verified / warn)
+
+   Design contract lives in css/tokens.css (canonical). This file DELIVERS
+   that contract by winning the cascade; values here mirror tokens.css.
+   Do NOT reintroduce flat #202020 charcoal or gold chrome without a
+   Daniel-ratified directive + tokens.css + QUANTANIUM.json update.
+
+   Revised: 2026-07-10  —  ice-glass pass (was: #202020 flat monochrome)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ── ROOT VARIABLES (override any legacy :root) ─────────────────────── */
+/* ── ROOT VARIABLES (align legacy names to the ice-glass palette) ──────── */
 :root {
-  --bg:            #202020 !important;
-  --bg-elev:       #2a2a2a !important;
-  --bg-card:       #262626 !important;
-  --bg-darker:     #161616 !important;
-  --border:        #333333 !important;
-  --border-hot:    #4a4a4a !important;
-  --text:          #ffffff !important;
-  --text-primary:  #ffffff !important;
-  --text-secondary:#b9b9b9 !important;
-  --text-tertiary: #7a7a7a !important;
-  --text-muted:    #b9b9b9 !important;
-  --text-dim:      #7a7a7a !important;
-  --accent:        #c9a44c !important;
-  --accent-gold:   #c9a44c !important;
-  --font-sans:     "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  --bg:            #05080d !important;
+  --bg-elev:       rgba(255,255,255,0.05) !important;
+  --bg-card:       rgba(255,255,255,0.045) !important;
+  --bg-darker:     rgba(3,6,11,0.85) !important;
+  --border:        rgba(255,255,255,0.10) !important;
+  --border-hot:    rgba(255,255,255,0.30) !important;
+  --text:          #f5fafc !important;
+  --text-primary:  #f5fafc !important;
+  --text-secondary:#c4d2dc !important;
+  --text-tertiary: #8a9ba8 !important;
+  --text-muted:    #a8bcc8 !important;
+  --text-dim:      #8a9ba8 !important;
+  --accent:        #eef6fa !important;
+  --accent-gold:   #eef6fa !important;
+  --font-sans:     "Atkinson Hyperlegible", "Inter", system-ui, sans-serif !important;
   --font-mono:     "IBM Plex Mono", "Consolas", ui-monospace, monospace !important;
 
-  /* Kill legacy palette vars */
-  --primary:       #c9a44c !important;
-  --primary-light: #d4b46a !important;
-  --secondary:     #262626 !important;
-  --surface:       #262626 !important;
-  --on-surface:    #ffffff !important;
-  --card-bg:       #262626 !important;
-  --section-bg:    #202020 !important;
-  --hero-bg:       #161616 !important;
+  /* Legacy palette vars → ice */
+  --primary:       #eef6fa !important;
+  --primary-light: #ffffff !important;
+  --secondary:     rgba(255,255,255,0.045) !important;
+  --surface:       rgba(255,255,255,0.045) !important;
+  --on-surface:    #f5fafc !important;
+  --card-bg:       rgba(255,255,255,0.045) !important;
+  --section-bg:    transparent !important;
+  --hero-bg:       transparent !important;
 
-  /* Slate system overrides */
-  --slate-bg:         #202020 !important;
-  --slate-raised:     #262626 !important;
-  --slate-sunken:     #1a1a1a !important;
-  --slate-overlay:    #161616 !important;
-  --slate-ink:        #ffffff !important;
+  /* Slate system → ice (mirror tokens.css) */
+  --slate-bg:         linear-gradient(135deg,#091823,#02070c) !important;
+  --slate-raised:     rgba(255,255,255,0.05) !important;
+  --slate-sunken:     rgba(0,15,30,0.30) !important;
+  --slate-overlay:    rgba(0,15,30,0.60) !important;
+  --slate-ink:        #f5fafc !important;
   --slate-ink-strong: #ffffff !important;
-  --slate-ink-dim:    #b9b9b9 !important;
-  --slate-ink-muted:  #7a7a7a !important;
-  --slate-accent:     #c9a44c !important;
-  --slate-link:       #c9a44c !important;
-  --slate-border:     #333333 !important;
-  --slate-brass:      #c9a44c !important;
+  --slate-ink-dim:    #c4d2dc !important;
+  --slate-ink-muted:  #8a9ba8 !important;
+  --slate-accent:     #eef6fa !important;
+  --slate-link:       #eef6fa !important;
+  --slate-border:     rgba(255,255,255,0.10) !important;
+  --slate-brass:      #a8bcc8 !important;
+
+  /* Glass primitives — cool ice-tint, mirror tokens.css ice utilities */
+  --glass-fill:       rgba(200,230,245,0.045) !important;   /* --slate-ice-skin */
+  --glass-fill-hi:    rgba(200,230,245,0.085) !important;
+  --glass-border:     rgba(235,248,255,0.14) !important;    /* --slate-ice-edge */
+  --glass-blur:       blur(18px) saturate(135%) !important;
+  --glass-shadow:     0 14px 44px rgba(0,6,14,0.58),
+                      inset 0 1px 0 rgba(235,248,255,0.14) !important;
 
   color-scheme: dark !important;
 }
 
-/* ── GLOBAL SURFACE ─────────────────────────────────────────────────── */
-html, body {
-  background: #202020 !important;
-  color: #ffffff !important;
-  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+/* ── GLOBAL GROUND — deep icy water with radial depth ───────────────────── */
+html {
+  background: #04070c !important;
+}
+body {
+  background:
+    radial-gradient(1200px 820px at 50% -12%, #0d1c2a 0%, rgba(8,15,22,0) 55%),
+    radial-gradient(900px 700px at 88% 8%, rgba(30,58,82,0.28) 0%, rgba(8,15,22,0) 50%),
+    linear-gradient(180deg, #071119 0%, #04090f 60%, #02060b 100%) !important;
+  background-attachment: fixed !important;
+  color: #c4d2dc !important;
+  font-family: "Atkinson Hyperlegible", "Inter", system-ui, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
 }
 
-/* Kill any legacy background patterns/images */
+/* Kill legacy grain/topo patterns — the ground carries the atmosphere now */
 body.topo,
 body.topo::before,
 body::before {
   background-image: none !important;
-  background: #202020 !important;
+  background: transparent !important;
 }
 
-/* ── LEGACY OVERLAY KILL ────────────────────────────────────────────── */
-.grain-overlay,
-.vignette,
-.film-grain,
-.noise-overlay,
-.topo-lines,
-.quantanium-container::before,
-.quantanium-container::after,
-[class*="grain"],
-[class*="vignette"] {
+.grain-overlay, .vignette, .film-grain, .noise-overlay, .topo-lines,
+.quantanium-container::before, .quantanium-container::after,
+[class*="grain"], [class*="vignette"] {
   display: none !important;
   opacity: 0 !important;
 }
 
-/* ── TYPOGRAPHY ─────────────────────────────────────────────────────── */
+/* ── TYPOGRAPHY ─────────────────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
-  color: #ffffff !important;
-  font-family: "Inter", "Helvetica Neue", sans-serif !important;
-  font-weight: 500 !important;
-  letter-spacing: -0.01em !important;
+  color: #f5fafc !important;
+  font-family: "Atkinson Hyperlegible", "Inter", sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em !important;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(1.9rem, 4vw, 2.9rem) !important; line-height: 1.08 !important; }
+h2 { font-size: clamp(1.35rem, 2.6vw, 1.9rem) !important; line-height: 1.15 !important; }
+
+p, li, td, dd, dt, span, div {
+  color: #c4d2dc !important;
+}
+article, main, .content, .page-content, [role="main"] { color: #c4d2dc !important; }
+strong, b, .highlight, .emphasis { color: #ffffff !important; }
+small, .caption, .muted, figcaption { color: #8a9ba8 !important; }
+
+/* Eyebrows / kickers / labels — mono, spaced, cool silver */
+.eyebrow, .kicker, .label-mono, .section-label, [class*="eyebrow"] {
+  font-family: "IBM Plex Mono", monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.22em !important;
+  color: #a8bcc8 !important;
 }
 
-h1 { font-size: clamp(1.8rem, 4vw, 2.8rem) !important; }
-h2 { font-size: clamp(1.3rem, 2.5vw, 1.8rem) !important; }
-
-p, li, td, th, dd, dt, span, div {
-  color: #b9b9b9 !important;
-}
-
-/* Ensure primary text containers are readable */
-article, main, .content, .page-content, [role="main"] {
-  color: #b9b9b9 !important;
-}
-
-/* Strong emphasis stays white */
-strong, b, .highlight, .emphasis {
-  color: #ffffff !important;
-}
-
-/* ── LINKS ──────────────────────────────────────────────────────────── */
+/* ── LINKS — ice-white, hairline underline, brighten on hover ──────────── */
 a {
-  color: #c9a44c !important;
+  color: #eef6fa !important;
   text-decoration: none !important;
-  transition: color 0.2s ease !important;
+  transition: color .18s ease !important;
 }
-a:hover {
-  color: #ffffff !important;
+a:visited { color: #eef6fa !important; }
+a:hover   { color: #ffffff !important; }
+
+p a, li a, dd a, td a, .prose a, .content a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 2px !important;
+  text-decoration-color: rgba(255,255,255,0.28) !important;
 }
-a:visited {
-  color: #c9a44c !important;
+p a:hover, li a:hover, dd a:hover, td a:hover, .prose a:hover, .content a:hover {
+  text-decoration-color: rgba(255,255,255,0.7) !important;
 }
 
-/* ── CARDS & SECTIONS ───────────────────────────────────────────────── */
-.evidence-box,
-.card,
-.panel,
-.info-box,
-.data-card,
-.finding-card,
-.ts-card,
-section[style*="border-radius"],
-section[style*="background"],
-div[class*="card"],
-div[class*="panel"],
-div[class*="box"] {
-  background: #262626 !important;
-  border: 1px solid #333333 !important;
-  border-radius: 4px !important;
-  box-shadow: none !important;
+/* ── CARDS & SECTIONS — frosted glass panels floating on the ground ────── */
+.evidence-box, .card, .panel, .info-box, .data-card, .finding-card, .ts-card,
+.metric-card, .stat-card, .evidence-entry,
+section[style*="border-radius"], section[style*="background"],
+div[class*="card"], div[class*="panel"], div[class*="box"] {
+  background: var(--glass-fill) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--glass-shadow) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease !important;
+}
+.card:hover, .panel:hover, .data-card:hover, .finding-card:hover,
+.evidence-box:hover, .metric-card:hover, .stat-card:hover {
+  background: var(--glass-fill-hi) !important;
+  border-color: rgba(255,255,255,0.18) !important;
 }
 
-/* Section backgrounds */
-section {
-  background-color: transparent !important;
-}
+section { background-color: transparent !important; }
 section[style*="gradient"] {
-  background: #262626 !important;
+  background: var(--glass-fill) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
 }
 
-/* ── NAVIGATION ─────────────────────────────────────────────────────── */
-.page-header,
-#site-header-frame,
-nav,
-header {
-  background: rgba(32, 32, 32, 0.94) !important;
-  border-bottom: 1px solid #333333 !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+/* ── NAVIGATION — floating frosted bar ─────────────────────────────────── */
+.page-header, #site-header-frame, nav, header {
+  background: rgba(6,12,19,0.68) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.1) !important;
+  backdrop-filter: blur(18px) saturate(1.1) !important;
 }
+nav a, header a { color: #c4d2dc !important; }
+nav a:hover, header a:hover { color: #ffffff !important; }
 
-nav a, header a {
-  color: #b9b9b9 !important;
-}
-nav a:hover, header a:hover {
-  color: #ffffff !important;
-}
-
-/* ── FOOTER ─────────────────────────────────────────────────────────── */
+/* ── FOOTER ─────────────────────────────────────────────────────────────── */
 footer, .site-footer, #site-footer-frame {
-  background: #161616 !important;
-  border-top: 1px solid #333333 !important;
-  color: #b9b9b9 !important;
+  background: rgba(3,6,11,0.82) !important;
+  border-top: 1px solid rgba(255,255,255,0.08) !important;
+  color: #a8bcc8 !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  backdrop-filter: blur(14px) !important;
 }
 
-/* ── FORM ELEMENTS ──────────────────────────────────────────────────── */
+/* ── FORM ELEMENTS — glass inputs, ice focus ring ──────────────────────── */
 button, input, select, textarea {
-  background: #262626 !important;
-  color: #ffffff !important;
-  border: 1px solid #444444 !important;
-  border-radius: 2px !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: #f5fafc !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  border-radius: 8px !important;
   font-family: inherit !important;
 }
-button:hover, input:hover {
-  border-color: #c9a44c !important;
-}
+button:hover, input:hover { border-color: rgba(255,255,255,0.30) !important; }
 button:focus, input:focus, select:focus, textarea:focus {
-  outline: 1px solid #c9a44c !important;
+  outline: 2px solid rgba(238,246,250,0.55) !important;
   outline-offset: 1px !important;
+  border-color: rgba(238,246,250,0.55) !important;
 }
+::placeholder { color: #5f6f7c !important; }
 
-/* ── CODE BLOCKS ────────────────────────────────────────────────────── */
-code, pre, .mono, [class*="mono"] {
-  background: #161616 !important;
-  border: 1px solid #333333 !important;
-  color: #b9b9b9 !important;
-  font-family: "IBM Plex Mono", Consolas, ui-monospace, monospace !important;
-}
-
-/* ── TABLES ─────────────────────────────────────────────────────────── */
-table {
-  border-collapse: collapse !important;
-}
-th {
-  background: #262626 !important;
+/* Primary buttons read as brighter glass */
+.btn-primary, button.primary, .cta {
+  background: rgba(255,255,255,0.10) !important;
+  border-color: rgba(255,255,255,0.24) !important;
   color: #ffffff !important;
-  border: 1px solid #333333 !important;
-  padding: 8px 12px !important;
-  font-weight: 500 !important;
+}
+.btn-primary:hover, button.primary:hover, .cta:hover {
+  background: rgba(255,255,255,0.16) !important;
+}
+
+/* ── CODE BLOCKS — sunken glass ────────────────────────────────────────── */
+code, pre, .mono, [class*="mono"] {
+  background: rgba(0,0,0,0.32) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: #c4d2dc !important;
+  font-family: "IBM Plex Mono", Consolas, ui-monospace, monospace !important;
+  border-radius: 8px !important;
+}
+
+/* ── TABLES — glass header, hairline rows ──────────────────────────────── */
+table { border-collapse: collapse !important; }
+th {
+  background: rgba(255,255,255,0.06) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  padding: 9px 13px !important;
+  font-weight: 600 !important;
   font-family: "IBM Plex Mono", monospace !important;
   font-size: 11px !important;
-  letter-spacing: 0.12em !important;
+  letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
 }
 td {
-  background: #202020 !important;
-  border: 1px solid #333333 !important;
-  padding: 8px 12px !important;
+  background: rgba(255,255,255,0.02) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  padding: 9px 13px !important;
 }
-tr:hover td {
-  background: #2a2a2a !important;
-}
+tr:hover td { background: rgba(255,255,255,0.055) !important; }
 
-/* ── SKIP LINK ──────────────────────────────────────────────────────── */
-.skip-link {
-  background: #c9a44c !important;
-  color: #202020 !important;
-}
+/* ── SKIP LINK ──────────────────────────────────────────────────────────── */
+.skip-link { background: #eef6fa !important; color: #04090f !important; }
 
-/* ── BADGES & TAGS ──────────────────────────────────────────────────── */
+/* ── BADGES & TAGS — glass chips; status classes carry DATA colour ─────── */
 .badge, .tag, .label, .chip,
 [class*="badge"], [class*="tag"] {
-  background: rgba(201, 164, 76, 0.12) !important;
-  color: #c9a44c !important;
-  border: 1px solid rgba(201, 164, 76, 0.3) !important;
+  background: rgba(255,255,255,0.08) !important;
+  color: #eef6fa !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
   font-family: "IBM Plex Mono", monospace !important;
   font-size: 10px !important;
   letter-spacing: 0.2em !important;
   text-transform: uppercase !important;
+  border-radius: 999px !important;
 }
 
-/* ── BLOCKQUOTES ────────────────────────────────────────────────────── */
+/* DATA SEMANTICS — the ONLY colour on the site. MUTED, never neon
+   (canonical tokens.css: weight + underline carry hierarchy, not glow). */
+.critical, .badge-critical, .status-critical, [class*="critical"] {
+  color: #c76a5f !important; border-color: rgba(176,84,74,0.45) !important;
+}
+.verified, .badge-verified, .status-verified, [class*="verified"] {
+  color: #86a880 !important; border-color: rgba(110,143,104,0.45) !important;
+}
+.warning, .badge-warning, .status-warning, .flagged, [class*="warning"] {
+  color: #c9a44c !important; border-color: rgba(201,164,76,0.45) !important;
+}
+.info, .badge-info, .status-info, [class*="badge-info"] {
+  color: #93b0c2 !important; border-color: rgba(122,155,176,0.45) !important;
+}
+
+/* ── BLOCKQUOTES ────────────────────────────────────────────────────────── */
 blockquote {
-  border-left: 3px solid #c9a44c !important;
-  background: #1a1a1a !important;
-  padding: 16px 20px !important;
-  margin: 16px 0 !important;
-  color: #b9b9b9 !important;
+  border-left: 2px solid rgba(255,255,255,0.28) !important;
+  background: rgba(255,255,255,0.035) !important;
+  padding: 16px 22px !important;
+  margin: 18px 0 !important;
+  color: #c4d2dc !important;
+  border-radius: 0 10px 10px 0 !important;
 }
-blockquote p {
-  color: #b9b9b9 !important;
-}
+blockquote p { color: #c4d2dc !important; }
 
-/* ── HORIZONTAL RULES ───────────────────────────────────────────────── */
+/* ── HORIZONTAL RULES ───────────────────────────────────────────────────── */
 hr {
   border: none !important;
   height: 1px !important;
-  background: #333333 !important;
-  margin: 32px 0 !important;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent) !important;
+  margin: 34px 0 !important;
 }
 
-/* ── SCROLLBAR ──────────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #161616;
-}
+/* ── SCROLLBAR — thin ice ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: #444444;
-  border-radius: 4px;
+  background: rgba(255,255,255,0.16); border-radius: 999px;
+  border: 2px solid transparent; background-clip: padding-box;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #555555;
-}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); background-clip: padding-box; }
 
-/* ── SELECTION ──────────────────────────────────────────────────────── */
-::selection {
-  background: rgba(201, 164, 76, 0.3) !important;
-  color: #ffffff !important;
-}
+/* ── SELECTION — cool ice tint ─────────────────────────────────────────── */
+::selection { background: rgba(140,190,225,0.32) !important; color: #ffffff !important; }
 
-/* ── IMAGES ─────────────────────────────────────────────────────────── */
+/* ── IMAGES — crisp, cool hairline frame, gentle depth ─────────────────── */
 img {
-  filter: brightness(0.9) contrast(1.05) !important;
-  border-radius: 4px !important;
+  border-radius: 10px !important;
+}
+figure img, .figure img, .media img {
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 0 10px 30px rgba(0,8,16,0.45) !important;
 }
 
-/* ── LISTS ──────────────────────────────────────────────────────────── */
-ul, ol {
-  color: #b9b9b9 !important;
-}
-li::marker {
-  color: #c9a44c !important;
-}
+/* ── LISTS ──────────────────────────────────────────────────────────────── */
+ul, ol { color: #c4d2dc !important; }
+li::marker { color: #a8bcc8 !important; }
 
-/* ── SPECIFIC LEGACY CLASS OVERRIDES ────────────────────────────────── */
-/* Old Shift5/S5 classes that may still exist */
+/* ── LEGACY / DASHBOARD SPECIFICS ──────────────────────────────────────── */
 .s5-header, .shift5-nav { display: none !important; }
+.dashboard-header { background: rgba(3,6,11,0.6) !important; }
+.metric-value, .stat-value {
+  color: #eef6fa !important; font-family: "IBM Plex Mono", monospace !important;
+}
+.source-badge { background: rgba(255,255,255,0.08) !important; color: #eef6fa !important; }
+.timeline-item { border-left: 2px solid rgba(255,255,255,0.12) !important; }
+.timeline-dot  { background: #eef6fa !important; box-shadow: 0 0 0 3px rgba(238,246,250,0.12) !important; }
+.timeline-date { color: #8a9ba8 !important; font-family: "IBM Plex Mono", monospace !important; }
 
-/* OSINT dashboard specific */
-.dashboard-header { background: #161616 !important; }
-.metric-card, .stat-card { background: #262626 !important; border: 1px solid #333 !important; }
-.metric-value, .stat-value { color: #c9a44c !important; font-family: "IBM Plex Mono", monospace !important; }
-
-/* Evidence page specific */
-.evidence-entry { background: #262626 !important; border: 1px solid #333 !important; }
-.source-badge { background: rgba(201,164,76,0.1) !important; color: #c9a44c !important; }
-
-/* Timeline specific */
-.timeline-item { border-left: 2px solid #333 !important; }
-.timeline-dot { background: #c9a44c !important; }
-.timeline-date { color: #7a7a7a !important; font-family: "IBM Plex Mono", monospace !important; }
-
-/* ── PRINT ──────────────────────────────────────────────────────────── */
+/* ── PRINT ──────────────────────────────────────────────────────────────── */
 @media print {
   html, body { background: #fff !important; color: #000 !important; }
   a { color: #000 !important; text-decoration: underline !important; }
   .grain-overlay, .vignette, nav, footer { display: none !important; }
 }
 
-/* ── REDUCED MOTION ─────────────────────────────────────────────────── */
+/* ── REDUCED MOTION ─────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001s !important;
@@ -332,9 +350,15 @@ li::marker {
   }
 }
 
-/* ── RESPONSIVE ─────────────────────────────────────────────────────── */
+/* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  body { font-size: 15px !important; }
-  h1 { font-size: 1.6rem !important; }
-  h2 { font-size: 1.2rem !important; }
+  body { font-size: 15px !important; background-attachment: scroll !important; }
+  h1 { font-size: 1.7rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  /* Blur is expensive on mobile — soften to plain translucency */
+  .card, .panel, .data-card, .evidence-box, nav, header, footer {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(12,20,28,0.9) !important;
+  }
 }

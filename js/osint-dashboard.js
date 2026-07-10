@@ -1,6 +1,11 @@
 /**
  * TENET5 OSINT Dashboard Logic
- * Loads latest.json intelligence brief and renders live metrics.
+ * Loads data/intelligence_briefs/latest.json and renders live metrics.
+ * Schema-tolerant: supports both the 2026-06 brief shape
+ * (investigative_threads / feeds_polled / …) and older shapes
+ * (contracts_scanned / anomalies_detected / …).
+ *
+ * Theme: QUANTANIUM monochrome — colour only for severity/data meaning.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,17 +13,163 @@ document.addEventListener("DOMContentLoaded", () => {
   initNetworkCanvas();
 });
 
-async function fetchDashboardData() {
+function escapeHtml(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Map threat_level strings → CSS class suffix + display label */
+function normalizeThreat(level) {
+  const raw = String(level || "UNKNOWN").trim().toUpperCase();
+  const map = {
+    CRITICAL: "critical",
+    HIGH: "high",
+    RED: "high",
+    AMBER: "amber",
+    MEDIUM: "medium",
+    YELLOW: "amber",
+    LOW: "low",
+    GREEN: "green",
+    INFO: "low",
+  };
+  const cls = map[raw] || "amber";
+  return { cls, label: raw };
+}
+
+/** Pick metric cards from whichever schema the brief carries */
+function buildMetricCards(metrics) {
+  if (!metrics || typeof metrics !== "object") return [];
+  const m = metrics;
+
+  // Preferred modern brief schema (2026-06+)
+  if (
+    m.investigative_threads != null ||
+    m.headlines_reviewed != null ||
+    m.feeds_polled != null
+  ) {
+    return [
+      {
+        value: m.investigative_threads ?? 0,
+        label: "Investigative Threads",
+        tone: null,
+      },
+      {
+        value: m.high_threads ?? m.critical_threads ?? 0,
+        label: "High / Critical",
+        tone: (m.critical_threads || 0) > 0 ? "critical" : "high",
+      },
+      {
+        value: m.headlines_reviewed ?? m.unique_stories ?? 0,
+        label: "Headlines Reviewed",
+        tone: null,
+      },
+      {
+        value: m.feeds_polled ?? 0,
+        label: "Feeds Polled",
+        tone: (m.feeds_blocked || 0) > 0 ? "high" : "verified",
+      },
+    ];
+  }
+
+  // Legacy schema
+  return [
+    {
+      value: m.contracts_scanned ?? 0,
+      label: "Contracts Scanned",
+      tone: null,
+    },
+    {
+      value: m.anomalies_detected ?? 0,
+      label: "Anomalies Detected",
+      tone: "high",
+    },
+    {
+      value: m.entities_tracked ?? 0,
+      label: "Entities Tracked",
+      tone: null,
+    },
+    {
+      value: m.evidence_entries ?? 0,
+      label: "Evidence Sealed",
+      tone: "verified",
+    },
+  ];
+}
+
+function formatMetric(n) {
+  const num = Number(n) || 0;
   try {
-    // Add cache buster
-    const res = await fetch(`data/intelligence_briefs/latest.json?t=${Date.now()}`);
-    if (!res.ok) throw new Error("Failed to load latest.json");
+    return num.toLocaleString("en-CA");
+  } catch (_) {
+    return String(num);
+  }
+}
+
+function toneClass(tone) {
+  if (tone === "high") return " is-high";
+  if (tone === "critical") return " is-critical";
+  if (tone === "verified") return " is-verified";
+  return "";
+}
+
+function renderBriefHtml(data) {
+  const parts = [];
+  if (data.title) {
+    parts.push(`<p class="brief-title">${escapeHtml(data.title)}</p>`);
+  }
+  const metaBits = [];
+  if (data.date) metaBits.push(escapeHtml(data.date));
+  if (data.threat_level) metaBits.push("THREAT " + escapeHtml(String(data.threat_level).toUpperCase()));
+  if (metaBits.length) {
+    parts.push(`<p class="brief-meta">${metaBits.join(" · ")}</p>`);
+  }
+  const summary = String(data.summary || "").trim();
+  if (!summary) {
+    parts.push(`<p class="brief-empty">No summary text in this brief cycle.</p>`);
+  } else {
+    // Split on blank lines; also tolerate single-newline paragraphs
+    const paras = summary.split(/\n\s*\n/).filter(Boolean);
+    paras.forEach((p) => {
+      parts.push(`<p>${escapeHtml(p.replace(/\n/g, " "))}</p>`);
+    });
+  }
+  return parts.join("");
+}
+
+function isStale(generatedAt, maxDays) {
+  if (!generatedAt) return true;
+  const t = Date.parse(generatedAt);
+  if (Number.isNaN(t)) return true;
+  const ageMs = Date.now() - t;
+  return ageMs > (maxDays || 14) * 24 * 60 * 60 * 1000;
+}
+
+async function fetchDashboardData() {
+  const briefEl = document.getElementById("brief-content");
+  try {
+    const res = await fetch(`data/intelligence_briefs/latest.json?t=${Date.now()}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status + " loading latest.json");
     const data = await res.json();
     renderDashboard(data);
   } catch (err) {
     console.error("OSINT Dashboard error:", err);
-    document.getElementById("brief-content").innerHTML = 
-      `<p style="color:var(--osint-red)">Error loading intelligence brief. Ensure data pipeline is running.</p>`;
+    if (briefEl) {
+      briefEl.innerHTML =
+        `<p class="brief-error">Intelligence brief unavailable (${escapeHtml(err.message)}). ` +
+        `Check <code>data/intelligence_briefs/latest.json</code> — LIRIL overnight pipeline may be stalled.</p>`;
+    }
+    // Keep skeletons from sitting forever
+    const metricsContainer = document.getElementById("metrics-container");
+    if (metricsContainer && metricsContainer.querySelector(".metric-skeleton")) {
+      metricsContainer.innerHTML =
+        `<div class="metric-card"><div class="metric-value">—</div>` +
+        `<div class="metric-label">Brief offline</div></div>`;
+    }
   }
 }
 
@@ -26,132 +177,207 @@ function renderDashboard(data) {
   // 1. Threat Level
   const threatEl = document.getElementById("global-threat-level");
   if (threatEl) {
-    threatEl.className = `threat-indicator level-${data.threat_level.toLowerCase()}`;
-    threatEl.querySelector(".threat-text").textContent = `THREAT: ${data.threat_level}`;
+    const { cls, label } = normalizeThreat(data.threat_level);
+    threatEl.className = `threat-indicator level-${cls}`;
+    const textEl = threatEl.querySelector(".threat-text");
+    if (textEl) textEl.textContent = `THREAT: ${label}`;
   }
 
-  // 2. Metrics
+  // 2. Metrics (schema-tolerant)
   const metricsContainer = document.getElementById("metrics-container");
-  if (metricsContainer && data.metrics) {
-    metricsContainer.innerHTML = `
-      <div class="metric-card">
-        <div class="metric-value">${data.metrics.contracts_scanned.toLocaleString()}</div>
-        <div class="metric-label">Contracts Scanned</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value" style="color:var(--osint-amber)">${data.metrics.anomalies_detected.toLocaleString()}</div>
-        <div class="metric-label">Anomalies Detected</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">${data.metrics.entities_tracked.toLocaleString()}</div>
-        <div class="metric-label">Entities Tracked</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">${data.metrics.evidence_entries.toLocaleString()}</div>
-        <div class="metric-label">Evidence Sealed</div>
-      </div>
-    `;
-  }
-
-  // 3. Daily Brief
-  const briefContent = document.getElementById("brief-content");
-  if (briefContent) {
-    // Basic markdown-to-html for paragraphs
-    const htmlText = data.summary.split('\n\n').map(p => `<p>${p}</p>`).join('');
-    briefContent.innerHTML = htmlText;
-  }
-  
-  const timestamp = document.getElementById("brief-timestamp");
-  if (timestamp) {
-    timestamp.textContent = new Date(data.generated_at).toLocaleString('en-CA', {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    }) + " UTC";
-  }
-
-  // 4. Anomalies Feed (using top_findings)
-  const anomaliesFeed = document.getElementById("anomalies-feed");
-  if (anomaliesFeed && data.top_findings) {
-    anomaliesFeed.innerHTML = data.top_findings.map(f => `
-      <div class="anomaly-item ${f.severity}">
-        <span class="a-cat">[${f.severity}] ${f.category}</span>
-        <span class="a-text">${f.finding}</span>
-      </div>
-    `).join('');
-    if (data.top_findings.length === 0) {
-      anomaliesFeed.innerHTML = `<div class="anomaly-item"><span class="a-text">No critical anomalies flagged in the current cycle.</span></div>`;
+  if (metricsContainer) {
+    const cards = buildMetricCards(data.metrics);
+    if (cards.length === 0) {
+      metricsContainer.innerHTML =
+        `<div class="metric-card"><div class="metric-value">—</div>` +
+        `<div class="metric-label">No metrics in brief</div></div>`;
+    } else {
+      metricsContainer.innerHTML = cards
+        .map(
+          (c) =>
+            `<div class="metric-card">` +
+            `<div class="metric-value${toneClass(c.tone)}">${formatMetric(c.value)}</div>` +
+            `<div class="metric-label">${escapeHtml(c.label)}</div>` +
+            `</div>`
+        )
+        .join("");
     }
   }
 
-  // 5. Recent Reports List
+  // 3. Daily Brief body
+  const briefContent = document.getElementById("brief-content");
+  if (briefContent) {
+    briefContent.innerHTML = renderBriefHtml(data);
+  }
+
+  // Stale-banner when generated_at is old (operational honesty)
+  if (isStale(data.generated_at, 14)) {
+    const main = document.querySelector(".dashboard-main");
+    if (main && !document.getElementById("brief-stale-banner")) {
+      const ban = document.createElement("div");
+      ban.id = "brief-stale-banner";
+      ban.className = "brief-stale-banner";
+      ban.setAttribute("role", "status");
+      ban.textContent =
+        "Brief is stale — last sealed " +
+        (data.generated_at || data.date || "unknown") +
+        ". Overnight LIRIL scan may need a cycle.";
+      main.insertBefore(ban, main.firstChild);
+    }
+  }
+
+  const timestamp = document.getElementById("brief-timestamp");
+  if (timestamp) {
+    try {
+      const d = new Date(data.generated_at || data.date);
+      timestamp.textContent =
+        (Number.isNaN(d.getTime())
+          ? String(data.date || "—")
+          : d.toLocaleString("en-CA", {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "UTC",
+            })) + " UTC";
+    } catch (_) {
+      timestamp.textContent = String(data.date || "—");
+    }
+  }
+
+  // 4. Anomalies Feed
+  const anomaliesFeed = document.getElementById("anomalies-feed");
+  if (anomaliesFeed) {
+    const findings = Array.isArray(data.top_findings) ? data.top_findings : [];
+    if (findings.length === 0) {
+      anomaliesFeed.innerHTML =
+        `<div class="anomaly-item"><span class="a-text">No critical anomalies flagged in the current cycle.</span></div>`;
+    } else {
+      anomaliesFeed.innerHTML = findings
+        .map((f) => {
+          const sev = escapeHtml(f.severity || "MEDIUM");
+          const cat = escapeHtml(f.category || "SIGNAL");
+          const finding = escapeHtml(f.finding || "");
+          return (
+            `<div class="anomaly-item ${sev}">` +
+            `<span class="a-cat">[${sev}] ${cat}</span>` +
+            `<span class="a-text">${finding}</span>` +
+            `</div>`
+          );
+        })
+        .join("");
+    }
+  }
+
+  // 5. Recent Reports — prefer detailed_brief + sealed date over dead links
   const reportList = document.getElementById("report-list");
   if (reportList) {
-    reportList.innerHTML = `
-      <li>
-        <a href="intelligence-report-${data.date}.html">
-          Daily Intelligence Brief
-          <span class="report-date">${data.date}</span>
-        </a>
-      </li>
-      <li>
-        <a href="data/intelligence_briefs/fencing_report_20260423.md">
-          Public Figure Fencing Report
-          <span class="report-date">2026-04-23</span>
-        </a>
-      </li>
-      <li>
-        <a href="intelligence-report-apr2026.html">
-          Procurement Anomaly Investigation
-          <span class="report-date">2026-04-21</span>
-        </a>
-      </li>
-    `;
+    const items = [];
+    const date = data.date || "";
+    // Prefer the structured brief JSON when present
+    if (data.detailed_brief) {
+      items.push({
+        href: data.detailed_brief,
+        title: "Structured daily brief (JSON)",
+        date: date,
+        live: true,
+      });
+    }
+    // Human-readable HTML report if the seal date matches a known file
+    if (date) {
+      items.push({
+        href: `intelligence-report-${date}.html`,
+        title: "Daily Intelligence Brief (HTML)",
+        date: date,
+        live: false,
+      });
+    }
+    items.push({
+      href: "data/intelligence_briefs/latest.json",
+      title: "latest.json (machine brief)",
+      date: date || "live",
+      live: true,
+    });
+    items.push({
+      href: "data/intelligence_briefs/fencing_report_20260423.md",
+      title: "Public Figure Fencing Report",
+      date: "2026-04-23",
+      live: false,
+    });
+    items.push({
+      href: "intelligence-report-apr2026.html",
+      title: "Procurement Anomaly Investigation",
+      date: "2026-04-21",
+      live: false,
+    });
+
+    reportList.innerHTML = items
+      .map((it) => {
+        const live = it.live
+          ? `<span class="report-live">sealed</span>`
+          : "";
+        return (
+          `<li><a href="${escapeHtml(it.href)}">` +
+          `${escapeHtml(it.title)}${live}` +
+          `<span class="report-date">${escapeHtml(it.date)}</span>` +
+          `</a></li>`
+        );
+      })
+      .join("");
   }
 }
 
-// Simple decorative network canvas
+// Decorative network canvas — monochrome QUANTANIUM ink, not blue cyber
 function initNetworkCanvas() {
   const canvas = document.getElementById("network-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  
-  // Set internal canvas size to match display
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-  
-  document.getElementById("network-overlay").style.display = "none";
-  
-  // Generate random nodes
-  const nodes = Array.from({length: 40}, () => ({
+  if (!ctx) return;
+
+  canvas.width = canvas.offsetWidth || 400;
+  canvas.height = canvas.offsetHeight || 250;
+
+  const overlay = document.getElementById("network-overlay");
+  if (overlay) overlay.style.display = "none";
+
+  const nodes = Array.from({ length: 36 }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
-    vx: (Math.random() - 0.5) * 0.5,
-    vy: (Math.random() - 0.5) * 0.5,
-    r: Math.random() * 2 + 1
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: (Math.random() - 0.5) * 0.4,
+    r: Math.random() * 2 + 1,
   }));
 
+  let raf = 0;
+  let frames = 0;
+  const MAX_FRAMES = 60 * 60; // stop after ~60s idle to save CPU
+
   function draw() {
+    frames += 1;
+    if (frames > MAX_FRAMES) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "rgba(59, 130, 246, 0.8)";
-    ctx.strokeStyle = "rgba(59, 130, 246, 0.15)";
-    
-    // Update and draw nodes
-    nodes.forEach(n => {
-      n.x += n.vx; n.y += n.vy;
+    // near-white ink nodes, muted edges
+    // glacial ice nodes over abyssal water
+    ctx.fillStyle = "rgba(238, 246, 250, 0.72)";
+    ctx.strokeStyle = "rgba(160, 200, 230, 0.12)";
+
+    nodes.forEach((n) => {
+      n.x += n.vx;
+      n.y += n.vy;
       if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
       if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
-      
       ctx.beginPath();
       ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
       ctx.fill();
     });
-    
-    // Draw edges
+
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const dx = nodes[i].x - nodes[j].x;
         const dy = nodes[i].y - nodes[j].y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 60) {
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 55) {
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
           ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -159,9 +385,15 @@ function initNetworkCanvas() {
         }
       }
     }
-    
-    requestAnimationFrame(draw);
+
+    raf = requestAnimationFrame(draw);
   }
-  
+
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Static single frame for reduced-motion users
+    draw();
+    cancelAnimationFrame(raf);
+    return;
+  }
   draw();
 }
