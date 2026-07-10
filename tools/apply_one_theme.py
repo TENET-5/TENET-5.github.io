@@ -28,7 +28,7 @@ SKIP_NAMES = {
     "index_backup.html",
     "index-legacy-cap222-shell.html",
 }
-THEME_VER = "70"
+THEME_VER = "71"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
