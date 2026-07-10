@@ -716,6 +716,71 @@ def render_catalog() -> str:
 </section>"""
 
 
+def page_meta(stem: str) -> tuple[str, str] | None:
+    f = ROOT / f"{stem}.html"
+    if not f.exists():
+        return None
+    h = f.read_text(encoding="utf-8", errors="replace")
+    tm = re.search(r"<title>(.*?)</title>", h, re.I | re.S)
+    if not tm:
+        return None
+    title = re.sub(r"\s*\|\s*TENET5\s*$", "", tm.group(1).strip())
+    dm = re.search(r'name="description"\s+content="([^"]*)"', h, re.I)
+    return title, (dm.group(1).strip() if dm else "")[:150]
+
+
+def build_acts() -> int:
+    """Each act page carries its full evidence file — every site document
+    assigned to that act (data/act_assignments.json), regenerated per build
+    so the acts always index the current record."""
+    data = json.loads((ROOT / "data" / "act_assignments.json").read_text(encoding="utf-8"))
+    by_act: dict[str, list[str]] = {}
+    for stem, act in data["assignments"].items():
+        if act in ("i", "ii", "iii", "iv", "v") and not stem.startswith(("act-", "404")):
+            by_act.setdefault(act, []).append(stem)
+    built = 0
+    for act, stems in by_act.items():
+        page = ROOT / f"act-{act}.html"
+        if not page.exists():
+            continue
+        entries = []
+        for stem in sorted(stems):
+            meta = page_meta(stem)
+            if not meta:
+                continue
+            t, d = meta
+            entries.append(
+                f'<a class="cat-item" href="{esc(stem)}.html" data-narrate="{esc(t)}. {esc(d)}">'
+                f'<span class="t">{esc(t)}</span>'
+                + (f'<span class="d">{esc(d)}</span>' if d else "") + "</a>")
+        if not entries:
+            continue
+        section = (
+            "<!-- ACT-EVIDENCE:BEGIN -->\n"
+            f'<section class="catalog" id="evidence-file" data-line="The evidence file for this act — '
+            f'{len(entries)} sourced documents. Choose any one and I will read it with you.">\n'
+            f'<span class="kick">The Evidence File · {len(entries)} Documents · Rebuilt Daily</span>\n'
+            f'<h2 style="margin-top:1.5vh">The record behind this act</h2>\n'
+            '<p style="margin-top:1.5vh;max-width:720px;color:var(--ivory-dim);font-size:15px;line-height:1.7">'
+            "Every document below is a sourced file on this site and part of the record for this act. "
+            "LIRIL can read any of them to you.</p>\n"
+            f'<div class="cat-grid">{"".join(entries)}</div>\n</section>\n'
+            "<!-- ACT-EVIDENCE:END -->")
+        html_txt = page.read_text(encoding="utf-8", errors="replace")
+        if "ACT-EVIDENCE:BEGIN" in html_txt:
+            html_txt = re.sub(r"<!-- ACT-EVIDENCE:BEGIN -->.*?<!-- ACT-EVIDENCE:END -->",
+                              lambda _m: section, html_txt, flags=re.S)
+        else:
+            m = (re.search(r'<section class="[^"]*cap263-mt-3[^"]*">\s*<h2>Continue the walkthrough', html_txt)
+                 or re.search(r"</main>", html_txt, re.I))
+            if not m:
+                continue
+            html_txt = html_txt[:m.start()] + section + "\n" + html_txt[m.start():]
+        page.write_text(html_txt, encoding="utf-8", newline="\n")
+        built += 1
+    return built
+
+
 def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     buckets: dict[str, list[dict]] = {k: [] for k, *_ in BUCKETS}
     for p in sorted(posts, key=lambda x: x.get("date", ""), reverse=True):
@@ -1237,8 +1302,9 @@ def main() -> int:
             (STORY_DIR / f'{p["slug"]}.html').write_text(build_article(site, p), encoding="utf-8")
             n_stories += 1
 
+    n_acts = build_acts()
     print(f"[press] built index.html ({len(posts)} posts), evidence-index.html "
-          f"({len(evidence)} sources), {n_stories} story pages")
+          f"({len(evidence)} sources), {n_stories} story pages, {n_acts} act evidence files")
     return 0
 
 
