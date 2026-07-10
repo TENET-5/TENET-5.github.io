@@ -1,27 +1,49 @@
-# TENET5 canonical theme — LOCKED to Daniel screenshot
+# ONE THEME — WordPress model (PRISM permanent duty)
 
-**Ground truth image:** `C:\Users\Xbxac\Pictures\Screenshots\Screenshot 2026-07-10 042513.png`  
-**Homepage:** press surface — “The record, read **backwards.**”
+## Single source of truth
 
-## Homepage (index.html) — DO NOT FLATTEN
+| Asset | Role |
+|-------|------|
+| **`css/press-theme.css`** | Entire visual system (palette, type, cover, glass, chrome) |
+| **`tools/press.py`** | Builds homepage + evidence + story from `content/` |
+| **`tools/apply_one_theme.py`** | Forces every HTML page onto the one CSS file |
+| **`tools/prism_site_duty.py`** | Continuous guardian (rebuild + enforce + proof) |
 
-| Element | Spec |
-|---------|------|
-| Type | **Fraunces** display (light) + IBM Plex Mono labels |
-| Accent | Ice cyan `#9adbe8` on italic “backwards.” |
-| Structure | Red vertical rails, cover bar, LIRIL guide box, BEGIN, ghost 5, right timeline |
-| Builder | `tools/press.py` only |
-| Protect | `slate_css_migration.py` skips press markers |
+## Ground truth
 
-Wordmark only (no crest) per public brand rules.
+Screenshot `2026-07-10 042513`: *The record, read **backwards.***  
+Fraunces display · ice `#9adbe8` · red rails · ivory paper · ghost 5 · LIRIL guide.
 
-## Interior pages
+## Page contract
 
-May use QUANTANIUM cascade (tokens → standard → quantanium) for investigation dossiers.  
-Never replace the homepage with product-only shell.
+Every public HTML page loads **only**:
 
-## Forbidden
+```html
+<link href="…Fraunces…IBM+Plex+Mono…" rel="stylesheet">
+<link rel="stylesheet" href="css/press-theme.css?v=64">
+```
 
-- Stripping index to `tokens + product` only
-- Atkinson-only hero that kills Fraunces cover
-- Cap#222 oxblood grid as homepage
+No `product.css`, `quantanium.css`, `tokens.css`, `tenet5.css`, or Cap stacks.
+
+## Continuous PRISM duty
+
+```bash
+# one lap
+python tools/prism_site_duty.py
+
+# local continuous (supervisor)
+python tools/prism_site_duty.py --loop 60
+
+# GitHub Actions: .github/workflows/prism-site-duty.yml every 15 minutes
+```
+
+Proof: `C:/PRISM/log/prism_site_duty_last.json` · `data/prism_site_duty_last.json`
+
+## Forward development rule
+
+Any new page or agent edit must:
+
+1. Not invent a second theme file
+2. Link only `press-theme.css`
+3. Use press chrome (`.press-bar` / `.press-main` / `.press-foot`) on interiors
+4. Run `prism_site_duty.py` before declaring ship

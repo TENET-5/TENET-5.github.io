@@ -303,10 +303,8 @@ canvas { max-width: 100%; }
    auto-oscillate); everything scroll-linked / auto-animating is killed.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* 1. No smooth scroll, no scroll-snap — the two scroll-position feedback
-      loops. Match presentation.css's body.pres-active specificity + !important. */
-html, body,
-body.pres-active, body.nature-bg, body.topo, body.pres-active * {
+/* 1. Prevent scroll oscillation specifically on snap pages */
+body.pres-active {
   scroll-behavior: auto !important;
   scroll-snap-type: none !important;
   scroll-snap-align: none !important;
@@ -314,31 +312,14 @@ body.pres-active, body.nature-bg, body.topo, body.pres-active * {
   overscroll-behavior: none !important;
 }
 
-/* 2. No keyframe/scroll-timeline animation anywhere (animated grain, pulses,
-      scan lines, the scroll progress bar) — these are the auto-motion sources.
-      JS-driven count-ups use textContent, not CSS animation, so they survive. */
-*, *::before, *::after {
-  animation: none !important;
-  animation-timeline: auto !important;
-}
-
-/* 3. Reveal/entrance transforms render FINAL-STATE instantly. A transform that
-      fires near an IntersectionObserver threshold can re-trigger in a loop. */
-.q-rise, .reveal, .reveal .line, [class*="reveal"], [class*="fade-"],
-[data-narrate], .q-progress {
+body.pres-active .q-rise,
+body.pres-active .reveal,
+body.pres-active .reveal .line {
   opacity: 1 !important;
   transform: none !important;
   transition: none !important;
 }
 
-/* 4. Remove decorative fixed full-viewport layers that force per-frame repaint. */
-.q-progress, .grain-overlay, .film-grain, .noise-overlay, .liril-scan,
-[class*="grain"], body::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* 5. Nothing may exceed the content width (100vw includes the scrollbar and
-      toggles the vertical scrollbar → width jitter). */
+/* 2. Global width stability */
 html { overflow-x: clip; scrollbar-gutter: stable; }
 body { overflow-x: clip; max-width: 100%; }
