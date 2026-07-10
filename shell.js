@@ -150,71 +150,57 @@
     return;
   }
 
+  // Product surface = clean pages that own their chrome (gateway, briefing, film, cases).
+  // Do NOT inject dual nav / theme-slider / documentary / supabase soup.
+  function isProductSurface() {
+    try {
+      var html = document.documentElement;
+      if (html && html.getAttribute('data-product') === '1') return true;
+      if (document.body && document.body.getAttribute('data-product') === '1') return true;
+      var p = (window.location.pathname || '').toLowerCase();
+      var clean = [
+        'index.html', 'daily-briefing.html', 'liril-film.html', 'experience.html',
+        'osint-dashboard.html', 'cbc-social-amplification.html', 'cbc-5gw-media-vector.html',
+        'accountability.html', 'evidence-index.html', 'gateway'
+      ];
+      if (p === '/' || p.endsWith('/')) return true;
+      for (var i = 0; i < clean.length; i++) {
+        if (p.indexOf(clean[i]) >= 0) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
   // ── Init ────────────────────────────────────────────────────────────────
   function init() {
-    injectQuantaniumContract();
-    injectReportPresentationCSS();
-    injectCinematicCSS();
-    injectBackdrop();
-    injectPolishCSS();
-    if (isFrameShell) {
-      // INDEX.HTML — frame shell: only load nav for the top bar
-      ensureFrame('site-header-frame', 'div', 'prepend');
-      loadScript(BASE + 'nav.js?v=50')
-        .then(function() { return loadScript(BASE + 'js/theme-slider.js?v=41'); })
-        .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
-        .then(function() { return loadScript(BASE + 'js/config.js?v=41'); })
-        .then(function() { return loadScript(BASE + 'js/auth-nav.js?v=1'); });
-
-    } else if (isInIframe) {
-      // INSIDE IFRAME — content page: only load content-level components
-      // (no header/footer — parent frame provides those)
-      loadScript(BASE + 'js/theme-slider.js?v=41');
-      // SHAKE FIX (2026-07-10): removed video-bg.js, reveal.js, presentation.js
-      // (scroll-snap), perception.js — all sources of continuous or scroll-
-      // linked motion. Content pages are now STATIC: only data/util scripts.
-      Promise.all([
-        loadScript(BASE + 'js/timeline.js?v=1'),
-        loadScript(BASE + 'share.js?v=2'),
-        loadScript(BASE + 'js/share-actions.js?v=2'),
-        loadScript(BASE + 'js/liril-voice.js?v=41'),
-        loadScript(BASE + 'js/figures.js?v=1'),
-        loadScript(BASE + 'js/breadcrumbs.js?v=2'),
-        loadScript(BASE + 'js/error-reporter.js?v=2')
-      ]).then(function() {
-        // liril-documentary.js is the ONE narration/tour engine (manual).
-        return loadScript(BASE + 'js/liril-documentary.js?v=4');
-      }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'readnext.js?v=41'); })
-      .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
-      .then(function() { return loadScript(BASE + 'js/config.js?v=41'); })
-      .then(function() { return loadScript(BASE + 'js/my-mp.js?v=2'); })
-      .then(function() { return loadScript(BASE + 'js/mp-scorecard.js?v=1'); })
-      .then(function() { return loadScript(BASE + 'js/impact-tracker.js?v=2'); });
-
-    } else {
-      // DIRECT ACCESS fallback — full standalone page
-      // (frame buster normally prevents this, but just in case)
-      ensureFrame('site-header-frame', 'div', 'prepend');
-      ensureFrame('site-footer-frame', 'div', null);
-
-      // SHAKE FIX (2026-07-10): no video-bg / reveal / presentation-snap /
-      // perception / auto-scroll engines here either. Static page.
-      loadScript(BASE + 'nav.js?v=50')
-        .then(function() { return loadScript(BASE + 'js/theme-slider.js?v=41'); })
-        .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
-        .then(function() { return loadScript(BASE + 'js/config.js?v=41'); })
-        .then(function() { return loadScript(BASE + 'js/auth-nav.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=41'); })
-        .then(function() { return loadScript(BASE + 'js/liril-documentary.js?v=4'); })
-        .then(function() { return loadScript(BASE + 'js/breadcrumbs.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'share.js?v=2'); })
-        .then(function() { return loadScript(BASE + 'js/share-actions.js?v=2'); })
-        .then(function() { return loadScript(BASE + 'readnext.js?v=41'); })
-        .then(function() { return loadScript(BASE + 'footer.js?v=41'); });
+    // PRODUCT MODE — zero chrome injection. Page CSS is the product.
+    if (isProductSurface()) {
+      try {
+        document.documentElement.setAttribute('data-quantanium', 'pristine-ice-lake');
+        document.documentElement.setAttribute('data-theme', 'quantanium');
+        document.documentElement.setAttribute('data-product', '1');
+      } catch (e) {}
+      return;
     }
+
+    injectQuantaniumContract();
+    // Archive pages only: tokens + light polish. No theme-slider, no documentary auto-tour,
+    // no supabase, no dual nav stack, no readnext spam.
+    if (isFrameShell) {
+      ensureFrame('site-header-frame', 'div', 'prepend');
+      loadScript(BASE + 'nav.js?v=51');
+      return;
+    }
+    if (isInIframe) {
+      // Minimal content helpers only
+      loadScript(BASE + 'js/figures.js?v=1');
+      return;
+    }
+    // Direct archive page — single nav, no junk pile
+    ensureFrame('site-header-frame', 'div', 'prepend');
+    ensureFrame('site-footer-frame', 'div', null);
+    loadScript(BASE + 'nav.js?v=51')
+      .then(function () { return loadScript(BASE + 'footer.js?v=41'); });
   }
 
   if (document.readyState === 'loading') {

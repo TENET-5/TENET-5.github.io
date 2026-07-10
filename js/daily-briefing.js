@@ -19,15 +19,7 @@
 
   function pageHref(page) {
     if (!page) return '#';
-    try {
-      if (window !== window.top) {
-        return '/index.html?load=' + encodeURIComponent(page);
-      }
-    } catch (e) {}
-    /* Prefer shell when available from top-level site */
-    if (document.referrer && document.referrer.indexOf('index.html') !== -1) {
-      return 'index.html?load=' + encodeURIComponent(page);
-    }
+    /* Direct pages — product gateway index is NOT a ?load= shell anymore */
     return page;
   }
 

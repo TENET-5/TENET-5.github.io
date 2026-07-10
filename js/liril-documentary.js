@@ -475,7 +475,14 @@
   }
 
   function ensureStartButton() {
+    /* No floating chrome on product pages — film lives at /liril-film.html */
     if (document.getElementById('liril-doc-start')) return;
+    var path = (window.location.pathname || '');
+    if (path.indexOf('liril-film') >= 0 || path.indexOf('index.html') >= 0 || path === '/' || path.endsWith('/')) {
+      return;
+    }
+    /* Only show on experience / about when explicitly wanted */
+    if (path.indexOf('experience') < 0 && path.indexOf('about') < 0) return;
     injectCss();
     var btn = el('button', 'liril-doc-start');
     btn.id = 'liril-doc-start';
@@ -484,16 +491,9 @@
     btn.innerHTML = 'Full film';
     btn.title = 'Multi-hour LIRIL film — origins to now';
     btn.addEventListener('click', function (ev) {
-      /* Prefer full film over short site tour */
       if (!ev.shiftKey) {
         ev.preventDefault();
         ev.stopPropagation();
-        try {
-          if (window.top && window.top !== window) {
-            window.top.location.href = FULL_FILM_URL;
-            return;
-          }
-        } catch (e) {}
         window.location.href = FULL_FILM_URL;
       }
     }, true);
