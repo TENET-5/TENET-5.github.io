@@ -46,34 +46,7 @@ FONTS = (
 PRESS_CSS = f'  <link rel="stylesheet" href="css/press-theme.css?v={V}">\n'
 
 # Interior layout glue (press aesthetic, not product shell)
-INTERIOR_CSS = """  <style id="press-interior">
-    .press-bar{display:flex;justify-content:space-between;align-items:center;gap:18px;
-      padding:16px clamp(20px,4vw,48px);font-family:var(--mono,'IBM Plex Mono',monospace);
-      font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ivory-faint,#6b6459);
-      border-bottom:1px solid var(--hair,#26221c);background:var(--void,#050708);position:sticky;top:0;z-index:100}
-    .press-bar a{color:var(--ivory-dim,#a89f90);text-decoration:none;margin-left:14px}
-    .press-bar a:hover{color:var(--ice,#9adbe8)}
-    .press-bar .wm{font-family:var(--serif,'Fraunces',Georgia,serif);font-size:16px;letter-spacing:.04em;
-      color:var(--ivory,#ece7dc);text-transform:none}
-    .press-bar .wm sup{font-size:.5em;color:var(--ice,#9adbe8)}
-    .press-main{max-width:920px;margin:0 auto;padding:clamp(36px,6vw,72px) clamp(20px,4vw,40px) 80px;
-      color:var(--ivory-dim,#a89f90);font-family:var(--serif,'Fraunces',Georgia,serif);font-weight:300;line-height:1.65}
-    .press-main h1,.press-main h2,.press-main h3{color:var(--ivory,#ece7dc);font-weight:400;letter-spacing:-.02em}
-    .press-main h1{font-size:clamp(2rem,4.5vw,3.2rem);line-height:1.1;margin:0 0 .5em}
-    .press-main a{color:var(--ice,#9adbe8)}
-    .press-main .inv-stat,.press-main .finding-box,.press-main .country-card,.press-main .panel,
-    .press-main .p-card{background:linear-gradient(160deg,rgba(154,219,232,.06),rgba(5,7,8,.35));
-      border:1px solid rgba(154,219,232,.14);border-radius:8px}
-    .press-foot{max-width:920px;margin:0 auto;padding:24px clamp(20px,4vw,40px) 56px;
-      border-top:1px solid var(--hair,#26221c);font-family:var(--mono,'IBM Plex Mono',monospace);
-      font-size:10.5px;letter-spacing:.08em;color:var(--ivory-faint,#6b6459);
-      display:flex;flex-wrap:wrap;gap:10px 18px}
-    .press-foot a{color:var(--ivory-dim,#a89f90);text-decoration:none}
-    .press-foot a:hover{color:var(--ice,#9adbe8)}
-    .tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.brand-crest,
-    img[src*="crest"],.ambient-glow,.grain-overlay,.vignette{display:none!important}
-  </style>
-"""
+INTERIOR_CSS = ""
 
 NAV = """  <header class="press-bar">
     <a class="wm" href="index.html">TENET<sup>5</sup></a>

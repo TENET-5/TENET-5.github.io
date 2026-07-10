@@ -510,20 +510,38 @@ def head(title: str, desc: str) -> str:
 <body>
 """
 
-def footer_html(site: dict) -> str:
-    links = "".join(
-        f'<a href="{esc(u)}">{esc(t)}</a>'
-        for t, u in [("About & Method", "about.html"), ("Findings", "accountability.html"),
-                     ("Daily Briefing", "daily-briefing.html"), ("Agent Walkthrough", "liril-film.html"),
-                     ("Evidence", "evidence-index.html")]
-    )
+def press_nav(active: str = "") -> str:
+    """Interior chrome only — homepage keeps the cover. Never use cover-bar here."""
+    items = [
+        ("Home", "index.html", "home"),
+        ("Briefing", "daily-briefing.html", "briefing"),
+        ("Evidence", "evidence-index.html", "evidence"),
+        ("Film", "liril-film.html", "film"),
+        ("About", "about.html", "about"),
+    ]
+    links = []
+    for label, href, key in items:
+        on = ' class="is-on"' if key == active else ""
+        links.append(f'<a href="{href}"{on}>{label}</a>')
     return f"""
-<footer>
-  <div class="rowf">
-    <span class="fm">TENET<sup>5</sup></span>
-    <span>{links}</span>
-  </div>
-  <div class="origin">{esc(site["origin_line"])}</div>
+<header class="press-bar" role="banner">
+  <a class="wm" href="index.html">TENET<sup>5</sup></a>
+  <nav aria-label="Primary">{"".join(links)}</nav>
+</header>
+"""
+
+
+def footer_html(site: dict) -> str:
+    # Canonical press chrome (apply_one_theme also enforces this on every interior).
+    _ = site  # origin kept on homepage cover path; interiors share press-foot
+    return """
+<footer class="press-foot" role="contentinfo">
+  <span>TENET5 · Powered by LIRIL AI</span>
+  <a href="methodology-transparency.html">Methodology</a>
+  <a href="about.html">About</a>
+  <a href="legal.html">Legal</a>
+  <a href="evidence-index.html">Evidence</a>
+  <a href="daily-briefing.html">Briefing</a>
 </footer>
 """
 
@@ -794,23 +812,13 @@ def build_evidence(site: dict, evidence: list[dict]) -> str:
         if rows:
             sections.append(f'<div class="shelf-cat">{esc(CAT_LABELS[cat])}</div>' + "".join(rows))
 
-    body = f"""
-<header class="cover" style="min-height:52vh">
-  <div class="cover-bar">
-    <span class="brand"><a href="index.html" style="display:flex;align-items:center;gap:14px">
-      <span class="wm">TENET<sup>5</sup></span></a></span>
-    <span id="dateline">&mdash;</span>
-    <span><a href="index.html">&larr; The Record</a></span>
-  </div>
-  <div class="cover-core" style="justify-content:flex-end;padding-bottom:6vh">
-    <div class="cover-kick">Every document we cite · nothing you can't check</div>
-    <h1 style="font-size:clamp(40px,6.4vw,92px)">The evidence <em>shelf.</em></h1>
-    <p class="stand">Each entry below is a source this newsroom relies on — what it is,
-    what it establishes, who published it, and the link to read it yourself.
-    The underlying data files are downloadable beside each entry.</p>
-  </div>
-</header>
-<main class="wrapx field" style="padding-top:4vh;padding-bottom:10vh">
+    body = press_nav("evidence") + f"""
+<main class="press-main">
+  <p class="kick">Every document we cite · nothing you can't check</p>
+  <h1>The evidence <em>shelf.</em></h1>
+  <p class="stand">Each entry below is a source this newsroom relies on — what it is,
+  what it establishes, who published it, and the link to read it yourself.
+  The underlying data files are downloadable beside each entry.</p>
   <div class="shelf-controls rv">
     <input id="ev-q" type="search" placeholder="Search the shelf&hellip;" aria-label="Search evidence">
     <select id="ev-cat" aria-label="Filter by category">
@@ -852,26 +860,17 @@ def build_evidence(site: dict, evidence: list[dict]) -> str:
 def build_briefing(site: dict) -> str:
     """Press-designed shell; content populates at runtime from the daily JSONs
     (the automation refreshes those without needing a press rebuild)."""
-    body = """
-<header class="cover" style="min-height:58vh">
-  <div class="cover-bar">
-    <span class="brand"><a href="index.html" style="display:flex;align-items:center;gap:14px">
-      <span class="wm">TENET<sup>5</sup></span></a></span>
-    <span id="dateline">&mdash;</span>
-    <span><a href="index.html">&larr; The Record</a></span>
-  </div>
-  <div class="cover-core" style="justify-content:flex-end;padding-bottom:6vh">
-    <div class="cover-kick">The Daily Briefing · every line cited · read by LIRIL</div>
-    <h1 style="font-size:clamp(40px,6.4vw,92px)">Today, in the <em>record.</em></h1>
+    body = press_nav("briefing") + """
+<main class="press-main">
+    <p class="kick">The Daily Briefing · every line cited · read by LIRIL</p>
+    <h1>Today, in the <em>record.</em></h1>
     <p class="stand" id="brief-oneline">Loading today's briefing from the record&hellip;</p>
-    <div style="margin-top:3vh;display:flex;align-items:center;gap:22px;flex-wrap:wrap">
-      <button class="read-brief" id="read-brief" type="button">&#9654; LIRIL reads the briefing</button>
+    <div class="guide-actions" style="margin:1.5em 0 2em">
+      <button class="guide-cta" id="read-brief" type="button">LIRIL reads the briefing</button>
       <span class="threat" id="brief-threat" hidden></span>
       <span class="meta" id="brief-date"></span>
     </div>
-  </div>
-</header>
-<main class="wrapx field" style="padding-top:6vh;padding-bottom:10vh">
+
   <div id="brief-err"></div>
 
   <div class="shelf-cat rv">Happening now</div>
@@ -980,22 +979,13 @@ def build_briefing(site: dict) -> str:
 def build_network(site: dict) -> str:
     """Documented-connections board rendered at runtime from
     data/investigation_board.json (curated nodes/threads with sources)."""
-    body = """
-<header class="cover" style="min-height:52vh">
-  <div class="cover-bar">
-    <span class="brand"><a href="index.html" style="display:flex;align-items:center;gap:14px">
-      <span class="wm">TENET<sup>5</sup></span></a></span>
-    <span id="dateline">&mdash;</span>
-    <span><a href="index.html">&larr; The Record</a></span>
-  </div>
-  <div class="cover-core" style="justify-content:flex-end;padding-bottom:6vh">
-    <div class="cover-kick">Documented connections only · every edge cites its file</div>
-    <h1 style="font-size:clamp(40px,6.4vw,92px)">The network, <em>documented.</em></h1>
+    body = press_nav("home") + """
+<main class="press-main">
+    <p class="kick">Documented connections only · every edge cites its file</p>
+    <h1>The network, <em>documented.</em></h1>
     <p class="stand" id="net-stand">Loading the board&hellip;</p>
     <span class="meta" id="net-meta"></span>
-  </div>
-</header>
-<main class="wrapx field" style="padding-top:5vh;padding-bottom:10vh">
+
   <div class="chips" id="net-chips"></div>
   <div class="board-wrap">
     <div class="board glass"><svg id="net-svg" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"
@@ -1140,25 +1130,19 @@ def build_network(site: dict) -> str:
 def build_article(site: dict, p: dict) -> str:
     paras = "".join(f'<p class="bodyp">{esc(b)}</p>' for b in p.get("body", []))
     srcs = "".join(f'<div class="meta" style="margin-bottom:8px">{sources_line(p)}</div>')
-    body = f"""
-<header class="cover" style="min-height:0">
-  <div class="cover-bar">
-    <span class="brand"><a href="../index.html" style="display:flex;align-items:center;gap:14px">
-      <span class="wm">TENET<sup>5</sup></span></a></span>
-    <span>{esc(p.get("kicker",""))}</span>
-    <span><a href="../index.html">&larr; The Record</a></span>
-  </div>
-</header>
-<main class="article field">
-  <span class="kick red">{esc(p.get("kicker",""))}{sample}</span>
+    # story/ pages: press chrome with ../ paths
+    nav = press_nav("home").replace('href="', 'href="../')
+    body = nav + f"""
+<main class="press-main article">
+  <span class="kick red">{esc(p.get("kicker",""))}</span>
   <h1>{esc(p["title"])}</h1>
   <p class="dek">{esc(p.get("dek",""))}</p>
   {paras}
   <div class="srcs glass"><h4>Sources in this file</h4>{srcs}</div>
 </main>"""
     page = (head(p["title"], p.get("dek", ""))
-            + body + footer_html(site) + dock_and_script(site, with_rail=False))
-    # article pages live in story/ — fix relative asset paths
+            + body + footer_html(site).replace('href="', 'href="../')
+            + dock_and_script(site, with_rail=False))
     return page.replace('src="js/liril-voice.js"', 'src="../js/liril-voice.js"') \
                .replace("fetch('data/film", "fetch('../data/film")
 

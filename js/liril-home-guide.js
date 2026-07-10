@@ -8,10 +8,13 @@
 
   document.documentElement.classList.add('js');
 
-  var COVER_GREET =
+  var COVER_GREET_PAST =
     'I am LIRIL, your guide through the public record of Canada. ' +
     'We begin at this hour and walk backwards — week, month, year, then the full era. ' +
     'Every line carries a source. Bring your skepticism.';
+  var COVER_GREET_FUTURE =
+    'We pivot to the horizon. Tracking predictive modeling and anticipated policy fallout. ' +
+    'Let us look forward.';
 
   function $(id) { return document.getElementById(id); }
 
@@ -109,7 +112,7 @@
       }, Math.min(12000, 80 * text.length + 800));
     }
 
-    function enableGuide(fromUser) {
+    function enableGuide(fromUser, customMessage) {
       voiceOn = true;
       if (voiceBtn) {
         voiceBtn.textContent = 'Voice · On';
@@ -120,17 +123,19 @@
         guideBtn.classList.add('on');
         guideBtn.textContent = 'Guiding…';
       }
-      if (!greeted) {
+      if (!greeted || customMessage) {
         greeted = true;
-        speak(COVER_GREET, true);
+        speak(customMessage || (isFuture ? COVER_GREET_FUTURE : COVER_GREET_PAST), true);
       } else if (fromUser) {
-        speak('Guide on. Continue scrolling — I will narrate each chapter.', true);
+        speak('Guide on. Walking the record automatically.', true);
       }
       setStatus('LIRIL guiding · Voice on');
+      startAutoScroll();
     }
 
     function disableGuide() {
       voiceOn = false;
+      stopAutoScroll();
       if (voiceBtn) {
         voiceBtn.textContent = 'Voice · Off';
         voiceBtn.classList.remove('on');
@@ -158,15 +163,80 @@
     function startGuideAndScroll(e) {
       if (e && e.preventDefault) e.preventDefault();
       enableGuide(true);
-      var now = document.getElementById('now');
-      if (now && now.scrollIntoView) {
-        setTimeout(function () {
-          now.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 400);
-      }
     }
     if (guideBtn) guideBtn.addEventListener('click', startGuideAndScroll);
     if (guideBtnCover) guideBtnCover.addEventListener('click', startGuideAndScroll);
+
+    // Auto-scroll logic
+    var autoScrollTimer = null;
+    var autoScrollIndex = 0;
+    var isFuture = false;
+
+    function getActiveChapters() {
+      return document.querySelectorAll(isFuture ? 'section.future-track' : 'section.past-track');
+    }
+
+    function stopAutoScroll() {
+      if (autoScrollTimer) clearTimeout(autoScrollTimer);
+      autoScrollTimer = null;
+    }
+
+    function stepAutoScroll() {
+      var chapters = getActiveChapters();
+      if (autoScrollIndex >= chapters.length) return;
+      var el = chapters[autoScrollIndex];
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      autoScrollIndex++;
+      autoScrollTimer = setTimeout(stepAutoScroll, 15000); // Wait 15 seconds per chapter
+    }
+
+    function startAutoScroll() {
+      stopAutoScroll();
+      autoScrollIndex = 0;
+      stepAutoScroll();
+    }
+
+    // Toggle Past vs Future
+    var togglePastBtn = $('toggle-past');
+    var toggleFutureBtn = $('toggle-future');
+    var pastRail = document.querySelector('.past-rail');
+    var futureRail = document.querySelector('.future-rail');
+    
+    function switchTimeline(toFuture) {
+      isFuture = toFuture;
+      if (togglePastBtn) togglePastBtn.classList.toggle('active', !isFuture);
+      if (togglePastBtn) togglePastBtn.style.background = isFuture ? 'transparent' : 'var(--ice)';
+      if (togglePastBtn) togglePastBtn.style.color = isFuture ? 'var(--ice)' : 'var(--void)';
+      
+      if (toggleFutureBtn) toggleFutureBtn.classList.toggle('active', isFuture);
+      if (toggleFutureBtn) toggleFutureBtn.style.background = isFuture ? 'var(--ice)' : 'transparent';
+      if (toggleFutureBtn) toggleFutureBtn.style.color = isFuture ? 'var(--void)' : 'var(--ice)';
+
+      if (pastRail) pastRail.style.display = isFuture ? 'none' : '';
+      if (futureRail) futureRail.style.display = isFuture ? '' : 'none';
+
+      document.getElementById('timeline-past').style.display = isFuture ? 'none' : '';
+      document.getElementById('timeline-future').style.display = isFuture ? '' : 'none';
+
+      if (window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
+      
+      if (voiceOn) {
+        enableGuide(true, isFuture ? COVER_GREET_FUTURE : COVER_GREET_PAST);
+      } else {
+        autoScrollIndex = 0;
+        var chapters = getActiveChapters();
+        if (chapters.length) chapters[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    if (togglePastBtn) togglePastBtn.addEventListener('click', function() { switchTimeline(false); });
+    if (toggleFutureBtn) toggleFutureBtn.addEventListener('click', function() { switchTimeline(true); });
+
+    // Stop auto-scroll on manual wheel/touch
+    window.addEventListener('wheel', stopAutoScroll, {passive: true});
+    window.addEventListener('touchstart', stopAutoScroll, {passive: true});
 
     // BEGIN also offers guide if user has not started
     var begin = document.getElementById('begin-record') || document.querySelector('a.begin');
@@ -174,35 +244,42 @@
       begin.addEventListener('click', function () {
         setLine('We enter this hour. Scroll to walk the record backwards.');
         if (!greeted) {
-          // Soft prompt in dock without forcing voice (browser autoplay policies)
           setStatus('Tap “Guide me” or Voice · On to hear LIRIL');
         }
       });
     }
 
     // Chapters: text always updates; voice when on
-    var chapters = document.querySelectorAll('section.ch');
-    var segs = {};
-    document.querySelectorAll('.rail .seg').forEach(function (s) {
-      segs[s.getAttribute('data-ch')] = s;
-    });
+    var chIO = null;
+    function observeChapters() {
+      if (!('IntersectionObserver' in window)) return;
+      if (chIO) chIO.disconnect();
+      
+      var segs = {};
+      document.querySelectorAll(isFuture ? '.future-rail .seg' : '.past-rail .seg').forEach(function (s) {
+        segs[s.getAttribute('data-ch')] = s;
+      });
 
-    if ('IntersectionObserver' in window && chapters.length) {
-      var chIO = new IntersectionObserver(function (es) {
+      chIO = new IntersectionObserver(function (es) {
         es.forEach(function (e) {
           if (!e.isIntersecting) return;
           var id = e.target.id;
           if (id === lastCh) return;
           lastCh = id;
-          Object.keys(segs).forEach(function (k) {
-            segs[k].classList.toggle('on', k === id);
-          });
+          document.querySelectorAll('.rail .seg').forEach(function(s){ s.classList.remove('on'); });
+          if (segs[id]) segs[id].classList.add('on');
           var line = e.target.getAttribute('data-line') || '';
           if (line) speak(line, false);
         });
       }, { threshold: 0.28, rootMargin: '0px 0px -10% 0px' });
-      chapters.forEach(function (c) { chIO.observe(c); });
+      
+      getActiveChapters().forEach(function (c) { chIO.observe(c); });
     }
+    observeChapters();
+
+    // Re-observe when switching
+    if (togglePastBtn) togglePastBtn.addEventListener('click', observeChapters);
+    if (toggleFutureBtn) toggleFutureBtn.addEventListener('click', observeChapters);
 
     // Hash deep-links (#week etc.) — guide narrates that chapter
     function hashGuide() {
@@ -212,8 +289,8 @@
       if (!sec) return;
       var line = sec.getAttribute('data-line') || '';
       lastCh = h;
-      Object.keys(segs).forEach(function (k) {
-        segs[k].classList.toggle('on', k === h);
+      document.querySelectorAll('.rail .seg').forEach(function(s) {
+        s.classList.toggle('on', s.getAttribute('data-ch') === h);
       });
       if (line) {
         setLine(line);
@@ -269,6 +346,22 @@
     setDateline();
     initReveal();
     initGuide();
+
+    // Auto-play immediately
+    // Browsers heavily restrict this, so we hook 'click' on document body as fallback
+    if (window.LIRIL_HOME_GUIDE && !window.LIRIL_HOME_GUIDE.isOn()) {
+      var started = false;
+      function autoStart() {
+        if (started) return;
+        started = true;
+        window.LIRIL_HOME_GUIDE.enable();
+        document.body.removeEventListener('click', autoStart);
+      }
+      setTimeout(function() {
+        if (!started) window.LIRIL_HOME_GUIDE.enable();
+      }, 500); // Wait for voice async load
+      document.body.addEventListener('click', autoStart);
+    }
   }
 
   if (document.readyState === 'loading') {

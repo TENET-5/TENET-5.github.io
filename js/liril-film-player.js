@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    LIRIL FILM PLAYER v4 — multi-hour entire Canada open-record history
    Prefers data/documentary_chapters.json (full spine); falls back to film acts.
-   Speak + long source dwell. Progress localStorage v4. QUANTANIUM ice chrome.
+   Speak + long source dwell. Progress localStorage v4. Press theme (css/press-theme.css).
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
