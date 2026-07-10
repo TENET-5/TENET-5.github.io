@@ -135,18 +135,12 @@
   // ── Text split reveal (Locomotive-style) ─────────────
   // Splits heading into words/chars that animate in with stagger
   function splitReveal(el) {
-    var text = el.textContent;
-    var words = text.split(/\s+/);
-    el.innerHTML = '';
-    el.style.overflow = 'hidden';
-    words.forEach(function(word, i) {
-      var span = document.createElement('span');
-      span.textContent = word + ' ';
-      span.style.cssText = 'display:inline-block;opacity:0;transform:translateY(100%);' +
-        'transition:opacity 0.5s cubic-bezier(0.215,0.61,0.355,1) ' + (i * 0.06) + 's,' +
-        'transform 0.6s cubic-bezier(0.215,0.61,0.355,1) ' + (i * 0.06) + 's;';
-      el.appendChild(span);
-    });
+    // DISABLED 2026-07-10 (owner directive: audiobook newsroom, not a movie).
+    // The word-split animation also fused headline words: each word sat in its
+    // own display:inline-block span with the space INSIDE the span, and CSS
+    // strips a collapsible trailing space at the end of an inline-block, so
+    // "$93 Million" rendered as "$93Million". Headings now render as plain text.
+    void el;
   }
 
   var splitObserver = new IntersectionObserver(function(entries) {

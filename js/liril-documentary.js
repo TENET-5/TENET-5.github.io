@@ -488,7 +488,7 @@
     btn.id = 'liril-doc-start';
     btn.type = 'button';
     btn.setAttribute('aria-label', 'Open multi-hour LIRIL film of Canada');
-    btn.innerHTML = 'Full film';
+    btn.innerHTML = 'Guided record';
     btn.title = 'Multi-hour LIRIL film — origins to now';
     btn.addEventListener('click', function (ev) {
       if (!ev.shiftKey) {

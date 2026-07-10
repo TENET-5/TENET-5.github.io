@@ -21,40 +21,51 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab", ""}
+SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES = {
     "index_legacy.html",
     "index_backup.html",
     "index-legacy-cap222-shell.html",
 }
-THEME_VER = "67"
-THEME_HREF = f"css/press-theme.css?v={THEME_VER}"
+THEME_VER = "68"
 
-FONTS_BLOCK = f"""  <link rel="preconnect" href="https://fonts.googleapis.com">
+def _rel_prefix(path: Path) -> str:
+    """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
+    try:
+        rel = path.parent.relative_to(ROOT)
+        depth = len(rel.parts)
+    except ValueError:
+        depth = 0
+    return "../" * depth if depth > 0 else ""
+
+def _fonts_block(prefix: str = "") -> str:
+    return f"""  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{THEME_HREF}">
+  <link rel="stylesheet" href="{prefix}css/press-theme.css?v={THEME_VER}">
   <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 """
 
-NAV = """  <header class="press-bar" role="banner">
-    <a class="wm" href="index.html">TENET<sup>5</sup></a>
+def _nav(prefix: str = "") -> str:
+    return f"""  <header class="press-bar" role="banner">
+    <a class="wm" href="{prefix}index.html">TENET<sup>5</sup></a>
     <nav aria-label="Primary">
-      <a href="index.html">Home</a>
-      <a href="daily-briefing.html">Briefing</a>
-      <a href="evidence-index.html">Evidence</a>
-      <a href="liril-film.html">Film</a>
-      <a href="about.html">About</a>
+      <a href="{prefix}index.html">Home</a>
+      <a href="{prefix}daily-briefing.html">Briefing</a>
+      <a href="{prefix}evidence-index.html">Evidence</a>
+      <a href="{prefix}liril-film.html">Guided</a>
+      <a href="{prefix}about.html">About</a>
     </nav>
   </header>
 """
 
-FOOT = """  <footer class="press-foot" role="contentinfo">
+def _foot(prefix: str = "") -> str:
+    return f"""  <footer class="press-foot" role="contentinfo">
     <span>TENET5 · Powered by LIRIL AI</span>
-    <a href="methodology-transparency.html">Methodology</a>
-    <a href="about.html">About</a>
-    <a href="legal.html">Legal</a>
+    <a href="{prefix}methodology-transparency.html">Methodology</a>
+    <a href="{prefix}about.html">About</a>
+    <a href="{prefix}legal.html">Legal</a>
   </footer>
 """
 
@@ -85,6 +96,12 @@ RE_SOUP_NODES = re.compile(
     re.I,
 )
 RE_SKIP = re.compile(r"\s*<a\b[^>]*class=\"[^\"]*skip-link[^\"]*\"[^>]*>.*?</a>\s*", re.I | re.S)
+# Retired chrome injectors: nav.js/footer.js build the old unstyled mega-nav at
+# runtime; liril-bootstrap.js loads them dynamically. press-bar is the only chrome.
+RE_LEGACY_CHROME_JS = re.compile(
+    r'\s*<script\b[^>]*src="[^"]*(?:nav\.js|footer\.js|liril-bootstrap\.js)(?:\?[^"]*)?"[^>]*>\s*</script>',
+    re.I,
+)
 
 PRESS_HOME_MARKERS = ("read <em>backwards", 'class="cover"', "ghost5")
 
@@ -191,6 +208,10 @@ def apply_page(path: Path) -> bool:
     original = text
     name = path.name
     home = is_press_home(name, text)
+    prefix = _rel_prefix(path)
+    fonts_block = _fonts_block(prefix)
+    nav = _nav(prefix)
+    foot = _foot(prefix)
 
     text = _strip_bom(text)
 
@@ -201,6 +222,10 @@ def apply_page(path: Path) -> bool:
 
     def _strip_theme_style(m: re.Match[str]) -> str:
         body = m.group(0)
+        # data-heal blocks are the restored legacy component styles (2026-07-10
+        # heal after the theme strip left 359 pages unstyled) — never remove.
+        if "data-heal" in body[:120]:
+            return body
         if (
             "--void" in body
             or "--serif" in body
@@ -217,13 +242,13 @@ def apply_page(path: Path) -> bool:
     if re.search(r"<meta[^>]+charset", text, re.I):
         text = re.sub(
             r"(<meta[^>]+charset[^>]*>\s*)",
-            r"\1" + FONTS_BLOCK,
+            r"\1" + _fonts_block(prefix),
             text,
             count=1,
             flags=re.I,
         )
     elif re.search(r"<head\b", text, re.I):
-        text = re.sub(r"(<head\b[^>]*>)", r"\1\n" + FONTS_BLOCK, text, count=1, flags=re.I)
+        text = re.sub(r"(<head\b[^>]*>)", r"\1\n" + _fonts_block(prefix), text, count=1, flags=re.I)
     else:
         return False
 
@@ -281,8 +306,10 @@ def apply_page(path: Path) -> bool:
         # Strip product soup shells
         text = RE_SOUP_NODES.sub("\n", text)
         text = RE_SKIP.sub("\n", text)
+        text = RE_LEGACY_CHROME_JS.sub("", text)
 
         # Replace ANY existing header with canonical press-bar
+        NAV = _nav(prefix)
         if RE_HEADER.search(text):
             text = RE_HEADER.sub(NAV, text, count=1)
         elif 'class="press-bar' not in text:
@@ -305,6 +332,7 @@ def apply_page(path: Path) -> bool:
         )
 
         # Footers → exactly one press-foot (replace any <footer>…</footer>)
+        FOOT = _foot(prefix)
         if RE_FOOTER_ANY.search(text):
             text = RE_FOOTER_ANY.sub(FOOT, text, count=1)
             # remove any additional footers
@@ -337,13 +365,13 @@ def validate() -> dict:
     product_left = 0
     cover_bar_interior = 0
 
-    for path in sorted(ROOT.glob("*.html")):
-        if path.name in SKIP_NAMES:
+    for path in sorted(ROOT.rglob("*.html")):
+        if not is_public_page(path):
             continue
         pages += 1
         t = path.read_text(encoding="utf-8", errors="replace")
         home = is_press_home(path.name, t)
-        n = len(re.findall(r'href=["\']css/press-theme\.css', t, flags=re.I))
+        n = len(re.findall(r'href=["\'](?:\.\./)*css/press-theme\.css', t, flags=re.I))
         if n != 1:
             issues.append(f"{path.name}: press-theme links={n}")
             continue
@@ -428,3 +456,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
