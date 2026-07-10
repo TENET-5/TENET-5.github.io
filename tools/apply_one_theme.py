@@ -21,14 +21,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab", "data"}
+SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab", ""}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES = {
     "index_legacy.html",
     "index_backup.html",
     "index-legacy-cap222-shell.html",
 }
-THEME_VER = "66"
+THEME_VER = "67"
 THEME_HREF = f"css/press-theme.css?v={THEME_VER}"
 
 FONTS_BLOCK = f"""  <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -248,6 +248,36 @@ def apply_page(path: Path) -> bool:
     text = _force_body(text, home)
 
     if not home:
+        # Cap224 breadcrumb wreckage: orphan links + "CAP224-NAV-END"
+        text = re.sub(
+            r"(?:<main[^>]*>\s*)?(?:<a href=\"index\.html\">Home</a>\s*)?"
+            r"(?:<span class=\"tnt-bc-sep\">[^<]*</span>\s*)?"
+            r"(?:<span class=\"tnt-bc-current\">[^<]*</span>\s*)?"
+            r"</div>\s*CAP224-NAV-END\s*",
+            "",
+            text,
+            count=1,
+            flags=re.I,
+        )
+        text = re.sub(r"\s*CAP224-NAV-END\s*", "\n", text, flags=re.I)
+        text = re.sub(
+            r"<a href=\"index\.html\">Home</a><span class=\"tnt-bc-sep\">[^<]*</span>"
+            r"<span class=\"tnt-bc-current\">[^<]*</span></div>\s*",
+            "",
+            text,
+            flags=re.I,
+        )
+        # hero-tag emoji cosplay → plain kicker
+        text = re.sub(
+            r'(class="hero-tag"[^>]*>)\s*[^\w]*\s*',
+            r"\1",
+            text,
+            flags=re.I,
+        )
+        # undefined product accent var
+        text = text.replace("var(--accent)", "var(--ice)")
+        text = text.replace("var(--slate-ice-edge)", "rgba(154,219,232,.16)")
+
         # Strip product soup shells
         text = RE_SOUP_NODES.sub("\n", text)
         text = RE_SKIP.sub("\n", text)
