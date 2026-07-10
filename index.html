@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TENET5 — Canada's Intelligent-Automation Newsroom</title>
+<title>Canada's Intelligent-Automation Newsroom | TENET5</title>
+<meta property="og:site_name" content="TENET5">
+<meta property="og:title" content="Canada's Intelligent-Automation Newsroom | TENET5">
+<meta property="og:description" content="Every outlet read, every public document indexed, every public claim held to the record — by machine, verified by people, spoken by LIRIL.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tenet-5.github.io/">
 <style>
   :root{
     --void:#06090d;          /* page ground */
@@ -35,9 +40,9 @@
   a:hover{color:var(--ice)}
   .wrap{max-width:1280px;margin:0 auto;padding:0 24px}
 
-  /* reveal-on-scroll */
-  .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
-  .rv.in{opacity:1;transform:none}
+  /* reveal-on-scroll — hidden state only when JS is present (html.js) */
+  .js .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .js .rv.in{opacity:1;transform:none}
 
   /* ── prototype notice ─────────────────────────── */
   .proto{background:#141007;border-bottom:1px solid #2c2410;color:#c8a24a;font-family:var(--mono);
@@ -61,7 +66,9 @@
   .masthead .kick-line::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge-lit),transparent)}
   .masthead h1{font-family:var(--serif);font-weight:700;font-size:clamp(64px,11vw,148px);
     line-height:.88;letter-spacing:-.015em}
-  .masthead h1 span{color:var(--ice)}
+  /* wordmark rule: the 5 is an exponent — small, raised, ice */
+  .masthead h1 sup{font-size:.34em;color:var(--ice);vertical-align:baseline;
+    position:relative;top:-1.05em;letter-spacing:0;margin-left:.06em}
   .masthead .row2{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
     margin-top:18px;flex-wrap:wrap}
   .masthead .tag{font-family:var(--serif);font-style:italic;font-size:clamp(15px,2vw,19px);color:var(--dim);max-width:560px}
@@ -243,7 +250,7 @@
   footer{padding:44px 0 60px;color:var(--faint);font-size:12.5px;background:var(--void)}
   footer .cols{display:flex;gap:48px;flex-wrap:wrap;justify-content:space-between}
   footer .fm{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--paper)}
-  footer .fm span{color:var(--ice)}
+  footer .fm sup{font-size:.4em;color:var(--ice);vertical-align:baseline;position:relative;top:-.85em}
   footer ul{list-style:none;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
     text-transform:uppercase;line-height:2.5}
   footer ul a{color:var(--dim)}
@@ -266,8 +273,8 @@
 
 <header class="masthead">
   <div class="wrap">
-    <div class="kick-line">Intelligent-Automation Newsroom · Canada</div>
-    <h1>TENET<span>5</span></h1>
+    <div class="kick-line">Intelligent-Automation Newsroom · Canada · Powered by LIRIL</div>
+    <h1>TENET<sup>5</sup></h1>
     <div class="row2">
       <p class="tag"><b>Canada's digital watchdog.</b> Every outlet read, every public document
       indexed, every public claim held to the record — by machine, verified by people,
@@ -281,8 +288,7 @@
   <div class="wrap">
     <a href="#front" class="hot">Top Stories</a>
     <a href="#record"><em>02</em>The Record</a>
-    <a href="#watch"><em>03</em>Media Watch</a>
-    <a href="#watch"><em>03</em>Claim Check</a>
+    <a href="#watch"><em>03</em>Media Watch · Claim Check</a>
     <a href="#data"><em>04</em>Data Desk</a>
     <a href="#cases"><em>05</em>Investigations</a>
     <a href="#liril"><em>06</em>LIRIL</a>
@@ -544,6 +550,10 @@
         to — and then verify yourself, source by source.</p>
         <div class="rulebox"><b>The speaking rule:</b> silence over speculation. LIRIL would
         rather skip a story than voice an uncited claim.</div>
+        <a class="play" id="hear-liril" href="daily-briefing.html" style="display:inline-flex;
+        align-items:center;gap:10px;margin-top:22px;font-family:var(--mono);font-size:11px;
+        font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--void);
+        background:var(--ice);padding:10px 22px;border-radius:2px">◉ Hear LIRIL</a>
       </div>
       <div class="voice-cards rv">
         <a class="vcard card-hover" href="daily-briefing.html">
@@ -575,7 +585,7 @@
   <div class="wrap">
     <div class="cols">
       <div>
-        <div class="fm">TENET<span>5</span></div>
+        <div class="fm">TENET<sup>5</sup></div>
         <p style="max-width:330px;margin-top:10px">Canada's intelligent-automation newsroom.
         The machines read everything public. People verify. LIRIL speaks. The record decides.</p>
       </div>
@@ -598,12 +608,26 @@
         <li><a href="504-database.html">Case Database</a></li>
       </ul>
     </div>
-    <div class="origin">TENET5 is an independent Canadian public-interest newsroom. Public
-    record only — no private data. · © 2026 TENET5</div>
+    <div class="origin">TENET5 is an independent Canadian public-interest newsroom, created amid
+    an ongoing political prosecution by the Canadian Forces military police for identifying
+    foreign interference in the military. Public record only — no private data. · © 2026 TENET5</div>
   </div>
 </footer>
 
+<script src="js/liril-voice.js"></script>
 <script>
+  document.documentElement.classList.add('js');
+  // LIRIL voice — ALL speech through the guard; silence over wrong voice.
+  (function(){
+    var btn=document.getElementById('hear-liril');
+    if(!btn) return;
+    btn.addEventListener('click',function(ev){
+      if(window.LIRIL_VOICE && typeof window.LIRIL_VOICE.speak==='function'){
+        ev.preventDefault();
+        window.LIRIL_VOICE.speak('This is LIRIL, the voice of TENET5. Every sentence I speak is drawn from a cited public document. If I cannot cite it, I do not say it.');
+      } // no guard available → fall through to the briefing page, never raw speechSynthesis
+    });
+  })();
   (function(){
     var d=new Date();
     var days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
