@@ -1275,7 +1275,7 @@
       // Delay start if audio is still fetching to prevent SpeechSynthesis race condition
       if (!audioMode && _audioFetchPending) {
         console.log('[LIRIL] Waiting for audio fetch before starting...');
-        startBtn.innerHTML = 'SYNCING QUANTUM AUDIO...';
+        startBtn.innerHTML = 'SYNCING AUDIO...';
         var checkInterval = setInterval(function() {
           if (!isActive) { clearInterval(checkInterval); return; }
           if (!_audioFetchPending) {

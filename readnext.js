@@ -1357,32 +1357,15 @@
     'geneva-vs-jails.html': {
       current: 'Below Geneva — Jails vs. PoW Standards',
       next: [
-        { href: 'quantum-accountability.html', label: 'Quantum Accountability', desc: 'Grover amplification on the corrections dossier and the 1,181-node network' },
+        { href: 'methodology-transparency.html', label: 'Methodology & Findings', desc: 'How the corrections dossier decision-makers were built and ranked' },
         { href: 'disability-genocide.html', label: 'Disability & CRPD Violations', desc: 'Canada\u2019s war on the disabled \u2014 same treaty-violation pattern' },
         { href: 'accountability.html', label: 'The 504 Database', desc: '1,105 confirmed records of government misconduct' },
-      ]
-    },
-    'quantum-accountability.html': {
-      current: 'Quantum Accountability',
-      next: [
-        { href: 'quantum-methodology.html', label: 'Methodology', desc: 'How to reproduce + verify the investigation' },
-        { href: 'geneva-vs-jails.html', label: 'Below Geneva', desc: 'The corrections thesis Grover amplifies' },
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'The 1,181-node reclassified influence graph' },
-      ]
-    },
-    'quantum-methodology.html': {
-      current: 'Methodology',
-      next: [
-        { href: 'grover-send.html', label: 'Ready-to-Send Campaigns', desc: 'Pre-built emails targeting the Grover-amplified actors' },
-        { href: 'quantum-accountability.html', label: 'Quantum Accountability', desc: 'The findings the methodology produced (8 axes, 5 chairs)' },
-        { href: 'cija-maid-pipeline.html', label: 'Retraction Trail', desc: 'What the method retracted and why' },
       ]
     },
     'grover-send.html': {
       current: 'Ready-to-Send Campaigns',
       next: [
-        { href: 'quantum-accountability.html', label: 'Quantum Accountability', desc: 'The 8-axis findings behind the campaigns' },
-        { href: 'quantum-methodology.html', label: 'Methodology', desc: 'How the targets were identified' },
+        { href: 'methodology-transparency.html', label: 'Methodology & Findings', desc: 'How the accountability findings were built and ranked' },
         { href: 'email-campaign.html', label: 'Full MP Campaign Generator', desc: 'Individualized emails for every MP (340 total)' },
       ]
     },
