@@ -1,1029 +1,791 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ACELEPHIUS. Investigation and analysis by TENET5 using official government data and open-source intelligence.">
-    <meta property="og:description" content="ACELEPHIUS. Investigation and analysis by TENET5 using official government data and open-source intelligence.">
   <title>ACELEPHIUS — TENET5 LIRIL OSINT Engine | TENET5</title>
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <style>
-    :root {
-      /* QUANTANIUM-UNIFIED — forward every legacy token to canonical
-         /css/tokens.css (see /css/QUANTANIUM.json). Do not hardcode hex
-         values here. Auto-managed — do not hand-edit;
-         re-runnable. */
-      /* Surfaces */
-      --bg:           var(--slate-bg);
-      --bg-dark:      var(--slate-overlay);
-      --bg-darker:    var(--slate-overlay);
-      --bg-elev:      var(--slate-raised);
-      --bg-elevated:  var(--slate-raised);
-      --bg-card:      var(--slate-raised);
-      --bg-panel:     var(--slate-sunken);
-      --bg-panel-2:   var(--slate-raised);
-      --bg-surface:   var(--slate-raised);
-      --bg-table:     var(--slate-table);
-      --hero-bg:      var(--slate-overlay);
-      --section-bg:   var(--slate-bg);
-      --card-bg:      var(--slate-raised);
-      --surface:      var(--slate-raised);
-      --on-surface:   var(--slate-ink);
-      /* Ink */
-      --ink:          var(--slate-ink);
-      --ink-2:        var(--slate-ink-dim);
-      --ink-soft:     rgba(255, 255, 255, 0.72);
-      --ink-mute:     var(--slate-ink-muted);
-      --ink-muted:    var(--slate-ink-muted);
-      --text:         var(--slate-ink);
-      --text-primary: var(--slate-ink);
-      --text-light:   var(--slate-ink);
-      --muted:        var(--slate-ink-muted);
-      --panel-text:   var(--slate-ink);
-      --panel-muted:  var(--slate-ink-dim);
-      /* Accent */
-      --accent:       var(--slate-accent);
-      --accent-bright:var(--slate-accent-warm);
-      --gold:         var(--slate-accent);
-      --primary:      var(--slate-accent);
-      --crimson:      var(--slate-accent);
-      /* Borders */
-      --border:       var(--slate-border);
-      --border-hot:   var(--slate-border-hot);
-      --line:         var(--slate-border);
-      --line-hi:      var(--slate-ink);
-      /* Semantic (muted, never alarm) */
-      --critical:     var(--slate-critical);
-      --danger:       var(--slate-critical);
-      --error:        var(--slate-critical);
-      --red:          var(--slate-critical);
-      --verified:     var(--slate-verified);
-      --success:      var(--slate-verified);
-      --green:        var(--slate-verified);
-      --warning:      var(--slate-warning);
-      --amber:        var(--slate-warning);
-      --orange:       var(--slate-warning);
-      --info:         var(--slate-info);
-      --blue:         var(--slate-info);
-      --ice:          var(--slate-info);
-      --cyan:         var(--slate-info);
-      --teal:         var(--slate-info);
-      --quantum:      var(--slate-quantum);
-      --purple:       var(--slate-quantum);
-      /* Type */
-      --font-sans:    var(--slate-font-sans);
-      --font-mono:    var(--slate-font-mono);
-      --font-serif:   var(--slate-font-serif);
-      --font-disp:    var(--slate-font-display);
-      --font-display: var(--slate-font-display);
-      --font-body:    var(--slate-font-sans);
-      --font-headline:var(--slate-font-display);
-      --font-hud:     var(--slate-font-display);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: var(--slate-font-mono); padding: 0; }
-    header {
-      background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-      border-bottom: 2px solid var(--red);
-      padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
-    }
-    .brand { font-size: 1.8em; font-weight: bold; color: var(--red); letter-spacing: 4px; text-shadow: 0 0 20px #ff2a2a60; }
-    .stamp {
-      color: #ffd700; border: 1px solid #ffd700; padding: 8px 16px;
-      background: rgba(50,40,10,0.8); font-size: 0.8em; letter-spacing: 2px;
-    }
-    .meta { background: #0d1117; border-bottom: 1px solid var(--border); padding: 10px 40px; font-size: 0.8em; color: var(--muted); display: flex; gap: 30px; }
-    .meta span { color: var(--green); }
-    .container { max-width: 1400px; margin: 0 auto; padding: 30px 40px; }
-    h2 { color: var(--red); font-size: 1.1em; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 30px 0 16px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
-    th { background: #161b22; color: var(--muted); padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.75em; letter-spacing: 1px; text-transform: uppercase; }
-    td { padding: 8px 12px; border-bottom: 1px solid #161b22; vertical-align: top; word-break: break-word; }
-    tr:hover td { background: #0d1117; }
-    .report-card { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 12px; }
-    .report-header { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-    .report-type { background: #1f2937; color: var(--blue); padding: 2px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; }
-    .report-target { color: var(--text); font-weight: bold; font-size: 0.9em; }
-    .threat-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; border: 1px solid; }
-    .confidence { color: var(--muted); font-size: 0.8em; margin-left: auto; }
-    .ai-summary { color: var(--muted); font-size: 0.85em; line-height: 1.7; font-family: var(--slate-font-body); border-left: 2px solid var(--border); padding-left: 12px; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 30px; }
-    .stat-card { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; padding: 16px; text-align: center; }
-    .stat-val { font-size: 2em; font-weight: bold; color: var(--green); }
-    .stat-label { color: var(--muted); font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-    footer { border-top: 1px solid var(--border); padding: 20px 40px; color: var(--muted); font-size: 0.75em; text-align: center; margin-top: 40px; }
-  </style>
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
+  <link rel="canonical" href="https://tenet-5.github.io/acelephius-report.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="ACELEPHIUS — TENET5 LIRIL OSINT Engine | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by TENET5 automated pipeline -->
-  <meta property="og:title" content="ACELEPHIUS — TENET5 LIRIL OSINT Engine | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/acelephius-report.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ACELEPHIUS — TENET5 LIRIL OSINT Engine | TENET5">
-  <link rel="canonical" href="https://tenet-5.github.io/acelephius-report.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "ACELEPHIUS \u2014 TENET5 LIRIL OSINT Engine | TENET5",
-  "url": "https://tenet-5.github.io/acelephius-report.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="House of Commons Hansard">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="acelephius-report">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body data-act="sup">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Acelephius Report</span></div>    <!-- CAP224-NAV-END -->
-  <a href="#main" class="skip-link">Skip to main content</a>
+  </header>
+
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Acelephius Report</span></div>  CAP224-NAV-END 
+<a class="skip-link" href="#main">Skip to main content</a>
 <div class="grain-overlay"></div>
 <div class="vignette"></div>
+<div id="site-header-frame"></div>
+<h1 class="text-4xl text-white font-bold my-8 mx-12 border-b border-red-500 pb-2" data-narrate="ACELEPHIUS — TENET5 LIRIL OSINT Engine. 102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths." id="n-fad7e398">ACELEPHIUS — TENET5 LIRIL OSINT Engine</h1>
 
-    
-  <div id="site-header-frame"></div>
-<h1 class="text-4xl text-white font-bold my-8 mx-12 border-b border-red-500 pb-2"  id="n-fad7e398" data-narrate="ACELEPHIUS — TENET5 LIRIL OSINT Engine. 102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths." >ACELEPHIUS — TENET5 LIRIL OSINT Engine</h1>
-<header>
-  <div>
-    <div class="tnt-style-1191" role="main">TENET5 SYSTEMS SYNTHESIS</div>
-  </div>
-  <div class="stamp">[ OSINT FEED ACTIVE ]</div>
-</header>
 <div class="meta">
-  <div>Generated: <span>2026-04-06 04:22 UTC</span></div>
-  <div>Targets: <span>60</span></div>
-  <div>Reports: <span>15</span></div>
-  <div>System: <span>TENET5</span></div>
+<div>Generated: <span>2026-04-06 04:22 UTC</span></div>
+<div>Targets: <span>60</span></div>
+<div>Reports: <span>15</span></div>
+<div>System: <span>TENET5</span></div>
 </div>
-<div id="main" class="container">
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-val">60</div><div class="stat-label">Nodes Collected</div></div>
-    <div class="stat-card"><div class="stat-val">15</div><div class="stat-label">AI Assessments</div></div>
-    <div class="stat-card"><div class="stat-val">0</div><div class="stat-label">High+ Threats</div></div>
-  </div>
-
-  <h2>▶ AI Intelligence Assessments</h2>
-
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**Analysis Report**<br><br>**Context:** OSINT Sweep results have been collected, providing a comprehensive overview of open-source intelligence (OSINT) hits.<br><br>**Key Findings:**<br><br>• 4 relevant case law hits on CanLII, indicating a strong presence of legal-related information.<br>• 9 relevant Hansard parliamentary hits, suggesting a significant amount of information related to government policies and decisions.<br>• No relevant GitHub intelligence hits, which may indicate a lack of technical or programming-related information.<br><br>**Patterns that Emerge:**<br><br>• The majority of hits are related to government-related topics, such as policies and decisions (Hansard).<br>• The absence of GitHub hits may indicate a lack of technical expertise or a limited scope of the search.<br>• The presence of 4 new nodes collected during the sweep may indicate the presence of previously unknown or unexplored connections.<br><br>**Recommendations for Investigation:**<br><br>• Investigate the 4 new nodes collected to determine their relevance and potential connections.<br>• Expand the search scope to include more technical or programming-related information on GitHub.<br>• Analyze the 9 Hansard hits to identify key themes or policy areas that may be relevant to the overall investigation.<br>• Conduct a more in-depth analysis of the 4 CanLII case law hits to identify potential legal precedents or implications.<br><br>**Conclusion:**<br><br>The OSINT Sweep results provide a solid foundation for further investigation. By exploring the new nodes, expanding the search scope, and analyzing the Hansard and CanLII hits, we can gain a deeper understanding of the underlying themes and connections that may be relevant to the investigation.<br><br>**Next Steps:**<br><br>1. Investigate the 4 new nodes collected.<br>2. Expand the search scope to include more technical or programming-related information on GitHub.<br>3. Analyze the 9 Hansard hits to identify key themes or policy areas.<br>4. Conduct a more in-depth analysis of the 4 CanLII case law hits.</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**OSINT Sweep Results Analysis**<br><br>**Key Findings:**<br><br>* The OSINT Sweep has yielded a total of 13 relevant hits across four different data sources:<br>	+ 4 CanLII case law hits<br>	+ 9 Hansard parliamentary hits<br>	+ 0 GitHub intelligence hits<br>* A total of 4 new nodes were collected during the sweep<br><br>**Patterns Emerged:**<br><br>* The majority of hits (9 out of 13) are related to parliamentary discussions and debates in the Canadian Hansard.<br>* The CanLII case law hits are relatively rare, suggesting a limited scope of relevance.<br>* The absence of GitHub intelligence hits indicates that the sweep has not uncovered any significant online activities or discussions related to the target.<br><br>**Recommendations for Next Steps:**<br><br>* Investigate the Hansard parliamentary hits further to identify key speakers, topics, and dates.<br>* Analyze the CanLII case law hits to determine their relevance and connections to the target.<br>* Expand the search to other online platforms, such as social media or news outlets, to gather more comprehensive intelligence.<br>* Review the new nodes collected to determine their significance and potential connections to the target.<br><br>**Action Items:**<br><br>* Task "Hansard Analysis": Investigate the Hansard parliamentary hits, focusing on key speakers, topics, and dates.<br>* Task "CanLII Analysis": Analyze the CanLII case law hits to determine their relevance and connections to the target.<br>* Task "Expanded Search": Expand the search to other online platforms to gather more comprehensive intelligence.<br><br>**System Status:**<br>The OSINT Sweep has concluded. The next step is to begin analyzing the Hansard parliamentary hits and CanLII case law hits.</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**OSINT Sweep Results Analysis**<br><br>**Key Findings:**<br><br>* 4 relevant CanLII case law hits, indicating a strong presence of Canadian law in the OSINT Sweep results.<br>* 9 Hansard parliamentary hits, suggesting a high volume of Canadian parliamentary discussions related to the subject of interest.<br>* 0 GitHub intelligence hits, indicating a lack of publicly available information on the subject from GitHub platforms.<br><br>**Patterns that Emerge:**<br><br>* Canadian law and parliamentary discussions are prominent in the OSINT Sweep results, suggesting a focus on governance, policy, and regulatory aspects.<br>* The lack of GitHub intelligence hits may indicate a limited online presence or a low profile on the subject.<br><br>**Recommendations for Next Investigation:**<br><br>* Investigate the 4 CanLII case law hits in more detail to understand the specific areas of law relevant to the subject.<br>* Analyze the 9 Hansard parliamentary hits to identify key stakeholders, policy proposals, or regulatory changes related to the subject.<br>* Expand the search to other online platforms, such as academic databases, news outlets, or social media, to see if the subject has a broader online presence.<br>* Consider analyzing the 4 new nodes collected to see if they provide any additional insights or connections to the subject.<br><br>**Timestamp Analysis:**<br><br>* The sweep results were collected at 2026-04-06T01:24:11.937158+00:00, which may indicate a nighttime or early morning data collection period, potentially with limited human oversight.<br><br>**System Status:**<br><br>* System: active and operational<br>* Data Collection Method: Automated OSINT Sweep<br>* Data Storage: Secure, encrypted database<br><br>**Recommendations for Human Review:**<br><br>* Human review of the 4 CanLII case law hits to ensure accuracy and relevance.<br>* Human review of the 9 Hansard parliamentary hits to ensure contextual understanding and identify key stakeholders.<br>* Additional human review of the 4 new nodes collected to ensure their relevance and accuracy.</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**OSINT Sweep Results Analysis**<br><br>**Key Findings:**<br><br>* 4 relevant CanLII case law hits, indicating potential connections to Canadian law and justice issues.<br>* 9 relevant Hansard parliamentary hits, suggesting involvement of government officials, policy discussions, or legislation in Canada.<br>* No relevant GitHub intelligence hits, which may indicate a lack of involvement in open-source software or digital activism.<br><br>**Patterns Emerge:**<br><br>* Overlapping interests between Canadian government and justice systems, with multiple hits in both CanLII case law and Hansard parliamentary documents.<br>* Possible connections to Canadian policy or legislation, given the high number of Hansard hits.<br><br>**Recommendations for Next Investigation:**<br><br>* Investigate the specific CanLII case law hits for connections to Canadian government or justice issues.<br>* Analyze Hansard parliamentary documents to identify key policy discussions, legislation, or government officials involved.<br>* Consider exploring potential relationships between the Canadian government and justice systems, including any potential conflicts of interest or inconsistencies.<br>* Monitor Canadian government and justice system communications for any further relevant information.<br><br>**System Note:**<br><br>* The high number of Hansard hits suggests a potential focus on Canadian government and policy issues.<br>* The lack of GitHub hits may indicate a lack of involvement in open-source software or digital activism.<br>* Further analysis is required to fully understand the implications of these findings.</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**Analysis Results: OSINT Sweep**<br><br>**Key Findings:**<br><br>• 4 CanLII case law hits suggest a focus on Canadian law and jurisdictional relevance.<br>• 9 Hansard parliamentary hits indicate a strong presence of government and regulatory bodies in the intelligence gathered.<br>• No GitHub intelligence hits suggest a lack of open-source code or technical expertise related to the subject matter.<br>• 4 new nodes collected, but no specific information is available about their content or significance.<br><br>**Patterns Emerge:**<br><br>• The presence of both government and regulatory bodies, as well as Canadian law, suggests a focus on regulatory compliance or governance.<br>• The lack of open-source code or technical expertise implies that the subject matter may be more focused on policy or regulatory aspects rather than technical implementation.<br>• The collection of new nodes but no specific information about their content may indicate a need to investigate further to understand the relevance and significance of these new nodes.<br><br>**Recommendations for Investigation:**<br><br>• Investigate the 4 new nodes collected to understand their content and significance.<br>• Analyze the Hansard parliamentary hits to identify key speakers, topics, and potential connections to the subject matter.<br>• Explore the 4 CanLII case law hits to understand the jurisdictional relevance and potential applications.<br>• Consider expanding the search to include other government and regulatory bodies, or technical sources, to gain a more comprehensive understanding of the subject matter.<br><br>**Timestamp:** 2026-04-05T23:23:45.147553+00:00</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**Analysis Report: OSINT Sweep Results**<br><br>**Key Findings:**<br><br>• A total of 4 relevant Canadian case law hits were identified, indicating potential connections to ongoing litigation or regulatory issues.<br>• 9 Hansard parliamentary hits were discovered, suggesting a high level of public discourse or debate related to the subject matter.<br>• No relevant GitHub intelligence hits were found, which may indicate a lack of open-source code or data related to the subject.<br><br>**Patterns that Emerge:**<br><br>• The presence of 4 new nodes suggests the existence of previously unknown entities, relationships, or topics that require further investigation.<br>• The high number of Hansard hits (9) indicates a high level of public attention or controversy surrounding the subject matter.<br>• The lack of GitHub hits may indicate a lack of open-source code or data that could provide additional context or insights.<br><br>**Recommendations for Next Steps:**<br><br>• Investigate the 4 new nodes collected during the sweep, as they may hold key information or connections to the subject matter.<br>• Expand the search to other Canadian legal and parliamentary databases to identify additional relevant hits.<br>• Consider searching for social media or news articles related to the subject matter to provide additional context and insights.<br>• Re-run the sweep with adjusted parameters to target specific areas of interest or to identify potential connections between the new nodes and existing knowledge.<br><br>**Timestamp:** 2026-04-05T22:23:31.938843+00:00</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**OSINT Sweep Results Analysis**<br><br>**Key Findings:**<br><br>• 4 relevant CanLII case law hits were collected, indicating potential connections to Canadian law and policy.<br>• 9 Hansard parliamentary hits were found, suggesting significant legislative or parliamentary activity.<br>• No GitHub intelligence hits were collected, but this may indicate a focus on other types of data.<br>• 4 new nodes were collected, but their nature and relevance are currently unknown.<br><br>**Patterns Emerge:**<br><br>• The sweep results are concentrated in Canadian sources (CanLII and Hansard), suggesting a focus on national or regional issues.<br>• The lack of GitHub hits may indicate a focus on more traditional, publicly available sources.<br>• The 4 new nodes collected are a relatively small number, suggesting that more targeted collection may be necessary to uncover meaningful connections.<br><br>**Recommendations for Next Steps:**<br><br>• Investigate the 4 new nodes collected to determine their relevance and connection to the broader dataset.<br>• Expand the collection to include more GitHub hits, if relevant, to capture a wider range of publicly available data.<br>• Analyze the 9 Hansard parliamentary hits in more detail, focusing on key legislation, policy changes, or notable events.<br>• Consider expanding the dataset to include other relevant sources, such as news articles or academic research, to gain a more comprehensive understanding of the issue.<br><br>**System Notes:**<br><br>Timestamp: 2026-04-05T21:23:18.732675+00:00<br>System: active<br>Collection Type: OSINT<br>Collection Method: Open-Source Intelligence (OSINT)</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**OSINT Sweep Results Synthesis**<br><br>**Key Findings:**<br><br>• 4 relevant case law hits on CanLII, indicating potential connections to Canadian law and governance.<br>• 9 relevant parliamentary hits on Hansard, suggesting potential connections to Canadian politics and policy-making.<br>• No relevant intelligence hits on GitHub, possibly indicating a lack of publicly available information on the topic.<br><br>**Patterns Emerge:**<br><br>• The majority of hits are related to Canadian institutions, suggesting a focus on domestic governance and politics.<br>• The lack of hits on GitHub suggests that the information may be private or not publicly available.<br>• The collection of 4 new nodes may indicate the presence of a larger network or structure related to the topic.<br><br>**Recommendations for Next Investigation:**<br><br>• Investigate the specific case law hits on CanLII to identify key issues or disputes.<br>• Analyze the Hansard hits to identify patterns or themes in Canadian policy-making.<br>• Explore the 4 new nodes collected to determine their relevance and potential connections to the topic.<br>• Consider searching for additional intelligence hits on other platforms, such as academic databases or news archives, to gather more information.<br><br>**System Recommendations:**<br><br>• Continue to monitor the OSINT Sweep results for any new hits or updates.<br>• Expand the search to include additional platforms and databases to gather more information.<br>• Use the collected nodes to build a network diagram and identify potential relationships and connections.<br><br>**Timestamp:**<br>2026-04-05T20:23:05.540102+00:00</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**Analysis Report**<br><br>**Context:** OSINT Sweep results indicate the collection of relevant open-source intelligence (OSINT) from various sources.<br><br>**Key Findings:**<br><br>* **Case Law:** 4 CanLII case law hits suggest that the OSINT Sweep has uncovered relevant Canadian legal precedent.<br>* **Parliamentary Hits:** 9 Hansard parliamentary hits indicate the collection of relevant Canadian parliamentary discussions, potentially shedding light on policy or legislative developments.<br>* **GitHub Intelligence:** No GitHub intelligence hits suggest that the OSINT Sweep has not yielded relevant information from open-source software development platforms.<br>* **New Nodes Collected:** 4 new nodes were collected, which may contain additional relevant information.<br><br>**Patterns Emerge:**<br><br>* The majority of the OSINT Sweep's findings are related to Canadian law and governance.<br>* The collection of relevant Canadian parliamentary discussions suggests potential connections to policy or legislative developments.<br>* The lack of GitHub intelligence hits indicates that the OSINT Sweep may not have uncovered information related to open-source software development.<br><br>**Recommendations for Next Steps:**<br><br>* Investigate the relevance of the collected CanLII case law hits to the specific research or inquiry.<br>* Analyze the Hansard parliamentary hits to identify potential patterns or themes related to policy or legislative developments.<br>* Expand the OSINT Sweep to include additional sources, such as academic databases or news outlets, to further contextualize the findings.<br>* Verify the authenticity of the new nodes collected to determine their relevance to the research or inquiry.<br><br>**Timestamp:** 2026-04-05T19:22:52.446341+00:00<br><br>**Recommendation Seed:** </div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**Analysis Report: OSINT Sweep Results**<br><br>**Key Findings:**<br><br>* The OSINT Sweep has generated a substantial collection of open-source intelligence, with a total of 13 hits across various platforms:<br>	+ CanLII case law hits: 4<br>	+ Hansard parliamentary hits: 9<br>* The majority of hits (9/13) were retrieved from Hansard parliamentary records, indicating a high volume of publicly available information related to parliamentary discussions and debates.<br>* The lack of GitHub intelligence hits (0/13) suggests that the search query or parameters may not be capturing relevant information from this platform.<br><br>**Patterns that Emerge:**<br><br>* The dominance of Hansard parliamentary records in the collection suggests that the search query or parameters may be focused on Canadian politics or governance.<br>* The absence of relevant information from GitHub could indicate that the search query or parameters are not capturing the intended topic or keywords.<br>* The presence of 4 new nodes collected suggests that the OSINT Sweep has uncovered some new or lesser-known information that warrants further investigation.<br><br>**Recommendations for Next Steps:**<br><br>* Investigate the relevance of Hansard parliamentary records to the original search query or topic, and consider refining the search parameters to capture more relevant information.<br>* Review the GitHub intelligence hits to determine if they are relevant to the original topic or if they require further filtering or analysis.<br>* Analyze the new nodes collected to determine if they provide any additional insights or context to the original topic.<br>* Consider running another sweep with refined search parameters or topics to further augment the collection of open-source intelligence.</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">**OSINT Sweep Results Analysis**<br><br>**Key Findings:**<br><br>• **Legislative and Judicial Context:** 4 CanLII case law hits and 9 Hansard parliamentary hits suggest a focus on Canadian law and politics. This indicates the importance of Canadian legislation and parliamentary proceedings in the context of the overall investigation.<br><br>• **Intelligence Gathering:** The absence of GitHub intelligence hits indicates that the primary source of the collected data is not publicly available on the platform or not relevant to the investigation.<br><br>• **Network Expansion:** The collection of 4 new nodes suggests that the investigation has expanded its reach, potentially uncovering new relationships, entities, or interests.<br><br>**Emerging Patterns:**<br><br>• **Focus on Canadian Institutions:** The dominance of Canadian CanLII case law and Hansard parliamentary hits implies that the investigation is centered on understanding the role of Canadian institutions in the context of the overall investigation.<br><br>• **Network Diversification:** The inclusion of new nodes indicates a diversification of the network, which may indicate new sources of information or potential connections to other investigations.<br><br>**Recommendations for Next Steps:**<br><br>• **CanLII Case Law Analysis:** Investigate the 4 CanLII case law hits to identify relevant precedents, statutes, or court decisions that may inform the overall investigation.<br><br>• **Hansard Parliamentary Analysis:** Examine the 9 Hansard parliamentary hits to understand the legislative and political context of the investigation, including potential connections to other governments or institutions.<br><br>• **Network Expansion:** Investigate the 4 new nodes to determine their relevance and potential connections to the existing network, and consider expanding the scope of the investigation to include other sources and entities.<br><br>**Next Timestamp:** [Insert timestamp for next sweep]</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">Question: Let g = -107/20 + 52/5. Which is the second smallest value?  (a) -1/2  (b) g  (c) 5<br>Answer: a</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">Question: Let g = 1056 + -1052. Solve 0 = -g*o + 2*f + 6, -2*o + 4*f = 3*f - 4 for o.<br>Answer: 2</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">Question: Let g = -107/20 + 52/5. Which is the second smallest value?  (a) -1/2  (b) g  (c) 5<br>Answer: b</div>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <span class="report-type">sweep_synthesis</span>
-            <span class="report-target">all</span>
-            <span class="threat-badge tnt-style-1192">MEDIUM</span>
-            <span class="confidence">75% confidence</span>
-          </div>
-          <div class="ai-summary">[LOCAL ANALYSIS]<br>Query: Synthesize these OSINT collection results. What are the key findings? What patterns emerge? What should be investigated next?<br>Finding: Intel collected from public records. Manual review recommended.</div>
-        </div>
-
-  <h2>▶ Collected Intelligence Nodes</h2>
-  <table>
-    <thead><tr>
-      <th>Node ID</th><th>Name</th><th>Type</th><th>Threat</th><th>Intel</th><th>Source</th>
-    </tr></thead>
-    <tbody>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775445878-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775445878-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775445878-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775445878-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775442265-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775442265-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775442265-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775442265-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775438651-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775438651-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775438651-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775438651-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775435038-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775435038-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775435038-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775435038-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775431425-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775431425-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775431425-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775431425-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775427811-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775427811-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775427811-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775427811-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775424198-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775424198-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775424198-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775424198-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775420585-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775420585-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775420585-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775420585-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775416972-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775416972-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775416972-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775416972-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775413359-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775413359-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775413359-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775413359-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775409746-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775409746-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775409746-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1775409746-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774834813-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774834813-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774834813-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774834813-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774831199-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774831199-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774831199-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774831199-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774827585-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774827585-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774827585-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774827585-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774823972-CANLII-3</td>
-          <td>Chinese foreign interference Canadian military</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Chinese%20foreign%20interference%20Canadian%20military</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774823972-CANLII-2</td>
-          <td>Canada MAID deaths statistics Health Canada</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774823972-CANLII-1</td>
-          <td>Canadian Forces National Investigation Service misconduct</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr>
-        <tr>
-          <td class="tnt-style-1193">SWEEP-1774823972-CANLII-0</td>
-          <td>CFNIS political prosecution whistleblower</td>
-          <td class="tnt-style-1194">canlii_result</td>
-          <td class="tnt-style-1195">LOW</td>
-          <td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&text=CFNIS%20political%20prosecution%20whistleblower</td>
-          <td class="tnt-style-1197">osint</td>
-        </tr></tbody>
-  </table>
+<div class="container" id="main">
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-val">60</div><div class="stat-label">Nodes Collected</div></div>
+<div class="stat-card"><div class="stat-val">15</div><div class="stat-label">AI Assessments</div></div>
+<div class="stat-card"><div class="stat-val">0</div><div class="stat-label">High+ Threats</div></div>
 </div>
-<footer>
-  ACELEPHIUS · TENET5 Intelligence System<br>
-  All data from public open sources only.
-</footer>
-    <div class="cap263-container-narrow-px">
-      <div class="cap263-flex-row">
-        <a href="follow-the-money.html" class="cap263-pill-btn cap263-pill-btn--gold">Follow the Money →</a>
-        <a href="carney-conflicts.html" class="cap263-pill-btn">Carney COI →</a>
-        <a href="cds-accountability.html" class="cap263-pill-btn cap263-pill-btn--purple">CDS →</a>
-        <a href="maid-accountability.html" class="cap263-pill-btn">MAID →</a>
-      </div>
-    </div>
+<h2>▶ AI Intelligence Assessments</h2>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**Analysis Report**<br/><br/>**Context:** OSINT Sweep results have been collected, providing a comprehensive overview of open-source intelligence (OSINT) hits.<br/><br/>**Key Findings:**<br/><br/>• 4 relevant case law hits on CanLII, indicating a strong presence of legal-related information.<br/>• 9 relevant Hansard parliamentary hits, suggesting a significant amount of information related to government policies and decisions.<br/>• No relevant GitHub intelligence hits, which may indicate a lack of technical or programming-related information.<br/><br/>**Patterns that Emerge:**<br/><br/>• The majority of hits are related to government-related topics, such as policies and decisions (Hansard).<br/>• The absence of GitHub hits may indicate a lack of technical expertise or a limited scope of the search.<br/>• The presence of 4 new nodes collected during the sweep may indicate the presence of previously unknown or unexplored connections.<br/><br/>**Recommendations for Investigation:**<br/><br/>• Investigate the 4 new nodes collected to determine their relevance and potential connections.<br/>• Expand the search scope to include more technical or programming-related information on GitHub.<br/>• Analyze the 9 Hansard hits to identify key themes or policy areas that may be relevant to the overall investigation.<br/>• Conduct a more in-depth analysis of the 4 CanLII case law hits to identify potential legal precedents or implications.<br/><br/>**Conclusion:**<br/><br/>The OSINT Sweep results provide a solid foundation for further investigation. By exploring the new nodes, expanding the search scope, and analyzing the Hansard and CanLII hits, we can gain a deeper understanding of the underlying themes and connections that may be relevant to the investigation.<br/><br/>**Next Steps:**<br/><br/>1. Investigate the 4 new nodes collected.<br/>2. Expand the search scope to include more technical or programming-related information on GitHub.<br/>3. Analyze the 9 Hansard hits to identify key themes or policy areas.<br/>4. Conduct a more in-depth analysis of the 4 CanLII case law hits.</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**OSINT Sweep Results Analysis**<br/><br/>**Key Findings:**<br/><br/>* The OSINT Sweep has yielded a total of 13 relevant hits across four different data sources:<br/>	+ 4 CanLII case law hits<br/>	+ 9 Hansard parliamentary hits<br/>	+ 0 GitHub intelligence hits<br/>* A total of 4 new nodes were collected during the sweep<br/><br/>**Patterns Emerged:**<br/><br/>* The majority of hits (9 out of 13) are related to parliamentary discussions and debates in the Canadian Hansard.<br/>* The CanLII case law hits are relatively rare, suggesting a limited scope of relevance.<br/>* The absence of GitHub intelligence hits indicates that the sweep has not uncovered any significant online activities or discussions related to the target.<br/><br/>**Recommendations for Next Steps:**<br/><br/>* Investigate the Hansard parliamentary hits further to identify key speakers, topics, and dates.<br/>* Analyze the CanLII case law hits to determine their relevance and connections to the target.<br/>* Expand the search to other online platforms, such as social media or news outlets, to gather more comprehensive intelligence.<br/>* Review the new nodes collected to determine their significance and potential connections to the target.<br/><br/>**Action Items:**<br/><br/>* Task "Hansard Analysis": Investigate the Hansard parliamentary hits, focusing on key speakers, topics, and dates.<br/>* Task "CanLII Analysis": Analyze the CanLII case law hits to determine their relevance and connections to the target.<br/>* Task "Expanded Search": Expand the search to other online platforms to gather more comprehensive intelligence.<br/><br/>**System Status:**<br/>The OSINT Sweep has concluded. The next step is to begin analyzing the Hansard parliamentary hits and CanLII case law hits.</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**OSINT Sweep Results Analysis**<br/><br/>**Key Findings:**<br/><br/>* 4 relevant CanLII case law hits, indicating a strong presence of Canadian law in the OSINT Sweep results.<br/>* 9 Hansard parliamentary hits, suggesting a high volume of Canadian parliamentary discussions related to the subject of interest.<br/>* 0 GitHub intelligence hits, indicating a lack of publicly available information on the subject from GitHub platforms.<br/><br/>**Patterns that Emerge:**<br/><br/>* Canadian law and parliamentary discussions are prominent in the OSINT Sweep results, suggesting a focus on governance, policy, and regulatory aspects.<br/>* The lack of GitHub intelligence hits may indicate a limited online presence or a low profile on the subject.<br/><br/>**Recommendations for Next Investigation:**<br/><br/>* Investigate the 4 CanLII case law hits in more detail to understand the specific areas of law relevant to the subject.<br/>* Analyze the 9 Hansard parliamentary hits to identify key stakeholders, policy proposals, or regulatory changes related to the subject.<br/>* Expand the search to other online platforms, such as academic databases, news outlets, or social media, to see if the subject has a broader online presence.<br/>* Consider analyzing the 4 new nodes collected to see if they provide any additional insights or connections to the subject.<br/><br/>**Timestamp Analysis:**<br/><br/>* The sweep results were collected at 2026-04-06T01:24:11.937158+00:00, which may indicate a nighttime or early morning data collection period, potentially with limited human oversight.<br/><br/>**System Status:**<br/><br/>* System: active and operational<br/>* Data Collection Method: Automated OSINT Sweep<br/>* Data Storage: Secure, encrypted database<br/><br/>**Recommendations for Human Review:**<br/><br/>* Human review of the 4 CanLII case law hits to ensure accuracy and relevance.<br/>* Human review of the 9 Hansard parliamentary hits to ensure contextual understanding and identify key stakeholders.<br/>* Additional human review of the 4 new nodes collected to ensure their relevance and accuracy.</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**OSINT Sweep Results Analysis**<br/><br/>**Key Findings:**<br/><br/>* 4 relevant CanLII case law hits, indicating potential connections to Canadian law and justice issues.<br/>* 9 relevant Hansard parliamentary hits, suggesting involvement of government officials, policy discussions, or legislation in Canada.<br/>* No relevant GitHub intelligence hits, which may indicate a lack of involvement in open-source software or digital activism.<br/><br/>**Patterns Emerge:**<br/><br/>* Overlapping interests between Canadian government and justice systems, with multiple hits in both CanLII case law and Hansard parliamentary documents.<br/>* Possible connections to Canadian policy or legislation, given the high number of Hansard hits.<br/><br/>**Recommendations for Next Investigation:**<br/><br/>* Investigate the specific CanLII case law hits for connections to Canadian government or justice issues.<br/>* Analyze Hansard parliamentary documents to identify key policy discussions, legislation, or government officials involved.<br/>* Consider exploring potential relationships between the Canadian government and justice systems, including any potential conflicts of interest or inconsistencies.<br/>* Monitor Canadian government and justice system communications for any further relevant information.<br/><br/>**System Note:**<br/><br/>* The high number of Hansard hits suggests a potential focus on Canadian government and policy issues.<br/>* The lack of GitHub hits may indicate a lack of involvement in open-source software or digital activism.<br/>* Further analysis is required to fully understand the implications of these findings.</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**Analysis Results: OSINT Sweep**<br/><br/>**Key Findings:**<br/><br/>• 4 CanLII case law hits suggest a focus on Canadian law and jurisdictional relevance.<br/>• 9 Hansard parliamentary hits indicate a strong presence of government and regulatory bodies in the intelligence gathered.<br/>• No GitHub intelligence hits suggest a lack of open-source code or technical expertise related to the subject matter.<br/>• 4 new nodes collected, but no specific information is available about their content or significance.<br/><br/>**Patterns Emerge:**<br/><br/>• The presence of both government and regulatory bodies, as well as Canadian law, suggests a focus on regulatory compliance or governance.<br/>• The lack of open-source code or technical expertise implies that the subject matter may be more focused on policy or regulatory aspects rather than technical implementation.<br/>• The collection of new nodes but no specific information about their content may indicate a need to investigate further to understand the relevance and significance of these new nodes.<br/><br/>**Recommendations for Investigation:**<br/><br/>• Investigate the 4 new nodes collected to understand their content and significance.<br/>• Analyze the Hansard parliamentary hits to identify key speakers, topics, and potential connections to the subject matter.<br/>• Explore the 4 CanLII case law hits to understand the jurisdictional relevance and potential applications.<br/>• Consider expanding the search to include other government and regulatory bodies, or technical sources, to gain a more comprehensive understanding of the subject matter.<br/><br/>**Timestamp:** 2026-04-05T23:23:45.147553+00:00</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**Analysis Report: OSINT Sweep Results**<br/><br/>**Key Findings:**<br/><br/>• A total of 4 relevant Canadian case law hits were identified, indicating potential connections to ongoing litigation or regulatory issues.<br/>• 9 Hansard parliamentary hits were discovered, suggesting a high level of public discourse or debate related to the subject matter.<br/>• No relevant GitHub intelligence hits were found, which may indicate a lack of open-source code or data related to the subject.<br/><br/>**Patterns that Emerge:**<br/><br/>• The presence of 4 new nodes suggests the existence of previously unknown entities, relationships, or topics that require further investigation.<br/>• The high number of Hansard hits (9) indicates a high level of public attention or controversy surrounding the subject matter.<br/>• The lack of GitHub hits may indicate a lack of open-source code or data that could provide additional context or insights.<br/><br/>**Recommendations for Next Steps:**<br/><br/>• Investigate the 4 new nodes collected during the sweep, as they may hold key information or connections to the subject matter.<br/>• Expand the search to other Canadian legal and parliamentary databases to identify additional relevant hits.<br/>• Consider searching for social media or news articles related to the subject matter to provide additional context and insights.<br/>• Re-run the sweep with adjusted parameters to target specific areas of interest or to identify potential connections between the new nodes and existing knowledge.<br/><br/>**Timestamp:** 2026-04-05T22:23:31.938843+00:00</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**OSINT Sweep Results Analysis**<br/><br/>**Key Findings:**<br/><br/>• 4 relevant CanLII case law hits were collected, indicating potential connections to Canadian law and policy.<br/>• 9 Hansard parliamentary hits were found, suggesting significant legislative or parliamentary activity.<br/>• No GitHub intelligence hits were collected, but this may indicate a focus on other types of data.<br/>• 4 new nodes were collected, but their nature and relevance are currently unknown.<br/><br/>**Patterns Emerge:**<br/><br/>• The sweep results are concentrated in Canadian sources (CanLII and Hansard), suggesting a focus on national or regional issues.<br/>• The lack of GitHub hits may indicate a focus on more traditional, publicly available sources.<br/>• The 4 new nodes collected are a relatively small number, suggesting that more targeted collection may be necessary to uncover meaningful connections.<br/><br/>**Recommendations for Next Steps:**<br/><br/>• Investigate the 4 new nodes collected to determine their relevance and connection to the broader dataset.<br/>• Expand the collection to include more GitHub hits, if relevant, to capture a wider range of publicly available data.<br/>• Analyze the 9 Hansard parliamentary hits in more detail, focusing on key legislation, policy changes, or notable events.<br/>• Consider expanding the dataset to include other relevant sources, such as news articles or academic research, to gain a more comprehensive understanding of the issue.<br/><br/>**System Notes:**<br/><br/>Timestamp: 2026-04-05T21:23:18.732675+00:00<br/>System: active<br/>Collection Type: OSINT<br/>Collection Method: Open-Source Intelligence (OSINT)</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**OSINT Sweep Results Synthesis**<br/><br/>**Key Findings:**<br/><br/>• 4 relevant case law hits on CanLII, indicating potential connections to Canadian law and governance.<br/>• 9 relevant parliamentary hits on Hansard, suggesting potential connections to Canadian politics and policy-making.<br/>• No relevant intelligence hits on GitHub, possibly indicating a lack of publicly available information on the topic.<br/><br/>**Patterns Emerge:**<br/><br/>• The majority of hits are related to Canadian institutions, suggesting a focus on domestic governance and politics.<br/>• The lack of hits on GitHub suggests that the information may be private or not publicly available.<br/>• The collection of 4 new nodes may indicate the presence of a larger network or structure related to the topic.<br/><br/>**Recommendations for Next Investigation:**<br/><br/>• Investigate the specific case law hits on CanLII to identify key issues or disputes.<br/>• Analyze the Hansard hits to identify patterns or themes in Canadian policy-making.<br/>• Explore the 4 new nodes collected to determine their relevance and potential connections to the topic.<br/>• Consider searching for additional intelligence hits on other platforms, such as academic databases or news archives, to gather more information.<br/><br/>**System Recommendations:**<br/><br/>• Continue to monitor the OSINT Sweep results for any new hits or updates.<br/>• Expand the search to include additional platforms and databases to gather more information.<br/>• Use the collected nodes to build a network diagram and identify potential relationships and connections.<br/><br/>**Timestamp:**<br/>2026-04-05T20:23:05.540102+00:00</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**Analysis Report**<br/><br/>**Context:** OSINT Sweep results indicate the collection of relevant open-source intelligence (OSINT) from various sources.<br/><br/>**Key Findings:**<br/><br/>* **Case Law:** 4 CanLII case law hits suggest that the OSINT Sweep has uncovered relevant Canadian legal precedent.<br/>* **Parliamentary Hits:** 9 Hansard parliamentary hits indicate the collection of relevant Canadian parliamentary discussions, potentially shedding light on policy or legislative developments.<br/>* **GitHub Intelligence:** No GitHub intelligence hits suggest that the OSINT Sweep has not yielded relevant information from open-source software development platforms.<br/>* **New Nodes Collected:** 4 new nodes were collected, which may contain additional relevant information.<br/><br/>**Patterns Emerge:**<br/><br/>* The majority of the OSINT Sweep's findings are related to Canadian law and governance.<br/>* The collection of relevant Canadian parliamentary discussions suggests potential connections to policy or legislative developments.<br/>* The lack of GitHub intelligence hits indicates that the OSINT Sweep may not have uncovered information related to open-source software development.<br/><br/>**Recommendations for Next Steps:**<br/><br/>* Investigate the relevance of the collected CanLII case law hits to the specific research or inquiry.<br/>* Analyze the Hansard parliamentary hits to identify potential patterns or themes related to policy or legislative developments.<br/>* Expand the OSINT Sweep to include additional sources, such as academic databases or news outlets, to further contextualize the findings.<br/>* Verify the authenticity of the new nodes collected to determine their relevance to the research or inquiry.<br/><br/>**Timestamp:** 2026-04-05T19:22:52.446341+00:00<br/><br/>**Recommendation Seed:** </div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**Analysis Report: OSINT Sweep Results**<br/><br/>**Key Findings:**<br/><br/>* The OSINT Sweep has generated a substantial collection of open-source intelligence, with a total of 13 hits across various platforms:<br/>	+ CanLII case law hits: 4<br/>	+ Hansard parliamentary hits: 9<br/>* The majority of hits (9/13) were retrieved from Hansard parliamentary records, indicating a high volume of publicly available information related to parliamentary discussions and debates.<br/>* The lack of GitHub intelligence hits (0/13) suggests that the search query or parameters may not be capturing relevant information from this platform.<br/><br/>**Patterns that Emerge:**<br/><br/>* The dominance of Hansard parliamentary records in the collection suggests that the search query or parameters may be focused on Canadian politics or governance.<br/>* The absence of relevant information from GitHub could indicate that the search query or parameters are not capturing the intended topic or keywords.<br/>* The presence of 4 new nodes collected suggests that the OSINT Sweep has uncovered some new or lesser-known information that warrants further investigation.<br/><br/>**Recommendations for Next Steps:**<br/><br/>* Investigate the relevance of Hansard parliamentary records to the original search query or topic, and consider refining the search parameters to capture more relevant information.<br/>* Review the GitHub intelligence hits to determine if they are relevant to the original topic or if they require further filtering or analysis.<br/>* Analyze the new nodes collected to determine if they provide any additional insights or context to the original topic.<br/>* Consider running another sweep with refined search parameters or topics to further augment the collection of open-source intelligence.</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">**OSINT Sweep Results Analysis**<br/><br/>**Key Findings:**<br/><br/>• **Legislative and Judicial Context:** 4 CanLII case law hits and 9 Hansard parliamentary hits suggest a focus on Canadian law and politics. This indicates the importance of Canadian legislation and parliamentary proceedings in the context of the overall investigation.<br/><br/>• **Intelligence Gathering:** The absence of GitHub intelligence hits indicates that the primary source of the collected data is not publicly available on the platform or not relevant to the investigation.<br/><br/>• **Network Expansion:** The collection of 4 new nodes suggests that the investigation has expanded its reach, potentially uncovering new relationships, entities, or interests.<br/><br/>**Emerging Patterns:**<br/><br/>• **Focus on Canadian Institutions:** The dominance of Canadian CanLII case law and Hansard parliamentary hits implies that the investigation is centered on understanding the role of Canadian institutions in the context of the overall investigation.<br/><br/>• **Network Diversification:** The inclusion of new nodes indicates a diversification of the network, which may indicate new sources of information or potential connections to other investigations.<br/><br/>**Recommendations for Next Steps:**<br/><br/>• **CanLII Case Law Analysis:** Investigate the 4 CanLII case law hits to identify relevant precedents, statutes, or court decisions that may inform the overall investigation.<br/><br/>• **Hansard Parliamentary Analysis:** Examine the 9 Hansard parliamentary hits to understand the legislative and political context of the investigation, including potential connections to other governments or institutions.<br/><br/>• **Network Expansion:** Investigate the 4 new nodes to determine their relevance and potential connections to the existing network, and consider expanding the scope of the investigation to include other sources and entities.<br/><br/>**Next Timestamp:** [Insert timestamp for next sweep]</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">Question: Let g = -107/20 + 52/5. Which is the second smallest value?  (a) -1/2  (b) g  (c) 5<br/>Answer: a</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">Question: Let g = 1056 + -1052. Solve 0 = -g*o + 2*f + 6, -2*o + 4*f = 3*f - 4 for o.<br/>Answer: 2</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">Question: Let g = -107/20 + 52/5. Which is the second smallest value?  (a) -1/2  (b) g  (c) 5<br/>Answer: b</div>
+</div>
+<div class="report-card">
+<div class="report-header">
+<span class="report-type">sweep_synthesis</span>
+<span class="report-target">all</span>
+<span class="threat-badge tnt-style-1192">MEDIUM</span>
+<span class="confidence">75% confidence</span>
+</div>
+<div class="ai-summary">[LOCAL ANALYSIS]<br/>Query: Synthesize these OSINT collection results. What are the key findings? What patterns emerge? What should be investigated next?<br/>Finding: Intel collected from public records. Manual review recommended.</div>
+</div>
+<h2>▶ Collected Intelligence Nodes</h2>
+<table>
+<thead><tr>
+<th>Node ID</th><th>Name</th><th>Type</th><th>Threat</th><th>Intel</th><th>Source</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775445878-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775445878-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775445878-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775445878-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775442265-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775442265-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775442265-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775442265-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775438651-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775438651-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775438651-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775438651-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775435038-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775435038-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775435038-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775435038-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775431425-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775431425-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775431425-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775431425-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775427811-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775427811-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775427811-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775427811-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775424198-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775424198-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775424198-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775424198-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775420585-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775420585-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775420585-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775420585-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775416972-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775416972-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775416972-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775416972-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775413359-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775413359-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775413359-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775413359-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775409746-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775409746-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775409746-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1775409746-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774834813-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774834813-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774834813-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774834813-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774831199-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774831199-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774831199-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774831199-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774827585-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774827585-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774827585-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774827585-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774823972-CANLII-3</td>
+<td>Chinese foreign interference Canadian military</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Chinese%20foreign%20interference%20Canadian%20military</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774823972-CANLII-2</td>
+<td>Canada MAID deaths statistics Health Canada</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canada%20MAID%20deaths%20statistics%20Health%20Canada</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774823972-CANLII-1</td>
+<td>Canadian Forces National Investigation Service misconduct</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=Canadian%20Forces%20National%20Investigation%20Service%20misconduct</td>
+<td class="tnt-style-1197">osint</td>
+</tr>
+<tr>
+<td class="tnt-style-1193">SWEEP-1774823972-CANLII-0</td>
+<td>CFNIS political prosecution whistleblower</td>
+<td class="tnt-style-1194">canlii_result</td>
+<td class="tnt-style-1195">LOW</td>
+<td class="tnt-style-1196">https://www.canlii.org/en/#search/type=decision&amp;text=CFNIS%20political%20prosecution%20whistleblower</td>
+<td class="tnt-style-1197">osint</td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="cap263-container-narrow-px">
+<div class="cap263-flex-row">
+<a class="cap263-pill-btn cap263-pill-btn--gold" href="follow-the-money.html">Follow the Money →</a>
+<a class="cap263-pill-btn" href="carney-conflicts.html">Carney COI →</a>
+<a class="cap263-pill-btn cap263-pill-btn--purple" href="cds-accountability.html">CDS →</a>
+<a class="cap263-pill-btn" href="maid-accountability.html">MAID →</a>
+</div>
+</div>
 <div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    
-      <div class="cap263-tag cap263-tag--red">Investigation</div>
-      <div class="cap263-bold-tight">Acelephius-Wardoll</div>
-    
-    <a href="network-analysis.html" class="cap263-card-link">
-      <div class="cap263-tag">Network</div>
-      <div class="cap263-bold-tight">Network Analysis</div>
-    </a>
-    <a href="evidence-index.html" class="cap263-card-link">
-      <div class="cap263-tag">Evidence</div>
-      <div class="cap263-bold-tight">Evidence Index</div>
-    </a>
-  </div>
+<h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
+<div class="cap263-grid-cards">
+<div class="cap263-tag cap263-tag--red">Investigation</div>
+<div class="cap263-bold-tight">Acelephius-Wardoll</div>
+<a class="cap263-card-link" href="network-analysis.html">
+<div class="cap263-tag">Network</div>
+<div class="cap263-bold-tight">Network Analysis</div>
+</a>
+<a class="cap263-card-link" href="evidence-index.html">
+<div class="cap263-tag">Evidence</div>
+<div class="cap263-bold-tight">Evidence Index</div>
+</a>
+</div>
 </div>
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
 </div>
-  <div id="read-next"></div>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="read-next"></div>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1049,28 +811,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>

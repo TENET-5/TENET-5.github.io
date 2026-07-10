@@ -1,480 +1,300 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Procurement Anomaly Detector | TENET5</title>
-<meta name="description" content="Automated analysis of 1.13M Canadian government contracts. Flags sole-source deals, vendor concentration, cost overruns, and revolving door indicators from open.canada.ca data.">
-<link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-<style>
-  .osint-container { max-width: 1000px; margin: 0 auto; padding: 0 var(--s-md); }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
-  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.5rem; text-align: center; }
-  .stat-card .number { font-family: var(--slate-font-mono); font-size: 2rem; color: var(--accent-bright); font-weight: 700; }
-  .stat-card .label { font-size: 0.75rem; color: var(--text-tertiary); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.3rem; }
-  .anomaly-card { background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: var(--r-md); padding: 1.2rem 1.5rem; margin: 1rem 0; }
-  .anomaly-card h4 { color: var(--text-primary); margin-bottom: 0.5rem; }
-  .anomaly-card .meta { font-size: 0.8rem; color: var(--text-tertiary); font-family: var(--slate-font-mono); }
-  .anomaly-card .value { color: var(--accent-bright); font-weight: 700; font-family: var(--slate-font-mono); }
-  .flag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; margin-right: 4px; }
-  .flag-sole { background: rgba(239,68,68,0.15); color: #ef4444; }
-  .flag-amend { background: rgba(251,191,36,0.15); color: #fbbf24; }
-  .flag-revolve { background: rgba(168,85,247,0.15); color: #a855f7; }
-  .flag-concen { background: rgba(59,130,246,0.15); color: #3b82f6; }
-  .search-box { display: flex; gap: 0.5rem; margin: 1.5rem 0; flex-wrap: wrap; }
-  .search-box input, .search-box select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 0.6rem 1rem; border-radius: var(--r-md); font-family: var(--slate-font-body); font-size: 0.85rem; }
-  .search-box input { flex: 1; min-width: 200px; }
-  .search-box select { min-width: 150px; }
-  .search-box button { background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.5rem; border-radius: var(--r-md); cursor: pointer; font-weight: 600; }
-  .results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.82rem; }
-  .results-table th { background: var(--bg-elevated); color: var(--text-tertiary); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--border); }
-  .results-table td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-  .results-table tr:hover { background: var(--bg-card-h); }
-  .td-value { font-family: var(--slate-font-mono); color: var(--text-primary); }
-  .td-flag { white-space: nowrap; }
-  .methodology { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 2rem; margin: 2rem 0; }
-  .methodology h3 { color: var(--accent-bright); margin-bottom: 1rem; }
-  .methodology code { background: var(--bg-elevated); padding: 2px 6px; border-radius: 3px; font-family: var(--slate-font-mono); font-size: 0.85em; color: var(--text-primary); }
-</style>
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procurement Anomaly Detector | TENET5</title>
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
+  <link rel="canonical" href="https://tenet-5.github.io/procurement-analysis.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="Procurement Anomaly Detector | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- offline_db.js removed: 17MB blocking load -->
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by TENET5 automated pipeline -->
-  <meta property="og:title" content="Procurement Anomaly Detector | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/procurement-analysis.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Procurement Anomaly Detector | TENET5">
-  <link rel="canonical" href="https://tenet-5.github.io/procurement-analysis.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Procurement Anomaly Detector \u2014 TENET5",
-  "url": "https://tenet-5.github.io/procurement-analysis.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:description" content="Automated analysis of 1.13M Canadian government contracts. Flags sole-source deals, vendor concentration, cost overruns, and revolving door indicators from open.canada.ca data.">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="procurement-analysis">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body data-act="iii">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Procurement Analysis</span></div>    <!-- CAP224-NAV-END -->
-  <a href="#main" class="skip-link">Skip to main content</a>
+  </header>
+
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Procurement Analysis</span></div>  CAP224-NAV-END 
+<a class="skip-link" href="#main">Skip to main content</a>
 <div class="grain-overlay"></div>
 <div class="vignette"></div>
+<div id="site-header-frame"></div>
 
-
-  <div id="site-header-frame"></div>
-<header class="hero tnt-style-1267">
-    <div class="flag tnt-style-98" id="main" role="main">&#128269;</div>
-    <h1  id="n-40881d2b" data-narrate="Procurement Anomaly Detector — TENET5. Automated analysis of 1,130,985 Canadian government contracts from open.canada.ca. Flagging sole-source deals, vendor concentration, cost overruns, and revolving door indicators." >Procurement<br>Anomaly Detector</h1>
-    <p class="subtitle">Automated analysis of 1,130,985 Canadian government contracts from open.canada.ca. Flagging sole-source deals, vendor concentration, cost overruns, and revolving door indicators.</p>
-  </header>
-  <!-- CAMPAIGN SHARE BAR -->
-  <div id="share-bar" class="share-bar">
-    <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
-    <div class="share-bar-buttons">
-      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
-      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
-      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
-      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
-      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
-    </div>
-  </div>
-
-  <div class="osint-container">
-
-    <!-- Autonomous 24/7 AI Expansion Override -->
-    <div id="autonomous-ai-expansion" class="tnt-style-1268">
-      <div class="tnt-style-182">
-        <span class="tnt-style-183">🤖</span> CONTINUOUS ANALYSIS OVERRIDE
+ CAMPAIGN SHARE BAR 
+<div class="share-bar" id="share-bar">
+<span class="share-bar-label">📢 SHARE THIS. EVERY SHARE IS A WITNESS.</span>
+<div class="share-bar-buttons">
+<button class="share-btn share-btn-x" onclick="shareX()">X / Twitter</button>
+<button class="share-btn share-btn-facebook" onclick="shareFacebook()">Facebook</button>
+<button class="share-btn share-btn-reddit" onclick="shareReddit()">Reddit</button>
+<button class="share-btn share-btn-linkedin" onclick="shareLinkedIn()">LinkedIn</button>
+<button class="share-btn share-btn-copy" id="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+</div>
+</div>
+<div class="osint-container">
+<!-- Autonomous 24/7 AI Expansion Override -->
+<div class="tnt-style-1268" id="autonomous-ai-expansion">
+<div class="tnt-style-182">
+<span class="tnt-style-183">🤖</span> CONTINUOUS ANALYSIS OVERRIDE
       </div>
-      <div id="ai-expansion-content"></div>
-    </div>
-
-    <section>
-      <h2><span class="section-num">01 &mdash; DATABASE OVERVIEW</span>1.13 Million Contracts Analyzed</h2>
-
-      <div class="stat-grid reveal">
-        <div class="stat-card">
-          <div class="number" data-count>1,130,985</div>
-          <div class="label">Total Contracts</div>
-        </div>
-        <div class="stat-card">
-          <div class="number">80+</div>
-          <div class="label">Departments</div>
-        </div>
-        <div class="stat-card">
-          <div class="number">17</div>
-          <div class="label">Years of Data</div>
-        </div>
-        <div class="stat-card">
-          <div class="number">6</div>
-          <div class="label">Anomaly Flags</div>
-        </div>
-      </div>
-
-      <p>Every contract the Government of Canada signs over $10,000 is published on <a href="https://search.open.canada.ca/contracts/" target="_blank" rel="noopener noreferrer">open.canada.ca</a>. This page analyzes that data for patterns that indicate waste, corruption, or institutional capture.</p>
-    </section>
-
-    <section>
-      <h2Limited Tendering" solicitation procedure means no other vendor was considered. Common justifications: "Exclusive Rights" (only one vendor can do it) and "Extreme Urgency" (no time to compete). Both are frequently abused."><span class="section-num">02 &mdash; ANOMALY FLAGS</span>What We Look For</h2>
-
-      <div class="anomaly-card">
-        <h4><span class="flag flag-sole">SOLE-SOURCE</span> Non-Competitive Contracts</h4>
-        <p>Contracts awarded without competitive bidding. The "Limited Tendering" solicitation procedure means no other vendor was considered. Common justifications: "Exclusive Rights" (only one vendor can do it) and "Extreme Urgency" (no time to compete). Both are frequently abused.</p>
-        <div class="meta">Field: Solicitation Procedure = "Limited Tendering" | Limited Tendering Reason</div>
-      </div>
-
-      <div class="anomaly-card">
-        <h4><span class="flag flag-amend">AMENDMENT</span> Cost Overruns via Amendments</h4>
-        <p>When a contract's amendment value significantly exceeds the original value, the initial bid was either deliberately low (to win the competition) or the scope expanded without re-competing. Either way, the taxpayer pays more than was approved. Flagged when amendment &gt; 50% of original.</p>
-        <div class="meta">Field: Amendment Value &gt; Original Value &times; 0.5</div>
-      </div>
-
-      <div class="anomaly-card">
-        <h4><span class="flag flag-concen">CONCENTRATION</span> Vendor Concentration</h4>
-        <p>When a single vendor receives a disproportionate number of contracts from a department, it suggests institutional capture — the department is dependent on (or captured by) that vendor. Flagged when one vendor holds &gt;15% of a department's contracts by value.</p>
-        <div class="meta">Field: GROUP BY vendor_name, organization | HAVING SUM(value) &gt; 15% of dept total</div>
-      </div>
-
-      <div class="anomaly-card">
-        <h4><span class="flag flag-revolve">REVOLVING DOOR</span> Former Public Servant</h4>
-        <p>Contracts awarded to companies whose key personnel are former federal employees. The "Former Public Servant" field indicates the contractor previously worked for the government — potentially the same department awarding the contract.</p>
-        <div class="meta">Field: Former Public Servant = Yes</div>
-      </div>
-
-      <div class="anomaly-card">
-        <h4><span class="flag flag-sole">URGENCY</span> "Extreme Urgency" Claims</h4>
-        <p>The "Extreme Urgency" justification for sole-sourcing should be rare. When a department uses it frequently, it indicates either chronic under-planning or deliberate abuse of the urgency exception to avoid competition.</p>
-        <div class="meta">Field: Limited Tendering Reason = "Extreme Urgency" | Frequency per department</div>
-      </div>
-
-      <div class="anomaly-card">
-        <h4><span class="flag flag-amend">SPLIT</span> Contract Splitting</h4>
-        <p>Multiple contracts just below reporting thresholds ($10K, $25K, $100K) to the same vendor suggest deliberate splitting to avoid scrutiny or competition requirements. Flagged when &gt;3 contracts to same vendor within 30 days with similar descriptions.</p>
-        <div class="meta">Field: GROUP BY vendor_name WHERE date_diff &lt; 30 AND count &gt; 3</div>
-      </div>
-    </section>
-
-    <section>
-      <h2><span class="section-num">03 &mdash; KNOWN ANOMALIES</span>Already Documented in The 504</h2>
-
-      <p>The following contracts have already been flagged and documented in <a href="accountability.html">The 504</a>:</p>
-
-      <table class="results-table">
-        <thead>
-          <tr><th>Contract</th><th>Original</th><th>Final</th><th>Overrun</th><th>Flags</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Phoenix Pay System (IBM)</td><td class="td-value">$309M</td><td class="td-value">$7.5B+</td><td class="td-value tnt-style-171">2,327%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-amend">AMENDMENT</span></td></tr>
-          <tr><td>ArriveCAN (GCStrategies)</td><td class="td-value">$2.5M</td><td class="td-value">$54M</td><td class="td-value tnt-style-171">2,060%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-revolve">REVOLVING DOOR</span></td></tr>
-          <tr><td>Trans Mountain Pipeline</td><td class="td-value">$5.4B</td><td class="td-value">$34.2B</td><td class="td-value tnt-style-171">533%</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
-          <tr><td>CSC Frigates (Type 26)</td><td class="td-value">$26.2B</td><td class="td-value">$80B+</td><td class="td-value tnt-style-171">205%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-amend">AMENDMENT</span></td></tr>
-          <tr><td>F-35 Fighter Jets</td><td class="td-value">$19B</td><td class="td-value">$27.7B</td><td class="td-value tnt-style-171">46%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span></td></tr>
-          <tr><td>Site C Dam (BC Hydro)</td><td class="td-value">$6.6B</td><td class="td-value">$16B</td><td class="td-value tnt-style-171">143%</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
-          <tr><td>SDTC Green Fund</td><td class="td-value">$1B</td><td class="td-value">$1.15B</td><td class="td-value tnt-style-171">15%</td><td class="td-flag"><span class="flag flag-revolve">REVOLVING DOOR</span><span class="flag flag-concen">CONCENTRATION</span></td></tr>
-          <tr><td>McKinsey Consulting</td><td class="td-value">—</td><td class="td-value">$209M</td><td class="td-value">—</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-concen">CONCENTRATION</span></td></tr>
-          <tr><td>Cúram Benefits System</td><td class="td-value">—</td><td class="td-value">$5B+</td><td class="td-value">—</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
-          <tr><td>Ontario Staples/Walmart PPE</td><td class="td-value">est.</td><td class="td-value">26x</td><td class="td-value tnt-style-171">2,500%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span></td></tr>
-        </tbody>
-      </table>
-
-      <p class="tnt-style-438">Combined documented overruns: <strong class="tnt-style-848">$140+ billion</strong> across 10 contracts. Average overrun: <strong>987%</strong>. Sources: Auditor General, PBO, Parliamentary Committees, CBC News.</p>
-    </section>
-
-    <section>
-      <h2><span class="section-num">03b &mdash; SEARCH</span>Full Anomaly Database (18 Cases)</h2>
-      <p>Search and filter all documented procurement failures. Click any vendor name to search the government's own contract registry.</p>
-
-      <div class="search-box">
-        <input type="text" id="proc-search" placeholder="Search contracts, vendors, departments...">
-        <select id="proc-flag-filter">
-          <option value="">All Flags</option>
-          <option value="SOLE-SOURCE">Sole-Source</option>
-          <option value="AMENDMENT">Amendment/Overrun</option>
-          <option value="REVOLVING DOOR">Revolving Door</option>
-          <option value="CONCENTRATION">Concentration</option>
-        </select>
-        <select id="proc-outcome-filter">
-          <option value="">All Outcomes</option>
-          <option value="AG Finding">AG Finding</option>
-          <option value="Conviction">Conviction</option>
-          <option value="Charges/RCMP">Charges/RCMP</option>
-          <option value="PBO">PBO</option>
-          <option value="Parliamentary">Parliamentary</option>
-          <option value="Ongoing">Ongoing</option>
-        </select>
-        <select id="proc-sort">
-          <option value="overrun">Sort: Overrun %</option>
-          <option value="final">Sort: Final Cost</option>
-          <option value="year">Sort: Year</option>
-          <option value="name">Sort: Name</option>
-        </select>
-      </div>
-
-      <div id="proc-stats" class="tnt-style-1269"></div>
-
-      <table class="results-table" id="proc-results">
-        <thead>
-          <tr><th>Contract</th><th>Vendor</th><th>Original</th><th>Final</th><th>Overrun</th><th>Flags</th><th>Outcome</th></tr>
-        </thead>
-        <tbody id="proc-tbody">
-          <tr><td colspan="7" class="tnt-style-164">Loading data...</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section id="live-scan">
-      <h2><span class="section-num">04 &mdash; LIVE SCAN</span>Latest Automated Scan Results</h2>
-      <p>Live anomaly scan from <a href="https://open.canada.ca/data/en/dataset?q=contracts" target="_blank" rel="noopener noreferrer">open.canada.ca</a> proactive disclosure data. Last run: <span id="scan-ts" class="tnt-style-848">loading...</span></p>
-
-      <div class="stat-grid tnt-style-1270">
-        <div class="stat-card"><div class="number" id="scan-contracts">--</div><div class="label">Contracts Scanned</div></div>
-        <div class="stat-card"><div class="number" id="scan-anomalies">--</div><div class="label">Anomalies Found</div></div>
-        <div class="stat-card"><div class="number tnt-style-171" id="scan-high">--</div><div class="label">High Severity</div></div>
-      </div>
-
-      <table class="results-table" id="scan-table">
-        <thead><tr><th>Vendor</th><th>Department</th><th>Spend</th><th>Dept Total</th><th>Concentration</th><th>Severity</th></tr></thead>
-        <tbody id="scan-tbody"><tr><td colspan="6" class="tnt-style-164">Loading live scan...</td></tr></tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="section-num">05 &mdash; METHODOLOGY</span>How the Detector Works</h2>
-
-      <div class="methodology">
-        <h3>Detection Algorithm</h3>
-        <p>The anomaly detector applies 6 flags to every contract in the database:</p>
-        <ol class="tnt-style-1271">
-          <li><code>SOLE-SOURCE</code> &mdash; Solicitation Procedure = "Limited Tendering"</li>
-          <li><code>AMENDMENT</code> &mdash; Amendment Value &gt; 50% of Original Value</li>
-          <li><code>CONCENTRATION</code> &mdash; Vendor holds &gt;15% of department spend</li>
-          <li><code>REVOLVING DOOR</code> &mdash; Former Public Servant = Yes</li>
-          <li><code>URGENCY</code> &mdash; Limited Tendering Reason = "Extreme Urgency" (department frequency &gt; 5%)</li>
-          <li><code>SPLIT</code> &mdash; &gt;3 contracts to same vendor within 30 days, similar descriptions</li>
-        </ol>
-        <p class="tnt-style-77">Contracts with 2+ flags are marked <strong>high priority</strong>. Contracts with 3+ flags are marked <strong>critical</strong>. The algorithm produces zero false accusations — it flags patterns, not people. The data speaks for itself.</p>
-      </div>
-
-      <div class="methodology">
-        <h3>Data Source</h3>
-        <p>All data comes from <a href="https://search.open.canada.ca/contracts/" target="_blank" rel="noopener noreferrer">open.canada.ca/contracts</a> — the Government of Canada's own proactive disclosure portal. 1,130,985 contracts. 80+ departments. 17 years of history. This is not leaked data. This is not hacked data. This is data the government published about itself.</p>
-        <p class="tnt-style-1272">The government built the database. We built the detector. The math does the rest.</p>
-      </div>
-    </section>
-
-    <section>
-      <h2><span class="section-num">05 &mdash; THE PATTERN</span>What the Data Proves</h2>
-
-      <div class="tnt-style-1273">
-        <p class="tnt-style-1274">THE PROCUREMENT PATTERN</p>
-        <ul class="tnt-style-1275">
-          <li>&#9632; Phoenix: $309M &rarr; $7.5B (2,327% overrun). Nobody fired.</li>
-          <li>&#9632; ArriveCAN: $2.5M &rarr; $54M (2,060%). Two-person company. Sole-sourced.</li>
-          <li>&#9632; Trans Mountain: $5.4B &rarr; $34.2B (533%). Sold at a loss.</li>
-          <li>&#9632; CSC Frigates: $26.2B &rarr; $80B+ (205%). Design not finished.</li>
-          <li>&#9632; Cúram: Cost unknown. Officials: "we don't know."</li>
-          <li>&#9632; Ontario PPE: 26x expected cost. Sole-sourced to Staples.</li>
-          <li>&#9632; <strong>Combined overruns: $140+ billion. Average: 987%. Convictions: 0.</strong></li>
-        </ul>
-        <p class="tnt-style-1276">Every contract was awarded by the government. Every overrun was approved by the government. Every audit was conducted by the government. And not a single person responsible for $140 billion in overruns has served prison time. The procurement system isn't broken — it's working exactly as designed. For someone.</p>
-      </div>
-    </section>
-
-  </div>
+<div id="ai-expansion-content"></div>
+</div>
+<section>
+<h2><span class="section-num">01 — DATABASE OVERVIEW</span>1.13 Million Contracts Analyzed</h2>
+<div class="stat-grid reveal">
+<div class="stat-card">
+<div class="number" data-count="">1,130,985</div>
+<div class="label">Total Contracts</div>
+</div>
+<div class="stat-card">
+<div class="number">80+</div>
+<div class="label">Departments</div>
+</div>
+<div class="stat-card">
+<div class="number">17</div>
+<div class="label">Years of Data</div>
+</div>
+<div class="stat-card">
+<div class="number">6</div>
+<div class="label">Anomaly Flags</div>
+</div>
+</div>
+<p>Every contract the Government of Canada signs over $10,000 is published on <a href="https://search.open.canada.ca/contracts/" rel="noopener noreferrer" target="_blank">open.canada.ca</a>. This page analyzes that data for patterns that indicate waste, corruption, or institutional capture.</p>
+</section>
+<section>
+<h2limited "exclusive="" "extreme="" (no="" (only="" abused."="" and="" are="" both="" can="" common="" compete).="" considered.="" do="" frequently="" it)="" justifications:="" means="" no="" one="" other="" procedure="" rights"="" solicitation="" tendering"="" time="" to="" urgency"="" vendor="" was=""><span class="section-num">02 — ANOMALY FLAGS</span>What We Look For
+<div class="anomaly-card">
+<h4><span class="flag flag-sole">SOLE-SOURCE</span> Non-Competitive Contracts</h4>
+<p>Contracts awarded without competitive bidding. The "Limited Tendering" solicitation procedure means no other vendor was considered. Common justifications: "Exclusive Rights" (only one vendor can do it) and "Extreme Urgency" (no time to compete). Both are frequently abused.</p>
+<div class="meta">Field: Solicitation Procedure = "Limited Tendering" | Limited Tendering Reason</div>
+</div>
+<div class="anomaly-card">
+<h4><span class="flag flag-amend">AMENDMENT</span> Cost Overruns via Amendments</h4>
+<p>When a contract's amendment value significantly exceeds the original value, the initial bid was either deliberately low (to win the competition) or the scope expanded without re-competing. Either way, the taxpayer pays more than was approved. Flagged when amendment &gt; 50% of original.</p>
+<div class="meta">Field: Amendment Value &gt; Original Value × 0.5</div>
+</div>
+<div class="anomaly-card">
+<h4><span class="flag flag-concen">CONCENTRATION</span> Vendor Concentration</h4>
+<p>When a single vendor receives a disproportionate number of contracts from a department, it suggests institutional capture — the department is dependent on (or captured by) that vendor. Flagged when one vendor holds &gt;15% of a department's contracts by value.</p>
+<div class="meta">Field: GROUP BY vendor_name, organization | HAVING SUM(value) &gt; 15% of dept total</div>
+</div>
+<div class="anomaly-card">
+<h4><span class="flag flag-revolve">REVOLVING DOOR</span> Former Public Servant</h4>
+<p>Contracts awarded to companies whose key personnel are former federal employees. The "Former Public Servant" field indicates the contractor previously worked for the government — potentially the same department awarding the contract.</p>
+<div class="meta">Field: Former Public Servant = Yes</div>
+</div>
+<div class="anomaly-card">
+<h4><span class="flag flag-sole">URGENCY</span> "Extreme Urgency" Claims</h4>
+<p>The "Extreme Urgency" justification for sole-sourcing should be rare. When a department uses it frequently, it indicates either chronic under-planning or deliberate abuse of the urgency exception to avoid competition.</p>
+<div class="meta">Field: Limited Tendering Reason = "Extreme Urgency" | Frequency per department</div>
+</div>
+<div class="anomaly-card">
+<h4><span class="flag flag-amend">SPLIT</span> Contract Splitting</h4>
+<p>Multiple contracts just below reporting thresholds ($10K, $25K, $100K) to the same vendor suggest deliberate splitting to avoid scrutiny or competition requirements. Flagged when &gt;3 contracts to same vendor within 30 days with similar descriptions.</p>
+<div class="meta">Field: GROUP BY vendor_name WHERE date_diff &lt; 30 AND count &gt; 3</div>
+</div>
+</h2limited></section>
+<section>
+<h2><span class="section-num">03 — KNOWN ANOMALIES</span>Already Documented in The 504</h2>
+<p>The following contracts have already been flagged and documented in <a href="accountability.html">The 504</a>:</p>
+<table class="results-table">
+<thead>
+<tr><th>Contract</th><th>Original</th><th>Final</th><th>Overrun</th><th>Flags</th></tr>
+</thead>
+<tbody>
+<tr><td>Phoenix Pay System (IBM)</td><td class="td-value">$309M</td><td class="td-value">$7.5B+</td><td class="td-value tnt-style-171">2,327%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-amend">AMENDMENT</span></td></tr>
+<tr><td>ArriveCAN (GCStrategies)</td><td class="td-value">$2.5M</td><td class="td-value">$54M</td><td class="td-value tnt-style-171">2,060%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-revolve">REVOLVING DOOR</span></td></tr>
+<tr><td>Trans Mountain Pipeline</td><td class="td-value">$5.4B</td><td class="td-value">$34.2B</td><td class="td-value tnt-style-171">533%</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
+<tr><td>CSC Frigates (Type 26)</td><td class="td-value">$26.2B</td><td class="td-value">$80B+</td><td class="td-value tnt-style-171">205%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-amend">AMENDMENT</span></td></tr>
+<tr><td>F-35 Fighter Jets</td><td class="td-value">$19B</td><td class="td-value">$27.7B</td><td class="td-value tnt-style-171">46%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span></td></tr>
+<tr><td>Site C Dam (BC Hydro)</td><td class="td-value">$6.6B</td><td class="td-value">$16B</td><td class="td-value tnt-style-171">143%</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
+<tr><td>SDTC Green Fund</td><td class="td-value">$1B</td><td class="td-value">$1.15B</td><td class="td-value tnt-style-171">15%</td><td class="td-flag"><span class="flag flag-revolve">REVOLVING DOOR</span><span class="flag flag-concen">CONCENTRATION</span></td></tr>
+<tr><td>McKinsey Consulting</td><td class="td-value">—</td><td class="td-value">$209M</td><td class="td-value">—</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span><span class="flag flag-concen">CONCENTRATION</span></td></tr>
+<tr><td>Cúram Benefits System</td><td class="td-value">—</td><td class="td-value">$5B+</td><td class="td-value">—</td><td class="td-flag"><span class="flag flag-amend">AMENDMENT</span></td></tr>
+<tr><td>Ontario Staples/Walmart PPE</td><td class="td-value">est.</td><td class="td-value">26x</td><td class="td-value tnt-style-171">2,500%</td><td class="td-flag"><span class="flag flag-sole">SOLE-SOURCE</span></td></tr>
+</tbody>
+</table>
+<p class="tnt-style-438">Combined documented overruns: <strong class="tnt-style-848">$140+ billion</strong> across 10 contracts. Average overrun: <strong>987%</strong>. Sources: Auditor General, PBO, Parliamentary Committees, CBC News.</p>
+</section>
+<section>
+<h2><span class="section-num">03b — SEARCH</span>Full Anomaly Database (18 Cases)</h2>
+<p>Search and filter all documented procurement failures. Click any vendor name to search the government's own contract registry.</p>
+<div class="search-box">
+<input id="proc-search" placeholder="Search contracts, vendors, departments..." type="text"/>
+<select id="proc-flag-filter">
+<option value="">All Flags</option>
+<option value="SOLE-SOURCE">Sole-Source</option>
+<option value="AMENDMENT">Amendment/Overrun</option>
+<option value="REVOLVING DOOR">Revolving Door</option>
+<option value="CONCENTRATION">Concentration</option>
+</select>
+<select id="proc-outcome-filter">
+<option value="">All Outcomes</option>
+<option value="AG Finding">AG Finding</option>
+<option value="Conviction">Conviction</option>
+<option value="Charges/RCMP">Charges/RCMP</option>
+<option value="PBO">PBO</option>
+<option value="Parliamentary">Parliamentary</option>
+<option value="Ongoing">Ongoing</option>
+</select>
+<select id="proc-sort">
+<option value="overrun">Sort: Overrun %</option>
+<option value="final">Sort: Final Cost</option>
+<option value="year">Sort: Year</option>
+<option value="name">Sort: Name</option>
+</select>
+</div>
+<div class="tnt-style-1269" id="proc-stats"></div>
+<table class="results-table" id="proc-results">
+<thead>
+<tr><th>Contract</th><th>Vendor</th><th>Original</th><th>Final</th><th>Overrun</th><th>Flags</th><th>Outcome</th></tr>
+</thead>
+<tbody id="proc-tbody">
+<tr><td class="tnt-style-164" colspan="7">Loading data...</td></tr>
+</tbody>
+</table>
+</section>
+<section id="live-scan">
+<h2><span class="section-num">04 — LIVE SCAN</span>Latest Automated Scan Results</h2>
+<p>Live anomaly scan from <a href="https://open.canada.ca/data/en/dataset?q=contracts" rel="noopener noreferrer" target="_blank">open.canada.ca</a> proactive disclosure data. Last run: <span class="tnt-style-848" id="scan-ts">loading...</span></p>
+<div class="stat-grid tnt-style-1270">
+<div class="stat-card"><div class="number" id="scan-contracts">--</div><div class="label">Contracts Scanned</div></div>
+<div class="stat-card"><div class="number" id="scan-anomalies">--</div><div class="label">Anomalies Found</div></div>
+<div class="stat-card"><div class="number tnt-style-171" id="scan-high">--</div><div class="label">High Severity</div></div>
+</div>
+<table class="results-table" id="scan-table">
+<thead><tr><th>Vendor</th><th>Department</th><th>Spend</th><th>Dept Total</th><th>Concentration</th><th>Severity</th></tr></thead>
+<tbody id="scan-tbody"><tr><td class="tnt-style-164" colspan="6">Loading live scan...</td></tr></tbody>
+</table>
+</section>
+<section>
+<h2><span class="section-num">05 — METHODOLOGY</span>How the Detector Works</h2>
+<div class="methodology">
+<h3>Detection Algorithm</h3>
+<p>The anomaly detector applies 6 flags to every contract in the database:</p>
+<ol class="tnt-style-1271">
+<li><code>SOLE-SOURCE</code> — Solicitation Procedure = "Limited Tendering"</li>
+<li><code>AMENDMENT</code> — Amendment Value &gt; 50% of Original Value</li>
+<li><code>CONCENTRATION</code> — Vendor holds &gt;15% of department spend</li>
+<li><code>REVOLVING DOOR</code> — Former Public Servant = Yes</li>
+<li><code>URGENCY</code> — Limited Tendering Reason = "Extreme Urgency" (department frequency &gt; 5%)</li>
+<li><code>SPLIT</code> — &gt;3 contracts to same vendor within 30 days, similar descriptions</li>
+</ol>
+<p class="tnt-style-77">Contracts with 2+ flags are marked <strong>high priority</strong>. Contracts with 3+ flags are marked <strong>critical</strong>. The algorithm produces zero false accusations — it flags patterns, not people. The data speaks for itself.</p>
+</div>
+<div class="methodology">
+<h3>Data Source</h3>
+<p>All data comes from <a href="https://search.open.canada.ca/contracts/" rel="noopener noreferrer" target="_blank">open.canada.ca/contracts</a> — the Government of Canada's own proactive disclosure portal. 1,130,985 contracts. 80+ departments. 17 years of history. This is not leaked data. This is not hacked data. This is data the government published about itself.</p>
+<p class="tnt-style-1272">The government built the database. We built the detector. The math does the rest.</p>
+</div>
+</section>
+<section>
+<h2><span class="section-num">05 — THE PATTERN</span>What the Data Proves</h2>
+<div class="tnt-style-1273">
+<p class="tnt-style-1274">THE PROCUREMENT PATTERN</p>
+<ul class="tnt-style-1275">
+<li>■ Phoenix: $309M → $7.5B (2,327% overrun). Nobody fired.</li>
+<li>■ ArriveCAN: $2.5M → $54M (2,060%). Two-person company. Sole-sourced.</li>
+<li>■ Trans Mountain: $5.4B → $34.2B (533%). Sold at a loss.</li>
+<li>■ CSC Frigates: $26.2B → $80B+ (205%). Design not finished.</li>
+<li>■ Cúram: Cost unknown. Officials: "we don't know."</li>
+<li>■ Ontario PPE: 26x expected cost. Sole-sourced to Staples.</li>
+<li>■ <strong>Combined overruns: $140+ billion. Average: 987%. Convictions: 0.</strong></li>
+</ul>
+<p class="tnt-style-1276">Every contract was awarded by the government. Every overrun was approved by the government. Every audit was conducted by the government. And not a single person responsible for $140 billion in overruns has served prison time. The procurement system isn't broken — it's working exactly as designed. For someone.</p>
+</div>
+</section>
+</div>
 <script>
   (function() {
     'use strict';
@@ -529,7 +349,7 @@
           '<td>' + vendorLink + '</td>' +
           '<td class="td-value">' + money(d.original) + '</td>' +
           '<td class="td-value">' + money(d.final) + '</td>' +
-          '<td class="td-value"' + (d.overrun_pct > 100 ? ' style="color:#ef4444;"' : '') + '>' + (d.overrun_pct ? d.overrun_pct.toLocaleString() + '%' : '—') + '</td>' +
+          '<td class="td-value"' + (d.overrun_pct > 100 ? ' style="color:var(--slate-critical, #b0544a);"' : '') + '>' + (d.overrun_pct ? d.overrun_pct.toLocaleString() + '%' : '—') + '</td>' +
           '<td class="td-flag">' + flagHTML(d.flags) + '</td>' +
           '<td>' + (d.outcome || '—') + '</td>' +
           '</tr>';
@@ -564,7 +384,7 @@
         return;
       }
       tbody.innerHTML = anomalies.map(function(a) {
-        var sevColor = a.severity === 'HIGH' ? '#ef4444' : '#fbbf24';
+        var sevColor = a.severity === 'HIGH' ? 'var(--slate-critical, #b0544a)' : 'var(--slate-warning, #c9a44c)';
         return '<tr>' +
           '<td class="tnt-style-1278">' + (a.vendor || '?') + '</td>' +
           '<td>' + (a.department || '?') + '</td>' +
@@ -580,17 +400,17 @@
 <div class="cap263-container-narrow">
 <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
 <div class="cap263-grid-cards">
-<a href="procurement-deep-dive.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">PROCUREMENT</span><br><span class="cap263-bold-primary">Procurement Deep Dive &rarr;</span></a>
-<a href="follow-the-money.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">FINANCE</span><br><span class="cap263-bold-primary">Follow the Money &rarr;</span></a>
-<a href="snc-lavalin.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">CORRUPTION</span><br><span class="cap263-bold-primary">SNC-Lavalin &rarr;</span></a>
-<a href="evidence.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">EVIDENCE</span><br><span class="cap263-bold-primary">Evidence Database &rarr;</span></a>
+<a href="procurement-deep-dive.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">PROCUREMENT</span><br/><span class="cap263-bold-primary">Procurement Deep Dive →</span></a>
+<a href="follow-the-money.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">FINANCE</span><br/><span class="cap263-bold-primary">Follow the Money →</span></a>
+<a href="snc-lavalin.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">CORRUPTION</span><br/><span class="cap263-bold-primary">SNC-Lavalin →</span></a>
+<a href="evidence.html" style="display:block;padding:1rem;background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:8px;text-decoration:none;transition:border-color 0.2s;"><span class="cap263-tag-mute">EVIDENCE</span><br/><span class="cap263-bold-primary">Evidence Database →</span></a>
 </div>
 </div>
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="file-504.html" class="cap263-text-accent-bold">File charges →</a> | <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-accent-bold" href="file-504.html">File charges →</a> | <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
 </div>
-  <div id="read-next"></div>
+<div id="read-next"></div>
 <script>
     // ── Asynchronous content loading
     fetch('data/ai_expansions/procurement.json')
@@ -600,7 +420,7 @@
         document.getElementById('autonomous-ai-expansion').style.display = 'block';
         var html = '';
         data.insights.forEach(function(insight) {
-           var alertColor = insight.severity === 'CRITICAL' ? '#ef4444' : '#f59e0b';
+           var alertColor = insight.severity === 'CRITICAL' ? 'var(--slate-critical, #b0544a)' : 'var(--slate-warning, #c9a44c)';
            html += '<div class="tnt-style-210">';
            html += '<h3 class="tnt-style-211">';
            html += '<span class="tnt-style-212"></span>';
@@ -615,18 +435,16 @@
       })
       .catch(function(e) { /* AI expansion feed dormant — silent fallback */ });
   </script>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -652,29 +470,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>
-

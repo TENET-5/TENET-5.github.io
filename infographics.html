@@ -1,591 +1,217 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MAID Infographics — The Math in Pictures | TENET5</title>
-  <meta name="description" content="Visual proof: Canada's MAID program in charts. All data from Health Canada annual reports.">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <style>
-    /* ── Infographic-specific styles ── */
-    .chart-container {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2rem 1.5rem;
-      margin: 2rem 0;
-    }
-    .chart-container h3 {
-      color: #fff;
-      font-size: 1.2rem;
-      margin-bottom: 0.3rem;
-    }
-    .chart-container .chart-subtitle {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-bottom: 1.5rem;
-      font-style: italic;
-    }
-    .chart-source {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 1rem;
-      text-align: right;
-    }
-    svg text { font-family: var(--slate-font-mono); }
-
-    /* ── Bar chart ── */
-    .bar-chart { width: 100%; max-width: 760px; }
-    .bar-chart .bar { transition: opacity 0.2s; }
-    .bar-chart .bar:hover { opacity: 0.85; }
-
-    /* ── Donut chart ── */
-    .donut-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      align-items: center;
-      justify-content: center;
-    }
-    .donut-legend {
-      list-style: none;
-      padding: 0;
-      font-size: 0.9rem;
-    }
-    .donut-legend li {
-      padding: 0.3rem 0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .donut-legend .swatch {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-      flex-shrink: 0;
-    }
-
-    /* ── Icon grid (daily deaths) ── */
-    .icon-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      max-width: 500px;
-      margin: 1rem auto;
-    }
-    .icon-grid .person {
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-    }
-    .icon-grid .person.dead { background: var(--accent); }
-    .icon-grid .person.alive { background: #1a3a1a; }
-
-    /* ── Timeline ── */
-    .projection-bar {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.6rem;
-    }
-    .projection-bar .year-label {
-      width: 50px;
-      font-family: var(--slate-font-mono);
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      flex-shrink: 0;
-    }
-    .projection-bar .bar-track {
-      flex: 1;
-      height: 28px;
-      background: var(--bg-card);
-      border-radius: 3px;
-      overflow: hidden;
-      position: relative;
-    }
-    .projection-bar .bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      display: flex;
-      align-items: center;
-      padding-left: 8px;
-      font-family: var(--slate-font-mono);
-      font-size: 0.75rem;
-      color: #fff;
-      white-space: nowrap;
-    }
-    .projection-bar .bar-fill.actual { background: var(--accent); }
-    .projection-bar .bar-fill.projected { background: #6a2030; border: 1px dashed var(--accent); }
-
-    /* ── Share-of-deaths pie ── */
-    .share-visual {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2px;
-      max-width: 400px;
-      margin: 1rem auto;
-    }
-    .share-visual .cell {
-      width: 18px;
-      height: 18px;
-      border-radius: 2px;
-    }
-    .share-visual .cell.maid { background: var(--accent); }
-    .share-visual .cell.other { background: #1a1a1a; border: 1px solid #222; }
-
-    /* ── Nav ── */
-    .back-link {
-      display: inline-block;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-
-    /* ── Responsive: All infographics scale to any resolution ── */
-    .chart-container {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .bar-chart {
-      width: 100%;
-      height: auto;
-      min-width: 0;
-    }
-    @media (max-width: 768px) {
-      .chart-container {
-        padding: 1.2rem 0.8rem;
-        margin: 1.2rem 0;
-      }
-      .chart-container h3 {
-        font-size: 1rem;
-      }
-      .chart-container .chart-subtitle {
-        font-size: 0.78rem;
-      }
-      .bar-chart {
-        max-width: 100%;
-      }
-      .donut-row {
-        flex-direction: column;
-        gap: 1rem;
-      }
-      .donut-row svg {
-        width: 160px;
-        height: 160px;
-      }
-      .donut-legend {
-        font-size: 0.8rem;
-      }
-      .share-visual {
-        max-width: 100%;
-      }
-      .share-visual .cell {
-        width: 14px;
-        height: 14px;
-      }
-      .icon-grid {
-        max-width: 100%;
-      }
-      .icon-grid .person {
-        width: 16px !important;
-        height: 16px !important;
-      }
-      .projection-bar .year-label {
-        font-size: 0.72rem;
-        width: 40px;
-      }
-      .projection-bar .bar-fill {
-        font-size: 0.65rem;
-        padding-left: 4px;
-      }
-      .data-table {
-        font-size: 0.75rem !important;
-        display: block;
-        overflow-x: auto;
-      }
-      .data-table th, .data-table td {
-        padding: 0.4rem;
-        white-space: nowrap;
-      }
-      .stat-callout .callout-text {
-        font-size: 0.85rem;
-      }
-    }
-    @media (max-width: 480px) {
-      .chart-container {
-        padding: 0.8rem 0.5rem;
-        margin: 0.8rem 0;
-      }
-      .chart-container h3 {
-        font-size: 0.9rem;
-      }
-      .share-visual .cell {
-        width: 10px;
-        height: 10px;
-      }
-      .icon-grid .person {
-        width: 12px !important;
-        height: 12px !important;
-      }
-      .donut-row svg {
-        width: 140px;
-        height: 140px;
-      }
-      .projection-bar {
-        margin-bottom: 0.4rem;
-      }
-      .projection-bar .bar-track {
-        height: 22px;
-      }
-      .projection-bar .bar-fill {
-        font-size: 0.58rem;
-      }
-    }
-  </style>
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
+  <link rel="canonical" href="https://tenet-5.github.io/infographics.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="MAID Infographics — The Math in Pictures | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="MAID Infographics — The Math in Pictures">
-  <meta property="og:url" content="https://tenet-5.github.io/infographics.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="MAID Infographics — The Math in Pictures">
-  <link rel="canonical" href="https://tenet-5.github.io/infographics.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "MAID Infographics \u2014 The Math in Pictures",
-  "url": "https://tenet-5.github.io/infographics.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
-    }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:description" content="Visual proof: Canada">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="Criminal Code of Canada (R.S.C., 1985, c. C-46); Rome Statute of the International Criminal Court; Statistics Canada">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="infographics">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
-</head>
-<body data-act="sup">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
-    </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Infographics</span></div>    <!-- CAP224-NAV-END -->
-<div class="grain-overlay"></div>
-<div class="vignette"></div>
-
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <div id="site-header-frame"></div>
-<a href="#main" class="skip-link">Skip to content</a>
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-<!-- ── CAMPAIGN SHARE BAR ── -->
-  <div id="share-bar" class="share-bar">
-    <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
-    <div class="share-bar-buttons">
-      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
-      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
-      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
-      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
-      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
-    </div>
-  </div>
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
 
-  <header class="hero">
-    <div class="flag">&#127464;&#127462;</div>
-    <h1  id="n-98744232" data-narrate="MAID Infographics — The Math in Pictures. Every chart on this page is generated from Health Canada's published data. No AI-generated images. No stock photos. Just numbers visualized." >The Math in Pictures</h1>
-    <p class="subtitle">Every chart on this page is generated from Health Canada's published data. No AI-generated images. No stock photos. Just numbers visualized.</p>
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
+</head>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
+    </nav>
   </header>
 
-  <div class="content" id="main" role="main">
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Infographics</span></div>  CAP224-NAV-END 
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+<div id="site-header-frame"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+ ── CAMPAIGN SHARE BAR ── 
+<div class="share-bar" id="share-bar">
+<span class="share-bar-label">📢 SHARE THIS. EVERY SHARE IS A WITNESS.</span>
+<div class="share-bar-buttons">
+<button class="share-btn share-btn-x" onclick="shareX()">X / Twitter</button>
+<button class="share-btn share-btn-facebook" onclick="shareFacebook()">Facebook</button>
+<button class="share-btn share-btn-reddit" onclick="shareReddit()">Reddit</button>
+<button class="share-btn share-btn-linkedin" onclick="shareLinkedIn()">LinkedIn</button>
+<button class="share-btn share-btn-copy" id="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+</div>
+</div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin:1.5rem 0;">
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:#dc2626;">~100K</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Dead</div>
-      </div>
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:#facc15;">5.1%</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Of All Deaths</div>
-      </div>
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:#dc2626;">32min</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Between Deaths</div>
-      </div>
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:#facc15;">$20,685</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Saved Per Death</div>
-      </div>
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:#dc2626;">$69.52</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">PM&rsquo;s Cut Per Death</div>
-      </div>
-    </div>
-
-    <!-- ══════ CHART 1: Annual MAID Deaths Bar Chart ══════ -->
-    <div class="chart-container">
-      <h3>Annual MAID Deaths in Canada (2016&ndash;2024)</h3>
-      <p class="chart-subtitle">Compound Annual Growth Rate: 41.6% &mdash; Doubling every 2 years</p>
-
-      <svg class="bar-chart" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
-        <!-- Y-axis -->
-        <line x1="60" y1="20" x2="60" y2="280" stroke="#333" stroke-width="1"/>
-        <!-- X-axis -->
-        <line x1="60" y1="280" x2="740" y2="280" stroke="#333" stroke-width="1"/>
-
-        <!-- Y-axis labels (max ~18000) -->
-        <text x="55" y="280" fill="#666" font-size="11" text-anchor="end">0</text>
-        <text x="55" y="211" fill="#666" font-size="11" text-anchor="end">5K</text>
-        <line x1="60" y1="208" x2="740" y2="208" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4"/>
-        <text x="55" y="139" fill="#666" font-size="11" text-anchor="end">10K</text>
-        <line x1="60" y1="136" x2="740" y2="136" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4"/>
-        <text x="55" y="66" fill="#666" font-size="11" text-anchor="end">15K</text>
-        <line x1="60" y1="63" x2="740" y2="63" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4"/>
-        <text x="55" y="23" fill="#666" font-size="11" text-anchor="end">18K</text>
-
-        <!-- Bars: height = deaths/18000 * 260, y = 280 - height -->
-        <!-- 2016: 1018 → h=14.7 -->
-        <rect class="bar" x="80" y="265" width="60" height="15" rx="2" fill="#8b1a2b"/>
-        <text x="110" y="260" fill="#ccc" font-size="10" text-anchor="middle">1,018</text>
-        <text x="110" y="298" fill="#888" font-size="11" text-anchor="middle">2016</text>
-
-        <!-- 2017: 2838 → h=41 -->
-        <rect class="bar" x="152" y="239" width="60" height="41" rx="2" fill="#9b1e30"/>
-        <text x="182" y="234" fill="#ccc" font-size="10" text-anchor="middle">2,838</text>
-        <text x="182" y="298" fill="#888" font-size="11" text-anchor="middle">2017</text>
-
-        <!-- 2018: 4480 → h=65 -->
-        <rect class="bar" x="224" y="215" width="60" height="65" rx="2" fill="#ab2236"/>
-        <text x="254" y="210" fill="#ccc" font-size="10" text-anchor="middle">4,480</text>
-        <text x="254" y="298" fill="#888" font-size="11" text-anchor="middle">2018</text>
-
-        <!-- 2019: 5631 → h=81 -->
-        <rect class="bar" x="296" y="199" width="60" height="81" rx="2" fill="#b5263a"/>
-        <text x="326" y="194" fill="#ccc" font-size="10" text-anchor="middle">5,631</text>
-        <text x="326" y="298" fill="#888" font-size="11" text-anchor="middle">2019</text>
-
-        <!-- 2020: 7595 → h=110 -->
-        <rect class="bar" x="368" y="170" width="60" height="110" rx="2" fill="#bf2a3e"/>
-        <text x="398" y="165" fill="#ccc" font-size="10" text-anchor="middle">7,595</text>
-        <text x="398" y="298" fill="#888" font-size="11" text-anchor="middle">2020</text>
-
-        <!-- 2021: 10064 → h=145 -->
-        <rect class="bar" x="440" y="135" width="60" height="145" rx="2" fill="#c92e42"/>
-        <text x="470" y="130" fill="#ccc" font-size="10" text-anchor="middle">10,064</text>
-        <text x="470" y="298" fill="#888" font-size="11" text-anchor="middle">2021</text>
-
-        <!-- 2022: 13241 → h=191 -->
-        <rect class="bar" x="512" y="89" width="60" height="191" rx="2" fill="#d43248"/>
-        <text x="542" y="84" fill="#ccc" font-size="10" text-anchor="middle">13,241</text>
-        <text x="542" y="298" fill="#888" font-size="11" text-anchor="middle">2022</text>
-
-        <!-- 2023: 15343 → h=222 -->
-        <rect class="bar" x="584" y="58" width="60" height="222" rx="2" fill="#de364c"/>
-        <text x="614" y="53" fill="#ccc" font-size="10" text-anchor="middle">15,343</text>
-        <text x="614" y="298" fill="#888" font-size="11" text-anchor="middle">2023</text>
-
-        <!-- 2024: 16499 → h=238 -->
-        <rect class="bar" x="656" y="42" width="60" height="238" rx="2" fill="#e63950"/>
-        <text x="686" y="37" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">16,499</text>
-        <text x="686" y="298" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">2024</text>
-
-        <!-- Trend arrow -->
-        <text x="700" y="320" fill="#e63950" font-size="10" text-anchor="end">CAGR: 41.6%</text>
-      </svg>
-      <p class="chart-source">Source: Health Canada Annual Reports 1st&ndash;6th [1]&ndash;[6]</p>
-    </div>
-
-    <!-- ══════ CHART 2: Share of All Deaths (waffle chart) ══════ -->
-    <div class="chart-container">
-      <h3>1 in 20 Deaths in Canada Is Now MAID</h3>
-      <p class="chart-subtitle">Each square represents 1 out of 20 Canadian deaths in 2024. The red square is MAID.</p>
-
-      <div class="share-visual" id="waffle-20">
-        <!-- 1 red, 19 dark = 5% -->
-      </div>
-      <script>
+<div class="content" id="main" role="main">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin:1.5rem 0;">
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:var(--slate-critical, #b0544a);">~100K</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Dead</div>
+</div>
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:var(--slate-warning, #c9a44c);">5.1%</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Of All Deaths</div>
+</div>
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:var(--slate-critical, #b0544a);">32min</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Between Deaths</div>
+</div>
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:var(--slate-warning, #c9a44c);">$20,685</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Saved Per Death</div>
+</div>
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:1.8rem;font-weight:900;color:var(--slate-critical, #b0544a);">$69.52</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">PM’s Cut Per Death</div>
+</div>
+</div>
+<!-- ══════ CHART 1: Annual MAID Deaths Bar Chart ══════ -->
+<div class="chart-container">
+<h3>Annual MAID Deaths in Canada (2016–2024)</h3>
+<p class="chart-subtitle">Compound Annual Growth Rate: 41.6% — Doubling every 2 years</p>
+<svg class="bar-chart" viewbox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
+<!-- Y-axis -->
+<line stroke="#333" stroke-width="1" x1="60" x2="60" y1="20" y2="280"></line>
+<!-- X-axis -->
+<line stroke="#333" stroke-width="1" x1="60" x2="740" y1="280" y2="280"></line>
+<!-- Y-axis labels (max ~18000) -->
+<text fill="#666" font-size="11" text-anchor="end" x="55" y="280">0</text>
+<text fill="#666" font-size="11" text-anchor="end" x="55" y="211">5K</text>
+<line stroke="#1a1a1a" stroke-dasharray="4" stroke-width="1" x1="60" x2="740" y1="208" y2="208"></line>
+<text fill="#666" font-size="11" text-anchor="end" x="55" y="139">10K</text>
+<line stroke="#1a1a1a" stroke-dasharray="4" stroke-width="1" x1="60" x2="740" y1="136" y2="136"></line>
+<text fill="#666" font-size="11" text-anchor="end" x="55" y="66">15K</text>
+<line stroke="#1a1a1a" stroke-dasharray="4" stroke-width="1" x1="60" x2="740" y1="63" y2="63"></line>
+<text fill="#666" font-size="11" text-anchor="end" x="55" y="23">18K</text>
+<!-- Bars: height = deaths/18000 * 260, y = 280 - height -->
+<!-- 2016: 1018 → h=14.7 -->
+<rect class="bar" fill="#8b1a2b" height="15" rx="2" width="60" x="80" y="265"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="110" y="260">1,018</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="110" y="298">2016</text>
+<!-- 2017: 2838 → h=41 -->
+<rect class="bar" fill="#9b1e30" height="41" rx="2" width="60" x="152" y="239"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="182" y="234">2,838</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="182" y="298">2017</text>
+<!-- 2018: 4480 → h=65 -->
+<rect class="bar" fill="#ab2236" height="65" rx="2" width="60" x="224" y="215"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="254" y="210">4,480</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="254" y="298">2018</text>
+<!-- 2019: 5631 → h=81 -->
+<rect class="bar" fill="#b5263a" height="81" rx="2" width="60" x="296" y="199"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="326" y="194">5,631</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="326" y="298">2019</text>
+<!-- 2020: 7595 → h=110 -->
+<rect class="bar" fill="#bf2a3e" height="110" rx="2" width="60" x="368" y="170"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="398" y="165">7,595</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="398" y="298">2020</text>
+<!-- 2021: 10064 → h=145 -->
+<rect class="bar" fill="#c92e42" height="145" rx="2" width="60" x="440" y="135"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="470" y="130">10,064</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="470" y="298">2021</text>
+<!-- 2022: 13241 → h=191 -->
+<rect class="bar" fill="#d43248" height="191" rx="2" width="60" x="512" y="89"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="542" y="84">13,241</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="542" y="298">2022</text>
+<!-- 2023: 15343 → h=222 -->
+<rect class="bar" fill="#de364c" height="222" rx="2" width="60" x="584" y="58"></rect>
+<text fill="#ccc" font-size="10" text-anchor="middle" x="614" y="53">15,343</text>
+<text fill="#888" font-size="11" text-anchor="middle" x="614" y="298">2023</text>
+<!-- 2024: 16499 → h=238 -->
+<rect class="bar" fill="#e63950" height="238" rx="2" width="60" x="656" y="42"></rect>
+<text fill="#fff" font-size="11" font-weight="bold" text-anchor="middle" x="686" y="37">16,499</text>
+<text fill="#fff" font-size="11" font-weight="bold" text-anchor="middle" x="686" y="298">2024</text>
+<!-- Trend arrow -->
+<text fill="#e63950" font-size="10" text-anchor="end" x="700" y="320">CAGR: 41.6%</text>
+</svg>
+<p class="chart-source">Source: Health Canada Annual Reports 1st–6th [1]–[6]</p>
+</div>
+<!-- ══════ CHART 2: Share of All Deaths (waffle chart) ══════ -->
+<div class="chart-container">
+<h3>1 in 20 Deaths in Canada Is Now MAID</h3>
+<p class="chart-subtitle">Each square represents 1 out of 20 Canadian deaths in 2024. The red square is MAID.</p>
+<div class="share-visual" id="waffle-20">
+<!-- 1 red, 19 dark = 5% -->
+</div>
+<script>
         (function() {
           var w = document.getElementById('waffle-20');
           for (var i = 0; i < 400; i++) {
@@ -595,50 +221,43 @@
           }
         })();
       </script>
-
-      <div class="tnt-style-476">
-        <span><span class="tnt-style-477"></span> MAID death (5.05%)</span>
-        <span><span class="tnt-style-478"></span> Other cause of death</span>
-      </div>
-      <p class="chart-source">Source: Health Canada [6], Statistics Canada [13]</p>
-    </div>
-
-    <!-- ══════ CHART 3: Marginalisation Donut ══════ -->
-    <div class="chart-container">
-      <h3>Who Is Being Killed? Track 2 MAID by Housing Vulnerability</h3>
-      <p class="chart-subtitle">If MAID were random, 20% would come from each income quintile. It's not random.</p>
-
-      <div class="donut-row">
-        <svg width="220" height="220" viewBox="0 0 220 220">
-          <!-- Background ring -->
-          <circle cx="110" cy="110" r="85" fill="none" stroke="#1a1a1a" stroke-width="30"/>
-          <!-- 48.3% = poorest quintile (red) -->
-          <!-- circumference = 2π×85 = 534.07, 48.3% = 258.0 -->
-          <circle cx="110" cy="110" r="85" fill="none" stroke="#c41e3a" stroke-width="30"
-            stroke-dasharray="258 276" stroke-dashoffset="133.5" transform="rotate(-90 110 110)"/>
-          <!-- Center text -->
-          <text x="110" y="100" fill="#fff" font-size="28" font-weight="bold" text-anchor="middle">48.3%</text>
-          <text x="110" y="122" fill="#888" font-size="12" text-anchor="middle">poorest quintile</text>
-          <text x="110" y="140" fill="#666" font-size="10" text-anchor="middle">(expected: 20%)</text>
-        </svg>
-
-        <ul class="donut-legend">
-          <li><span class="swatch tnt-style-479"></span> <strong>48.3%</strong> from poorest housing quintile</li>
-          <li><span class="swatch tnt-style-480"></span> 51.7% from all other quintiles combined</li>
-          <li class="tnt-style-481">2.42&times; overrepresentation vs expected 20%</li>
-          <li class="tnt-style-482">Source: Ontario Coroner data [7]</li>
-        </ul>
-      </div>
-      <p class="chart-source">Source: The Conversation / Ontario Coroner [7], Cardus [14]</p>
-    </div>
-
-    <!-- ══════ CHART 4: Daily Deaths Visualization ══════ -->
-    <div class="chart-container">
-      <h3>45 Canadians Killed Per Day by MAID in 2024</h3>
-      <p class="chart-subtitle">Each red dot represents one person killed by their government in a single day.</p>
-
-      <div class="icon-grid" id="daily-grid"></div>
-      <script>
+<div class="tnt-style-476">
+<span><span class="tnt-style-477"></span> MAID death (5.05%)</span>
+<span><span class="tnt-style-478"></span> Other cause of death</span>
+</div>
+<p class="chart-source">Source: Health Canada [6], Statistics Canada [13]</p>
+</div>
+<!-- ══════ CHART 3: Marginalisation Donut ══════ -->
+<div class="chart-container">
+<h3>Who Is Being Killed? Track 2 MAID by Housing Vulnerability</h3>
+<p class="chart-subtitle">If MAID were random, 20% would come from each income quintile. It's not random.</p>
+<div class="donut-row">
+<svg height="220" viewbox="0 0 220 220" width="220">
+<!-- Background ring -->
+<circle cx="110" cy="110" fill="none" r="85" stroke="#1a1a1a" stroke-width="30"></circle>
+<!-- 48.3% = poorest quintile (red) -->
+<!-- circumference = 2π×85 = 534.07, 48.3% = 258.0 -->
+<circle cx="110" cy="110" fill="none" r="85" stroke="#c41e3a" stroke-dasharray="258 276" stroke-dashoffset="133.5" stroke-width="30" transform="rotate(-90 110 110)"></circle>
+<!-- Center text -->
+<text fill="#fff" font-size="28" font-weight="bold" text-anchor="middle" x="110" y="100">48.3%</text>
+<text fill="#888" font-size="12" text-anchor="middle" x="110" y="122">poorest quintile</text>
+<text fill="#666" font-size="10" text-anchor="middle" x="110" y="140">(expected: 20%)</text>
+</svg>
+<ul class="donut-legend">
+<li><span class="swatch tnt-style-479"></span> <strong>48.3%</strong> from poorest housing quintile</li>
+<li><span class="swatch tnt-style-480"></span> 51.7% from all other quintiles combined</li>
+<li class="tnt-style-481">2.42× overrepresentation vs expected 20%</li>
+<li class="tnt-style-482">Source: Ontario Coroner data [7]</li>
+</ul>
+</div>
+<p class="chart-source">Source: The Conversation / Ontario Coroner [7], Cardus [14]</p>
+</div>
+<!-- ══════ CHART 4: Daily Deaths Visualization ══════ -->
+<div class="chart-container">
+<h3>45 Canadians Killed Per Day by MAID in 2024</h3>
+<p class="chart-subtitle">Each red dot represents one person killed by their government in a single day.</p>
+<div class="icon-grid" id="daily-grid"></div>
+<script>
         (function() {
           var g = document.getElementById('daily-grid');
           for (var i = 0; i < 45; i++) {
@@ -652,618 +271,541 @@
           }
         })();
       </script>
-      <p class="tnt-style-483">
+<p class="tnt-style-483">
         45 circles = 45 people. <strong>Every single day.</strong> 16,499 / 366 days = 45.1 per day.
       </p>
-      <p class="chart-source">Source: Health Canada [6]</p>
-    </div>
-
-    <!-- ══════ CHART 5: 2030 Projection ══════ -->
-    <div class="chart-container">
-      <h3>Conservative Projection: 200,000+ Dead by 2030</h3>
-      <p class="chart-subtitle">Using the government's own lowest growth rate (7.5% from 2023&rarr;2024)</p>
-
-      <div class="tnt-style-484">
-        <!-- 2024 actual -->
-        <div class="projection-bar">
-          <span class="year-label">2024</span>
-          <div class="bar-track">
-            <div class="bar-fill actual tnt-style-485">76,475 (actual)</div>
-          </div>
-        </div>
-        <!-- 2025 -->
-        <div class="projection-bar">
-          <span class="year-label">2025</span>
-          <div class="bar-track">
-            <div class="bar-fill projected tnt-style-486">94,211</div>
-          </div>
-        </div>
-        <!-- 2026 -->
-        <div class="projection-bar">
-          <span class="year-label">2026</span>
-          <div class="bar-track">
-            <div class="bar-fill projected tnt-style-487">113,277</div>
-          </div>
-        </div>
-        <!-- 2027 -->
-        <div class="projection-bar">
-          <span class="year-label">2027</span>
-          <div class="bar-track">
-            <div class="bar-fill projected tnt-style-488">133,773</div>
-          </div>
-        </div>
-        <!-- 2028 -->
-        <div class="projection-bar">
-          <span class="year-label">2028</span>
-          <div class="bar-track">
-            <div class="bar-fill projected tnt-style-489">155,806</div>
-          </div>
-        </div>
-        <!-- 2029 -->
-        <div class="projection-bar">
-          <span class="year-label">2029</span>
-          <div class="bar-track">
-            <div class="bar-fill projected tnt-style-490">179,492</div>
-          </div>
-        </div>
-        <!-- 2030 -->
-        <div class="projection-bar">
-          <span class="year-label tnt-style-491">2030</span>
-          <div class="bar-track">
-            <div class="bar-fill actual tnt-style-45"><strong>204,954</strong></div>
-          </div>
-        </div>
-      </div>
-
-      <p class="tnt-style-77">Formula: N(t) = 16,499 &times; (1.075)<sup>t</sup>, cumulative sum from 2016 base of 76,475.</p>
-      <p class="chart-source">Source: Health Canada [6], author calculation using government's own 7.5% growth rate</p>
-    </div>
-
-    <!-- ══════ CHART 6: Loneliness & Burden (Track 2) ══════ -->
-    <div class="chart-container">
-      <h3>Track 2: Why They Chose Death</h3>
-      <p class="chart-subtitle">Self-reported reasons among people whose death was NOT reasonably foreseeable (2024)</p>
-
-      <svg viewBox="0 0 600 180" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
-        <!-- Feeling like a burden: 49% -->
-        <text x="210" y="35" fill="#ccc" font-size="13" text-anchor="end">Feeling like a burden</text>
-        <rect x="220" y="20" width="294" height="24" rx="3" fill="#c41e3a" opacity="0.9"/>
-        <text x="520" y="37" fill="#fff" font-size="12" font-weight="bold">49%</text>
-
-        <!-- Loneliness: 47% -->
-        <text x="210" y="75" fill="#ccc" font-size="13" text-anchor="end">Loneliness &amp; isolation</text>
-        <rect x="220" y="60" width="282" height="24" rx="3" fill="#c41e3a" opacity="0.75"/>
-        <text x="508" y="77" fill="#fff" font-size="12" font-weight="bold">47%</text>
-
-        <!-- Loss of meaningful activities -->
-        <text x="210" y="115" fill="#ccc" font-size="13" text-anchor="end">Loss of meaningful activities</text>
-        <rect x="220" y="100" width="330" height="24" rx="3" fill="#8b1a2b"/>
-        <text x="556" y="117" fill="#ccc" font-size="12" font-weight="bold">~55%</text>
-
-        <!-- Context line -->
-        <text x="220" y="155" fill="#666" font-size="10">These are people who were not dying. They were lonely, poor, and felt like a burden.</text>
-        <text x="220" y="170" fill="#666" font-size="10">Canada's answer: kill them.</text>
-      </svg>
-      <p class="chart-source">Source: Health Canada Sixth Annual Report [6]</p>
-    </div>
-
-    <!-- ══════ CHART 7: International Comparison ══════ -->
-    <div class="chart-container">
-      <h3>Canada vs. The World: Assisted Death as % of All Deaths</h3>
-      <p class="chart-subtitle">Canada now kills a higher proportion of its citizens than any country except the Netherlands</p>
-
-      <svg viewBox="0 0 700 260" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
-        <!-- Axis: horizontal bars grow rightward from x=200 at 40px per percentage point -->
-        <line x1="200" y1="30" x2="200" y2="225" stroke="#333" stroke-width="1"/>
-        <line x1="200" y1="225" x2="460" y2="225" stroke="#333" stroke-width="1"/>
-        <!-- % gridlines at x = 200 + pct*40, labelled along the baseline -->
-        <text x="200" y="240" fill="#666" font-size="10" text-anchor="middle">0%</text>
-        <line x1="280" y1="30" x2="280" y2="225" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3"/>
-        <text x="280" y="240" fill="#666" font-size="10" text-anchor="middle">2%</text>
-        <line x1="360" y1="30" x2="360" y2="225" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3"/>
-        <text x="360" y="240" fill="#666" font-size="10" text-anchor="middle">4%</text>
-        <line x1="440" y1="30" x2="440" y2="225" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3"/>
-        <text x="440" y="240" fill="#666" font-size="10" text-anchor="middle">6%</text>
-
-        <!-- Switzerland 2.34% → h=78 -->
-        <text x="195" y="45" fill="#ccc" font-size="12" text-anchor="end">Switzerland</text>
-        <rect x="200" y="37" width="94" height="24" rx="3" fill="#4a4a6a"/>
-        <text x="300" y="53" fill="#fff" font-size="11">2.34%</text>
-        <text x="200" y="16" fill="#666" font-size="9" text-anchor="start">(2023)</text>
-
-        <!-- Belgium 3.55% → h=118 -->
-        <text x="195" y="95" fill="#ccc" font-size="12" text-anchor="end">Belgium</text>
-        <rect x="200" y="87" width="142" height="24" rx="3" fill="#5a4a6a"/>
-        <text x="348" y="103" fill="#fff" font-size="11">3.55%</text>
-        <text x="200" y="66" fill="#666" font-size="9" text-anchor="start">(2024)</text>
-
-        <!-- CANADA 5.05% → h=202 -->
-        <text x="195" y="145" fill="#fff" font-size="13" font-weight="bold" text-anchor="end">CANADA</text>
-        <rect x="200" y="137" width="202" height="24" rx="3" fill="#c41e3a"/>
-        <text x="408" y="153" fill="#fff" font-size="12" font-weight="bold">5.05%</text>
-        <text x="200" y="116" fill="#e63950" font-size="9" text-anchor="start">(2024)</text>
-
-        <!-- Netherlands 5.35% → h=214 -->
-        <text x="195" y="195" fill="#ccc" font-size="12" text-anchor="end">Netherlands</text>
-        <rect x="200" y="187" width="214" height="24" rx="3" fill="#6a3a4a"/>
-        <text x="420" y="203" fill="#fff" font-size="11">5.35%</text>
-        <text x="200" y="166" fill="#666" font-size="9" text-anchor="start">(2023)</text>
-
-        <!-- Annotation -->
-        <text x="200" y="250" fill="#888" font-size="10">Canada's rate grew from 0.3% to 5.05% in 8 years — the fastest expansion of any country.</text>
-      </svg>
-      <p class="chart-source">Source: Health Canada [6], N-IUSSP [16], Lancet Public Health [17], Belgium Federal Commission [18]</p>
-    </div>
-
-    <!-- ══════ CHART 8: Nuremberg / International Law Comparison ══════ -->
-    <div class="chart-container">
-      <h3>International Law Violations: A Side-by-Side</h3>
-      <p class="chart-subtitle">Legal principles established at Nuremberg (1947), Geneva (1949), and Rome (1998) — and how Canada's MAID program intersects with each</p>
-
-      <table class="data-table tnt-style-150">
-        <thead>
-          <tr>
-            <th class="tnt-style-492">Legal Principle</th>
-            <th class="tnt-style-50">What It Says</th>
-            <th class="tnt-style-50">What Canada Did</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Nuremberg Code, Principle 1</strong> (1947)</td>
-            <td>Voluntary consent is absolutely essential. The person must have sufficient understanding to make an enlightened decision.</td>
-            <td>149 people killed in 2024 could have received disability support but didn't. 47% of Track 2 recipients cited loneliness. Is consent given under despair truly voluntary?</td>
-          </tr>
-          <tr>
-            <td><strong>ICCPR Article 6(1)</strong></td>
-            <td>Every human being has the inherent right to life. No one shall be arbitrarily deprived of life.</td>
-            <td>76,475 state-administered deaths since 2016. The poor and disabled are killed at 2.42&times; the expected rate.</td>
-          </tr>
-          <tr class="highlight">
-            <td><strong>Rome Statute, Article 7(1)(a)</strong></td>
-            <td>Murder, when committed as part of a widespread or systematic attack against a civilian population.</td>
-            <td>16,499 deaths in a single year (2024). Systematic: written into federal law. Widespread: 5.05% of all deaths. Directed against civilians: disproportionately the vulnerable.</td>
-          </tr>
-          <tr class="highlight">
-            <td><strong>Rome Statute, Article 7(2)(a)</strong></td>
-            <td>"Attack directed against any civilian population" means a course of conduct pursuant to a State or organizational policy.</td>
-            <td>MAID is federal law (Bill C-7, Bill C-14). It is government policy. The killing is conducted by state-sanctioned medical professionals.</td>
-          </tr>
-          <tr>
-            <td><strong>CRPD Article 10</strong></td>
-            <td>States shall ensure the right to life of persons with disabilities on an equal basis.</td>
-            <td>Track 2 MAID recipients from the most vulnerable disability quintile: 56.9% (expected: 20%). A 2.85&times; overrepresentation.</td>
-          </tr>
-          <tr>
-            <td><strong>Geneva Convention Common Article 3</strong></td>
-            <td>Prohibits violence to life and person, in particular murder of all kinds, of persons taking no active part in hostilities.</td>
-            <td>Veterans offered MAID instead of wheelchair ramps. At least 4-5 cases referred to RCMP. Military personnel targeted by their own support system.</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="chart-source">Sources: Nuremberg Code [19], Rome Statute [12], ICCPR Art. 6, CRPD Art. 10, Geneva Conventions Common Art. 3</p>
-    </div>
-
-    <!-- ══════ CHART 9: The Disability-to-Death Pipeline ══════ -->
-    <div class="chart-container">
-      <h3>The Pipeline: From Disability to State-Administered Death</h3>
-      <p class="chart-subtitle">How Canada's system funnels vulnerable people toward MAID instead of support</p>
-
-      <svg viewBox="0 0 700 400" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
-        <!-- Stage 1: Disability -->
-        <rect x="50" y="20" width="600" height="50" rx="4" fill="#1a2a3a"/>
-        <text x="350" y="40" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold">6.2 million Canadians with disabilities</text>
-        <text x="350" y="57" fill="#8ab" font-size="10" text-anchor="middle">22% of population (Statistics Canada, 2022)</text>
-
-        <!-- Arrow -->
-        <polygon points="340,75 360,75 350,90" fill="#333"/>
-        <text x="500" y="85" fill="#666" font-size="10">Inadequate housing, income, care</text>
-
-        <!-- Stage 2: Poverty -->
-        <rect x="100" y="95" width="500" height="50" rx="4" fill="#2a1a2a"/>
-        <text x="350" y="115" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">Track 2: 732 people whose death was NOT foreseeable</text>
-        <text x="350" y="132" fill="#a8a" font-size="10" text-anchor="middle">Health Canada Sixth Annual Report, 2024</text>
-
-        <!-- Arrow -->
-        <polygon points="340,150 360,150 350,165" fill="#333"/>
-        <text x="500" y="160" fill="#666" font-size="10">47% report loneliness</text>
-
-        <!-- Stage 3: Burden -->
-        <rect x="140" y="170" width="420" height="50" rx="4" fill="#3a1a2a"/>
-        <text x="350" y="190" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">49% felt like a burden on others</text>
-        <text x="350" y="207" fill="#a88" font-size="10" text-anchor="middle">48.3% from poorest housing quintile (2.42&times; expected)</text>
-
-        <!-- Arrow -->
-        <polygon points="340,225 360,225 350,240" fill="#444"/>
-        <text x="500" y="235" fill="#666" font-size="10">No support offered</text>
-
-        <!-- Stage 4: MAID offered -->
-        <rect x="180" y="245" width="340" height="50" rx="4" fill="#5a1a2a"/>
-        <text x="350" y="265" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">163 did not receive disability services</text>
-        <text x="350" y="282" fill="#c88" font-size="10" text-anchor="middle">149 COULD have received them (Health Canada, 2024)</text>
-
-        <!-- Arrow -->
-        <polygon points="340,300 360,300 350,315" fill="#555"/>
-
-        <!-- Stage 5: Death -->
-        <rect x="220" y="320" width="260" height="55" rx="4" fill="#c41e3a"/>
-        <text x="350" y="342" fill="#fff" font-size="15" text-anchor="middle" font-weight="bold">KILLED BY THE STATE</text>
-        <text x="350" y="362" fill="#fcc" font-size="11" text-anchor="middle">16,499 in 2024 alone</text>
-      </svg>
-      <p class="tnt-style-493">Each stage narrows. The funnel points one direction: death. The exits &mdash; housing, income support, mental health care &mdash; are missing.</p>
-      <p class="chart-source">Source: Health Canada [6], Statistics Canada [11], Ontario Coroner [7]</p>
-    </div>
-
-    <!-- ══════ CHART 10: Provincial Per-Capita Heat Bar ══════ -->
-    <div class="chart-container">
-      <h3>MAID Deaths Per 100,000 Population by Province (2024)</h3>
-      <p class="chart-subtitle">Normalized by population to show which provinces kill at the highest rate</p>
-
-      <svg viewBox="0 0 700 380" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
-        <!-- Using 2024 MAID deaths / 2024 population estimates -->
-        <!-- QC: 5998/8.9M=67.4, BC: 2997/5.4M=55.5, NS: 445/1.0M=44.5, ON: 4944/15.8M=31.3, NB: 283/0.82M=34.5 -->
-        <!-- SK: 341/1.2M=28.4, AB: 1117/4.8M=23.3, MB: 186/1.4M=13.3, NL: 108/0.53M=20.4, PEI: 57/0.17M=33.5 -->
-        <!-- Scale: max ~70 per 100K, bar width = value/70 * 400 -->
-
-        <text x="120" y="30" fill="#888" font-size="10" text-anchor="end">MAID deaths per 100,000 residents</text>
-        <!-- Axis -->
-        <line x1="130" y1="40" x2="130" y2="360" stroke="#333" stroke-width="1"/>
-
-        <!-- Quebec: 67.4 -->
-        <text x="125" y="62" fill="#fff" font-size="12" text-anchor="end" font-weight="bold">Quebec</text>
-        <rect x="130" y="50" width="385" height="22" rx="3" fill="#c41e3a"/>
-        <text x="520" y="65" fill="#fff" font-size="11" font-weight="bold">67.4</text>
-
-        <!-- BC: 55.5 -->
-        <text x="125" y="92" fill="#ccc" font-size="12" text-anchor="end">British Columbia</text>
-        <rect x="130" y="80" width="317" height="22" rx="3" fill="#a82040"/>
-        <text x="452" y="95" fill="#ccc" font-size="11">55.5</text>
-
-        <!-- Nova Scotia: 44.5 -->
-        <text x="125" y="122" fill="#ccc" font-size="12" text-anchor="end">Nova Scotia</text>
-        <rect x="130" y="110" width="254" height="22" rx="3" fill="#901a38"/>
-        <text x="389" y="125" fill="#ccc" font-size="11">44.5</text>
-
-        <!-- New Brunswick: 34.5 -->
-        <text x="125" y="152" fill="#ccc" font-size="12" text-anchor="end">New Brunswick</text>
-        <rect x="130" y="140" width="197" height="22" rx="3" fill="#801530"/>
-        <text x="332" y="155" fill="#ccc" font-size="11">34.5</text>
-
-        <!-- PEI: 33.5 -->
-        <text x="125" y="182" fill="#ccc" font-size="12" text-anchor="end">P.E.I.</text>
-        <rect x="130" y="170" width="191" height="22" rx="3" fill="#781430"/>
-        <text x="326" y="185" fill="#ccc" font-size="11">33.5</text>
-
-        <!-- Ontario: 31.3 -->
-        <text x="125" y="212" fill="#ccc" font-size="12" text-anchor="end">Ontario</text>
-        <rect x="130" y="200" width="179" height="22" rx="3" fill="#701228"/>
-        <text x="314" y="215" fill="#ccc" font-size="11">31.3</text>
-
-        <!-- Saskatchewan: 28.4 -->
-        <text x="125" y="242" fill="#ccc" font-size="12" text-anchor="end">Saskatchewan</text>
-        <rect x="130" y="230" width="162" height="22" rx="3" fill="#681025"/>
-        <text x="297" y="245" fill="#ccc" font-size="11">28.4</text>
-
-        <!-- Alberta: 23.3 -->
-        <text x="125" y="272" fill="#ccc" font-size="12" text-anchor="end">Alberta</text>
-        <rect x="130" y="260" width="133" height="22" rx="3" fill="#601020"/>
-        <text x="268" y="275" fill="#ccc" font-size="11">23.3</text>
-
-        <!-- NL: 20.4 -->
-        <text x="125" y="302" fill="#ccc" font-size="12" text-anchor="end">Newfoundland</text>
-        <rect x="130" y="290" width="117" height="22" rx="3" fill="#580e1c"/>
-        <text x="252" y="305" fill="#ccc" font-size="11">20.4</text>
-
-        <!-- Manitoba: 13.3 -->
-        <text x="125" y="332" fill="#ccc" font-size="12" text-anchor="end">Manitoba</text>
-        <rect x="130" y="320" width="76" height="22" rx="3" fill="#500c18"/>
-        <text x="211" y="335" fill="#ccc" font-size="11">13.3</text>
-
-        <!-- Context -->
-        <text x="130" y="365" fill="#888" font-size="10">Quebec kills its residents at 5&times; the rate of Manitoba. Geography determines your risk of state-administered death.</text>
-      </svg>
-      <p class="chart-source">Source: Health Canada [6], Statistics Canada population estimates [20]</p>
-    </div>
-
-    <!-- ══════ CHART 11: MAID Expansion Timeline ══════ -->
-    <div class="chart-container">
-      <h3>The Expansion Timeline: Who Canada Plans to Kill Next</h3>
-      <p class="chart-subtitle">Each expansion lowers the bar. Each delay proves they know it's wrong.</p>
-
-      <svg viewBox="0 0 700 420" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
-        <!-- Timeline spine -->
-        <line x1="100" y1="30" x2="100" y2="400" stroke="#c41e3a" stroke-width="3"/>
-
-        <!-- 2016: Legalized -->
-        <circle cx="100" cy="40" r="8" fill="#c41e3a"/>
-        <text x="120" y="36" fill="#fff" font-size="13" font-weight="bold">2016 — Bill C-14: MAID Legalized</text>
-        <text x="120" y="54" fill="#888" font-size="11">Only for adults whose death is "reasonably foreseeable"</text>
-        <text x="120" y="68" fill="#666" font-size="10">1,018 killed in first year</text>
-
-        <!-- 2021: Track 2 -->
-        <circle cx="100" cy="110" r="8" fill="#c41e3a"/>
-        <text x="120" y="106" fill="#fff" font-size="13" font-weight="bold">2021 — Bill C-7: Track 2 Expansion</text>
-        <text x="120" y="124" fill="#888" font-size="11">Death no longer needs to be "reasonably foreseeable"</text>
-        <text x="120" y="138" fill="#666" font-size="10">Disabled, chronically ill, lonely now eligible. 10,064 killed.</text>
-
-        <!-- 2023: Mental illness delayed -->
-        <circle cx="100" cy="185" r="8" fill="#6a2030" stroke="#c41e3a" stroke-width="2"/>
-        <text x="120" y="181" fill="#e63950" font-size="13" font-weight="bold">2023 — Mental Illness Expansion DELAYED</text>
-        <text x="120" y="199" fill="#888" font-size="11">Originally set for March 2023. Delayed to March 2024.</text>
-        <text x="120" y="213" fill="#666" font-size="10">Psychiatrists warned: suicidal ideation cannot be distinguished from MAID requests.</text>
-
-        <!-- 2024: Delayed again -->
-        <circle cx="100" cy="260" r="8" fill="#6a2030" stroke="#c41e3a" stroke-width="2"/>
-        <text x="120" y="256" fill="#e63950" font-size="13" font-weight="bold">2024 — Bill C-62: Delayed AGAIN to 2027</text>
-        <text x="120" y="274" fill="#888" font-size="11">No clinical consensus on when mental illness is "irremediable"</text>
-        <text x="120" y="288" fill="#666" font-size="10">16,499 killed this year. 76,475 cumulative. Society of Canadian Psychiatry objects.</text>
-
-        <!-- 2027: Mental illness -->
-        <circle cx="100" cy="335" r="10" fill="#c41e3a" stroke="#fff" stroke-width="2"/>
-        <text x="120" y="331" fill="#fff" font-size="14" font-weight="bold">MARCH 2027 — Mental Illness Eligible</text>
-        <text x="120" y="349" fill="#e63950" font-size="12">Depression. Anxiety. PTSD. Personality disorders.</text>
-        <text x="120" y="365" fill="#888" font-size="11">Veterans with PTSD. Abuse survivors. The homeless.</text>
-        <text x="120" y="379" fill="#666" font-size="10">Projected: 20,000+ kills/year once mental illness is included.</text>
-
-        <!-- Future: Children -->
-        <circle cx="100" cy="400" r="6" fill="none" stroke="#c41e3a" stroke-width="2" stroke-dasharray="3"/>
-        <text x="120" y="403" fill="#888" font-size="11">PROPOSED: "Mature minors" — children eligible without parental consent</text>
-      </svg>
-      <p class="chart-source">Sources: Justice Canada [21], Bill C-62 [22], CCCC [23], CAMH [24]</p>
-    </div>
-
-    <!-- ══════ CHART 12: The Growth Rate Comparison ══════ -->
-    <div class="chart-container">
-      <h3>Nothing in History Has Grown Like This</h3>
-      <p class="chart-subtitle">8-year compound annual growth rate comparison</p>
-
-      <svg viewBox="0 0 700 250" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
-        <line x1="280" y1="20" x2="280" y2="220" stroke="#333" stroke-width="1"/>
-
-        <!-- Canada MAID: 41.6% CAGR -->
-        <text x="275" y="48" fill="#fff" font-size="12" font-weight="bold" text-anchor="end">Canada MAID</text>
-        <rect x="280" y="35" width="400" height="26" rx="3" fill="#c41e3a"/>
-        <text x="686" y="53" fill="#fff" font-size="12" font-weight="bold">41.6% /yr</text>
-
-        <!-- COVID peak: ~15% deaths increase -->
-        <text x="275" y="88" fill="#ccc" font-size="11" text-anchor="end">COVID excess deaths (peak)</text>
-        <rect x="280" y="75" width="144" height="22" rx="3" fill="#3a5a7a"/>
-        <text x="430" y="90" fill="#ccc" font-size="11">~15% /yr</text>
-
-        <!-- Opioid crisis: ~10% -->
-        <text x="275" y="123" fill="#ccc" font-size="11" text-anchor="end">Opioid crisis growth</text>
-        <rect x="280" y="110" width="96" height="22" rx="3" fill="#4a4a6a"/>
-        <text x="382" y="125" fill="#ccc" font-size="11">~10% /yr</text>
-
-        <!-- Cancer incidence: 2% -->
-        <text x="275" y="158" fill="#ccc" font-size="11" text-anchor="end">Cancer incidence growth</text>
-        <rect x="280" y="145" width="19" height="22" rx="3" fill="#3a4a3a"/>
-        <text x="305" y="160" fill="#ccc" font-size="11">~2% /yr</text>
-
-        <!-- Population growth: 1.4% -->
-        <text x="275" y="193" fill="#ccc" font-size="11" text-anchor="end">Canada population growth</text>
-        <rect x="280" y="180" width="13" height="22" rx="3" fill="#2a3a2a"/>
-        <text x="299" y="195" fill="#ccc" font-size="11">1.4% /yr</text>
-
-        <!-- Annotation -->
-        <text x="280" y="230" fill="#e63950" font-size="11" font-weight="bold">MAID grew 4&times; faster than COVID, 20&times; faster than cancer, 30&times; faster than population.</text>
-      </svg>
-      <p class="chart-source">Source: Health Canada [1]-[6], StatsCan [11], PHAC opioid data [25]</p>
-    </div>
-
-    <!-- ══════ CHART 13: The Consent Question ══════ -->
-    <div class="chart-container">
-      <h3>Can Consent Exist Under These Conditions?</h3>
-      <p class="chart-subtitle">The Nuremberg Code requires "understanding and enlightened decision" free from coercion. Health Canada's own data shows who is choosing MAID.</p>
-
-      <table class="data-table tnt-style-150">
-        <thead>
-          <tr>
-            <th>Condition at Time of MAID Request</th>
-            <th>Track 1 (dying)</th>
-            <th>Track 2 (NOT dying)</th>
-            <th>Consent Valid?</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Felt like a burden on others</td>
-            <td>45%</td>
-            <td><strong>49%</strong></td>
-            <td class="tnt-style-494">Coerced by guilt</td>
-          </tr>
-          <tr>
-            <td>Loneliness and isolation</td>
-            <td>27%</td>
-            <td><strong>47%</strong></td>
-            <td class="tnt-style-494">Coerced by abandonment</td>
-          </tr>
-          <tr>
-            <td>From poorest housing quintile</td>
-            <td>—</td>
-            <td><strong>48.3%</strong> (expected: 20%)</td>
-            <td class="tnt-style-494">Coerced by poverty</td>
-          </tr>
-          <tr>
-            <td>Did not receive disability services</td>
-            <td>—</td>
-            <td><strong>149 people</strong></td>
-            <td class="tnt-style-494">Denied alternative</td>
-          </tr>
-          <tr class="highlight">
-            <td>Veteran offered MAID instead of wheelchair ramp</td>
-            <td colspan="2">Confirmed by Veterans Minister in Parliament</td>
-            <td class="tnt-style-494"><strong>State coercion</strong></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="stat-callout tnt-style-109">
-        <p class="callout-text">The Nuremberg Code, Principle 1: The person must be so situated as to be able to exercise <strong>free power of choice, without the intervention of any element of force, fraud, deceit, duress, overreaching, or other ulterior form of constraint or coercion.</strong></p>
-        <p class="tnt-style-495">— Nuremberg Military Tribunals, 1947. The same tribunal that convicted Nazi doctors.</p>
-      </div>
-      <p class="chart-source">Source: Health Canada [6], Nuremberg Code [19], Ontario Coroner [7], CBC [9]</p>
-    </div>
-
-    <!-- ══════ CHART 15: Veteran Death Pathways ══════ -->
-    <div class="chart-container">
-      <h3>Three Ways Canada Kills Its Veterans</h3>
-      <p class="chart-subtitle">Government's own data on veteran death pathways</p>
-
-      <svg viewBox="0 0 700 340" class="bar-chart" xmlns="http://www.w3.org/2000/svg">
-        <!-- Central node -->
-        <rect x="250" y="10" width="200" height="45" rx="6" fill="#333" stroke="#fff" stroke-width="1"/>
-        <text x="350" y="30" fill="#fff" font-size="12" text-anchor="middle" font-weight="bold">CANADIAN VETERAN</text>
-        <text x="350" y="46" fill="#888" font-size="10" text-anchor="middle">Leaves service, needs help</text>
-
-        <!-- Three paths -->
-        <!-- Path lines -->
-        <line x1="200" y1="55" x2="100" y2="100" stroke="#c41e3a" stroke-width="2"/>
-        <line x1="350" y1="55" x2="350" y2="100" stroke="#c41e3a" stroke-width="2"/>
-        <line x1="500" y1="55" x2="600" y2="100" stroke="#c41e3a" stroke-width="2"/>
-
-        <!-- Path 1: Suicide -->
-        <rect x="10" y="100" width="195" height="105" rx="4" fill="#3a1520"/>
-        <text x="107" y="120" fill="#e63950" font-size="13" text-anchor="middle" font-weight="bold">PATHWAY 1: SUICIDE</text>
-        <line x1="20" y1="130" x2="195" y2="130" stroke="#4a2030" stroke-width="1"/>
-        <text x="107" y="148" fill="#fff" font-size="11" text-anchor="middle">Male: 1.4&times; civilian rate</text>
-        <text x="107" y="165" fill="#fff" font-size="11" text-anchor="middle">Female: 1.9&times; civilian rate</text>
-        <text x="107" y="182" fill="#c88" font-size="10" text-anchor="middle">Highest risk: first 4 years</text>
-        <text x="107" y="196" fill="#888" font-size="9" text-anchor="middle">Source: VAC 2021 Study</text>
-
-        <!-- Path 2: Benefits Denied -->
-        <rect x="215" y="100" width="270" height="105" rx="4" fill="#2a2a1a"/>
-        <text x="350" y="120" fill="#e6a830" font-size="13" text-anchor="middle" font-weight="bold">PATHWAY 2: DENIED &amp; ABANDONED</text>
-        <line x1="225" y1="130" x2="475" y2="130" stroke="#4a4a2a" stroke-width="1"/>
-        <text x="350" y="148" fill="#fff" font-size="11" text-anchor="middle">24% mental health claims DENIED</text>
-        <text x="350" y="165" fill="#fff" font-size="11" text-anchor="middle">Only 47% meet 16-week standard</text>
-        <text x="350" y="182" fill="#cc8" font-size="10" text-anchor="middle">Backlog: 11,000+ and growing</text>
-        <text x="350" y="196" fill="#888" font-size="9" text-anchor="middle">Source: Auditor General 2022, VAC 2024-25</text>
-
-        <!-- Path 3: MAID -->
-        <rect x="495" y="100" width="195" height="105" rx="4" fill="#3a1520"/>
-        <text x="592" y="120" fill="#e63950" font-size="13" text-anchor="middle" font-weight="bold">PATHWAY 3: MAID</text>
-        <line x1="505" y1="130" x2="680" y2="130" stroke="#4a2030" stroke-width="1"/>
-        <text x="592" y="148" fill="#fff" font-size="11" text-anchor="middle">Asked for wheelchair ramp</text>
-        <text x="592" y="165" fill="#fff" font-size="11" text-anchor="middle">Offered death instead</text>
-        <text x="592" y="182" fill="#c88" font-size="10" text-anchor="middle">4-5 cases referred to RCMP</text>
-        <text x="592" y="196" fill="#888" font-size="9" text-anchor="middle">Source: Parliamentary testimony 2022</text>
-
-        <!-- Convergence -->
-        <line x1="100" y1="205" x2="350" y2="245" stroke="#c41e3a" stroke-width="1.5" stroke-dasharray="4"/>
-        <line x1="350" y1="205" x2="350" y2="245" stroke="#c41e3a" stroke-width="1.5" stroke-dasharray="4"/>
-        <line x1="600" y1="205" x2="350" y2="245" stroke="#c41e3a" stroke-width="1.5" stroke-dasharray="4"/>
-
-        <!-- Bottom: the math -->
-        <rect x="150" y="245" width="400" height="80" rx="6" fill="#c41e3a"/>
-        <text x="350" y="268" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold">THE MATH</text>
-        <text x="350" y="288" fill="#fdd" font-size="11" text-anchor="middle">MAID: ~$2,500 | Wheelchair ramp: ~$5,000 | Annual benefits: ~$25,000</text>
-        <text x="350" y="306" fill="#fff" font-size="12" text-anchor="middle" font-weight="bold">It costs less to kill a veteran than to help one for 6 months</text>
-        <text x="350" y="320" fill="#fcc" font-size="10" text-anchor="middle">Source: CMAJ cost analysis, VAC benefits schedule</text>
-      </svg>
-      <p class="chart-source">Sources: VAC [veterans.html refs 1-6], Parliamentary testimony [7-8], CMAJ [9]</p>
-    </div>
-
-    <!-- Removed: two non-data image blocks (a self-promotional "TENET5 vs Copilot"
+<p class="chart-source">Source: Health Canada [6]</p>
+</div>
+<!-- ══════ CHART 5: 2030 Projection ══════ -->
+<div class="chart-container">
+<h3>Conservative Projection: 200,000+ Dead by 2030</h3>
+<p class="chart-subtitle">Using the government's own lowest growth rate (7.5% from 2023→2024)</p>
+<div class="tnt-style-484">
+<!-- 2024 actual -->
+<div class="projection-bar">
+<span class="year-label">2024</span>
+<div class="bar-track">
+<div class="bar-fill actual tnt-style-485">76,475 (actual)</div>
+</div>
+</div>
+<!-- 2025 -->
+<div class="projection-bar">
+<span class="year-label">2025</span>
+<div class="bar-track">
+<div class="bar-fill projected tnt-style-486">94,211</div>
+</div>
+</div>
+<!-- 2026 -->
+<div class="projection-bar">
+<span class="year-label">2026</span>
+<div class="bar-track">
+<div class="bar-fill projected tnt-style-487">113,277</div>
+</div>
+</div>
+<!-- 2027 -->
+<div class="projection-bar">
+<span class="year-label">2027</span>
+<div class="bar-track">
+<div class="bar-fill projected tnt-style-488">133,773</div>
+</div>
+</div>
+<!-- 2028 -->
+<div class="projection-bar">
+<span class="year-label">2028</span>
+<div class="bar-track">
+<div class="bar-fill projected tnt-style-489">155,806</div>
+</div>
+</div>
+<!-- 2029 -->
+<div class="projection-bar">
+<span class="year-label">2029</span>
+<div class="bar-track">
+<div class="bar-fill projected tnt-style-490">179,492</div>
+</div>
+</div>
+<!-- 2030 -->
+<div class="projection-bar">
+<span class="year-label tnt-style-491">2030</span>
+<div class="bar-track">
+<div class="bar-fill actual tnt-style-45"><strong>204,954</strong></div>
+</div>
+</div>
+</div>
+<p class="tnt-style-77">Formula: N(t) = 16,499 × (1.075)<sup>t</sup>, cumulative sum from 2016 base of 76,475.</p>
+<p class="chart-source">Source: Health Canada [6], author calculation using government's own 7.5% growth rate</p>
+</div>
+<!-- ══════ CHART 6: Loneliness & Burden (Track 2) ══════ -->
+<div class="chart-container">
+<h3>Track 2: Why They Chose Death</h3>
+<p class="chart-subtitle">Self-reported reasons among people whose death was NOT reasonably foreseeable (2024)</p>
+<svg class="bar-chart" viewbox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+<!-- Feeling like a burden: 49% -->
+<text fill="#ccc" font-size="13" text-anchor="end" x="210" y="35">Feeling like a burden</text>
+<rect fill="#c41e3a" height="24" opacity="0.9" rx="3" width="294" x="220" y="20"></rect>
+<text fill="#fff" font-size="12" font-weight="bold" x="520" y="37">49%</text>
+<!-- Loneliness: 47% -->
+<text fill="#ccc" font-size="13" text-anchor="end" x="210" y="75">Loneliness &amp; isolation</text>
+<rect fill="#c41e3a" height="24" opacity="0.75" rx="3" width="282" x="220" y="60"></rect>
+<text fill="#fff" font-size="12" font-weight="bold" x="508" y="77">47%</text>
+<!-- Loss of meaningful activities -->
+<text fill="#ccc" font-size="13" text-anchor="end" x="210" y="115">Loss of meaningful activities</text>
+<rect fill="#8b1a2b" height="24" rx="3" width="330" x="220" y="100"></rect>
+<text fill="#ccc" font-size="12" font-weight="bold" x="556" y="117">~55%</text>
+<!-- Context line -->
+<text fill="#666" font-size="10" x="220" y="155">These are people who were not dying. They were lonely, poor, and felt like a burden.</text>
+<text fill="#666" font-size="10" x="220" y="170">Canada's answer: kill them.</text>
+</svg>
+<p class="chart-source">Source: Health Canada Sixth Annual Report [6]</p>
+</div>
+<!-- ══════ CHART 7: International Comparison ══════ -->
+<div class="chart-container">
+<h3>Canada vs. The World: Assisted Death as % of All Deaths</h3>
+<p class="chart-subtitle">Canada now kills a higher proportion of its citizens than any country except the Netherlands</p>
+<svg class="bar-chart" viewbox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+<!-- Axis: horizontal bars grow rightward from x=200 at 40px per percentage point -->
+<line stroke="#333" stroke-width="1" x1="200" x2="200" y1="30" y2="225"></line>
+<line stroke="#333" stroke-width="1" x1="200" x2="460" y1="225" y2="225"></line>
+<!-- % gridlines at x = 200 + pct*40, labelled along the baseline -->
+<text fill="#666" font-size="10" text-anchor="middle" x="200" y="240">0%</text>
+<line stroke="#1a1a1a" stroke-dasharray="3" stroke-width="1" x1="280" x2="280" y1="30" y2="225"></line>
+<text fill="#666" font-size="10" text-anchor="middle" x="280" y="240">2%</text>
+<line stroke="#1a1a1a" stroke-dasharray="3" stroke-width="1" x1="360" x2="360" y1="30" y2="225"></line>
+<text fill="#666" font-size="10" text-anchor="middle" x="360" y="240">4%</text>
+<line stroke="#1a1a1a" stroke-dasharray="3" stroke-width="1" x1="440" x2="440" y1="30" y2="225"></line>
+<text fill="#666" font-size="10" text-anchor="middle" x="440" y="240">6%</text>
+<!-- Switzerland 2.34% → h=78 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="195" y="45">Switzerland</text>
+<rect fill="#4a4a6a" height="24" rx="3" width="94" x="200" y="37"></rect>
+<text fill="#fff" font-size="11" x="300" y="53">2.34%</text>
+<text fill="#666" font-size="9" text-anchor="start" x="200" y="16">(2023)</text>
+<!-- Belgium 3.55% → h=118 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="195" y="95">Belgium</text>
+<rect fill="#5a4a6a" height="24" rx="3" width="142" x="200" y="87"></rect>
+<text fill="#fff" font-size="11" x="348" y="103">3.55%</text>
+<text fill="#666" font-size="9" text-anchor="start" x="200" y="66">(2024)</text>
+<!-- CANADA 5.05% → h=202 -->
+<text fill="#fff" font-size="13" font-weight="bold" text-anchor="end" x="195" y="145">CANADA</text>
+<rect fill="#c41e3a" height="24" rx="3" width="202" x="200" y="137"></rect>
+<text fill="#fff" font-size="12" font-weight="bold" x="408" y="153">5.05%</text>
+<text fill="#e63950" font-size="9" text-anchor="start" x="200" y="116">(2024)</text>
+<!-- Netherlands 5.35% → h=214 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="195" y="195">Netherlands</text>
+<rect fill="#6a3a4a" height="24" rx="3" width="214" x="200" y="187"></rect>
+<text fill="#fff" font-size="11" x="420" y="203">5.35%</text>
+<text fill="#666" font-size="9" text-anchor="start" x="200" y="166">(2023)</text>
+<!-- Annotation -->
+<text fill="#888" font-size="10" x="200" y="250">Canada's rate grew from 0.3% to 5.05% in 8 years — the fastest expansion of any country.</text>
+</svg>
+<p class="chart-source">Source: Health Canada [6], N-IUSSP [16], Lancet Public Health [17], Belgium Federal Commission [18]</p>
+</div>
+<!-- ══════ CHART 8: Nuremberg / International Law Comparison ══════ -->
+<div class="chart-container">
+<h3>International Law Violations: A Side-by-Side</h3>
+<p class="chart-subtitle">Legal principles established at Nuremberg (1947), Geneva (1949), and Rome (1998) — and how Canada's MAID program intersects with each</p>
+<table class="data-table tnt-style-150">
+<thead>
+<tr>
+<th class="tnt-style-492">Legal Principle</th>
+<th class="tnt-style-50">What It Says</th>
+<th class="tnt-style-50">What Canada Did</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Nuremberg Code, Principle 1</strong> (1947)</td>
+<td>Voluntary consent is absolutely essential. The person must have sufficient understanding to make an enlightened decision.</td>
+<td>149 people killed in 2024 could have received disability support but didn't. 47% of Track 2 recipients cited loneliness. Is consent given under despair truly voluntary?</td>
+</tr>
+<tr>
+<td><strong>ICCPR Article 6(1)</strong></td>
+<td>Every human being has the inherent right to life. No one shall be arbitrarily deprived of life.</td>
+<td>76,475 state-administered deaths since 2016. The poor and disabled are killed at 2.42× the expected rate.</td>
+</tr>
+<tr class="highlight">
+<td><strong>Rome Statute, Article 7(1)(a)</strong></td>
+<td>Murder, when committed as part of a widespread or systematic attack against a civilian population.</td>
+<td>16,499 deaths in a single year (2024). Systematic: written into federal law. Widespread: 5.05% of all deaths. Directed against civilians: disproportionately the vulnerable.</td>
+</tr>
+<tr class="highlight">
+<td><strong>Rome Statute, Article 7(2)(a)</strong></td>
+<td>"Attack directed against any civilian population" means a course of conduct pursuant to a State or organizational policy.</td>
+<td>MAID is federal law (Bill C-7, Bill C-14). It is government policy. The killing is conducted by state-sanctioned medical professionals.</td>
+</tr>
+<tr>
+<td><strong>CRPD Article 10</strong></td>
+<td>States shall ensure the right to life of persons with disabilities on an equal basis.</td>
+<td>Track 2 MAID recipients from the most vulnerable disability quintile: 56.9% (expected: 20%). A 2.85× overrepresentation.</td>
+</tr>
+<tr>
+<td><strong>Geneva Convention Common Article 3</strong></td>
+<td>Prohibits violence to life and person, in particular murder of all kinds, of persons taking no active part in hostilities.</td>
+<td>Veterans offered MAID instead of wheelchair ramps. At least 4-5 cases referred to RCMP. Military personnel targeted by their own support system.</td>
+</tr>
+</tbody>
+</table>
+<p class="chart-source">Sources: Nuremberg Code [19], Rome Statute [12], ICCPR Art. 6, CRPD Art. 10, Geneva Conventions Common Art. 3</p>
+</div>
+<!-- ══════ CHART 9: The Disability-to-Death Pipeline ══════ -->
+<div class="chart-container">
+<h3>The Pipeline: From Disability to State-Administered Death</h3>
+<p class="chart-subtitle">How Canada's system funnels vulnerable people toward MAID instead of support</p>
+<svg class="bar-chart" viewbox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+<!-- Stage 1: Disability -->
+<rect fill="#1a2a3a" height="50" rx="4" width="600" x="50" y="20"></rect>
+<text fill="#fff" font-size="14" font-weight="bold" text-anchor="middle" x="350" y="40">6.2 million Canadians with disabilities</text>
+<text fill="#8ab" font-size="10" text-anchor="middle" x="350" y="57">22% of population (Statistics Canada, 2022)</text>
+<!-- Arrow -->
+<polygon fill="#333" points="340,75 360,75 350,90"></polygon>
+<text fill="#666" font-size="10" x="500" y="85">Inadequate housing, income, care</text>
+<!-- Stage 2: Poverty -->
+<rect fill="#2a1a2a" height="50" rx="4" width="500" x="100" y="95"></rect>
+<text fill="#fff" font-size="13" font-weight="bold" text-anchor="middle" x="350" y="115">Track 2: 732 people whose death was NOT foreseeable</text>
+<text fill="#a8a" font-size="10" text-anchor="middle" x="350" y="132">Health Canada Sixth Annual Report, 2024</text>
+<!-- Arrow -->
+<polygon fill="#333" points="340,150 360,150 350,165"></polygon>
+<text fill="#666" font-size="10" x="500" y="160">47% report loneliness</text>
+<!-- Stage 3: Burden -->
+<rect fill="#3a1a2a" height="50" rx="4" width="420" x="140" y="170"></rect>
+<text fill="#fff" font-size="13" font-weight="bold" text-anchor="middle" x="350" y="190">49% felt like a burden on others</text>
+<text fill="#a88" font-size="10" text-anchor="middle" x="350" y="207">48.3% from poorest housing quintile (2.42× expected)</text>
+<!-- Arrow -->
+<polygon fill="#444" points="340,225 360,225 350,240"></polygon>
+<text fill="#666" font-size="10" x="500" y="235">No support offered</text>
+<!-- Stage 4: MAID offered -->
+<rect fill="#5a1a2a" height="50" rx="4" width="340" x="180" y="245"></rect>
+<text fill="#fff" font-size="13" font-weight="bold" text-anchor="middle" x="350" y="265">163 did not receive disability services</text>
+<text fill="#c88" font-size="10" text-anchor="middle" x="350" y="282">149 COULD have received them (Health Canada, 2024)</text>
+<!-- Arrow -->
+<polygon fill="#555" points="340,300 360,300 350,315"></polygon>
+<!-- Stage 5: Death -->
+<rect fill="#c41e3a" height="55" rx="4" width="260" x="220" y="320"></rect>
+<text fill="#fff" font-size="15" font-weight="bold" text-anchor="middle" x="350" y="342">KILLED BY THE STATE</text>
+<text fill="#fcc" font-size="11" text-anchor="middle" x="350" y="362">16,499 in 2024 alone</text>
+</svg>
+<p class="tnt-style-493">Each stage narrows. The funnel points one direction: death. The exits — housing, income support, mental health care — are missing.</p>
+<p class="chart-source">Source: Health Canada [6], Statistics Canada [11], Ontario Coroner [7]</p>
+</div>
+<!-- ══════ CHART 10: Provincial Per-Capita Heat Bar ══════ -->
+<div class="chart-container">
+<h3>MAID Deaths Per 100,000 Population by Province (2024)</h3>
+<p class="chart-subtitle">Normalized by population to show which provinces kill at the highest rate</p>
+<svg class="bar-chart" viewbox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+<!-- Using 2024 MAID deaths / 2024 population estimates -->
+<!-- QC: 5998/8.9M=67.4, BC: 2997/5.4M=55.5, NS: 445/1.0M=44.5, ON: 4944/15.8M=31.3, NB: 283/0.82M=34.5 -->
+<!-- SK: 341/1.2M=28.4, AB: 1117/4.8M=23.3, MB: 186/1.4M=13.3, NL: 108/0.53M=20.4, PEI: 57/0.17M=33.5 -->
+<!-- Scale: max ~70 per 100K, bar width = value/70 * 400 -->
+<text fill="#888" font-size="10" text-anchor="end" x="120" y="30">MAID deaths per 100,000 residents</text>
+<!-- Axis -->
+<line stroke="#333" stroke-width="1" x1="130" x2="130" y1="40" y2="360"></line>
+<!-- Quebec: 67.4 -->
+<text fill="#fff" font-size="12" font-weight="bold" text-anchor="end" x="125" y="62">Quebec</text>
+<rect fill="#c41e3a" height="22" rx="3" width="385" x="130" y="50"></rect>
+<text fill="#fff" font-size="11" font-weight="bold" x="520" y="65">67.4</text>
+<!-- BC: 55.5 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="92">British Columbia</text>
+<rect fill="#a82040" height="22" rx="3" width="317" x="130" y="80"></rect>
+<text fill="#ccc" font-size="11" x="452" y="95">55.5</text>
+<!-- Nova Scotia: 44.5 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="122">Nova Scotia</text>
+<rect fill="#901a38" height="22" rx="3" width="254" x="130" y="110"></rect>
+<text fill="#ccc" font-size="11" x="389" y="125">44.5</text>
+<!-- New Brunswick: 34.5 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="152">New Brunswick</text>
+<rect fill="#801530" height="22" rx="3" width="197" x="130" y="140"></rect>
+<text fill="#ccc" font-size="11" x="332" y="155">34.5</text>
+<!-- PEI: 33.5 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="182">P.E.I.</text>
+<rect fill="#781430" height="22" rx="3" width="191" x="130" y="170"></rect>
+<text fill="#ccc" font-size="11" x="326" y="185">33.5</text>
+<!-- Ontario: 31.3 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="212">Ontario</text>
+<rect fill="#701228" height="22" rx="3" width="179" x="130" y="200"></rect>
+<text fill="#ccc" font-size="11" x="314" y="215">31.3</text>
+<!-- Saskatchewan: 28.4 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="242">Saskatchewan</text>
+<rect fill="#681025" height="22" rx="3" width="162" x="130" y="230"></rect>
+<text fill="#ccc" font-size="11" x="297" y="245">28.4</text>
+<!-- Alberta: 23.3 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="272">Alberta</text>
+<rect fill="#601020" height="22" rx="3" width="133" x="130" y="260"></rect>
+<text fill="#ccc" font-size="11" x="268" y="275">23.3</text>
+<!-- NL: 20.4 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="302">Newfoundland</text>
+<rect fill="#580e1c" height="22" rx="3" width="117" x="130" y="290"></rect>
+<text fill="#ccc" font-size="11" x="252" y="305">20.4</text>
+<!-- Manitoba: 13.3 -->
+<text fill="#ccc" font-size="12" text-anchor="end" x="125" y="332">Manitoba</text>
+<rect fill="#500c18" height="22" rx="3" width="76" x="130" y="320"></rect>
+<text fill="#ccc" font-size="11" x="211" y="335">13.3</text>
+<!-- Context -->
+<text fill="#888" font-size="10" x="130" y="365">Quebec kills its residents at 5× the rate of Manitoba. Geography determines your risk of state-administered death.</text>
+</svg>
+<p class="chart-source">Source: Health Canada [6], Statistics Canada population estimates [20]</p>
+</div>
+<!-- ══════ CHART 11: MAID Expansion Timeline ══════ -->
+<div class="chart-container">
+<h3>The Expansion Timeline: Who Canada Plans to Kill Next</h3>
+<p class="chart-subtitle">Each expansion lowers the bar. Each delay proves they know it's wrong.</p>
+<svg class="bar-chart" viewbox="0 0 700 420" xmlns="http://www.w3.org/2000/svg">
+<!-- Timeline spine -->
+<line stroke="#c41e3a" stroke-width="3" x1="100" x2="100" y1="30" y2="400"></line>
+<!-- 2016: Legalized -->
+<circle cx="100" cy="40" fill="#c41e3a" r="8"></circle>
+<text fill="#fff" font-size="13" font-weight="bold" x="120" y="36">2016 — Bill C-14: MAID Legalized</text>
+<text fill="#888" font-size="11" x="120" y="54">Only for adults whose death is "reasonably foreseeable"</text>
+<text fill="#666" font-size="10" x="120" y="68">1,018 killed in first year</text>
+<!-- 2021: Track 2 -->
+<circle cx="100" cy="110" fill="#c41e3a" r="8"></circle>
+<text fill="#fff" font-size="13" font-weight="bold" x="120" y="106">2021 — Bill C-7: Track 2 Expansion</text>
+<text fill="#888" font-size="11" x="120" y="124">Death no longer needs to be "reasonably foreseeable"</text>
+<text fill="#666" font-size="10" x="120" y="138">Disabled, chronically ill, lonely now eligible. 10,064 killed.</text>
+<!-- 2023: Mental illness delayed -->
+<circle cx="100" cy="185" fill="#6a2030" r="8" stroke="#c41e3a" stroke-width="2"></circle>
+<text fill="#e63950" font-size="13" font-weight="bold" x="120" y="181">2023 — Mental Illness Expansion DELAYED</text>
+<text fill="#888" font-size="11" x="120" y="199">Originally set for March 2023. Delayed to March 2024.</text>
+<text fill="#666" font-size="10" x="120" y="213">Psychiatrists warned: suicidal ideation cannot be distinguished from MAID requests.</text>
+<!-- 2024: Delayed again -->
+<circle cx="100" cy="260" fill="#6a2030" r="8" stroke="#c41e3a" stroke-width="2"></circle>
+<text fill="#e63950" font-size="13" font-weight="bold" x="120" y="256">2024 — Bill C-62: Delayed AGAIN to 2027</text>
+<text fill="#888" font-size="11" x="120" y="274">No clinical consensus on when mental illness is "irremediable"</text>
+<text fill="#666" font-size="10" x="120" y="288">16,499 killed this year. 76,475 cumulative. Society of Canadian Psychiatry objects.</text>
+<!-- 2027: Mental illness -->
+<circle cx="100" cy="335" fill="#c41e3a" r="10" stroke="#fff" stroke-width="2"></circle>
+<text fill="#fff" font-size="14" font-weight="bold" x="120" y="331">MARCH 2027 — Mental Illness Eligible</text>
+<text fill="#e63950" font-size="12" x="120" y="349">Depression. Anxiety. PTSD. Personality disorders.</text>
+<text fill="#888" font-size="11" x="120" y="365">Veterans with PTSD. Abuse survivors. The homeless.</text>
+<text fill="#666" font-size="10" x="120" y="379">Projected: 20,000+ kills/year once mental illness is included.</text>
+<!-- Future: Children -->
+<circle cx="100" cy="400" fill="none" r="6" stroke="#c41e3a" stroke-dasharray="3" stroke-width="2"></circle>
+<text fill="#888" font-size="11" x="120" y="403">PROPOSED: "Mature minors" — children eligible without parental consent</text>
+</svg>
+<p class="chart-source">Sources: Justice Canada [21], Bill C-62 [22], CCCC [23], CAMH [24]</p>
+</div>
+<!-- ══════ CHART 12: The Growth Rate Comparison ══════ -->
+<div class="chart-container">
+<h3>Nothing in History Has Grown Like This</h3>
+<p class="chart-subtitle">8-year compound annual growth rate comparison</p>
+<svg class="bar-chart" viewbox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+<line stroke="#333" stroke-width="1" x1="280" x2="280" y1="20" y2="220"></line>
+<!-- Canada MAID: 41.6% CAGR -->
+<text fill="#fff" font-size="12" font-weight="bold" text-anchor="end" x="275" y="48">Canada MAID</text>
+<rect fill="#c41e3a" height="26" rx="3" width="400" x="280" y="35"></rect>
+<text fill="#fff" font-size="12" font-weight="bold" x="686" y="53">41.6% /yr</text>
+<!-- COVID peak: ~15% deaths increase -->
+<text fill="#ccc" font-size="11" text-anchor="end" x="275" y="88">COVID excess deaths (peak)</text>
+<rect fill="#3a5a7a" height="22" rx="3" width="144" x="280" y="75"></rect>
+<text fill="#ccc" font-size="11" x="430" y="90">~15% /yr</text>
+<!-- Opioid crisis: ~10% -->
+<text fill="#ccc" font-size="11" text-anchor="end" x="275" y="123">Opioid crisis growth</text>
+<rect fill="#4a4a6a" height="22" rx="3" width="96" x="280" y="110"></rect>
+<text fill="#ccc" font-size="11" x="382" y="125">~10% /yr</text>
+<!-- Cancer incidence: 2% -->
+<text fill="#ccc" font-size="11" text-anchor="end" x="275" y="158">Cancer incidence growth</text>
+<rect fill="#3a4a3a" height="22" rx="3" width="19" x="280" y="145"></rect>
+<text fill="#ccc" font-size="11" x="305" y="160">~2% /yr</text>
+<!-- Population growth: 1.4% -->
+<text fill="#ccc" font-size="11" text-anchor="end" x="275" y="193">Canada population growth</text>
+<rect fill="#2a3a2a" height="22" rx="3" width="13" x="280" y="180"></rect>
+<text fill="#ccc" font-size="11" x="299" y="195">1.4% /yr</text>
+<!-- Annotation -->
+<text fill="#e63950" font-size="11" font-weight="bold" x="280" y="230">MAID grew 4× faster than COVID, 20× faster than cancer, 30× faster than population.</text>
+</svg>
+<p class="chart-source">Source: Health Canada [1]-[6], StatsCan [11], PHAC opioid data [25]</p>
+</div>
+<!-- ══════ CHART 13: The Consent Question ══════ -->
+<div class="chart-container">
+<h3>Can Consent Exist Under These Conditions?</h3>
+<p class="chart-subtitle">The Nuremberg Code requires "understanding and enlightened decision" free from coercion. Health Canada's own data shows who is choosing MAID.</p>
+<table class="data-table tnt-style-150">
+<thead>
+<tr>
+<th>Condition at Time of MAID Request</th>
+<th>Track 1 (dying)</th>
+<th>Track 2 (NOT dying)</th>
+<th>Consent Valid?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Felt like a burden on others</td>
+<td>45%</td>
+<td><strong>49%</strong></td>
+<td class="tnt-style-494">Coerced by guilt</td>
+</tr>
+<tr>
+<td>Loneliness and isolation</td>
+<td>27%</td>
+<td><strong>47%</strong></td>
+<td class="tnt-style-494">Coerced by abandonment</td>
+</tr>
+<tr>
+<td>From poorest housing quintile</td>
+<td>—</td>
+<td><strong>48.3%</strong> (expected: 20%)</td>
+<td class="tnt-style-494">Coerced by poverty</td>
+</tr>
+<tr>
+<td>Did not receive disability services</td>
+<td>—</td>
+<td><strong>149 people</strong></td>
+<td class="tnt-style-494">Denied alternative</td>
+</tr>
+<tr class="highlight">
+<td>Veteran offered MAID instead of wheelchair ramp</td>
+<td colspan="2">Confirmed by Veterans Minister in Parliament</td>
+<td class="tnt-style-494"><strong>State coercion</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="stat-callout tnt-style-109">
+<p class="callout-text">The Nuremberg Code, Principle 1: The person must be so situated as to be able to exercise <strong>free power of choice, without the intervention of any element of force, fraud, deceit, duress, overreaching, or other ulterior form of constraint or coercion.</strong></p>
+<p class="tnt-style-495">— Nuremberg Military Tribunals, 1947. The same tribunal that convicted Nazi doctors.</p>
+</div>
+<p class="chart-source">Source: Health Canada [6], Nuremberg Code [19], Ontario Coroner [7], CBC [9]</p>
+</div>
+<!-- ══════ CHART 15: Veteran Death Pathways ══════ -->
+<div class="chart-container">
+<h3>Three Ways Canada Kills Its Veterans</h3>
+<p class="chart-subtitle">Government's own data on veteran death pathways</p>
+<svg class="bar-chart" viewbox="0 0 700 340" xmlns="http://www.w3.org/2000/svg">
+<!-- Central node -->
+<rect fill="#333" height="45" rx="6" stroke="#fff" stroke-width="1" width="200" x="250" y="10"></rect>
+<text fill="#fff" font-size="12" font-weight="bold" text-anchor="middle" x="350" y="30">CANADIAN VETERAN</text>
+<text fill="#888" font-size="10" text-anchor="middle" x="350" y="46">Leaves service, needs help</text>
+<!-- Three paths -->
+<!-- Path lines -->
+<line stroke="#c41e3a" stroke-width="2" x1="200" x2="100" y1="55" y2="100"></line>
+<line stroke="#c41e3a" stroke-width="2" x1="350" x2="350" y1="55" y2="100"></line>
+<line stroke="#c41e3a" stroke-width="2" x1="500" x2="600" y1="55" y2="100"></line>
+<!-- Path 1: Suicide -->
+<rect fill="#3a1520" height="105" rx="4" width="195" x="10" y="100"></rect>
+<text fill="#e63950" font-size="13" font-weight="bold" text-anchor="middle" x="107" y="120">PATHWAY 1: SUICIDE</text>
+<line stroke="#4a2030" stroke-width="1" x1="20" x2="195" y1="130" y2="130"></line>
+<text fill="#fff" font-size="11" text-anchor="middle" x="107" y="148">Male: 1.4× civilian rate</text>
+<text fill="#fff" font-size="11" text-anchor="middle" x="107" y="165">Female: 1.9× civilian rate</text>
+<text fill="#c88" font-size="10" text-anchor="middle" x="107" y="182">Highest risk: first 4 years</text>
+<text fill="#888" font-size="9" text-anchor="middle" x="107" y="196">Source: VAC 2021 Study</text>
+<!-- Path 2: Benefits Denied -->
+<rect fill="#2a2a1a" height="105" rx="4" width="270" x="215" y="100"></rect>
+<text fill="#e6a830" font-size="13" font-weight="bold" text-anchor="middle" x="350" y="120">PATHWAY 2: DENIED &amp; ABANDONED</text>
+<line stroke="#4a4a2a" stroke-width="1" x1="225" x2="475" y1="130" y2="130"></line>
+<text fill="#fff" font-size="11" text-anchor="middle" x="350" y="148">24% mental health claims DENIED</text>
+<text fill="#fff" font-size="11" text-anchor="middle" x="350" y="165">Only 47% meet 16-week standard</text>
+<text fill="#cc8" font-size="10" text-anchor="middle" x="350" y="182">Backlog: 11,000+ and growing</text>
+<text fill="#888" font-size="9" text-anchor="middle" x="350" y="196">Source: Auditor General 2022, VAC 2024-25</text>
+<!-- Path 3: MAID -->
+<rect fill="#3a1520" height="105" rx="4" width="195" x="495" y="100"></rect>
+<text fill="#e63950" font-size="13" font-weight="bold" text-anchor="middle" x="592" y="120">PATHWAY 3: MAID</text>
+<line stroke="#4a2030" stroke-width="1" x1="505" x2="680" y1="130" y2="130"></line>
+<text fill="#fff" font-size="11" text-anchor="middle" x="592" y="148">Asked for wheelchair ramp</text>
+<text fill="#fff" font-size="11" text-anchor="middle" x="592" y="165">Offered death instead</text>
+<text fill="#c88" font-size="10" text-anchor="middle" x="592" y="182">4-5 cases referred to RCMP</text>
+<text fill="#888" font-size="9" text-anchor="middle" x="592" y="196">Source: Parliamentary testimony 2022</text>
+<!-- Convergence -->
+<line stroke="#c41e3a" stroke-dasharray="4" stroke-width="1.5" x1="100" x2="350" y1="205" y2="245"></line>
+<line stroke="#c41e3a" stroke-dasharray="4" stroke-width="1.5" x1="350" x2="350" y1="205" y2="245"></line>
+<line stroke="#c41e3a" stroke-dasharray="4" stroke-width="1.5" x1="600" x2="350" y1="205" y2="245"></line>
+<!-- Bottom: the math -->
+<rect fill="#c41e3a" height="80" rx="6" width="400" x="150" y="245"></rect>
+<text fill="#fff" font-size="14" font-weight="bold" text-anchor="middle" x="350" y="268">THE MATH</text>
+<text fill="#fdd" font-size="11" text-anchor="middle" x="350" y="288">MAID: ~$2,500 | Wheelchair ramp: ~$5,000 | Annual benefits: ~$25,000</text>
+<text fill="#fff" font-size="12" font-weight="bold" text-anchor="middle" x="350" y="306">It costs less to kill a veteran than to help one for 6 months</text>
+<text fill="#fcc" font-size="10" text-anchor="middle" x="350" y="320">Source: CMAJ cost analysis, VAC benefits schedule</text>
+</svg>
+<p class="chart-source">Sources: VAC [veterans.html refs 1-6], Parliamentary testimony [7-8], CMAJ [9]</p>
+</div>
+<!-- Removed: two non-data image blocks (a self-promotional "TENET5 vs Copilot"
          performance graphic and an AI-generated poster gallery). Both were off-topic
          for a MAID data page, carried no verifiable source, and directly contradicted
          this page's stated premise: "No AI-generated images. Just numbers visualized." -->
-
-    <!-- ══════ DOWNLOAD / SHARE ══════ -->
-    <section id="share">
-      <h2><span class="section-num">SHARE</span>Spread the Math</h2>
-      <p>Every chart on this page is built from pure HTML and SVG. Screenshot any chart and share it everywhere.</p>
-      <p><strong>15 infographics. 7 mathematical proofs. 50+ government citations. All verifiable.</strong></p>
-      <p><a href="index.html">&larr; Back to the full report with all mathematical proofs and citations</a></p>
-    </section>
-
-  </div>
-
-    <!-- ══════ REFERENCES ══════ -->
-    <section id="references">
-      <h2><span class="section-num">SOURCES</span>Chart Data References</h2>
-      <ol class="ref-list">
-        <li id="ref16">N-IUSSP. <em>Medically assisted dying: a demographic perspective.</em> 2024. <a href="https://www.niussp.org" target="_blank" rel="noopener noreferrer">niussp.org</a></li>
-        <li id="ref17">The Lancet Public Health. <em>Medical assistance in dying in Canada: trends and policy.</em> 2024. <a href="https://www.thelancet.com/journals/lanpub" target="_blank" rel="noopener noreferrer">thelancet.com</a></li>
-        <li id="ref18">Belgian Federal Commission on Euthanasia. <em>Annual Statistics Report.</em> 2024. <a href="https://health.belgium.be" target="_blank" rel="noopener noreferrer">health.belgium.be</a></li>
-        <li id="ref19">Nuremberg Code (1947). <em>Permissible Medical Experiments.</em> <a href="https://www.ushmm.org/information/exhibitions/online-exhibitions/special-focus/doctors-trial/nuremberg-code" target="_blank" rel="noopener noreferrer">ushmm.org</a></li>
-        <li id="ref20">Statistics Canada. <em>Population estimates, quarterly.</em> Table 17-10-0009-01. <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000901" target="_blank" rel="noopener noreferrer">statcan.gc.ca</a></li>
-        <li id="ref21">Department of Justice Canada. <em>Criminal Code, R.S.C. 1985, c. C-46.</em> <a href="https://laws-lois.justice.gc.ca/eng/acts/c-46/" target="_blank" rel="noopener noreferrer">laws-lois.justice.gc.ca</a></li>
-        <li id="ref22">Parliament of Canada. <em>Bill C-62: Mental illness MAID delay.</em> <a href="https://www.parl.ca/legisinfo/en/bill/44-1/c-62" target="_blank" rel="noopener noreferrer">parl.ca</a></li>
-        <li id="ref23">Canadian Council of Criminal Defence Lawyers. <em>Position statements on MAID safeguards.</em> <a href="https://cccdl.ca" target="_blank" rel="noopener noreferrer">cccdl.ca</a></li>
-        <li id="ref24">Centre for Addiction and Mental Health (CAMH). <em>Position on MAID and mental illness.</em> <a href="https://www.camh.ca" target="_blank" rel="noopener noreferrer">camh.ca</a></li>
-        <li id="ref25">Public Health Agency of Canada. <em>Opioid and stimulant-related harms surveillance.</em> <a href="https://health-infobase.canada.ca/substance-related-harms/" target="_blank" rel="noopener noreferrer">health-infobase.canada.ca</a></li>
-      </ol>
-      <p class="tnt-style-77"><a href="index.html#references">See main report for references [1]&ndash;[15]</a></p>
-    </section>
-
-  <!-- ═══ SHAREABLE INFOGRAPHICS ═══ -->
-  <section class="tnt-style-500">
-    <h2 class="tnt-style-501">Shareable Infographics</h2>
-    <p class="tnt-style-71">Right-click and save. Share on Instagram, Twitter, or anywhere. All data sourced from official government records.</p>
-    <div class="tnt-style-502">
-      <div>
-        <h3 class="tnt-style-503">MAID Statistics</h3>
-        <img src="img/infographics/maid_1080.png" alt="MAID Statistics — 76,475 deaths since 2016" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
-      </div>
-      <div>
-        <h3 class="tnt-style-503">Foreign Interference Timeline</h3>
-        <img src="img/infographics/timeline_1080.png" alt="Foreign Interference Timeline 2018-2025" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
-      </div>
-      <div>
-        <h3 class="tnt-style-503">Whistleblower Scorecard</h3>
-        <img src="img/infographics/scorecard_1080.png" alt="PSDPA Scorecard — 7 referrals, 0 remedies" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
-      </div>
-      <div>
-        <h3 class="tnt-style-503">20 Criminal Code Charges</h3>
-        <img src="img/infographics/charges_1080.png" alt="20 Criminal Code Charges Filed" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
-      </div>
-      <div>
-        <h3 class="tnt-style-503">Tissue Paper Shield</h3>
-        <img src="img/infographics/quote_1080.png" alt="Canada's whistleblower law — tissue paper shield" class="tnt-style-504" loading="lazy" width="1080" height="1080" style="aspect-ratio: 1/1;">
-      </div>
-    </div>
-  </section>
-
-<div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    <a href="campaign-generator.html" class="cap263-card-link">
-      <div class="cap263-tag">Campaign Tool</div>
-      <div class="cap263-bold-tight">Campaign Generator</div>
-    </a>
-    <a href="entity-viewer.html" class="cap263-card-link">
-      <div class="cap263-tag">Investigation</div>
-      <div class="cap263-bold-tight">Entity Viewer</div>
-    </a>
-    <a href="evidence.html" class="cap263-card-link">
-      <div class="cap263-tag">Evidence Base</div>
-      <div class="cap263-bold-tight">Evidence Index</div>
-    </a>
-    <a href="follow-the-money.html" class="cap263-card-link">
-      <div class="cap263-tag cap263-tag--gold-hex">Financial Trail</div>
-      <div class="cap263-bold-tight">Follow the Money</div>
-    </a>
-  </div>
+<!-- ══════ DOWNLOAD / SHARE ══════ -->
+<section id="share">
+<h2><span class="section-num">SHARE</span>Spread the Math</h2>
+<p>Every chart on this page is built from pure HTML and SVG. Screenshot any chart and share it everywhere.</p>
+<p><strong>15 infographics. 7 mathematical proofs. 50+ government citations. All verifiable.</strong></p>
+<p><a href="index.html">← Back to the full report with all mathematical proofs and citations</a></p>
+</section>
 </div>
-
+ ══════ REFERENCES ══════ 
+<section id="references">
+<h2><span class="section-num">SOURCES</span>Chart Data References</h2>
+<ol class="ref-list">
+<li id="ref16">N-IUSSP. <em>Medically assisted dying: a demographic perspective.</em> 2024. <a href="https://www.niussp.org" rel="noopener noreferrer" target="_blank">niussp.org</a></li>
+<li id="ref17">The Lancet Public Health. <em>Medical assistance in dying in Canada: trends and policy.</em> 2024. <a href="https://www.thelancet.com/journals/lanpub" rel="noopener noreferrer" target="_blank">thelancet.com</a></li>
+<li id="ref18">Belgian Federal Commission on Euthanasia. <em>Annual Statistics Report.</em> 2024. <a href="https://health.belgium.be" rel="noopener noreferrer" target="_blank">health.belgium.be</a></li>
+<li id="ref19">Nuremberg Code (1947). <em>Permissible Medical Experiments.</em> <a href="https://www.ushmm.org/information/exhibitions/online-exhibitions/special-focus/doctors-trial/nuremberg-code" rel="noopener noreferrer" target="_blank">ushmm.org</a></li>
+<li id="ref20">Statistics Canada. <em>Population estimates, quarterly.</em> Table 17-10-0009-01. <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000901" rel="noopener noreferrer" target="_blank">statcan.gc.ca</a></li>
+<li id="ref21">Department of Justice Canada. <em>Criminal Code, R.S.C. 1985, c. C-46.</em> <a href="https://laws-lois.justice.gc.ca/eng/acts/c-46/" rel="noopener noreferrer" target="_blank">laws-lois.justice.gc.ca</a></li>
+<li id="ref22">Parliament of Canada. <em>Bill C-62: Mental illness MAID delay.</em> <a href="https://www.parl.ca/legisinfo/en/bill/44-1/c-62" rel="noopener noreferrer" target="_blank">parl.ca</a></li>
+<li id="ref23">Canadian Council of Criminal Defence Lawyers. <em>Position statements on MAID safeguards.</em> <a href="https://cccdl.ca" rel="noopener noreferrer" target="_blank">cccdl.ca</a></li>
+<li id="ref24">Centre for Addiction and Mental Health (CAMH). <em>Position on MAID and mental illness.</em> <a href="https://www.camh.ca" rel="noopener noreferrer" target="_blank">camh.ca</a></li>
+<li id="ref25">Public Health Agency of Canada. <em>Opioid and stimulant-related harms surveillance.</em> <a href="https://health-infobase.canada.ca/substance-related-harms/" rel="noopener noreferrer" target="_blank">health-infobase.canada.ca</a></li>
+</ol>
+<p class="tnt-style-77"><a href="index.html#references">See main report for references [1]–[15]</a></p>
+</section>
+ ═══ SHAREABLE INFOGRAPHICS ═══ 
+<section class="tnt-style-500">
+<h2 class="tnt-style-501">Shareable Infographics</h2>
+<p class="tnt-style-71">Right-click and save. Share on Instagram, Twitter, or anywhere. All data sourced from official government records.</p>
+<div class="tnt-style-502">
+<div>
+<h3 class="tnt-style-503">MAID Statistics</h3>
+<img alt="MAID Statistics — 76,475 deaths since 2016" class="tnt-style-504" height="1080" loading="lazy" src="img/infographics/maid_1080.png" style="aspect-ratio: 1/1;" width="1080"/>
+</div>
+<div>
+<h3 class="tnt-style-503">Foreign Interference Timeline</h3>
+<img alt="Foreign Interference Timeline 2018-2025" class="tnt-style-504" height="1080" loading="lazy" src="img/infographics/timeline_1080.png" style="aspect-ratio: 1/1;" width="1080"/>
+</div>
+<div>
+<h3 class="tnt-style-503">Whistleblower Scorecard</h3>
+<img alt="PSDPA Scorecard — 7 referrals, 0 remedies" class="tnt-style-504" height="1080" loading="lazy" src="img/infographics/scorecard_1080.png" style="aspect-ratio: 1/1;" width="1080"/>
+</div>
+<div>
+<h3 class="tnt-style-503">20 Criminal Code Charges</h3>
+<img alt="20 Criminal Code Charges Filed" class="tnt-style-504" height="1080" loading="lazy" src="img/infographics/charges_1080.png" style="aspect-ratio: 1/1;" width="1080"/>
+</div>
+<div>
+<h3 class="tnt-style-503">Tissue Paper Shield</h3>
+<img alt="Canada's whistleblower law — tissue paper shield" class="tnt-style-504" height="1080" loading="lazy" src="img/infographics/quote_1080.png" style="aspect-ratio: 1/1;" width="1080"/>
+</div>
+</div>
+</section>
+<div class="cap263-container-narrow">
+<h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
+<div class="cap263-grid-cards">
+<a class="cap263-card-link" href="campaign-generator.html">
+<div class="cap263-tag">Campaign Tool</div>
+<div class="cap263-bold-tight">Campaign Generator</div>
+</a>
+<a class="cap263-card-link" href="entity-viewer.html">
+<div class="cap263-tag">Investigation</div>
+<div class="cap263-bold-tight">Entity Viewer</div>
+</a>
+<a class="cap263-card-link" href="evidence.html">
+<div class="cap263-tag">Evidence Base</div>
+<div class="cap263-bold-tight">Evidence Index</div>
+</a>
+<a class="cap263-card-link" href="follow-the-money.html">
+<div class="cap263-tag cap263-tag--gold-hex">Financial Trail</div>
+<div class="cap263-bold-tight">Follow the Money</div>
+</a>
+</div>
+</div>
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
 </div>
 <div id="read-next"></div>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1289,29 +831,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>
-

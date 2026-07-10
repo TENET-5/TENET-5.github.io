@@ -1,1182 +1,692 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRA Enforcement — Selective Tax Collection | TENET5</title>
-  <meta name="description" content="Forensic investigation of CRA enforcement failures: billions lost offshore while working Canadians face audits for $500 deductions. Every figure sourced from PBO, AG Reports, and CRA's own data.">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
-  <style>
-    :root {
-      /* QUANTANIUM-UNIFIED — forward every legacy token to canonical
-         /css/tokens.css (see /css/QUANTANIUM.json). Do not hardcode hex
-         values here. Auto-managed — do not hand-edit;
-         re-runnable. */
-      /* Surfaces */
-      --bg:           var(--slate-bg);
-      --bg-dark:      var(--slate-overlay);
-      --bg-darker:    var(--slate-overlay);
-      --bg-elev:      var(--slate-raised);
-      --bg-elevated:  var(--slate-raised);
-      --bg-card:      var(--slate-raised);
-      --bg-panel:     var(--slate-sunken);
-      --bg-panel-2:   var(--slate-raised);
-      --bg-surface:   var(--slate-raised);
-      --bg-table:     var(--slate-table);
-      --hero-bg:      var(--slate-overlay);
-      --section-bg:   var(--slate-bg);
-      --card-bg:      var(--slate-raised);
-      --surface:      var(--slate-raised);
-      --on-surface:   var(--slate-ink);
-      /* Ink */
-      --ink:          var(--slate-ink);
-      --ink-2:        var(--slate-ink-dim);
-      --ink-soft:     rgba(255, 255, 255, 0.72);
-      --ink-mute:     var(--slate-ink-muted);
-      --ink-muted:    var(--slate-ink-muted);
-      --text:         var(--slate-ink);
-      --text-primary: var(--slate-ink);
-      --text-light:   var(--slate-ink);
-      --muted:        var(--slate-ink-muted);
-      --panel-text:   var(--slate-ink);
-      --panel-muted:  var(--slate-ink-dim);
-      /* Accent */
-      --accent:       var(--slate-accent);
-      --accent-bright:var(--slate-accent-warm);
-      --gold:         var(--slate-accent);
-      --primary:      var(--slate-accent);
-      --crimson:      var(--slate-accent);
-      /* Borders */
-      --border:       var(--slate-border);
-      --border-hot:   var(--slate-border-hot);
-      --line:         var(--slate-border);
-      --line-hi:      var(--slate-ink);
-      /* Semantic (muted, never alarm) */
-      --critical:     var(--slate-critical);
-      --danger:       var(--slate-critical);
-      --error:        var(--slate-critical);
-      --red:          var(--slate-critical);
-      --verified:     var(--slate-verified);
-      --success:      var(--slate-verified);
-      --green:        var(--slate-verified);
-      --warning:      var(--slate-warning);
-      --amber:        var(--slate-warning);
-      --orange:       var(--slate-warning);
-      --info:         var(--slate-info);
-      --blue:         var(--slate-info);
-      --ice:          var(--slate-info);
-      --cyan:         var(--slate-info);
-      --teal:         var(--slate-info);
-      --quantum:      var(--slate-quantum);
-      --purple:       var(--slate-quantum);
-      /* Type */
-      --font-sans:    var(--slate-font-sans);
-      --font-mono:    var(--slate-font-mono);
-      --font-serif:   var(--slate-font-serif);
-      --font-disp:    var(--slate-font-display);
-      --font-display: var(--slate-font-display);
-      --font-body:    var(--slate-font-sans);
-      --font-headline:var(--slate-font-display);
-      --font-hud:     var(--slate-font-display);
-    }
-
-    /* Hero */
-    .cra-hero{background:linear-gradient(135deg,#1a1f36,#2a1520 45%,#3b0f15);padding:4.5rem 2rem 3.5rem;text-align:center;border-bottom:4px solid var(--cra);position:relative;overflow:hidden}
-    .cra-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(220,38,38,.12),transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(220,38,38,.08),transparent 60%);pointer-events:none}
-    .cra-hero::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(255,255,255,.02) 59px,rgba(255,255,255,.02) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(255,255,255,.02) 59px,rgba(255,255,255,.02) 60px);pointer-events:none}
-    .cra-hero .flag{font-size:3rem;margin-bottom:.5rem;display:block;position:relative;z-index:1}
-    .cra-hero h1{font-family: var(--slate-font-body);font-size:clamp(2rem,5vw,3.2rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:1rem;position:relative;z-index:1;animation:fadeInUp .7s ease both}
-    .cra-hero h1 em{color:var(--cra);font-style:normal}
-    .cra-hero .subtitle{font-size:clamp(.95rem,1.3vw,1.15rem);color:rgba(255,255,255,.82);max-width:780px;margin:0 auto;line-height:1.75;position:relative;z-index:1;animation:fadeInUp .8s .15s ease both}
-
-    /* Hero Stats */
-    .hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;max-width:960px;margin:2.5rem auto 0;position:relative;z-index:1}
-    .hero-stat-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:1.3rem 1rem;text-align:center;transition:border-color .3s,transform .3s}
-    .hero-stat-card:hover{border-color:rgba(220,38,38,.4);transform:translateY(-3px)}
-    .hero-stat-card .stat-num{font-family: var(--slate-font-mono);font-size:2rem;font-weight:900;color:var(--cra);display:block;line-height:1.1}
-    .hero-stat-card .stat-label{font-size:.78rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-top:.4rem;display:block}
-
-    /* Share Bar */
-    .share-bar{background:linear-gradient(135deg,rgba(26,31,54,.96),rgba(15,18,30,.98));backdrop-filter:blur(12px);padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;position:sticky;top:56px;z-index:9998;border-bottom:1px solid rgba(220,38,38,.15)}
-    .share-bar-label{font-weight:700;font-size:.85rem;color:#fff;letter-spacing:1px}
-    .share-btns{display:flex;gap:.5rem;flex-wrap:wrap}
-    .share-btn{color:#fff;border:none;padding:.35rem 1rem;border-radius:20px;cursor:pointer;font-size:.8rem;font-weight:600;font-family: var(--slate-font-body);text-decoration:none;display:inline-block;transition:transform .2s,filter .2s}
-    .share-btn:hover{transform:scale(1.05);filter:brightness(1.15)}
-    .share-btn-x{background:#000;border:1px solid #333} .share-btn-facebook{background:#1877f2} .share-btn-reddit{background:#ff4500} .share-btn-copy{background:rgba(255,255,255,0.08);color:var(--cra);font-weight:700}
-
-    /* Content & Sections */
-    .content{max-width:860px;margin:0 auto;padding:0 1.5rem}
-    .content section{padding:3rem 0 2.5rem;border-bottom:1px solid rgba(0,0,0,.06)}
-    .content section:last-of-type{border-bottom:none}
-    .section-head{margin-bottom:1.8rem}
-    .section-num{font-family: var(--slate-font-mono);font-size:.72rem;color:var(--cra);display:block;margin-bottom:.4rem;letter-spacing:4px;text-transform:uppercase;font-weight:600}
-    .section-head h2{font-family: var(--slate-font-body);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900;color:#1a1f36;line-height:1.2;letter-spacing:-.02em}
-
-    /* Fact Lists */
-    .fact-list{list-style:none;padding:0;margin:1.5rem 0}
-    .fact-list li{padding:.9rem 0 .9rem 1.6rem;border-bottom:1px solid rgba(0,0,0,.05);position:relative;line-height:1.75;color:#3d4355;font-size:.98rem}
-    .fact-list li::before{content:'▸';position:absolute;left:0;color:var(--cra);font-weight:900;font-size:1.1rem}
-    .fact-list li:last-child{border-bottom:none}
-
-    /* Stat Cards */
-    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:2rem 0}
-    .stat-card{background:rgba(10,14,22,0.55);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1.5rem 1rem;text-align:center;transition:border-color .3s,transform .3s,box-shadow .3s}
-    .stat-card:hover{border-color:rgba(220,38,38,.3);transform:translateY(-4px);box-shadow:0 8px 32px rgba(220,38,38,.08),0 2px 8px rgba(0,0,0,.06)}
-    .stat-card .stat-number{font-family: var(--slate-font-body);font-size:2.2rem;font-weight:900;color:var(--cra);display:block;line-height:1;letter-spacing:-.03em}
-    .stat-card .stat-number.blue{color:var(--blu)} .stat-card .stat-number.green{color:var(--grn)} .stat-card .stat-number.gold{color:var(--gold)}
-    .stat-card .stat-label{font-size:.72rem;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;margin-top:.5rem;display:block}
-
-    /* Tax Gap Chart */
-    .tax-gap-chart{background:rgba(10,14,22,0.45);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:2rem 1.5rem;margin:2rem 0}
-    .tax-gap-chart h3{font-family: var(--slate-font-mono);font-size:.8rem;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin-bottom:1.5rem}
-    .gap-bar-row{display:flex;align-items:center;margin-bottom:1rem}
-    .gap-bar-label{width:160px;font-size:.85rem;font-weight:600;color:#3d4355;flex-shrink:0}
-    .gap-bar-track{flex:1;height:32px;background:rgba(0,0,0,.04);border-radius:6px;overflow:hidden}
-    .gap-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-family: var(--slate-font-mono);font-size:.78rem;font-weight:700;color:#fff;transition:width 1s ease}
-    .gap-bar-fill.crimson{background:linear-gradient(90deg,#991b1b,#dc2626)} .gap-bar-fill.gold{background:linear-gradient(90deg,#92400e,#d97706)}
-    .gap-bar-fill.green{background:linear-gradient(90deg,#065f46,#059669)} .gap-bar-fill.blue{background:linear-gradient(90deg,#1e40af,#2563eb)}
-    .gap-bar-note{font-size:.75rem;color:#9ca3af;margin-left:.5rem;white-space:nowrap}
-
-    /* Two-Tier Comparison */
-    .two-tier-compare{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:2rem 0}
-    @media(max-width:640px){.two-tier-compare,.recovery-grid{grid-template-columns:1fr!important}}
-    .tier-card{border-radius:12px;padding:1.8rem}
-    .tier-card.workers{background:linear-gradient(135deg,rgba(196,30,58,0.12),rgba(10,14,22,0.55));border:2px solid var(--cra)}
-    .tier-card.wealthy{background:linear-gradient(135deg,rgba(5,150,105,0.1),rgba(10,14,22,0.55));border:2px solid var(--grn)}
-    .tier-card .tier-icon{font-size:2.5rem;margin-bottom:.8rem}
-    .tier-card h3{font-family: var(--slate-font-body);font-size:1.25rem;font-weight:900;margin-bottom:.8rem}
-    .tier-card.workers h3{color:var(--cra)} .tier-card.wealthy h3{color:var(--grn)}
-    .tier-card ul{list-style:none;padding:0;margin:0}
-    .tier-card ul li{padding:.5rem 0;font-size:.92rem;color:#3d4355;line-height:1.6;border-bottom:1px solid rgba(0,0,0,.04)}
-    .tier-card ul li:last-child{border-bottom:none}
-
-    /* Pipeline Diagram */
-    .pipeline-diagram{background:#1a1f36;border-radius:12px;padding:2.5rem 2rem;margin:2rem 0;color:#fff;overflow-x:auto}
-    .pipeline-diagram h3{font-family: var(--slate-font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,.5);margin-bottom:2rem;text-align:center}
-    .pipeline-flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap}
-    .pipeline-node{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:1rem 1.2rem;text-align:center;min-width:130px;transition:border-color .3s}
-    .pipeline-node:hover{border-color:var(--cra)}
-    .pipeline-node .node-icon{font-size:1.8rem;display:block;margin-bottom:.4rem}
-    .pipeline-node .node-label{font-size:.78rem;font-weight:700;display:block}
-    .pipeline-node .node-detail{font-size:.68rem;color:rgba(255,255,255,.5);margin-top:.25rem;display:block}
-    .pipeline-arrow{font-size:1.5rem;color:var(--cra);padding:0 .6rem;flex-shrink:0}
-
-    /* Callouts & Citations */
-    .callout{background:rgba(220,38,38,.08);border-left:4px solid var(--cra);border-radius:0 8px 8px 0;padding:1.3rem 1.5rem;margin:1.5rem 0}
-    .callout p{font-size:.95rem;color:#3d4355;line-height:1.75;margin:0}
-    .callout .source{font-size:.8rem;color:#6b7280;font-style:italic;margin-top:.5rem;display:block}
-    sup a{font-size:.7em;color:var(--cra);text-decoration:none;font-weight:600} sup a:hover{text-decoration:underline}
-
-    /* Source Table */
-    .source-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.88rem}
-    .source-table thead th{background:#1a1f36;color:#fff;padding:.9rem 1rem;text-align:left;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:1px}
-    .source-table tbody td{padding:.8rem 1rem;border-bottom:1px solid rgba(0,0,0,.06);color:#3d4355;line-height:1.6;vertical-align:top}
-    .source-table tbody tr:hover{background:rgba(220,38,38,.03)}
-
-    /* Recovery Cards */
-    .recovery-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
-    .recovery-card{background:rgba(10,14,22,0.55);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1.3rem;display:flex;align-items:flex-start;gap:.8rem;transition:border-color .3s,transform .3s}
-    .recovery-card:hover{border-color:var(--grn);transform:translateY(-2px)}
-    .recovery-card .rc-icon{font-size:1.8rem;flex-shrink:0}
-    .recovery-card .rc-amount{font-family: var(--slate-font-mono);font-size:1.15rem;font-weight:800;color:var(--grn);display:block}
-    .recovery-card .rc-label{font-size:.85rem;color:#3d4355;line-height:1.5}
-
-    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    @media print{.share-bar,.pipeline-diagram{display:none}.cra-hero{background:#fff!important}.cra-hero h1,.cra-hero .subtitle{color:#000!important}}
-  </style>
-
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="Two-Tier Tax Justice: How CRA Protects the Wealthy and Punishes Workers | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/cra-enforcement.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Two-Tier Tax Justice: How CRA Protects the Wealthy and Punishes Workers | TENET5">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
   <link rel="canonical" href="https://tenet-5.github.io/cra-enforcement.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Two-Tier Tax Justice: How CRA Protects the Wealthy and Punishes Workers | TENET5",
-  "url": "https://tenet-5.github.io/cra-enforcement.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="CRA Enforcement — Selective Tax Collection | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:description" content="Forensic investigation of CRA enforcement failures: billions lost offshore while working Canadians face audits for $500 deductions. Every figure sourced from PBO, AG Reports, and CRA">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="Canada Revenue Agency — Charity Data; House of Commons Hansard">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="cra-enforcement">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body data-act="iii">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Cra Enforcement</span></div>    <!-- CAP224-NAV-END -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-<div class="grain-overlay"></div>
-<div class="vignette"></div>
+  </header>
 
-
-  <div id="site-header-frame"></div>
-<!-- ═══ SECTION 1 — HERO ═══ -->
-  <div class="cra-hero hero">
-    <span class="flag">🍁</span>
-    <h1  id="n-686b7aea" data-narrate="CRA Enforcement — Selective Tax Collection. Our grandfathers paid their taxes and built this country — the roads, the hospitals, the schools. Now the ultra-wealthy hide billions in offshore accounts while CRA audits working families for $500 home-office deductions. The numbers prove it. Every figure on this page comes from CRA's own reports, the Parliamentary Budget Officer, and the Auditor General." >Two-Tier Tax Justice:<br>How CRA <em>Protects the Wealthy</em><br>and Punishes Workers</h1>
-    <p class="subtitle">
-      Our grandfathers paid their taxes and built this country — the roads, the hospitals,
-      the schools. Now the ultra-wealthy hide billions in offshore accounts while CRA audits
-      working families for $500 home-office deductions. The numbers prove it. Every figure
-      on this page comes from CRA's own reports, the Parliamentary Budget Officer, and the
-      Auditor General.
-    </p>
-    <div class="hero-stats">
-      <div class="hero-stat-card">
-        <span class="stat-num">$20–26B</span>
-        <span class="stat-label">Estimated Annual Tax Gap</span>
-      </div>
-      <div class="hero-stat-card">
-        <span class="stat-num">$2.2B</span>
-        <span class="stat-label">CRA's Actual Recovery</span>
-      </div>
-      <div class="hero-stat-card">
-        <span class="stat-num">&lt;0.1%</span>
-        <span class="stat-label">Offshore Prosecution Rate</span>
-      </div>
-      <div class="hero-stat-card">
-        <span class="stat-num">3×</span>
-        <span class="stat-label">Small Biz Audits vs Corporate</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SHARE BAR ═══ -->
-  <div class="share-bar">
-    <span class="share-bar-label">📢 SHARE THIS INVESTIGATION</span>
-    <div class="share-btns">
-      <a class="share-btn share-btn-x" href="https://twitter.com/intent/tweet?text=Two-Tier%20Tax%20Justice%3A%20CRA%20audits%20workers%20while%20billions%20hide%20offshore.&url=" target="_blank" rel="noopener noreferrer">𝕏 Post</a>
-      <a class="share-btn share-btn-facebook" href="https://www.facebook.com/sharer/sharer.php?u=" target="_blank" rel="noopener noreferrer">Facebook</a>
-      <a class="share-btn share-btn-reddit" href="https://reddit.com/submit?title=Two-Tier%20Tax%20Justice&url=" target="_blank" rel="noopener noreferrer">Reddit</a>
-      <button class="share-btn share-btn-copy" onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='Copied ✓';setTimeout(()=>{this.textContent='Copy Link'},2000)})">Copy Link</button>
-    </div>
-  </div>
-
-  <main id="main" role="main" class="content">
-
-    <!-- ═══ SECTION 01 — THE TAX GAP ═══ -->
-    <section id="tax-gap">
-      <div class="section-head">
-        <span class="section-num">SECTION 01</span>
-        <h2>The Tax Gap: What Canada Loses Every Year</h2>
-      </div>
-
-      <p>The "tax gap" is the difference between what Canadians owe in taxes and what CRA
+  <main class="unified-main">
+    
+ ═══ SECTION 01 — THE TAX GAP ═══ 
+<section id="tax-gap">
+<div class="section-head">
+<span class="section-num">SECTION 01</span>
+<h2>The Tax Gap: What Canada Loses Every Year</h2>
+</div>
+<p>The "tax gap" is the difference between what Canadians owe in taxes and what CRA
         actually collects. The PBO estimates this gap at <strong>$20 billion to $26 billion
         annually</strong> at the federal level alone.<sup><a href="#fn1">[1]</a></sup>
         That is not a rounding error. That is roughly the entire annual federal transfer
         for healthcare.</p>
-
-      <div class="stat-grid reveal">
-        <div class="stat-card">
-          <span class="stat-number">$20–26B</span>
-          <span class="stat-label">Federal Tax Gap (PBO Est.)</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number gold">$8.7B</span>
-          <span class="stat-label">International Tax Gap (CRA)</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number blue">$2.2B</span>
-          <span class="stat-label">CRA Total Recovery</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number green">~10%</span>
-          <span class="stat-label">Recovery-to-Gap Ratio</span>
-        </div>
-      </div>
-
-      <p>CRA's own Annual Report to Parliament shows the agency identified <strong>$2.2 billion</strong>
+<div class="stat-grid reveal">
+<div class="stat-card">
+<span class="stat-number">$20–26B</span>
+<span class="stat-label">Federal Tax Gap (PBO Est.)</span>
+</div>
+<div class="stat-card">
+<span class="stat-number gold">$8.7B</span>
+<span class="stat-label">International Tax Gap (CRA)</span>
+</div>
+<div class="stat-card">
+<span class="stat-number blue">$2.2B</span>
+<span class="stat-label">CRA Total Recovery</span>
+</div>
+<div class="stat-card">
+<span class="stat-number green">~10%</span>
+<span class="stat-label">Recovery-to-Gap Ratio</span>
+</div>
+</div>
+<p>CRA's own Annual Report to Parliament shows the agency identified <strong>$2.2 billion</strong>
         in fiscal impact from all compliance activities — audits, investigations, and collections
         combined.<sup><a href="#fn2">[2]</a></sup> That means for every dollar lost to the tax
         gap, CRA recovers roughly ten cents. In any other context, a 10% success rate would
         be cause for termination. At CRA, it's cause for a press release.</p>
-
-      <div class="tax-gap-chart">
-        <h3>📊 Federal Tax Gap vs. Recovery — Visual Scale</h3>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">Total Tax Gap</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill crimson tnt-style-45">$20–26B</div>
-          </div>
-        </div>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">Offshore Gap</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill gold tnt-style-990">$8.7B</div>
-          </div>
-          <span class="gap-bar-note">~38% of total</span>
-        </div>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">CRA Recovery</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill green tnt-style-1065">$2.2B</div>
-          </div>
-          <span class="gap-bar-note">~10% of gap</span>
-        </div>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">Prosecutions</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill blue tnt-style-1066">~50/yr</div>
-          </div>
-          <span class="gap-bar-note">vs. thousands identified</span>
-        </div>
-      </div>
-
-      <p>CRA's offshore tax gap studies estimated international non-compliance at
+<div class="tax-gap-chart">
+<h3>📊 Federal Tax Gap vs. Recovery — Visual Scale</h3>
+<div class="gap-bar-row">
+<span class="gap-bar-label">Total Tax Gap</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill crimson tnt-style-45">$20–26B</div>
+</div>
+</div>
+<div class="gap-bar-row">
+<span class="gap-bar-label">Offshore Gap</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill gold tnt-style-990">$8.7B</div>
+</div>
+<span class="gap-bar-note">~38% of total</span>
+</div>
+<div class="gap-bar-row">
+<span class="gap-bar-label">CRA Recovery</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill green tnt-style-1065">$2.2B</div>
+</div>
+<span class="gap-bar-note">~10% of gap</span>
+</div>
+<div class="gap-bar-row">
+<span class="gap-bar-label">Prosecutions</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill blue tnt-style-1066">~50/yr</div>
+</div>
+<span class="gap-bar-note">vs. thousands identified</span>
+</div>
+</div>
+<p>CRA's offshore tax gap studies estimated international non-compliance at
         <strong>$8.7 billion</strong>.<sup><a href="#fn3">[3]</a></sup> That figure alone
         would fund the National Housing Strategy twice over. The PBO called the gap
         "significant and persistent" — a polite way of saying CRA is losing the fight
         and has been losing it for decades.</p>
-
-      <div class="callout">
-        <p><strong>"The federal tax gap represents a significant erosion of the tax base
+<div class="callout">
+<p><strong>"The federal tax gap represents a significant erosion of the tax base
           that undermines the fairness and integrity of the tax system."</strong></p>
-        <span class="source">— Parliamentary Budget Officer, Federal Tax Gap Analysis</span>
-      </div>
-    </section>
-
-    <!-- ═══ SECTION 02 — PANAMA / PARADISE PAPERS ═══ -->
-    <section id="panama-paradise">
-      <div class="section-head">
-        <span class="section-num">SECTION 02</span>
-        <h2>Panama &amp; Paradise Papers: Canada's Offshore Shame</h2>
-      </div>
-
-      <p>In 2016, the International Consortium of Investigative Journalists published the
+<span class="source">— Parliamentary Budget Officer, Federal Tax Gap Analysis</span>
+</div>
+</section>
+ ═══ SECTION 02 — PANAMA / PARADISE PAPERS ═══ 
+<section id="panama-paradise">
+<div class="section-head">
+<span class="section-num">SECTION 02</span>
+<h2>Panama &amp; Paradise Papers: Canada's Offshore Shame</h2>
+</div>
+<p>In 2016, the International Consortium of Investigative Journalists published the
         Panama Papers — 11.5 million leaked documents from Mossack Fonseca revealing the
         offshore financial dealings of the world's elite. Among them: <strong>thousands of
         Canadian-linked entities</strong>.<sup><a href="#fn4">[4]</a></sup></p>
-
-      <ul class="fact-list">
-        <li>The ICIJ's public database identified <strong>over 2,000 Canadian-linked
+<ul class="fact-list">
+<li>The ICIJ's public database identified <strong>over 2,000 Canadian-linked
           entities</strong> in the Panama Papers — offshore corporations, trusts, and
           intermediaries registered across dozens of tax
           havens.<sup><a href="#fn4">[4]</a></sup></li>
-        <li>The 2017 Paradise Papers revealed further connections — Canadian individuals
+<li>The 2017 Paradise Papers revealed further connections — Canadian individuals
           and corporations routing wealth through Bermuda, the Cayman Islands, and the
           Isle of Man via Appleby and Asiaciti
           Trust.<sup><a href="#fn5">[5]</a></sup></li>
-        <li>CRA's own Annual Report states the agency reviewed "all Canadian-linked entities"
+<li>CRA's own Annual Report states the agency reviewed "all Canadian-linked entities"
           from the Panama Papers. Criminal prosecutions remained in the
           <strong>single digits</strong>.<sup><a href="#fn6">[6]</a></sup></li>
-        <li>Between 2016 and 2023, CRA secured fewer than <strong>50 criminal convictions</strong>
+<li>Between 2016 and 2023, CRA secured fewer than <strong>50 criminal convictions</strong>
           for offshore tax evasion — out of thousands of identified
           entities.<sup><a href="#fn7">[7]</a></sup></li>
-        <li>The FINA Committee held hearings where witnesses testified CRA lacked the resources
+<li>The FINA Committee held hearings where witnesses testified CRA lacked the resources
           and political will to pursue complex international
           cases.<sup><a href="#fn8">[8]</a></sup></li>
-      </ul>
-
-      <div class="pipeline-diagram">
-        <h3>🌐 The Offshore Pipeline — How Money Disappears</h3>
-        <div class="pipeline-flow">
-          <div class="pipeline-node">
-            <span class="node-icon">🇨🇦</span>
-            <span class="node-label">Canadian Income</span>
-            <span class="node-detail">Earned domestically</span>
-          </div>
-          <span class="pipeline-arrow">→</span>
-          <div class="pipeline-node">
-            <span class="node-icon">🏢</span>
-            <span class="node-label">Shell Corp</span>
-            <span class="node-detail">Mossack Fonseca et al.</span>
-          </div>
-          <span class="pipeline-arrow">→</span>
-          <div class="pipeline-node">
-            <span class="node-icon">🏝️</span>
-            <span class="node-label">Tax Haven</span>
-            <span class="node-detail">Cayman, BVI, Panama</span>
-          </div>
-          <span class="pipeline-arrow">→</span>
-          <div class="pipeline-node">
-            <span class="node-icon">🏦</span>
-            <span class="node-label">Offshore Bank</span>
-            <span class="node-detail">Swiss, Singaporean</span>
-          </div>
-          <span class="pipeline-arrow">→</span>
-          <div class="pipeline-node">
-            <span class="node-icon">👻</span>
-            <span class="node-label">Untaxed Wealth</span>
-            <span class="node-detail">$8.7B+ gap</span>
-          </div>
-        </div>
-      </div>
-
-      <p>Compare this with other leak responses. After the Panama Papers, <strong>Germany
+</ul>
+<div class="pipeline-diagram">
+<h3>🌐 The Offshore Pipeline — How Money Disappears</h3>
+<div class="pipeline-flow">
+<div class="pipeline-node">
+<span class="node-icon">🇨🇦</span>
+<span class="node-label">Canadian Income</span>
+<span class="node-detail">Earned domestically</span>
+</div>
+<span class="pipeline-arrow">→</span>
+<div class="pipeline-node">
+<span class="node-icon">🏢</span>
+<span class="node-label">Shell Corp</span>
+<span class="node-detail">Mossack Fonseca et al.</span>
+</div>
+<span class="pipeline-arrow">→</span>
+<div class="pipeline-node">
+<span class="node-icon">🏝️</span>
+<span class="node-label">Tax Haven</span>
+<span class="node-detail">Cayman, BVI, Panama</span>
+</div>
+<span class="pipeline-arrow">→</span>
+<div class="pipeline-node">
+<span class="node-icon">🏦</span>
+<span class="node-label">Offshore Bank</span>
+<span class="node-detail">Swiss, Singaporean</span>
+</div>
+<span class="pipeline-arrow">→</span>
+<div class="pipeline-node">
+<span class="node-icon">👻</span>
+<span class="node-label">Untaxed Wealth</span>
+<span class="node-detail">$8.7B+ gap</span>
+</div>
+</div>
+</div>
+<p>Compare this with other leak responses. After the Panama Papers, <strong>Germany
         launched hundreds of investigations and recovered billions in back taxes.</strong>
         Australia created a dedicated taskforce. In Canada, CRA issued reassessments and
         collected penalties — but when you can hide millions offshore and face a civil
         penalty instead of a prison cell, you haven't been punished. You've paid a fee.
         The full timeline of all eight leaks — from LuxLeaks to Cyprus Confidential — is
-        documented in the <a href="panama-papers.html" class="cap263-text-accent-bold">Offshore Financial Investigation</a>.</p>
-
-      <div class="callout">
-        <p><strong>"Despite identifying thousands of Canadian-linked entities in the Panama
+        documented in the <a class="cap263-text-accent-bold" href="panama-papers.html">Offshore Financial Investigation</a>.</p>
+<div class="callout">
+<p><strong>"Despite identifying thousands of Canadian-linked entities in the Panama
           Papers, the number of criminal prosecutions for offshore tax evasion remained
           exceptionally low."</strong></p>
-        <span class="source">— CRA Annual Report, Offshore Compliance Section</span>
-      </div>
-    </section>
-
-    <!-- ═══ SECTION 03 — OFFSHORE COMPLIANCE ═══ -->
-    <section id="offshore-compliance">
-      <div class="section-head">
-        <span class="section-num">SECTION 03</span>
-        <h2>Offshore Compliance: The Agency That Can't — or Won't</h2>
-      </div>
-
-      <p>CRA's International and Large Business Directorate is tasked with catching offshore
+<span class="source">— CRA Annual Report, Offshore Compliance Section</span>
+</div>
+</section>
+ ═══ SECTION 03 — OFFSHORE COMPLIANCE ═══ 
+<section id="offshore-compliance">
+<div class="section-head">
+<span class="section-num">SECTION 03</span>
+<h2>Offshore Compliance: The Agency That Can't — or Won't</h2>
+</div>
+<p>CRA's International and Large Business Directorate is tasked with catching offshore
         tax cheats. On paper, the numbers sound impressive. In practice, the Auditor General
         found systemic failures that call the entire program into question.</p>
-
-      <ul class="fact-list">
-        <li>CRA's International and Large Business Directorate identified <strong>billions
+<ul class="fact-list">
+<li>CRA's International and Large Business Directorate identified <strong>billions
           in offshore non-compliance</strong> through audits of international transactions,
           transfer pricing, and treaty shopping.<sup><a href="#fn9">[9]</a></sup></li>
-        <li>The Voluntary Disclosure Program (VDP) processed thousands of applications
+<li>The Voluntary Disclosure Program (VDP) processed thousands of applications
           annually. CRA's VDP statistics show the vast majority involved <strong>previously
           unreported offshore income and assets</strong>.<sup><a href="#fn10">[10]</a></sup></li>
-        <li>The VDP was reformed in 2018 after criticism it offered a "get out of jail free
+<li>The VDP was reformed in 2018 after criticism it offered a "get out of jail free
           card" for wealthy tax evaders. Even after reform, applicants avoided criminal
           charges in nearly all cases.<sup><a href="#fn10">[10]</a></sup></li>
-        <li>The AG found CRA <strong>"could not demonstrate that its offshore compliance
+<li>The AG found CRA <strong>"could not demonstrate that its offshore compliance
           activities were achieving intended results"</strong> — a devastating finding
           questioning the entire program.<sup><a href="#fn11">[11]</a></sup></li>
-        <li>The AG found CRA had no adequate performance measurement framework for offshore
+<li>The AG found CRA had no adequate performance measurement framework for offshore
           compliance, making it impossible to determine whether hundreds of millions invested
           were producing results.<sup><a href="#fn11">[11]</a></sup></li>
-      </ul>
-
-      <div class="stat-grid reveal">
-        <div class="stat-card">
-          <span class="stat-number">5,000+</span>
-          <span class="stat-label">VDP Applications (Annual)</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number green">~0</span>
-          <span class="stat-label">VDP Criminal Charges</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number gold">$1B+</span>
-          <span class="stat-label">Offshore Assessments</span>
-        </div>
-      </div>
-
-      <p>Think about what this means. Canada operates a program that says: <em>if you've been
+</ul>
+<div class="stat-grid reveal">
+<div class="stat-card">
+<span class="stat-number">5,000+</span>
+<span class="stat-label">VDP Applications (Annual)</span>
+</div>
+<div class="stat-card">
+<span class="stat-number green">~0</span>
+<span class="stat-label">VDP Criminal Charges</span>
+</div>
+<div class="stat-card">
+<span class="stat-number gold">$1B+</span>
+<span class="stat-label">Offshore Assessments</span>
+</div>
+</div>
+<p>Think about what this means. Canada operates a program that says: <em>if you've been
         hiding money offshore, come tell us and we won't prosecute you.</em> For a working
         family who accidentally misclaims a $500 childcare deduction, CRA sends auditors.
         For a millionaire who hid $5 million in the Caymans for a decade, CRA offers a
         handshake deal. Our grandfathers would be disgusted.</p>
-
-      <div class="callout">
-        <p><strong>"The CRA could not demonstrate that its offshore compliance activities
+<div class="callout">
+<p><strong>"The CRA could not demonstrate that its offshore compliance activities
           were achieving intended results."</strong></p>
-        <span class="source">— Auditor General of Canada, Report on CRA Offshore Compliance</span>
-      </div>
-    </section>
-
-    <!-- ═══ SECTION 04 — THE TWO-TIER SYSTEM ═══ -->
-    <section id="two-tier">
-      <div class="section-head">
-        <span class="section-num">SECTION 04</span>
-        <h2>The Two-Tier System: Workers vs. the Wealthy</h2>
-      </div>
-
-      <p>This is where the numbers become personal. CRA's own Annual Report compliance data
+<span class="source">— Auditor General of Canada, Report on CRA Offshore Compliance</span>
+</div>
+</section>
+ ═══ SECTION 04 — THE TWO-TIER SYSTEM ═══ 
+<section id="two-tier">
+<div class="section-head">
+<span class="section-num">SECTION 04</span>
+<h2>The Two-Tier System: Workers vs. the Wealthy</h2>
+</div>
+<p>This is where the numbers become personal. CRA's own Annual Report compliance data
         reveals a two-tier enforcement system so stark it reads like satire — except it's
         real, and it's been running for decades.</p>
-
-      <div class="two-tier-compare">
-        <div class="tier-card workers">
-          <div class="tier-icon">👷</div>
-          <h3>Working Canadians &amp; Small Business</h3>
-          <ul>
-            <li><strong>Audit rate:</strong> Small businesses audited at ~<strong>3× the rate</strong>
+<div class="two-tier-compare">
+<div class="tier-card workers">
+<div class="tier-icon">👷</div>
+<h3>Working Canadians &amp; Small Business</h3>
+<ul>
+<li><strong>Audit rate:</strong> Small businesses audited at ~<strong>3× the rate</strong>
               of large corps relative to revenue<sup><a href="#fn12">[12]</a></sup></li>
-            <li><strong>Targets:</strong> Home-office deductions, childcare credits, disability claims</li>
-            <li><strong>Timeline:</strong> 30–90 day response windows with penalties for non-compliance</li>
-            <li><strong>Stakes:</strong> Denial of legitimate claims, interest charges, financial hardship</li>
-            <li><strong>Resources:</strong> No team of accountants or lawyers to fight back</li>
-          </ul>
-        </div>
-        <div class="tier-card wealthy">
-          <div class="tier-icon">🏰</div>
-          <h3>Large Corporations &amp; Ultra-Wealthy</h3>
-          <ul>
-            <li><strong>Audit rate:</strong> Complex international arrangements reviewed infrequently;
+<li><strong>Targets:</strong> Home-office deductions, childcare credits, disability claims</li>
+<li><strong>Timeline:</strong> 30–90 day response windows with penalties for non-compliance</li>
+<li><strong>Stakes:</strong> Denial of legitimate claims, interest charges, financial hardship</li>
+<li><strong>Resources:</strong> No team of accountants or lawyers to fight back</li>
+</ul>
+</div>
+<div class="tier-card wealthy">
+<div class="tier-icon">🏰</div>
+<h3>Large Corporations &amp; Ultra-Wealthy</h3>
+<ul>
+<li><strong>Audit rate:</strong> Complex international arrangements reviewed infrequently;
               cases take <strong>years</strong><sup><a href="#fn12">[12]</a></sup></li>
-            <li><strong>Targets:</strong> Transfer pricing, treaty shopping, offshore structures — slowly</li>
-            <li><strong>Timeline:</strong> Multi-year audit cycles; appeals can stretch a decade</li>
-            <li><strong>Stakes:</strong> Reassessments negotiated down; prosecution nearly nonexistent</li>
-            <li><strong>Resources:</strong> Armies of tax lawyers and Big Four accounting firms</li>
-          </ul>
-        </div>
-      </div>
-
-      <ul class="fact-list">
-        <li>CRA's Annual Report shows <strong>hundreds of thousands of reviews and audits</strong>
+<li><strong>Targets:</strong> Transfer pricing, treaty shopping, offshore structures — slowly</li>
+<li><strong>Timeline:</strong> Multi-year audit cycles; appeals can stretch a decade</li>
+<li><strong>Stakes:</strong> Reassessments negotiated down; prosecution nearly nonexistent</li>
+<li><strong>Resources:</strong> Armies of tax lawyers and Big Four accounting firms</li>
+</ul>
+</div>
+</div>
+<ul class="fact-list">
+<li>CRA's Annual Report shows <strong>hundreds of thousands of reviews and audits</strong>
           of small and medium enterprises yearly, compared to far fewer complex audits of
           large corporations.<sup><a href="#fn12">[12]</a></sup></li>
-        <li>The PBO and CRA's Departmental Plan confirm disproportionate compliance resources
+<li>The PBO and CRA's Departmental Plan confirm disproportionate compliance resources
           allocated to small/medium taxpayer programs — the "low-hanging fruit" — not complex
           international structures where the biggest losses
           occur.<sup><a href="#fn13">[13]</a></sup></li>
-        <li>CRA suffered major data breaches affecting hundreds of thousands of accounts.
+<li>CRA suffered major data breaches affecting hundreds of thousands of accounts.
           The Privacy Commissioner found CRA <strong>failed to implement adequate
           safeguards</strong> to protect taxpayer
           information.<sup><a href="#fn14">[14]</a></sup></li>
-        <li>After the breaches, CRA locked thousands of taxpayer accounts, preventing legitimate
+<li>After the breaches, CRA locked thousands of taxpayer accounts, preventing legitimate
           access to benefits and refunds — while the agency's own security failures went
           unpunished.<sup><a href="#fn14">[14]</a></sup></li>
-      </ul>
-
-      <div class="tax-gap-chart">
-        <h3>📊 Audit Intensity — Who CRA Actually Targets</h3>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">Small Business</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill crimson tnt-style-1009">High Frequency</div>
-          </div>
-        </div>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">Individuals</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill gold tnt-style-55">Moderate</div>
-          </div>
-        </div>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">Large Corp</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill blue tnt-style-1014">Complex / Slow</div>
-          </div>
-        </div>
-        <div class="gap-bar-row">
-          <span class="gap-bar-label">Offshore</span>
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill green tnt-style-1016">Minimal</div>
-          </div>
-        </div>
-      </div>
-
-      <p>The pattern is undeniable. CRA punches down because it's easy. Auditing a plumber
+</ul>
+<div class="tax-gap-chart">
+<h3>📊 Audit Intensity — Who CRA Actually Targets</h3>
+<div class="gap-bar-row">
+<span class="gap-bar-label">Small Business</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill crimson tnt-style-1009">High Frequency</div>
+</div>
+</div>
+<div class="gap-bar-row">
+<span class="gap-bar-label">Individuals</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill gold tnt-style-55">Moderate</div>
+</div>
+</div>
+<div class="gap-bar-row">
+<span class="gap-bar-label">Large Corp</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill blue tnt-style-1014">Complex / Slow</div>
+</div>
+</div>
+<div class="gap-bar-row">
+<span class="gap-bar-label">Offshore</span>
+<div class="gap-bar-track">
+<div class="gap-bar-fill green tnt-style-1016">Minimal</div>
+</div>
+</div>
+</div>
+<p>The pattern is undeniable. CRA punches down because it's easy. Auditing a plumber
         for his truck deduction takes one agent and three months. Auditing a multinational's
         transfer pricing scheme takes a team of specialists and five years. CRA chose the
         path of least resistance — and working Canadians pay the price.</p>
-    </section>
-
-    <!-- ═══ SECTION 05 — CORPORATE TAX AVOIDANCE ═══ -->
-    <section id="corporate-avoidance">
-      <div class="section-head">
-        <span class="section-num">SECTION 05</span>
-        <h2>Corporate Tax Avoidance: Legal Theft</h2>
-      </div>
-
-      <p>Canada's statutory corporate tax rate is <strong>15% federally</strong> (26.5%
+</section>
+ ═══ SECTION 05 — CORPORATE TAX AVOIDANCE ═══ 
+<section id="corporate-avoidance">
+<div class="section-head">
+<span class="section-num">SECTION 05</span>
+<h2>Corporate Tax Avoidance: Legal Theft</h2>
+</div>
+<p>Canada's statutory corporate tax rate is <strong>15% federally</strong> (26.5%
         combined with most provinces). But the PBO's Corporate Tax Analysis reveals the
         effective rate — what corporations actually pay — is substantially lower, thanks to
         a labyrinth of deductions, credits, and
         deferrals.<sup><a href="#fn15">[15]</a></sup></p>
-
-      <div class="stat-grid reveal">
-        <div class="stat-card">
-          <span class="stat-number">26.5%</span>
-          <span class="stat-label">Statutory Combined Rate</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number green">~15–18%</span>
-          <span class="stat-label">Effective Rate (PBO Est.)</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number gold">$20B+</span>
-          <span class="stat-label">Annual Tax Expenditures</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number blue">200+</span>
-          <span class="stat-label">Federal Tax Expenditures</span>
-        </div>
-      </div>
-
-      <ul class="fact-list">
-        <li>The Department of Finance's Report on Federal Tax Expenditures catalogs
+<div class="stat-grid reveal">
+<div class="stat-card">
+<span class="stat-number">26.5%</span>
+<span class="stat-label">Statutory Combined Rate</span>
+</div>
+<div class="stat-card">
+<span class="stat-number green">~15–18%</span>
+<span class="stat-label">Effective Rate (PBO Est.)</span>
+</div>
+<div class="stat-card">
+<span class="stat-number gold">$20B+</span>
+<span class="stat-label">Annual Tax Expenditures</span>
+</div>
+<div class="stat-card">
+<span class="stat-number blue">200+</span>
+<span class="stat-label">Federal Tax Expenditures</span>
+</div>
+</div>
+<ul class="fact-list">
+<li>The Department of Finance's Report on Federal Tax Expenditures catalogs
           <strong>over 200 separate tax expenditures</strong> — deductions, credits,
           exemptions, and deferrals — that collectively reduce federal revenue by tens
           of billions annually.<sup><a href="#fn16">[16]</a></sup></li>
-        <li>Many tax expenditures disproportionately benefit large corporations and
+<li>Many tax expenditures disproportionately benefit large corporations and
           high-income individuals — the stock option deduction, capital gains inclusion
           rate, and industry-specific write-offs.<sup><a href="#fn16">[16]</a></sup></li>
-        <li>The PBO estimates the gap between statutory and effective corporate tax rates
+<li>The PBO estimates the gap between statutory and effective corporate tax rates
           represents <strong>billions in foregone revenue</strong> — money flowing to
           shareholders instead of public services.<sup><a href="#fn15">[15]</a></sup></li>
-        <li>Transfer pricing — multinationals shifting profits to low-tax jurisdictions
+<li>Transfer pricing — multinationals shifting profits to low-tax jurisdictions
           through intra-company transactions — remains one of CRA's largest enforcement
           challenges.<sup><a href="#fn9">[9]</a></sup></li>
-        <li>Canada's thin capitalization and CFC rules have been criticized as weaker than
+<li>Canada's thin capitalization and CFC rules have been criticized as weaker than
           comparable OECD nations, enabling profit-shifting that dwarfs individual
           evasion.<sup><a href="#fn17">[17]</a></sup></li>
-      </ul>
-
-      <p>When a nurse or a teacher files their taxes, they pay the full rate. When a
+</ul>
+<p>When a nurse or a teacher files their taxes, they pay the full rate. When a
         multinational routes profits through Ireland, Luxembourg, and Bermuda before
         declaring them in Canada, they pay whatever their lawyers negotiate. The tax code
         is the weapon — designed by lobbyists, for their clients.</p>
-
-      <div class="callout">
-        <p><strong>"Federal tax expenditures represent a significant cost to the treasury,
+<div class="callout">
+<p><strong>"Federal tax expenditures represent a significant cost to the treasury,
           often with limited transparency regarding their effectiveness or distributional
           impact."</strong></p>
-        <span class="source">— Department of Finance, Report on Federal Tax Expenditures</span>
-      </div>
-    </section>
-
-    <!-- ═══ SECTION 06 — WHAT RECOVERY LOOKS LIKE ═══ -->
-    <section id="recovery">
-      <div class="section-head">
-        <span class="section-num">SECTION 06</span>
-        <h2>What Recovery Looks Like: The Money Is There</h2>
-      </div>
-
-      <p>The PBO's tax gap analysis makes one thing clear: the money exists. It's not
+<span class="source">— Department of Finance, Report on Federal Tax Expenditures</span>
+</div>
+</section>
+ ═══ SECTION 06 — WHAT RECOVERY LOOKS LIKE ═══ 
+<section id="recovery">
+<div class="section-head">
+<span class="section-num">SECTION 06</span>
+<h2>What Recovery Looks Like: The Money Is There</h2>
+</div>
+<p>The PBO's tax gap analysis makes one thing clear: the money exists. It's not
         theoretical. It's sitting in offshore accounts, flowing through shell corporations,
         and hiding behind legal structures designed to obscure ownership. If Canada closed
         even <strong>half the tax gap</strong>, the revenue impact would be
         transformative.<sup><a href="#fn1">[1]</a></sup></p>
-
-      <div class="stat-grid reveal">
-        <div class="stat-card">
-          <span class="stat-number green">$10–13B</span>
-          <span class="stat-label">If 50% of Gap Closed</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number">$20–26B</span>
-          <span class="stat-label">If Full Gap Closed</span>
-        </div>
-      </div>
-
-      <p>What could $10–13 billion per year fund? Here's what our grandfathers would have
+<div class="stat-grid reveal">
+<div class="stat-card">
+<span class="stat-number green">$10–13B</span>
+<span class="stat-label">If 50% of Gap Closed</span>
+</div>
+<div class="stat-card">
+<span class="stat-number">$20–26B</span>
+<span class="stat-label">If Full Gap Closed</span>
+</div>
+</div>
+<p>What could $10–13 billion per year fund? Here's what our grandfathers would have
         spent it on — the things that actually build a country:</p>
-
-      <div class="recovery-grid">
-        <div class="recovery-card">
-          <span class="rc-icon">🏥</span>
-          <div>
-            <span class="rc-amount">$3.0B</span>
-            <span class="rc-label">Eliminate surgical wait times — hire 15,000 surgeons and nurses</span>
-          </div>
-        </div>
-        <div class="recovery-card">
-          <span class="rc-icon">🏠</span>
-          <div>
-            <span class="rc-amount">$4.0B</span>
-            <span class="rc-label">Build 40,000 affordable housing units per year</span>
-          </div>
-        </div>
-        <div class="recovery-card">
-          <span class="rc-icon">🎓</span>
-          <div>
-            <span class="rc-amount">$1.5B</span>
-            <span class="rc-label">Eliminate student loan interest and reduce tuition nationally</span>
-          </div>
-        </div>
-        <div class="recovery-card">
-          <span class="rc-icon">🛡️</span>
-          <div>
-            <span class="rc-amount">$2.0B</span>
-            <span class="rc-label">Restore Canadian Forces equipment and operational readiness</span>
-          </div>
-        </div>
-        <div class="recovery-card">
-          <span class="rc-icon">🌾</span>
-          <div>
-            <span class="rc-amount">$1.0B</span>
-            <span class="rc-label">Rural infrastructure — roads, broadband, water treatment</span>
-          </div>
-        </div>
-        <div class="recovery-card">
-          <span class="rc-icon">👴</span>
-          <div>
-            <span class="rc-amount">$1.5B</span>
-            <span class="rc-label">Long-term care facility standards and proper staffing ratios</span>
-          </div>
-        </div>
-      </div>
-
-      <p>Other nations show it's possible. The OECD's Tax Administration reports document how
+<div class="recovery-grid">
+<div class="recovery-card">
+<span class="rc-icon">🏥</span>
+<div>
+<span class="rc-amount">$3.0B</span>
+<span class="rc-label">Eliminate surgical wait times — hire 15,000 surgeons and nurses</span>
+</div>
+</div>
+<div class="recovery-card">
+<span class="rc-icon">🏠</span>
+<div>
+<span class="rc-amount">$4.0B</span>
+<span class="rc-label">Build 40,000 affordable housing units per year</span>
+</div>
+</div>
+<div class="recovery-card">
+<span class="rc-icon">🎓</span>
+<div>
+<span class="rc-amount">$1.5B</span>
+<span class="rc-label">Eliminate student loan interest and reduce tuition nationally</span>
+</div>
+</div>
+<div class="recovery-card">
+<span class="rc-icon">🛡️</span>
+<div>
+<span class="rc-amount">$2.0B</span>
+<span class="rc-label">Restore Canadian Forces equipment and operational readiness</span>
+</div>
+</div>
+<div class="recovery-card">
+<span class="rc-icon">🌾</span>
+<div>
+<span class="rc-amount">$1.0B</span>
+<span class="rc-label">Rural infrastructure — roads, broadband, water treatment</span>
+</div>
+</div>
+<div class="recovery-card">
+<span class="rc-icon">👴</span>
+<div>
+<span class="rc-amount">$1.5B</span>
+<span class="rc-label">Long-term care facility standards and proper staffing ratios</span>
+</div>
+</div>
+</div>
+<p>Other nations show it's possible. The OECD's Tax Administration reports document how
         peer countries have dramatically improved
         recovery:<sup><a href="#fn17">[17]</a></sup></p>
-
-      <ul class="fact-list">
-        <li><strong>United Kingdom (HMRC):</strong> Publishes annual tax gap estimates and
+<ul class="fact-list">
+<li><strong>United Kingdom (HMRC):</strong> Publishes annual tax gap estimates and
           reduced it from 8.4% to under 5% through digital compliance tools and targeted
           enforcement.<sup><a href="#fn17">[17]</a></sup></li>
-        <li><strong>United States (IRS):</strong> The Inflation Reduction Act invested $80B
+<li><strong>United States (IRS):</strong> The Inflation Reduction Act invested $80B
           in enforcement, projected to recover $200B+ over a decade — primarily from
           high-income non-compliance.<sup><a href="#fn17">[17]</a></sup></li>
-        <li><strong>Australia (ATO):</strong> Created a Tax Avoidance Taskforce targeting
+<li><strong>Australia (ATO):</strong> Created a Tax Avoidance Taskforce targeting
           multinational avoidance, recovering billions through aggressive transfer pricing
           enforcement.<sup><a href="#fn17">[17]</a></sup></li>
-        <li><strong>Canada (CRA):</strong> Does not publish a comprehensive annual tax gap
+<li><strong>Canada (CRA):</strong> Does not publish a comprehensive annual tax gap
           estimate. The PBO has called for mandatory annual publication — CRA has not
           complied.<sup><a href="#fn1">[1]</a></sup></li>
-      </ul>
-
-      <div class="callout">
-        <p><strong>The money is not missing. It's hidden. The question is whether Canada
+</ul>
+<div class="callout">
+<p><strong>The money is not missing. It's hidden. The question is whether Canada
           has the political will to go get it — or whether we'll keep auditing plumbers
           and nurses while billionaires negotiate.</strong></p>
-        <span class="source">— TENET5 Project analysis of PBO and OECD data</span>
-      </div>
-    </section>
-
-    <!-- ═══ SECTION 07 — SOURCES ═══ -->
-    <section id="sources">
-      <div class="section-head">
-        <span class="section-num">SECTION 07</span>
-        <h2>Sources &amp; Attribution</h2>
-      </div>
-
-      <p>Every claim on this page is drawn from official Canadian government reports,
+<span class="source">— TENET5 Project analysis of PBO and OECD data</span>
+</div>
+</section>
+ ═══ SECTION 07 — SOURCES ═══ 
+<section id="sources">
+<div class="section-head">
+<span class="section-num">SECTION 07</span>
+<h2>Sources &amp; Attribution</h2>
+</div>
+<p>Every claim on this page is drawn from official Canadian government reports,
         independent parliamentary officers, and internationally recognized investigative
         databases. We don't speculate. We cite.</p>
-
-      <table class="source-table">
-        <thead>
-          <tr><th>Ref</th><th>Source</th><th>Description</th></tr>
-        </thead>
-        <tbody>
-          <tr id="fn1">
-            <td><strong>[1]</strong></td>
-            <td>Parliamentary Budget Officer</td>
-            <td>Federal Tax Gap Analysis — estimates $20–26B annual federal tax gap.
+<table class="source-table">
+<thead>
+<tr><th>Ref</th><th>Source</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr id="fn1">
+<td><strong>[1]</strong></td>
+<td>Parliamentary Budget Officer</td>
+<td>Federal Tax Gap Analysis — estimates $20–26B annual federal tax gap.
               Recommended CRA publish annual gap estimates.</td>
-          </tr>
-          <tr id="fn2">
-            <td><strong>[2]</strong></td>
-            <td>CRA Annual Report to Parliament</td>
-            <td>Total fiscal impact of compliance activities: ~$2.2B from audits,
+</tr>
+<tr id="fn2">
+<td><strong>[2]</strong></td>
+<td>CRA Annual Report to Parliament</td>
+<td>Total fiscal impact of compliance activities: ~$2.2B from audits,
               investigations, and collections combined.</td>
-          </tr>
-          <tr id="fn3">
-            <td><strong>[3]</strong></td>
-            <td>CRA Offshore Tax Gap Studies</td>
-            <td>International tax gap estimated at $8.7B — offshore income, unreported
+</tr>
+<tr id="fn3">
+<td><strong>[3]</strong></td>
+<td>CRA Offshore Tax Gap Studies</td>
+<td>International tax gap estimated at $8.7B — offshore income, unreported
               foreign property, and transfer pricing non-compliance.</td>
-          </tr>
-          <tr id="fn4">
-            <td><strong>[4]</strong></td>
-            <td>ICIJ, Panama Papers Database (Public)</td>
-            <td>Searchable database of Mossack Fonseca entities. Over 2,000
+</tr>
+<tr id="fn4">
+<td><strong>[4]</strong></td>
+<td>ICIJ, Panama Papers Database (Public)</td>
+<td>Searchable database of Mossack Fonseca entities. Over 2,000
               Canadian-linked entities identified.</td>
-          </tr>
-          <tr id="fn5">
-            <td><strong>[5]</strong></td>
-            <td>ICIJ, Paradise Papers Database (Public)</td>
-            <td>Appleby/Asiaciti Trust leaks. Canadian connections through Bermuda,
+</tr>
+<tr id="fn5">
+<td><strong>[5]</strong></td>
+<td>ICIJ, Paradise Papers Database (Public)</td>
+<td>Appleby/Asiaciti Trust leaks. Canadian connections through Bermuda,
               Cayman Islands, Isle of Man.</td>
-          </tr>
-          <tr id="fn6">
-            <td><strong>[6]</strong></td>
-            <td>CRA Annual Report — Offshore Compliance</td>
-            <td>Panama Papers response: audits initiated, reassessments issued. Criminal
+</tr>
+<tr id="fn6">
+<td><strong>[6]</strong></td>
+<td>CRA Annual Report — Offshore Compliance</td>
+<td>Panama Papers response: audits initiated, reassessments issued. Criminal
               prosecutions in single digits.</td>
-          </tr>
-          <tr id="fn7">
-            <td><strong>[7]</strong></td>
-            <td>CRA Enforcement Statistics</td>
-            <td>Criminal convictions for offshore evasion. Fewer than 50 convictions
+</tr>
+<tr id="fn7">
+<td><strong>[7]</strong></td>
+<td>CRA Enforcement Statistics</td>
+<td>Criminal convictions for offshore evasion. Fewer than 50 convictions
               between 2016–2023.</td>
-          </tr>
-          <tr id="fn8">
-            <td><strong>[8]</strong></td>
-            <td>Hansard, FINA Committee</td>
-            <td>Standing Committee on Finance hearings on CRA enforcement capacity
+</tr>
+<tr id="fn8">
+<td><strong>[8]</strong></td>
+<td>Hansard, FINA Committee</td>
+<td>Standing Committee on Finance hearings on CRA enforcement capacity
               and offshore evasion.</td>
-          </tr>
-          <tr id="fn9">
-            <td><strong>[9]</strong></td>
-            <td>CRA, Int'l &amp; Large Business Directorate</td>
-            <td>Audits of international transactions, transfer pricing, treaty shopping.
+</tr>
+<tr id="fn9">
+<td><strong>[9]</strong></td>
+<td>CRA, Int'l &amp; Large Business Directorate</td>
+<td>Audits of international transactions, transfer pricing, treaty shopping.
               Billions in non-compliance identified.</td>
-          </tr>
-          <tr id="fn10">
-            <td><strong>[10]</strong></td>
-            <td>CRA, VDP Statistics</td>
-            <td>Voluntary Disclosure Program: thousands of annual applications involving
+</tr>
+<tr id="fn10">
+<td><strong>[10]</strong></td>
+<td>CRA, VDP Statistics</td>
+<td>Voluntary Disclosure Program: thousands of annual applications involving
               unreported offshore income. Near-zero criminal prosecution rate.</td>
-          </tr>
-          <tr id="fn11">
-            <td><strong>[11]</strong></td>
-            <td>AG Report on CRA Offshore Compliance</td>
-            <td>Found CRA "could not demonstrate offshore compliance activities were
+</tr>
+<tr id="fn11">
+<td><strong>[11]</strong></td>
+<td>AG Report on CRA Offshore Compliance</td>
+<td>Found CRA "could not demonstrate offshore compliance activities were
               achieving intended results." Lacked performance frameworks.</td>
-          </tr>
-          <tr id="fn12">
-            <td><strong>[12]</strong></td>
-            <td>CRA Annual Report — Compliance Data</td>
-            <td>Audit volumes by segment: hundreds of thousands of SME reviews vs.
+</tr>
+<tr id="fn12">
+<td><strong>[12]</strong></td>
+<td>CRA Annual Report — Compliance Data</td>
+<td>Audit volumes by segment: hundreds of thousands of SME reviews vs.
               far fewer large corporate complex audits.</td>
-          </tr>
-          <tr id="fn13">
-            <td><strong>[13]</strong></td>
-            <td>CRA Departmental Plan + PBO</td>
-            <td>Resource allocation: disproportionate spending on small/medium taxpayer
+</tr>
+<tr id="fn13">
+<td><strong>[13]</strong></td>
+<td>CRA Departmental Plan + PBO</td>
+<td>Resource allocation: disproportionate spending on small/medium taxpayer
               programs vs. complex international enforcement.</td>
-          </tr>
-          <tr id="fn14">
-            <td><strong>[14]</strong></td>
-            <td>Office of the Privacy Commissioner</td>
-            <td>CRA data breaches, inadequate safeguards, and account lockouts
+</tr>
+<tr id="fn14">
+<td><strong>[14]</strong></td>
+<td>Office of the Privacy Commissioner</td>
+<td>CRA data breaches, inadequate safeguards, and account lockouts
               preventing access to benefits.</td>
-          </tr>
-          <tr id="fn15">
-            <td><strong>[15]</strong></td>
-            <td>PBO, Corporate Tax Analysis</td>
-            <td>Effective vs. statutory corporate tax rates — billions in foregone
+</tr>
+<tr id="fn15">
+<td><strong>[15]</strong></td>
+<td>PBO, Corporate Tax Analysis</td>
+<td>Effective vs. statutory corporate tax rates — billions in foregone
               revenue documented.</td>
-          </tr>
-          <tr id="fn16">
-            <td><strong>[16]</strong></td>
-            <td>Dept. of Finance, Tax Expenditures Report</td>
-            <td>200+ federal tax expenditures catalogued. Tens of billions in annual
+</tr>
+<tr id="fn16">
+<td><strong>[16]</strong></td>
+<td>Dept. of Finance, Tax Expenditures Report</td>
+<td>200+ federal tax expenditures catalogued. Tens of billions in annual
               foregone revenue.</td>
-          </tr>
-          <tr id="fn17">
-            <td><strong>[17]</strong></td>
-            <td>OECD Tax Administration Reports</td>
-            <td>Comparative tax administration across OECD — gap estimates, enforcement
+</tr>
+<tr id="fn17">
+<td><strong>[17]</strong></td>
+<td>OECD Tax Administration Reports</td>
+<td>Comparative tax administration across OECD — gap estimates, enforcement
               investment, HMRC/IRS/ATO recovery approaches.</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="callout">
-        <p><strong>A note on methodology:</strong> All figures cited on this page are drawn
+</tr>
+</tbody>
+</table>
+<div class="callout">
+<p><strong>A note on methodology:</strong> All figures cited on this page are drawn
           from publicly available official Canadian government documents, parliamentary
           publications, and internationally recognized investigative databases. Where ranges
           are given, they reflect the range presented in the original source. This page does
           not speculate — it presents what the government's own data reveals.</p>
-        <span class="source">Primary sources: PBO, Auditor General, CRA Annual Reports,
+<span class="source">Primary sources: PBO, Auditor General, CRA Annual Reports,
           CRA Departmental Plans, Dept. of Finance Tax Expenditure Reports, ICIJ Databases,
           Hansard, Privacy Commissioner, OECD Tax Administration.</span>
-      </div>
+</div>
+<p class="tnt-style-1067">
 
-      <p class="tnt-style-1067">
-
-        This page is part of the TENET5 TENET5 Project.<br>
+        This page is part of the TENET5 TENET5 Project.<br/>
         Every fact sourced. Every figure cited. Our grandfathers built this country with
         honest work and honest taxes. We owe them the truth.
       </p>
-    </section>
+</section>
 
   </main>
 
-    <div class="cap263-container-narrow-px">
-      <h3 class="cap263-eyebrow">Connected Investigations</h3>
-      <div class="cap263-flex-row">
-        <a href="follow-the-money.html" class="cap263-pill-btn cap263-pill-btn--160">Follow the Money →</a>
-        <a href="maid-accountability.html" class="cap263-pill-btn cap263-pill-btn--160">MAID Investigation →</a>
-        <a href="carney-conflicts.html" class="cap263-pill-btn cap263-pill-btn--160">Carney-Brookfield →</a>
-        <a href="scandals.html" class="cap263-pill-btn cap263-pill-btn--160">All Scandals →</a>
-      </div>
-    </div>
-<!-- ═══ statistical anomaly ANALYSIS — auto-generated ═══ -->
-<section style="max-width:900px;margin:3rem auto 2rem;padding:1.5rem;background:linear-gradient(135deg,rgba(10,10,20,0.95),rgba(20,15,40,0.9));border:1px solid rgba(139,92,246,0.3);border-radius:12px;">
-  <h2 style="color:#a855f7;font-family: var(--slate-font-mono);font-size:0.9rem;letter-spacing:2px;margin:0 0 1rem;">
-    <span class="cap263-text-cyan">⚛</span> STATISTICAL ANOMALY ANALYSIS
-  </h2>
-  <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
-    <div style="flex:1;min-width:100px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:0.8rem;text-align:center;">
-      <div style="font-size:1.3rem;font-weight:900;font-family: var(--slate-font-mono);color:#ef4444;">13.177</div>
-      <div style="font-size:0.6rem;color:#8b5cf6;text-transform:uppercase;letter-spacing:1px;">Anomaly Score</div>
-    </div>
-    <div style="flex:1;min-width:100px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:0.8rem;text-align:center;">
-      <div style="font-size:1.3rem;font-weight:900;font-family: var(--slate-font-mono);color:#ef4444;">FLAGGED</div>
-      <div style="font-size:0.6rem;color:#ef4444;text-transform:uppercase;letter-spacing:1px;">Structural Anomalies</div>
-    </div>
-    <div style="flex:1;min-width:100px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:0.8rem;text-align:center;">
-      <div style="font-size:1.3rem;font-weight:900;font-family: var(--slate-font-mono);color:#facc15;">$0</div>
-      <div style="font-size:0.6rem;color:#8b5cf6;text-transform:uppercase;letter-spacing:1px;">CRA Collected</div>
-    </div>
-  </div>
-  <p style="color:#5a6a7a;font-size:0.7rem;margin:0;">Structural-anomaly analysis | <a href="panama-papers.html#structural-anomaly" style="color:#8b5cf6;">Full analysis →</a> | <a href="data/offshore_structural_analysis.json" style="color:#8b5cf6;">Raw data →</a></p>
-</section>
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
 
-<div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    <a href="follow-the-money.html" class="cap263-card-link">
-      <div class="cap263-tag cap263-tag--red">Financial</div>
-      <div class="cap263-bold-tight">Follow the Money</div>
-    </a>
-    <a href="crown-corporations.html" class="cap263-card-link cap263-card-link--gold">
-      <div class="cap263-tag cap263-tag--gold">Crown Corps</div>
-      <div class="cap263-bold-tight">Crown Corporations</div>
-    </a>
-    <a href="debt-fiscal.html" class="cap263-card-link">
-      <div class="cap263-tag">Fiscal</div>
-      <div class="cap263-bold-tight">Debt & Fiscal</div>
-    </a>
-    <a href="accountability.html" class="cap263-card-link">
-      <div class="cap263-tag">Accountability</div>
-      <div class="cap263-bold-tight">Accountability Database</div>
-    </a>
-  </div>
-</div>
-<div class="source-note cap263-container-narrow-2rem"><strong>Sources:</strong> CRA Annual Reports; AG CRA Audit Reports; ICIJ Panama Papers. All data from official government records.</div>
-<div class="cap263-alert-card">
-      <p class="cap263-headline-red">These people must be arrested and put on trial immediately. The state won&#39;t prosecute itself.</p>
-      <p class="cap263-meta"><a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a> | <a href="cds-accountability.html" style="color:#a855f7;font-weight:600;">CDS →</a></p>
-    </div>
-  <div id="read-next"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
 
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
-<script src="js/ux.js"></script>
-<script src="js/slate.js?v=42"></script>
-<script src="js/cinema.js?v=41"></script>
-<script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
-<script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
-<style>
-/* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
-.liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
-  border-top:1px solid var(--slate-border,rgba(232,227,214,.16));
-  background:rgba(40,48,56,.35);
-  font-family:'Inter',system-ui,sans-serif}
-.liril-related h2{margin:0 0 .8rem;padding:0;border:0;
-  font-family:'JetBrains Mono',ui-monospace,monospace;
-  font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--slate-ink-dim,#c9c3b3)}
-.liril-related ul{list-style:none;margin:0;padding:0;
-  display:flex;flex-wrap:wrap;gap:.45rem .55rem}
-.liril-related li{margin:0;padding:0}
-.liril-rel-link{display:inline-block;padding:.32rem .65rem;
-  border:1px solid var(--slate-border,rgba(232,227,214,.16));
-  border-radius:3px;font-size:.82rem;text-decoration:none;
-  color:var(--slate-ink,#e8e3d6);background:rgba(255,255,255,.02);
-  transition:background .12s ease,color .12s ease,border-color .12s ease}
-.liril-rel-link:hover,.liril-rel-link:focus-visible{
-  color:var(--slate-link-hover,#e0b58c);
-  border-color:var(--slate-brass,#b8835a);
-  background:rgba(184,131,90,.10);outline:none}
-@media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
-  .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
-</style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
-</nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
 </body>
 </html>

@@ -1,829 +1,194 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
-<!-- Phase 63 Infrastructural Vulnerability Resolution: CSP / Clickjacking / HTTPS -->
-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests;">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Investigation Board — Foreign Influence in Canadian Politics | TENET5</title>
-<meta name="description" content="Interactive investigation board mapping foreign state influence on Canadian politics. Sources include Hansard, Elections Canada, and the Lobbying Registry.">
-<link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-      /* QUANTANIUM-UNIFIED — forward every legacy token to canonical
-         /css/tokens.css (see /css/QUANTANIUM.json). Do not hardcode hex
-         values here. Auto-managed — do not hand-edit;
-         re-runnable. */
-      /* Surfaces */
-      --bg:           var(--slate-bg);
-      --bg-dark:      var(--slate-overlay);
-      --bg-darker:    var(--slate-overlay);
-      --bg-elev:      var(--slate-raised);
-      --bg-elevated:  var(--slate-raised);
-      --bg-card:      var(--slate-raised);
-      --bg-panel:     var(--slate-sunken);
-      --bg-panel-2:   var(--slate-raised);
-      --bg-surface:   var(--slate-raised);
-      --bg-table:     var(--slate-table);
-      --hero-bg:      var(--slate-overlay);
-      --section-bg:   var(--slate-bg);
-      --card-bg:      var(--slate-raised);
-      --surface:      var(--slate-raised);
-      --on-surface:   var(--slate-ink);
-      /* Ink */
-      --ink:          var(--slate-ink);
-      --ink-2:        var(--slate-ink-dim);
-      --ink-soft:     rgba(255, 255, 255, 0.72);
-      --ink-mute:     var(--slate-ink-muted);
-      --ink-muted:    var(--slate-ink-muted);
-      --text:         var(--slate-ink);
-      --text-primary: var(--slate-ink);
-      --text-light:   var(--slate-ink);
-      --muted:        var(--slate-ink-muted);
-      --panel-text:   var(--slate-ink);
-      --panel-muted:  var(--slate-ink-dim);
-      /* Accent */
-      --accent:       var(--slate-accent);
-      --accent-bright:var(--slate-accent-warm);
-      --gold:         var(--slate-accent);
-      --primary:      var(--slate-accent);
-      --crimson:      var(--slate-accent);
-      /* Borders */
-      --border:       var(--slate-border);
-      --border-hot:   var(--slate-border-hot);
-      --line:         var(--slate-border);
-      --line-hi:      var(--slate-ink);
-      /* Semantic (muted, never alarm) */
-      --critical:     var(--slate-critical);
-      --danger:       var(--slate-critical);
-      --error:        var(--slate-critical);
-      --red:          var(--slate-critical);
-      --verified:     var(--slate-verified);
-      --success:      var(--slate-verified);
-      --green:        var(--slate-verified);
-      --warning:      var(--slate-warning);
-      --amber:        var(--slate-warning);
-      --orange:       var(--slate-warning);
-      --info:         var(--slate-info);
-      --blue:         var(--slate-info);
-      --ice:          var(--slate-info);
-      --cyan:         var(--slate-info);
-      --teal:         var(--slate-info);
-      --quantum:      var(--slate-quantum);
-      --purple:       var(--slate-quantum);
-      /* Type */
-      --font-sans:    var(--slate-font-sans);
-      --font-mono:    var(--slate-font-mono);
-      --font-serif:   var(--slate-font-serif);
-      --font-disp:    var(--slate-font-display);
-      --font-display: var(--slate-font-display);
-      --font-body:    var(--slate-font-sans);
-      --font-headline:var(--slate-font-display);
-      --font-hud:     var(--slate-font-display);
-    }
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100% !important; overflow:hidden !important; }
-body {
-  background: #06080c !important;
-  color: #c8d6e5 !important;
-  font-family: var(--slate-font-body);
-  line-height: 1.5;
-}
-
-/* ── HEADER ── */
-.board-bar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  padding: 10px 16px;
-  background: rgba(12,16,24,0.92);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.board-bar-brand {
-  font-weight: 900; font-size: 0.85rem; color: var(--red);
-  letter-spacing: 1px; flex-shrink: 0;
-}
-.board-bar a {
-  color: var(--text-dim); font-size: 0.72rem; text-decoration: none;
-  transition: color 0.2s; padding: 4px 6px; border-radius: 4px;
-}
-.board-bar a:hover, .board-bar a.active { color: var(--text-bright); background: rgba(255,255,255,0.04); }
-.board-bar-spacer { flex: 1; }
-.board-bar-search {
-  position: relative; flex-shrink: 1;
-}
-.board-bar-search input {
-  width: 180px; padding: 6px 12px 6px 28px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px; color: var(--text); font-family: var(--slate-font-mono);
-  font-size: 0.7rem; outline: none; transition: all 0.3s;
-  -webkit-tap-highlight-color: transparent;
-}
-.board-bar-search::before {
-  content: '🔍'; position: absolute; left: 8px; top: 50%;
-  transform: translateY(-50%); font-size: 0.6rem; pointer-events: none;
-}
-.board-bar-search input:focus {
-  width: 240px; border-color: var(--blue);
-  background: rgba(255,255,255,0.06);
-}
-.board-bar-search input::placeholder { color: var(--text-dim); }
-
-/* ── STATS ── */
-.stats-bar {
-  display: flex; gap: 6px; padding: 0 16px; flex-wrap: wrap;
-}
-.stat-chip {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-  border-radius: 6px; padding: 4px 10px; text-align: center;
-  font-family: var(--slate-font-mono); font-size: 0.7rem;
-}
-.stat-chip .n { color: var(--red); font-weight: 700; font-size: 0.9rem; }
-.stat-chip .l { color: var(--text-dim); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* ── SORT DROPDOWN ── */
-.sort-wrap {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 0.65rem; color: var(--text-dim);
-}
-.sort-wrap select {
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 6px; color: var(--text); font-family: var(--slate-font-mono);
-  font-size: 0.65rem; padding: 4px 8px; outline: none; cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.sort-wrap select:focus { border-color: var(--blue); }
-
-/* ── TYPE FILTER PILLS ── */
-.type-pills {
-  display: flex; gap: 3px; margin-left: 6px;
-}
-.type-pill {
-  font-family: var(--slate-font-body); font-size: 0.58rem; padding: 3px 8px;
-  border-radius: 4px; border: 1px solid var(--border); cursor: pointer;
-  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
-  transition: all 0.2s; background: transparent; color: var(--text-dim);
-  -webkit-tap-highlight-color: transparent;
-}
-.type-pill:hover { border-color: var(--border-active); color: var(--text); }
-.type-pill.on { border-color: var(--indicator, var(--text)); color: var(--indicator, var(--text)); background: rgba(255,255,255,0.04); }
-.type-pill[data-t="person"] { --indicator: var(--pink); }
-.type-pill[data-t="org"]    { --indicator: var(--purple); }
-.type-pill[data-t="event"]  { --indicator: var(--yellow); }
-.type-pill[data-t="evidence"] { --indicator: var(--green); }
-
-/* ── NODE CONNECTION COUNT BADGE ── */
-.node .conn-count {
-  position: absolute; top: -6px; right: -6px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: var(--red); color: #fff;
-  font-size: 0.52rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--slate-font-mono);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  pointer-events: none;
-}
-
-/* ── FILTERS ── */
-.filter-bar {
-  display: flex; gap: 4px; padding: 8px 16px; overflow-x: auto;
-  -webkit-overflow-scrolling: touch; scrollbar-width: none;
-}
-.filter-bar::-webkit-scrollbar { display: none; }
-.fbtn {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-  color: var(--text-dim); padding: 5px 12px; border-radius: 20px;
-  font-size: 0.68rem; cursor: pointer; font-family: var(--slate-font-body);
-  transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-}
-.fbtn:hover, .fbtn.on { background: rgba(255,255,255,0.06); color: var(--text-bright); border-color: var(--border-active); }
-.fbtn[data-c="israel"].on { border-color: var(--blue); color: var(--blue); }
-.fbtn[data-c="ccp"].on { border-color: var(--red); color: var(--red); }
-.fbtn[data-c="india"].on { border-color: var(--orange); color: var(--orange); }
-.fbtn[data-c="cfnis"].on { border-color: var(--yellow); color: var(--yellow); }
-.fbtn[data-c="media"].on { border-color: var(--purple); color: var(--purple); }
-.fbtn[data-c="disinfo"].on { border-color: var(--cyan); color: var(--cyan); }
-
-/* ── CANVAS AREA ── */
-.canvas-wrap {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  overflow: hidden; touch-action: none;
-}
-.canvas {
-  position: absolute; width: 4000px; height: 3200px;
-  transform-origin: 0 0;
-  will-change: transform;
-}
-.canvas-grid {
-  position: absolute; inset: 0;
-  background-color: #040608;
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(230, 57, 70, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(58, 134, 255, 0.05) 0%, transparent 40%),
-    url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(230,57,70,0.07)' stroke-width='0.5'%3E%3Cpath d='M0,50 Q100,100 200,50 T400,50 M0,150 Q100,200 200,150 T400,150 M0,250 Q100,300 200,250 T400,250 M0,350 Q100,400 200,350 T400,350' /%3E%3Cpath stroke='rgba(58,134,255,0.07)' d='M50,0 Q100,100 50,200 T50,400 M150,0 Q200,100 150,200 T150,400 M250,0 Q300,100 250,200 T250,400 M350,0 Q400,100 350,200 T350,400' /%3E%3C/g%3E%3C/svg%3E"),
-    radial-gradient(circle, rgba(26,37,53,0.4) 1px, transparent 1px),
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 800px 800px, 50px 50px, 200px 200px, 200px 200px;
-  pointer-events: none;
-}
-.canvas-grid::after {
-  content: ''; position: absolute; inset: 0;
-  background-image: 
-    linear-gradient(to right, rgba(230,57,70,0.15) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(230,57,70,0.15) 1px, transparent 1px);
-  background-size: 1000px 1000px; background-position: center; pointer-events: none;
-}
-.canvas canvas {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 0;
-}
-
-/* ── NODE CARDS ── */
-.node {
-  position: absolute; width: 170px;
-  background: rgba(17, 24, 32, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-  border-radius: var(--radius); padding: 10px 12px;
-  cursor: pointer; z-index: 2; user-select: none;
-  transition: border-color 0.25s, box-shadow 0.25s, opacity 0.3s;
-  -webkit-tap-highlight-color: transparent;
-  contain: layout style;
-}
-.node:hover {
-  border-color: var(--border-active);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-  z-index: 20; transform: scale(1.04);
-}
-.node.selected {
-  border-color: var(--blue) !important;
-  box-shadow: 0 0 20px rgba(58,134,255,0.3), 0 4px 24px rgba(0,0,0,0.5);
-  z-index: 30;
-}
-.node.dim { opacity: 0.12; pointer-events: none; }
-.node .badge {
-  display: inline-block; padding: 1px 6px; border-radius: 3px;
-  font-size: 0.55rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.5px; margin-bottom: 3px;
-}
-.node .name { font-size: 0.78rem; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
-.node .sub { font-size: 0.62rem; color: var(--text-dim); margin-top: 1px; }
-.node .info {
-  font-size: 0.62rem; color: var(--text-dim); margin-top: 6px;
-  line-height: 1.4; max-height: 0; overflow: hidden; opacity: 0;
-  transition: max-height 0.3s, opacity 0.3s, margin 0.3s;
-}
-.node.selected .info, .node:hover .info { max-height: 200px; opacity: 1; margin-top: 6px; }
-.node .ev-link {
-  display: inline-block; margin-top: 5px; font-size: 0.58rem; color: var(--blue);
-  opacity: 0; transition: opacity 0.2s;
-}
-.node.selected .ev-link, .node:hover .ev-link { opacity: 1; }
-.type-person { border-left: 3px solid var(--pink); }
-.type-org    { border-left: 3px solid var(--purple); }
-.type-event  { border-left: 3px solid var(--yellow); }
-.type-evidence { border-left: 3px solid var(--green); }
-.type-navigate { border-left: 3px solid var(--cyan); }
-
-/* ── LIST VIEW (clean fallback / default) ──
-   Replaces the force-directed board which piled nodes into an illegible
-   cluster of overlapping labels. Cards render left-to-right on a clean
-   grid, fully readable, same filters apply. */
-.list-view {
-  display: none; padding: 1rem 1.2rem 4rem; background: var(--bg);
-  min-height: calc(100vh - 200px);
-}
-.list-view.on { display: block; }
-.list-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 0.8rem; max-width: 1600px; margin: 0 auto;
-}
-.list-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 0.9rem 1rem; cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
-}
-.list-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
-.list-card.type-person { border-left: 3px solid var(--pink); }
-.list-card.type-org    { border-left: 3px solid var(--purple); }
-.list-card.type-event  { border-left: 3px solid var(--yellow); }
-.list-card.type-evidence { border-left: 3px solid var(--green); }
-.list-card.type-navigate { border-left: 3px solid var(--cyan); background: linear-gradient(135deg, rgba(0,180,216,0.05) 0%, var(--card) 100%); }
-.list-card .badge {
-  display: inline-block; font-size: 0.6rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  padding: 1px 6px; border-radius: 3px; margin-bottom: 4px;
-}
-.list-card.type-person .badge { background: rgba(255,0,110,0.15); color: var(--pink); }
-.list-card.type-org .badge    { background: rgba(131,56,236,0.15); color: var(--purple); }
-.list-card.type-event .badge  { background: rgba(255,214,10,0.15); color: var(--yellow); }
-.list-card.type-evidence .badge { background: rgba(6,214,160,0.15); color: var(--green); }
-.list-card.type-navigate .badge { background: rgba(0,180,216,0.2); color: var(--cyan); }
-.list-card .name { font-size: 0.9rem; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
-.list-card .sub  { font-size: 0.72rem; color: var(--text-dim); margin-top: 3px; }
-.list-card .info { font-size: 0.75rem; color: var(--text-dim); margin-top: 7px; line-height: 1.5; }
-.list-card.dim   { opacity: 0.22; }
-.view-toggle {
-  display: inline-flex; margin-left: 8px; background: rgba(0,0,0,0.3);
-  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
-}
-.view-toggle button {
-  background: transparent; color: var(--text-dim); border: none;
-  padding: 4px 10px; font-size: 0.78rem; cursor: pointer;
-  font-family: var(--slate-font-mono);
-}
-.view-toggle button.on { background: rgba(0,180,216,0.2); color: var(--cyan); }
-.type-person .badge { background: rgba(255,0,110,0.15); color: var(--pink); }
-.type-org .badge    { background: rgba(131,56,236,0.15); color: var(--purple); }
-.type-event .badge  { background: rgba(255,214,10,0.15); color: var(--yellow); }
-.type-evidence .badge { background: rgba(6,214,160,0.15); color: var(--green); }
-.type-navigate .badge { background: rgba(0,180,216,0.2); color: var(--cyan); }
-
-/* ── NAVIGATE hub nodes ── */
-.type-navigate {
-  background: linear-gradient(135deg, rgba(0,180,216,0.06) 0%, var(--card) 100%) !important;
-  min-width: 160px;
-}
-.type-navigate:hover {
-  border-color: rgba(0,180,216,0.7) !important;
-  box-shadow: 0 0 20px rgba(0,180,216,0.15), inset 0 0 12px rgba(0,180,216,0.05) !important;
-}
-.type-navigate .name { color: var(--cyan) !important; }
-
-/* ── NAV BUTTON on nodes ── */
-.node .nav-btn {
-  display: inline-block; margin-top: 6px; padding: 3px 10px;
-  background: rgba(0,180,216,0.1); border: 1px solid rgba(0,180,216,0.25);
-  border-radius: 4px; color: var(--cyan); font-size: 0.6rem;
-  font-weight: 700; text-decoration: none; cursor: pointer;
-  transition: all 0.2s; opacity: 0;
-}
-.node:hover .nav-btn, .node.selected .nav-btn { opacity: 1; }
-.node .nav-btn:hover {
-  background: rgba(0,180,216,0.25); border-color: var(--cyan);
-  box-shadow: 0 0 8px rgba(0,180,216,0.2);
-}
-.type-navigate .nav-btn { opacity: 1 !important; }
-
-/* ── DETAIL PANEL (right side) ── */
-.detail-panel {
-  position: fixed; top: 48px; right: 0; bottom: 0; width: 360px;
-  background: rgba(12,16,24,0.94); backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-left: 1px solid var(--border); z-index: 90;
-  padding: 20px; overflow-y: auto; transform: translateX(100%);
-  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-.detail-panel.open { transform: translateX(0); }
-.detail-panel-close {
-  position: absolute; top: 12px; right: 12px; background: none;
-  border: 1px solid var(--border); color: var(--text-dim);
-  width: 32px; height: 32px; border-radius: 6px;
-  cursor: pointer; font-size: 1rem; display: flex;
-  align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-.detail-panel-close:hover { color: var(--text-bright); border-color: var(--red); }
-.detail-panel h2 { font-size: 1.1rem; color: var(--text-bright); margin-bottom: 4px; }
-.detail-panel .dp-sub { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 12px; }
-.detail-panel .dp-body { font-size: 0.8rem; color: var(--text); line-height: 1.6; }
-.detail-panel .dp-connections { margin-top: 16px; }
-.detail-panel .dp-conn-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 8px; border-radius: 6px; cursor: pointer;
-  font-size: 0.72rem; color: var(--text); transition: background 0.2s;
-}
-.detail-panel .dp-conn-item:hover { background: rgba(255,255,255,0.04); }
-.detail-panel .dp-conn-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.detail-panel .dp-link {
-  display: inline-block; margin-top: 12px; padding: 6px 14px;
-  background: rgba(58,134,255,0.1); border: 1px solid rgba(58,134,255,0.3);
-  border-radius: 6px; color: var(--blue); font-size: 0.72rem;
-  text-decoration: none; transition: background 0.2s;
-}
-.detail-panel .dp-link:hover { background: rgba(58,134,255,0.2); }
-.detail-panel .dp-explore-header {
-  margin: 12px 0 8px; font-size: 0.65rem; color: var(--cyan);
-  font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-}
-.detail-panel .dp-explore-links {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
-}
-.detail-panel .dp-explore-btn {
-  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
-  border-radius: 5px; font-size: 0.65rem; font-weight: 600;
-  background: rgba(0,180,216,0.08); border: 1px solid rgba(0,180,216,0.2);
-  color: var(--cyan); text-decoration: none; transition: all 0.2s;
-}
-.detail-panel .dp-explore-btn:hover { background: rgba(0,180,216,0.2); }
-
-/* ── CONTROLS OVERLAY ── */
-.ctrl-float {
-  position: fixed; right: 16px; bottom: 16px; z-index: 80;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.ctrl-btn {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: rgba(12,16,24,0.88); backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08); color: var(--text-dim);
-  font-size: 1.1rem; cursor: pointer; display: flex;
-  align-items: center; justify-content: center; transition: all 0.2s;
-  font-family: var(--slate-font-mono);
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-}
-.ctrl-btn:hover { color: var(--text-bright); border-color: var(--blue); background: rgba(255,255,255,0.06); }
-.ctrl-btn:active { transform: scale(0.9); }
-
-/* ── LEGEND ── */
-.legend-float {
-  position: fixed; left: 16px; bottom: 16px; z-index: 80;
-  display: flex; gap: 10px; flex-wrap: wrap;
-  background: rgba(12,16,24,0.85); backdrop-filter: blur(12px);
-  padding: 6px 12px; border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.legend-item {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 0.62rem; color: var(--text-dim);
-}
-.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-/* ── FALCON CRYPTO BADGE ── */
-.falcon-crypto {
-  margin: 12px 0;
-  padding: 10px;
-  background: rgba(0, 255, 136, 0.05);
-  border: 1px solid rgba(0, 255, 136, 0.3);
-  border-left: 3px solid #00ff88;
-  border-radius: 4px;
-  font-family: var(--slate-font-mono);
-  font-size: 0.65rem;
-  color: #00ff88;
-  word-break: break-all;
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.1), inset 0 0 10px rgba(0, 255, 136, 0.05);
-}
-.falcon-crypto strong { color: #fff; display: inline-block; width: 60px; }
-.falcon-crypto .fc-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 700;
-  font-size: 0.70rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-  padding-bottom: 6px;
-  color: #00ff88;
-  text-shadow: 0 0 5px rgba(0, 255, 136, 0.4);
-}
-
-/* ── FOOTER ── */
-.board-foot {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 5;
-  text-align: center; padding: 6px; font-size: 0.58rem; color: var(--text-dim);
-  background: linear-gradient(transparent, rgba(6,8,12,0.9));
-  pointer-events: none;
-}
-
-/* ═══ MOBILE ═══ */
-@media (max-width: 768px) {
-  .board-bar { padding: 8px 10px; gap: 6px; }
-  .board-bar a { font-size: 0.62rem; padding: 3px 4px; }
-  .board-bar-brand { font-size: 0.75rem; }
-  .board-bar-search input { width: 120px; font-size: 0.62rem; }
-  .board-bar-search input:focus { width: 160px; }
-  .stats-bar { padding: 0 10px; }
-  .stat-chip { padding: 3px 7px; }
-  .stat-chip .n { font-size: 0.78rem; }
-  .filter-bar { padding: 6px 10px; }
-  .node { width: 140px; padding: 8px 10px; }
-  .node .name { font-size: 0.7rem; }
-  .node .sub { font-size: 0.55rem; }
-  .detail-panel { width: 100%; top: 44px; }
-  .detail-panel .dp-explore-header { font-size: 0.75rem; margin-top: 16px; margin-bottom: 12px; }
-  .detail-panel .dp-explore-btn { padding: 8px 12px; font-size: 0.72rem; flex: 1 1 auto; justify-content: center; }
-  .ctrl-float { right: 10px; bottom: 10px; }
-  .ctrl-btn { width: 36px; height: 36px; font-size: 1rem; }
-  .legend-float { left: 10px; bottom: 10px; padding: 4px 8px; }
-  .legend-item { font-size: 0.55rem; }
-}
-@media (max-width: 480px) {
-  .board-bar a:not(.active) { display: none; }
-  .node { width: 120px; padding: 6px 8px; }
-  .node .name { font-size: 0.62rem; }
-  .node .badge { font-size: 0.48rem; }
-  .legend-float { display: none; }
-}
-</style>
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investigation Board — Foreign Influence in Canadian Politics | TENET5</title>
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
+  <link rel="canonical" href="https://tenet-5.github.io/conspiracy-board.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="Investigation Board — Foreign Influence in Canadian Politics | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- offline_db.js removed: 17MB blocking load -->
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="Investigation Board — Foreign Influence in Canadian Politics | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/conspiracy-board.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Investigation Board — Foreign Influence in Canadian Politics | TENET5">
-  <link rel="canonical" href="https://tenet-5.github.io/conspiracy-board.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Investigation Board \u2014 Foreign Influence in Canadian Politics",
-  "url": "https://tenet-5.github.io/conspiracy-board.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:description" content="Interactive investigation board mapping foreign state influence on Canadian politics. Sources include Hansard, Elections Canada, and the Lobbying Registry.">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="Canadian Court Records; Elections Canada; House of Commons Hansard; Lobbying Commissioner Registry; RCMP Public Reports; Access to Information Releases; Office of the Auditor General">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="conspiracy-board">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body data-act="sup">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Conspiracy Board</span></div>    <!-- CAP224-NAV-END -->
-<a href="#n-611379c7" class="skip-link">Skip to main content</a>
+  </header>
+
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Conspiracy Board</span></div>  CAP224-NAV-END 
+<a class="skip-link" href="#n-611379c7">Skip to main content</a>
 <div class="grain-overlay"></div>
 <div class="vignette"></div>
-
-    
-  <div id="site-header-frame"></div>
-<h1 class="text-4xl text-white font-bold my-8 mx-12 border-b border-red-500 pb-2"  id="n-1640e5b3" data-narrate="Investigation Board — Foreign Influence in Canadian Politics. Every node on this board traces to public government records : Hansard transcripts, Lobbying Commissioner Registry, Elections Canada filings, RCMP public reports, court decisions, Access to Information releases, and Auditor General findings. Zero speculation — all sourced." >Investigation Board — Foreign Influence in Canadian Politics</h1>
+<div id="site-header-frame"></div>
+<h1 class="text-4xl text-white font-bold my-8 mx-12 border-b border-red-500 pb-2" data-narrate="Investigation Board — Foreign Influence in Canadian Politics. Every node on this board traces to public government records : Hansard transcripts, Lobbying Commissioner Registry, Elections Canada filings, RCMP public reports, court decisions, Access to Information releases, and Auditor General findings. Zero speculation — all sourced." id="n-1640e5b3">Investigation Board — Foreign Influence in Canadian Politics</h1>
 <div class="warning" style="border-color: var(--color-cross-reference, #eab308); padding: 1rem; border-left: 4px solid var(--color-cross-reference, #eab308); background: rgba(234, 179, 8, 0.05); border-radius: 4px; margin: 0 3rem 24px 3rem;">
-  <strong style="color: var(--color-cross-reference, #eab308);">PRIMARY-SOURCE CROSS-REFERENCE:</strong> All data on this page is procedurally mapped from public government repositories, legislative actions, and verified OSINT streams. Every node is authenticated.
+<strong style="color: var(--color-cross-reference, #eab308);">PRIMARY-SOURCE CROSS-REFERENCE:</strong> All data on this page is procedurally mapped from public government repositories, legislative actions, and verified OSINT streams. Every node is authenticated.
 </div>
-<!-- HEADER BAR -->
+ HEADER BAR 
 <div class="board-bar" id="topbar">
-  <span class="board-bar-brand">THE BOARD</span>
-  <a href="index.html">Home</a>
-  <a href="foreign-influence.html">Analysis</a>
-  <a href="accountability.html">504 DB</a>
-  <a href="evidence.html">Evidence</a>
-  <a href="conspiracy-board.html" class="active tnt-style-798">Board</a>
-  <span class="board-bar-spacer"></span>
-  <div class="stats-bar" id="stats"></div>
-  <div class="board-bar-search">
-    <label for="searchBox" class="sr-only">Search investigation board nodes</label>
-    <input type="text" id="searchBox" placeholder="Search nodes..." autocomplete="off">
-  </div>
-  <div class="sort-wrap" id="main" role="main">
-    <span>Sort:</span>
-    <select id="sortSelect">
-      <option value="default">Default</option>
-      <option value="name">A → Z</option>
-      <option value="connections">Connections ↓</option>
-      <option value="type">Type</option>
-    </select>
-  </div>
-  <div class="type-pills" id="typePills">
-    <button class="type-pill on" data-t="all">All</button>
-    <button class="type-pill" data-t="person">Person</button>
-    <button class="type-pill" data-t="org">Org</button>
-    <button class="type-pill" data-t="event">Event</button>
-    <button class="type-pill" data-t="evidence">Evidence</button>
-    <button class="type-pill" data-t="navigate">🧭 Navigate</button>
-  </div>
+<span class="board-bar-brand">THE BOARD</span>
+<a href="index.html">Home</a>
+<a href="foreign-influence.html">Analysis</a>
+<a href="accountability.html">504 DB</a>
+<a href="evidence.html">Evidence</a>
+<a class="active tnt-style-798" href="conspiracy-board.html">Board</a>
+<span class="board-bar-spacer"></span>
+<div class="stats-bar" id="stats"></div>
+<div class="board-bar-search">
+<label class="sr-only" for="searchBox">Search investigation board nodes</label>
+<input autocomplete="off" id="searchBox" placeholder="Search nodes..." type="text"/>
 </div>
-
-<!-- FILTERS -->
+<div class="sort-wrap" id="main" role="main">
+<span>Sort:</span>
+<select id="sortSelect">
+<option value="default">Default</option>
+<option value="name">A → Z</option>
+<option value="connections">Connections ↓</option>
+<option value="type">Type</option>
+</select>
+</div>
+<div class="type-pills" id="typePills">
+<button class="type-pill on" data-t="all">All</button>
+<button class="type-pill" data-t="person">Person</button>
+<button class="type-pill" data-t="org">Org</button>
+<button class="type-pill" data-t="event">Event</button>
+<button class="type-pill" data-t="evidence">Evidence</button>
+<button class="type-pill" data-t="navigate">🧭 Navigate</button>
+</div>
+</div>
+ FILTERS 
 <div class="filter-bar tnt-style-799" id="filters"></div>
-
-<!-- INVESTIGATION BRIEFING (collapsible) -->
-<div id="board-briefing" class="tnt-style-800">
-  <div class="tnt-style-801">
-    <h2 class="tnt-style-802">
+ INVESTIGATION BRIEFING (collapsible) 
+<div class="tnt-style-800" id="board-briefing">
+<div class="tnt-style-801">
+<h2 class="tnt-style-802">
       🔍 INVESTIGATION METHODOLOGY — How This Board Was Built
     </h2>
-    <div class="tnt-style-803">
-      <div class="tnt-style-804">
-        <h3 class="tnt-style-805">📊 Data Sources</h3>
-        <p class="tnt-style-806">
+<div class="tnt-style-803">
+<div class="tnt-style-804">
+<h3 class="tnt-style-805">📊 Data Sources</h3>
+<p class="tnt-style-806">
           Every node on this board traces to <strong>public government records</strong>: Hansard transcripts,
           Lobbying Commissioner Registry, Elections Canada filings, RCMP public reports, court decisions,
           Access to Information releases, and Auditor General findings. Zero speculation — all sourced.
         </p>
-      </div>
-      <div class="tnt-style-804">
-        <h3 class="tnt-style-807">🔍 Algorithmic Organization</h3>
-        <p class="tnt-style-806">
+</div>
+<div class="tnt-style-804">
+<h3 class="tnt-style-807">🔍 Algorithmic Organization</h3>
+<p class="tnt-style-806">
           All entities are clustered and grouped based on frequency of interaction. Connections are weighted
           by co-occurrence in official records — financial ties, lobbying contacts, vote correlations.
         </p>
-      </div>
-      <div class="tnt-style-804">
-        <h3 class="tnt-style-808">🗂 Entity Categories</h3>
-        <p class="tnt-style-806">
-          <strong class="tnt-style-809">Persons:</strong> MPs, Senators, lobbyists, executives.<br>
-          <strong class="tnt-style-810">Organizations:</strong> CIJA, CCC, CCP-linked entities, PACs.<br>
-          <strong class="tnt-style-811">Events:</strong> Votes, meetings, financial transfers.<br>
-          <strong class="tnt-style-812">Evidence:</strong> Documents, filings, testimony.
+</div>
+<div class="tnt-style-804">
+<h3 class="tnt-style-808">🗂 Entity Categories</h3>
+<p class="tnt-style-806">
+<strong class="tnt-style-809">Persons:</strong> MPs, Senators, lobbyists, executives.<br/>
+<strong class="tnt-style-810">Organizations:</strong> CIJA, CCC, CCP-linked entities, PACs.<br/>
+<strong class="tnt-style-811">Events:</strong> Votes, meetings, financial transfers.<br/>
+<strong class="tnt-style-812">Evidence:</strong> Documents, filings, testimony.
         </p>
-      </div>
-    </div>
-    <div class="tnt-style-813">
-      <p class="tnt-style-814">
-        <strong class="tnt-style-815">⚠️ KEY FINDINGS:</strong>
+</div>
+</div>
+<div class="tnt-style-813">
+<p class="tnt-style-814">
+<strong class="tnt-style-815">⚠️ KEY FINDINGS:</strong>
         This board maps documented foreign influence operations affecting Canadian policy.
         Every connection shown represents a <em>verified public record</em> — lobbying registration,
         campaign contribution, Hansard testimony, or court filing. Click any node for source details.
         The men who stormed Juno Beach didn't fight so foreign states could buy our Parliament.
       </p>
-    </div>
-  </div>
+</div>
+</div>
 </div>
 <script>
 (function(){
@@ -845,44 +210,37 @@ body {
   }
 })();
 </script>
-
-<!-- LIST VIEW (default — clean, legible) -->
+ LIST VIEW (default — clean, legible) 
 <div class="list-view on" id="listView">
-  <div class="list-grid" id="listGrid"></div>
+<div class="list-grid" id="listGrid"></div>
 </div>
-
-<!-- CANVAS -->
+ CANVAS 
 <div class="canvas-wrap tnt-style-816" id="wrap" style="display:none;">
-  <div class="canvas" id="board">
-    <div class="canvas-grid"></div>
-    <canvas id="lines"></canvas>
-  </div>
+<div class="canvas" id="board">
+<div class="canvas-grid"></div>
+<canvas id="lines"></canvas>
 </div>
-
-<!-- DETAIL PANEL -->
+</div>
+ DETAIL PANEL 
 <div class="detail-panel" id="detailPanel">
-  <button class="detail-panel-close" id="detailClose" aria-label="Close detail panel">✕</button>
-  <div id="detailContent"></div>
+<button aria-label="Close detail panel" class="detail-panel-close" id="detailClose">✕</button>
+<div id="detailContent"></div>
 </div>
-
-<!-- ZOOM CONTROLS -->
+ ZOOM CONTROLS 
 <div class="ctrl-float">
-  <button class="ctrl-btn" id="zIn" title="Zoom in" aria-label="Zoom in">+</button>
-  <button class="ctrl-btn" id="zReset" title="Reset" aria-label="Reset zoom">⊙</button>
-  <button class="ctrl-btn" id="zOut" title="Zoom out" aria-label="Zoom out">−</button>
+<button aria-label="Zoom in" class="ctrl-btn" id="zIn" title="Zoom in">+</button>
+<button aria-label="Reset zoom" class="ctrl-btn" id="zReset" title="Reset">⊙</button>
+<button aria-label="Zoom out" class="ctrl-btn" id="zOut" title="Zoom out">−</button>
 </div>
-
-<!-- LEGEND -->
+ LEGEND 
 <div class="legend-float">
-  <div class="legend-item"><div class="legend-dot tnt-style-817"></div> Person</div>
-  <div class="legend-item"><div class="legend-dot tnt-style-818"></div> Organization</div>
-  <div class="legend-item"><div class="legend-dot tnt-style-819"></div> Event</div>
-  <div class="legend-item"><div class="legend-dot tnt-style-820"></div> Evidence</div>
-  <div class="legend-item"><div class="legend-dot tnt-style-821"></div> 🧭 Navigate</div>
+<div class="legend-item"><div class="legend-dot tnt-style-817"></div> Person</div>
+<div class="legend-item"><div class="legend-dot tnt-style-818"></div> Organization</div>
+<div class="legend-item"><div class="legend-dot tnt-style-819"></div> Event</div>
+<div class="legend-item"><div class="legend-dot tnt-style-820"></div> Evidence</div>
+<div class="legend-item"><div class="legend-dot tnt-style-821"></div> 🧭 Navigate</div>
 </div>
-
 <div class="board-foot">Investigation by Daniel Perry | Data: TENET5 | All sources public record</div>
-
 <script src="data/investigation_board.js"></script>
 <script>
 (async function() {
@@ -1199,7 +557,7 @@ body {
       <div class="name">${n.label || n.name || n.id}</div>
       <div class="sub">${n.subtitle || ''}</div>
       <div class="info">${n.detail || ''}</div>
-      ${pageLink ? `<a class="nav-btn" role="button" style="display:inline-block;margin-top:6px;font-size:0.72rem;color:#38bdf8;text-decoration:none;" href="${pageLink}" onclick="event.stopPropagation()">Open →</a>` : ''}
+      ${pageLink ? `<a class="nav-btn" role="button" style="display:inline-block;margin-top:6px;font-size:0.72rem;color:#a8bcc8;text-decoration:none;" href="${pageLink}" onclick="event.stopPropagation()">Open →</a>` : ''}
     `;
     c.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1603,46 +961,43 @@ body {
   window.addEventListener('resize', scheduleDrawLines);
 })();
 </script>
-
-<!-- No footer on board page — full-screen canvas tool -->
-
+ No footer on board page — full-screen canvas tool 
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="file-504.html" class="cap263-text-accent-bold">File charges →</a> | <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-accent-bold" href="file-504.html">File charges →</a> | <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
 </div>
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
 <div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    <a href="convergence-matrix.html" class="cap263-card-link">
-      <div class="cap263-tag cap263-tag--red">Network</div>
-      <div class="cap263-bold-tight">Convergence Matrix</div>
-    </a>
-    <a href="network-analysis.html" class="cap263-card-link cap263-card-link--gold">
-      <div class="cap263-tag cap263-tag--gold">Analysis</div>
-      <div class="cap263-bold-tight">Network Analysis</div>
-    </a>
-    <a href="foreign-interference.html" class="cap263-card-link">
-      <div class="cap263-tag">Intelligence</div>
-      <div class="cap263-bold-tight">Foreign Interference</div>
-    </a>
-    <a href="corruption-map.html" class="cap263-card-link">
-      <div class="cap263-tag">Mapping</div>
-      <div class="cap263-bold-tight">Corruption Map</div>
-    </a>
-  </div>
+<h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
+<div class="cap263-grid-cards">
+<a class="cap263-card-link" href="convergence-matrix.html">
+<div class="cap263-tag cap263-tag--red">Network</div>
+<div class="cap263-bold-tight">Convergence Matrix</div>
+</a>
+<a class="cap263-card-link cap263-card-link--gold" href="network-analysis.html">
+<div class="cap263-tag cap263-tag--gold">Analysis</div>
+<div class="cap263-bold-tight">Network Analysis</div>
+</a>
+<a class="cap263-card-link" href="foreign-interference.html">
+<div class="cap263-tag">Intelligence</div>
+<div class="cap263-bold-tight">Foreign Interference</div>
+</a>
+<a class="cap263-card-link" href="corruption-map.html">
+<div class="cap263-tag">Mapping</div>
+<div class="cap263-bold-tight">Corruption Map</div>
+</a>
 </div>
-<div style="max-width:900px;margin:2rem auto;padding:1rem 1.5rem;background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.15);border-radius:10px;"><p style="font-size:0.85rem;line-height:1.7;color:var(--text-secondary);">76,475 confirmed dead. 102 doctors killed 373 each. Government saves <strong class="cap263-text-red">$20,685 per death</strong>. PM holds <strong class="cap263-text-gold">$6.8M</strong> in Brookfield. <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p></div>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+</div>
+<div style="max-width:900px;margin:2rem auto;padding:1rem 1.5rem;background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.15);border-radius:10px;"><p style="font-size:0.85rem;line-height:1.7;color:var(--text-secondary);">76,475 confirmed dead. 102 doctors killed 373 each. Government saves <strong class="cap263-text-red">$20,685 per death</strong>. PM holds <strong class="cap263-text-gold">$6.8M</strong> in Brookfield. <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p></div>
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1668,28 +1023,60 @@ body {
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>

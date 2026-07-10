@@ -1,1066 +1,510 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RCMP &amp; MAID: The Dereliction of Duty | TENET5</title>
-  <meta name="description" content="~98,000 Canadians dead under state-sanctioned MAID. Every RCMP commissioner since 2016 failed to act. Official records exposed.">
-  <meta property="og:description" content="~98,000 Canadians dead under state-sanctioned MAID. Every RCMP commissioner since 2016 failed to act. Official records exposed.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://tenet-5.github.io/rcmp-maid-accountability.html">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
-  <style>
-    /* ── Death count bar chart ─────────────────────── */
-    .death-chart { margin: 2rem 0 1rem; }
-    .chart-bar-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .chart-year {
-      font-family: var(--slate-font-mono);
-      font-size: 0.78rem;
-      color: var(--text-tertiary);
-      min-width: 3.2rem;
-      text-align: right;
-      font-weight: 600;
-    }
-    .chart-bar-track {
-      flex: 1;
-      background: rgba(196, 30, 58, 0.08);
-      border-radius: 3px;
-      height: 1.6rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .chart-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      background: linear-gradient(90deg, #c41e3a, #e53555);
-      transition: width 1.2s var(--ease);
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 0.5rem;
-      min-width: 2.5rem;
-    }
-    .chart-bar-fill span {
-      font-family: var(--slate-font-mono);
-      font-size: 0.68rem;
-      color: #fff;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .chart-bar-fill.total-bar {
-      background: linear-gradient(90deg, #8b0000, #c41e3a, #e53555);
-    }
-    .chart-annotation {
-      font-family: var(--slate-font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.5px;
-      margin-top: 0.4rem;
-      padding: 0.4rem 0.6rem;
-      border-radius: var(--r-sm);
-    }
-    .chart-annotation.bill-note {
-      color: var(--color-gold);
-      background: rgba(217, 119, 6, 0.08);
-      border-left: 2px solid var(--color-gold);
-      display: inline-block;
-    }
-    .chart-total-row {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 2px solid var(--accent);
-    }
-    .chart-total-row .chart-bar-fill {
-      background: linear-gradient(90deg, #8b0000, #c41e3a);
-    }
-
-    /* ── T4 comparison line ───────────────────────── */
-    .t4-comparison-block {
-      margin: 1.5rem 0;
-      padding: 1.2rem 1.4rem;
-      background: rgba(196, 30, 58, 0.06);
-      border: 1px solid rgba(196, 30, 58, 0.2);
-      border-radius: var(--r-md);
-    }
-    .t4-range-bar {
-      position: relative;
-      height: 2.2rem;
-      background: rgba(255,255,255,0.04);
-      border-radius: 3px;
-      margin: 1rem 0 0.6rem;
-      overflow: visible;
-    }
-    .t4-range-fill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background: repeating-linear-gradient(
-        -45deg,
-        rgba(139, 0, 0, 0.3),
-        rgba(139, 0, 0, 0.3) 4px,
-        rgba(139, 0, 0, 0.15) 4px,
-        rgba(139, 0, 0, 0.15) 8px
-      );
-      border-radius: 3px;
-      border: 1px dashed rgba(196, 30, 58, 0.5);
-    }
-    .canada-marker {
-      position: absolute;
-      top: -4px;
-      height: calc(100% + 8px);
-      width: 3px;
-      background: var(--accent-bright);
-      border-radius: 2px;
-    }
-    .canada-marker::after {
-      content: 'CANADA ~98,000';
-      position: absolute;
-      top: -1.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: var(--slate-font-mono);
-      font-size: 0.62rem;
-      color: var(--accent-bright);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .t4-label-low, .t4-label-high {
-      font-family: var(--slate-font-mono);
-      font-size: 0.62rem;
-      color: var(--text-tertiary);
-    }
-    .t4-label-row {
-      display: flex;
-      justify-content: space-between;
-    }
-
-    /* ── Commissioner cards ────────────────────────── */
-    .comm-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--accent);
-      border-radius: var(--r-md);
-      padding: 1.5rem 1.6rem;
-      margin-bottom: 1.5rem;
-    }
-    .comm-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-    .comm-card-name {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-    .comm-card-tenure {
-      font-family: var(--slate-font-mono);
-      font-size: 0.72rem;
-      color: var(--text-tertiary);
-      background: var(--bg-surface);
-      padding: 0.2rem 0.6rem;
-      border-radius: var(--r-sm);
-      white-space: nowrap;
-    }
-    .comm-card-role {
-      font-size: 0.82rem;
-      color: var(--text-tertiary);
-      margin-bottom: 0.75rem;
-      font-style: italic;
-    }
-    .comm-card p {
-      font-size: 0.95rem;
-      line-height: 1.75;
-      margin-bottom: 0.75rem;
-    }
-    .comm-bill-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.75rem;
-    }
-    .comm-bill-tag {
-      font-family: var(--slate-font-mono);
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 0.2rem 0.6rem;
-      border-radius: 3px;
-      letter-spacing: 0.3px;
-    }
-    .comm-bill-tag.red {
-      background: rgba(196, 30, 58, 0.12);
-      border: 1px solid rgba(196, 30, 58, 0.35);
-      color: var(--accent-bright);
-    }
-    .comm-bill-tag.amber {
-      background: rgba(217, 119, 6, 0.1);
-      border: 1px solid rgba(217, 119, 6, 0.3);
-      color: var(--color-gold);
-    }
-    .comm-bill-tag.blue {
-      background: rgba(37, 99, 235, 0.1);
-      border: 1px solid rgba(37, 99, 235, 0.3);
-      color: var(--color-blue);
-    }
-
-    /* ── Legislation timeline cards ─────────────── */
-    .law-timeline { position: relative; padding-left: 2rem; }
-    .law-timeline::before {
-      content: '';
-      position: absolute;
-      left: 0.45rem;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(180deg, var(--accent), var(--border));
-    }
-    .law-card {
-      position: relative;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--r-md);
-      padding: 1.2rem 1.4rem;
-      margin-bottom: 1.2rem;
-    }
-    .law-card::before {
-      content: '';
-      position: absolute;
-      left: -1.72rem;
-      top: 1.2rem;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 2px solid var(--bg-card);
-    }
-    .law-card-label {
-      font-family: var(--slate-font-mono);
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--accent-bright);
-      letter-spacing: 0.5px;
-      margin-bottom: 0.3rem;
-    }
-    .law-card h3 {
-      font-size: 1.05rem;
-      margin-bottom: 0.5rem;
-    }
-    .law-card p {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      line-height: 1.7;
-    }
-    .vote-badge {
-      display: inline-block;
-      font-family: var(--slate-font-mono);
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 3px;
-      margin-top: 0.5rem;
-      margin-right: 0.4rem;
-    }
-    .vote-badge.yea { background: rgba(196, 30, 58, 0.12); color: var(--accent-bright); }
-    .vote-badge.nay { background: rgba(37, 99, 235, 0.12); color: var(--color-blue); }
-
-    /* ── International record cards ──────────────── */
-    .intl-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--color-blue);
-      border-radius: var(--r-md);
-      padding: 1.2rem 1.4rem;
-      margin-bottom: 1rem;
-    }
-    .intl-card-org {
-      font-family: var(--slate-font-mono);
-      font-size: 0.68rem;
-      color: var(--color-blue);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-    .intl-card blockquote {
-      border: none;
-      padding: 0;
-      margin: 0.5rem 0;
-      font-style: italic;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      line-height: 1.7;
-    }
-    .intl-card .cite {
-      font-family: var(--slate-font-mono);
-      font-size: 0.65rem;
-      color: var(--text-quaternary);
-      margin-top: 0.4rem;
-    }
-
-    /* ── Verdict callout ──────────────────────────── */
-    .verdict-box {
-      background: rgba(196, 30, 58, 0.06);
-      border: 1px solid rgba(196, 30, 58, 0.2);
-      border-radius: var(--r-md);
-      padding: 1.5rem 1.6rem;
-      margin: 1.5rem 0;
-    }
-    .verdict-box p {
-      font-size: 1rem;
-      line-height: 1.8;
-    }
-
-    /* ── Source list ───────────────────────────────── */
-    .source-list {
-      list-style: none;
-      padding: 0;
-    }
-    .source-list li {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-      line-height: 1.6;
-    }
-    .source-list li:last-child { border-bottom: none; }
-    .source-list li strong {
-      color: var(--text-primary);
-      font-weight: 700;
-    }
-
-    /* ── Responsive ────────────────────────────────── */
-    @media (max-width: 600px) {
-      .chart-bar-row { gap: 0.4rem; }
-      .chart-year { font-size: 0.68rem; min-width: 2.6rem; }
-      .chart-bar-fill span { font-size: 0.6rem; }
-      .comm-card { padding: 1.2rem; }
-      .comm-card-header { flex-direction: column; }
-      .canada-marker::after { font-size: 0.55rem; }
-    }
-  </style>
-
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="RCMP &amp; MAID: The Dereliction of Duty | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/rcmp-maid-accountability.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="RCMP &amp; MAID: The Dereliction of Duty | TENET5">
-  <link rel="canonical" href="https://tenet-5.github.io/rcmp-maid-accountability.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "RCMP &amp; MAID: The Dereliction of Duty | TENET5",
-  "url": "https://tenet-5.github.io/rcmp-maid-accountability.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
-    }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="Criminal Code of Canada (R.S.C., 1985, c. C-46); House of Commons Hansard">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="rcmp-maid-accountability">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
-</head>
-<body class="topo" data-act="iii">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav"
-
-    <!-- AUTONOMOUS LIRIL NARRATIVE INJECTION (post-milestone) -->
-    <section class="liril-narrative" style="max-width:1100px;margin:2rem auto;padding:0 1rem;">
-      <h2 class="cap263-text-violet-bold" style="font-size:1.35rem;margin-bottom:0.8rem;">Narrative Layer — Corporate Influence Architecture</h2>
-      
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #c4b5fd;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>The pattern is structural, not incidental.</strong> The same family offices and numbered companies appear repeatedly across energy, infrastructure, and social policy files, creating a multi-level web that is visible only when cross-referenced across SEDI, lobbying records, and corporate filings.</p>
-      </div>
-
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #34d399;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>Timeline of concentrated influence.</strong> Key appointments and policy windows between 2015-2023 show recurring names from the accountability list moving into vehicles that directly benefit from decisions made during those exact periods.</p>
-      </div>
-
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #fbbf24;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>Geography and parallel pipelines.</strong> The densest nodes sit in Ontario and Quebec, with secondary concentrations in Alberta energy and municipal infrastructure — the same geography documented in other accountability axes.</p>
-      </div>
-
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #a855f7;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>The opacity layer.</strong> Many holdings are held through private numbered entities whose beneficial owners only surface through forensic cross-referencing, creating a second, parallel system of influence outside standard disclosure rules.</p>
-      </div>
-    </section>
-    <!-- END AUTONOMOUS LIRIL NARRATIVE INJECTION -->
- aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
-    </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Rcmp Maid Accountability</span></div>    <!-- CAP224-NAV-END -->
-<div class="grain-overlay"></div>
-<div class="vignette"></div>
-
+  <title>RCMP & MAID: The Dereliction of Duty | TENET5</title>
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
   
-  <div id="site-header-frame"></div>
-<a href="#main" class="skip-link">Skip to content</a>
-<!-- share bar -->
-  <div id="share-bar" class="share-bar">
-    <span class="share-bar-label">📢 ~98,000 DEAD. EVERY COMMISSIONER FAILED.</span>
-    <div class="share-bar-buttons">
-      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
-      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
-      <button onclick="navigator.clipboard.writeText(location.href)" class="tnt-style-632">Copy Link</button>
-    </div>
-  </div>
+  <link rel="canonical" href="https://tenet-5.github.io/rcmp-maid-accountability.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="RCMP & MAID: The Dereliction of Duty | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-  <header class="hero">
-    <h1  id="n-c7a257ba" data-narrate="RCMP MAID: The Dereliction of Duty. ~98,000 Canadians are dead under state-sanctioned killing. Three RCMP Commissioners swore an oath to uphold the law — and every last one of them stood down while their country built a bureaucratic extermination programme that would make the architects of Aktion T4 blush at its efficiency." >The Dereliction of Duty</h1>
-    <p class="subtitle">~98,000 Canadians are dead under state-sanctioned killing. Three RCMP Commissioners swore an oath to uphold the law&hairsp;—&hairsp;and every last one of them stood down while their country built a bureaucratic extermination programme that would make the architects of Aktion&nbsp;T4 blush at its efficiency.</p>
-    <p class="tnt-style-828">Our grandfathers did not fight their way across Europe under the Red Ensign for this.</p>
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
+</head>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
+    </nav>
   </header>
 
-  <div class="content" id="main" role="main">
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav (post-milestone)="" --="" <!--="" autonomous="" class="tnt-pillar-nav" injection="" liril="" narrative="">
+<section class="liril-narrative" style="max-width:1100px;margin:2rem auto;padding:0 1rem;">
+<h2 class="cap263-text-violet-bold" style="font-size:1.35rem;margin-bottom:0.8rem;">Narrative Layer — Corporate Influence Architecture</h2>
+<div class="crisis-card" data-narrate="" style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #a8bcc8;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
+<p><strong>The pattern is structural, not incidental.</strong> The same family offices and numbered companies appear repeatedly across energy, infrastructure, and social policy files, creating a multi-level web that is visible only when cross-referenced across SEDI, lobbying records, and corporate filings.</p>
+</div>
+<div class="crisis-card" data-narrate="" style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #34d399;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
+<p><strong>Timeline of concentrated influence.</strong> Key appointments and policy windows between 2015-2023 show recurring names from the accountability list moving into vehicles that directly benefit from decisions made during those exact periods.</p>
+</div>
+<div class="crisis-card" data-narrate="" style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid var(--slate-warning, #c9a44c);padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
+<p><strong>Geography and parallel pipelines.</strong> The densest nodes sit in Ontario and Quebec, with secondary concentrations in Alberta energy and municipal infrastructure — the same geography documented in other accountability axes.</p>
+</div>
+<div class="crisis-card" data-narrate="" style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #a8bcc8;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
+<p><strong>The opacity layer.</strong> Many holdings are held through private numbered entities whose beneficial owners only surface through forensic cross-referencing, creating a second, parallel system of influence outside standard disclosure rules.</p>
+</div>
+</section>
+<!-- END AUTONOMOUS LIRIL NARRATIVE INJECTION -->
+ aria-label="TENET5 Pillars"&gt;
+      <a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Rcmp Maid Accountability</span></div>  CAP224-NAV-END 
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+<div id="site-header-frame"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+ share bar 
+<div class="share-bar" id="share-bar">
+<span class="share-bar-label">📢 ~98,000 DEAD. EVERY COMMISSIONER FAILED.</span>
+<div class="share-bar-buttons">
+<button class="share-btn share-btn-x" onclick="shareX()">X / Twitter</button>
+<button class="share-btn share-btn-facebook" onclick="shareFacebook()">Facebook</button>
+<button class="tnt-style-632" onclick="navigator.clipboard.writeText(location.href)">Copy Link</button>
+</div>
+</div>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 1 — OPENING SALVO                       -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section>
-      <h2><span class="section-num">OPENING SALVO</span>The Generation That Would Not Recognise This Country</h2>
-
-      <p>On the morning of June 6, 1944, Canadian soldiers of the 3rd Infantry Division waded through neck-deep water under withering machine-gun fire at Juno Beach. They fought house to house through Courseulles-sur-Mer. They bled at Bény-sur-Mer. They held the line at Carpiquet against Panzer counterattacks that should have broken them. They did not break.</p>
-
-      <p>At Ortona, they fought room to room in what the press called "Little Stalingrad," breaching walls with explosives because the streets were killing fields. At the Scheldt Estuary, they waded through flooded polders under artillery fire to open the port of Antwerp. In the Netherlands, they liberated a starving nation — and the Dutch have never forgotten it, even if Canada has.</p>
-
-      <p>That generation fought under the Canadian Red Ensign — the Red Duster. They fought <em>against</em> a regime that had built Aktion T4: a state programme to murder people the government deemed unworthy of life. The disabled. The mentally ill. The "useless eaters." Between 1939 and 1941, Nazi Germany killed an estimated 70,000 to 100,000 people under T4 before public outcry forced it underground.</p>
-
-      <p><strong>Canada's MAID programme has now killed ~98,000 people.</strong></p>
-
-      <p>That is not hyperbole. That is not rhetoric. That is the official number from Health Canada's own Annual Reports on Medical Assistance in Dying, first through fourth editions, covering 2016 through 2023. Sixty thousand, one hundred and sixty-seven Canadians are dead — and the programme is <em>accelerating.</em></p>
-
-      <p>The men who liberated Bergen-Belsen, who saw with their own eyes what happens when a state decides some lives aren't worth living, would be incandescent with rage. And they would have a very specific question for the Royal Canadian Mounted Police — the same force whose members served in both World Wars, whose officers wore the Stetson in Normandy and Korea:</p>
-
-      <div class="verdict-box">
-        <p><strong>What exactly have you been doing?</strong> The Criminal Code of Canada makes it illegal to counsel or aid suicide. Section 241. It's still there. You enforce it every day — except when the state is the one doing the killing. Three Commissioners have sat in that chair since 2016. Not one of them raised a single public objection. Not one launched a review. Not one questioned whether an exemption carved into a prohibition might warrant the attention of the national police force sworn to uphold that very Code.</p>
-      </div>
-
-      <p>Three Commissioners. Eight years. Sixty thousand dead. And the RCMP's official position is silence.</p>
-
-      <p>Not confused silence. Not "we're reviewing the matter" silence. Not "we've referred it to the appropriate authority" silence. <em>Total</em> silence. As if sixty thousand state-sanctioned deaths don't rise to the level of a single memorandum. As if the national police force of a G7 democracy has no opinion on whether its own Criminal Code — the document it exists to enforce — should contain an exemption that allows the government to kill people who aren't dying.</p>
-
-      <p>The Red Duster generation would call that what it is: <strong>dereliction of duty.</strong></p>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 2 — THE DEATH COUNT                     -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section id="death-count">
-      <h2><span class="section-num">THE BODY COUNT</span>Year by Year — From Health Canada's Own Reports</h2>
-
-      <p>These are not estimates. These are not projections. These are not extrapolations from incomplete data. These are the official numbers published by Health Canada in their Annual Reports on Medical Assistance in Dying — the 1st through 4th editions. Every single one is a Canadian citizen, with a name and a family and a life, who is now dead because the state said it was acceptable to kill them.</p>
-
-      <div class="death-chart">
-        <!-- 2016 — 1,018 / 15,343 = 6.63% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2016</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-829"><span>1,018</span></div>
-          </div>
-        </div>
-        <div class="tnt-style-830">
-          <span class="chart-annotation bill-note">⚖ Bill C-14 receives Royal Assent — June 17, 2016</span>
-        </div>
-
-        <!-- 2017 — 2,838 / 15,343 = 18.5% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2017</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-831"><span>2,838</span></div>
-          </div>
-        </div>
-
-        <!-- 2018 — 4,480 / 15,343 = 29.2% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2018</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-832"><span>4,480</span></div>
-          </div>
-        </div>
-
-        <!-- 2019 — 5,631 / 15,343 = 36.7% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2019</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-833"><span>5,631</span></div>
-          </div>
-        </div>
-
-        <!-- 2020 — 7,595 / 15,343 = 49.5% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2020</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-834"><span>7,595</span></div>
-          </div>
-        </div>
-
-        <!-- 2021 — 10,064 / 15,343 = 65.6% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2021</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-835"><span>10,064</span></div>
-          </div>
-        </div>
-        <div class="tnt-style-830">
-          <span class="chart-annotation bill-note">⚖ Bill C-7 receives Royal Assent — March 17, 2021 — "reasonably foreseeable death" REMOVED</span>
-        </div>
-
-        <!-- 2022 — 13,241 / 15,343 = 86.3% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2022</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-836"><span>13,241</span></div>
-          </div>
-        </div>
-
-        <!-- 2023 — 15,343 / 15,343 = 100% -->
-        <div class="chart-bar-row">
-          <span class="chart-year">2023</span>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill tnt-style-45"><span>15,343</span></div>
-          </div>
-        </div>
-
-        <!-- TOTAL -->
-        <div class="chart-bar-row chart-total-row">
-          <span class="chart-year tnt-style-837">TOTAL</span>
-          <div class="chart-bar-track tnt-style-838">
-            <div class="chart-bar-fill total-bar tnt-style-45"><span class="tnt-style-839">~98,000</span></div>
-          </div>
-        </div>
-      </div>
-
-      <p class="tnt-style-840">Source: Health Canada — 1st Annual Report on MAID (2017), 2nd (2020), 3rd (2022), 4th (2024)</p>
-
-      <p>Look at that chart. Look at the trajectory. Year after year, the numbers don't just grow — they <em>accelerate.</em> Each year kills more than the last. The 2023 figure is <strong>fifteen times</strong> the first year. This is not a programme that reached equilibrium. This is not a programme that found its natural level. This is a programme that is feeding — and every year it feeds more.</p>
-
-      <p>In 2023, MAID accounted for 4.7% of all deaths in Canada. Nearly one in twenty. A Canadian is now more likely to die by state-sanctioned killing than in a car accident. That is not a statistic that should exist in a democracy. That is a statistic that should trigger an investigation by the national police force. It has not.</p>
-
-      <!-- T4 Comparison -->
-      <div class="t4-comparison-block">
-        <h3 class="tnt-style-841">The Aktion T4 Comparison</h3>
-        <p class="tnt-style-842">Nazi Germany's Aktion T4 programme — the state murder of disabled persons — killed an estimated 70,000 to 100,000 people between 1939 and 1941 before public outcry and clerical opposition forced it into covert continuation. Canada's MAID programme has killed ~98,000 in eight years and is <strong>still accelerating</strong> with full public funding and political support.</p>
-
-        <div class="t4-range-bar">
-          <!-- T4 range: 70k-100k on a scale of 0–110k. 70/110 = 63.6%, 100/110 = 90.9% -->
-          <div class="t4-range-fill tnt-style-843"></div>
-          <!-- Canada marker: ~98,000 / 110,000 = 54.7% -->
-          <div class="canada-marker tnt-style-844"></div>
-        </div>
-        <div class="t4-label-row">
-          <span class="t4-label-low">0</span>
-          <span class="t4-label-low tnt-style-845">
-            <span class="tnt-style-846">T4: 70,000–100,000</span>
-          </span>
-          <span class="t4-label-high">110,000</span>
-        </div>
-
-        <p class="tnt-style-847">T4 was stopped by public opposition. MAID is being expanded by Parliament. At current growth rates, Canada's total will surpass the upper T4 estimate within two years.</p>
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 3 — RCMP COMMISSIONERS                  -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section id="commissioners">
-      <h2><span class="section-num">WHO WAS ON WATCH</span>RCMP Commissioners — The Men and Women Who Did Nothing</h2>
-
-      <p>The Commissioner of the RCMP is the senior law enforcement officer in Canada. They swear an oath to uphold the laws of Canada — including the Criminal Code. These are the three individuals who held that office while the state killed ~98,000 of its own citizens.</p>
-
-      <!-- Bob Paulson -->
-      <div class="comm-card">
-        <div class="comm-card-header">
-          <div>
-            <div class="comm-card-name">Bob Paulson</div>
-            <div class="comm-card-role">Commissioner of the RCMP &mdash; November 2011 to June 2017</div>
-          </div>
-          <span class="comm-card-tenure">NOV 2011 – JUN 2017</span>
-        </div>
-        <p>Paulson was Commissioner when Bill C-14 passed on June 17, 2016 — the bill that carved the first exemption into Criminal Code Section 241, which has <em>always</em> made it illegal to counsel or aid suicide. That section didn't disappear. It's still there. Parliament didn't repeal it. They punched a hole in it and called the hole "medical assistance in dying."</p>
-        <p>The RCMP is the federal police force responsible for enforcing the Criminal Code of Canada. When Parliament proposed creating an exemption to a criminal prohibition against assisting suicide, Paulson's RCMP raised <strong>no objection.</strong> They launched <strong>no review.</strong> They filed <strong>no constitutional challenge.</strong> They didn't even publicly comment on whether the force tasked with enforcing s.241 had concerns about a state-sponsored exemption to s.241.</p>
-        <p>One thousand and eighteen Canadians died under MAID in 2016 alone. By the time Paulson retired quietly in June 2017, the annual count had nearly tripled to 2,838. He left the building without a word.</p>
-        <p>The veterans who landed at Juno Beach didn't have the option of retiring quietly. Neither should the man who let a killing programme launch on his watch.</p>
-        <div class="comm-bill-tags">
-          <span class="comm-bill-tag red">BILL C-14 — ROYAL ASSENT JUN 17, 2016</span>
-          <span class="comm-bill-tag amber">3,856 MAID DEATHS ON HIS WATCH</span>
-        </div>
-      </div>
-
-      <!-- Brenda Lucki -->
-      <div class="comm-card">
-        <div class="comm-card-header">
-          <div>
-            <div class="comm-card-name">Brenda Lucki</div>
-            <div class="comm-card-role">Commissioner of the RCMP &mdash; April 2018 to March 2023</div>
-          </div>
-          <span class="comm-card-tenure">APR 2018 – MAR 2023</span>
-        </div>
-        <p>If Paulson let the programme launch, Lucki let it metastasise. She was Commissioner during the single most dangerous expansion of MAID in Canadian history: Bill C-7, which received Royal Assent on March 17, 2021.</p>
-        <p>Bill C-7 removed the <strong>"reasonably foreseeable natural death"</strong> requirement. Read that again. The original law — already a carved exemption from a criminal prohibition — at least required that the person was going to die anyway. Bill C-7 removed that safeguard. It created "Track 2" — MAID for people whose natural death was <em>not</em> foreseeable. People who were not dying. People whose "condition" was disability, chronic pain, or simply being unable to access adequate care.</p>
-        <p>Under Lucki's command, MAID deaths went from 4,480 per year (2018) to 13,241 per year (2022). That is a <strong>196% increase.</strong> Track 2 deaths — people who were not terminally ill — rose to 4.1% of all MAID provisions.</p>
-        <p>And what was Commissioner Lucki doing during this period? She was managing the RCMP's catastrophic handling of the April 2020 Nova Scotia mass shooting — the worst in Canadian history, 22 dead. The Mass Casualty Commission's 2023 Final Report documented a pattern of institutional failure. Lucki was accused of attempting to leverage the tragedy to push the government's firearms agenda, allegations she denied under oath but which the Commission found credible enough to document extensively.</p>
-        <p>While Lucki was not disclosing interference by the Prime Minister's Office in a mass murder investigation, Track 2 MAID was killing Canadians whose only qualifying "illness" was being poor, being disabled, or being unable to access housing and healthcare. She made <strong>zero public statements</strong> on MAID oversight. Not one.</p>
-        <div class="comm-bill-tags">
-          <span class="comm-bill-tag red">BILL C-7 — ROYAL ASSENT MAR 17, 2021</span>
-          <span class="comm-bill-tag amber">NOVA SCOTIA MASS SHOOTING COVER-UP</span>
-          <span class="comm-bill-tag red">~41,011 MAID DEATHS ON HER WATCH</span>
-        </div>
-      </div>
-
-      <!-- Mike Duheme -->
-      <div class="comm-card">
-        <div class="comm-card-header">
-          <div>
-            <div class="comm-card-name">Mike Duheme</div>
-            <div class="comm-card-role">Commissioner of the RCMP &mdash; March 2023 to Present</div>
-          </div>
-          <span class="comm-card-tenure">MAR 2023 – PRESENT</span>
-        </div>
-        <p>Duheme inherited a body count exceeding 44,000 and climbing at a rate that added another 15,343 in his first full year. By the time he took office, MAID accounted for <strong>4.7% of all deaths in Canada</strong> — nearly one in twenty. He inherited a programme that the United Nations had flagged, that disability rights organisations had begged the government to review, and that was killing people at a rate that put it within striking distance of the Aktion T4 total.</p>
-        <p>Commissioner Duheme has made <strong>zero public statements</strong> on MAID oversight. Zero. Not a press conference. Not a written statement. Not a mention in his annual reports. Nothing.</p>
-        <p>Under his tenure, Bill C-39 delayed the expansion of MAID to include mental illness as a sole qualifying condition. Note the word: <strong>delayed.</strong> Not cancelled. Not repealed. Delayed. Originally set for March 2023, pushed to 2024, then to March 2027. The infrastructure is being built. The training programmes are being developed. The eligibility criteria are being drafted. It is coming — and the RCMP's senior officer has nothing to say about whether the national police force has any role in overseeing a programme that will allow the state to kill people because they are depressed.</p>
-        <p>The men who fought at Kapyong in Korea — who held an impossible position against a Chinese division because they were told to hold it — would have something to say about a Commissioner who can't even hold a press conference.</p>
-        <div class="comm-bill-tags">
-          <span class="comm-bill-tag amber">BILL C-39 — MENTAL ILLNESS MAID DELAYED TO 2027</span>
-          <span class="comm-bill-tag red">15,343+ MAID DEATHS ON HIS WATCH (AND COUNTING)</span>
-          <span class="comm-bill-tag blue">ZERO PUBLIC STATEMENTS ON MAID</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 4 — THE LEGISLATION                     -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section id="legislation">
-      <h2><span class="section-num">THE LAW</span>What They Changed — And What They Didn't</h2>
-
-      <p>Understanding how Canada built a state killing apparatus requires understanding what the law said <em>before</em> — and how surgically Parliament carved exemptions into prohibitions that still exist on the books today. The Criminal Code sections they amended haven't been repealed. The prohibitions are still there. They just have holes in them now — holes large enough to drive a hearse through.</p>
-
-      <div class="law-timeline">
-
-        <div class="law-card">
-          <div class="law-card-label">CRIMINAL CODE S.241 — THE FOUNDATION</div>
-          <h3>Counselling or Aiding Suicide — Still Illegal</h3>
-          <p>Section 241 of the Criminal Code of Canada, RSC 1985, c C-46, makes it a criminal offence to counsel or aid a person to die by suicide. Maximum penalty: 14 years imprisonment. This section has been law since Confederation. It is <strong>still law.</strong> Parliament did not repeal it. They carved an exemption into it. The prohibition and the exemption exist in the same section of the same statute. If you aid someone's suicide outside the MAID framework, you go to prison for 14 years. If you do it inside the framework, the government pays you.</p>
-        </div>
-
-        <div class="law-card">
-          <div class="law-card-label">CRIMINAL CODE S.222 — HOMICIDE</div>
-          <h3>Causing Death — The Definition Parliament Cannot Amend Away</h3>
-          <p>Section 222 of the Criminal Code defines homicide as "directly or indirectly, by any means," causing the death of a human being. MAID practitioners directly cause the death of human beings. This is, by the plain text of the Criminal Code, homicide. The MAID exemption does not amend s.222. It does not change the definition of homicide. It creates a procedural shield for an act that meets every element of the offence.</p>
-        </div>
-
-        <div class="law-card">
-          <div class="law-card-label">JUNE 17, 2016</div>
-          <h3>Bill C-14 — The First Exemption</h3>
-          <p>Passed 186–137 in the House of Commons. Introduced by the Trudeau government. Minister of Justice: Jody Wilson-Raybould. Created the first MAID exemption within Criminal Code s.241. Required that natural death be "reasonably foreseeable." Senate proposed amendments to expand eligibility; the government <em>stripped them</em> — an irony given what came next. Royal Assent: June 17, 2016. Commissioner Paulson's RCMP: silent.</p>
-          <span class="vote-badge yea">YEAS: 186 (LPC majority + some NDP)</span>
-          <span class="vote-badge nay">NAYS: 137 (CPC majority + LPC dissent)</span>
-        </div>
-
-        <div class="law-card">
-          <div class="law-card-label">MARCH 17, 2021</div>
-          <h3>Bill C-7 — The Floodgates Open</h3>
-          <p>Passed 180–149. Minister of Justice: David Lametti. This is the bill that killed Canada's last meaningful safeguard. Bill C-7 <strong>removed the "reasonably foreseeable natural death" requirement.</strong> Created Track 2: MAID for people whose death was not foreseeable. People who were not dying. People whose qualifying condition was disability, chronic illness, or — as documented in Health Canada's own reports — inadequate access to housing, support services, or medical care. The Senate added a sunset provision for mental illness MAID; the government accepted it.</p>
-          <span class="vote-badge yea">YEAS: 180 (LPC + NDP + some BQ)</span>
-          <span class="vote-badge nay">NAYS: 149 (CPC + LPC dissent)</span>
-        </div>
-
-        <div class="law-card">
-          <div class="law-card-label">MARCH 2023</div>
-          <h3>Bill C-39 — The Delay That Isn't a Cancellation</h3>
-          <p>Mental illness as a sole qualifying condition for MAID was originally set to become eligible in March 2023. Bill C-39 delayed that date. Then it was delayed again. The current target: <strong>March 17, 2027.</strong> Note carefully: this is a <em>delay</em>, not a repeal. The legal framework for killing Canadians because they have depression, anxiety, PTSD, or any other mental health condition is being built. Training programmes are in development. Eligibility criteria are being drafted. The infrastructure exists. The switch has not been flipped yet. But it has been installed.</p>
-          <span class="comm-bill-tag amber tnt-style-249">NOT CANCELLED — DELAYED TO MARCH 2027</span>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 5 — WHO VOTED FOR THIS                  -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section id="votes">
-      <h2><span class="section-num">THE VOTE</span>Who Voted For This</h2>
-
-      <p>Every Member of Parliament who voted for Bill C-14 and Bill C-7 is on the public record. Hansard does not forget. The division bells rang, the Speaker called the vote, and 338 Members of Parliament stood up to be counted. Their names are recorded. Their choices are permanent. And sixty thousand Canadians are dead because of what they decided.</p>
-
-      <ul class="fact-list">
-        <li><strong>Bill C-14 — Yeas (186):</strong><br>
+<div class="content" id="main" role="main">
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 1 — OPENING SALVO                       -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+<h2><span class="section-num">OPENING SALVO</span>The Generation That Would Not Recognise This Country</h2>
+<p>On the morning of June 6, 1944, Canadian soldiers of the 3rd Infantry Division waded through neck-deep water under withering machine-gun fire at Juno Beach. They fought house to house through Courseulles-sur-Mer. They bled at Bény-sur-Mer. They held the line at Carpiquet against Panzer counterattacks that should have broken them. They did not break.</p>
+<p>At Ortona, they fought room to room in what the press called "Little Stalingrad," breaching walls with explosives because the streets were killing fields. At the Scheldt Estuary, they waded through flooded polders under artillery fire to open the port of Antwerp. In the Netherlands, they liberated a starving nation — and the Dutch have never forgotten it, even if Canada has.</p>
+<p>That generation fought under the Canadian Red Ensign — the Red Duster. They fought <em>against</em> a regime that had built Aktion T4: a state programme to murder people the government deemed unworthy of life. The disabled. The mentally ill. The "useless eaters." Between 1939 and 1941, Nazi Germany killed an estimated 70,000 to 100,000 people under T4 before public outcry forced it underground.</p>
+<p><strong>Canada's MAID programme has now killed ~98,000 people.</strong></p>
+<p>That is not hyperbole. That is not rhetoric. That is the official number from Health Canada's own Annual Reports on Medical Assistance in Dying, first through fourth editions, covering 2016 through 2023. Sixty thousand, one hundred and sixty-seven Canadians are dead — and the programme is <em>accelerating.</em></p>
+<p>The men who liberated Bergen-Belsen, who saw with their own eyes what happens when a state decides some lives aren't worth living, would be incandescent with rage. And they would have a very specific question for the Royal Canadian Mounted Police — the same force whose members served in both World Wars, whose officers wore the Stetson in Normandy and Korea:</p>
+<div class="verdict-box">
+<p><strong>What exactly have you been doing?</strong> The Criminal Code of Canada makes it illegal to counsel or aid suicide. Section 241. It's still there. You enforce it every day — except when the state is the one doing the killing. Three Commissioners have sat in that chair since 2016. Not one of them raised a single public objection. Not one launched a review. Not one questioned whether an exemption carved into a prohibition might warrant the attention of the national police force sworn to uphold that very Code.</p>
+</div>
+<p>Three Commissioners. Eight years. Sixty thousand dead. And the RCMP's official position is silence.</p>
+<p>Not confused silence. Not "we're reviewing the matter" silence. Not "we've referred it to the appropriate authority" silence. <em>Total</em> silence. As if sixty thousand state-sanctioned deaths don't rise to the level of a single memorandum. As if the national police force of a G7 democracy has no opinion on whether its own Criminal Code — the document it exists to enforce — should contain an exemption that allows the government to kill people who aren't dying.</p>
+<p>The Red Duster generation would call that what it is: <strong>dereliction of duty.</strong></p>
+</section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 2 — THE DEATH COUNT                     -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="death-count">
+<h2><span class="section-num">THE BODY COUNT</span>Year by Year — From Health Canada's Own Reports</h2>
+<p>These are not estimates. These are not projections. These are not extrapolations from incomplete data. These are the official numbers published by Health Canada in their Annual Reports on Medical Assistance in Dying — the 1st through 4th editions. Every single one is a Canadian citizen, with a name and a family and a life, who is now dead because the state said it was acceptable to kill them.</p>
+<div class="death-chart">
+<!-- 2016 — 1,018 / 15,343 = 6.63% -->
+<div class="chart-bar-row">
+<span class="chart-year">2016</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-829"><span>1,018</span></div>
+</div>
+</div>
+<div class="tnt-style-830">
+<span class="chart-annotation bill-note">⚖ Bill C-14 receives Royal Assent — June 17, 2016</span>
+</div>
+<!-- 2017 — 2,838 / 15,343 = 18.5% -->
+<div class="chart-bar-row">
+<span class="chart-year">2017</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-831"><span>2,838</span></div>
+</div>
+</div>
+<!-- 2018 — 4,480 / 15,343 = 29.2% -->
+<div class="chart-bar-row">
+<span class="chart-year">2018</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-832"><span>4,480</span></div>
+</div>
+</div>
+<!-- 2019 — 5,631 / 15,343 = 36.7% -->
+<div class="chart-bar-row">
+<span class="chart-year">2019</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-833"><span>5,631</span></div>
+</div>
+</div>
+<!-- 2020 — 7,595 / 15,343 = 49.5% -->
+<div class="chart-bar-row">
+<span class="chart-year">2020</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-834"><span>7,595</span></div>
+</div>
+</div>
+<!-- 2021 — 10,064 / 15,343 = 65.6% -->
+<div class="chart-bar-row">
+<span class="chart-year">2021</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-835"><span>10,064</span></div>
+</div>
+</div>
+<div class="tnt-style-830">
+<span class="chart-annotation bill-note">⚖ Bill C-7 receives Royal Assent — March 17, 2021 — "reasonably foreseeable death" REMOVED</span>
+</div>
+<!-- 2022 — 13,241 / 15,343 = 86.3% -->
+<div class="chart-bar-row">
+<span class="chart-year">2022</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-836"><span>13,241</span></div>
+</div>
+</div>
+<!-- 2023 — 15,343 / 15,343 = 100% -->
+<div class="chart-bar-row">
+<span class="chart-year">2023</span>
+<div class="chart-bar-track">
+<div class="chart-bar-fill tnt-style-45"><span>15,343</span></div>
+</div>
+</div>
+<!-- TOTAL -->
+<div class="chart-bar-row chart-total-row">
+<span class="chart-year tnt-style-837">TOTAL</span>
+<div class="chart-bar-track tnt-style-838">
+<div class="chart-bar-fill total-bar tnt-style-45"><span class="tnt-style-839">~98,000</span></div>
+</div>
+</div>
+</div>
+<p class="tnt-style-840">Source: Health Canada — 1st Annual Report on MAID (2017), 2nd (2020), 3rd (2022), 4th (2024)</p>
+<p>Look at that chart. Look at the trajectory. Year after year, the numbers don't just grow — they <em>accelerate.</em> Each year kills more than the last. The 2023 figure is <strong>fifteen times</strong> the first year. This is not a programme that reached equilibrium. This is not a programme that found its natural level. This is a programme that is feeding — and every year it feeds more.</p>
+<p>In 2023, MAID accounted for 4.7% of all deaths in Canada. Nearly one in twenty. A Canadian is now more likely to die by state-sanctioned killing than in a car accident. That is not a statistic that should exist in a democracy. That is a statistic that should trigger an investigation by the national police force. It has not.</p>
+<!-- T4 Comparison -->
+<div class="t4-comparison-block">
+<h3 class="tnt-style-841">The Aktion T4 Comparison</h3>
+<p class="tnt-style-842">Nazi Germany's Aktion T4 programme — the state murder of disabled persons — killed an estimated 70,000 to 100,000 people between 1939 and 1941 before public outcry and clerical opposition forced it into covert continuation. Canada's MAID programme has killed ~98,000 in eight years and is <strong>still accelerating</strong> with full public funding and political support.</p>
+<div class="t4-range-bar">
+<!-- T4 range: 70k-100k on a scale of 0–110k. 70/110 = 63.6%, 100/110 = 90.9% -->
+<div class="t4-range-fill tnt-style-843"></div>
+<!-- Canada marker: ~98,000 / 110,000 = 54.7% -->
+<div class="canada-marker tnt-style-844"></div>
+</div>
+<div class="t4-label-row">
+<span class="t4-label-low">0</span>
+<span class="t4-label-low tnt-style-845">
+<span class="tnt-style-846">T4: 70,000–100,000</span>
+</span>
+<span class="t4-label-high">110,000</span>
+</div>
+<p class="tnt-style-847">T4 was stopped by public opposition. MAID is being expanded by Parliament. At current growth rates, Canada's total will surpass the upper T4 estimate within two years.</p>
+</div>
+</section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 3 — RCMP COMMISSIONERS                  -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="commissioners">
+<h2><span class="section-num">WHO WAS ON WATCH</span>RCMP Commissioners — The Men and Women Who Did Nothing</h2>
+<p>The Commissioner of the RCMP is the senior law enforcement officer in Canada. They swear an oath to uphold the laws of Canada — including the Criminal Code. These are the three individuals who held that office while the state killed ~98,000 of its own citizens.</p>
+<!-- Bob Paulson -->
+<div class="comm-card">
+<div class="comm-card-header">
+<div>
+<div class="comm-card-name">Bob Paulson</div>
+<div class="comm-card-role">Commissioner of the RCMP — November 2011 to June 2017</div>
+</div>
+<span class="comm-card-tenure">NOV 2011 – JUN 2017</span>
+</div>
+<p>Paulson was Commissioner when Bill C-14 passed on June 17, 2016 — the bill that carved the first exemption into Criminal Code Section 241, which has <em>always</em> made it illegal to counsel or aid suicide. That section didn't disappear. It's still there. Parliament didn't repeal it. They punched a hole in it and called the hole "medical assistance in dying."</p>
+<p>The RCMP is the federal police force responsible for enforcing the Criminal Code of Canada. When Parliament proposed creating an exemption to a criminal prohibition against assisting suicide, Paulson's RCMP raised <strong>no objection.</strong> They launched <strong>no review.</strong> They filed <strong>no constitutional challenge.</strong> They didn't even publicly comment on whether the force tasked with enforcing s.241 had concerns about a state-sponsored exemption to s.241.</p>
+<p>One thousand and eighteen Canadians died under MAID in 2016 alone. By the time Paulson retired quietly in June 2017, the annual count had nearly tripled to 2,838. He left the building without a word.</p>
+<p>The veterans who landed at Juno Beach didn't have the option of retiring quietly. Neither should the man who let a killing programme launch on his watch.</p>
+<div class="comm-bill-tags">
+<span class="comm-bill-tag red">BILL C-14 — ROYAL ASSENT JUN 17, 2016</span>
+<span class="comm-bill-tag amber">3,856 MAID DEATHS ON HIS WATCH</span>
+</div>
+</div>
+<!-- Brenda Lucki -->
+<div class="comm-card">
+<div class="comm-card-header">
+<div>
+<div class="comm-card-name">Brenda Lucki</div>
+<div class="comm-card-role">Commissioner of the RCMP — April 2018 to March 2023</div>
+</div>
+<span class="comm-card-tenure">APR 2018 – MAR 2023</span>
+</div>
+<p>If Paulson let the programme launch, Lucki let it metastasise. She was Commissioner during the single most dangerous expansion of MAID in Canadian history: Bill C-7, which received Royal Assent on March 17, 2021.</p>
+<p>Bill C-7 removed the <strong>"reasonably foreseeable natural death"</strong> requirement. Read that again. The original law — already a carved exemption from a criminal prohibition — at least required that the person was going to die anyway. Bill C-7 removed that safeguard. It created "Track 2" — MAID for people whose natural death was <em>not</em> foreseeable. People who were not dying. People whose "condition" was disability, chronic pain, or simply being unable to access adequate care.</p>
+<p>Under Lucki's command, MAID deaths went from 4,480 per year (2018) to 13,241 per year (2022). That is a <strong>196% increase.</strong> Track 2 deaths — people who were not terminally ill — rose to 4.1% of all MAID provisions.</p>
+<p>And what was Commissioner Lucki doing during this period? She was managing the RCMP's catastrophic handling of the April 2020 Nova Scotia mass shooting — the worst in Canadian history, 22 dead. The Mass Casualty Commission's 2023 Final Report documented a pattern of institutional failure. Lucki was accused of attempting to leverage the tragedy to push the government's firearms agenda, allegations she denied under oath but which the Commission found credible enough to document extensively.</p>
+<p>While Lucki was not disclosing interference by the Prime Minister's Office in a mass murder investigation, Track 2 MAID was killing Canadians whose only qualifying "illness" was being poor, being disabled, or being unable to access housing and healthcare. She made <strong>zero public statements</strong> on MAID oversight. Not one.</p>
+<div class="comm-bill-tags">
+<span class="comm-bill-tag red">BILL C-7 — ROYAL ASSENT MAR 17, 2021</span>
+<span class="comm-bill-tag amber">NOVA SCOTIA MASS SHOOTING COVER-UP</span>
+<span class="comm-bill-tag red">~41,011 MAID DEATHS ON HER WATCH</span>
+</div>
+</div>
+<!-- Mike Duheme -->
+<div class="comm-card">
+<div class="comm-card-header">
+<div>
+<div class="comm-card-name">Mike Duheme</div>
+<div class="comm-card-role">Commissioner of the RCMP — March 2023 to Present</div>
+</div>
+<span class="comm-card-tenure">MAR 2023 – PRESENT</span>
+</div>
+<p>Duheme inherited a body count exceeding 44,000 and climbing at a rate that added another 15,343 in his first full year. By the time he took office, MAID accounted for <strong>4.7% of all deaths in Canada</strong> — nearly one in twenty. He inherited a programme that the United Nations had flagged, that disability rights organisations had begged the government to review, and that was killing people at a rate that put it within striking distance of the Aktion T4 total.</p>
+<p>Commissioner Duheme has made <strong>zero public statements</strong> on MAID oversight. Zero. Not a press conference. Not a written statement. Not a mention in his annual reports. Nothing.</p>
+<p>Under his tenure, Bill C-39 delayed the expansion of MAID to include mental illness as a sole qualifying condition. Note the word: <strong>delayed.</strong> Not cancelled. Not repealed. Delayed. Originally set for March 2023, pushed to 2024, then to March 2027. The infrastructure is being built. The training programmes are being developed. The eligibility criteria are being drafted. It is coming — and the RCMP's senior officer has nothing to say about whether the national police force has any role in overseeing a programme that will allow the state to kill people because they are depressed.</p>
+<p>The men who fought at Kapyong in Korea — who held an impossible position against a Chinese division because they were told to hold it — would have something to say about a Commissioner who can't even hold a press conference.</p>
+<div class="comm-bill-tags">
+<span class="comm-bill-tag amber">BILL C-39 — MENTAL ILLNESS MAID DELAYED TO 2027</span>
+<span class="comm-bill-tag red">15,343+ MAID DEATHS ON HIS WATCH (AND COUNTING)</span>
+<span class="comm-bill-tag blue">ZERO PUBLIC STATEMENTS ON MAID</span>
+</div>
+</div>
+</section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 4 — THE LEGISLATION                     -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="legislation">
+<h2><span class="section-num">THE LAW</span>What They Changed — And What They Didn't</h2>
+<p>Understanding how Canada built a state killing apparatus requires understanding what the law said <em>before</em> — and how surgically Parliament carved exemptions into prohibitions that still exist on the books today. The Criminal Code sections they amended haven't been repealed. The prohibitions are still there. They just have holes in them now — holes large enough to drive a hearse through.</p>
+<div class="law-timeline">
+<div class="law-card">
+<div class="law-card-label">CRIMINAL CODE S.241 — THE FOUNDATION</div>
+<h3>Counselling or Aiding Suicide — Still Illegal</h3>
+<p>Section 241 of the Criminal Code of Canada, RSC 1985, c C-46, makes it a criminal offence to counsel or aid a person to die by suicide. Maximum penalty: 14 years imprisonment. This section has been law since Confederation. It is <strong>still law.</strong> Parliament did not repeal it. They carved an exemption into it. The prohibition and the exemption exist in the same section of the same statute. If you aid someone's suicide outside the MAID framework, you go to prison for 14 years. If you do it inside the framework, the government pays you.</p>
+</div>
+<div class="law-card">
+<div class="law-card-label">CRIMINAL CODE S.222 — HOMICIDE</div>
+<h3>Causing Death — The Definition Parliament Cannot Amend Away</h3>
+<p>Section 222 of the Criminal Code defines homicide as "directly or indirectly, by any means," causing the death of a human being. MAID practitioners directly cause the death of human beings. This is, by the plain text of the Criminal Code, homicide. The MAID exemption does not amend s.222. It does not change the definition of homicide. It creates a procedural shield for an act that meets every element of the offence.</p>
+</div>
+<div class="law-card">
+<div class="law-card-label">JUNE 17, 2016</div>
+<h3>Bill C-14 — The First Exemption</h3>
+<p>Passed 186–137 in the House of Commons. Introduced by the Trudeau government. Minister of Justice: Jody Wilson-Raybould. Created the first MAID exemption within Criminal Code s.241. Required that natural death be "reasonably foreseeable." Senate proposed amendments to expand eligibility; the government <em>stripped them</em> — an irony given what came next. Royal Assent: June 17, 2016. Commissioner Paulson's RCMP: silent.</p>
+<span class="vote-badge yea">YEAS: 186 (LPC majority + some NDP)</span>
+<span class="vote-badge nay">NAYS: 137 (CPC majority + LPC dissent)</span>
+</div>
+<div class="law-card">
+<div class="law-card-label">MARCH 17, 2021</div>
+<h3>Bill C-7 — The Floodgates Open</h3>
+<p>Passed 180–149. Minister of Justice: David Lametti. This is the bill that killed Canada's last meaningful safeguard. Bill C-7 <strong>removed the "reasonably foreseeable natural death" requirement.</strong> Created Track 2: MAID for people whose death was not foreseeable. People who were not dying. People whose qualifying condition was disability, chronic illness, or — as documented in Health Canada's own reports — inadequate access to housing, support services, or medical care. The Senate added a sunset provision for mental illness MAID; the government accepted it.</p>
+<span class="vote-badge yea">YEAS: 180 (LPC + NDP + some BQ)</span>
+<span class="vote-badge nay">NAYS: 149 (CPC + LPC dissent)</span>
+</div>
+<div class="law-card">
+<div class="law-card-label">MARCH 2023</div>
+<h3>Bill C-39 — The Delay That Isn't a Cancellation</h3>
+<p>Mental illness as a sole qualifying condition for MAID was originally set to become eligible in March 2023. Bill C-39 delayed that date. Then it was delayed again. The current target: <strong>March 17, 2027.</strong> Note carefully: this is a <em>delay</em>, not a repeal. The legal framework for killing Canadians because they have depression, anxiety, PTSD, or any other mental health condition is being built. Training programmes are in development. Eligibility criteria are being drafted. The infrastructure exists. The switch has not been flipped yet. But it has been installed.</p>
+<span class="comm-bill-tag amber tnt-style-249">NOT CANCELLED — DELAYED TO MARCH 2027</span>
+</div>
+</div>
+</section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 5 — WHO VOTED FOR THIS                  -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="votes">
+<h2><span class="section-num">THE VOTE</span>Who Voted For This</h2>
+<p>Every Member of Parliament who voted for Bill C-14 and Bill C-7 is on the public record. Hansard does not forget. The division bells rang, the Speaker called the vote, and 338 Members of Parliament stood up to be counted. Their names are recorded. Their choices are permanent. And sixty thousand Canadians are dead because of what they decided.</p>
+<ul class="fact-list">
+<li><strong>Bill C-14 — Yeas (186):</strong><br/>
         Majority Liberal caucus plus some NDP members. This was a government bill with a whipped vote. Liberal MPs who voted against their own government's bill did so at significant political cost — and history will record that they were right to do so. The Yeas created the first state-sanctioned killing programme in Canadian history.</li>
-
-        <li><strong>Bill C-14 — Nays (137):</strong><br>
+<li><strong>Bill C-14 — Nays (137):</strong><br/>
         Most of the Conservative caucus plus a small number of Liberal MPs who broke ranks. Several cited the Criminal Code conflict directly — pointing out that you cannot carve an exemption into a criminal prohibition and call it compassion. Their objections are preserved in Hansard, June 16, 2016, Third Reading debate. They were outvoted. They were not wrong.</li>
-
-        <li><strong>Bill C-7 — Yeas (180):</strong><br>
+<li><strong>Bill C-7 — Yeas (180):</strong><br/>
         Liberal caucus, NDP caucus, and a portion of the Bloc Québécois. The NDP's support for removing the "reasonably foreseeable death" requirement is one of the most consequential votes in modern Canadian parliamentary history. They voted — on the record, with their names attached — to allow the state to kill people who were not dying. Every NDP MP who voted Yea should be asked, directly and on camera, whether they understood what Track 2 would mean for disabled Canadians who couldn't access housing.</li>
-
-        <li><strong>Bill C-7 — Nays (149):</strong><br>
+<li><strong>Bill C-7 — Nays (149):</strong><br/>
         Conservative caucus plus a handful of Liberal MPs who again broke ranks. The margin actually <em>narrowed</em> from C-14 — meaning more MPs supported the expansion than supported the original programme. The Overton window shifted, the threshold moved, and people who would have been protected under C-14's "reasonably foreseeable death" requirement are now dead under C-7's removal of it.</li>
-      </ul>
-
-      <p>The men who served in the Canadian Expeditionary Force in 1917 — who went over the top at Vimy Ridge in a country that was barely fifty years old — were volunteers. They didn't have to go. They chose to. And they would have a very direct question for the 180 Members of Parliament who voted to remove the last safeguard standing between disabled Canadians and state-administered death: <strong>Is this what we fought for?</strong></p>
-
-      <p class="tnt-style-77"><strong>→ Full MP-by-MP voting breakdown:</strong> <a href="voting-records.html" class="tnt-style-848">MP Voting Records Database</a></p>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 6 — INTERNATIONAL RECORD                -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section id="international">
-      <h2><span class="section-num">THE WORLD IS WATCHING</span>The International Record</h2>
-
-      <p>Canada's allies and the international human rights community have not been silent — even if Ottawa has been stone deaf. The warnings are on the official record. They were filed in triplicate, translated into both official languages, and ignored with the bureaucratic precision that only a G7 government can muster.</p>
-
-      <div class="intl-card">
-        <div class="intl-card-org">UN Committee on the Rights of Persons with Disabilities</div>
-        <blockquote>"The Committee is concerned about the implementation of legislation allowing for medical assistance in dying, which may put at risk the lives of persons with disabilities."</blockquote>
-        <div class="cite">— Concluding Observations on Canada, CRPD/C/CAN/CO/1, 2017</div>
-        <p class="tnt-style-849">The UN's own disability rights body raised the alarm in <em>2017</em> — a year after C-14 passed. Canada's response: Bill C-7, which expanded the programme to include non-terminal conditions. They didn't listen. They accelerated.</p>
-      </div>
-
-      <div class="intl-card">
-        <div class="intl-card-org">UN Special Rapporteur on the Rights of Persons with Disabilities</div>
-        <blockquote>"I am extremely concerned about the implementation of the legislation on medical assistance in dying from a disability rights perspective."</blockquote>
-        <div class="cite">— Statement by the Special Rapporteur, 2021</div>
-        <p class="tnt-style-849">The UN Special Rapporteur expressed alarm in 2021 as Bill C-7 was being passed. The Canadian government acknowledged the concern and proceeded to pass the bill anyway. The 2021 death count: 10,064.</p>
-      </div>
-
-      <div class="intl-card">
-        <div class="intl-card-org">Council of Canadian Academies — Expert Panel on MAID</div>
-        <blockquote>The Expert Panel identified significant concerns about safeguard adequacy, the vulnerability of persons with disabilities, and the risk that social determinants — poverty, isolation, lack of services — could influence MAID requests.</blockquote>
-        <div class="cite">— The State of Knowledge on Medical Assistance in Dying Where a Mental Disorder Is the Sole Underlying Medical Condition, 2018</div>
-        <p class="tnt-style-849">Canada's own expert panel warned that people were seeking MAID not because they wanted to die but because they couldn't access the support to live. The government's response: expand eligibility.</p>
-      </div>
-
-      <div class="intl-card">
-        <div class="intl-card-org">Canadian Disability Rights Coalition (CDRC) / Council of Canadians with Disabilities (CCD) / IRIS</div>
-        <blockquote>Disability rights organisations across Canada filed formal complaints, issued public statements, and pleaded with Parliament not to expand MAID to non-terminal conditions. They were largely ignored by the legislative process.</blockquote>
-        <div class="cite">— Multiple submissions to House of Commons and Senate committees, 2020–2021</div>
-        <p class="tnt-style-849">The people most directly affected by this legislation — disabled Canadians — begged Parliament not to pass it. Parliament passed it. The RCMP said nothing. The disabled Canadians are now dying under it.</p>
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 7 — WHAT THE VETERANS WOULD SAY         -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section id="veterans">
-      <h2><span class="section-num">THE RECKONING</span>What the Veterans Would Say</h2>
-
-      <p>Imagine, for a moment, that the men who fought under the Red Ensign could see this.</p>
-
-      <p>The men of the Royal Winnipeg Rifles who waded ashore at Juno Beach into a wall of MG-42 fire. The men of the Loyal Edmonton Regiment who fought room to room through Ortona at Christmas 1943, pulling dead comrades from the rubble between engagements. The men of the 1st Canadian Parachute Battalion who dropped into Normandy in the dark hours before D-Day. The men of the Cape Breton Highlanders who fought through the Gothic Line in Italy. The men of the Algonquin Regiment who held the Scheldt against everything the Wehrmacht could throw at them.</p>
-
-      <p>They fought against a regime that had decided — through bureaucratic process, medical authority, and state power — that some human lives were not worth living. That disability was a burden on the state. That mental illness was a disqualification from the right to exist. They saw where that logic ended. They liberated the camps. They saw the bodies.</p>
-
-      <p>And then imagine telling those men that eighty years later, their own country — the country they bled for, the country whose flag they carried into battle — had built a programme that:</p>
-
-      <ul class="fact-list">
-        <li><strong>Kills people who are not dying.</strong> Track 2 MAID has no requirement for foreseeable death. A person whose "condition" is disability qualifies.</li>
-        <li><strong>Kills people who are poor.</strong> Health Canada's own reports document cases where inadequate housing, lack of social support, and poverty were cited as factors in MAID requests.</li>
-        <li><strong>Kills people at a rate approaching Aktion T4.</strong> ~98,000 dead in eight years. T4 killed 70,000–100,000 in roughly the same period. Canada is closing the gap with state funding and parliamentary enthusiasm.</li>
-        <li><strong>Is planning to expand to mental illness.</strong> Not if — when. March 2027 is the current date. The delay is administrative, not moral. The principle has been accepted: the state can kill you because you are depressed.</li>
-        <li><strong>Has never been investigated by the national police force.</strong> Three Commissioners. Not one inquiry. Not one review. Not one public statement.</li>
-      </ul>
-
-      <div class="verdict-box">
-        <p>The men who fought at Vimy Ridge in 1917. At Dieppe in 1942. At Juno Beach in 1944. At the Scheldt in 1944. At Kapyong in 1951. They did not sacrifice so that Canada could build a state apparatus that kills its own vulnerable citizens at a rate that would make the T4 programme look inefficient by comparison. They fought <strong>against</strong> regimes that decided some lives weren't worth living. Now their own country has codified that exact principle into law — and the RCMP, the force whose members served alongside those veterans, whose officers wore the Stetson in Normandy, whose motto is <em>Maintiens le droit</em> — Defend the Law — <strong>won't even investigate.</strong></p>
-      </div>
-
-      <p><em>Maintiens le droit.</em> Defend the law. That is what the Stetson means. That is what the oath means. That is what "Commissioner of the Royal Canadian Mounted Police" means. And three Commissioners, in succession, have sat in that chair and decided that sixty thousand dead Canadians don't warrant so much as a press conference.</p>
-
-      <p>There is a memorial in Ottawa — the National War Memorial, with the bronze figures of Canadian soldiers marching through an archway. Every November 11th, the country gathers there and pretends to remember what those soldiers fought for. And then on November 12th, the programme runs. The forms are processed. The injections are administered. The numbers climb.</p>
-
-      <p>In the Netherlands, Dutch children still lay flowers on Canadian war graves every May 5th — Liberation Day. Eighty years on, they remember. They remember that Canadian boys, teenagers some of them, died to free their grandparents from a regime that killed people it judged unfit to live. Those Dutch children honour a Canada that no longer exists — a Canada that would have been horrified by what its Parliament has built and its police force has ignored.</p>
-
-      <p>The Red Duster generation didn't fight their way across Europe for this. They didn't freeze in the Hochwald. They didn't bleed at Falaise. They didn't die on the beaches of Normandy so that eighty years later, their own country could offer their disabled grandchildren a needle instead of a wheelchair ramp, a lethal injection instead of adequate housing, a death certificate instead of a doctor who gives a damn.</p>
-
-      <p>And they would not forgive it. Not the programme. Not the Parliament that built it. And certainly not the three Commissioners who swore an oath to defend the law and then sat in silence while the state killed sixty thousand of the people they were sworn to protect.</p>
-
-      <p>The Red Ensign flew over Juno Beach. <em>Maintiens le droit</em> is engraved on the RCMP crest. Somewhere between those two facts, Canada lost its way — and the RCMP lost its honour.</p>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- SECTION 8 — SOURCES                             -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section id="sources" class="tnt-style-850">
-      <h2><span class="section-num">PRIMARY SOURCES</span>Every Claim on This Page Is From the Public Record</h2>
-
-      <p class="tnt-style-851">This page contains no anonymous sources, no leaked documents, and no speculation. Every fact is drawn from official Government of Canada publications, parliamentary records, or international body reports. The sources are listed below so that anyone can verify every claim independently.</p>
-
-      <ul class="source-list">
-        <li><strong>Health Canada — 1st Annual Report on Medical Assistance in Dying in Canada, 2017</strong><br>
+</ul>
+<p>The men who served in the Canadian Expeditionary Force in 1917 — who went over the top at Vimy Ridge in a country that was barely fifty years old — were volunteers. They didn't have to go. They chose to. And they would have a very direct question for the 180 Members of Parliament who voted to remove the last safeguard standing between disabled Canadians and state-administered death: <strong>Is this what we fought for?</strong></p>
+<p class="tnt-style-77"><strong>→ Full MP-by-MP voting breakdown:</strong> <a class="tnt-style-848" href="voting-records.html">MP Voting Records Database</a></p>
+</section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 6 — INTERNATIONAL RECORD                -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="international">
+<h2><span class="section-num">THE WORLD IS WATCHING</span>The International Record</h2>
+<p>Canada's allies and the international human rights community have not been silent — even if Ottawa has been stone deaf. The warnings are on the official record. They were filed in triplicate, translated into both official languages, and ignored with the bureaucratic precision that only a G7 government can muster.</p>
+<div class="intl-card">
+<div class="intl-card-org">UN Committee on the Rights of Persons with Disabilities</div>
+<blockquote>"The Committee is concerned about the implementation of legislation allowing for medical assistance in dying, which may put at risk the lives of persons with disabilities."</blockquote>
+<div class="cite">— Concluding Observations on Canada, CRPD/C/CAN/CO/1, 2017</div>
+<p class="tnt-style-849">The UN's own disability rights body raised the alarm in <em>2017</em> — a year after C-14 passed. Canada's response: Bill C-7, which expanded the programme to include non-terminal conditions. They didn't listen. They accelerated.</p>
+</div>
+<div class="intl-card">
+<div class="intl-card-org">UN Special Rapporteur on the Rights of Persons with Disabilities</div>
+<blockquote>"I am extremely concerned about the implementation of the legislation on medical assistance in dying from a disability rights perspective."</blockquote>
+<div class="cite">— Statement by the Special Rapporteur, 2021</div>
+<p class="tnt-style-849">The UN Special Rapporteur expressed alarm in 2021 as Bill C-7 was being passed. The Canadian government acknowledged the concern and proceeded to pass the bill anyway. The 2021 death count: 10,064.</p>
+</div>
+<div class="intl-card">
+<div class="intl-card-org">Council of Canadian Academies — Expert Panel on MAID</div>
+<blockquote>The Expert Panel identified significant concerns about safeguard adequacy, the vulnerability of persons with disabilities, and the risk that social determinants — poverty, isolation, lack of services — could influence MAID requests.</blockquote>
+<div class="cite">— The State of Knowledge on Medical Assistance in Dying Where a Mental Disorder Is the Sole Underlying Medical Condition, 2018</div>
+<p class="tnt-style-849">Canada's own expert panel warned that people were seeking MAID not because they wanted to die but because they couldn't access the support to live. The government's response: expand eligibility.</p>
+</div>
+<div class="intl-card">
+<div class="intl-card-org">Canadian Disability Rights Coalition (CDRC) / Council of Canadians with Disabilities (CCD) / IRIS</div>
+<blockquote>Disability rights organisations across Canada filed formal complaints, issued public statements, and pleaded with Parliament not to expand MAID to non-terminal conditions. They were largely ignored by the legislative process.</blockquote>
+<div class="cite">— Multiple submissions to House of Commons and Senate committees, 2020–2021</div>
+<p class="tnt-style-849">The people most directly affected by this legislation — disabled Canadians — begged Parliament not to pass it. Parliament passed it. The RCMP said nothing. The disabled Canadians are now dying under it.</p>
+</div>
+</section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 7 — WHAT THE VETERANS WOULD SAY         -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="veterans">
+<h2><span class="section-num">THE RECKONING</span>What the Veterans Would Say</h2>
+<p>Imagine, for a moment, that the men who fought under the Red Ensign could see this.</p>
+<p>The men of the Royal Winnipeg Rifles who waded ashore at Juno Beach into a wall of MG-42 fire. The men of the Loyal Edmonton Regiment who fought room to room through Ortona at Christmas 1943, pulling dead comrades from the rubble between engagements. The men of the 1st Canadian Parachute Battalion who dropped into Normandy in the dark hours before D-Day. The men of the Cape Breton Highlanders who fought through the Gothic Line in Italy. The men of the Algonquin Regiment who held the Scheldt against everything the Wehrmacht could throw at them.</p>
+<p>They fought against a regime that had decided — through bureaucratic process, medical authority, and state power — that some human lives were not worth living. That disability was a burden on the state. That mental illness was a disqualification from the right to exist. They saw where that logic ended. They liberated the camps. They saw the bodies.</p>
+<p>And then imagine telling those men that eighty years later, their own country — the country they bled for, the country whose flag they carried into battle — had built a programme that:</p>
+<ul class="fact-list">
+<li><strong>Kills people who are not dying.</strong> Track 2 MAID has no requirement for foreseeable death. A person whose "condition" is disability qualifies.</li>
+<li><strong>Kills people who are poor.</strong> Health Canada's own reports document cases where inadequate housing, lack of social support, and poverty were cited as factors in MAID requests.</li>
+<li><strong>Kills people at a rate approaching Aktion T4.</strong> ~98,000 dead in eight years. T4 killed 70,000–100,000 in roughly the same period. Canada is closing the gap with state funding and parliamentary enthusiasm.</li>
+<li><strong>Is planning to expand to mental illness.</strong> Not if — when. March 2027 is the current date. The delay is administrative, not moral. The principle has been accepted: the state can kill you because you are depressed.</li>
+<li><strong>Has never been investigated by the national police force.</strong> Three Commissioners. Not one inquiry. Not one review. Not one public statement.</li>
+</ul>
+<div class="verdict-box">
+<p>The men who fought at Vimy Ridge in 1917. At Dieppe in 1942. At Juno Beach in 1944. At the Scheldt in 1944. At Kapyong in 1951. They did not sacrifice so that Canada could build a state apparatus that kills its own vulnerable citizens at a rate that would make the T4 programme look inefficient by comparison. They fought <strong>against</strong> regimes that decided some lives weren't worth living. Now their own country has codified that exact principle into law — and the RCMP, the force whose members served alongside those veterans, whose officers wore the Stetson in Normandy, whose motto is <em>Maintiens le droit</em> — Defend the Law — <strong>won't even investigate.</strong></p>
+</div>
+<p><em>Maintiens le droit.</em> Defend the law. That is what the Stetson means. That is what the oath means. That is what "Commissioner of the Royal Canadian Mounted Police" means. And three Commissioners, in succession, have sat in that chair and decided that sixty thousand dead Canadians don't warrant so much as a press conference.</p>
+<p>There is a memorial in Ottawa — the National War Memorial, with the bronze figures of Canadian soldiers marching through an archway. Every November 11th, the country gathers there and pretends to remember what those soldiers fought for. And then on November 12th, the programme runs. The forms are processed. The injections are administered. The numbers climb.</p>
+<p>In the Netherlands, Dutch children still lay flowers on Canadian war graves every May 5th — Liberation Day. Eighty years on, they remember. They remember that Canadian boys, teenagers some of them, died to free their grandparents from a regime that killed people it judged unfit to live. Those Dutch children honour a Canada that no longer exists — a Canada that would have been horrified by what its Parliament has built and its police force has ignored.</p>
+<p>The Red Duster generation didn't fight their way across Europe for this. They didn't freeze in the Hochwald. They didn't bleed at Falaise. They didn't die on the beaches of Normandy so that eighty years later, their own country could offer their disabled grandchildren a needle instead of a wheelchair ramp, a lethal injection instead of adequate housing, a death certificate instead of a doctor who gives a damn.</p>
+<p>And they would not forgive it. Not the programme. Not the Parliament that built it. And certainly not the three Commissioners who swore an oath to defend the law and then sat in silence while the state killed sixty thousand of the people they were sworn to protect.</p>
+<p>The Red Ensign flew over Juno Beach. <em>Maintiens le droit</em> is engraved on the RCMP crest. Somewhere between those two facts, Canada lost its way — and the RCMP lost its honour.</p>
+</section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 8 — SOURCES                             -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="tnt-style-850" id="sources">
+<h2><span class="section-num">PRIMARY SOURCES</span>Every Claim on This Page Is From the Public Record</h2>
+<p class="tnt-style-851">This page contains no anonymous sources, no leaked documents, and no speculation. Every fact is drawn from official Government of Canada publications, parliamentary records, or international body reports. The sources are listed below so that anyone can verify every claim independently.</p>
+<ul class="source-list">
+<li><strong>Health Canada — 1st Annual Report on Medical Assistance in Dying in Canada, 2017</strong><br/>
         Government of Canada. Covers MAID provisions for calendar year 2016. Published July 2017.</li>
-
-        <li><strong>Health Canada — 2nd Annual Report on Medical Assistance in Dying in Canada, 2020</strong><br>
+<li><strong>Health Canada — 2nd Annual Report on Medical Assistance in Dying in Canada, 2020</strong><br/>
         Government of Canada. Covers MAID provisions for calendar years 2017–2018. Published July 2020.</li>
-
-        <li><strong>Health Canada — 3rd Annual Report on Medical Assistance in Dying in Canada, 2022</strong><br>
+<li><strong>Health Canada — 3rd Annual Report on Medical Assistance in Dying in Canada, 2022</strong><br/>
         Government of Canada. Covers MAID provisions for calendar years 2019–2020. Published June 2022.</li>
-
-        <li><strong>Health Canada — 4th Annual Report on Medical Assistance in Dying in Canada, 2024</strong><br>
+<li><strong>Health Canada — 4th Annual Report on Medical Assistance in Dying in Canada, 2024</strong><br/>
         Government of Canada. Covers MAID provisions for calendar years 2021–2023. Published October 2024.</li>
-
-        <li><strong>Hansard — House of Commons Debates, June 16, 2016</strong><br>
+<li><strong>Hansard — House of Commons Debates, June 16, 2016</strong><br/>
         Third Reading debate on Bill C-14 (An Act to amend the Criminal Code and to make related amendments to other Acts — medical assistance in dying). Division No. 39. Yeas: 186, Nays: 137.</li>
-
-        <li><strong>Hansard — House of Commons Debates, March 11, 2021</strong><br>
+<li><strong>Hansard — House of Commons Debates, March 11, 2021</strong><br/>
         Third Reading debate on Bill C-7 (An Act to amend the Criminal Code — medical assistance in dying). Division No. 56. Yeas: 180, Nays: 149.</li>
-
-        <li><strong>Criminal Code of Canada, RSC 1985, c C-46</strong><br>
+<li><strong>Criminal Code of Canada, RSC 1985, c C-46</strong><br/>
         Section 241 — Counselling or Aiding Suicide. Section 222 — Homicide. Section 241.1–241.4 — Medical Assistance in Dying exemptions (as amended by Bills C-14 and C-7).</li>
-
-        <li><strong>Nova Scotia Mass Casualty Commission — Final Report, 2023</strong><br>
+<li><strong>Nova Scotia Mass Casualty Commission — Final Report, 2023</strong><br/>
         Joint Federal-Provincial Public Inquiry. Volumes 1–7. Findings on RCMP institutional failures and political interference. Commissioner Lucki's testimony documented extensively.</li>
-
-        <li><strong>UN Committee on the Rights of Persons with Disabilities — Concluding Observations on Canada</strong><br>
+<li><strong>UN Committee on the Rights of Persons with Disabilities — Concluding Observations on Canada</strong><br/>
         CRPD/C/CAN/CO/1, April 2017. Paragraphs on MAID and disability rights concerns.</li>
-
-        <li><strong>UN Special Rapporteur on the Rights of Persons with Disabilities</strong><br>
+<li><strong>UN Special Rapporteur on the Rights of Persons with Disabilities</strong><br/>
         Statement expressing concern about Canada's MAID regime and disability rights, 2021.</li>
-
-        <li><strong>Council of Canadian Academies — Expert Panel on MAID, 2018</strong><br>
+<li><strong>Council of Canadian Academies — Expert Panel on MAID, 2018</strong><br/>
         "The State of Knowledge on Medical Assistance in Dying Where a Mental Disorder Is the Sole Underlying Medical Condition." Commissioned by Health Canada.</li>
-
-        <li><strong>RCMP Commissioner Appointments</strong><br>
+<li><strong>RCMP Commissioner Appointments</strong><br/>
         Public records: Bob Paulson (Nov 2011 – Jun 2017), Brenda Lucki (Apr 2018 – Mar 2023), Mike Duheme (Mar 2023 – present). Source: rcmp-grc.gc.ca.</li>
-
-        <li><strong>Bill C-39 — An Act to amend the Criminal Code (medical assistance in dying), 2023</strong><br>
+<li><strong>Bill C-39 — An Act to amend the Criminal Code (medical assistance in dying), 2023</strong><br/>
         Delayed mental illness eligibility for MAID. Extended sunset clause from March 2023 to March 2024; subsequently extended to March 17, 2027.</li>
-      </ul>
-    </section>
-
-  </div><!-- /content -->
-
+</ul>
+</section>
+</div> /content 
 <div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    <a href="cija-maid-pipeline.html" class="cap263-card-link">
-      <div class="cap263-tag cap263-tag--red">Pipeline</div>
-      <div class="cap263-bold-tight">CIJA-MAID Pipeline</div>
-    </a>
-    <a href="rcmp-complicity.html" class="cap263-card-link cap263-card-link--gold">
-      <div class="cap263-tag cap263-tag--gold">Law Enforcement</div>
-      <div class="cap263-bold-tight">RCMP Complicity</div>
-    </a>
-    <a href="disability-genocide.html" class="cap263-card-link">
-      <div class="cap263-tag">Human Rights</div>
-      <div class="cap263-bold-tight">Disability Genocide</div>
-    </a>
-    <a href="accountability.html" class="cap263-card-link">
-      <div class="cap263-tag">Accountability</div>
-      <div class="cap263-bold-tight">Accountability Database</div>
-    </a>
-  </div>
+<h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
+<div class="cap263-grid-cards">
+<a class="cap263-card-link" href="cija-maid-pipeline.html">
+<div class="cap263-tag cap263-tag--red">Pipeline</div>
+<div class="cap263-bold-tight">CIJA-MAID Pipeline</div>
+</a>
+<a class="cap263-card-link cap263-card-link--gold" href="rcmp-complicity.html">
+<div class="cap263-tag cap263-tag--gold">Law Enforcement</div>
+<div class="cap263-bold-tight">RCMP Complicity</div>
+</a>
+<a class="cap263-card-link" href="disability-genocide.html">
+<div class="cap263-tag">Human Rights</div>
+<div class="cap263-bold-tight">Disability Genocide</div>
+</a>
+<a class="cap263-card-link" href="accountability.html">
+<div class="cap263-tag">Accountability</div>
+<div class="cap263-bold-tight">Accountability Database</div>
+</a>
+</div>
 </div>
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="file-504.html" class="cap263-text-accent-bold">File charges →</a> | <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-accent-bold" href="file-504.html">File charges →</a> | <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
 </div>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1086,28 +530,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>

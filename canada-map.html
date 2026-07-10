@@ -1,857 +1,296 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🗺️ National Corruption Map | TENET5</title>
-  <meta name="description" content="Interactive national corruption investigation hub. Every municipality in Canada — documented, scored, cross-referenced. Searchable, filterable, evidence-backed.">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <meta name="theme-color" content="#2E3440">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
+  <link rel="canonical" href="https://tenet-5.github.io/canada-map.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="🗺️ National Corruption Map | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
   <style>
-    /* ── Layout ─────────────────────────────────────── */
-    .map-layout {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--s-lg);
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 var(--s-md) var(--s-xl);
-    }
-    @media (min-width: 1024px) {
-      .map-layout {
-        grid-template-columns: 220px 1fr;
-        align-items: start;
-      }
-    }
-
-    /* ── Live stats bar ──────────────────────────────── */
-    .stats-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--s-sm);
-      justify-content: center;
-      margin-top: var(--s-md);
-    }
-    .stat-pill {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.85);
-      white-space: nowrap;
-    }
-    .stat-pill span {
-      color: #ffd700;
-      font-weight: 700;
-    }
-
-    /* ── Sticky filter bar ───────────────────────────── */
-    .filter-bar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--bg-secondary, #1a1f36);
-      border-bottom: 1px solid var(--border);
-      padding: var(--s-sm) var(--s-md);
-    }
-    .filter-inner {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--s-xs);
-      align-items: center;
-      max-width: 1280px;
-      margin: 0 auto;
-    }
-    .filter-bar input[type="search"] {
-      flex: 1 1 200px;
-      min-width: 150px;
-      background: var(--bg-tertiary, #252a45);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-primary);
-      padding: 7px 12px;
-      font-size: 0.85rem;
-      outline: none;
-    }
-    .filter-bar input[type="search"]:focus {
-      border-color: var(--accent, #667eea);
-    }
-    .filter-bar select {
-      background: var(--bg-tertiary, #252a45);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-primary);
-      padding: 7px 10px;
-      font-size: 0.82rem;
-      cursor: pointer;
-      outline: none;
-    }
-    .sev-btns {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-    .sev-btn {
-      padding: 5px 12px;
-      border-radius: 5px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .sev-btn:hover { border-color: #667eea; color: #fff; }
-    .sev-btn.active { background: var(--accent, #667eea); border-color: var(--accent, #667eea); color: #fff; }
-    .sev-btn[data-sev="CRITICAL"].active { background: #e53e3e; border-color: #e53e3e; }
-    .sev-btn[data-sev="HIGH"].active    { background: #dd6b20; border-color: #dd6b20; }
-    .sev-btn[data-sev="MODERATE"].active { background: #d69e2e; border-color: #d69e2e; color: #000; }
-    .sev-btn[data-sev="MONITORED"].active { background: #38a169; border-color: #38a169; }
-
-    .results-line {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--text-quaternary);
-      padding: 4px var(--s-md);
-      max-width: 1280px;
-      margin: 0 auto;
-    }
-
-    /* ── Province sidebar ────────────────────────────── */
-    .province-sidebar {
-      position: sticky;
-      top: 80px;
-    }
-    .sidebar-title {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: var(--text-quaternary);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: var(--s-xs);
-    }
-    .prov-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      border: 1px solid transparent;
-      transition: all 0.15s;
-      margin-bottom: 2px;
-    }
-    .prov-item:hover, .prov-item.active {
-      background: rgba(102,126,234,0.12);
-      border-color: rgba(102,126,234,0.3);
-      color: var(--text-primary);
-    }
-    .prov-count {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-quaternary);
-    }
-    .prov-avg {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      padding: 1px 5px;
-      border-radius: 3px;
-    }
-
-    /* ── Municipality cards ──────────────────────────── */
-    .muni-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: var(--s-md);
-    }
-    .muni-card {
-      background: var(--bg-card, #1e2340);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: var(--s-md);
-      transition: border-color 0.2s, transform 0.15s;
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: 8px;
     }
-    .muni-card:hover {
-      border-color: rgba(102,126,234,0.5);
-      transform: translateY(-1px);
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .card-city {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.3;
-    }
-    .prov-badge {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      background: rgba(102,126,234,0.2);
-      color: #a5b4fc;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .card-meta {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--text-quaternary);
-    }
-    .score-bar-wrap {
-      background: rgba(255,255,255,0.06);
-      border-radius: 4px;
-      height: 6px;
-      overflow: hidden;
-    }
-    .score-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.4s ease;
-    }
-    .score-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .score-num {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-    .badge-sev {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      letter-spacing: 0.05em;
-    }
-    .badge-CRITICAL  { background: rgba(229,62,62,0.2);  color: #fc8181; border: 1px solid rgba(229,62,62,0.4); }
-    .badge-HIGH      { background: rgba(221,107,32,0.2); color: #f6ad55; border: 1px solid rgba(221,107,32,0.4); }
-    .badge-MODERATE  { background: rgba(214,158,46,0.2); color: #f6e05e; border: 1px solid rgba(214,158,46,0.4); }
-    .badge-MONITORED { background: rgba(56,161,105,0.2); color: #68d391; border: 1px solid rgba(56,161,105,0.4); }
-    .card-summary {
-      font-size: 0.80rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
+
+    /* Core Content Wrapper */
+    .unified-main {
       flex: 1;
-    }
-    .card-cats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .cat-tag {
-      font-family: var(--font-mono);
-      font-size: 0.60rem;
-      padding: 2px 6px;
-      border-radius: 3px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text-quaternary);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .card-btn {
-      display: block;
-      text-align: center;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 0.80rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      text-decoration: none;
-      border: none;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
       width: 100%;
       box-sizing: border-box;
     }
-    .btn-investigate {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
-    }
-    .btn-investigate:hover { opacity: 0.9; }
-    .btn-details {
-      background: rgba(102,126,234,0.12);
-      color: #a5b4fc;
-      border: 1px solid rgba(102,126,234,0.3);
-    }
-    .btn-details:hover { background: rgba(102,126,234,0.22); }
 
-    /* ── Modal ───────────────────────────────────────── */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      z-index: 500;
-      overflow-y: auto;
-      padding: 40px 20px;
-    }
-    .modal-backdrop.open { display: flex; align-items: flex-start; justify-content: center; }
-    .modal-box {
-      background: var(--bg-secondary, #1a1f36);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: var(--s-lg);
-      max-width: 700px;
-      width: 100%;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute;
-      top: 12px; right: 16px;
-      background: none; border: none;
-      color: var(--text-secondary);
-      font-size: 1.4rem;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .modal-close:hover { color: var(--text-primary); }
-    .modal-header { margin-bottom: var(--s-md); }
-    .modal-city { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
-    .modal-meta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
-    .modal-summary { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin: var(--s-sm) 0; }
-    .findings-list { display: flex; flex-direction: column; gap: var(--s-sm); margin-top: var(--s-sm); }
-    .finding-card {
-      background: var(--bg-tertiary, #252a45);
-      border-radius: 8px;
-      padding: var(--s-sm);
-      border-left: 3px solid #667eea;
-    }
-    .finding-card.critical { border-left-color: #e53e3e; }
-    .finding-card.high     { border-left-color: #dd6b20; }
-    .finding-card.moderate { border-left-color: #d69e2e; }
-    .finding-title { font-weight: 700; color: var(--text-primary); font-size: 0.85rem; }
-    .finding-detail { font-size: 0.80rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
-    .finding-source { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-quaternary); margin-top: 6px; }
-    .modal-section-title {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-quaternary);
-      margin: var(--s-md) 0 var(--s-xs);
-    }
-    .modal-links { display: flex; gap: var(--s-sm); flex-wrap: wrap; margin-top: var(--s-md); }
-    .modal-link-btn {
-      padding: 7px 14px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-decoration: none;
-      border: 1px solid rgba(102,126,234,0.4);
-      color: #a5b4fc;
-      background: rgba(102,126,234,0.1);
-      transition: all 0.15s;
-    }
-    .modal-link-btn:hover { background: rgba(102,126,234,0.2); }
-
-    /* ── Corruption networks ─────────────────────────── */
-    .networks-section {
-      max-width: 1280px;
-      margin: var(--s-xl) auto;
-      padding: 0 var(--s-md);
-    }
-    .network-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: var(--s-md);
-      margin-top: var(--s-md);
-    }
-    .network-card {
-      background: var(--bg-card, #1e2340);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: var(--s-md);
-      border-top: 3px solid #e53e3e;
-    }
-    .network-title {
+    .p-logo {
+      font-family: var(--slate-font-sans);
       font-weight: 700;
-      font-size: 0.92rem;
-      color: var(--text-primary);
-      margin-bottom: 6px;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
     }
-    .network-nodes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-bottom: 8px;
-    }
-    .network-node {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      padding: 2px 7px;
-      border-radius: 3px;
-      background: rgba(229,62,62,0.12);
-      color: #fc8181;
-      border: 1px solid rgba(229,62,62,0.25);
-    }
-    .network-desc {
-      font-size: 0.80rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* ── Footer CTA ─────────────────────────────────── */
-    .map-cta {
-      max-width: 1280px;
-      margin: var(--s-xl) auto;
-      padding: 0 var(--s-md) var(--s-xl);
-      display: flex;
-      gap: var(--s-md);
-      flex-wrap: wrap;
-    }
-    .map-cta .cta-box { flex: 1 1 280px; }
-
-    /* ── Empty state ─────────────────────────────────── */
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: var(--s-xl);
-      color: var(--text-quaternary);
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
   </style>
-
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="🗺️ National Corruption Map | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/canada-map.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="🗺️ National Corruption Map | TENET5">
-  <link rel="canonical" href="https://tenet-5.github.io/canada-map.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "\ud83d\uddfa\ufe0f National Corruption Map \u2014 TENET5",
-  "url": "https://tenet-5.github.io/canada-map.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
-    }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:description" content="Interactive national corruption investigation hub. Every municipality in Canada — documented, scored, cross-referenced. Searchable, filterable, evidence-backed.">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="canada-map">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body class="topo" data-act="sup">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Canada Map</span></div>    <!-- CAP224-NAV-END -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-<div class="grain-overlay"></div>
-<div class="vignette"></div>
-
-
-  <div id="site-header-frame"></div>
-<!-- ── Hero ───────────────────────────────────────── -->
-  <header class="hero tnt-style-777">
-    <div class="tnt-style-675">🗺️</div>
-    <h1  id="n-8385d15c" data-narrate="🗺️ National Corruption Map — TENET5. Every municipality in Canada — documented, scored, cross-referenced" >National Corruption Map</h1>
-    <p class="subtitle tnt-style-778">Every municipality in Canada — documented, scored, cross-referenced</p>
-    <div class="stats-bar" id="stats-bar">
-      <div class="stat-pill">Municipalities tracked: <span id="stat-muni">—</span></div>
-      <div class="stat-pill">Findings documented: <span id="stat-findings">—</span></div>
-      <div class="stat-pill">Provinces covered: <span id="stat-provs">—</span></div>
-      <div class="stat-pill">$ in violations: <span id="stat-dollars">—</span></div>
-    </div>
-    <div class="tnt-style-779">
-      TENET5 — OSINT ACCOUNTABILITY | RESEARCH ENGINE | SEED DATA v1.0
-    </div>
   </header>
 
-  <!-- ── Sticky filter bar ────────────────────────────── -->
-  <div class="filter-bar" id="filter-bar">
-    <div class="filter-inner">
-      <input type="search" id="search" placeholder="🔍 Search city, province, finding…" autocomplete="off">
-      <select id="province-select">
-        <option value="ALL">All Provinces</option>
-        <option value="ON">ON — Ontario</option>
-        <option value="BC">BC — British Columbia</option>
-        <option value="AB">AB — Alberta</option>
-        <option value="QC">QC — Québec</option>
-        <option value="MB">MB — Manitoba</option>
-        <option value="SK">SK — Saskatchewan</option>
-        <option value="NS">NS — Nova Scotia</option>
-        <option value="NB">NB — New Brunswick</option>
-        <option value="NL">NL — Newfoundland</option>
-        <option value="PE">PE — PEI</option>
-        <option value="NT">NT — Northwest Territories</option>
-        <option value="YT">YT — Yukon</option>
-        <option value="NU">NU — Nunavut</option>
-      </select>
-      <div class="sev-btns" id="sev-btns">
-        <button class="sev-btn active" data-sev="ALL">ALL</button>
-        <button class="sev-btn" data-sev="CRITICAL">CRITICAL</button>
-        <button class="sev-btn" data-sev="HIGH">HIGH</button>
-        <button class="sev-btn" data-sev="MODERATE">MODERATE</button>
-        <button class="sev-btn" data-sev="MONITORED">MONITORED</button>
-      </div>
-      <select id="sort-select">
-        <option value="score">Highest Risk Score</option>
-        <option value="pop">Population</option>
-        <option value="budget">Budget</option>
-        <option value="alpha">Alphabetical</option>
-      </select>
-    </div>
-    <div class="results-line" id="results-line">Loading…</div>
-  </div>
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Canada Map</span></div>  CAP224-NAV-END 
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+<div id="site-header-frame"></div>
+ ── Hero ───────────────────────────────────────── 
 
-  <!-- ── Main layout (sidebar + grid) ─────────────────── -->
-  <div class="map-layout tnt-style-12">
-
-    <!-- Province sidebar (desktop only) -->
-    <aside class="province-sidebar tnt-style-88" id="province-sidebar">
-      <div class="sidebar-title">Filter by Province</div>
-      <div id="prov-list"></div>
-    </aside>
-
-    <!-- Municipality grid -->
-    <div>
-      <div class="muni-grid" id="muni-grid">
-        <div class="empty-state">Loading municipalities…</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Corruption Networks section ────────────────── -->
-  <div class="networks-section">
-    <h2 class="tnt-style-780">🕸️ Corruption Networks — Cross-Municipal Patterns</h2>
-    <p class="tnt-style-781">These patterns span multiple municipalities and reveal systemic, coordinated failures in Canadian municipal governance.</p>
-    <div class="network-grid">
-
-      <div class="network-card">
-        <div class="network-title">SNC-Lavalin / Federal Procurement Network</div>
-        <div class="network-nodes">
-          <span class="network-node">Montréal</span>
-          <span class="network-node">Ottawa LRT</span>
-          <span class="network-node">Hamilton LRT</span>
-          <span class="network-node">Calgary</span>
-          <span class="network-node">Federal Crown Corps</span>
-        </div>
-        <div class="network-desc">SNC-Lavalin (now AtkinsRéalis) appears as vendor or sub-contractor across federal and municipal LRT projects. Corporate deferred prosecution agreement (2019) covered $127.7M in fraud on Libyan contracts. Federal political interference in SNC prosecution documented by Wilson-Raybould.</div>
-      </div>
-
-      <div class="network-card tnt-style-782">
-        <div class="network-title">Developer Donation Web</div>
-        <div class="network-nodes">
-          <span class="network-node tnt-style-783">Vancouver ABC $1.3M</span>
-          <span class="network-node tnt-style-783">Brampton developers</span>
-          <span class="network-node tnt-style-783">Mississauga McCallion era</span>
-          <span class="network-node tnt-style-783">Calgary East Village TIF</span>
-        </div>
-        <div class="network-desc">Development industry systematically funds municipal election campaigns in exchange for favourable zoning, upzoning, and TIF financing. Vancouver's $1.3M ABC donations came despite 2018 provincial donation reform. Pattern repeats from Halifax to Victoria.</div>
-      </div>
-
-      <div class="network-card">
-        <div class="network-title">LRT Cost Overrun Pattern — Systemic</div>
-        <div class="network-nodes">
-          <span class="network-node">Ottawa $2.1B</span>
-          <span class="network-node">Toronto Crosstown $12.5B</span>
-          <span class="network-node">Hamilton $130M cancelled</span>
-          <span class="network-node">Edmonton $3.1B</span>
-          <span class="network-node">Calgary Green Line</span>
-        </div>
-        <div class="network-desc">Every major Canadian LRT project has gone dramatically over budget and schedule. Common contractors, shared consultants (Stantec, AECOM, WSP), and federal cost-sharing agreements create perverse incentives to lowball initial estimates. Ottawa inquiry found systemic management failures; Toronto Crosstown contractor placed in default 2023.</div>
-      </div>
-
-      <div class="network-card tnt-style-782">
-        <div class="network-title">Coordinated Police Budget Expansion</div>
-        <div class="network-nodes">
-          <span class="network-node tnt-style-783">Vancouver +19%</span>
-          <span class="network-node tnt-style-783">Ottawa +9.2%</span>
-          <span class="network-node tnt-style-783">Toronto +7%</span>
-          <span class="network-node tnt-style-783">Hamilton 34% of tax levy</span>
-          <span class="network-node tnt-style-783">Thunder Bay OHRT finding</span>
-        </div>
-        <div class="network-desc">Police budgets have expanded faster than any other municipal service category while civilian oversight mechanisms are simultaneously defunded or weakened. Thunder Bay's 2018 OHRT systemic racism finding shows accountability gap. Coordinated growth suggests lobbying by police associations.</div>
-      </div>
-
-      <div class="network-card">
-        <div class="network-title">Charbonneau Commission Spillover — QC</div>
-        <div class="network-nodes">
-          <span class="network-node">Montréal (Vaillancourt)</span>
-          <span class="network-node">Laval ($8M bribes)</span>
-          <span class="network-node">Longueuil</span>
-          <span class="network-node">Mascouche</span>
-          <span class="network-node">Rizzuto network</span>
-        </div>
-        <div class="network-desc">The 2015 Charbonneau Commission documented a province-wide Mafia-construction-political nexus. Laval Mayor Vaillancourt ran a 2.5% kickback scheme for 20+ years. Despite the commission, oversight mechanisms were subsequently weakened and new procurement irregularities have emerged in REM transit contracts.</div>
-      </div>
-
-      <div class="network-card tnt-style-784">
-        <div class="network-title">Executive Pay / Sunshine List Inflation</div>
-        <div class="network-nodes">
-          <span class="network-node tnt-style-785">Toronto 4,500 staff $100K+</span>
-          <span class="network-node tnt-style-785">Calgary CAO $454K</span>
-          <span class="network-node tnt-style-785">Ottawa + Winnipeg</span>
-        </div>
-        <div class="network-desc">Executive compensation at Canadian cities has grown 2-3x faster than inflation over 10 years. The Ontario Sunshine List (salaries >$100K) has become a baseline rather than an exception in large cities. CUPE and management salary benchmarking creates self-reinforcing pay escalation.</div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ── Footer CTAs ────────────────────────────────── -->
-  <div class="map-cta">
-    <div class="cta-box tnt-style-786">
-      <div class="tnt-style-787">🔬</div>
-      <h3 class="tnt-style-677">Help Us Investigate Your Municipality</h3>
-      <p class="tnt-style-788">Every Canadian city deserves scrutiny. Submit tips, procurement data, council records, or audit findings.</p>
-      <a href="community.html" class="card-btn btn-investigate tnt-style-789">Get Involved →</a>
-    </div>
-    <div class="cta-box tnt-style-786">
-      <div class="tnt-style-787">🛡️</div>
-      <h3 class="tnt-style-677">Whistleblower? We Protect Sources</h3>
-      <p class="tnt-style-788">Municipal employees, contractors, and councillors — if you've witnessed corruption, we use secure, anonymous channels.</p>
-      <a href="whistleblower-guide.html" class="card-btn btn-investigate tnt-style-789">Secure Submission →</a>
-    </div>
-  </div>
-
-  <!-- ── Detail Modal ─────────────────────────────────── -->
-  <div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-box" id="modal-box">
-      <button class="modal-close" id="modal-close" aria-label="Close">×</button>
-      <div id="modal-content"></div>
-    </div>
-  </div>
-
-<div class="isobar isobar-thick" aria-hidden="true"></div>
+ ── Sticky filter bar ────────────────────────────── 
+<div class="filter-bar" id="filter-bar">
+<div class="filter-inner">
+<input autocomplete="off" id="search" placeholder="🔍 Search city, province, finding…" type="search"/>
+<select id="province-select">
+<option value="ALL">All Provinces</option>
+<option value="ON">ON — Ontario</option>
+<option value="BC">BC — British Columbia</option>
+<option value="AB">AB — Alberta</option>
+<option value="QC">QC — Québec</option>
+<option value="MB">MB — Manitoba</option>
+<option value="SK">SK — Saskatchewan</option>
+<option value="NS">NS — Nova Scotia</option>
+<option value="NB">NB — New Brunswick</option>
+<option value="NL">NL — Newfoundland</option>
+<option value="PE">PE — PEI</option>
+<option value="NT">NT — Northwest Territories</option>
+<option value="YT">YT — Yukon</option>
+<option value="NU">NU — Nunavut</option>
+</select>
+<div class="sev-btns" id="sev-btns">
+<button class="sev-btn active" data-sev="ALL">ALL</button>
+<button class="sev-btn" data-sev="CRITICAL">CRITICAL</button>
+<button class="sev-btn" data-sev="HIGH">HIGH</button>
+<button class="sev-btn" data-sev="MODERATE">MODERATE</button>
+<button class="sev-btn" data-sev="MONITORED">MONITORED</button>
+</div>
+<select id="sort-select">
+<option value="score">Highest Risk Score</option>
+<option value="pop">Population</option>
+<option value="budget">Budget</option>
+<option value="alpha">Alphabetical</option>
+</select>
+</div>
+<div class="results-line" id="results-line">Loading…</div>
+</div>
+ ── Main layout (sidebar + grid) ─────────────────── 
+<div class="map-layout tnt-style-12">
+<!-- Province sidebar (desktop only) -->
+<aside class="province-sidebar tnt-style-88" id="province-sidebar">
+<div class="sidebar-title">Filter by Province</div>
+<div id="prov-list"></div>
+</aside>
+<!-- Municipality grid -->
+<div>
+<div class="muni-grid" id="muni-grid">
+<div class="empty-state">Loading municipalities…</div>
+</div>
+</div>
+</div>
+ ── Corruption Networks section ────────────────── 
+<div class="networks-section">
+<h2 class="tnt-style-780">🕸️ Corruption Networks — Cross-Municipal Patterns</h2>
+<p class="tnt-style-781">These patterns span multiple municipalities and reveal systemic, coordinated failures in Canadian municipal governance.</p>
+<div class="network-grid">
+<div class="network-card">
+<div class="network-title">SNC-Lavalin / Federal Procurement Network</div>
+<div class="network-nodes">
+<span class="network-node">Montréal</span>
+<span class="network-node">Ottawa LRT</span>
+<span class="network-node">Hamilton LRT</span>
+<span class="network-node">Calgary</span>
+<span class="network-node">Federal Crown Corps</span>
+</div>
+<div class="network-desc">SNC-Lavalin (now AtkinsRéalis) appears as vendor or sub-contractor across federal and municipal LRT projects. Corporate deferred prosecution agreement (2019) covered $127.7M in fraud on Libyan contracts. Federal political interference in SNC prosecution documented by Wilson-Raybould.</div>
+</div>
+<div class="network-card tnt-style-782">
+<div class="network-title">Developer Donation Web</div>
+<div class="network-nodes">
+<span class="network-node tnt-style-783">Vancouver ABC $1.3M</span>
+<span class="network-node tnt-style-783">Brampton developers</span>
+<span class="network-node tnt-style-783">Mississauga McCallion era</span>
+<span class="network-node tnt-style-783">Calgary East Village TIF</span>
+</div>
+<div class="network-desc">Development industry systematically funds municipal election campaigns in exchange for favourable zoning, upzoning, and TIF financing. Vancouver's $1.3M ABC donations came despite 2018 provincial donation reform. Pattern repeats from Halifax to Victoria.</div>
+</div>
+<div class="network-card">
+<div class="network-title">LRT Cost Overrun Pattern — Systemic</div>
+<div class="network-nodes">
+<span class="network-node">Ottawa $2.1B</span>
+<span class="network-node">Toronto Crosstown $12.5B</span>
+<span class="network-node">Hamilton $130M cancelled</span>
+<span class="network-node">Edmonton $3.1B</span>
+<span class="network-node">Calgary Green Line</span>
+</div>
+<div class="network-desc">Every major Canadian LRT project has gone dramatically over budget and schedule. Common contractors, shared consultants (Stantec, AECOM, WSP), and federal cost-sharing agreements create perverse incentives to lowball initial estimates. Ottawa inquiry found systemic management failures; Toronto Crosstown contractor placed in default 2023.</div>
+</div>
+<div class="network-card tnt-style-782">
+<div class="network-title">Coordinated Police Budget Expansion</div>
+<div class="network-nodes">
+<span class="network-node tnt-style-783">Vancouver +19%</span>
+<span class="network-node tnt-style-783">Ottawa +9.2%</span>
+<span class="network-node tnt-style-783">Toronto +7%</span>
+<span class="network-node tnt-style-783">Hamilton 34% of tax levy</span>
+<span class="network-node tnt-style-783">Thunder Bay OHRT finding</span>
+</div>
+<div class="network-desc">Police budgets have expanded faster than any other municipal service category while civilian oversight mechanisms are simultaneously defunded or weakened. Thunder Bay's 2018 OHRT systemic racism finding shows accountability gap. Coordinated growth suggests lobbying by police associations.</div>
+</div>
+<div class="network-card">
+<div class="network-title">Charbonneau Commission Spillover — QC</div>
+<div class="network-nodes">
+<span class="network-node">Montréal (Vaillancourt)</span>
+<span class="network-node">Laval ($8M bribes)</span>
+<span class="network-node">Longueuil</span>
+<span class="network-node">Mascouche</span>
+<span class="network-node">Rizzuto network</span>
+</div>
+<div class="network-desc">The 2015 Charbonneau Commission documented a province-wide Mafia-construction-political nexus. Laval Mayor Vaillancourt ran a 2.5% kickback scheme for 20+ years. Despite the commission, oversight mechanisms were subsequently weakened and new procurement irregularities have emerged in REM transit contracts.</div>
+</div>
+<div class="network-card tnt-style-784">
+<div class="network-title">Executive Pay / Sunshine List Inflation</div>
+<div class="network-nodes">
+<span class="network-node tnt-style-785">Toronto 4,500 staff $100K+</span>
+<span class="network-node tnt-style-785">Calgary CAO $454K</span>
+<span class="network-node tnt-style-785">Ottawa + Winnipeg</span>
+</div>
+<div class="network-desc">Executive compensation at Canadian cities has grown 2-3x faster than inflation over 10 years. The Ontario Sunshine List (salaries &gt;$100K) has become a baseline rather than an exception in large cities. CUPE and management salary benchmarking creates self-reinforcing pay escalation.</div>
+</div>
+</div>
+</div>
+ ── Footer CTAs ────────────────────────────────── 
+<div class="map-cta">
+<div class="cta-box tnt-style-786">
+<div class="tnt-style-787">🔬</div>
+<h3 class="tnt-style-677">Help Us Investigate Your Municipality</h3>
+<p class="tnt-style-788">Every Canadian city deserves scrutiny. Submit tips, procurement data, council records, or audit findings.</p>
+<a class="card-btn btn-investigate tnt-style-789" href="community.html">Get Involved →</a>
+</div>
+<div class="cta-box tnt-style-786">
+<div class="tnt-style-787">🛡️</div>
+<h3 class="tnt-style-677">Whistleblower? We Protect Sources</h3>
+<p class="tnt-style-788">Municipal employees, contractors, and councillors — if you've witnessed corruption, we use secure, anonymous channels.</p>
+<a class="card-btn btn-investigate tnt-style-789" href="whistleblower-guide.html">Secure Submission →</a>
+</div>
+</div>
+ ── Detail Modal ─────────────────────────────────── 
+<div aria-modal="true" class="modal-backdrop" id="modal-backdrop" role="dialog">
+<div class="modal-box" id="modal-box">
+<button aria-label="Close" class="modal-close" id="modal-close">×</button>
+<div id="modal-content"></div>
+</div>
+</div>
+<div aria-hidden="true" class="isobar isobar-thick"></div>
 <div class="cap263-container-narrow">
-  <div class="carto-header">
-    <h2 style="color:var(--accent);font-family: var(--slate-font-body);font-size:1.2rem;margin:0;">Connected Intelligence</h2>
-    <span class="ch-scale">4 terrain routes</span>
-    <span class="ch-datum">Municipal Survey Grid</span>
-  </div>
-  <div class="terrain-grid cap263-mt-1">
-    <a href="provincial-analysis.html" class="terrain-card cap263-link-clean">
-      <span class="elev-badge cap263-corner-tag">&#9650; 4,200m</span>
-      <div class="tc-title">Provincial Analysis</div>
-      <span class="ridge-label rl-osint">provincial</span>
-    </a>
-    <a href="municipal-intelligence.html" class="terrain-card cap263-link-clean">
-      <span class="elev-badge cap263-corner-tag">&#9650; 3,800m</span>
-      <div class="tc-title">Municipal Intelligence</div>
-      <span class="ridge-label rl-lobbying">municipal</span>
-    </a>
-    <a href="corruption-map.html" class="terrain-card cap263-link-clean">
-      <span class="elev-badge cap263-corner-tag">&#9650; 5,000m</span>
-      <div class="tc-title">Corruption Map</div>
-      <span class="ridge-label rl-treason">mapping</span>
-    </a>
-    <a href="network-analysis.html" class="terrain-card cap263-link-clean">
-      <span class="elev-badge cap263-corner-tag">&#9650; 4,500m</span>
-      <div class="tc-title">Network Analysis</div>
-      <span class="ridge-label rl-foreign">network</span>
-    </a>
-  </div>
+<div class="carto-header">
+<h2 style="color:var(--accent);font-family: var(--slate-font-body);font-size:1.2rem;margin:0;">Connected Intelligence</h2>
+<span class="ch-scale">4 terrain routes</span>
+<span class="ch-datum">Municipal Survey Grid</span>
+</div>
+<div class="terrain-grid cap263-mt-1">
+<a class="terrain-card cap263-link-clean" href="provincial-analysis.html">
+<span class="elev-badge cap263-corner-tag">▲ 4,200m</span>
+<div class="tc-title">Provincial Analysis</div>
+<span class="ridge-label rl-osint">provincial</span>
+</a>
+<a class="terrain-card cap263-link-clean" href="municipal-intelligence.html">
+<span class="elev-badge cap263-corner-tag">▲ 3,800m</span>
+<div class="tc-title">Municipal Intelligence</div>
+<span class="ridge-label rl-lobbying">municipal</span>
+</a>
+<a class="terrain-card cap263-link-clean" href="corruption-map.html">
+<span class="elev-badge cap263-corner-tag">▲ 5,000m</span>
+<div class="tc-title">Corruption Map</div>
+<span class="ridge-label rl-treason">mapping</span>
+</a>
+<a class="terrain-card cap263-link-clean" href="network-analysis.html">
+<span class="elev-badge cap263-corner-tag">▲ 4,500m</span>
+<div class="tc-title">Network Analysis</div>
+<span class="ridge-label rl-foreign">network</span>
+</a>
+</div>
 </div>
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
 </div>
-  <div id="read-next"></div>
-<!-- Data -->
-  <script src="js/canada-municipalities.js?v=41"></script>
-
-  <!-- Nav/Footer -->
+<div id="read-next"></div>
+ Data 
+<script src="js/canada-municipalities.js?v=41"></script>
+ Nav/Footer 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const data = window.CANADA_MUNICIPALITIES || [];
@@ -1109,18 +548,16 @@
     render();
   });
   </script>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1146,28 +583,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>

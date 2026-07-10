@@ -1,776 +1,510 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
-<!-- Phase 67 Infrastructural Vulnerability Resolution: CSP / XSS Guard -->
-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests;">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Policy Harm Index — Canadian Legislative Changes That… | TENET5</title>
-  <meta name="description" content="Every documented Canadian policy change with a measurable increase in preventable death. Sources: Statistics Canada, Health Canada, CIHI, AG reports, coroner findings.">
-  <meta property="og:description" content="Documented policy changes with measurable increases in preventable death rates. Public record only.">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
+  <link rel="canonical" href="https://tenet-5.github.io/harm-index.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="Policy Harm Index — Canadian Legislative Changes That… | TENET5">
   <meta property="og:type" content="website">
-  <meta property="og:locale" content="en_CA">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <link rel="stylesheet" href="css/film-grain.css?v=41">
-  <style>
-    .harm-entry {
-      background: var(--bg-card);
-      border-left: 4px solid #c41e3a;
-      border-radius: 4px;
-      margin: 1.5rem 0;
-      padding: 1.2rem 1.5rem;
-    }
-    .harm-entry[data-severity="critical"] { border-left-color: #ff2244; }
-    .harm-entry[data-severity="high"]     { border-left-color: #e63950; }
-    .harm-entry[data-severity="moderate"] { border-left-color: #f59e0b; }
-
-    .entry-header {
-      display: flex;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.6rem;
-    }
-    .entry-year   { font-size: 0.8rem; color: var(--text-tertiary); font-family: var(--slate-font-mono); }
-    .entry-actor  { font-size: 0.85rem; background: var(--bg-surface); color: #93c5fd; padding: 0.15rem 0.6rem; border-radius: 12px; }
-    .entry-tag    { font-size: 0.75rem; background: rgba(220,38,38,0.05); color: #fca5a5; padding: 0.15rem 0.6rem; border-radius: 12px; }
-    .entry-title  { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0.3rem 0; }
-    .entry-body   { font-size: 0.9rem; color: var(--text-tertiary); margin: 0.4rem 0; line-height: 1.7; }
-
-    .death-count {
-      display: inline-block;
-      background: rgba(220,38,38,0.04);
-      border: 1px solid #c41e3a;
-      border-radius: 4px;
-      padding: 0.5rem 1rem;
-      margin: 0.6rem 0;
-      font-family: var(--slate-font-mono);
-    }
-    .death-count .num { font-size: 1.5rem; color: #ff6b6b; font-weight: bold; display: block; }
-    .death-count .lbl { font-size: 0.75rem; color: var(--text-tertiary); }
-
-    .evidence-links {
-      margin-top: 0.8rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .evidence-link {
-      font-size: 0.8rem; color: #60a5fa; text-decoration: none;
-      background: var(--bg-surface); padding: 0.2rem 0.7rem;
-      border-radius: 4px; border: 1px solid var(--border);
-    }
-    .evidence-link:hover { background: #1e3a5f; }
-
-    .causal-chain {
-      margin: 0.8rem 0;
-      background: #0a0a1a;
-      border: 1px solid #222;
-      border-radius: 4px;
-      padding: 0.7rem 1rem;
-      font-size: 0.85rem;
-      font-family: var(--slate-font-mono);
-      color: var(--text-secondary);
-      line-height: 1.8;
-    }
-    .causal-chain .arrow { color: #ff6b6b; }
-
-    .filter-bar {
-      display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0;
-    }
-    .filter-btn {
-      background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary);
-      padding: 0.35rem 0.9rem; border-radius: 20px; cursor: pointer;
-      font-size: 0.85rem; transition: all 0.2s;
-    }
-    .filter-btn:hover, .filter-btn.active {
-      background: #c41e3a; border-color: #c41e3a; color: #fff;
-    }
-    .hidden { display: none; }
-
-    .total-bar {
-      background: #1a0505;
-      border: 2px solid #ff2244;
-      border-radius: 6px;
-      padding: 1.5rem;
-      margin: 2rem 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      align-items: center;
-    }
-    .total-item { text-align: center; }
-    .total-item .n { font-size: 2rem; font-weight: bold; color: #ff6b6b; font-family: var(--slate-font-mono); }
-    .total-item .l { font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.2rem; }
-
-    .timeline-bar {
-      position: relative;
-      height: 6px;
-      background: var(--bg-surface);
-      border-radius: 3px;
-      margin: 2rem 0 1rem;
-    }
-    .tl-marker {
-      position: absolute;
-      top: -8px;
-      width: 2px;
-      height: 22px;
-      background: #c41e3a;
-    }
-    .tl-label {
-      position: absolute;
-      top: 18px;
-      font-size: 0.65rem;
-      color: var(--text-tertiary);
-      white-space: nowrap;
-      transform: translateX(-50%);
-    }
-  </style>
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="Policy Harm Index — Canadian Legislative Changes That Increased Death Rates">
-  <meta property="og:url" content="https://tenet-5.github.io/harm-index.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Policy Harm Index — Canadian Legislative Changes That Increased Death Rates">
-  <link rel="canonical" href="https://tenet-5.github.io/harm-index.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Policy Harm Index \u2014 Canadian Legislative Changes That Increased Death Rates",
-  "url": "https://tenet-5.github.io/harm-index.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="Standing Committee on Veterans Affairs (ACVA); Statistics Canada">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="harm-index">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body class="topo" data-act="iii">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Harm Index</span></div>    <!-- CAP224-NAV-END -->
+  </header>
+
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Harm Index</span></div>  CAP224-NAV-END 
 <div class="film-grain-overlay"></div>
 <div class="film-scanlines"></div>
 <div class="film-scratches"></div>
 <div class="film-vignette"></div>
+<div id="site-header-frame"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+ ── CAMPAIGN SHARE BAR ── 
+<div class="share-bar" id="share-bar">
+<span class="share-bar-label">📢 SHARE THIS. EVERY SHARE IS A WITNESS.</span>
+<div class="share-bar-buttons">
+<button class="share-btn share-btn-x" onclick="shareX()">X / Twitter</button>
+<button class="share-btn share-btn-facebook" onclick="shareFacebook()">Facebook</button>
+<button class="share-btn share-btn-reddit" onclick="shareReddit()">Reddit</button>
+<button class="share-btn share-btn-linkedin" onclick="shareLinkedIn()">LinkedIn</button>
+<button class="share-btn share-btn-copy" id="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+</div>
+</div>
 
-  
-  
-  <div id="site-header-frame"></div>
-<a href="#main" class="skip-link">Skip to content</a>
-
-<!-- ── CAMPAIGN SHARE BAR ── -->
-  <div id="share-bar" class="share-bar">
-    <span class="share-bar-label">&#128226; SHARE THIS. EVERY SHARE IS A WITNESS.</span>
-    <div class="share-bar-buttons">
-      <button onclick="shareX()" class="share-btn share-btn-x">X / Twitter</button>
-      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
-      <button onclick="shareReddit()" class="share-btn share-btn-reddit">Reddit</button>
-      <button onclick="shareLinkedIn()" class="share-btn share-btn-linkedin">LinkedIn</button>
-      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">&#128203; Copy Link</button>
-    </div>
+<div class="warning" style="border-color: var(--color-cross-reference, #eab308); max-width: 900px; margin: 1.5rem auto 2rem auto; padding: 1rem; border-left: 4px solid var(--color-cross-reference, #eab308); background: rgba(234, 179, 8, 0.05); border-radius: 4px;">
+<strong style="color: var(--color-cross-reference, #eab308);">PRIMARY-SOURCE CROSS-REFERENCE:</strong> All data on this page is procedurally mapped from public government repositories, legislative actions, and verified OSINT streams. Every node is authenticated.
   </div>
-
-  <header class="hero">
-    <div class="flag">&#127464;&#127462;</div>
-    <h1  id="n-52b2acdf" data-narrate="Policy Harm Index — Canadian Legislative Changes That…. Every entry documents a Canadian legislative or policy change with a measurable, publicly reported increase in preventable death or mortality rate. Sources: Statistics Canada, Health Canada, CIHI, Auditor General, coroner reports, peer-reviewed epidemiology. These are not opinions — these are numbers the government published about itself." >Policy Harm Index</h1>
-    <p class="subtitle">Every entry documents a Canadian legislative or policy change with a measurable, publicly reported increase in preventable death or mortality rate. Sources: Statistics Canada, Health Canada, CIHI, Auditor General, coroner reports, peer-reviewed epidemiology. These are not opinions — these are numbers the government published about itself.</p>
-  </header>
-  
-  <div class="warning" style="border-color: var(--color-cross-reference, #eab308); max-width: 900px; margin: 1.5rem auto 2rem auto; padding: 1rem; border-left: 4px solid var(--color-cross-reference, #eab308); background: rgba(234, 179, 8, 0.05); border-radius: 4px;">
-    <strong style="color: var(--color-cross-reference, #eab308);">PRIMARY-SOURCE CROSS-REFERENCE:</strong> All data on this page is procedurally mapped from public government repositories, legislative actions, and verified OSINT streams. Every node is authenticated.
-  </div>
-
-  <div class="content" id="main" role="main">
-    <!-- TOTALS -->
-    <section id="totals">
-      <h2><span class="section-num">00 &mdash; SUMMARY</span>Documented Preventable Deaths by Policy Category</h2>
-
-      <div class="total-bar">
-        <div class="total-item">
-          <div class="n">76,475+</div>
-          <div class="l">MAID deaths since 2016<br><small>Health Canada Annual Reports</small></div>
+<div class="content" id="main" role="main">
+<!-- TOTALS -->
+<section id="totals">
+<h2><span class="section-num">00 — SUMMARY</span>Documented Preventable Deaths by Policy Category</h2>
+<div class="total-bar">
+<div class="total-item">
+<div class="n">76,475+</div>
+<div class="l">MAID deaths since 2016<br/><small>Health Canada Annual Reports</small></div>
+</div>
+<div class="total-item">
+<div class="n">47,000+</div>
+<div class="l">Opioid overdose deaths since 2016<br/><small>PHAC National Report</small></div>
+</div>
+<div class="total-item">
+<div class="n">~10,000+</div>
+<div class="l">Estimated excess deaths from<br/>housing/homelessness since 2016<br/><small>Stat Can, CIHI estimates</small></div>
+</div>
+<div class="total-item">
+<div class="n">4,500+</div>
+<div class="l">Veteran suicides since 2000<br/><small>VAC / DND reports</small></div>
+</div>
+<div class="total-item">
+<div class="n">~5,000+</div>
+<div class="l">Long-term care COVID deaths<br/>attributable to policy failures<br/><small>AG reports, CIHI</small></div>
+</div>
+</div>
+<div class="section-head tnt-style-146">
+<h3 class="tnt-style-147">Policy Impact Matrix: Continuous Mortality Vectors</h3>
+</div>
+<div class="matrix-wrapper tnt-style-148">
+<canvas id="mortalityMatrix"></canvas>
+</div>
+</section>
+<!-- FILTERS -->
+<section id="entries">
+<h2><span class="section-num">01 — THE RECORD</span>Policy Changes → Documented Death Rate Increases</h2>
+<div class="filter-bar">
+<button class="filter-btn active" onclick="filterEntries('all', event)">All</button>
+<button class="filter-btn" onclick="filterEntries('maid', event)">MAID</button>
+<button class="filter-btn" onclick="filterEntries('opioid', event)">Opioid Crisis</button>
+<button class="filter-btn" onclick="filterEntries('housing', event)">Housing/Homelessness</button>
+<button class="filter-btn" onclick="filterEntries('veterans', event)">Veterans</button>
+<button class="filter-btn" onclick="filterEntries('healthcare', event)">Healthcare Cuts</button>
+<button class="filter-btn" onclick="filterEntries('covid', event)">COVID Policy</button>
+</div>
+<!-- ─── MAID C-14 ─── -->
+<div class="harm-entry" data-severity="critical" data-tags="maid">
+<div class="entry-header">
+<span class="entry-year">June 2016</span>
+<span class="entry-actor">Trudeau / Bill C-14</span>
+<span class="entry-tag">MAID</span>
+</div>
+<div class="entry-title">Bill C-14 — Medical Assistance in Dying Legalized</div>
+<div class="death-count">
+<span class="num">76,475+</span>
+<span class="lbl">cumulative MAID deaths 2016–2024 · Health Canada 6th Annual Report</span>
+</div>
+<div class="entry-body">
+<strong>The policy:</strong> Bill C-14 legalized MAID for adults with a "grievous and irremediable medical condition" where natural death was "reasonably foreseeable." Initial safeguards included a 10-day reflection period and two independent assessments.
+          <br/><br/>
+<strong>The trajectory:</strong> 1,018 deaths in 2016 → 16,499 in 2024. That is a 1,520% increase in 8 years. Canada now has the second-highest rate of state-administered death in the world (5.1% of all deaths), behind only the Netherlands — and Canada's growth rate is faster.
         </div>
-        <div class="total-item">
-          <div class="n">47,000+</div>
-          <div class="l">Opioid overdose deaths since 2016<br><small>PHAC National Report</small></div>
-        </div>
-        <div class="total-item">
-          <div class="n">~10,000+</div>
-          <div class="l">Estimated excess deaths from<br>housing/homelessness since 2016<br><small>Stat Can, CIHI estimates</small></div>
-        </div>
-        <div class="total-item">
-          <div class="n">4,500+</div>
-          <div class="l">Veteran suicides since 2000<br><small>VAC / DND reports</small></div>
-        </div>
-        <div class="total-item">
-          <div class="n">~5,000+</div>
-          <div class="l">Long-term care COVID deaths<br>attributable to policy failures<br><small>AG reports, CIHI</small></div>
-        </div>
-      </div>
-
-      <div class="section-head tnt-style-146">
-        <h3 class="tnt-style-147">Policy Impact Matrix: Continuous Mortality Vectors</h3>
-      </div>
-      <div class="matrix-wrapper tnt-style-148">
-        <canvas id="mortalityMatrix"></canvas>
-      </div>
-    </section>
-
-    <!-- FILTERS -->
-    <section id="entries">
-      <h2><span class="section-num">01 &mdash; THE RECORD</span>Policy Changes → Documented Death Rate Increases</h2>
-
-      <div class="filter-bar">
-        <button class="filter-btn active" onclick="filterEntries('all', event)">All</button>
-        <button class="filter-btn" onclick="filterEntries('maid', event)">MAID</button>
-        <button class="filter-btn" onclick="filterEntries('opioid', event)">Opioid Crisis</button>
-        <button class="filter-btn" onclick="filterEntries('housing', event)">Housing/Homelessness</button>
-        <button class="filter-btn" onclick="filterEntries('veterans', event)">Veterans</button>
-        <button class="filter-btn" onclick="filterEntries('healthcare', event)">Healthcare Cuts</button>
-        <button class="filter-btn" onclick="filterEntries('covid', event)">COVID Policy</button>
-      </div>
-
-      <!-- ─── MAID C-14 ─── -->
-      <div class="harm-entry" data-severity="critical" data-tags="maid">
-        <div class="entry-header">
-          <span class="entry-year">June 2016</span>
-          <span class="entry-actor">Trudeau / Bill C-14</span>
-          <span class="entry-tag">MAID</span>
-        </div>
-        <div class="entry-title">Bill C-14 — Medical Assistance in Dying Legalized</div>
-        <div class="death-count">
-          <span class="num">76,475+</span>
-          <span class="lbl">cumulative MAID deaths 2016–2024 · Health Canada 6th Annual Report</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy:</strong> Bill C-14 legalized MAID for adults with a "grievous and irremediable medical condition" where natural death was "reasonably foreseeable." Initial safeguards included a 10-day reflection period and two independent assessments.
-          <br><br>
-          <strong>The trajectory:</strong> 1,018 deaths in 2016 → 16,499 in 2024. That is a 1,520% increase in 8 years. Canada now has the second-highest rate of state-administered death in the world (5.1% of all deaths), behind only the Netherlands — and Canada's growth rate is faster.
-        </div>
-        <div class="causal-chain">
+<div class="causal-chain">
           C-14 (2016) <span class="arrow">→</span> MAID legalized, "reasonably foreseeable" criterion
-          <br>C-7 (2021) <span class="arrow">→</span> "Reasonably foreseeable" removed → Track 2 created (chronic, non-terminal)
-          <br>Bill C-7 s.3 <span class="arrow">→</span> 10-day reflection period eliminated
-          <br>2023 <span class="arrow">→</span> Mental illness expansion (MD-SUMC) delayed but not cancelled
-          <br>Result <span class="arrow">→</span> 732 Track 2 deaths in 2024 — people not expected to die naturally
+          <br/>C-7 (2021) <span class="arrow">→</span> "Reasonably foreseeable" removed → Track 2 created (chronic, non-terminal)
+          <br/>Bill C-7 s.3 <span class="arrow">→</span> 10-day reflection period eliminated
+          <br/>2023 <span class="arrow">→</span> Mental illness expansion (MD-SUMC) delayed but not cancelled
+          <br/>Result <span class="arrow">→</span> 732 Track 2 deaths in 2024 — people not expected to die naturally
         </div>
-        <div class="evidence-links">
-
-
-          <a class="evidence-link" href="https://www.canada.ca/en/health-canada/services/health-services-benefits/medical-assistance-dying/annual-reports.html" target="_blank" rel="noopener noreferrer">Health Canada MAID Reports 1–6</a>
-          <a class="evidence-link" href="https://parl.ca/LegisInfo/en/bill/42-1/c-14" target="_blank" rel="noopener noreferrer">Bill C-14 — Parliament</a>
-          <a class="evidence-link" href="https://parl.ca/LegisInfo/en/bill/43-2/c-7" target="_blank" rel="noopener noreferrer">Bill C-7 — Parliament</a>
-          <a class="evidence-link" href="index.html">Full MAID data → Main Report</a>
+<div class="evidence-links">
+<a class="evidence-link" href="https://www.canada.ca/en/health-canada/services/health-services-benefits/medical-assistance-dying/annual-reports.html" rel="noopener noreferrer" target="_blank">Health Canada MAID Reports 1–6</a>
+<a class="evidence-link" href="https://parl.ca/LegisInfo/en/bill/42-1/c-14" rel="noopener noreferrer" target="_blank">Bill C-14 — Parliament</a>
+<a class="evidence-link" href="https://parl.ca/LegisInfo/en/bill/43-2/c-7" rel="noopener noreferrer" target="_blank">Bill C-7 — Parliament</a>
+<a class="evidence-link" href="index.html">Full MAID data → Main Report</a>
+</div>
+</div>
+<!-- ─── OPIOID SAFE SUPPLY ─── -->
+<div class="harm-entry" data-severity="critical" data-tags="opioid">
+<div class="entry-header">
+<span class="entry-year">2016–present</span>
+<span class="entry-actor">Health Canada / Trudeau government</span>
+<span class="entry-tag">Opioid Crisis</span>
+</div>
+<div class="entry-title">Opioid Crisis — Policy Response Lag and Safe Supply Diversion Led to 47,000+ Deaths</div>
+<div class="death-count">
+<span class="num">47,000+</span>
+<span class="lbl">apparent opioid toxicity deaths 2016–2023 · PHAC National Report on Drug-Related Deaths</span>
+</div>
+<div class="entry-body">
+<strong>The policy failures:</strong>
+<ul class="tnt-style-149">
+<li><strong>2016:</strong> BC declared public health emergency — federal response delayed 2+ years</li>
+<li><strong>2018:</strong> Health Canada exemptions for supervised consumption sites granted slowly; 38 sites operational by 2022 vs. need</li>
+<li><strong>2020–2023:</strong> Safe supply programs (hydromorphone) expanded without adequate diversion controls — coroners reported prescribed safe supply being diverted to illicit market in multiple provinces</li>
+<li><strong>2023:</strong> BC decriminalization experiment — small amounts of hard drugs decriminalized; BC coroner data showed no decline in overdose deaths; program partially reversed 2024</li>
+<li><strong>Fentanyl contamination:</strong> Despite 7 years of crisis, no federal strategy to interdict fentanyl precursors from China/Mexico at border until 2024 tariff pressure</li>
+</ul>
+<strong>Death rate:</strong> 2016: ~3,000/year → 2022: 7,328/year (peak). 21 Canadians per day, every day, for 8 years.
         </div>
-      </div>
-
-      <!-- ─── OPIOID SAFE SUPPLY ─── -->
-      <div class="harm-entry" data-severity="critical" data-tags="opioid">
-        <div class="entry-header">
-          <span class="entry-year">2016–present</span>
-          <span class="entry-actor">Health Canada / Trudeau government</span>
-          <span class="entry-tag">Opioid Crisis</span>
-        </div>
-        <div class="entry-title">Opioid Crisis — Policy Response Lag and Safe Supply Diversion Led to 47,000+ Deaths</div>
-        <div class="death-count">
-          <span class="num">47,000+</span>
-          <span class="lbl">apparent opioid toxicity deaths 2016–2023 · PHAC National Report on Drug-Related Deaths</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy failures:</strong>
-          <ul class="tnt-style-149">
-            <li><strong>2016:</strong> BC declared public health emergency — federal response delayed 2+ years</li>
-            <li><strong>2018:</strong> Health Canada exemptions for supervised consumption sites granted slowly; 38 sites operational by 2022 vs. need</li>
-            <li><strong>2020–2023:</strong> Safe supply programs (hydromorphone) expanded without adequate diversion controls — coroners reported prescribed safe supply being diverted to illicit market in multiple provinces</li>
-            <li><strong>2023:</strong> BC decriminalization experiment — small amounts of hard drugs decriminalized; BC coroner data showed no decline in overdose deaths; program partially reversed 2024</li>
-            <li><strong>Fentanyl contamination:</strong> Despite 7 years of crisis, no federal strategy to interdict fentanyl precursors from China/Mexico at border until 2024 tariff pressure</li>
-          </ul>
-          <strong>Death rate:</strong> 2016: ~3,000/year → 2022: 7,328/year (peak). 21 Canadians per day, every day, for 8 years.
-        </div>
-        <div class="causal-chain">
+<div class="causal-chain">
           Fentanyl enters illicit supply (2015–16) <span class="arrow">→</span> Death rate spikes
-          <br>Federal emergency declaration delayed <span class="arrow">→</span> 2+ year response gap
-          <br>Supervised consumption underfunded <span class="arrow">→</span> Insufficient capacity
-          <br>Safe supply without diversion controls <span class="arrow">→</span> Prescribed drugs enter illicit market
-          <br>No precursor interdiction strategy <span class="arrow">→</span> Supply continues uninterrupted 8 years
+          <br/>Federal emergency declaration delayed <span class="arrow">→</span> 2+ year response gap
+          <br/>Supervised consumption underfunded <span class="arrow">→</span> Insufficient capacity
+          <br/>Safe supply without diversion controls <span class="arrow">→</span> Prescribed drugs enter illicit market
+          <br/>No precursor interdiction strategy <span class="arrow">→</span> Supply continues uninterrupted 8 years
         </div>
-        <div class="evidence-links">
-          <a class="evidence-link" href="https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/" target="_blank" rel="noopener noreferrer">PHAC Opioid Death Data — Live</a>
-          <a class="evidence-link" href="https://www.cihi.ca/en/opioid-related-harms-in-canada" target="_blank" rel="noopener noreferrer">CIHI Opioid Harms Report</a>
-          <a class="evidence-link" href="https://www2.gov.bc.ca/gov/content/overdose/data" target="_blank" rel="noopener noreferrer">BC Coroner Overdose Data</a>
+<div class="evidence-links">
+<a class="evidence-link" href="https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/" rel="noopener noreferrer" target="_blank">PHAC Opioid Death Data — Live</a>
+<a class="evidence-link" href="https://www.cihi.ca/en/opioid-related-harms-in-canada" rel="noopener noreferrer" target="_blank">CIHI Opioid Harms Report</a>
+<a class="evidence-link" href="https://www2.gov.bc.ca/gov/content/overdose/data" rel="noopener noreferrer" target="_blank">BC Coroner Overdose Data</a>
+</div>
+</div>
+<!-- ─── HOUSING CRISIS ─── -->
+<div class="harm-entry" data-severity="critical" data-tags="housing">
+<div class="entry-header">
+<span class="entry-year">1993–present</span>
+<span class="entry-actor">Chrétien / Martin / Harper / Trudeau — all parties</span>
+<span class="entry-tag">Housing/Homelessness</span>
+</div>
+<div class="entry-title">Federal Housing Withdrawal — Social Housing Eliminated, Homelessness Tripled, Preventable Deaths Rose</div>
+<div class="death-count">
+<span class="num">~235,000</span>
+<span class="lbl">Canadians experiencing homelessness on any given night · Stat Can 2022 · up from ~80,000 in 2000</span>
+</div>
+<div class="entry-body">
+<strong>The policy sequence:</strong>
+<ul class="tnt-style-149">
+<li><strong>1993 (Chrétien):</strong> Federal government eliminated the national social housing program — downloaded to provinces with no funding. 650,000 planned social housing units never built.</li>
+<li><strong>1996 (Chrétien):</strong> Canada Assistance Plan replaced by CHST block transfers — provinces cut welfare rates. Ontario cut welfare 21.6% (Harris/Chrétien coordination).</li>
+<li><strong>2006–2015 (Harper):</strong> Homelessness Partnering Strategy kept at 2006 funding levels through 10 years of inflation. Affordable housing stock continued to deteriorate.</li>
+<li><strong>2015–2024 (Trudeau):</strong> National Housing Strategy announced ($72B over 10 years) — but CMHC data shows net loss of affordable units continued; strategy weighted toward market housing.</li>
+<li><strong>2017–2024:</strong> Immigration intake (500,000+/yr target) accelerated without proportional housing supply — vacancy rates fell below 1.5% nationally, rents doubled in major cities.</li>
+</ul>
+<strong>Death link:</strong> CIHI and Statistics Canada data show homelessness correlates with 10–20 year reduction in life expectancy. Exposure deaths, overdose deaths, and violence deaths among homeless Canadians are not separately tracked federally — a deliberate data gap.
         </div>
-      </div>
-
-      <!-- ─── HOUSING CRISIS ─── -->
-      <div class="harm-entry" data-severity="critical" data-tags="housing">
-        <div class="entry-header">
-          <span class="entry-year">1993–present</span>
-          <span class="entry-actor">Chrétien / Martin / Harper / Trudeau — all parties</span>
-          <span class="entry-tag">Housing/Homelessness</span>
-        </div>
-        <div class="entry-title">Federal Housing Withdrawal — Social Housing Eliminated, Homelessness Tripled, Preventable Deaths Rose</div>
-        <div class="death-count">
-          <span class="num">~235,000</span>
-          <span class="lbl">Canadians experiencing homelessness on any given night · Stat Can 2022 · up from ~80,000 in 2000</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy sequence:</strong>
-          <ul class="tnt-style-149">
-            <li><strong>1993 (Chrétien):</strong> Federal government eliminated the national social housing program — downloaded to provinces with no funding. 650,000 planned social housing units never built.</li>
-            <li><strong>1996 (Chrétien):</strong> Canada Assistance Plan replaced by CHST block transfers — provinces cut welfare rates. Ontario cut welfare 21.6% (Harris/Chrétien coordination).</li>
-            <li><strong>2006–2015 (Harper):</strong> Homelessness Partnering Strategy kept at 2006 funding levels through 10 years of inflation. Affordable housing stock continued to deteriorate.</li>
-            <li><strong>2015–2024 (Trudeau):</strong> National Housing Strategy announced ($72B over 10 years) — but CMHC data shows net loss of affordable units continued; strategy weighted toward market housing.</li>
-            <li><strong>2017–2024:</strong> Immigration intake (500,000+/yr target) accelerated without proportional housing supply — vacancy rates fell below 1.5% nationally, rents doubled in major cities.</li>
-          </ul>
-          <strong>Death link:</strong> CIHI and Statistics Canada data show homelessness correlates with 10–20 year reduction in life expectancy. Exposure deaths, overdose deaths, and violence deaths among homeless Canadians are not separately tracked federally — a deliberate data gap.
-        </div>
-        <div class="causal-chain">
+<div class="causal-chain">
           1993: Federal housing exit <span class="arrow">→</span> No new social housing for 20+ years
-          <br>Welfare cuts <span class="arrow">→</span> People unable to afford existing housing
-          <br>Homelessness crisis (1990s–present) <span class="arrow">→</span> 235,000 unhoused
-          <br>No federal death tracking for homeless <span class="arrow">→</span> Deaths not attributed to policy
-          <br>Immigration surge without supply <span class="arrow">→</span> Crisis accelerated 2022–24
+          <br/>Welfare cuts <span class="arrow">→</span> People unable to afford existing housing
+          <br/>Homelessness crisis (1990s–present) <span class="arrow">→</span> 235,000 unhoused
+          <br/>No federal death tracking for homeless <span class="arrow">→</span> Deaths not attributed to policy
+          <br/>Immigration surge without supply <span class="arrow">→</span> Crisis accelerated 2022–24
         </div>
-        <div class="evidence-links">
-          <a class="evidence-link" href="https://www.cmhc-schl.gc.ca/en/housing-observer-online/2022-housing-observer/canadian-rental-market-report" target="_blank" rel="noopener noreferrer">CMHC Rental Market Report</a>
-          <a class="evidence-link" href="https://www.homelesshub.ca/about-homelessness/homelessness-101/how-many-people-are-homeless-canada" target="_blank" rel="noopener noreferrer">Canadian Observatory on Homelessness</a>
-          <a class="evidence-link" href="https://www150.statcan.gc.ca/n1/pub/75-006-x/2023001/article/00007-eng.htm" target="_blank" rel="noopener noreferrer">Stat Can — Housing Affordability</a>
+<div class="evidence-links">
+<a class="evidence-link" href="https://www.cmhc-schl.gc.ca/en/housing-observer-online/2022-housing-observer/canadian-rental-market-report" rel="noopener noreferrer" target="_blank">CMHC Rental Market Report</a>
+<a class="evidence-link" href="https://www.homelesshub.ca/about-homelessness/homelessness-101/how-many-people-are-homeless-canada" rel="noopener noreferrer" target="_blank">Canadian Observatory on Homelessness</a>
+<a class="evidence-link" href="https://www150.statcan.gc.ca/n1/pub/75-006-x/2023001/article/00007-eng.htm" rel="noopener noreferrer" target="_blank">Stat Can — Housing Affordability</a>
+</div>
+</div>
+<!-- ─── VETERAN MENTAL HEALTH ─── -->
+<div class="harm-entry" data-severity="high" data-tags="veterans">
+<div class="entry-header">
+<span class="entry-year">2006–present</span>
+<span class="entry-actor">Harper / Trudeau / Veterans Affairs Canada</span>
+<span class="entry-tag">Veterans</span>
+</div>
+<div class="entry-title">New Veterans Charter + VAC Underfunding — Veterans Die by Suicide at 1.4–1.9× Civilian Rate</div>
+<div class="death-count">
+<span class="num">1.4–1.9×</span>
+<span class="lbl">veteran suicide rate vs. general population · VAC 2021 Study · DND 2024 Report</span>
+</div>
+<div class="entry-body">
+<strong>The policy sequence:</strong>
+<ul class="tnt-style-149">
+<li><strong>2006 (Harper):</strong> New Veterans Charter replaced the Pension Act. Shifted from lifetime indexed pensions to lump-sum disability awards (max $310,000). Veterans groups called it a cut disguised as modernization.</li>
+<li><strong>2013 (Harper):</strong> VAC closed 9 district offices, eliminating in-person service across Canada. Wait times for mental health services increased from weeks to years.</li>
+<li><strong>2015–2024 (Trudeau):</strong> Promised to fix the NVC — partially restored some benefits, added Education and Training Benefit. Backlog remained: 43,000 applications pending in 2022; 11,000+ still pending 2024–25 with wait times rising again.</li>
+<li><strong>MAID offered to veterans:</strong> In 2022, a VAC case worker offered MAID to a veteran seeking mental health treatment and a wheelchair ramp. This was confirmed in parliamentary committee testimony. The worker was not disciplined.</li>
+</ul>
+<strong>Current rate:</strong> Active CAF members: 27 per 100,000 (2023) vs. 11.8 per 100,000 general population. Female veterans: 1.9× higher than civilian women.
         </div>
-      </div>
-
-      <!-- ─── VETERAN MENTAL HEALTH ─── -->
-      <div class="harm-entry" data-severity="high" data-tags="veterans">
-        <div class="entry-header">
-          <span class="entry-year">2006–present</span>
-          <span class="entry-actor">Harper / Trudeau / Veterans Affairs Canada</span>
-          <span class="entry-tag">Veterans</span>
-        </div>
-        <div class="entry-title">New Veterans Charter + VAC Underfunding — Veterans Die by Suicide at 1.4–1.9× Civilian Rate</div>
-        <div class="death-count">
-          <span class="num">1.4–1.9×</span>
-          <span class="lbl">veteran suicide rate vs. general population · VAC 2021 Study · DND 2024 Report</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy sequence:</strong>
-          <ul class="tnt-style-149">
-            <li><strong>2006 (Harper):</strong> New Veterans Charter replaced the Pension Act. Shifted from lifetime indexed pensions to lump-sum disability awards (max $310,000). Veterans groups called it a cut disguised as modernization.</li>
-            <li><strong>2013 (Harper):</strong> VAC closed 9 district offices, eliminating in-person service across Canada. Wait times for mental health services increased from weeks to years.</li>
-            <li><strong>2015–2024 (Trudeau):</strong> Promised to fix the NVC — partially restored some benefits, added Education and Training Benefit. Backlog remained: 43,000 applications pending in 2022; 11,000+ still pending 2024–25 with wait times rising again.</li>
-            <li><strong>MAID offered to veterans:</strong> In 2022, a VAC case worker offered MAID to a veteran seeking mental health treatment and a wheelchair ramp. This was confirmed in parliamentary committee testimony. The worker was not disciplined.</li>
-          </ul>
-          <strong>Current rate:</strong> Active CAF members: 27 per 100,000 (2023) vs. 11.8 per 100,000 general population. Female veterans: 1.9× higher than civilian women.
-        </div>
-        <div class="causal-chain">
+<div class="causal-chain">
           NVC lump-sum replaces lifetime pension <span class="arrow">→</span> Financial instability for injured veterans
-          <br>Office closures (2013) <span class="arrow">→</span> Service access eliminated in rural/northern Canada
-          <br>Mental health backlog <span class="arrow">→</span> Veterans wait years for treatment
-          <br>MAID offered before adequate care <span class="arrow">→</span> System offers death to those it failed
-          <br>Suicide rate 1.4–1.9× civilian <span class="arrow">→</span> Preventable deaths, ongoing
+          <br/>Office closures (2013) <span class="arrow">→</span> Service access eliminated in rural/northern Canada
+          <br/>Mental health backlog <span class="arrow">→</span> Veterans wait years for treatment
+          <br/>MAID offered before adequate care <span class="arrow">→</span> System offers death to those it failed
+          <br/>Suicide rate 1.4–1.9× civilian <span class="arrow">→</span> Preventable deaths, ongoing
         </div>
-        <div class="evidence-links">
-          <a class="evidence-link" href="https://www.veterans.gc.ca/en/about-vac/research/epidemiology/suicide-mortality-report" target="_blank" rel="noopener noreferrer">VAC Suicide Mortality Report 2021</a>
-          <a class="evidence-link" href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/casualty-statistics.html" target="_blank" rel="noopener noreferrer">DND Casualty Statistics 2024</a>
-          <a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/44-1/ACVA/meeting-47/evidence" target="_blank" rel="noopener noreferrer">ACVA Committee — MAID offered to veteran</a>
-          <a class="evidence-link" href="veterans.html">Full veterans data →</a>
-        </div>
-      </div>
-
-      <!-- ─── LONG-TERM CARE COVID ─── -->
-      <div class="harm-entry" data-severity="critical" data-tags="covid healthcare">
-        <div class="entry-header">
-          <span class="entry-year">2020–2021</span>
-          <span class="entry-actor">Federal + Provincial Governments / Long-Term Care sector</span>
-          <span class="entry-tag">COVID Policy</span>
-          <span class="entry-tag">Healthcare</span>
-        </div>
-        <div class="entry-title">Long-Term Care COVID Deaths — 17,000+ Deaths in Facilities That Federal Inspections Had Flagged as Deficient</div>
-        <div class="death-count">
-          <span class="num">17,000+</span>
-          <span class="lbl">LTC resident deaths attributed to COVID-19 · CIHI 2021 · ~80% of all early-pandemic Canadian COVID deaths</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy failures:</strong>
-          <ul class="tnt-style-149">
-            <li><strong>Pre-pandemic:</strong> Multiple Auditor General and provincial oversight reports flagged infection control failures, understaffing, and poor conditions in for-profit LTC facilities — none acted upon.</li>
-            <li><strong>March–April 2020:</strong> Personal protective equipment (PPE) national stockpile was depleted and not replenished — the Public Health Agency confirmed the stockpile was inadequate at pandemic onset.</li>
-            <li><strong>Military deployment:</strong> Canadian Forces deployed to 54 Ontario and Quebec LTC homes found "horrific" conditions — residents dehydrated, medicated without consent, left in soiled bedding. AG documented systemic failures.</li>
-            <li><strong>For-profit model:</strong> For-profit LTC homes had COVID death rates 78% higher than non-profit homes (CIHI data). The federal government continued to fund the for-profit model with no reform.</li>
-            <li><strong>No federal standards:</strong> Long-term care is provincially regulated. The federal government had the spending power to impose standards as a condition of transfer payments — it declined to do so for 30+ years despite repeated recommendations.</li>
-          </ul>
-        </div>
-        <div class="causal-chain">
+<div class="evidence-links">
+<a class="evidence-link" href="https://www.veterans.gc.ca/en/about-vac/research/epidemiology/suicide-mortality-report" rel="noopener noreferrer" target="_blank">VAC Suicide Mortality Report 2021</a>
+<a class="evidence-link" href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/casualty-statistics.html" rel="noopener noreferrer" target="_blank">DND Casualty Statistics 2024</a>
+<a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/44-1/ACVA/meeting-47/evidence" rel="noopener noreferrer" target="_blank">ACVA Committee — MAID offered to veteran</a>
+<a class="evidence-link" href="veterans.html">Full veterans data →</a>
+</div>
+</div>
+<!-- ─── LONG-TERM CARE COVID ─── -->
+<div class="harm-entry" data-severity="critical" data-tags="covid healthcare">
+<div class="entry-header">
+<span class="entry-year">2020–2021</span>
+<span class="entry-actor">Federal + Provincial Governments / Long-Term Care sector</span>
+<span class="entry-tag">COVID Policy</span>
+<span class="entry-tag">Healthcare</span>
+</div>
+<div class="entry-title">Long-Term Care COVID Deaths — 17,000+ Deaths in Facilities That Federal Inspections Had Flagged as Deficient</div>
+<div class="death-count">
+<span class="num">17,000+</span>
+<span class="lbl">LTC resident deaths attributed to COVID-19 · CIHI 2021 · ~80% of all early-pandemic Canadian COVID deaths</span>
+</div>
+<div class="entry-body">
+<strong>The policy failures:</strong>
+<ul class="tnt-style-149">
+<li><strong>Pre-pandemic:</strong> Multiple Auditor General and provincial oversight reports flagged infection control failures, understaffing, and poor conditions in for-profit LTC facilities — none acted upon.</li>
+<li><strong>March–April 2020:</strong> Personal protective equipment (PPE) national stockpile was depleted and not replenished — the Public Health Agency confirmed the stockpile was inadequate at pandemic onset.</li>
+<li><strong>Military deployment:</strong> Canadian Forces deployed to 54 Ontario and Quebec LTC homes found "horrific" conditions — residents dehydrated, medicated without consent, left in soiled bedding. AG documented systemic failures.</li>
+<li><strong>For-profit model:</strong> For-profit LTC homes had COVID death rates 78% higher than non-profit homes (CIHI data). The federal government continued to fund the for-profit model with no reform.</li>
+<li><strong>No federal standards:</strong> Long-term care is provincially regulated. The federal government had the spending power to impose standards as a condition of transfer payments — it declined to do so for 30+ years despite repeated recommendations.</li>
+</ul>
+</div>
+<div class="causal-chain">
           30 years: No federal LTC standards despite transfer payments <span class="arrow">→</span> Race to bottom on care quality
-          <br>For-profit model incentivizes cost-cutting <span class="arrow">→</span> Understaffing, infection control failures
-          <br>PPE stockpile not maintained <span class="arrow">→</span> Workers without protection
-          <br>CAF deployed to facilities <span class="arrow">→</span> Found "horrific" conditions already existing
-          <br>17,000+ deaths <span class="arrow">→</span> 80% of early-pandemic Canadian fatalities
+          <br/>For-profit model incentivizes cost-cutting <span class="arrow">→</span> Understaffing, infection control failures
+          <br/>PPE stockpile not maintained <span class="arrow">→</span> Workers without protection
+          <br/>CAF deployed to facilities <span class="arrow">→</span> Found "horrific" conditions already existing
+          <br/>17,000+ deaths <span class="arrow">→</span> 80% of early-pandemic Canadian fatalities
         </div>
-        <div class="evidence-links">
-          <a class="evidence-link" href="https://www.cihi.ca/en/long-term-care-and-covid-19" target="_blank" rel="noopener noreferrer">CIHI — LTC and COVID-19</a>
-          <a class="evidence-link" href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202104_04_e_43806.html" target="_blank" rel="noopener noreferrer">AG Report — PHAC Pandemic Preparedness</a>
-          <a class="evidence-link" href="https://www.canada.ca/en/department-national-defence/news/2020/05/report-on-operation-laser-observations-in-long-term-care-facilities.html" target="_blank" rel="noopener noreferrer">CAF LTC Report — DND</a>
+<div class="evidence-links">
+<a class="evidence-link" href="https://www.cihi.ca/en/long-term-care-and-covid-19" rel="noopener noreferrer" target="_blank">CIHI — LTC and COVID-19</a>
+<a class="evidence-link" href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202104_04_e_43806.html" rel="noopener noreferrer" target="_blank">AG Report — PHAC Pandemic Preparedness</a>
+<a class="evidence-link" href="https://www.canada.ca/en/department-national-defence/news/2020/05/report-on-operation-laser-observations-in-long-term-care-facilities.html" rel="noopener noreferrer" target="_blank">CAF LTC Report — DND</a>
+</div>
+</div>
+<!-- ─── HEALTHCARE TRANSFER CUTS ─── -->
+<div class="harm-entry" data-severity="high" data-tags="healthcare">
+<div class="entry-header">
+<span class="entry-year">1995–present</span>
+<span class="entry-actor">Chrétien / Martin / Harper / Trudeau — all parties</span>
+<span class="entry-tag">Healthcare</span>
+</div>
+<div class="entry-title">Canada Health Transfer Cuts — Per-Capita Healthcare Funding Declined, Wait Times Rose, Preventable Deaths Increased</div>
+<div class="death-count">
+<span class="num">~4M</span>
+<span class="lbl">Canadians without a family doctor · CMA 2023 · up from ~1.5M in 2000</span>
+</div>
+<div class="entry-body">
+<strong>The policy sequence:</strong>
+<ul class="tnt-style-149">
+<li><strong>1995 (Chrétien/Martin):</strong> Canada Health and Social Transfer (CHST) — federal health transfers cut by $6.5B. Provinces forced to cut hospital beds, staff, and programs.</li>
+<li><strong>1995–2001:</strong> Canada lost ~40,000 hospital beds (CIHI). Emergency departments closed. Wait times began systematic rise.</li>
+<li><strong>2004 (Martin):</strong> Health Accord — $41B over 10 years to reduce wait times. Benchmark wait times set for 5 priority areas. Wait times did not meet benchmarks in most provinces.</li>
+<li><strong>2012 (Harper):</strong> Unilaterally changed CHT growth rate from 6%/year to GDP growth (or 3% floor) — estimated $36B reduction over 10 years vs. prior trajectory.</li>
+<li><strong>2023:</strong> CIHI reports median wait time for specialist referral: 22.6 weeks (up from 9.3 weeks in 1993). Cardiovascular wait times: median 18 weeks — clinical standard is ≤2 weeks for urgent cases.</li>
+</ul>
+<strong>Death link:</strong> CIHI and peer-reviewed studies (Fraser Institute, NEJM) document preventable deaths from delayed cancer diagnoses, cardiac events, and surgical complications attributable to wait time exceedances. No federal aggregate tracking exists.
         </div>
-      </div>
-
-      <!-- ─── HEALTHCARE TRANSFER CUTS ─── -->
-      <div class="harm-entry" data-severity="high" data-tags="healthcare">
-        <div class="entry-header">
-          <span class="entry-year">1995–present</span>
-          <span class="entry-actor">Chrétien / Martin / Harper / Trudeau — all parties</span>
-          <span class="entry-tag">Healthcare</span>
-        </div>
-        <div class="entry-title">Canada Health Transfer Cuts — Per-Capita Healthcare Funding Declined, Wait Times Rose, Preventable Deaths Increased</div>
-        <div class="death-count">
-          <span class="num">~4M</span>
-          <span class="lbl">Canadians without a family doctor · CMA 2023 · up from ~1.5M in 2000</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy sequence:</strong>
-          <ul class="tnt-style-149">
-            <li><strong>1995 (Chrétien/Martin):</strong> Canada Health and Social Transfer (CHST) — federal health transfers cut by $6.5B. Provinces forced to cut hospital beds, staff, and programs.</li>
-            <li><strong>1995–2001:</strong> Canada lost ~40,000 hospital beds (CIHI). Emergency departments closed. Wait times began systematic rise.</li>
-            <li><strong>2004 (Martin):</strong> Health Accord — $41B over 10 years to reduce wait times. Benchmark wait times set for 5 priority areas. Wait times did not meet benchmarks in most provinces.</li>
-            <li><strong>2012 (Harper):</strong> Unilaterally changed CHT growth rate from 6%/year to GDP growth (or 3% floor) — estimated $36B reduction over 10 years vs. prior trajectory.</li>
-            <li><strong>2023:</strong> CIHI reports median wait time for specialist referral: 22.6 weeks (up from 9.3 weeks in 1993). Cardiovascular wait times: median 18 weeks — clinical standard is ≤2 weeks for urgent cases.</li>
-          </ul>
-          <strong>Death link:</strong> CIHI and peer-reviewed studies (Fraser Institute, NEJM) document preventable deaths from delayed cancer diagnoses, cardiac events, and surgical complications attributable to wait time exceedances. No federal aggregate tracking exists.
-        </div>
-        <div class="causal-chain">
+<div class="causal-chain">
           1995: $6.5B CHT cut <span class="arrow">→</span> Provinces cut 40,000 hospital beds
-          <br>2012: CHT growth rate cut <span class="arrow">→</span> $36B less over decade vs. prior formula
-          <br>Physician/specialist shortage (no federal training targets) <span class="arrow">→</span> 4M without GP
-          <br>Wait times: specialist 22.6 weeks median <span class="arrow">→</span> Delayed diagnosis, preventable deaths
-          <br>No federal tracking of wait-time deaths <span class="arrow">→</span> Deaths not attributed to policy
+          <br/>2012: CHT growth rate cut <span class="arrow">→</span> $36B less over decade vs. prior formula
+          <br/>Physician/specialist shortage (no federal training targets) <span class="arrow">→</span> 4M without GP
+          <br/>Wait times: specialist 22.6 weeks median <span class="arrow">→</span> Delayed diagnosis, preventable deaths
+          <br/>No federal tracking of wait-time deaths <span class="arrow">→</span> Deaths not attributed to policy
         </div>
-        <div class="evidence-links">
-          <a class="evidence-link" href="https://www.cihi.ca/en/wait-times-for-health-services" target="_blank" rel="noopener noreferrer">CIHI Wait Time Data — Live</a>
-          <a class="evidence-link" href="https://www.cihi.ca/en/hospital-beds-staffed-and-in-operation" target="_blank" rel="noopener noreferrer">CIHI Hospital Bed Tracking</a>
-          <a class="evidence-link" href="https://fraserinstitute.org/studies/waiting-your-turn-wait-times-for-health-care-in-canada" target="_blank" rel="noopener noreferrer">Fraser Institute Wait Times Survey (annual)</a>
-          <a class="evidence-link" href="https://www.pbo-dpb.ca/en/publications/RP-1617-012-S--federal-health-transfers--transferts-federaux-sante" target="_blank" rel="noopener noreferrer">PBO — Federal Health Transfers Analysis</a>
-        </div>
-      </div>
-
-      <!-- ─── INDIGENOUS WATER ─── -->
-      <div class="harm-entry" data-severity="high" data-tags="healthcare">
-        <div class="entry-header">
-          <span class="entry-year">1977–present</span>
-          <span class="entry-actor">All federal governments</span>
-          <span class="entry-tag">Healthcare</span>
-        </div>
-        <div class="entry-title">Indigenous Drinking Water Advisories — Decades of Contaminated Water on Reserves Caused Preventable Deaths and Disease</div>
-        <div class="death-count">
-          <span class="num">119</span>
-          <span class="lbl">long-term drinking water advisories still active as of 2021 · ISC Canada · some communities 25+ years without safe water</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy failure:</strong> The Safe Drinking Water for First Nations Act (2013) gave the federal government authority to set standards — but did not fund infrastructure to meet them. First Nations communities on reserves do not fall under provincial safe water regulations. Federal per-capita infrastructure funding for reserves was ~30–40% below comparable municipal funding for decades (ISC data).
-          <br><br>
+<div class="evidence-links">
+<a class="evidence-link" href="https://www.cihi.ca/en/wait-times-for-health-services" rel="noopener noreferrer" target="_blank">CIHI Wait Time Data — Live</a>
+<a class="evidence-link" href="https://www.cihi.ca/en/hospital-beds-staffed-and-in-operation" rel="noopener noreferrer" target="_blank">CIHI Hospital Bed Tracking</a>
+<a class="evidence-link" href="https://fraserinstitute.org/studies/waiting-your-turn-wait-times-for-health-care-in-canada" rel="noopener noreferrer" target="_blank">Fraser Institute Wait Times Survey (annual)</a>
+<a class="evidence-link" href="https://www.pbo-dpb.ca/en/publications/RP-1617-012-S--federal-health-transfers--transferts-federaux-sante" rel="noopener noreferrer" target="_blank">PBO — Federal Health Transfers Analysis</a>
+</div>
+</div>
+<!-- ─── INDIGENOUS WATER ─── -->
+<div class="harm-entry" data-severity="high" data-tags="healthcare">
+<div class="entry-header">
+<span class="entry-year">1977–present</span>
+<span class="entry-actor">All federal governments</span>
+<span class="entry-tag">Healthcare</span>
+</div>
+<div class="entry-title">Indigenous Drinking Water Advisories — Decades of Contaminated Water on Reserves Caused Preventable Deaths and Disease</div>
+<div class="death-count">
+<span class="num">119</span>
+<span class="lbl">long-term drinking water advisories still active as of 2021 · ISC Canada · some communities 25+ years without safe water</span>
+</div>
+<div class="entry-body">
+<strong>The policy failure:</strong> The Safe Drinking Water for First Nations Act (2013) gave the federal government authority to set standards — but did not fund infrastructure to meet them. First Nations communities on reserves do not fall under provincial safe water regulations. Federal per-capita infrastructure funding for reserves was ~30–40% below comparable municipal funding for decades (ISC data).
+          <br/><br/>
           Trudeau promised in 2015 to eliminate all long-term advisories. As of 2023, 28 remained — after spending $3.1B. Neskantaga First Nation in Ontario was without safe water for <strong>29 consecutive years</strong> (1995–2024).
-          <br><br>
-          <strong>Health outcomes:</strong> Gastrointestinal illness, skin conditions, cancer risk from carcinogens in unregulated water. Health Canada First Nations and Inuit Health Branch documented elevated rates of waterborne illness on affected reserves. No federal aggregate mortality study has been conducted — a persistent data gap.
+          <br/><br/>
+<strong>Health outcomes:</strong> Gastrointestinal illness, skin conditions, cancer risk from carcinogens in unregulated water. Health Canada First Nations and Inuit Health Branch documented elevated rates of waterborne illness on affected reserves. No federal aggregate mortality study has been conducted — a persistent data gap.
         </div>
-        <div class="evidence-links">
-          <a class="evidence-link" href="https://www.sac-isc.gc.ca/eng/1506514143353/1533317130660" target="_blank" rel="noopener noreferrer">ISC — Drinking Water Advisories Tracker</a>
-          <a class="evidence-link" href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202106_02_e_44213.html" target="_blank" rel="noopener noreferrer">AG Report 2021 — Safe Drinking Water</a>
-          <a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/44-1/HESA/meeting-13/evidence" target="_blank" rel="noopener noreferrer">HESA Committee Testimony</a>
+<div class="evidence-links">
+<a class="evidence-link" href="https://www.sac-isc.gc.ca/eng/1506514143353/1533317130660" rel="noopener noreferrer" target="_blank">ISC — Drinking Water Advisories Tracker</a>
+<a class="evidence-link" href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202106_02_e_44213.html" rel="noopener noreferrer" target="_blank">AG Report 2021 — Safe Drinking Water</a>
+<a class="evidence-link" href="https://www.ourcommons.ca/DocumentViewer/en/44-1/HESA/meeting-13/evidence" rel="noopener noreferrer" target="_blank">HESA Committee Testimony</a>
+</div>
+</div>
+<!-- ─── PRISON HEALTHCARE ─── -->
+<div class="harm-entry" data-severity="moderate" data-tags="healthcare">
+<div class="entry-header">
+<span class="entry-year">2012–present</span>
+<span class="entry-actor">Harper / Trudeau / Correctional Service Canada</span>
+<span class="entry-tag">Healthcare</span>
+</div>
+<div class="entry-title">Prison Healthcare Cuts — Federal Inmate Mortality Rates Increased After CSC Healthcare Budget Reduced</div>
+<div class="death-count">
+<span class="num">+47%</span>
+<span class="lbl">increase in federal inmate non-natural deaths 2012–2019 · OCI Annual Reports</span>
+</div>
+<div class="entry-body">
+<strong>The policy:</strong> The 2012 Harper budget reduced CSC healthcare funding and eliminated some mental health positions. The Office of the Correctional Investigator (OCI) documented subsequent increases in preventable deaths, self-harm incidents, and inadequate medical response times in federal institutions.
+          <br/><br/>
+<strong>Finding:</strong> OCI Annual Report 2019: "The rate of inmate deaths and the number of serious self-injurious incidents in federal custody remain unacceptably high." Segregation use — linked to mental health deterioration and suicide — continued despite multiple court rulings against it.
         </div>
-      </div>
-
-      <!-- ─── PRISON HEALTHCARE ─── -->
-      <div class="harm-entry" data-severity="moderate" data-tags="healthcare">
-        <div class="entry-header">
-          <span class="entry-year">2012–present</span>
-          <span class="entry-actor">Harper / Trudeau / Correctional Service Canada</span>
-          <span class="entry-tag">Healthcare</span>
-        </div>
-        <div class="entry-title">Prison Healthcare Cuts — Federal Inmate Mortality Rates Increased After CSC Healthcare Budget Reduced</div>
-        <div class="death-count">
-          <span class="num">+47%</span>
-          <span class="lbl">increase in federal inmate non-natural deaths 2012–2019 · OCI Annual Reports</span>
-        </div>
-        <div class="entry-body">
-          <strong>The policy:</strong> The 2012 Harper budget reduced CSC healthcare funding and eliminated some mental health positions. The Office of the Correctional Investigator (OCI) documented subsequent increases in preventable deaths, self-harm incidents, and inadequate medical response times in federal institutions.
-          <br><br>
-          <strong>Finding:</strong> OCI Annual Report 2019: "The rate of inmate deaths and the number of serious self-injurious incidents in federal custody remain unacceptably high." Segregation use — linked to mental health deterioration and suicide — continued despite multiple court rulings against it.
-        </div>
-        <div class="evidence-links">
-          <a class="evidence-link" href="https://oci-bec.gc.ca/en/content/annual-reports" target="_blank" rel="noopener noreferrer">OCI Annual Reports — All Years</a>
-          <a class="evidence-link" href="https://oci-bec.gc.ca/en/content/deaths-custody" target="_blank" rel="noopener noreferrer">OCI — Deaths in Custody Data</a>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ─── CROSS-CUTTING PATTERN ─── -->
-    <section id="pattern">
-      <h2><span class="section-num">02 &mdash; THE PATTERN</span>Common Mechanisms Across All Cases</h2>
-
-      <table class="data-table tnt-style-150">
-        <thead>
-          <tr><th>Mechanism</th><th>How It Works</th><th>Cases</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>No federal death tracking</strong></td>
-            <td>Deaths not attributed to policy because no aggregate data is collected. Prevents accountability.</td>
-            <td>Homelessness, wait times, reserves water, prison</td>
-          </tr>
-          <tr>
-            <td><strong>Downloading without funding</strong></td>
-            <td>Federal government transfers responsibility to provinces/territories without proportional funding. Provinces cut.</td>
-            <td>Housing (1993), healthcare (1995), LTC, Indigenous services</td>
-          </tr>
-          <tr>
-            <td><strong>Crisis used to bypass safeguards</strong></td>
-            <td>Emergency conditions remove procurement/oversight rules. Fraud and mismanagement follow.</td>
-            <td>ArriveCAN, safe supply without controls, PPE failure</td>
-          </tr>
-          <tr>
-            <td><strong>Expansion without evaluation</strong></td>
-            <td>Programs expanded before outcome data exists. Irreversible before problems identified.</td>
-            <td>MAID Track 2, safe supply diversion, immigration without housing</td>
-          </tr>
-          <tr class="highlight">
-            <td><strong>Offer death instead of support</strong></td>
-            <td>MAID and assisted death offered to people experiencing poverty, disability, and institutional failure — not terminal illness.</td>
-            <td>MAID Track 2, veteran offered MAID, mental illness expansion</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- SOURCES -->
-    <section id="sources">
-      <h2><span class="section-num">03 &mdash; SOURCES</span>All Public Record</h2>
-      <ol class="tnt-style-151">
-        <li>Health Canada — MAID Annual Reports 1st–6th — <a href="https://www.canada.ca/en/health-canada/services/health-services-benefits/medical-assistance-dying/annual-reports.html" target="_blank" rel="noopener noreferrer">canada.ca</a></li>
-        <li>PHAC — National Report: Apparent Opioid and Stimulant Toxicity Deaths — <a href="https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/" target="_blank" rel="noopener noreferrer">health-infobase.canada.ca</a></li>
-        <li>CIHI — Opioid-Related Harms in Canada — <a href="https://www.cihi.ca/en/opioid-related-harms-in-canada" target="_blank" rel="noopener noreferrer">cihi.ca</a></li>
-        <li>CIHI — Long-Term Care and COVID-19 — <a href="https://www.cihi.ca/en/long-term-care-and-covid-19" target="_blank" rel="noopener noreferrer">cihi.ca</a></li>
-        <li>CIHI — Wait Times for Health Services — <a href="https://www.cihi.ca/en/wait-times-for-health-services" target="_blank" rel="noopener noreferrer">cihi.ca</a></li>
-        <li>VAC — Suicide Mortality Study 2021 — <a href="https://www.veterans.gc.ca/en/about-vac/research/epidemiology/suicide-mortality-report" target="_blank" rel="noopener noreferrer">veterans.gc.ca</a></li>
-        <li>DND — Suicide and Self-Injury Report 2024 — <a href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/casualty-statistics.html" target="_blank" rel="noopener noreferrer">canada.ca</a></li>
-        <li>OCI — Annual Reports, Deaths in Custody — <a href="https://oci-bec.gc.ca/en/content/annual-reports" target="_blank" rel="noopener noreferrer">oci-bec.gc.ca</a></li>
-        <li>ISC — Drinking Water Advisories — <a href="https://www.sac-isc.gc.ca/eng/1506514143353/1533317130660" target="_blank" rel="noopener noreferrer">sac-isc.gc.ca</a></li>
-        <li>AG — PHAC Pandemic Preparedness 2021 — <a href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202104_04_e_43806.html" target="_blank" rel="noopener noreferrer">oag-bvg.gc.ca</a></li>
-        <li>AG — Safe Drinking Water for First Nations 2021 — <a href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202106_02_e_44213.html" target="_blank" rel="noopener noreferrer">oag-bvg.gc.ca</a></li>
-        <li>Statistics Canada — Housing Affordability 2023 — <a href="https://www150.statcan.gc.ca/n1/pub/75-006-x/2023001/article/00007-eng.htm" target="_blank" rel="noopener noreferrer">statcan.gc.ca</a></li>
-        <li>PBO — Federal Health Transfers Analysis — <a href="https://www.pbo-dpb.ca/en/publications/RP-1617-012-S--federal-health-transfers--transferts-federaux-sante" target="_blank" rel="noopener noreferrer">pbo-dpb.ca</a></li>
-      </ol>
-    </section>
-
-    <p class="back-link tnt-style-152"><a href="corruption-map.html">&larr; Back to Corruption Map</a> &nbsp;|&nbsp; <a href="index.html">&larr; Back to Main Report</a></p>
-
-    <h2><span class="section-num">04 &mdash; CONNECTED</span>Related Evidence</h2>
-    <div class="tnt-style-153">
-      <a href="genocide-evidence.html" class="tnt-style-154">💀 Genocide Evidence</a>
-      <a href="t4-comparison.html" class="tnt-style-154">📊 T4 Comparison</a>
-      <a href="accountability.html" class="tnt-style-154">📋 The 504 Database</a>
-      <a href="conspiracy-board.html" class="tnt-style-154">🕵 Investigation Board</a>
-      <a href="veterans.html" class="tnt-style-154">🎖 Veterans</a>
-      <a href="the-boot.html" class="tnt-style-154">🦶 The Boot</a>
-    </div>
-    <div class="tnt-style-155">🧭 OSINT Intelligence Tools</div>
-    <div class="tnt-style-156">
-      <a href="network-analysis.html" class="tnt-style-62">🕸 Network Analysis</a>
-      <a href="dossier-viewer.html" class="tnt-style-62">🔍 Dossier Viewer</a>
-      <a href="cross-reference.html" class="tnt-style-62">🔗 Cross-Reference Engine</a>
-      <a href="osint-dashboard.html" class="tnt-style-62">📊 OSINT Dashboard</a>
-    </div>
-  </div>
-
-  <script>
+<div class="evidence-links">
+<a class="evidence-link" href="https://oci-bec.gc.ca/en/content/annual-reports" rel="noopener noreferrer" target="_blank">OCI Annual Reports — All Years</a>
+<a class="evidence-link" href="https://oci-bec.gc.ca/en/content/deaths-custody" rel="noopener noreferrer" target="_blank">OCI — Deaths in Custody Data</a>
+</div>
+</div>
+</section>
+<!-- ─── CROSS-CUTTING PATTERN ─── -->
+<section id="pattern">
+<h2><span class="section-num">02 — THE PATTERN</span>Common Mechanisms Across All Cases</h2>
+<table class="data-table tnt-style-150">
+<thead>
+<tr><th>Mechanism</th><th>How It Works</th><th>Cases</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No federal death tracking</strong></td>
+<td>Deaths not attributed to policy because no aggregate data is collected. Prevents accountability.</td>
+<td>Homelessness, wait times, reserves water, prison</td>
+</tr>
+<tr>
+<td><strong>Downloading without funding</strong></td>
+<td>Federal government transfers responsibility to provinces/territories without proportional funding. Provinces cut.</td>
+<td>Housing (1993), healthcare (1995), LTC, Indigenous services</td>
+</tr>
+<tr>
+<td><strong>Crisis used to bypass safeguards</strong></td>
+<td>Emergency conditions remove procurement/oversight rules. Fraud and mismanagement follow.</td>
+<td>ArriveCAN, safe supply without controls, PPE failure</td>
+</tr>
+<tr>
+<td><strong>Expansion without evaluation</strong></td>
+<td>Programs expanded before outcome data exists. Irreversible before problems identified.</td>
+<td>MAID Track 2, safe supply diversion, immigration without housing</td>
+</tr>
+<tr class="highlight">
+<td><strong>Offer death instead of support</strong></td>
+<td>MAID and assisted death offered to people experiencing poverty, disability, and institutional failure — not terminal illness.</td>
+<td>MAID Track 2, veteran offered MAID, mental illness expansion</td>
+</tr>
+</tbody>
+</table>
+</section>
+<!-- SOURCES -->
+<section id="sources">
+<h2><span class="section-num">03 — SOURCES</span>All Public Record</h2>
+<ol class="tnt-style-151">
+<li>Health Canada — MAID Annual Reports 1st–6th — <a href="https://www.canada.ca/en/health-canada/services/health-services-benefits/medical-assistance-dying/annual-reports.html" rel="noopener noreferrer" target="_blank">canada.ca</a></li>
+<li>PHAC — National Report: Apparent Opioid and Stimulant Toxicity Deaths — <a href="https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/" rel="noopener noreferrer" target="_blank">health-infobase.canada.ca</a></li>
+<li>CIHI — Opioid-Related Harms in Canada — <a href="https://www.cihi.ca/en/opioid-related-harms-in-canada" rel="noopener noreferrer" target="_blank">cihi.ca</a></li>
+<li>CIHI — Long-Term Care and COVID-19 — <a href="https://www.cihi.ca/en/long-term-care-and-covid-19" rel="noopener noreferrer" target="_blank">cihi.ca</a></li>
+<li>CIHI — Wait Times for Health Services — <a href="https://www.cihi.ca/en/wait-times-for-health-services" rel="noopener noreferrer" target="_blank">cihi.ca</a></li>
+<li>VAC — Suicide Mortality Study 2021 — <a href="https://www.veterans.gc.ca/en/about-vac/research/epidemiology/suicide-mortality-report" rel="noopener noreferrer" target="_blank">veterans.gc.ca</a></li>
+<li>DND — Suicide and Self-Injury Report 2024 — <a href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/casualty-statistics.html" rel="noopener noreferrer" target="_blank">canada.ca</a></li>
+<li>OCI — Annual Reports, Deaths in Custody — <a href="https://oci-bec.gc.ca/en/content/annual-reports" rel="noopener noreferrer" target="_blank">oci-bec.gc.ca</a></li>
+<li>ISC — Drinking Water Advisories — <a href="https://www.sac-isc.gc.ca/eng/1506514143353/1533317130660" rel="noopener noreferrer" target="_blank">sac-isc.gc.ca</a></li>
+<li>AG — PHAC Pandemic Preparedness 2021 — <a href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202104_04_e_43806.html" rel="noopener noreferrer" target="_blank">oag-bvg.gc.ca</a></li>
+<li>AG — Safe Drinking Water for First Nations 2021 — <a href="https://www.oag-bvg.gc.ca/internet/English/parl_oag_202106_02_e_44213.html" rel="noopener noreferrer" target="_blank">oag-bvg.gc.ca</a></li>
+<li>Statistics Canada — Housing Affordability 2023 — <a href="https://www150.statcan.gc.ca/n1/pub/75-006-x/2023001/article/00007-eng.htm" rel="noopener noreferrer" target="_blank">statcan.gc.ca</a></li>
+<li>PBO — Federal Health Transfers Analysis — <a href="https://www.pbo-dpb.ca/en/publications/RP-1617-012-S--federal-health-transfers--transferts-federaux-sante" rel="noopener noreferrer" target="_blank">pbo-dpb.ca</a></li>
+</ol>
+</section>
+<p class="back-link tnt-style-152"><a href="corruption-map.html">← Back to Corruption Map</a>  |  <a href="index.html">← Back to Main Report</a></p>
+<h2><span class="section-num">04 — CONNECTED</span>Related Evidence</h2>
+<div class="tnt-style-153">
+<a class="tnt-style-154" href="genocide-evidence.html">💀 Genocide Evidence</a>
+<a class="tnt-style-154" href="t4-comparison.html">📊 T4 Comparison</a>
+<a class="tnt-style-154" href="accountability.html">📋 The 504 Database</a>
+<a class="tnt-style-154" href="conspiracy-board.html">🕵 Investigation Board</a>
+<a class="tnt-style-154" href="veterans.html">🎖 Veterans</a>
+<a class="tnt-style-154" href="the-boot.html">🦶 The Boot</a>
+</div>
+<div class="tnt-style-155">🧭 OSINT Intelligence Tools</div>
+<div class="tnt-style-156">
+<a class="tnt-style-62" href="network-analysis.html">🕸 Network Analysis</a>
+<a class="tnt-style-62" href="dossier-viewer.html">🔍 Dossier Viewer</a>
+<a class="tnt-style-62" href="cross-reference.html">🔗 Cross-Reference Engine</a>
+<a class="tnt-style-62" href="osint-dashboard.html">📊 OSINT Dashboard</a>
+</div>
+</div>
+<script>
     function filterEntries(tag, e) {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
@@ -834,9 +568,9 @@
       // Policy Origin Nodes
       var nodes = [
         { id: 'maid', lbl: 'C-14 / MAID Expansion', cx: 0.1, cy: 0.15, col: '#fca5a5' },
-        { id: 'opioid', lbl: 'Opioid / Safe Supply', cx: 0.1, cy: 0.32, col: '#ef4444' },
-        { id: 'housing', lbl: 'Federal Housing Exit', cx: 0.1, cy: 0.5, col: '#fbbf24' },
-        { id: 'vac', lbl: 'VAC NVC Funding', cx: 0.1, cy: 0.68, col: '#f59e0b' },
+        { id: 'opioid', lbl: 'Opioid / Safe Supply', cx: 0.1, cy: 0.32, col: 'var(--slate-critical, #b0544a)' },
+        { id: 'housing', lbl: 'Federal Housing Exit', cx: 0.1, cy: 0.5, col: 'var(--slate-warning, #c9a44c)' },
+        { id: 'vac', lbl: 'VAC NVC Funding', cx: 0.1, cy: 0.68, col: 'var(--slate-warning, #c9a44c)' },
         { id: 'ltc', lbl: 'LTC Deregulation', cx: 0.1, cy: 0.85, col: '#c41e3a' },
 
         // Central Gravity Node
@@ -964,58 +698,53 @@
     // Auto-init
     renderMortalityMatrix();
   </script>
-
-    <div class="cap263-container-narrow-px"><div class="cap263-flex-row"><a href="follow-the-money.html" class="cap263-pill-btn cap263-pill-btn--gold">Follow the Money →</a><a href="maid-accountability.html" class="cap263-pill-btn">MAID →</a><a href="carney-conflicts.html" class="cap263-pill-btn">Carney →</a><a href="file-504.html" class="cap263-pill-btn">s.504 →</a></div></div>
+<div class="cap263-container-narrow-px"><div class="cap263-flex-row"><a class="cap263-pill-btn cap263-pill-btn--gold" href="follow-the-money.html">Follow the Money →</a><a class="cap263-pill-btn" href="maid-accountability.html">MAID →</a><a class="cap263-pill-btn" href="carney-conflicts.html">Carney →</a><a class="cap263-pill-btn" href="file-504.html">s.504 →</a></div></div>
 <div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    <a href="disability-genocide.html" class="cap263-card-link">
-      <div class="cap263-tag cap263-tag--red">Human Rights</div>
-      <div class="cap263-bold-tight">Disability Genocide</div>
-    </a>
-    <a href="veterans-betrayal.html" class="cap263-card-link cap263-card-link--gold">
-      <div class="cap263-tag cap263-tag--gold">Veterans</div>
-      <div class="cap263-bold-tight">Veterans Betrayal</div>
-    </a>
-    <a href="maid-policy-evolution.html" class="cap263-card-link">
-      <div class="cap263-tag">Policy</div>
-      <div class="cap263-bold-tight">MAID Policy Evolution</div>
-    </a>
-    <a href="findings.html" class="cap263-card-link">
-      <div class="cap263-tag">Analysis</div>
-      <div class="cap263-bold-tight">Key Findings</div>
-    </a>
-    <a href="institutional-capture.html" class="cap263-card-link cap263-card-link--red">
-      <div class="cap263-tag cap263-tag--red">Synthesis</div>
-      <div class="cap263-bold-tight">Institutional Capture</div>
-    </a>
-    
-      <div class="cap263-tag cap263-tag--red">AI</div>
-      <div class="cap263-bold-tight">LIRIL Analysis Engine</div>
-    
-    <a href="genocide-evidence.html" class="cap263-card-link cap263-card-link--red">
-      <div class="cap263-tag cap263-tag--red">Human Rights</div>
-      <div class="cap263-bold-tight">Genocide Evidence — Legal Analysis Under the UN Convention</div>
-    </a>
-  </div>
+<h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
+<div class="cap263-grid-cards">
+<a class="cap263-card-link" href="disability-genocide.html">
+<div class="cap263-tag cap263-tag--red">Human Rights</div>
+<div class="cap263-bold-tight">Disability Genocide</div>
+</a>
+<a class="cap263-card-link cap263-card-link--gold" href="veterans-betrayal.html">
+<div class="cap263-tag cap263-tag--gold">Veterans</div>
+<div class="cap263-bold-tight">Veterans Betrayal</div>
+</a>
+<a class="cap263-card-link" href="maid-policy-evolution.html">
+<div class="cap263-tag">Policy</div>
+<div class="cap263-bold-tight">MAID Policy Evolution</div>
+</a>
+<a class="cap263-card-link" href="findings.html">
+<div class="cap263-tag">Analysis</div>
+<div class="cap263-bold-tight">Key Findings</div>
+</a>
+<a class="cap263-card-link cap263-card-link--red" href="institutional-capture.html">
+<div class="cap263-tag cap263-tag--red">Synthesis</div>
+<div class="cap263-bold-tight">Institutional Capture</div>
+</a>
+<div class="cap263-tag cap263-tag--red">AI</div>
+<div class="cap263-bold-tight">LIRIL Analysis Engine</div>
+<a class="cap263-card-link cap263-card-link--red" href="genocide-evidence.html">
+<div class="cap263-tag cap263-tag--red">Human Rights</div>
+<div class="cap263-bold-tight">Genocide Evidence — Legal Analysis Under the UN Convention</div>
+</a>
+</div>
 </div>
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="file-504.html" class="cap263-text-accent-bold">File charges →</a> | <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-accent-bold" href="file-504.html">File charges →</a> | <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
 </div>
 <div id="read-next"></div>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1041,29 +770,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>
-

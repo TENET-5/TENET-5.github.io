@@ -1,743 +1,270 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Network Analysis | TENET5</title>
-  <meta name="description" content="TENET5 cross-referenced influence network analysis. Visualize entity connections across lobbying, treason roster, OSINT vault, and parliamentary records.">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <link rel="stylesheet" href="css/film-grain.css?v=41">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-    /* ── BASE44 GLASSMORPHISM OVERRIDE ── */
-    body {
-      background: var(--bg); color: var(--text-primary);
-    }
-    body::after {
-      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
-      background:
-        radial-gradient(ellipse 600px 500px at 15% 20%, rgba(136,192,208,0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 500px 400px at 80% 60%, rgba(129,161,193,0.07) 0%, transparent 70%),
-        radial-gradient(ellipse 400px 350px at 50% 90%, rgba(143,188,187,0.05) 0%, transparent 70%);
-    }
-
-    .net-wrap { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: var(--slate-font-mono); color: var(--text-primary); }
-    .net-header { text-align: center; padding: 40px 0 20px; border-bottom: 2px solid rgba(196,30,58,0.4); margin-bottom: 24px; }
-    .net-header h1 { font-family: var(--slate-font-body); font-size: 2.2rem; color: var(--text-primary); letter-spacing: -1px; margin-bottom: 8px; }
-    .net-header .sub { font-size: 0.85rem; color: var(--text-tertiary); }
-
-    /* System Banner */
-    .sys-banner {
-      background: linear-gradient(135deg, rgba(10,10,15,0.98), rgba(15,10,20,0.95));
-      border: 1px solid rgba(57,255,20,0.2);
-      border-radius: 10px;
-      padding: 16px 24px;
-      margin-bottom: 24px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-    .sys-banner .item { display: flex; flex-direction: column; gap: 2px; }
-    .sys-banner .lbl { color: var(--text-tertiary); }
-    .sys-banner .val { color: #39ff14; font-weight: 700; }
-    .sys-banner .val.red { color: #e53555; }
-    .sys-banner .val.blue { color: #60a5fa; }
-
-    /* Score Overview Cards */
-    .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .score-card {
-      background: rgba(10,14,22,0.55);
-      backdrop-filter: blur(12px) saturate(160%);
-      -webkit-backdrop-filter: blur(12px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      transition: border-color 0.3s, background 0.3s, transform 0.2s;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-    .score-card:hover { border-color: rgba(196,30,58,0.3); background: rgba(15,20,32,0.65); transform: translateY(-2px); }
-    .score-card .big { font-size: 1.8rem; font-weight: 700; display: block; line-height: 1.1; }
-    .score-card .big.red { color: #e53555; }
-    .score-card .big.green { color: #39ff14; }
-    .score-card .big.blue { color: #60a5fa; }
-    .score-card .big.yellow { color: #facc15; }
-    .score-card .lbl { font-size: 0.6rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
-
-    /* ── FILTER TOOLBAR ── */
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 16px;
-      padding: 14px 18px;
-      background: rgba(10,14,22,0.50);
-      backdrop-filter: blur(10px) saturate(150%);
-      -webkit-backdrop-filter: blur(10px) saturate(150%);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
-    }
-    .filter-bar .search-wrap {
-      flex: 1;
-      min-width: 200px;
-      position: relative;
-    }
-    .filter-bar .search-wrap svg {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-quaternary);
-      pointer-events: none;
-    }
-    .filter-bar input[type="text"] {
-      width: 100%;
-      background: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 6px;
-      padding: 8px 10px 8px 32px;
-      color: var(--text-primary);
-      font-family: var(--slate-font-mono);
-      font-size: 0.78rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .filter-bar input[type="text"]:focus { border-color: rgba(196,30,58,0.4); }
-    .filter-bar input[type="text"]::placeholder { color: var(--text-quaternary); }
-    .cat-filters { display: flex; flex-wrap: wrap; gap: 4px; }
-    .cat-btn {
-      font-family: var(--slate-font-mono);
-      font-size: 0.62rem;
-      padding: 4px 10px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-tertiary);
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: all 0.2s;
-      font-weight: 600;
-    }
-    .cat-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text-tertiary); }
-    .cat-btn.active { border-color: var(--c, rgba(196,30,58,0.5)); color: var(--c, #e53555); background: var(--bg, rgba(196,30,58,0.08)); }
-    .filter-info { font-size: 0.65rem; color: var(--text-quaternary); margin-left: auto; white-space: nowrap; }
-
-    /* Network Canvas */
-    .canvas-container {
-      background: rgba(8,8,13,0.85);
-      backdrop-filter: blur(8px) saturate(140%);
-      -webkit-backdrop-filter: blur(8px) saturate(140%);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      position: relative;
-      width: 100%;
-      height: 800px;
-      margin-bottom: 28px;
-      overflow: hidden;
-    }
-    #network-canvas {
-      width: 100%;
-      height: 100%;
-      cursor: crosshair;
-    }
-    .canvas-legend {
-      position: absolute;
-      top: 14px; right: 14px;
-      background: rgba(8, 8, 13, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: 0.72rem;
-      color: #e0e0e8;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
-      max-width: 220px;
-    }
-    .canvas-legend .leg-title { font-size: 0.62rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-family: var(--slate-font-mono); }
-    .canvas-legend .leg-item { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; cursor: default; font-family: var(--slate-font-mono); letter-spacing: 0.3px; font-size: 0.68rem; }
-    .canvas-legend .dot { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 6px currentColor; border: 1px solid rgba(255,255,255,0.35); flex-shrink: 0; }
-    .canvas-legend .leg-count { margin-left: auto; font-size: 0.62rem; color: #666; font-weight: 700; }
-    .canvas-legend .leg-note { font-size: 0.62rem; color: #888; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); line-height: 1.4; }
-
-    /* "How to read this" explainer */
-    .howto-panel {
-      background: linear-gradient(135deg, rgba(57,255,20,0.06), rgba(96,165,250,0.04));
-      border: 1px solid rgba(57,255,20,0.25);
-      border-radius: 12px;
-      padding: 18px 22px;
-      margin-bottom: 20px;
-      font-family: var(--slate-font-body);
-    }
-    .howto-panel h3 { font-size: 0.82rem; color: #39ff14; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1.2px; font-family: var(--slate-font-mono); }
-    .howto-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-    .howto-item { display: flex; gap: 10px; align-items: flex-start; }
-    .howto-item .icon { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: rgba(57,255,20,0.12); color: #39ff14; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
-    .howto-item .text { font-size: 0.82rem; color: #d0d0d8; line-height: 1.5; }
-    .howto-item .text strong { color: #fff; display: block; font-size: 0.85rem; margin-bottom: 2px; }
-
-    /* Top-findings narrative */
-    .top-findings {
-      background: rgba(10,14,22,0.70);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 12px;
-      padding: 18px 22px;
-      margin-bottom: 20px;
-    }
-    .top-findings h3 { font-size: 0.82rem; color: #facc15; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 1.2px; font-family: var(--slate-font-mono); }
-    .top-findings .summary { font-size: 0.90rem; color: #d0d0d8; line-height: 1.65; font-family: var(--slate-font-body); }
-    .top-findings ol { padding-left: 1.2rem; margin-top: 10px; }
-    .top-findings ol li { margin-bottom: 5px; font-size: 0.85rem; color: #c0c0c8; line-height: 1.5; }
-    .top-findings ol li strong { color: #fff; font-weight: 700; }
-
-    /* View-mode toggle */
-    .view-toggle {
-      display: inline-flex;
-      gap: 0;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px;
-      overflow: hidden;
-      font-family: var(--slate-font-mono);
-    }
-    .view-toggle button {
-      background: transparent;
-      color: var(--text-tertiary);
-      border: none;
-      padding: 6px 12px;
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .view-toggle button.active { background: rgba(57,255,20,0.18); color: #39ff14; }
-    .view-toggle button:not(.active):hover { background: rgba(255,255,255,0.04); color: var(--text-secondary); }
-
-    .aggregate-note {
-      font-size: 0.72rem;
-      color: #888;
-      font-style: italic;
-      margin-top: 4px;
-    }
-
-    /* Tooltip */
-    .canvas-tooltip {
-      position: absolute;
-      display: none;
-      background: rgba(8,8,13,0.97);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 10px;
-      padding: 16px 20px;
-      font-size: 0.95rem;
-      color: #e8e8f0;
-      pointer-events: none;
-      z-index: 10;
-      max-width: 360px;
-      min-width: 220px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      font-family: var(--slate-font-body);
-      line-height: 1.5;
-    }
-    .canvas-tooltip .tt-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; color: #fff; }
-    .canvas-tooltip .tt-type { color: #a0a0b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
-    .canvas-tooltip .tt-cats { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
-    .canvas-tooltip .tt-cats .badge { font-size: 0.8rem; padding: 3px 10px; }
-    .canvas-tooltip .tt-detail { color: #b0b0c8; margin-top: 8px; font-size: 0.88rem; line-height: 1.5; }
-
-    /* Entity Table */
-    .entity-section { margin-bottom: 30px; }
-    .entity-section h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-    .entity-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-    .entity-table th { text-align: left; color: var(--text-tertiary); font-weight: 600; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.65rem; cursor: pointer; transition: color 0.2s; user-select: none; }
-    .entity-table th:hover { color: var(--text-tertiary); }
-    .entity-table th.sorted { color: #e53555; }
-    .entity-table th.sorted::after { content: ' ▼'; font-size: 0.5rem; }
-    .entity-table th.sorted.asc::after { content: ' ▲'; }
-    .entity-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #c0c0c6; }
-    .entity-table tr:hover td { background: rgba(255,255,255,0.02); }
-    .entity-table tr.hidden { display: none; }
-    .entity-table .score-col { text-align: right; font-weight: 700; }
-    .entity-table .score-col.high { color: #e53555; }
-    .entity-table .score-col.mid { color: #facc15; }
-    .entity-table .score-col.low { color: #39ff14; }
-    .entity-table .cats { font-size: 0.65rem; color: var(--text-tertiary); }
-    .entity-table .badge { display: inline-block; font-size: 0.55rem; padding: 2px 6px; border-radius: 3px; margin-right: 4px; font-weight: 600; text-transform: uppercase; }
-    .badge-israel { background: rgba(77,159,255,0.15); color: #4d9fff; }
-    .badge-ccp { background: rgba(239,68,68,0.15); color: #ef4444; }
-    .badge-india { background: rgba(251,146,60,0.15); color: #fb923c; }
-    .badge-cfnis { background: rgba(250,204,21,0.15); color: #facc15; }
-    .badge-osint { background: rgba(156,163,175,0.15); color: #9ca3af; }
-    .badge-lobby { background: rgba(20,184,166,0.15); color: #14b8a6; }
-    .badge-donor { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .badge-media { background: rgba(244,114,182,0.15); color: #f472b6; }
-    .badge-maid { background: rgba(236,72,153,0.15); color: #ec4899; }
-    .badge-procurement { background: rgba(234,179,8,0.15); color: #eab308; }
-    .badge-aggregate { background: rgba(156,163,175,0.12); color: #9ca3af; border: 1px dashed rgba(156,163,175,0.35); }
-
-    /* Overlap Section */
-    .overlap-card {
-      background: var(--bg-surface);
-      border: 1px solid rgba(229,53,85,0.15);
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 10px;
-      transition: border-color 0.2s;
-    }
-    .overlap-card:hover { border-color: rgba(229,53,85,0.4); }
-    .overlap-card .name { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
-    .overlap-card .meta { font-size: 0.72rem; color: var(--text-tertiary); margin-top: 4px; }
-    .overlap-card .sources { font-size: 0.7rem; color: var(--text-tertiary); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
-
-    /* Falcon Crypto Display */
-    .falcon-crypto {
-      margin-top: 10px;
-      padding: 8px 12px;
-      background: rgba(0, 255, 136, 0.05);
-      border: 1px solid rgba(0, 255, 136, 0.3);
-      border-left: 3px solid #00ff88;
-      border-radius: 4px;
-      font-family: var(--slate-font-mono);
-      font-size: 0.70rem;
-      color: #00ff88;
-      word-break: break-all;
-    }
-    .falcon-crypto strong { color: #fff; display: inline-block; width: 60px; }
-
-    @media (max-width: 700px) {
-      .canvas-container { height: 550px; }
-      .score-grid { grid-template-columns: repeat(2, 1fr); }
-      .filter-bar { flex-direction: column; }
-    }
-  </style>
-
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="Network Analysis | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/network-analysis.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Network Analysis | TENET5">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
   <link rel="canonical" href="https://tenet-5.github.io/network-analysis.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Network Analysis | TENET5",
-  "url": "https://tenet-5.github.io/network-analysis.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="Network Analysis | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:description" content="TENET5 cross-referenced influence network analysis. Visualize entity connections across lobbying, treason roster, OSINT vault, and parliamentary records.">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="Office of the Commissioner of Lobbying">
-  <link rel="stylesheet" href="css/film-grain.css?v=41">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="network-analysis">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
-</head>
-<body class="topo topo-dense" data-act="sup">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
-    </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Network Analysis</span></div>    <!-- CAP224-NAV-END -->
-  <div class="film-grain-overlay"></div>
-  <div class="film-scanlines"></div>
-  <div class="film-scratches"></div>
-  <div class="film-vignette"></div>
-  <a href="#main" class="skip-link">Skip to main content</a>
 
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
 
-  <div id="site-header-frame"></div>
-<div class="net-wrap" id="main" role="main">
-    <div class="net-header">
-      <h1  id="n-a264555b" data-narrate="Network Analysis. Cross-referenced influence topology across all investigative data vectors" >&#128300; Network Analysis</h1>
-      <p class="sub">Cross-referenced influence topology across all investigative data vectors</p>
-    </div>
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
 
-    <!-- How to read this -->
-    <div class="howto-panel">
-      <h3>How to read this page</h3>
-      <div class="howto-grid">
-        <div class="howto-item"><div class="icon">1</div><div class="text"><strong>Start with the summary below.</strong> Read the top-findings list first — it tells you what the graph actually shows, in plain English.</div></div>
-        <div class="howto-item"><div class="icon">2</div><div class="text"><strong>Colour = category.</strong> Each colour maps to a specific influence stream (foreign state, military oversight, donors, procurement, media). The legend sits top-right of the graph.</div></div>
-        <div class="howto-item"><div class="icon">3</div><div class="text"><strong>Size = influence score.</strong> Larger circles appear in more primary sources (Lobbying Registry, Elections Canada donor filings, NSICOP annex, Hogue testimony).</div></div>
-        <div class="howto-item"><div class="icon">4</div><div class="text"><strong>Hover any circle</strong> for the entity name, categories, and source count. <strong>Click</strong> to zoom in and see its connections. Click empty space to reset.</div></div>
-        <div class="howto-item"><div class="icon">5</div><div class="text"><strong>Use the filter buttons</strong> below to isolate a single category. The default view shows only the top 40 entities by score — use the toggle to see all 200 if needed.</div></div>
-        <div class="howto-item"><div class="icon">6</div><div class="text"><strong>The table below the graph</strong> is the same data, sortable and searchable, for reviewers who prefer text.</div></div>
-      </div>
-    </div>
-
-    <!-- Top findings narrative -->
-    <div class="top-findings">
-      <h3>What this graph actually shows</h3>
-      <div class="summary" id="top-findings-summary">
-        Loading top-findings summary&hellip;
-      </div>
-    </div>
-
-    <!-- System Status -->
-    <div class="sys-banner">
-      <div class="item"><span class="lbl">TENET5 Cross-Reference Tracker</span><span class="val">TOPOLOGY MODE</span></div>
-      <div class="item"><span class="lbl">Empirical Cross-Reference</span><span class="val">SECURED</span></div>
-      <div class="item"><span class="lbl">Data Vectors</span><span class="val blue" id="vec-count">5</span></div>
-      <div class="item"><span class="lbl">Entity Graph</span><span class="val red" id="entity-count">LOADING...</span></div>
-      <div class="item"><span class="lbl">Quantum Engine</span><span class="val cap263-text-cyan">NV-ISING</span></div>
-      <div class="item"><span class="lbl">Phase 56 Disinfo Radar</span><span class="val" style="color:#bb86fc;">[ ENGAGED ]</span></div>
-    </div>
-
-    <!-- Score Overview -->
-    <div class="score-grid" id="score-grid">
-      <div class="score-card"><span class="big red" id="total-entities">--</span><div class="lbl">Unique Entities</div></div>
-      <div class="score-card"><span class="big blue" id="multi-source">--</span><div class="lbl">Multi-Source</div></div>
-      <div class="score-card"><span class="big green" id="graph-nodes">--</span><div class="lbl">Graph Nodes</div></div>
-      <div class="score-card"><span class="big yellow" id="graph-edges">--</span><div class="lbl">Connections</div></div>
-      <div class="score-card"><span class="big red" id="high-influence">--</span><div class="lbl">High Influence</div></div>
-    </div>
-
-    <!-- TENET5 cross-reference pipeline Cross-Reference Memory (Matrix Ledger) -->
-    <div class="entity-section" style="margin-bottom: 24px;">
-      <h2 style="font-size: 0.85rem; color: var(--accent); border-bottom-color: var(--accent-med);">Documented-Sources Convergence (-HARD)</h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px;">
-        <div class="overlap-card" style="border-color: rgba(136,192,208,0.3);">
-          <div class="name"><a href="influence-target-alpha.html" style="color: inherit; text-decoration: none;">Foreign Interference (Hogue/NSICOP findings)</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
-          <div class="meta" style="color:var(--text-secondary);">Topology: P-CLASS | Source: public government records</div>
-          <div class="sources"><span class="badge badge-ccp">foreign_influence detected in lobbying registry (cross-referenced)</span></div>
-        </div>
-        <div class="overlap-card" style="border-color: rgba(136,192,208,0.3);">
-          <div class="name"><a href="cija-lobbying.html" style="color: inherit; text-decoration: none;">CIJA Lobbying Pipeline</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
-          <div class="meta" style="color:var(--text-secondary);">Topology: NP-HARD | Source: public government records</div>
-          <div class="sources"><span class="badge badge-lobby">579 lobbying instances / Sponsored trips mapped (documented cross-referencing)</span></div>
-        </div>
-        <div class="overlap-card" style="border-color: rgba(136,192,208,0.3);">
-          <div class="name"><a href="cfnis-proxy.html" style="color: inherit; text-decoration: none;">CFNIS Proxy Node</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
-          <div class="meta" style="color:var(--text-secondary);">Topology: NP-HARD | Source: public government records</div>
-          <div class="sources"><span class="badge badge-cfnis">Internal oversight tampering (cross-referenced findings)</span></div>
-        </div>
-        <div class="overlap-card" style="border-color: rgba(229,53,85,0.4);">
-          <div class="name"><a href="maid-accountability.html" style="color: inherit; text-decoration: none;">MAID-Emergencies Nexus</a> <span style="float:right; color:#BF616A;">Threat: 1.00</span></div>
-          <div class="meta" style="color:var(--text-secondary);">Topology: P-CLASS | Vector: MF-MAID-EMG-100</div>
-          <div class="sources"><span class="badge badge-lobby">100% overlap with 5 triple threat lobbying nodes</span><span class="badge badge-osint">Confirmed Matrix Sync</span></div>
-        </div>
-        <div class="overlap-card" style="border-color: rgba(229,53,85,0.4);">
-          <div class="name"><a href="file-504.html" style="color: inherit; text-decoration: none;">Queen's University Judicial Linkage</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
-          <div class="meta" style="color:var(--text-secondary);">Topology: NP-HARD | Vector: MF-QUEENS-S504</div>
-          <div class="sources"><span class="badge badge-ccp">Confucius Institute / CCP infiltration</span><span class="badge badge-cfnis">Provincial Crown / CFNIS proxy</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filter Toolbar -->
-    <div class="filter-bar">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="entity-search" placeholder="Search entities... (e.g. 'CIJA', 'Housefather', 'SNC')">
-      </div>
-      <div class="view-toggle" id="view-toggle" title="Top 40 view is recommended for first-time readers">
-        <button class="active" data-mode="top40">Top 40</button>
-        <button data-mode="all">All 200</button>
-      </div>
-      <div class="cat-filters" id="cat-filters">
-        <button class="cat-btn active" data-cat="all">All <span class="cat-count" data-cat-count="all"></span></button>
-        <button class="cat-btn" data-cat="israel">Israel <span class="cat-count" data-cat-count="israel"></span></button>
-        <button class="cat-btn" data-cat="ccp">CCP <span class="cat-count" data-cat-count="ccp"></span></button>
-        <button class="cat-btn" data-cat="india">India <span class="cat-count" data-cat-count="india"></span></button>
-        <button class="cat-btn" data-cat="cfnis">CFNIS <span class="cat-count" data-cat-count="cfnis"></span></button>
-        <button class="cat-btn" data-cat="maid_legislation">MAID <span class="cat-count" data-cat-count="maid_legislation"></span></button>
-        <button class="cat-btn" data-cat="financial_vector">Procurement <span class="cat-count" data-cat-count="financial_vector"></span></button>
-        <button class="cat-btn" data-cat="lobbied_official">Lobbied <span class="cat-count" data-cat-count="lobbied_official"></span></button>
-        <button class="cat-btn" data-cat="political_donor">Donors <span class="cat-count" data-cat-count="political_donor"></span></button>
-        <button class="cat-btn" data-cat="media">Media <span class="cat-count" data-cat-count="media"></span></button>
-      </div>
-      <span class="filter-info" id="filter-info">Showing top 40</span>
-    </div>
-    <p class="aggregate-note">Note: Some high-score nodes are <em>aggregate buckets</em> from Elections Canada filings (e.g. &ldquo;Contributions of $200 or less&rdquo;) — they are not individual donors. These are flagged in tooltips and excluded from the Top-40 default view.</p>
-
-    <!-- Network Canvas -->
-    <div class="canvas-container">
-      <canvas id="network-canvas"></canvas>
-      <div class="canvas-tooltip" id="canvas-tooltip">
-        <div class="tt-name"></div>
-        <div class="tt-type"></div>
-        <div class="tt-cats"></div>
-        <div class="tt-detail"></div>
-      </div>
-      <div class="canvas-legend">
-        <div class="leg-title">Colour = category</div>
-        <div class="leg-item"><div class="dot" style="background:#ef4444;color:#ef4444;"></div> CCP / PRC <span class="leg-count" data-leg-count="ccp"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#4d9fff;color:#4d9fff;"></div> Israel <span class="leg-count" data-leg-count="israel"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#fb923c;color:#fb923c;"></div> India <span class="leg-count" data-leg-count="india"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#facc15;color:#facc15;"></div> CFNIS <span class="leg-count" data-leg-count="cfnis"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#ec4899;color:#ec4899;"></div> MAID <span class="leg-count" data-leg-count="maid_legislation"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#eab308;color:#eab308;"></div> Procurement <span class="leg-count" data-leg-count="financial_vector"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#22c55e;color:#22c55e;"></div> Donors <span class="leg-count" data-leg-count="political_donor"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#14b8a6;color:#14b8a6;"></div> Lobbied <span class="leg-count" data-leg-count="lobbied_official"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#f472b6;color:#f472b6;"></div> Media <span class="leg-count" data-leg-count="media"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#a855f7;color:#a855f7;"></div> Organization <span class="leg-count" data-leg-count="org"></span></div>
-        <div class="leg-item"><div class="dot" style="background:#6b7280;color:#6b7280;"></div> Uncategorized <span class="leg-count" data-leg-count="default"></span></div>
-        <div class="leg-note">Size = influence score (larger = more source appearances).</div>
-      </div>
-    </div>
-
-    <!-- Top Influence Entities -->
-    <div class="entity-section">
-      <h2>Top Influence Entities</h2>
-      <table class="entity-table" id="entity-table">
-        <thead>
-          <tr>
-            <th data-sort="rank">#</th>
-            <th data-sort="name">Entity</th>
-            <th>Categories</th>
-            <th data-sort="sources">Sources</th>
-            <th data-sort="score" class="score-col sorted">Score</th>
-          </tr>
-        </thead>
-        <tbody id="entity-tbody"></tbody>
-      </table>
-    </div>
-
-    <!-- Multi-Vector Entities -->
-    <div class="entity-section">
-      <h2>Multi-Vector Entities (&#9888; appear in 3+ investigation sources)</h2>
-      <div id="overlap-list"></div>
-    </div>
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
     
-    <!-- PHASE 59: Foreign Exposure Index -->
-    <div class="entity-section">
-      <h2>LIRIL Foreign Exposure Index <span>[PHASE 59 MATRICES]</span></h2>
-      <div class="disclaimer tnt-style-694">Influence propagated directly through algorithms tracking Topographical Intelligence. Mapped to target nodes: Beijing, PRC, United Front.</div>
-      <div id="foreign-exposure-list" style="margin-top: 15px;"></div>
-    </div>
-  </div>
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
+</head>
+<body class="product" data-product="1">
 
-  <footer>
-    <div class="footer-grid">
-      <div class="footer-col">
-        <h4>Investigation</h4>
-        <a href="accountability.html">The 504 Database</a>
-        <a href="conspiracy-board.html">Investigation Board</a>
-        <a href="evidence.html">Evidence Archive</a>
-        <a href="osint-dashboard.html">OSINT Dashboard</a>
-        <a href="dossier-viewer.html">Dossier Viewer</a>
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Network Analysis</span></div>  CAP224-NAV-END 
+<div class="film-grain-overlay"></div>
+<div class="film-scanlines"></div>
+<div class="film-scratches"></div>
+<div class="film-vignette"></div>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div id="site-header-frame"></div>
+<div class="net-wrap" id="main" role="main">
+<div class="net-header">
+<h1 data-narrate="Network Analysis. Cross-referenced influence topology across all investigative data vectors" id="n-a264555b">🔬 Network Analysis</h1>
+<p class="sub">Cross-referenced influence topology across all investigative data vectors</p>
+</div>
+<!-- How to read this -->
+<div class="howto-panel">
+<h3>How to read this page</h3>
+<div class="howto-grid">
+<div class="howto-item"><div class="icon">1</div><div class="text"><strong>Start with the summary below.</strong> Read the top-findings list first — it tells you what the graph actually shows, in plain English.</div></div>
+<div class="howto-item"><div class="icon">2</div><div class="text"><strong>Colour = category.</strong> Each colour maps to a specific influence stream (foreign state, military oversight, donors, procurement, media). The legend sits top-right of the graph.</div></div>
+<div class="howto-item"><div class="icon">3</div><div class="text"><strong>Size = influence score.</strong> Larger circles appear in more primary sources (Lobbying Registry, Elections Canada donor filings, NSICOP annex, Hogue testimony).</div></div>
+<div class="howto-item"><div class="icon">4</div><div class="text"><strong>Hover any circle</strong> for the entity name, categories, and source count. <strong>Click</strong> to zoom in and see its connections. Click empty space to reset.</div></div>
+<div class="howto-item"><div class="icon">5</div><div class="text"><strong>Use the filter buttons</strong> below to isolate a single category. The default view shows only the top 40 entities by score — use the toggle to see all 200 if needed.</div></div>
+<div class="howto-item"><div class="icon">6</div><div class="text"><strong>The table below the graph</strong> is the same data, sortable and searchable, for reviewers who prefer text.</div></div>
+</div>
+</div>
+<!-- Top findings narrative -->
+<div class="top-findings">
+<h3>What this graph actually shows</h3>
+<div class="summary" id="top-findings-summary">
+        Loading top-findings summary…
       </div>
-      <div class="footer-col">
-        <h4>Follow the Money</h4>
-        <a href="cross-reference.html">Cross-Reference Engine</a>
-        <a href="foreign-influence.html">Foreign Influence</a>
-        <a href="corruption-map.html">Corruption Map</a>
-        <a href="procurement-analysis.html">Procurement Analysis</a>
-      </div>
-      <div class="footer-col">
-        <h4>Legal</h4>
-        <a href="legal.html">Legal Framework</a>
-        <a href="cfnis.html">CFNIS Investigation</a>
-        <a href="whistleblower-guide.html">Whistleblower Guide</a>
-      </div>
-      <div class="footer-col">
-        <h4>About</h4>
-        <a href="open-letter.html">Open Letter to MPs</a>
-        <a href="timeline.html">Master Timeline</a>
-        <a href="history.html">FAQ &amp; History</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Daniel Perry. Canadian Forces combat veteran, Afghanistan. All rights reserved.</p>
-    </div>
-  </footer>
+</div>
+<!-- System Status -->
+<div class="sys-banner">
+<div class="item"><span class="lbl">TENET5 Cross-Reference Tracker</span><span class="val">TOPOLOGY MODE</span></div>
+<div class="item"><span class="lbl">Empirical Cross-Reference</span><span class="val">SECURED</span></div>
+<div class="item"><span class="lbl">Data Vectors</span><span class="val blue" id="vec-count">5</span></div>
+<div class="item"><span class="lbl">Entity Graph</span><span class="val red" id="entity-count">LOADING...</span></div>
+<div class="item"><span class="lbl">Quantum Engine</span><span class="val cap263-text-cyan">NV-ISING</span></div>
+<div class="item"><span class="lbl">Phase 56 Disinfo Radar</span><span class="val" style="color:#bb86fc;">[ ENGAGED ]</span></div>
+</div>
+<!-- Score Overview -->
+<div class="score-grid" id="score-grid">
+<div class="score-card"><span class="big red" id="total-entities">--</span><div class="lbl">Unique Entities</div></div>
+<div class="score-card"><span class="big blue" id="multi-source">--</span><div class="lbl">Multi-Source</div></div>
+<div class="score-card"><span class="big green" id="graph-nodes">--</span><div class="lbl">Graph Nodes</div></div>
+<div class="score-card"><span class="big yellow" id="graph-edges">--</span><div class="lbl">Connections</div></div>
+<div class="score-card"><span class="big red" id="high-influence">--</span><div class="lbl">High Influence</div></div>
+</div>
+<!-- TENET5 cross-reference pipeline Cross-Reference Memory (Matrix Ledger) -->
+<div class="entity-section" style="margin-bottom: 24px;">
+<h2 style="font-size: 0.85rem; color: var(--accent); border-bottom-color: var(--accent-med);">Documented-Sources Convergence (-HARD)</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px;">
+<div class="overlap-card" style="border-color: rgba(136,192,208,0.3);">
+<div class="name"><a href="influence-target-alpha.html" style="color: inherit; text-decoration: none;">Foreign Interference (Hogue/NSICOP findings)</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
+<div class="meta" style="color:var(--text-secondary);">Topology: P-CLASS | Source: public government records</div>
+<div class="sources"><span class="badge badge-ccp">foreign_influence detected in lobbying registry (cross-referenced)</span></div>
+</div>
+<div class="overlap-card" style="border-color: rgba(136,192,208,0.3);">
+<div class="name"><a href="cija-lobbying.html" style="color: inherit; text-decoration: none;">CIJA Lobbying Pipeline</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
+<div class="meta" style="color:var(--text-secondary);">Topology: NP-HARD | Source: public government records</div>
+<div class="sources"><span class="badge badge-lobby">579 lobbying instances / Sponsored trips mapped (documented cross-referencing)</span></div>
+</div>
+<div class="overlap-card" style="border-color: rgba(136,192,208,0.3);">
+<div class="name"><a href="cfnis-proxy.html" style="color: inherit; text-decoration: none;">CFNIS Proxy Node</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
+<div class="meta" style="color:var(--text-secondary);">Topology: NP-HARD | Source: public government records</div>
+<div class="sources"><span class="badge badge-cfnis">Internal oversight tampering (cross-referenced findings)</span></div>
+</div>
+<div class="overlap-card" style="border-color: rgba(229,53,85,0.4);">
+<div class="name"><a href="maid-accountability.html" style="color: inherit; text-decoration: none;">MAID-Emergencies Nexus</a> <span style="float:right; color:#BF616A;">Threat: 1.00</span></div>
+<div class="meta" style="color:var(--text-secondary);">Topology: P-CLASS | Vector: MF-MAID-EMG-100</div>
+<div class="sources"><span class="badge badge-lobby">100% overlap with 5 triple threat lobbying nodes</span><span class="badge badge-osint">Confirmed Matrix Sync</span></div>
+</div>
+<div class="overlap-card" style="border-color: rgba(229,53,85,0.4);">
+<div class="name"><a href="file-504.html" style="color: inherit; text-decoration: none;">Queen's University Judicial Linkage</a> <span style="float:right; color:#BF616A;">Source: Hogue Commission / NSICOP</span></div>
+<div class="meta" style="color:var(--text-secondary);">Topology: NP-HARD | Vector: MF-QUEENS-S504</div>
+<div class="sources"><span class="badge badge-ccp">Confucius Institute / CCP infiltration</span><span class="badge badge-cfnis">Provincial Crown / CFNIS proxy</span></div>
+</div>
+</div>
+</div>
+<!-- Filter Toolbar -->
+<div class="filter-bar">
+<div class="search-wrap">
+<svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="14"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
+<input id="entity-search" placeholder="Search entities... (e.g. 'CIJA', 'Housefather', 'SNC')" type="text"/>
+</div>
+<div class="view-toggle" id="view-toggle" title="Top 40 view is recommended for first-time readers">
+<button class="active" data-mode="top40">Top 40</button>
+<button data-mode="all">All 200</button>
+</div>
+<div class="cat-filters" id="cat-filters">
+<button class="cat-btn active" data-cat="all">All <span class="cat-count" data-cat-count="all"></span></button>
+<button class="cat-btn" data-cat="israel">Israel <span class="cat-count" data-cat-count="israel"></span></button>
+<button class="cat-btn" data-cat="ccp">CCP <span class="cat-count" data-cat-count="ccp"></span></button>
+<button class="cat-btn" data-cat="india">India <span class="cat-count" data-cat-count="india"></span></button>
+<button class="cat-btn" data-cat="cfnis">CFNIS <span class="cat-count" data-cat-count="cfnis"></span></button>
+<button class="cat-btn" data-cat="maid_legislation">MAID <span class="cat-count" data-cat-count="maid_legislation"></span></button>
+<button class="cat-btn" data-cat="financial_vector">Procurement <span class="cat-count" data-cat-count="financial_vector"></span></button>
+<button class="cat-btn" data-cat="lobbied_official">Lobbied <span class="cat-count" data-cat-count="lobbied_official"></span></button>
+<button class="cat-btn" data-cat="political_donor">Donors <span class="cat-count" data-cat-count="political_donor"></span></button>
+<button class="cat-btn" data-cat="media">Media <span class="cat-count" data-cat-count="media"></span></button>
+</div>
+<span class="filter-info" id="filter-info">Showing top 40</span>
+</div>
+<p class="aggregate-note">Note: Some high-score nodes are <em>aggregate buckets</em> from Elections Canada filings (e.g. “Contributions of $200 or less”) — they are not individual donors. These are flagged in tooltips and excluded from the Top-40 default view.</p>
+<!-- Network Canvas -->
+<div class="canvas-container">
+<canvas id="network-canvas"></canvas>
+<div class="canvas-tooltip" id="canvas-tooltip">
+<div class="tt-name"></div>
+<div class="tt-type"></div>
+<div class="tt-cats"></div>
+<div class="tt-detail"></div>
+</div>
+<div class="canvas-legend">
+<div class="leg-title">Colour = category</div>
+<div class="leg-item"><div class="dot" style="background:var(--slate-critical, #b0544a);color:var(--slate-critical, #b0544a);"></div> CCP / PRC <span class="leg-count" data-leg-count="ccp"></span></div>
+<div class="leg-item"><div class="dot" style="background:#4d9fff;color:#4d9fff;"></div> Israel <span class="leg-count" data-leg-count="israel"></span></div>
+<div class="leg-item"><div class="dot" style="background:#fb923c;color:#fb923c;"></div> India <span class="leg-count" data-leg-count="india"></span></div>
+<div class="leg-item"><div class="dot" style="background:var(--slate-warning, #c9a44c);color:var(--slate-warning, #c9a44c);"></div> CFNIS <span class="leg-count" data-leg-count="cfnis"></span></div>
+<div class="leg-item"><div class="dot" style="background:#ec4899;color:#ec4899;"></div> MAID <span class="leg-count" data-leg-count="maid_legislation"></span></div>
+<div class="leg-item"><div class="dot" style="background:#eab308;color:#eab308;"></div> Procurement <span class="leg-count" data-leg-count="financial_vector"></span></div>
+<div class="leg-item"><div class="dot" style="background:#22c55e;color:#22c55e;"></div> Donors <span class="leg-count" data-leg-count="political_donor"></span></div>
+<div class="leg-item"><div class="dot" style="background:#14b8a6;color:#14b8a6;"></div> Lobbied <span class="leg-count" data-leg-count="lobbied_official"></span></div>
+<div class="leg-item"><div class="dot" style="background:#f472b6;color:#f472b6;"></div> Media <span class="leg-count" data-leg-count="media"></span></div>
+<div class="leg-item"><div class="dot" style="background:#a8bcc8;color:#a8bcc8;"></div> Organization <span class="leg-count" data-leg-count="org"></span></div>
+<div class="leg-item"><div class="dot" style="background:#6b7280;color:#6b7280;"></div> Uncategorized <span class="leg-count" data-leg-count="default"></span></div>
+<div class="leg-note">Size = influence score (larger = more source appearances).</div>
+</div>
+</div>
+<!-- Top Influence Entities -->
+<div class="entity-section">
+<h2>Top Influence Entities</h2>
+<table class="entity-table" id="entity-table">
+<thead>
+<tr>
+<th data-sort="rank">#</th>
+<th data-sort="name">Entity</th>
+<th>Categories</th>
+<th data-sort="sources">Sources</th>
+<th class="score-col sorted" data-sort="score">Score</th>
+</tr>
+</thead>
+<tbody id="entity-tbody"></tbody>
+</table>
+</div>
+<!-- Multi-Vector Entities -->
+<div class="entity-section">
+<h2>Multi-Vector Entities (⚠ appear in 3+ investigation sources)</h2>
+<div id="overlap-list"></div>
+</div>
+<!-- PHASE 59: Foreign Exposure Index -->
+<div class="entity-section">
+<h2>LIRIL Foreign Exposure Index <span>[PHASE 59 MATRICES]</span></h2>
+<div class="disclaimer tnt-style-694">Influence propagated directly through algorithms tracking Topographical Intelligence. Mapped to target nodes: Beijing, PRC, United Front.</div>
+<div id="foreign-exposure-list" style="margin-top: 15px;"></div>
+</div>
+</div>
 
 <script src="data/investigation_board.js"></script>
-  <script src="data/network_analysis/influence_network.js"></script>
-  <script>
+<script src="data/network_analysis/influence_network.js"></script>
+<script>
   (function() {
     'use strict';
 
@@ -1335,16 +862,16 @@
     // Most nodes (generic osint_target) fall to 'default' grey, so the
     // genuine category signals pop visually instead of all being red.
     var CATEGORY_COLORS = {
-      ccp:              '#ef4444',
+      ccp:              'var(--slate-critical, #b0544a)',
       israel:           '#4d9fff',
       india:            '#fb923c',
-      cfnis:            '#facc15',
+      cfnis:            'var(--slate-warning, #c9a44c)',
       maid_legislation: '#ec4899',
       financial_vector: '#eab308',
       political_donor:  '#22c55e',
       lobbied_official: '#14b8a6',
       media:            '#f472b6',
-      org:              '#a855f7',
+      org:              '#a8bcc8',
       default:          '#6b7280'
     };
 
@@ -1618,61 +1145,59 @@
     loadData();
   })();
   </script>
-  <!-- No footer on canvas pages — full-screen tools -->
+ No footer on canvas pages — full-screen tools 
 <div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    <a href="convergence-matrix.html" class="cap263-card-link">
-    <a href="influence-target-alpha.html" class="cap263-card-link cap263-card-link--gray">
-      <div class="cap263-tag">Network</div>
-      <div class="cap263-tag">Related</div>
-      <div class="cap263-bold-tight">Influence the foreign-interference focus</div>
-    </a>
-</div>
-      <div class="cap263-bold-tight">Convergence Matrix</div>
-    </a>
-    <a href="conspiracy-board.html" class="cap263-card-link cap263-card-link--gold">
-      <div class="cap263-tag cap263-tag--gold">Analysis</div>
-      <div class="cap263-bold-tight">Conspiracy Board</div>
-    </a>
-    <a href="cross-reference.html" class="cap263-card-link">
-      <div class="cap263-tag">Cross-Ref</div>
-      <div class="cap263-bold-tight">Cross-Reference</div>
-    </a>
-    <a href="corruption-map.html" class="cap263-card-link">
-      <div class="cap263-tag">Mapping</div>
-      <div class="cap263-bold-tight">Corruption Map</div>
-    </a>
-    <a href="institutional-capture.html" class="cap263-card-link cap263-card-link--red">
-      <div class="cap263-tag cap263-tag--red">Synthesis</div>
-      <div class="cap263-bold-tight">Institutional Capture</div>
-    </a>
-    <a href="search.html" class="cap263-card-link cap263-card-link--red">
-      <div class="cap263-tag cap263-tag--red">Tools</div>
-      <div class="cap263-bold-tight">OSINT Search - TENET5</div>
-    </a>
-    <a href="dossier-viewer.html" class="cap263-card-link cap263-card-link--red">
-      <div class="cap263-tag cap263-tag--red">Tools</div>
-      <div class="cap263-bold-tight">OSINT Dossier Viewer</div>
-    </a>
-  </div>
-</div>
-<div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="file-504.html" class="cap263-text-accent-bold">File charges →</a> | <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a></p>
+<h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
+<div class="cap263-grid-cards">
+<a class="cap263-card-link" href="convergence-matrix.html">
+<a class="cap263-card-link cap263-card-link--gray" href="influence-target-alpha.html">
+<div class="cap263-tag">Network</div>
+<div class="cap263-tag">Related</div>
+<div class="cap263-bold-tight">Influence the foreign-interference focus</div>
+</a>
+</a></div>
+<div class="cap263-bold-tight">Convergence Matrix</div>
+
+<a class="cap263-card-link cap263-card-link--gold" href="conspiracy-board.html">
+<div class="cap263-tag cap263-tag--gold">Analysis</div>
+<div class="cap263-bold-tight">Conspiracy Board</div>
+</a>
+<a class="cap263-card-link" href="cross-reference.html">
+<div class="cap263-tag">Cross-Ref</div>
+<div class="cap263-bold-tight">Cross-Reference</div>
+</a>
+<a class="cap263-card-link" href="corruption-map.html">
+<div class="cap263-tag">Mapping</div>
+<div class="cap263-bold-tight">Corruption Map</div>
+</a>
+<a class="cap263-card-link cap263-card-link--red" href="institutional-capture.html">
+<div class="cap263-tag cap263-tag--red">Synthesis</div>
+<div class="cap263-bold-tight">Institutional Capture</div>
+</a>
+<a class="cap263-card-link cap263-card-link--red" href="search.html">
+<div class="cap263-tag cap263-tag--red">Tools</div>
+<div class="cap263-bold-tight">OSINT Search - TENET5</div>
+</a>
+<a class="cap263-card-link cap263-card-link--red" href="dossier-viewer.html">
+<div class="cap263-tag cap263-tag--red">Tools</div>
+<div class="cap263-bold-tight">OSINT Dossier Viewer</div>
+</a>
 </div>
 
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div class="cap263-alert-card">
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-accent-bold" href="file-504.html">File charges →</a> | <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
+</div>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1698,28 +1223,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>

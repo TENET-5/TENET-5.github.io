@@ -1,937 +1,307 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Corruption &amp; Influence Map — Network Graph Visualization | TENET5</title>
-  <meta name="description" content="Interactive corruption and influence map visualizing 382 entities and 6,802 connections across lobbying, treason roster, OSINT, and financial datasets. All from public records.">
-  <meta property="og:description" content="382 entities, 6,802 connections. Cross-referenced influence network across lobbying records, treason roster, OSINT vault, and financial analysis. Public record only.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://tenet-5.github.io/corruption-map.html">
-  <meta property="og:site_name" content="TENET5">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-findings.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:locale" content="en_CA">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Corruption &amp; Influence Map — Network Graph Visualization">
-  <meta name="twitter:description" content="382 entities, 6,802 connections mapped across 5 investigative data vectors. Cross-referenced influence topology from public records.">
-  <meta name="twitter:image" content="https://tenet-5.github.io/img/og-findings.png">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
-    /* ── LAYOUT ── */
-    .cm-wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px 60px;
-      font-family: var(--slate-font-mono);
-      color: var(--text-primary);
-    }
-
-    /* ── HERO ── */
-    .cm-hero {
-      text-align: center;
-      padding: 48px 0 32px;
-      border-bottom: 2px solid rgba(196,30,58,0.4);
-      margin-bottom: 28px;
-    }
-    .cm-hero h1 {
-      font-family: var(--slate-font-body);
-      font-size: 2.4rem;
-      color: var(--text-primary);
-      letter-spacing: -1px;
-      margin: 0 0 10px;
-      line-height: 1.15;
-    }
-    .cm-hero .sub {
-      font-size: 0.85rem;
-      color: var(--text-tertiary);
-      max-width: 700px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    /* ── LOADING ── */
-    .cm-loading {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-tertiary);
-      font-size: 0.85rem;
-    }
-    .cm-loading .spinner {
-      display: inline-block;
-      width: 28px;
-      height: 28px;
-      border: 3px solid rgba(196,30,58,0.2);
-      border-top-color: #c41e3a;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-bottom: 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── STATS DASHBOARD ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: rgba(10, 14, 22, 0.55);
-      backdrop-filter: blur(12px) saturate(160%);
-      -webkit-backdrop-filter: blur(12px) saturate(160%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 18px 16px;
-      text-align: center;
-      transition: border-color 0.3s, background 0.3s, transform 0.2s;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-    .stat-card:hover {
-      border-color: rgba(196,30,58,0.35);
-      background: rgba(15, 20, 32, 0.65);
-      transform: translateY(-2px);
-    }
-    .stat-card .big {
-      font-size: 1.9rem;
-      font-weight: 700;
-      display: block;
-      line-height: 1.1;
-    }
-    .stat-card .big.red { color: #e53555; }
-    .stat-card .big.blue { color: #60a5fa; }
-    .stat-card .big.green { color: #39ff14; }
-    .stat-card .big.yellow { color: #facc15; }
-    .stat-card .big.purple { color: #c084fc; }
-    .stat-card .lbl {
-      font-size: 0.6rem;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 6px;
-    }
-
-    /* ── SECTION HEADINGS ── */
-    .section-head {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--text-tertiary);
-      margin: 36px 0 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .section-head .num {
-      background: rgba(196,30,58,0.12);
-      color: #e53555;
-      padding: 3px 10px;
-      border-radius: 4px;
-      font-weight: 700;
-      font-size: 0.65rem;
-    }
-
-    /* ── SEARCH BAR ── */
-    .search-bar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 16px;
-      padding: 12px 16px;
-      background: rgba(10, 14, 22, 0.50);
-      backdrop-filter: blur(10px) saturate(150%);
-      -webkit-backdrop-filter: blur(10px) saturate(150%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
-    }
-    .search-bar .sw {
-      flex: 1;
-      min-width: 200px;
-      position: relative;
-    }
-    .search-bar .sw svg {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-quaternary);
-      pointer-events: none;
-    }
-    .search-bar input {
-      width: 100%;
-      background: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 6px;
-      padding: 8px 10px 8px 32px;
-      color: var(--text-primary);
-      font-family: var(--slate-font-mono);
-      font-size: 0.78rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .search-bar input:focus { border-color: rgba(196,30,58,0.4); }
-    .search-bar input::placeholder { color: var(--text-quaternary); }
-    .search-bar .info {
-      font-size: 0.65rem;
-      color: var(--text-quaternary);
-      white-space: nowrap;
-    }
-
-    /* ── TABLE GLASS WRAPPER ── */
-    .table-glass {
-      background: rgba(10, 14, 22, 0.45);
-      backdrop-filter: blur(8px) saturate(140%);
-      -webkit-backdrop-filter: blur(8px) saturate(140%);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 4px 12px 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-      overflow-x: auto;
-      margin-bottom: 28px;
-    }
-
-    /* ── SORTABLE TABLE ── */
-    .cm-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-      margin-bottom: 28px;
-    }
-    .cm-table th {
-      text-align: left;
-      color: var(--text-tertiary);
-      font-weight: 600;
-      padding: 10px 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 0.65rem;
-      cursor: pointer;
-      transition: color 0.2s;
-      user-select: none;
-      white-space: nowrap;
-    }
-    .cm-table th:hover { color: var(--text-secondary); }
-    .cm-table th.sorted { color: #e53555; }
-    .cm-table th.sorted::after { content: ' \u25BC'; font-size: 0.5rem; }
-    .cm-table th.sorted.asc::after { content: ' \u25B2'; }
-    .cm-table td {
-      padding: 10px 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      color: #c0c0c6;
-      vertical-align: top;
-    }
-    .cm-table tr:hover td { background: rgba(255,255,255,0.02); }
-    .cm-table tr.hidden { display: none; }
-
-    /* ── TYPE INDICATORS ── */
-    .type-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-    .type-dot.person { background: #e53555; }
-    .type-dot.org { background: #c084fc; }
-    .type-dot.official { background: #60a5fa; }
-    .type-dot.donor { background: #39ff14; }
-    .type-dot.event { background: #facc15; }
-    .type-dot.unknown { background: #6b7280; }
-
-    .name-cell { font-weight: 600; }
-    .name-cell.person { color: #fca5a5; }
-    .name-cell.org { color: #d8b4fe; }
-    .name-cell.official { color: #93c5fd; }
-    .name-cell.donor { color: #86efac; }
-    .name-cell.event { color: #fde68a; }
-    .name-cell.unknown { color: #9ca3af; }
-
-    .score-val {
-      font-weight: 700;
-      font-family: var(--slate-font-mono);
-      text-align: right;
-    }
-    .score-val.high { color: #e53555; }
-    .score-val.mid { color: #facc15; }
-    .score-val.low { color: #39ff14; }
-
-    /* ── BADGES ── */
-    .badge {
-      display: inline-block;
-      font-size: 0.55rem;
-      padding: 2px 7px;
-      border-radius: 3px;
-      margin: 1px 3px 1px 0;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .badge-treason_roster { background: rgba(229,53,85,0.15); color: #e53555; }
-    .badge-lobbied_official { background: rgba(168,85,247,0.15); color: #c084fc; }
-    .badge-israel { background: rgba(96,165,250,0.15); color: #60a5fa; }
-    .badge-osint_target { background: rgba(57,255,20,0.15); color: #39ff14; }
-    .badge-political_donor { background: rgba(249,115,22,0.15); color: #f97316; }
-    .badge-financial_vector { background: rgba(250,204,21,0.15); color: #facc15; }
-    .badge-person { background: rgba(229,53,85,0.1); color: #fca5a5; }
-    .badge-org { background: rgba(168,85,247,0.1); color: #d8b4fe; }
-    .badge-ccp { background: rgba(229,53,85,0.15); color: #e53555; }
-    .badge-default { background: rgba(255,255,255,0.06); color: var(--text-tertiary); }
-
-    .source-tag {
-      display: inline-block;
-      font-size: 0.58rem;
-      padding: 2px 6px;
-      border-radius: 3px;
-      background: rgba(96,165,250,0.1);
-      color: #93c5fd;
-      margin: 1px 2px;
-    }
-
-    /* ── CATEGORY ANALYSIS ── */
-    .cat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 10px;
-      margin-bottom: 28px;
-    }
-    .cat-card {
-      background: rgba(10, 14, 22, 0.55);
-      backdrop-filter: blur(10px) saturate(150%);
-      -webkit-backdrop-filter: blur(10px) saturate(150%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      transition: border-color 0.3s, background 0.3s, transform 0.2s;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-    .cat-card:hover {
-      border-color: rgba(196,30,58,0.3);
-      background: rgba(15, 20, 32, 0.65);
-      transform: translateY(-1px);
-    }
-    .cat-bar-wrap {
-      flex: 1;
-      min-width: 0;
-    }
-    .cat-name {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .cat-bar-bg {
-      height: 6px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .cat-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.6s ease;
-    }
-    .cat-count {
-      font-size: 1.1rem;
-      font-weight: 700;
-      min-width: 36px;
-      text-align: right;
-    }
-
-    /* ── TOP INFLUENCE CARDS ── */
-    .top-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-    .top-card {
-      background: rgba(10, 14, 22, 0.55);
-      backdrop-filter: blur(10px) saturate(150%);
-      -webkit-backdrop-filter: blur(10px) saturate(150%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 16px 18px;
-      transition: border-color 0.3s, background 0.3s, transform 0.2s;
-      position: relative;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-    .top-card:hover {
-      border-color: rgba(196,30,58,0.4);
-      background: rgba(15, 20, 32, 0.65);
-      transform: translateY(-1px);
-    }
-    .top-card .rank {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      font-size: 0.6rem;
-      color: var(--text-quaternary);
-      font-weight: 700;
-    }
-    .top-card .tc-name {
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .top-card .tc-type {
-      font-size: 0.62rem;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .tc-score-bar {
-      height: 5px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 6px;
-    }
-    .tc-score-fill {
-      height: 100%;
-      border-radius: 3px;
-      background: linear-gradient(90deg, #e53555, #f97316);
-    }
-    .tc-score-val {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #e53555;
-      margin-bottom: 8px;
-    }
-    .top-card .cats { font-size: 0.62rem; }
-
-    /* ── NETWORK STATS ── */
-    .netstats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .netstats-card {
-      background: rgba(10, 14, 22, 0.55);
-      backdrop-filter: blur(10px) saturate(150%);
-      -webkit-backdrop-filter: blur(10px) saturate(150%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 18px 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-    .netstats-card h3 {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-tertiary);
-      margin: 0 0 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
-    }
-    .ns-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 0;
-      font-size: 0.75rem;
-      border-bottom: 1px solid rgba(255,255,255,0.02);
-    }
-    .ns-row:last-child { border-bottom: none; }
-    .ns-row .ns-label { color: var(--text-tertiary); }
-    .ns-row .ns-val { font-weight: 700; }
-
-    /* ── CONNECTIONS BOX ── */
-    .connect-box {
-      background: rgba(10, 14, 22, 0.50);
-      backdrop-filter: blur(10px) saturate(150%);
-      -webkit-backdrop-filter: blur(10px) saturate(150%);
-      border: 1px solid rgba(96,165,250,0.15);
-      border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 28px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-    }
-    .connect-box h3 {
-      font-size: 0.82rem;
-      color: #93c5fd;
-      margin: 0 0 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .connect-box .links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .connect-box .clink {
-      display: inline-block;
-      font-size: 0.78rem;
-      color: #60a5fa;
-      text-decoration: none;
-      background: var(--bg-surface);
-      padding: 8px 16px;
-      border-radius: 6px;
-      border: 1px solid rgba(96,165,250,0.2);
-      transition: all 0.2s;
-    }
-    .connect-box .clink:hover {
-      background: rgba(96,165,250,0.1);
-      border-color: rgba(96,165,250,0.4);
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 700px) {
-      .cm-hero h1 { font-size: 1.6rem; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .cat-grid { grid-template-columns: 1fr; }
-      .top-grid { grid-template-columns: 1fr; }
-      .netstats-grid { grid-template-columns: 1fr; }
-      .cm-table { font-size: 0.7rem; }
-      .search-bar { flex-direction: column; }
-    }
-  </style>
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-<!-- offline_db.js removed: 17MB blocking load -->
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="Corruption &amp; Influence Map — Network Graph Visualization | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/corruption-map.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Corruption &amp; Influence Map — Network Graph Visualization | TENET5">
+  <title>Corruption & Influence Map — Network Graph Visualization | TENET5</title>
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
   <link rel="canonical" href="https://tenet-5.github.io/corruption-map.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Corruption &amp; Influence Map \u2014 Network Graph Visualization | TENET5",
-  "url": "https://tenet-5.github.io/corruption-map.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="Corruption & Influence Map — Network Graph Visualization | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="Criminal Code of Canada (R.S.C., 1985, c. C-46)">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="corruption-map">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body class="topo topo-dense" data-act="iv">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Corruption Map</span></div>    <!-- CAP224-NAV-END -->
+  </header>
+
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Corruption Map</span></div>  CAP224-NAV-END 
 <div class="grain-overlay"></div>
 <div class="vignette"></div>
-
-
-  <div id="site-header-frame"></div>
-<!-- ── ANIMATED NETWORK BACKGROUND ── -->
-  <canvas id="bg-network" class="tnt-style-1151"></canvas>
-
-  <a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header-frame"></div>
+ ── ANIMATED NETWORK BACKGROUND ── 
+<canvas class="tnt-style-1151" id="bg-network"></canvas>
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="cm-wrap" id="main" role="main">
-
-    <!-- ── HERO ── -->
-    <div class="cm-hero" style="position:relative;">
-      <!-- Compass rose — NE corner of hero, topographic accent -->
-      <svg class="compass" aria-hidden="true" focusable="false"
-           style="position:absolute;top:8px;right:8px;width:68px;height:68px;"
-           viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="46" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.55"/>
-        <circle cx="50" cy="50" r="38" fill="none" stroke="#c9a84c" stroke-width="0.4" opacity="0.35"/>
-        <circle cx="50" cy="50" r="2.5" fill="#c9a84c" opacity="0.7"/>
-        <polygon points="50,8 46,48 54,48" fill="#c9a84c" opacity="0.75"/>
-        <polygon points="50,92 46,52 54,52" fill="#7a776e" opacity="0.55"/>
-        <polygon points="8,50 48,46 48,54" fill="#7a776e" opacity="0.55"/>
-        <polygon points="92,50 52,46 52,54" fill="#7a776e" opacity="0.55"/>
-        <text x="50" y="6" text-anchor="middle" font-family="Cinzel, serif" font-size="7" fill="#c9a84c" opacity="0.85">N</text>
-      </svg>
-      <h1  id="n-64252bf4" data-narrate="Corruption Influence Map — Network Graph Visualization. N Corruption Influence Map Cross-referenced network graph of 382 entities and 6,802 connections across lobbying records, treason roster, OSINT vault, financial analysis, and investigation board datasets. Every data point sourced from public records." >Corruption &amp; Influence Map</h1>
-      <p class="sub" id="hero-sub">Cross-referenced network graph of <strong>382</strong> entities and <strong>6,802</strong> connections across lobbying records, treason roster, OSINT vault, financial analysis, and investigation board datasets. Every data point sourced from public records.</p>
-      <div class="pressure-ridge" aria-hidden="true" style="margin-top:20px;"></div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px;">
-        <span class="map-legend ml-critical"><span class="ml-key"></span>Peak connectivity ≥ 50</span>
-        <span class="map-legend ml-warn"><span class="ml-key"></span>High connectivity 20–49</span>
-        <span class="map-legend ml-gold"><span class="ml-key"></span>Ridge connectivity 5–19</span>
-        <span class="map-legend ml-ok"><span class="ml-key"></span>Foothill connectivity &lt; 5</span>
+<!-- ── HERO ── -->
+<div class="cm-hero" style="position:relative;">
+<!-- Compass rose — NE corner of hero, topographic accent -->
+<svg aria-hidden="true" class="compass" focusable="false" style="position:absolute;top:8px;right:8px;width:68px;height:68px;" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" opacity="0.55" r="46" stroke="#c9a84c" stroke-width="0.8"></circle>
+<circle cx="50" cy="50" fill="none" opacity="0.35" r="38" stroke="#c9a84c" stroke-width="0.4"></circle>
+<circle cx="50" cy="50" fill="#c9a84c" opacity="0.7" r="2.5"></circle>
+<polygon fill="#c9a84c" opacity="0.75" points="50,8 46,48 54,48"></polygon>
+<polygon fill="#7a776e" opacity="0.55" points="50,92 46,52 54,52"></polygon>
+<polygon fill="#7a776e" opacity="0.55" points="8,50 48,46 48,54"></polygon>
+<polygon fill="#7a776e" opacity="0.55" points="92,50 52,46 52,54"></polygon>
+<text fill="#c9a84c" font-family="Cinzel, serif" font-size="7" opacity="0.85" text-anchor="middle" x="50" y="6">N</text>
+</svg>
+<h1 data-narrate="Corruption Influence Map — Network Graph Visualization. N Corruption Influence Map Cross-referenced network graph of 382 entities and 6,802 connections across lobbying records, treason roster, OSINT vault, financial analysis, and investigation board datasets. Every data point sourced from public records." id="n-64252bf4">Corruption &amp; Influence Map</h1>
+<p class="sub" id="hero-sub">Cross-referenced network graph of <strong>382</strong> entities and <strong>6,802</strong> connections across lobbying records, treason roster, OSINT vault, financial analysis, and investigation board datasets. Every data point sourced from public records.</p>
+<div aria-hidden="true" class="pressure-ridge" style="margin-top:20px;"></div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px;">
+<span class="map-legend ml-critical"><span class="ml-key"></span>Peak connectivity ≥ 50</span>
+<span class="map-legend ml-warn"><span class="ml-key"></span>High connectivity 20–49</span>
+<span class="map-legend ml-gold"><span class="ml-key"></span>Ridge connectivity 5–19</span>
+<span class="map-legend ml-ok"><span class="ml-key"></span>Foothill connectivity &lt; 5</span>
+</div>
+</div>
+<!-- ── Topographic divider between hero and data ── -->
+<hr aria-hidden="true" class="survey-rule"/>
+<!-- ── LOADING STATE ── -->
+<div class="cm-loading" id="cm-loading">
+<div class="spinner"></div>
+<div>Loading influence network data...</div>
+</div>
+<!-- ── MAIN CONTENT (hidden until data loads) ── -->
+<div class="tnt-style-88" id="cm-content">
+<!-- ═══ A. STATS DASHBOARD ═══ -->
+<div class="stats-grid" id="stats-grid">
+<div class="stat-card"><span class="big red" id="s-nodes">--</span><div class="lbl">Total Entities</div></div>
+<div class="stat-card"><span class="big blue" id="s-edges">--</span><div class="lbl">Connections</div></div>
+<div class="stat-card"><span class="big purple" id="s-multi">--</span><div class="lbl">Multi-Source Entities</div></div>
+<div class="stat-card"><span class="big yellow" id="s-top-score">--</span><div class="lbl">Top Influence Score</div></div>
+<div class="stat-card"><span class="big green" id="s-avg-conn">--</span><div class="lbl">Avg Connections/Node</div></div>
+<div class="stat-card"><span class="big red" id="s-high-inf">--</span><div class="lbl">High Influence (50+)</div></div>
+</div>
+<div aria-hidden="true" class="isobar"></div>
+<!-- ═══ B. ENTITY OVERLAPS TABLE ═══ -->
+<div class="section-head">
+<span class="num">01</span> Multi-Source Entity Overlaps
       </div>
-    </div>
-
-    <!-- ── Topographic divider between hero and data ── -->
-    <hr class="survey-rule" aria-hidden="true">
-
-    <!-- ── LOADING STATE ── -->
-    <div class="cm-loading" id="cm-loading">
-      <div class="spinner"></div>
-      <div>Loading influence network data...</div>
-    </div>
-
-    <!-- ── MAIN CONTENT (hidden until data loads) ── -->
-    <div id="cm-content" class="tnt-style-88">
-
-      <!-- ═══ A. STATS DASHBOARD ═══ -->
-      <div class="stats-grid" id="stats-grid">
-        <div class="stat-card"><span class="big red" id="s-nodes">--</span><div class="lbl">Total Entities</div></div>
-        <div class="stat-card"><span class="big blue" id="s-edges">--</span><div class="lbl">Connections</div></div>
-        <div class="stat-card"><span class="big purple" id="s-multi">--</span><div class="lbl">Multi-Source Entities</div></div>
-        <div class="stat-card"><span class="big yellow" id="s-top-score">--</span><div class="lbl">Top Influence Score</div></div>
-        <div class="stat-card"><span class="big green" id="s-avg-conn">--</span><div class="lbl">Avg Connections/Node</div></div>
-        <div class="stat-card"><span class="big red" id="s-high-inf">--</span><div class="lbl">High Influence (50+)</div></div>
-      </div>
-
-      <div class="isobar" aria-hidden="true"></div>
-
-      <!-- ═══ B. ENTITY OVERLAPS TABLE ═══ -->
-      <div class="section-head">
-        <span class="num">01</span> Multi-Source Entity Overlaps
-      </div>
-      <p class="tnt-style-1152">
+<p class="tnt-style-1152">
         Entities appearing in 2 or more independent investigation datasets. Cross-referencing multiple sources increases confidence that these entities occupy structural positions within the influence network.
       </p>
-
-      <div class="search-bar">
-        <div class="sw">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="overlap-search" placeholder="Search entities... (e.g. 'Mendicino', 'CIJA', 'Housefather')">
-        </div>
-        <span class="info" id="overlap-info">--</span>
+<div class="search-bar">
+<div class="sw">
+<svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="14"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
+<input id="overlap-search" placeholder="Search entities... (e.g. 'Mendicino', 'CIJA', 'Housefather')" type="text"/>
+</div>
+<span class="info" id="overlap-info">--</span>
+</div>
+<div class="table-glass">
+<table class="cm-table" id="overlap-table">
+<thead>
+<tr>
+<th data-sort="name">Entity</th>
+<th class="sorted" data-sort="score">Influence</th>
+<th data-sort="sources">Sources</th>
+<th>Datasets</th>
+<th>Categories</th>
+</tr>
+</thead>
+<tbody id="overlap-tbody"></tbody>
+</table>
+</div>
+<div aria-hidden="true" class="isobar"></div>
+<!-- ═══ C. CATEGORY ANALYSIS ═══ -->
+<div class="section-head">
+<span class="num">02</span> Category Analysis
       </div>
-
-      <div class="table-glass">
-      <table class="cm-table" id="overlap-table">
-        <thead>
-          <tr>
-            <th data-sort="name">Entity</th>
-            <th data-sort="score" class="sorted">Influence</th>
-            <th data-sort="sources">Sources</th>
-            <th>Datasets</th>
-            <th>Categories</th>
-          </tr>
-        </thead>
-        <tbody id="overlap-tbody"></tbody>
-      </table>
-      </div>
-
-      <div class="isobar" aria-hidden="true"></div>
-
-      <!-- ═══ C. CATEGORY ANALYSIS ═══ -->
-      <div class="section-head">
-        <span class="num">02</span> Category Analysis
-      </div>
-      <p class="tnt-style-1152">
+<p class="tnt-style-1152">
         Distribution of entity categories across the influence network. Categories are assigned by source dataset classification.
       </p>
-      <div class="cat-grid" id="cat-grid"></div>
-
-      <div class="isobar" aria-hidden="true"></div>
-
-      <!-- ═══ D. TOP INFLUENCE NODES ═══ -->
-      <div class="section-head">
-        <span class="num">03</span> Top 20 Influence Nodes
+<div class="cat-grid" id="cat-grid"></div>
+<div aria-hidden="true" class="isobar"></div>
+<!-- ═══ D. TOP INFLUENCE NODES ═══ -->
+<div class="section-head">
+<span class="num">03</span> Top 20 Influence Nodes
       </div>
-      <p class="tnt-style-1152">
+<p class="tnt-style-1152">
         The 20 highest influence-score entities in the network. Influence score is computed from connection weight, source count, and category overlap.
       </p>
-      <div class="top-grid" id="top-grid"></div>
-
-      <div class="isobar" aria-hidden="true"></div>
-
-      <!-- ═══ E. NETWORK STATISTICS ═══ -->
-      <div class="section-head">
-        <span class="num">04</span> Network Statistics
+<div class="top-grid" id="top-grid"></div>
+<div aria-hidden="true" class="isobar"></div>
+<!-- ═══ E. NETWORK STATISTICS ═══ -->
+<div class="section-head">
+<span class="num">04</span> Network Statistics
       </div>
-      <div class="netstats-grid">
-        <div class="netstats-card">
-          <h3>Graph Metrics</h3>
-          <div id="graph-metrics"></div>
-        </div>
-        <div class="netstats-card">
-          <h3>Most Connected Nodes</h3>
-          <div id="most-connected"></div>
-        </div>
-        <div class="netstats-card">
-          <h3>Cluster Analysis</h3>
-          <div id="cluster-analysis"></div>
-        </div>
-      </div>
-
-      <div class="isobar" aria-hidden="true"></div>
-
-      <!-- ═══ F. N-VS-NP MATRIX ═══ -->
-      <div class="section-head" id="n-vs-np">
-        <span class="num">05</span> Policy Impact Matrix</div>
-      <p class="tnt-style-1152">
+<div class="netstats-grid">
+<div class="netstats-card">
+<h3>Graph Metrics</h3>
+<div id="graph-metrics"></div>
+</div>
+<div class="netstats-card">
+<h3>Most Connected Nodes</h3>
+<div id="most-connected"></div>
+</div>
+<div class="netstats-card">
+<h3>Cluster Analysis</h3>
+<div id="cluster-analysis"></div>
+</div>
+</div>
+<div aria-hidden="true" class="isobar"></div>
+<!-- ═══ F. N-VS-NP MATRIX ═══ -->
+<div class="section-head" id="n-vs-np">
+<span class="num">05</span> Policy Impact Matrix</div>
+<p class="tnt-style-1152">
         Data hand-off convergence mapping. This matrix visually plots the structural vectors linking the CIJA lobbying pipeline to the unhindered passage of MAID legislation via RCMP command failures.
       </p>
-      <div class="matrix-wrapper tnt-style-1153">
-         <canvas id="matrixCanvas"></canvas>
+<div class="matrix-wrapper tnt-style-1153">
+<canvas id="matrixCanvas"></canvas>
+</div>
+<div aria-hidden="true" class="isobar"></div>
+<!-- ═══ G. CONNECTION TO CRIMINAL CODE ═══ -->
+<div class="section-head">
+<span class="num">06</span> Related Analysis
       </div>
-
-      <div class="isobar" aria-hidden="true"></div>
-
-      <!-- ═══ G. CONNECTION TO CRIMINAL CODE ═══ -->
-      <div class="section-head">
-        <span class="num">06</span> Related Analysis
-      </div>
-      <div class="connect-box">
-        <h3>Cross-Reference with Legal Findings</h3>
-        <p class="tnt-style-1154">
+<div class="connect-box">
+<h3>Cross-Reference with Legal Findings</h3>
+<p class="tnt-style-1154">
           Entities in this influence network connect to documented Criminal Code findings and formal charges analysis. Use the links below to trace from entity to legal exposure.
         </p>
-        <div class="links">
-          <a href="charges-sheet.html" class="clink">Charges Sheet</a>
-          <a href="criminal-code-analysis.html" class="clink">Criminal Code Analysis</a>
-          <a href="network-analysis.html" class="clink">Full Network Graph</a>
-          <a href="cross-reference.html" class="clink">Cross-Reference Engine</a>
-          <a href="conspiracy-board.html" class="clink">Investigation Board</a>
-          <a href="dossier-viewer.html" class="clink">Dossier Viewer</a>
-        </div>
-      </div>
-
-    </div><!-- /cm-content -->
-  </div><!-- /cm-wrap -->
-
+<div class="links">
+<a class="clink" href="charges-sheet.html">Charges Sheet</a>
+<a class="clink" href="criminal-code-analysis.html">Criminal Code Analysis</a>
+<a class="clink" href="network-analysis.html">Full Network Graph</a>
+<a class="clink" href="cross-reference.html">Cross-Reference Engine</a>
+<a class="clink" href="conspiracy-board.html">Investigation Board</a>
+<a class="clink" href="dossier-viewer.html">Dossier Viewer</a>
+</div>
+</div>
+</div><!-- /cm-content -->
+</div> /cm-wrap 
 <div class="cap263-container-narrow-px">
-  <div class="isobar isobar-thick" aria-hidden="true"></div>
-  <div class="carto-header">
-    <h2 style="font-size:1.1rem;">Connected Intelligence</h2>
-    <span class="ch-scale">7 terrain routes</span>
-    <span class="ch-datum">Corruption Survey Grid</span>
-  </div>
-  <div class="terrain-grid">
-    <a href="follow-the-money.html" class="terrain-card" style="text-decoration:none;">
-      <span class="tc-elev">▲ 4,800m</span>
-      <div class="tc-title">Follow the Money</div>
-      <div class="tc-meta"><span class="ridge-label rl-financial">financial</span></div>
-    </a>
-    <a href="network-analysis.html" class="terrain-card" style="text-decoration:none;">
-      <span class="tc-elev">▲ 4,200m</span>
-      <div class="tc-title">Network Analysis</div>
-      <div class="tc-meta"><span class="ridge-label rl-lobbying">network</span></div>
-    </a>
-    <a href="scandals.html" class="terrain-card" style="text-decoration:none;">
-      <span class="tc-elev">▲ 3,600m</span>
-      <div class="tc-title">Scandals Database</div>
-      <div class="tc-meta"><span class="ridge-label rl-treason">investigation</span></div>
-    </a>
-    <a href="accountability.html" class="terrain-card" style="text-decoration:none;">
-      <span class="tc-elev">▲ 3,400m</span>
-      <div class="tc-title">Accountability Database</div>
-      <div class="tc-meta"><span class="ridge-label rl-treason">accountability</span></div>
-    </a>
-    <a href="institutional-capture.html" class="terrain-card" style="text-decoration:none;">
-      <span class="tc-elev">▲ 5,000m</span>
-      <div class="tc-title">Institutional Capture</div>
-      <div class="tc-meta"><span class="ridge-label rl-treason">synthesis</span></div>
-    </a>
-    <a href="indigenous-procurement-fraud.html" class="terrain-card" style="text-decoration:none;">
-      <span class="tc-elev">▲ 3,100m</span>
-      <div class="tc-title">Indigenous Procurement Fraud</div>
-      <div class="tc-meta"><span class="ridge-label rl-financial">procurement</span></div>
-    </a>
-    <a href="ledger-book.html" class="terrain-card" style="text-decoration:none;">
-      <span class="tc-elev">▲ 4,500m</span>
-      <div class="tc-title">Vol. I: The Accountability Ledger</div>
-      <div class="tc-meta"><span class="ridge-label rl-financial">financial</span></div>
-    </a>
-  </div>
+<div aria-hidden="true" class="isobar isobar-thick"></div>
+<div class="carto-header">
+<h2 style="font-size:1.1rem;">Connected Intelligence</h2>
+<span class="ch-scale">7 terrain routes</span>
+<span class="ch-datum">Corruption Survey Grid</span>
+</div>
+<div class="terrain-grid">
+<a class="terrain-card" href="follow-the-money.html" style="text-decoration:none;">
+<span class="tc-elev">▲ 4,800m</span>
+<div class="tc-title">Follow the Money</div>
+<div class="tc-meta"><span class="ridge-label rl-financial">financial</span></div>
+</a>
+<a class="terrain-card" href="network-analysis.html" style="text-decoration:none;">
+<span class="tc-elev">▲ 4,200m</span>
+<div class="tc-title">Network Analysis</div>
+<div class="tc-meta"><span class="ridge-label rl-lobbying">network</span></div>
+</a>
+<a class="terrain-card" href="scandals.html" style="text-decoration:none;">
+<span class="tc-elev">▲ 3,600m</span>
+<div class="tc-title">Scandals Database</div>
+<div class="tc-meta"><span class="ridge-label rl-treason">investigation</span></div>
+</a>
+<a class="terrain-card" href="accountability.html" style="text-decoration:none;">
+<span class="tc-elev">▲ 3,400m</span>
+<div class="tc-title">Accountability Database</div>
+<div class="tc-meta"><span class="ridge-label rl-treason">accountability</span></div>
+</a>
+<a class="terrain-card" href="institutional-capture.html" style="text-decoration:none;">
+<span class="tc-elev">▲ 5,000m</span>
+<div class="tc-title">Institutional Capture</div>
+<div class="tc-meta"><span class="ridge-label rl-treason">synthesis</span></div>
+</a>
+<a class="terrain-card" href="indigenous-procurement-fraud.html" style="text-decoration:none;">
+<span class="tc-elev">▲ 3,100m</span>
+<div class="tc-title">Indigenous Procurement Fraud</div>
+<div class="tc-meta"><span class="ridge-label rl-financial">procurement</span></div>
+</a>
+<a class="terrain-card" href="ledger-book.html" style="text-decoration:none;">
+<span class="tc-elev">▲ 4,500m</span>
+<div class="tc-title">Vol. I: The Accountability Ledger</div>
+<div class="tc-meta"><span class="ridge-label rl-financial">financial</span></div>
+</a>
+</div>
 </div>
 <div class="cap263-alert-card">
-      <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-      <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="file-504.html" class="cap263-text-accent-bold">File charges &rarr;</a> | <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money &rarr;</a></p>
-    </div>
-  <div id="read-next"></div>
-<!-- ── ANIMATED NETWORK BACKGROUND ── -->
-  <script>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-accent-bold" href="file-504.html">File charges →</a> | <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a></p>
+</div>
+<div id="read-next"></div>
+ ── ANIMATED NETWORK BACKGROUND ── 
+<script>
   (function() {
     'use strict';
     var cvs = document.getElementById('bg-network');
@@ -1149,8 +519,7 @@
     });
   })();
   </script>
-
-  <script>
+<script>
   (function() {
     'use strict';
 
@@ -1175,10 +544,10 @@
     var CAT_COLORS = {
       treason_roster: '#e53555',
       lobbied_official: '#c084fc',
-      israel: '#60a5fa',
+      israel: 'var(--slate-info, #6a8a9a)',
       osint_target: '#39ff14',
       political_donor: '#f97316',
-      financial_vector: '#facc15',
+      financial_vector: 'var(--slate-warning, #c9a44c)',
       person: '#fca5a5',
       org: '#d8b4fe',
       official: '#93c5fd',
@@ -1606,18 +975,16 @@
     }
   })();
   </script>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1643,28 +1010,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>

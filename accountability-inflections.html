@@ -1,340 +1,104 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accountability Inflection Points — Cabinet Shuffle Dates Cross-Axis | TENET5</title>
-  <meta name="description" content="OSINT chronological analysis: 7 Canadian federal cabinet-shuffle dates where multiple flagged decision-makers changed portfolios simultaneously. Each inflection lists the shuffle events, concurrent axes active, policy context, and primary sources. 2023-07-26 concentrated decisions across 9 axes in a single day.">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
-  <style>
-    .inflection {
-      background: #0f0f1f; border: 1px solid #2a2a4a;
-      border-left: 4px solid #a855f7; border-radius: 12px;
-      padding: 1.5rem 1.8rem; margin: 1.5rem 0; color: #d0d0e0;
-      line-height: 1.6;
-    }
-    .inflection.hot { border-left-color: #dc2626; background: linear-gradient(135deg, #0f0f1f, rgba(40,20,28,0.25)); }
-
-    .inflection .date {
-      font-family: var(--slate-font-mono); font-size: 1.1rem;
-      color: #fbbf24; font-weight: 700; letter-spacing: 0.02em;
-    }
-    .inflection .headline {
-      color: #f0f0f0; font-size: 1.15rem; font-weight: 700;
-      margin: 0.3rem 0 0.6rem; letter-spacing: -0.01em;
-    }
-    .inflection .score {
-      display: inline-block; padding: 0.15rem 0.55rem;
-      background: rgba(168,85,247,0.2); color: #c4b5fd;
-      font-family: var(--slate-font-mono); font-size: 0.72rem;
-      font-weight: 700; border-radius: 4px; margin-left: 0.5rem;
-    }
-    .inflection.hot .score {
-      background: rgba(220,38,38,0.25); color: #fca5a5;
-      border: 1px solid #dc2626;
-    }
-
-    .inflection h4 {
-      color: #c4b5fd; font-size: 0.78rem; text-transform: uppercase;
-      letter-spacing: 0.05em; margin: 1rem 0 0.4rem;
-    }
-
-    .inflection .shuffle-list {
-      margin: 0.3rem 0 0.6rem;
-      font-family: var(--slate-font-mono); font-size: 0.82rem;
-      color: #c0c0d8; line-height: 1.75;
-    }
-    .inflection .shuffle-list li {
-      margin: 0.2rem 0;
-      padding-left: 0.3rem;
-      border-left: 2px solid rgba(168,85,247,0.35);
-      padding-left: 0.6rem;
-    }
-
-    .inflection .axes {
-      display: flex; flex-wrap: wrap; gap: 0.35rem;
-      margin: 0.4rem 0 0.8rem;
-    }
-    .inflection .axis-tag {
-      font-family: var(--slate-font-mono); font-size: 0.72rem;
-      padding: 0.15rem 0.5rem; border-radius: 4px;
-      background: rgba(168,85,247,0.15); color: #c4b5fd;
-      border: 1px solid rgba(168,85,247,0.35);
-    }
-
-    .inflection .context {
-      background: rgba(0,0,0,0.25); padding: 0.8rem 1rem;
-      border-radius: 6px; border-left: 2px solid #67e8f9;
-      font-size: 0.92rem; color: #e0e0f0; line-height: 1.55;
-      margin: 0.6rem 0;
-    }
-
-    .inflection .sources {
-      font-family: var(--slate-font-mono); font-size: 0.72rem;
-      color: #8090a8; line-height: 1.65;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      padding-top: 0.5rem; margin-top: 0.6rem;
-    }
-
-    .summary-banner {
-      background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(124,58,237,0.06));
-      border: 1px solid #a855f7; border-radius: 12px;
-      padding: 1.4rem 1.7rem; margin: 2rem 0; color: #d0d0e0; line-height: 1.65;
-    }
-    .summary-banner h3 { color: #c4b5fd; margin-top: 0; }
-    .summary-banner em { color: #fbbf24; font-style: italic; }
-
-    .vis-timeline {
-      background: #0f0f1f; border: 1px solid #2a2a4a;
-      border-radius: 12px; padding: 1.3rem 1.5rem; margin: 2rem 0;
-      overflow-x: auto;
-    }
-    .vis-timeline-row {
-      display: grid; grid-template-columns: 110px 1fr 50px;
-      gap: 0.8rem; align-items: center;
-      padding: 0.3rem 0;
-      border-bottom: 1px dashed rgba(255,255,255,0.04);
-    }
-    .vis-timeline-date {
-      font-family: var(--slate-font-mono); font-size: 0.82rem;
-      color: #fbbf24; font-weight: 700;
-    }
-    .vis-timeline-bar {
-      height: 22px; background: rgba(255,255,255,0.04);
-      border-radius: 3px; overflow: hidden; position: relative;
-    }
-    .vis-timeline-fill {
-      height: 100%; background: linear-gradient(90deg, #a855f7, #dc2626);
-      display: flex; align-items: center; padding: 0 8px;
-      color: #fff; font-family: var(--slate-font-mono);
-      font-size: 0.72rem; font-weight: 700; white-space: nowrap;
-      box-shadow: 0 0 12px rgba(168,85,247,0.3);
-    }
-    .vis-timeline-score {
-      font-family: var(--slate-font-mono); color: #c4b5fd;
-      font-size: 0.78rem; font-weight: 700; text-align: right;
-    }
-  </style>
-
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <meta property="og:title" content="Accountability Inflection Points — Cabinet Shuffle Dates Cross-Axis | TENET5">
-  <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:site_name" content="TENET5">
-  <meta property="og:description" content="OSINT chronological analysis: 7 Canadian federal cabinet-shuffle dates where multiple flagged decision-makers changed portfolios simultaneously. Each inflection lists the shuffle events, concurrent axes active, policy context, and primary sources. 2023-07-26 concentrated decisions across 9 axes in a single day.">
-  <meta property="og:url" content="https://tenet-5.github.io/accountability-inflections.html">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
   <link rel="canonical" href="https://tenet-5.github.io/accountability-inflections.html">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="accountability-inflections">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="Accountability Inflection Points — Cabinet Shuffle Dates Cross-Axis | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#020408">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- QUANTANIUM Core System -->
+  <link rel="stylesheet" href="css/tokens.css?v=50">
+  <link rel="stylesheet" href="css/tenet5.css?v=11">
+  <link rel="stylesheet" href="css/liril-utilities.css">
+  <link rel="stylesheet" href="css/standard.css?v=1">
+  <link rel="stylesheet" href="css/product.css?v=6">
+
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
 </head>
-<body data-act="iv">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav"
+<body class="product" data-product="1">
 
-    <!-- AUTONOMOUS LIRIL NARRATIVE INJECTION (post-milestone) -->
-    <section class="liril-narrative" style="max-width:1100px;margin:2rem auto;padding:0 1rem;">
-      <h2 class="cap263-text-violet-bold" style="font-size:1.35rem;margin-bottom:0.8rem;">Narrative Layer — Corporate Influence Architecture</h2>
-      
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #c4b5fd;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>The pattern is structural, not incidental.</strong> The same family offices and numbered companies appear repeatedly across energy, infrastructure, and social policy files, creating a multi-level web that is visible only when cross-referenced across SEDI, lobbying records, and corporate filings.</p>
-      </div>
+  <div class="ambient-glow"></div>
 
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #34d399;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>Timeline of concentrated influence.</strong> Key appointments and policy windows between 2015-2023 show recurring names from the flagged list moving into vehicles that directly benefit from decisions made during those exact periods.</p>
-      </div>
-
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #fbbf24;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>Geography and parallel pipelines.</strong> The densest nodes sit in Ontario and Quebec, with secondary concentrations in Alberta energy and municipal infrastructure — the same geography documented in other accountability axes.</p>
-      </div>
-
-      <div class="crisis-card" data-narrate style="background:#0f0f1f;border:1px solid #2a2a4a;border-left:5px solid #a855f7;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-radius:8px;">
-        <p><strong>The opacity layer.</strong> Many holdings are held through private numbered entities whose beneficial owners only surface through forensic cross-referencing, creating a second, parallel system of influence outside standard disclosure rules.</p>
-      </div>
-    </section>
-    <!-- END AUTONOMOUS LIRIL NARRATIVE INJECTION -->
- aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Accountability Inflections</span></div>    <!-- CAP224-NAV-END -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-  <div class="grain-overlay"></div>
-  <div class="vignette"></div>
+  </header>
 
-  <div id="site-header-frame"></div>
+  <main class="unified-main">
+    
 
-  <div id="breadcrumb-mount" data-breadcrumb='["Home","State of investigation","Accountability inflections"]'></div>
-
-  <section class="hero"  id="n-464285bc" data-narrate="Accountability Inflection Points — Cabinet Shuffle Dates Cross-Axis. OSINT chronology · 7 dates · 9-axis peak on 2023-07-26" >
-    <p class="subtitle">OSINT chronology · 7 dates · 9-axis peak on 2023-07-26</p>
-    <h1>Accountability Inflection Points</h1>
-    <p class="subtitle">
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="grain-overlay"></div>
+<div class="vignette"></div>
+<div id="site-header-frame"></div>
+<div data-breadcrumb='["Home","State of investigation","Accountability inflections"]' id="breadcrumb-mount"></div>
+<section class="hero" data-narrate="Accountability Inflection Points — Cabinet Shuffle Dates Cross-Axis. OSINT chronology · 7 dates · 9-axis peak on 2023-07-26" id="n-464285bc">
+<p class="subtitle">OSINT chronology · 7 dates · 9-axis peak on 2023-07-26</p>
+<h1>Accountability Inflection Points</h1>
+<p class="subtitle">
       Seven Canadian federal dates where multiple flagged
       decision-makers changed portfolios <strong>simultaneously</strong>.
       Each inflection is a single day concentrating accountability-relevant
@@ -342,45 +106,40 @@
       <strong class="cap263-text-amber-bright">2023-07-26</strong> — had tenure changes in
       <strong style="color:#fca5a5;">9 separate accountability axes at once</strong>.
     </p>
-  </section>
-
-  <div class="content" id="main" role="main">
-
-    <div class="summary-banner">
-      <h3>Why "inflections"?</h3>
-      <p>
-        <a href="temporal-overlap.html" style="color:#fbbf24;font-weight:700;">Temporal overlap</a>
+</section>
+<div class="content" id="main" role="main">
+<div class="summary-banner">
+<h3>Why "inflections"?</h3>
+<p>
+<a href="temporal-overlap.html" style="color:var(--slate-warning, #c9a44c);font-weight:700;">Temporal overlap</a>
         shows <em>when</em> cross-axis bridges were live across years. This
         page zooms into the <em>exact dates</em> on which multiple axes
         concentrated portfolio changes <em>simultaneously</em>. Each
         inflection is a single day where 4–9 flagged actors
         simultaneously entered or exited federal roles.
       </p>
-      <p>
-        <strong>Why this matters:</strong> Canadian oversight bodies review
+<p>
+<strong>Why this matters:</strong> Canadian oversight bodies review
         each ministerial transition on its own. When five or more transitions
         happen on the same day, <em>no single body has jurisdiction over the
         cross-portfolio concurrent-decision window itself</em>. Inflection
         dates are the temporal counterpart of the
-        <a href="state-of-investigation.html" class="cap263-text-amber-bright">state-of-investigation</a>
+        <a class="cap263-text-amber-bright" href="state-of-investigation.html">state-of-investigation</a>
         structural finding.
       </p>
-    </div>
-
-    <!-- Visual timeline -->
-    <h2>Inflection intensity timeline</h2>
-    <div class="vis-timeline" id="vis-timeline"></div>
-
-    <!-- Full inflection cards -->
-    <h2>7 accountability inflection points (chronological)</h2>
-    <div id="inflection-list">
-      <p class="cap263-text-mute-italic">Loading inflections…</p>
-    </div>
-
-    <!-- Structural finding -->
-    <div style="background:linear-gradient(135deg,rgba(220,38,38,0.1),rgba(236,72,153,0.06));border:1px solid #dc2626;border-radius:12px;padding:1.5rem 1.8rem;margin:2rem 0;color:#d0d0e0;line-height:1.65;">
-      <h3 style="color:#fca5a5;margin-top:0;">Structural finding · concentrated decision days</h3>
-      <p>
+</div>
+<!-- Visual timeline -->
+<h2>Inflection intensity timeline</h2>
+<div class="vis-timeline" id="vis-timeline"></div>
+<!-- Full inflection cards -->
+<h2>7 accountability inflection points (chronological)</h2>
+<div id="inflection-list">
+<p class="cap263-text-mute-italic">Loading inflections…</p>
+</div>
+<!-- Structural finding -->
+<div style="background:linear-gradient(135deg,rgba(220,38,38,0.1),rgba(236,72,153,0.06));border:1px solid var(--slate-critical, #b0544a);border-radius:12px;padding:1.5rem 1.8rem;margin:2rem 0;color:#d0d0e0;line-height:1.65;">
+<h3 style="color:#fca5a5;margin-top:0;">Structural finding · concentrated decision days</h3>
+<p>
         Canadian cabinet shuffles intentionally concentrate multiple
         portfolio changes on a single date — for political reasons, optics,
         and press-cycle management. The accountability consequence is that
@@ -388,7 +147,7 @@
         body, but <strong>the aggregate cross-portfolio pattern of the
         shuffle itself is not anyone's jurisdiction</strong>.
       </p>
-      <p>
+<p>
         On <strong class="cap263-text-amber-bright">2023-07-26</strong>, 9 axes had
         portfolio changes. No body reviewed them as a cluster. On
         <strong class="cap263-text-amber-bright">2021-10-26</strong>, 6 axes had
@@ -396,27 +155,21 @@
         concentration finding together name this gap as
         <em>structural and repeating</em>, not accidental.
       </p>
-    </div>
-
-    <div style="margin-top:2rem;font-family: var(--slate-font-mono);font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
-      <strong class="cap263-text-violet">Receipts:</strong>
-      <code>data/accountability_inflections.json</code> (dataset) ·
+</div>
+<div style="margin-top:2rem;font-family: var(--slate-font-mono);font-size:0.78rem;color:#a0a0b8;line-height:1.7;">
+<strong class="cap263-text-violet">Receipts:</strong>
+<code>data/accountability_inflections.json</code> (dataset) ·
       <code>data/actor_tenures.json</code> (tenure ranges) ·
       <code>data/temporal_overlap.json</code> (pairwise overlap computation) ·
       <strong class="cap263-text-violet">Related:</strong>
-      <a href="temporal-overlap.html" class="cap263-text-violet">Temporal Overlap</a> ·
-      <a href="state-of-investigation.html" class="cap263-text-violet">State of Investigation</a>
-    </div>
-
-    <div id="read-next"></div>
-  </div>
-
-  <div id="site-footer-frame"></div>
-
-  <script src="shell.js?v=45"></script>
-  <script src="readnext.js?v=41"></script>
-
-  <script>
+<a class="cap263-text-violet" href="temporal-overlap.html">Temporal Overlap</a> ·
+      <a class="cap263-text-violet" href="state-of-investigation.html">State of Investigation</a>
+</div>
+<div id="read-next"></div>
+</div>
+<div id="site-footer-frame"></div>
+<script src="readnext.js?v=41"></script>
+<script>
   (function() {
     'use strict';
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -481,10 +234,10 @@
     }
   })();
   </script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -510,29 +263,54 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
 <script src="js/i18n.js"></script>
+
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
 </body>
 </html>

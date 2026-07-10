@@ -1,955 +1,551 @@
-﻿<!DOCTYPE html>
-<html lang="en-CA">
+<!DOCTYPE html>
+<html lang="en-CA" data-product="1">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Federal Procurement Failures | The 504 | TENET5</title>
-  <meta name="description" content="The Federal Procurement Failure Registry — every major confirmed federal government procurement disaster, sourced exclusively from AG reports, parliamentary committee findings, and court records. $260B+ documented.">
-  <meta name="keywords" content="federal procurement fraud, Canada Auditor General, ArriveCAN, Phoenix pay system, F-35 jets, Canadian Surface Combatants, GC Strategies, SDTC, Sponsorship Scandal, McKinsey government contracts, procurement failure Canada, federal waste Canada">
-  <meta property="og:description" content="18 confirmed AG/court procurement failures. $260B+ documented waste. Every entry sourced from Auditor General reports, parliamentary committee findings, and court records.">
-  <link rel="stylesheet" href="css/tenet5.css?v=6">
-  <link rel="stylesheet" href="css/liril-utilities.css">
-  <style>
-    /* ── PAGE-SPECIFIC STYLES ─────────────────────── */
-    .pr-controls {
-      display: flex; flex-wrap: wrap; gap: 0.5rem;
-      margin: 1.5rem 0;
-      position: sticky; top: 52px;
-      background: rgba(5,5,6,0.97); backdrop-filter: blur(16px);
-      padding: 0.9rem 0; z-index: 100;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .pr-search {
-      flex: 1 1 220px; min-width: 180px;
-      background: var(--bg-card); border: 1px solid var(--border);
-      color: var(--text-primary); padding: 0.55rem 1rem; border-radius: 6px;
-      font-size: 0.88rem; font-family: var(--slate-font-body);
-      transition: border-color 0.2s;
-    }
-    .pr-search:focus { outline: none; border-color: var(--accent); }
-    .pr-search::placeholder { color: var(--text-quaternary); }
-    .pr-select {
-      background: var(--bg-card); border: 1px solid var(--border);
-      color: var(--text-tertiary); padding: 0.5rem 0.8rem;
-      border-radius: 6px; cursor: pointer;
-      font-size: 0.82rem; font-family: var(--slate-font-body);
-      transition: border-color 0.2s;
-    }
-    .pr-select:focus { outline: none; border-color: var(--accent); }
-    .pr-filter-btn {
-      background: var(--bg-card); border: 1px solid var(--border);
-      color: var(--text-tertiary); padding: 0.45rem 0.9rem;
-      border-radius: 20px; cursor: pointer;
-      font-size: 0.78rem; font-weight: 500; font-family: var(--slate-font-body);
-      transition: all 0.2s; white-space: nowrap;
-    }
-    .pr-filter-btn:hover { background: #1a1a22; color: var(--text-primary); }
-    .pr-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .sort-label {
-      font-size: 0.75rem; color: var(--text-quaternary); font-family: var(--slate-font-mono);
-      letter-spacing: 0.05em; align-self: center; white-space: nowrap;
-    }
-
-    /* ── STAT BAR ─────────────────────────────────── */
-    .pr-stat-bar {
-      display: flex; flex-wrap: wrap; gap: 1rem;
-      background: var(--bg-surface); border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1.5rem 0;
-    }
-    .pr-stat {
-      flex: 1 1 140px; text-align: center;
-    }
-    .pr-stat-value {
-      font-family: var(--slate-font-mono);
-      font-size: clamp(1.3rem, 2vw, 1.8rem);
-      font-weight: 700; color: #c41e3a;
-      display: block; line-height: 1.2;
-    }
-    .pr-stat-value.gold { color: #f59e0b; }
-    .pr-stat-value.blue { color: #3b82f6; }
-    .pr-stat-label {
-      font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase;
-      letter-spacing: 0.1em; font-weight: 500; margin-top: 0.2rem;
-      display: block;
-    }
-    .pr-stat-divider {
-      width: 1px; background: rgba(255,255,255,0.06);
-      flex-shrink: 0; align-self: stretch;
-    }
-
-    /* ── ENTRY CARDS ──────────────────────────────── */
-    .pr-entry {
-      background: var(--bg-surface); border: 1px solid var(--border);
-      border-left: 3px solid #333; border-radius: 0 8px 8px 0;
-      padding: 1.2rem 1.4rem; margin: 1rem 0;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .pr-entry:hover { background: var(--bg-card); border-left-color: var(--accent); }
-    .pr-entry[data-outcome="charges"]    { border-left-color: #f97316; }
-    .pr-entry[data-outcome="conviction"] { border-left-color: #ff2244; }
-    .pr-entry[data-outcome="rcmp"]       { border-left-color: #f97316; }
-    .pr-entry[data-outcome="parliamentary"] { border-left-color: #a855f7; }
-    .pr-entry[data-outcome="ongoing"]    { border-left-color: #3b82f6; }
-    .pr-entry[data-outcome="ag"]         { border-left-color: #f59e0b; }
-    .pr-entry[data-outcome="pbo"]        { border-left-color: #6ee7b7; }
-
-    .pr-entry-header {
-      display: flex; flex-wrap: wrap; gap: 0.5rem;
-      align-items: flex-start; margin-bottom: 0.6rem;
-    }
-    .pr-contract-name {
-      font-size: clamp(1rem, 1.3vw, 1.15rem);
-      font-weight: 700; color: var(--text-primary); flex: 1 1 200px;
-      line-height: 1.25;
-    }
-    .pr-amount {
-      font-family: var(--slate-font-mono);
-      font-size: 1rem; font-weight: 700;
-      white-space: nowrap; color: var(--text-tertiary);
-    }
-    .pr-amount.massive { color: #ff2244; }
-    .pr-amount.large   { color: #f97316; }
-    .pr-amount.medium  { color: #f59e0b; }
-
-    .pr-meta {
-      display: flex; flex-wrap: wrap; gap: 0.4rem;
-      align-items: center; margin-bottom: 0.5rem;
-    }
-    .pr-vendor {
-      font-size: 0.8rem; color: var(--text-tertiary);
-      font-style: italic;
-    }
-    .pr-dept-badge {
-      font-size: 0.7rem; padding: 0.15rem 0.55rem;
-      border-radius: 10px; font-weight: 600;
-      background: #1a1a22; border: 1px solid var(--border);
-      color: var(--text-tertiary); white-space: nowrap;
-    }
-    .pr-year {
-      font-size: 0.75rem; color: var(--text-tertiary);
-      font-family: var(--slate-font-mono);
-    }
-
-    .pr-outcome-badge {
-      font-size: 0.68rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      padding: 0.2rem 0.6rem; border-radius: 4px;
-      white-space: nowrap;
-    }
-    .badge-conviction  { background: #2a0808; border: 1px solid #7f1d1d; color: #fca5a5; }
-    .badge-charges     { background: #1e1208; border: 1px solid #7c3100; color: #fdba74; }
-    .badge-rcmp        { background: #1e1208; border: 1px solid #9a3e00; color: #fed7aa; }
-    .badge-ag          { background: #1e1a04; border: 1px solid #714d00; color: #fde68a; }
-    .badge-parliamentary { background: #1a0d26; border: 1px solid #5b21b6; color: #c4b5fd; }
-    .badge-ongoing     { background: #050e1a; border: 1px solid var(--border); color: #93c5fd; }
-    .badge-pbo         { background: #051a14; border: 1px solid #065f46; color: #6ee7b7; }
-    .badge-stayed      { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-tertiary); }
-
-    .pr-detail {
-      font-size: 0.88rem; color: var(--text-tertiary); line-height: 1.7;
-      margin-top: 0.5rem;
-    }
-    .pr-source {
-      font-size: 0.75rem; color: var(--text-quaternary); margin-top: 0.5rem;
-      font-family: var(--slate-font-mono);
-      padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.04);
-    }
-    .pr-source strong { color: var(--text-tertiary); }
-
-    /* ── DISPLAY HELPERS ─────────────────────────── */
-    .hidden { display: none !important; }
-    .pr-results-info {
-      font-size: 0.78rem; color: var(--text-quaternary);
-      font-family: var(--slate-font-mono);
-      padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
-      margin-bottom: 0.5rem;
-    }
-    .pr-empty {
-      text-align: center; padding: 3rem;
-      color: var(--text-quaternary); font-style: italic;
-    }
-
-    /* ── INTRO BOX ────────────────────────────────── */
-    .pr-intro-box {
-      background: var(--bg-surface); border: 1px solid rgba(196,30,58,0.15);
-      border-radius: 8px; padding: 1.4rem 1.6rem; margin: 1.5rem 0;
-    }
-    .pr-intro-box p { margin-bottom: 0.5rem; font-size: 0.9rem; }
-    .pr-intro-box p:last-child { margin-bottom: 0; }
-
-    /* ── SORT CONTROLS ────────────────────────────── */
-    .sort-row {
-      display: flex; flex-wrap: wrap; gap: 0.4rem;
-      align-items: center; margin-top: 0.4rem;
-    }
-    .sort-btn {
-      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.07);
-      color: var(--text-tertiary); padding: 0.3rem 0.7rem;
-      border-radius: 4px; cursor: pointer;
-      font-size: 0.75rem; font-weight: 500; font-family: var(--slate-font-body);
-      transition: all 0.2s;
-    }
-    .sort-btn:hover { color: var(--text-primary); background: #1a1a22; }
-    .sort-btn.active { color: #f59e0b; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
-    .sort-btn.active.asc::after  { content: " ▲"; }
-    .sort-btn.active.desc::after { content: " ▼"; }
-
-    /* ── RESPONSIVE ───────────────────────────────── */
-    @media (max-width: 640px) {
-      .pr-controls { top: 52px; }
-      .pr-stat-divider { display: none; }
-      .pr-stat { flex-basis: 45%; }
-      .pr-entry-header { flex-direction: column; gap: 0.3rem; }
-      .pr-amount { font-size: 0.95rem; }
-    }
-  </style>
-  <!-- QUANTANIUM canonical design-token contract — see /css/tokens.css + /css/QUANTANIUM.json -->
-  <link rel="stylesheet" href="/css/tokens.css?v=49">
-  <!-- QUANTANIUM sprites — see /css/sprites.css + /img/sprites/quantanium-atlas.svg -->
-  <link rel="stylesheet" href="/css/sprites.css?v=1">
-  <meta name="theme-color" content="#2E3440">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F1E8;&#x1F1E6;</text></svg>">
+  <meta name="description" content="TENET5 is an independent Canadian public-interest newsroom. Primary sources only.">
+  
+  <link rel="canonical" href="https://tenet-5.github.io/procurement-registry.html">
+  <meta property="og:site_name" content="TENET5">
+  <meta property="og:title" content="Federal Procurement Failures | The 504 | TENET5">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#05080d">
+  
+  <!-- Font Lock: Atkinson Hyperlegible (Sans) + IBM Plex Mono (Labels) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<!-- TENET5 SEO INJECT -->
-  <!-- Dynamic SEO Enforced by the TENET5 automated pipeline -->
-  <meta property="og:title" content="Federal Procurement Failures | The 504 | TENET5">
-  <meta property="og:url" content="https://tenet-5.github.io/procurement-registry.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TENET5">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Federal Procurement Failures | The 504 | TENET5">
-  <link rel="canonical" href="https://tenet-5.github.io/procurement-registry.html">
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Federal Procurement Failures | The 504 | TENET5",
-  "url": "https://tenet-5.github.io/procurement-registry.html",
-  "publisher": {
-    "@type": "Organization",
-    "name": "TENET5",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://tenet-5.github.io/img/tenet5_logo.png"
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="css/tokens.css?v=60">
+  <link rel="stylesheet" href="css/product.css?v=9">
+<!-- QUANTANIUM Core System -->
+  <style>
+    /* Universal Cinematic Core Overrides */
+    body {
+      background: var(--slate-bg, #020408);
+      color: var(--slate-ink, #f5fafc);
+      font-family: var(--slate-font-sans, 'Atkinson Hyperlegible', sans-serif);
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-  }
-}
-  </script>
-<!-- /TENET5 SEO INJECT -->
-<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-<link rel="alternate" type="application/atom+xml" title="TENET5 Feed" href="feed.xml">
-<meta name="dc.source" content="House of Commons Hansard">
-<!-- LIRIL-THEME-SLIDER-INJECTED-BEGIN -->
-<!-- LIRIL Procedural Theme Slider (Cap#12-c3, 2026-04-20) -->
-<link rel="stylesheet" href="/css/liril-theme.css?v=1">
-<script src="/js/liril-theme-slider.js?v=1" defer></script>
-<!-- LIRIL-THEME-SLIDER-INJECTED-END -->
-  <link rel="stylesheet" href="css/tnt-override.css?v=49">
-  <script defer src="js/liril-voice.js?v=41"></script>
-  <meta name="scene-id" content="procurement-registry">
-  <script defer src="js/scene-template.js?v=1"></script>
-<style id="cap263-utilities">
-/* Cap#263 — extracted inline styles. Auto-generated; safe to edit class
-   bodies, do not rename class names without updating the extractor map. */
-.cap263-container-narrow { max-width:900px; margin:2rem auto; }
-.cap263-container-narrow-px { max-width:900px; margin:2rem auto; padding:0 1.5rem; }
-.cap263-alert-card { max-width:900px; margin:2rem auto; padding:1.3rem 1.5rem;
-  background:rgba(220,38,38,0.08); border:2px solid rgba(220,38,38,0.3);
-  border-radius:10px; text-align:center; }
-.cap263-flex-row { display:flex; flex-wrap:wrap; gap:10px; }
-.cap263-grid-cards { display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem; margin-top:1rem; }
-.cap263-pill-btn { flex:1; min-width:150px; text-align:center; padding:0.7rem;
-  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.8rem; font-weight:600; }
-.cap263-pill-btn--gold { color:#facc15; }
-.cap263-card-link { background:var(--glass-bg,rgba(255,255,255,0.03));
-  border:1px solid #333; padding:1rem; border-radius:6px;
-  text-decoration:none; color:#fff; display:block; }
-.cap263-card-link--gold { border-color:var(--gold,#facc15); }
-.cap263-card-link--red { border-color:rgba(220,38,38,0.4); }
-.cap263-mono-accent { color:var(--accent); font-family:var(--slate-font-mono);
-  font-size:1.2rem; }
-.cap263-text-accent-bold { color:var(--accent); font-weight:600; }
-.cap263-text-gold-bold { color:#facc15; font-weight:600; }
-.cap263-tag { font-size:0.7rem; color:var(--accent); text-transform:uppercase;
-  letter-spacing:1px; font-weight:600; }
-.cap263-tag--gold { color:var(--gold,#facc15); }
-.cap263-tag--red { color:#dc2626; }
-.cap263-meta { font-size:0.85rem; color:var(--text-secondary);
-  margin-top:0.5rem; }
-.cap263-headline-red { font-size:1.1rem; font-weight:700; color:#dc2626;
-  margin:0; }
-.cap263-bold-tight { font-weight:700; margin-top:0.2rem; }
-/* Cap#263b expansion */
-.cap263-text-blue { color:var(--blue); }
-.cap263-text-blue-bold { color:var(--blue); font-weight:700; }
-.cap263-text-accent { color:var(--accent); }
-.cap263-text-accent-bold700 { color:var(--accent); font-weight:700; }
-.cap263-text-red { color:#dc2626; }
-.cap263-text-red-bold-mb { color:#dc2626; font-weight:700; margin-bottom:0.5rem; }
-.cap263-text-gold { color:#facc15; }
-.cap263-text-amber { color:#f59e0b; }
-.cap263-text-violet { color:#c4b5fd; }
-.cap263-text-violet-bold { color:#c4b5fd; font-weight:700; }
-.cap263-text-purple { color:#a855f7; }
-.cap263-text-red-bright { color:#ef4444; }
-.cap263-text-amber-bright { color:#fbbf24; }
-.cap263-text-tan { color:#c9a84c; }
-.cap263-text-mute { color:#888; }
-.cap263-text-mute-italic { color:#888; font-style:italic; }
-.cap263-text-cyan { color:#22d3ee; }
-.cap263-text-slate { color:#b0b0c4; }
-.cap263-text-slate-sm { color:#a0a0b8; font-size:0.88rem; }
-.cap263-text-crimson { color:var(--crimson); }
-.cap263-text-blue-sm { color:var(--blue); font-size:0.7rem; }
-.cap263-mt-1 { margin-top:1rem; }
-.cap263-mt-half { margin-top:0.5rem; }
-.cap263-mt-08 { margin-top:0.8rem; }
-.cap263-mt-15 { margin-top:1.5rem; }
-.cap263-mt-2 { margin-top:2rem; }
-.cap263-mt-3 { margin-top:3rem; }
-.cap263-my-04 { margin:0.4rem 0; }
-.cap263-mb-15 { margin-bottom:1.5rem; }
-.cap263-mb-2 { margin-bottom:2rem; }
-.cap263-p-half { padding:0.5rem; }
-.cap263-p-06 { padding:0.6rem; }
-.cap263-p-half-bold { padding:0.5rem; font-weight:700; }
-.cap263-p-half-divider { padding:0.5rem; border-bottom:1px solid var(--border); }
-.cap263-row-divider { padding:0.6rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-secondary); }
-.cap263-divider { border-bottom:1px solid var(--border); }
-.cap263-bl-red { border-left-color:#dc2626; }
-.cap263-bl-crimson { border-left:4px solid var(--crimson); }
-.cap263-container-narrow-2rem { max-width:900px; margin:2rem auto; padding:0 2rem; }
-.cap263-text-xs { font-size:0.6rem; }
-.cap263-tag-mute { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-tertiary,#888); }
-.cap263-tag--gold-hex { color:#facc15; }
-.cap263-tag-tertiary { font-size:0.7rem; color:var(--text-tertiary);
-  text-transform:uppercase; }
-.cap263-tag--tan { color:#c9a84c; }
-.cap263-tag--red-bright { color:#ef4444; }
-.cap263-tag-white-bold { font-size:0.7rem; color:white; font-weight:700; }
-.cap263-text-sm { font-size:0.88rem; }
-.cap263-prose-secondary { font-size:0.88rem; line-height:1.7;
-  color:var(--text-secondary); }
-.cap263-prose { font-size:0.88rem; line-height:1.7; }
-.cap263-text-md { font-size:0.95rem; }
-.cap263-text-xl { font-size:1.5rem; }
-.cap263-caption { font-size:0.75rem; color:var(--text-tertiary);
-  font-style:italic; margin-top:0.5rem; }
-.cap263-eyebrow { font-size:0.9rem; color:var(--text-tertiary);
-  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem; }
-.cap263-bold-primary { font-weight:700; color:var(--text-primary,#eee); }
-.cap263-link-clean { text-decoration:none; color:#fff; }
-.cap263-link-inherit { text-decoration:none; color:inherit; }
-.cap263-corner-tag { position:absolute; top:6px; right:8px; }
-.cap263-card-link--gray { border-color:#444; }
-.cap263-card-link--tan { border-color:#c9a84c; }
-.cap263-card-link--red-bright { border-color:#ef4444; }
-.cap263-pill-btn--160 { min-width:160px; }
-.cap263-pill-btn--purple { color:#a855f7; }
-.cap263-flex-cell-200 { flex:1; min-width:200px; text-align:center; }
-.cap263-card { background:var(--bg-card); border:1px solid var(--border);
-  border-radius:10px; padding:1rem; text-align:center; }
-</style>
-<!-- QUANTANIUM theme stack (auto-standardized 2026-07-10) -->
-  <link rel="stylesheet" href="css/standard.css?v=50">
-  <link rel="stylesheet" href="css/quantanium.css?v=51">
-  <script defer src="js/quantanium.js?v=2"></script>
-  <script defer src="js/liril-documentary.js?v=2"></script>
+
+    .ambient-glow {
+      position: fixed;
+      top: 20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(238,246,250,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Core Content Wrapper */
+    .unified-main {
+      flex: 1;
+      max-width: var(--p-wide, min(1280px, 94vw));
+      margin: 0 auto;
+      padding: clamp(40px, 8vh, 120px) clamp(16px, 3vw, 28px) clamp(64px, 10vw, 96px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-logo {
+      font-family: var(--slate-font-sans);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--slate-ink);
+      text-decoration: none;
+    }
+    
+    .p-logo sup { font-size: 0.55em; letter-spacing: 0.08em; }
+  </style>
+  <style id="product-system-defense">.tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,.liril-masthead,.liril-related,.cap230-poster,.brand-crest,img[src*="crest"]{display:none!important}</style>
 </head>
-<body data-act="iii">
-    <!-- CAP224-NAV-BEGIN -->
-<style>
-/* Cap#224 unified pillar nav + verdict badge — locked to two-font system */
-.tnt-pillar-nav{position:sticky;top:0;z-index:9000;display:flex;flex-wrap:wrap;gap:0;
-  background:var(--slate-sunken,#4f5963);border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  padding:.4rem .75rem;font-family:'Inter',system-ui,sans-serif;font-size:.86rem;
-  align-items:center;backdrop-filter:saturate(140%) blur(6px)}
-.tnt-pillar-nav .tnt-pillar-link{color:var(--slate-ink,#e8e3d6);text-decoration:none;
-  padding:.35rem .7rem;border-radius:3px;letter-spacing:.02em;font-weight:500;
-  transition:background .12s ease,color .12s ease}
-.tnt-pillar-nav .tnt-pillar-link:hover{background:rgba(232,227,214,.08);color:var(--slate-ink-strong,#f5f1e6)}
-.tnt-pillar-nav .tnt-pillar-link.is-current{color:var(--slate-link-hover,#e0b58c);
-  background:rgba(184,131,90,.12);font-weight:700}
-.tnt-pillar-nav .tnt-spacer{flex:1 1 auto}
-.tnt-breadcrumb{display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
-  background:var(--slate-overlay,rgba(40,48,56,.55));border-bottom:1px solid var(--slate-border,rgba(232,227,214,.16));
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.78rem;color:var(--slate-ink-dim,#c9c3b3)}
-.tnt-breadcrumb a{color:var(--slate-link,#c89a76);text-decoration:none}
-.tnt-breadcrumb a:hover{color:var(--slate-link-hover,#e0b58c);text-decoration:underline}
-.tnt-bc-sep{opacity:.5}
-.tnt-bc-current{color:var(--slate-ink-strong,#f5f1e6);font-weight:600}
-  padding:.3rem .7rem;margin:.4rem .9rem;border-radius:3px;
-  background:rgba(110,143,104,.14);border:1px solid rgba(110,143,104,.45);
-  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem;
-  color:var(--slate-ink,#e8e3d6);letter-spacing:.04em}
-@media (max-width:640px){
-  .tnt-pillar-nav{font-size:.78rem;padding:.3rem .4rem}
-  .tnt-pillar-nav .tnt-pillar-link{padding:.25rem .45rem}
-}
-</style>
-    <nav class="tnt-pillar-nav" aria-label="TENET5 Pillars">
-      <a class="tnt-pillar-link" href="index.html">Home</a>
-      <a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
-      <a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
-      <a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
-      <a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
-      <a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
-      <a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
-      <a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
-      <a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
-      <a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
-      <a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
-      <a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
-      <a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
-      <a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
-      <span class="tnt-spacer"></span>
+<body class="product" data-product="1">
+
+  <div class="ambient-glow"></div>
+
+  <header class="p-top">
+    <a class="p-logo" href="index.html">TENET<sup>5</sup></a>
+    <nav class="p-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="start-here.html">Start</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Film</a>
+      <a href="accountability.html">Scorecard</a>
+      <a href="about.html">About</a>
     </nav>
-    <div class="tnt-breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Procurement Registry</span></div>    <!-- CAP224-NAV-END -->
+  </header>
+
+  <main class="unified-main">
+    
+ CAP224-NAV-BEGIN 
+<nav aria-label="TENET5 Pillars" class="tnt-pillar-nav">
+<a class="tnt-pillar-link" href="index.html">Home</a>
+<a class="tnt-pillar-link" href="5gw-subversion.html">5GW</a>
+<a class="tnt-pillar-link" href="accountability-scorecard.html">Scorecard</a>
+<a class="tnt-pillar-link" href="mp-accountability-grid.html">MP Grid</a>
+<a class="tnt-pillar-link" href="appointments-registry.html">Appointments</a>
+<a class="tnt-pillar-link" href="judicial-councils.html">Judicial</a>
+<a class="tnt-pillar-link" href="human-rights-commissions.html">HR Commissions</a>
+<a class="tnt-pillar-link" href="ombudsmen.html">Ombudsmen</a>
+<a class="tnt-pillar-link" href="mpcc.html">MPCC</a>
+<a class="tnt-pillar-link" href="law-societies.html">Law Societies</a>
+<a class="tnt-pillar-link" href="provincial-oversight.html">Prov Oversight</a>
+<a class="tnt-pillar-link" href="le-political-ties.html">LE Ties</a>
+<a class="tnt-pillar-link" href="nepotism-graph.html">Nepotism</a>
+<a class="tnt-pillar-link" href="methodology-transparency.html">Methodology</a>
+<span class="tnt-spacer"></span>
+</nav>
+<div aria-label="Breadcrumb" class="tnt-breadcrumb"><a href="index.html">Home</a><span class="tnt-bc-sep">/</span><span class="tnt-bc-current">Procurement Registry</span></div>  CAP224-NAV-END 
 <div class="grain-overlay"></div>
 <div class="vignette"></div>
-
-  
-  <div id="site-header-frame"></div>
-<a href="#main" class="skip-link">Skip to content</a>
-
+<div id="site-header-frame"></div>
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="share-bar">
-    <span class="share-bar-label">💰 FEDERAL PROCUREMENT FAILURE REGISTRY</span>
-    <div class="share-bar-buttons">
-      <button onclick="shareFacebook()" class="share-btn share-btn-facebook">Facebook</button>
-      <button onclick="copyLink()" id="copy-btn" class="share-btn share-btn-copy">📋 Copy</button>
-    </div>
-  </div>
-
-  <div class="content" id="main" role="main">
-
-    <div class="hero-section">
-      <span class="section-label">PROCUREMENT FAILURE REGISTRY</span>
-      <h1  id="n-cf76b973" data-narrate="Federal Procurement Failures. Every major confirmed federal procurement disaster — sourced exclusively from Auditor General reports, parliamentary committee findings, and court records. $260B+ documented. Not one minister served prison time." >Federal Procurement Failures</h1>
-      <p class="hero-sub">Every major confirmed federal procurement disaster — sourced exclusively from Auditor General reports, parliamentary committee findings, and court records. <strong>$260B+ documented. Not one minister served prison time.</strong></p>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin:1.5rem 0;">
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:2rem;font-weight:900;color:#dc2626;">$260B+</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Documented Waste</div>
-      </div>
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:2rem;font-weight:900;color:#facc15;">18</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">AG Findings</div>
-      </div>
-      <div class="cap263-card">
-        <div style="font-family: var(--slate-font-mono);font-size:2rem;font-weight:900;color:#10b981;">0</div>
-        <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Prison Time Served</div>
-      </div>
-    </div>
-
-    <div class="pr-intro-box">
-      <p>This registry documents <strong>confirmed</strong> federal procurement failures. Every entry sourced from Auditor General reports, PBO findings, parliamentary testimony, Gomery Commission records, or criminal court proceedings. <strong>Public record only.</strong></p>
-      <p>Related: <a href="follow-the-money.html" class="nav-warn">Follow the Money</a> · <a href="accountability.html" class="nav-danger">The 504</a> · <a href="carney-conflicts.html" class="nav-warn">Carney-Brookfield</a> · <a href="corruption-map.html" class="nav-warn">Corruption Map</a></p>
-    </div>
-
-    <!-- STAT BAR -->
-    <div class="pr-stat-bar">
-      <div class="pr-stat">
-        <span class="pr-stat-value" id="stat-total">$260B+</span>
-        <span class="pr-stat-label">Total Documented Value</span>
-      </div>
-      <div class="pr-stat-divider"></div>
-      <div class="pr-stat">
-        <span class="pr-stat-value gold" id="stat-entries">18</span>
-        <span class="pr-stat-label">Registry Entries</span>
-      </div>
-      <div class="pr-stat-divider"></div>
-      <div class="pr-stat">
-        <span class="pr-stat-value" id="stat-ag">12</span>
-        <span class="pr-stat-label">AG Findings</span>
-      </div>
-      <div class="pr-stat-divider"></div>
-      <div class="pr-stat">
-        <span class="pr-stat-value blue" id="stat-criminal">4</span>
-        <span class="pr-stat-label">Criminal Referrals / Convictions</span>
-      </div>
-    </div>
-
-    <!-- FILTER + SORT CONTROLS -->
-    <div class="pr-controls" id="pr-controls">
-      <input type="text" class="pr-search" id="pr-search"
-        placeholder="Search vendor, department, program…" oninput="filterPR()">
-
-      <select class="pr-select" id="filter-dept" onchange="filterPR()">
-        <option value="">All Departments</option>
-        <option value="dnd">DND / Military</option>
-        <option value="ssc">SSC / Treasury Board</option>
-        <option value="cbsa-phac">CBSA / PHAC</option>
-        <option value="ised">ISED</option>
-        <option value="hrdc">HRDC</option>
-        <option value="pwgsc">PWGSC / PCO</option>
-        <option value="nrcan">NRCan / NRC</option>
-        <option value="canada-post">Canada Post</option>
-        <option value="cib">Canada Infrastructure Bank</option>
-        <option value="multiple">Multiple Departments</option>
-      </select>
-
-      <select class="pr-select" id="filter-amount" onchange="filterPR()">
-        <option value="0">Any Amount</option>
-        <option value="1000">Over $1 Billion</option>
-        <option value="100">Over $100 Million</option>
-        <option value="10">Over $10 Million</option>
-      </select>
-
-      <select class="pr-select" id="filter-decade" onchange="filterPR()">
-        <option value="">Any Year</option>
-        <option value="1990">1990s</option>
-        <option value="2000">2000s</option>
-        <option value="2010">2010s</option>
-        <option value="2020">2020s</option>
-      </select>
-
-      <div class="sort-row">
-        <span class="sort-label">SORT:</span>
-        <button class="sort-btn active desc" id="sort-amount" onclick="setSort('amount', this)">$ Amount</button>
-        <button class="sort-btn" id="sort-year" onclick="setSort('year', this)">Year</button>
-        <button class="sort-btn" id="sort-dept" onclick="setSort('dept', this)">Dept</button>
-      </div>
-
-      <div class="tnt-style-243">
-        <button class="pr-filter-btn active" data-outcome="all" onclick="setOutcomeFilter(this)">All Outcomes</button>
-        <button class="pr-filter-btn" data-outcome="ag" onclick="setOutcomeFilter(this)">AG Finding</button>
-        <button class="pr-filter-btn" data-outcome="charges" onclick="setOutcomeFilter(this)">Charges / RCMP</button>
-        <button class="pr-filter-btn" data-outcome="conviction" onclick="setOutcomeFilter(this)">Conviction</button>
-        <button class="pr-filter-btn" data-outcome="parliamentary" onclick="setOutcomeFilter(this)">Parliamentary</button>
-        <button class="pr-filter-btn" data-outcome="pbo" onclick="setOutcomeFilter(this)">PBO Finding</button>
-        <button class="pr-filter-btn" data-outcome="ongoing" onclick="setOutcomeFilter(this)">Ongoing</button>
-      </div>
-    </div>
-
-    <div class="pr-results-info" id="pr-results-info">Showing 18 of 18 entries</div>
-
-    <!-- ENTRIES -->
-    <div id="pr-entries">
-
-      <!-- 1. Canadian Surface Combatants -->
-      <div class="pr-entry"
-        data-amount="84000" data-year="2014" data-dept="dnd"
-        data-outcome="ag"
-        data-search="canadian surface combatants irving halifax shipyard dnd navy warships competitive process cost escalation ag finding">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Canadian Surface Combatants (CSC)</span>
-          <span class="pr-amount massive">$8B → $84B</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Irving Shipbuilding / Halifax Shipyard</span>
-          <span class="pr-dept-badge">DND</span>
-          <span class="pr-year">2014 (est. rev. 2024)</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-        </div>
-        <div class="pr-detail">
+<span class="share-bar-label">💰 FEDERAL PROCUREMENT FAILURE REGISTRY</span>
+<div class="share-bar-buttons">
+<button class="share-btn share-btn-facebook" onclick="shareFacebook()">Facebook</button>
+<button class="share-btn share-btn-copy" id="copy-btn" onclick="copyLink()">📋 Copy</button>
+</div>
+</div>
+<div class="content" id="main" role="main">
+<div class="hero-section">
+<span class="section-label">PROCUREMENT FAILURE REGISTRY</span>
+<h1 data-narrate="Federal Procurement Failures. Every major confirmed federal procurement disaster — sourced exclusively from Auditor General reports, parliamentary committee findings, and court records. $260B+ documented. Not one minister served prison time." id="n-cf76b973">Federal Procurement Failures</h1>
+<p class="hero-sub">Every major confirmed federal procurement disaster — sourced exclusively from Auditor General reports, parliamentary committee findings, and court records. <strong>$260B+ documented. Not one minister served prison time.</strong></p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin:1.5rem 0;">
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:2rem;font-weight:900;color:var(--slate-critical, #b0544a);">$260B+</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Documented Waste</div>
+</div>
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:2rem;font-weight:900;color:var(--slate-warning, #c9a44c);">18</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">AG Findings</div>
+</div>
+<div class="cap263-card">
+<div style="font-family: var(--slate-font-mono);font-size:2rem;font-weight:900;color:#10b981;">0</div>
+<div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase;">Prison Time Served</div>
+</div>
+</div>
+<div class="pr-intro-box">
+<p>This registry documents <strong>confirmed</strong> federal procurement failures. Every entry sourced from Auditor General reports, PBO findings, parliamentary testimony, Gomery Commission records, or criminal court proceedings. <strong>Public record only.</strong></p>
+<p>Related: <a class="nav-warn" href="follow-the-money.html">Follow the Money</a> · <a class="nav-danger" href="accountability.html">The 504</a> · <a class="nav-warn" href="carney-conflicts.html">Carney-Brookfield</a> · <a class="nav-warn" href="corruption-map.html">Corruption Map</a></p>
+</div>
+<!-- STAT BAR -->
+<div class="pr-stat-bar">
+<div class="pr-stat">
+<span class="pr-stat-value" id="stat-total">$260B+</span>
+<span class="pr-stat-label">Total Documented Value</span>
+</div>
+<div class="pr-stat-divider"></div>
+<div class="pr-stat">
+<span class="pr-stat-value gold" id="stat-entries">18</span>
+<span class="pr-stat-label">Registry Entries</span>
+</div>
+<div class="pr-stat-divider"></div>
+<div class="pr-stat">
+<span class="pr-stat-value" id="stat-ag">12</span>
+<span class="pr-stat-label">AG Findings</span>
+</div>
+<div class="pr-stat-divider"></div>
+<div class="pr-stat">
+<span class="pr-stat-value blue" id="stat-criminal">4</span>
+<span class="pr-stat-label">Criminal Referrals / Convictions</span>
+</div>
+</div>
+<!-- FILTER + SORT CONTROLS -->
+<div class="pr-controls" id="pr-controls">
+<input class="pr-search" id="pr-search" oninput="filterPR()" placeholder="Search vendor, department, program…" type="text"/>
+<select class="pr-select" id="filter-dept" onchange="filterPR()">
+<option value="">All Departments</option>
+<option value="dnd">DND / Military</option>
+<option value="ssc">SSC / Treasury Board</option>
+<option value="cbsa-phac">CBSA / PHAC</option>
+<option value="ised">ISED</option>
+<option value="hrdc">HRDC</option>
+<option value="pwgsc">PWGSC / PCO</option>
+<option value="nrcan">NRCan / NRC</option>
+<option value="canada-post">Canada Post</option>
+<option value="cib">Canada Infrastructure Bank</option>
+<option value="multiple">Multiple Departments</option>
+</select>
+<select class="pr-select" id="filter-amount" onchange="filterPR()">
+<option value="0">Any Amount</option>
+<option value="1000">Over $1 Billion</option>
+<option value="100">Over $100 Million</option>
+<option value="10">Over $10 Million</option>
+</select>
+<select class="pr-select" id="filter-decade" onchange="filterPR()">
+<option value="">Any Year</option>
+<option value="1990">1990s</option>
+<option value="2000">2000s</option>
+<option value="2010">2010s</option>
+<option value="2020">2020s</option>
+</select>
+<div class="sort-row">
+<span class="sort-label">SORT:</span>
+<button class="sort-btn active desc" id="sort-amount" onclick="setSort('amount', this)">$ Amount</button>
+<button class="sort-btn" id="sort-year" onclick="setSort('year', this)">Year</button>
+<button class="sort-btn" id="sort-dept" onclick="setSort('dept', this)">Dept</button>
+</div>
+<div class="tnt-style-243">
+<button class="pr-filter-btn active" data-outcome="all" onclick="setOutcomeFilter(this)">All Outcomes</button>
+<button class="pr-filter-btn" data-outcome="ag" onclick="setOutcomeFilter(this)">AG Finding</button>
+<button class="pr-filter-btn" data-outcome="charges" onclick="setOutcomeFilter(this)">Charges / RCMP</button>
+<button class="pr-filter-btn" data-outcome="conviction" onclick="setOutcomeFilter(this)">Conviction</button>
+<button class="pr-filter-btn" data-outcome="parliamentary" onclick="setOutcomeFilter(this)">Parliamentary</button>
+<button class="pr-filter-btn" data-outcome="pbo" onclick="setOutcomeFilter(this)">PBO Finding</button>
+<button class="pr-filter-btn" data-outcome="ongoing" onclick="setOutcomeFilter(this)">Ongoing</button>
+</div>
+</div>
+<div class="pr-results-info" id="pr-results-info">Showing 18 of 18 entries</div>
+<!-- ENTRIES -->
+<div id="pr-entries">
+<!-- 1. Canadian Surface Combatants -->
+<div class="pr-entry" data-amount="84000" data-dept="dnd" data-outcome="ag" data-search="canadian surface combatants irving halifax shipyard dnd navy warships competitive process cost escalation ag finding" data-year="2014">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Canadian Surface Combatants (CSC)</span>
+<span class="pr-amount massive">$8B → $84B</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Irving Shipbuilding / Halifax Shipyard</span>
+<span class="pr-dept-badge">DND</span>
+<span class="pr-year">2014 (est. rev. 2024)</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+</div>
+<div class="pr-detail">
           Replacement program for Canada's fleet of frigates and destroyers. Originally estimated at $8 billion in 2014; by 2024 the Parliamentary Budget Office and DND revised the total lifecycle cost to <strong>$84 billion</strong> — a 950% cost escalation. The AG found that the shipyard selection in 2011 under the National Shipbuilding Strategy was conducted <strong>without a competitive process</strong>: Irving and Seaspan were selected as the two sole-sourced shipyards without competitive tendering. The AG's 2021 report found the program was not on track to deliver ships within timeline or budget. The cost escalation was not proactively disclosed to Parliament.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Report 2021 — National Shipbuilding Strategy; PBO Report June 2024 — Canadian Surface Combatants Lifecycle Cost Estimate; DND public disclosures 2023–2024</div>
-      </div>
-
-      <!-- 2. F-35 Fighter Jets -->
-      <div class="pr-entry"
-        data-amount="19000" data-year="2010" data-dept="dnd"
-        data-outcome="ag"
-        data-search="f-35 fighter jets lockheed martin dnd rcaf air force ag finding parliamentary censure harper understate cost pbo">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">F-35 Fighter Jet Acquisition</span>
-          <span class="pr-amount massive">$9B stated → $19B actual</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Lockheed Martin</span>
-          <span class="pr-dept-badge">DND / RCAF</span>
-          <span class="pr-year">2010 (contract signed 2023)</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-          <span class="pr-outcome-badge badge-parliamentary">Parliamentary Censure</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Report 2021 — National Shipbuilding Strategy; PBO Report June 2024 — Canadian Surface Combatants Lifecycle Cost Estimate; DND public disclosures 2023–2024</div>
+</div>
+<!-- 2. F-35 Fighter Jets -->
+<div class="pr-entry" data-amount="19000" data-dept="dnd" data-outcome="ag" data-search="f-35 fighter jets lockheed martin dnd rcaf air force ag finding parliamentary censure harper understate cost pbo" data-year="2010">
+<div class="pr-entry-header">
+<span class="pr-contract-name">F-35 Fighter Jet Acquisition</span>
+<span class="pr-amount massive">$9B stated → $19B actual</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Lockheed Martin</span>
+<span class="pr-dept-badge">DND / RCAF</span>
+<span class="pr-year">2010 (contract signed 2023)</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+<span class="pr-outcome-badge badge-parliamentary">Parliamentary Censure</span>
+</div>
+<div class="pr-detail">
           The Harper government committed to purchasing 65 F-35 fighters in 2010 and publicly stated the cost at $9 billion. The AG's 2012 report found the government <strong>understated the true lifecycle cost by $10 billion</strong> — the actual cost was closer to $25 billion when sustainment was included. The Parliamentary Budget Officer confirmed the government had provided Parliament with incomplete and inaccurate cost estimates. A Parliamentary committee found the government had <strong>misled Parliament</strong> on the true cost. A competitive process was not run until 2020. Canada ultimately signed a contract for 88 aircraft in January 2023 at approximately $19 billion — over double the original stated cost.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Spring Report 2012 — Chapter 2 (Replacing Canada's Fighter Jets); PBO Report 2011; House of Commons SCONDVA testimony; Public Services and Procurement Canada F-35 Final Negotiated Price 2023</div>
-      </div>
-
-      <!-- 3. ArriveCAN -->
-      <div class="pr-entry"
-        data-amount="54" data-year="2021" data-dept="cbsa-phac"
-        data-outcome="charges"
-        data-search="arrivecan arrive can app cbsa phac gc strategies accenture coredinate 2-person firm rcmp investigation ag spring 2024 covid questionnaire">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">ArriveCAN Application</span>
-          <span class="pr-amount large">$54M</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: GC Strategies, Coredinate, Accenture + 30+ subcontractors</span>
-          <span class="pr-dept-badge">CBSA / PHAC</span>
-          <span class="pr-year">2020–2022</span>
-          <span class="pr-outcome-badge badge-charges">AG Finding</span>
-          <span class="pr-outcome-badge badge-rcmp">RCMP Investigation</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Spring Report 2012 — Chapter 2 (Replacing Canada's Fighter Jets); PBO Report 2011; House of Commons SCONDVA testimony; Public Services and Procurement Canada F-35 Final Negotiated Price 2023</div>
+</div>
+<!-- 3. ArriveCAN -->
+<div class="pr-entry" data-amount="54" data-dept="cbsa-phac" data-outcome="charges" data-search="arrivecan arrive can app cbsa phac gc strategies accenture coredinate 2-person firm rcmp investigation ag spring 2024 covid questionnaire" data-year="2021">
+<div class="pr-entry-header">
+<span class="pr-contract-name">ArriveCAN Application</span>
+<span class="pr-amount large">$54M</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: GC Strategies, Coredinate, Accenture + 30+ subcontractors</span>
+<span class="pr-dept-badge">CBSA / PHAC</span>
+<span class="pr-year">2020–2022</span>
+<span class="pr-outcome-badge badge-charges">AG Finding</span>
+<span class="pr-outcome-badge badge-rcmp">RCMP Investigation</span>
+</div>
+<div class="pr-detail">
           A COVID-19 border control app that required travellers to submit health information. The AG's Spring 2024 report called it <strong>"the most problematic procurement"</strong> examined. GC Strategies — a two-person firm with no software developers — received <strong>$19.1 million</strong> to coordinate subcontractors; documentation was so poor the AG <strong>could not determine what Canada actually received</strong> for much of the spending. 76% of contractors billed for work that could not be verified. Contracts were awarded without proper documentation, competitive processes were bypassed, and invoices were approved without evidence of deliverables. The RCMP opened a criminal investigation in 2024.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Spring 2024 Report — Chapter 6 (ArriveCAN); OGGO Committee testimony 2023–2024; RCMP investigation confirmation May 2024; Public Accounts of Canada 2022–2023</div>
-      </div>
-
-      <!-- 4. Phoenix Pay System -->
-      <div class="pr-entry"
-        data-amount="2200" data-year="2016" data-dept="ssc"
-        data-outcome="ag"
-        data-search="phoenix pay system ibm treasury board ssc public servants federal employees underpaid overpaid ag 2018 defective launch warnings ignored ibm">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Phoenix Pay System</span>
-          <span class="pr-amount massive">$310M contract → $2.2B+ remediation</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: IBM</span>
-          <span class="pr-dept-badge">Treasury Board / SSC</span>
-          <span class="pr-year">2009–2016 (remediation ongoing)</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Spring 2024 Report — Chapter 6 (ArriveCAN); OGGO Committee testimony 2023–2024; RCMP investigation confirmation May 2024; Public Accounts of Canada 2022–2023</div>
+</div>
+<!-- 4. Phoenix Pay System -->
+<div class="pr-entry" data-amount="2200" data-dept="ssc" data-outcome="ag" data-search="phoenix pay system ibm treasury board ssc public servants federal employees underpaid overpaid ag 2018 defective launch warnings ignored ibm" data-year="2016">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Phoenix Pay System</span>
+<span class="pr-amount massive">$310M contract → $2.2B+ remediation</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: IBM</span>
+<span class="pr-dept-badge">Treasury Board / SSC</span>
+<span class="pr-year">2009–2016 (remediation ongoing)</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+</div>
+<div class="pr-detail">
           A centralized pay system for 290,000 federal public servants. IBM was awarded the $310 million contract; the government launched the system in February 2016 <strong>knowing it was defective</strong>. The AG's 2018 report found the government had <strong>"ignored warnings"</strong> from its own officials and proceeded despite testing failures. Over 300,000 federal employees were underpaid, overpaid, or not paid at all. Remediation costs had exceeded $2.2 billion by 2023 with the system still not fully fixed. A new pay system replacement program (NextGen HR and Pay) was launched with no guaranteed completion date. IBM faced no financial penalty.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Fall 2018 Report — Chapter 1 (Phoenix Pay System); AG 2020 Report — Phoenix follow-up; Treasury Board Secretariat Phoenix remediation updates 2019–2023; PBO Phoenix Cost Estimate 2020</div>
-      </div>
-
-      <!-- 17. NSS Irving + Seaspan -->
-      <div class="pr-entry"
-        data-amount="105000" data-year="2011" data-dept="dnd"
-        data-outcome="ag"
-        data-search="national shipbuilding strategy nss irving seaspan dnd coast guard ccg ag 2021 delays sole source no competition shipyard warships">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">National Shipbuilding Strategy — Full Program (NSS)</span>
-          <span class="pr-amount massive">$105B total program</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Irving Shipbuilding + Seaspan</span>
-          <span class="pr-dept-badge">DND / CCG</span>
-          <span class="pr-year">2011–ongoing</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Fall 2018 Report — Chapter 1 (Phoenix Pay System); AG 2020 Report — Phoenix follow-up; Treasury Board Secretariat Phoenix remediation updates 2019–2023; PBO Phoenix Cost Estimate 2020</div>
+</div>
+<!-- 17. NSS Irving + Seaspan -->
+<div class="pr-entry" data-amount="105000" data-dept="dnd" data-outcome="ag" data-search="national shipbuilding strategy nss irving seaspan dnd coast guard ccg ag 2021 delays sole source no competition shipyard warships" data-year="2011">
+<div class="pr-entry-header">
+<span class="pr-contract-name">National Shipbuilding Strategy — Full Program (NSS)</span>
+<span class="pr-amount massive">$105B total program</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Irving Shipbuilding + Seaspan</span>
+<span class="pr-dept-badge">DND / CCG</span>
+<span class="pr-year">2011–ongoing</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+</div>
+<div class="pr-detail">
           Canada's national fleet renewal strategy, covering warships, coast guard vessels, and supply ships. The AG's 2021 report found the National Shipbuilding Strategy was <strong>"not on track"</strong> — ships were delayed, costs had escalated significantly, and Canadian Armed Forces and Coast Guard operational readiness was being degraded by the gaps. Critically, the two shipyards (Irving in Halifax, Seaspan in Vancouver) were selected in 2011 through a <strong>non-competitive process</strong> — no tender was issued for the shipyards themselves. The entire $105 billion program rests on sole-sourced industrial relationships that were never competitively bid.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Spring 2021 Report — Chapter 5 (National Shipbuilding Strategy); DND Capital Program updates 2022–2024; PBO 2024 CSC Lifecycle Cost estimate</div>
-      </div>
-
-      <!-- 16. Canada Infrastructure Bank -->
-      <div class="pr-entry"
-        data-amount="35000" data-year="2017" data-dept="cib"
-        data-outcome="pbo"
-        data-search="canada infrastructure bank cib pbo parliamentary budget office mandate unmet private capital leverage projects deployed">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Canada Infrastructure Bank</span>
-          <span class="pr-amount massive">$35B mandate</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Various project recipients</span>
-          <span class="pr-dept-badge">Canada Infrastructure Bank</span>
-          <span class="pr-year">2017–ongoing</span>
-          <span class="pr-outcome-badge badge-pbo">PBO Finding</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Spring 2021 Report — Chapter 5 (National Shipbuilding Strategy); DND Capital Program updates 2022–2024; PBO 2024 CSC Lifecycle Cost estimate</div>
+</div>
+<!-- 16. Canada Infrastructure Bank -->
+<div class="pr-entry" data-amount="35000" data-dept="cib" data-outcome="pbo" data-search="canada infrastructure bank cib pbo parliamentary budget office mandate unmet private capital leverage projects deployed" data-year="2017">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Canada Infrastructure Bank</span>
+<span class="pr-amount massive">$35B mandate</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Various project recipients</span>
+<span class="pr-dept-badge">Canada Infrastructure Bank</span>
+<span class="pr-year">2017–ongoing</span>
+<span class="pr-outcome-badge badge-pbo">PBO Finding</span>
+</div>
+<div class="pr-detail">
           Created in 2017 with a $35 billion mandate to attract private investment in Canadian infrastructure at a promised ratio of $4 in private capital for every $1 in public money. The Parliamentary Budget Officer found that after <strong>7 years</strong>, only 7 projects were <strong>fully deployed</strong>. The private capital leverage ratio was never achieved at the promised rate. The Auditor General and PBO have both noted the CIB's mandate remains largely unmet. Billions in public funds were committed with minimal measurable infrastructure impact, and the "revenue-generating" model failed to attract private co-investment at the promised scale.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> PBO Report 2022 — Canada Infrastructure Bank; Standing Committee on Transport hearings 2022–2023; CIB Annual Reports 2019–2023; AG 2023 commentary</div>
-      </div>
-
-      <!-- 12. CH-148 Cyclone Helicopters -->
-      <div class="pr-entry"
-        data-amount="5100" data-year="1992" data-dept="dnd"
-        data-outcome="ag"
-        data-search="ch-148 cyclone helicopter sikorsky lockheed dnd navy maritime helicopter project mhp 30 years delays ag finding capability reductions">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">CH-148 Cyclone Maritime Helicopter</span>
-          <span class="pr-amount large">$5.1B (orig. $1.8B, 1992)</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Sikorsky / Lockheed Martin</span>
-          <span class="pr-dept-badge">DND / RCN</span>
-          <span class="pr-year">1992 (contract 2004, deliveries 2015–present)</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding (multiple)</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> PBO Report 2022 — Canada Infrastructure Bank; Standing Committee on Transport hearings 2022–2023; CIB Annual Reports 2019–2023; AG 2023 commentary</div>
+</div>
+<!-- 12. CH-148 Cyclone Helicopters -->
+<div class="pr-entry" data-amount="5100" data-dept="dnd" data-outcome="ag" data-search="ch-148 cyclone helicopter sikorsky lockheed dnd navy maritime helicopter project mhp 30 years delays ag finding capability reductions" data-year="1992">
+<div class="pr-entry-header">
+<span class="pr-contract-name">CH-148 Cyclone Maritime Helicopter</span>
+<span class="pr-amount large">$5.1B (orig. $1.8B, 1992)</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Sikorsky / Lockheed Martin</span>
+<span class="pr-dept-badge">DND / RCN</span>
+<span class="pr-year">1992 (contract 2004, deliveries 2015–present)</span>
+<span class="pr-outcome-badge badge-ag">AG Finding (multiple)</span>
+</div>
+<div class="pr-detail">
           Canada's 30-year helicopter procurement saga. The original contract for new naval helicopters was cancelled in 1993 (costing $500M in penalties), re-tendered, and eventually awarded to Sikorsky in 2004 at $1.8 billion for 28 helicopters. Final cost escalated to over <strong>$5.1 billion</strong>. The AG reported on this program multiple times over three decades, finding delays, capability reductions from original specification, and cost overruns at every stage. As of 2023, the aircraft <strong>still had not achieved all original capability specifications</strong> from the 1992 requirement. Over 30 years elapsed between identifying the requirement and delivering a marginally compliant helicopter.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Reports 1999, 2007, 2010, 2022 — Maritime Helicopter Project; SCONDVA committee hearings; DND Capital Equipment Program updates</div>
-      </div>
-
-      <!-- 5. SSC IT Consolidation -->
-      <div class="pr-entry"
-        data-amount="2000" data-year="2012" data-dept="ssc"
-        data-outcome="ag"
-        data-search="shared services canada ssc it consolidation ag 2015 2018 federal it infrastructure mandate failed departments">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Shared Services Canada — IT Consolidation</span>
-          <span class="pr-amount massive">$2B+</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Multiple (Hewlett Packard, Bell, SaskTel, CGI, others)</span>
-          <span class="pr-dept-badge">SSC</span>
-          <span class="pr-year">2011–ongoing</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding (multiple)</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Reports 1999, 2007, 2010, 2022 — Maritime Helicopter Project; SCONDVA committee hearings; DND Capital Equipment Program updates</div>
+</div>
+<!-- 5. SSC IT Consolidation -->
+<div class="pr-entry" data-amount="2000" data-dept="ssc" data-outcome="ag" data-search="shared services canada ssc it consolidation ag 2015 2018 federal it infrastructure mandate failed departments" data-year="2012">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Shared Services Canada — IT Consolidation</span>
+<span class="pr-amount massive">$2B+</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Multiple (Hewlett Packard, Bell, SaskTel, CGI, others)</span>
+<span class="pr-dept-badge">SSC</span>
+<span class="pr-year">2011–ongoing</span>
+<span class="pr-outcome-badge badge-ag">AG Finding (multiple)</span>
+</div>
+<div class="pr-detail">
           Shared Services Canada was created in 2011 to consolidate federal IT infrastructure — email, data centres, and networks — across 43 departments. The AG's 2015 report found SSC <strong>"failed to deliver on its mandate"</strong>; the 2018 audit found the situation had deteriorated further. Federal IT infrastructure became less reliable after SSC's intervention. Departments lost control of their own systems, government email was chronically unreliable, and data centre consolidation targets were missed. Over $2 billion was spent with outcomes that were worse than the pre-SSC state of affairs. The 2018 AG report found no viable plan to remediate the situation.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Fall 2015 Report — Chapter 3 (Shared Services Canada); AG Spring 2018 Report — Chapter 1 (IT Infrastructure); Treasury Board Secretariat SSC Performance 2017–2018</div>
-      </div>
-
-      <!-- 18. Federal Contaminated Sites -->
-      <div class="pr-entry"
-        data-amount="3500" data-year="2002" data-dept="nrcan"
-        data-outcome="ag"
-        data-search="federal contaminated sites eccc nrcan remediation liability 23000 sites ag 2002 2012 underfunded">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Federal Contaminated Sites Program</span>
-          <span class="pr-amount massive">$3.5B+ liability</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Various remediation contractors</span>
-          <span class="pr-dept-badge">ECCC / NRCan / DND</span>
-          <span class="pr-year">2002–ongoing</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding (multiple)</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Fall 2015 Report — Chapter 3 (Shared Services Canada); AG Spring 2018 Report — Chapter 1 (IT Infrastructure); Treasury Board Secretariat SSC Performance 2017–2018</div>
+</div>
+<!-- 18. Federal Contaminated Sites -->
+<div class="pr-entry" data-amount="3500" data-dept="nrcan" data-outcome="ag" data-search="federal contaminated sites eccc nrcan remediation liability 23000 sites ag 2002 2012 underfunded" data-year="2002">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Federal Contaminated Sites Program</span>
+<span class="pr-amount massive">$3.5B+ liability</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Various remediation contractors</span>
+<span class="pr-dept-badge">ECCC / NRCan / DND</span>
+<span class="pr-year">2002–ongoing</span>
+<span class="pr-outcome-badge badge-ag">AG Finding (multiple)</span>
+</div>
+<div class="pr-detail">
           The federal government owns and is responsible for 23,000+ contaminated sites across Canada — former military bases, industrial sites, mine tailings, northern fuel depots. The AG reported in 2002 and again in 2012 that the federal contaminated sites liability exceeded <strong>$3.5 billion</strong>, that remediation was chronically underfunded, and that the liability was growing faster than it was being addressed. Procurement of remediation contracts was found to be inconsistent, poorly documented, and in some cases awarded without proper competitive processes. The liability remains a multi-generational financial and environmental risk that successive governments have deferred.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG 2002 Report — Chapter 1 (Federal Contaminated Sites); AG 2012 Spring Report — Chapter 4 (Contaminated Sites); Treasury Board Federal Contaminated Sites Action Plan (FCSAP) audits</div>
-      </div>
-
-      <!-- 6. SDTC -->
-      <div class="pr-entry"
-        data-amount="330" data-year="2024" data-dept="ised"
-        data-outcome="charges"
-        data-search="sdtc sustainable development technology canada ised ag 2024 conflicts of interest 90 projects board members voted own companies rcmp referral">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Sustainable Development Technology Canada (SDTC)</span>
-          <span class="pr-amount medium">$330M</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: 226 grant recipients (board-connected companies)</span>
-          <span class="pr-dept-badge">ISED</span>
-          <span class="pr-year">2017–2024</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-          <span class="pr-outcome-badge badge-rcmp">RCMP Referral</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG 2002 Report — Chapter 1 (Federal Contaminated Sites); AG 2012 Spring Report — Chapter 4 (Contaminated Sites); Treasury Board Federal Contaminated Sites Action Plan (FCSAP) audits</div>
+</div>
+<!-- 6. SDTC -->
+<div class="pr-entry" data-amount="330" data-dept="ised" data-outcome="charges" data-search="sdtc sustainable development technology canada ised ag 2024 conflicts of interest 90 projects board members voted own companies rcmp referral" data-year="2024">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Sustainable Development Technology Canada (SDTC)</span>
+<span class="pr-amount medium">$330M</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: 226 grant recipients (board-connected companies)</span>
+<span class="pr-dept-badge">ISED</span>
+<span class="pr-year">2017–2024</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+<span class="pr-outcome-badge badge-rcmp">RCMP Referral</span>
+</div>
+<div class="pr-detail">
           A federal foundation distributing clean-tech grants. The AG's 2024 report found <strong>conflicts of interest in 90 of 226 approved projects</strong> (40%): board members voted to approve grants for companies in which they held financial interests. Some board members received grants for their <strong>own companies</strong> while sitting on the board that approved those grants. $58 million went to projects with direct board member conflicts. The government was found to have failed in its oversight role for years. The RCMP was referred the matter for investigation. The SDTC board was dissolved in 2024.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Spring 2024 Report — Chapter 7 (Sustainable Development Technology Canada); ISED Ministerial Review 2024; OGGO Committee hearings April–June 2024; RCMP referral confirmed by ISED June 2024</div>
-      </div>
-
-      <!-- 7. HRDC Boondoggle -->
-      <div class="pr-entry"
-        data-amount="1000" data-year="2000" data-dept="hrdc"
-        data-outcome="ag"
-        data-search="hrdc boondoggle human resources development canada ag 2000 87 percent compliance deficiencies grants without documentation ministerial resignation jane stewart">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">HRDC Grants and Contributions — The Boondoggle</span>
-          <span class="pr-amount massive">$1B (examined)</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Various grant recipients</span>
-          <span class="pr-dept-badge">HRDC</span>
-          <span class="pr-year">1999–2000</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-          <span class="pr-outcome-badge badge-parliamentary">Ministerial Resignation</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Spring 2024 Report — Chapter 7 (Sustainable Development Technology Canada); ISED Ministerial Review 2024; OGGO Committee hearings April–June 2024; RCMP referral confirmed by ISED June 2024</div>
+</div>
+<!-- 7. HRDC Boondoggle -->
+<div class="pr-entry" data-amount="1000" data-dept="hrdc" data-outcome="ag" data-search="hrdc boondoggle human resources development canada ag 2000 87 percent compliance deficiencies grants without documentation ministerial resignation jane stewart" data-year="2000">
+<div class="pr-entry-header">
+<span class="pr-contract-name">HRDC Grants and Contributions — The Boondoggle</span>
+<span class="pr-amount massive">$1B (examined)</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Various grant recipients</span>
+<span class="pr-dept-badge">HRDC</span>
+<span class="pr-year">1999–2000</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+<span class="pr-outcome-badge badge-parliamentary">Ministerial Resignation</span>
+</div>
+<div class="pr-detail">
           An internal government audit of $1 billion in HRDC grants and contributions found that <strong>87% of files had compliance deficiencies</strong>. Grants were issued without adequate documentation, without proof of need, and in some cases without evidence the projects existed. The audit found that job creation claims were unverified, grant agreements were incomplete, and financial monitoring was absent. The scandal resulted in Minister Jane Stewart issuing a public apology and the creation of an internal accountability framework. The AG subsequently reviewed the matter. While criminal charges were not laid, the scale of documentation failure across nearly all files examined was unprecedented in modern Canadian government auditing.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> HRDC Internal Audit (released February 2000); AG 2000 Report — follow-up audit; Hansard — Ministerial Statement, Jane Stewart, February 2000; Standing Committee on Human Resources testimony</div>
-      </div>
-
-      <!-- 8. Sponsorship Program / Gomery -->
-      <div class="pr-entry"
-        data-amount="300" data-year="2004" data-dept="pwgsc"
-        data-outcome="conviction"
-        data-search="sponsorship scandal gomery commission pwgsc pco ad agencies kickbacks liberal party criminal convictions jean brault groupaction publicité">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Federal Sponsorship Program (Gomery Commission)</span>
-          <span class="pr-amount medium">$300M ($100M "no value" — Gomery)</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Groupaction, Lafleur Communication, BCP + others</span>
-          <span class="pr-dept-badge">PWGSC / PCO</span>
-          <span class="pr-year">1996–2004</span>
-          <span class="pr-outcome-badge badge-conviction">Criminal Convictions</span>
-          <span class="pr-outcome-badge badge-parliamentary">Commission Finding</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> HRDC Internal Audit (released February 2000); AG 2000 Report — follow-up audit; Hansard — Ministerial Statement, Jane Stewart, February 2000; Standing Committee on Human Resources testimony</div>
+</div>
+<!-- 8. Sponsorship Program / Gomery -->
+<div class="pr-entry" data-amount="300" data-dept="pwgsc" data-outcome="conviction" data-search="sponsorship scandal gomery commission pwgsc pco ad agencies kickbacks liberal party criminal convictions jean brault groupaction publicité" data-year="2004">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Federal Sponsorship Program (Gomery Commission)</span>
+<span class="pr-amount medium">$300M ($100M "no value" — Gomery)</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Groupaction, Lafleur Communication, BCP + others</span>
+<span class="pr-dept-badge">PWGSC / PCO</span>
+<span class="pr-year">1996–2004</span>
+<span class="pr-outcome-badge badge-conviction">Criminal Convictions</span>
+<span class="pr-outcome-badge badge-parliamentary">Commission Finding</span>
+</div>
+<div class="pr-detail">
           The federal sponsorship program distributed approximately $300 million to advertising agencies in Quebec ostensibly for national unity promotion. Justice Gomery's Commission of Inquiry found that <strong>approximately $100 million was paid for little or no value</strong>, that ad agencies received inflated commissions and kickbacks, and that a portion of the funds was funnelled back to the Liberal Party of Canada as illegal political financing. Multiple criminal convictions followed: Jean Brault (Groupaction) and other agency executives were convicted of fraud. The scandal directly contributed to the Liberal government's defeat in 2006 and resulted in the Federal Accountability Act.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> Commission of Inquiry into the Sponsorship Program and Advertising Activities (Gomery Commission) — Final Report 2006; R. v. Brault [2006]; R. v. Guité — criminal trial records; Public Accounts Special Examination</div>
-      </div>
-
-      <!-- 9. Chalk River / AECL -->
-      <div class="pr-entry"
-        data-amount="1000" data-year="2008" data-dept="nrcan"
-        data-outcome="ag"
-        data-search="chalk river aecl atomic energy canada limited nrcan nrc ag 2008 medical isotopes nuclear reactor decommissioning infrastructure failure underfunded">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Chalk River / AECL Nuclear Infrastructure</span>
-          <span class="pr-amount massive">$1B+ decommissioning / remediation</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: AECL (Crown Corporation)</span>
-          <span class="pr-dept-badge">NRCan / NRC / AECL</span>
-          <span class="pr-year">1996–2011 (ongoing)</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> Commission of Inquiry into the Sponsorship Program and Advertising Activities (Gomery Commission) — Final Report 2006; R. v. Brault [2006]; R. v. Guité — criminal trial records; Public Accounts Special Examination</div>
+</div>
+<!-- 9. Chalk River / AECL -->
+<div class="pr-entry" data-amount="1000" data-dept="nrcan" data-outcome="ag" data-search="chalk river aecl atomic energy canada limited nrcan nrc ag 2008 medical isotopes nuclear reactor decommissioning infrastructure failure underfunded" data-year="2008">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Chalk River / AECL Nuclear Infrastructure</span>
+<span class="pr-amount massive">$1B+ decommissioning / remediation</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: AECL (Crown Corporation)</span>
+<span class="pr-dept-badge">NRCan / NRC / AECL</span>
+<span class="pr-year">1996–2011 (ongoing)</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+</div>
+<div class="pr-detail">
           The Chalk River Laboratories — Canada's flagship nuclear research facility — were chronically underfunded for decades. The AG's 2008 report found AECL's infrastructure was deteriorating, the NRU reactor was unreliable, and the liability for decommissioning and contaminated site remediation exceeded $1 billion, with <strong>no funded decommissioning plan</strong>. The 2007 NRU reactor shutdown (government overrode the nuclear regulator to force restart) caused a global medical isotope shortage. The government subsequently sold AECL's commercial reactor division at a massive loss and invested billions in Chalk River cleanup without a strategic plan. Contaminated site liability continues to grow.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Fall 2008 Report — Chapter 3 (AECL Nuclear Infrastructure); CNSC Regulatory Decision 2007; AECL Annual Reports; Parliamentary Standing Committee on Natural Resources testimony 2009</div>
-      </div>
-
-      <!-- 13. Canada Post -->
-      <div class="pr-entry"
-        data-amount="1000" data-year="2024" data-dept="canada-post"
-        data-outcome="ag"
-        data-search="canada post postal transformation ag 2024 no strategic direction 8 years cumulative losses 3 billion">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Canada Post — Strategic Failure / Postal Transformation</span>
-          <span class="pr-amount massive">$3B+ cumulative losses</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Various (Canada Post Crown Corporation)</span>
-          <span class="pr-dept-badge">Canada Post / PSPC</span>
-          <span class="pr-year">2016–2024</span>
-          <span class="pr-outcome-badge badge-ag">AG Finding</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Fall 2008 Report — Chapter 3 (AECL Nuclear Infrastructure); CNSC Regulatory Decision 2007; AECL Annual Reports; Parliamentary Standing Committee on Natural Resources testimony 2009</div>
+</div>
+<!-- 13. Canada Post -->
+<div class="pr-entry" data-amount="1000" data-dept="canada-post" data-outcome="ag" data-search="canada post postal transformation ag 2024 no strategic direction 8 years cumulative losses 3 billion" data-year="2024">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Canada Post — Strategic Failure / Postal Transformation</span>
+<span class="pr-amount massive">$3B+ cumulative losses</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Various (Canada Post Crown Corporation)</span>
+<span class="pr-dept-badge">Canada Post / PSPC</span>
+<span class="pr-year">2016–2024</span>
+<span class="pr-outcome-badge badge-ag">AG Finding</span>
+</div>
+<div class="pr-detail">
           The AG's 2024 report found that the federal government had given <strong>no strategic direction</strong> to Canada Post for <strong>8 years</strong>, despite the Crown corporation accumulating over $3 billion in cumulative losses. During this period, Canada Post undertook a "postal transformation" involving over $1 billion in capital investment in new sorting and delivery infrastructure. The AG found the government failed to provide a clear mandate, leaving Canada Post without direction on whether to modernize, reduce service, expand into financial services, or undergo another model. The corporation continued to operate without a sustainable financial model or ministerial guidance. Investment decisions were made in a strategic vacuum.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> AG Spring 2024 Report — Chapter 4 (Canada Post); Canada Post Annual Reports 2016–2023; House of Commons INDU Committee testimony 2022–2023</div>
-      </div>
-
-      <!-- 15. McKinsey -->
-      <div class="pr-entry"
-        data-amount="200" data-year="2022" data-dept="multiple"
-        data-outcome="parliamentary"
-        data-search="mckinsey company federal consulting oggo committee 2023 sole source directed contracts ircc phac dnd finance procurement rules bypassed">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">McKinsey &amp; Company — Federal Consulting Contracts</span>
-          <span class="pr-amount medium">$200M+</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: McKinsey &amp; Company</span>
-          <span class="pr-dept-badge">IRCC / PHAC / DND / Finance</span>
-          <span class="pr-year">2015–2023</span>
-          <span class="pr-outcome-badge badge-parliamentary">Parliamentary Finding</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> AG Spring 2024 Report — Chapter 4 (Canada Post); Canada Post Annual Reports 2016–2023; House of Commons INDU Committee testimony 2022–2023</div>
+</div>
+<!-- 15. McKinsey -->
+<div class="pr-entry" data-amount="200" data-dept="multiple" data-outcome="parliamentary" data-search="mckinsey company federal consulting oggo committee 2023 sole source directed contracts ircc phac dnd finance procurement rules bypassed" data-year="2022">
+<div class="pr-entry-header">
+<span class="pr-contract-name">McKinsey &amp; Company — Federal Consulting Contracts</span>
+<span class="pr-amount medium">$200M+</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: McKinsey &amp; Company</span>
+<span class="pr-dept-badge">IRCC / PHAC / DND / Finance</span>
+<span class="pr-year">2015–2023</span>
+<span class="pr-outcome-badge badge-parliamentary">Parliamentary Finding</span>
+</div>
+<div class="pr-detail">
           The House of Commons Standing Committee on Government Operations (OGGO) investigation in 2023 found that McKinsey &amp; Company received over $200 million in federal contracts across multiple departments — IRCC, PHAC, DND, Finance — with procurement rules <strong>regularly bypassed</strong>. Contracts were awarded as sole-source or directed contracts, circumventing competitive processes. The committee found that McKinsey had a disproportionate access to senior government officials and that standard procurement controls were not applied. No competitive bids were sought for many contracts. The committee recommended a moratorium on McKinsey contracts pending a broader review of consulting procurement practices.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> OGGO Committee Report — "McKinsey &amp; Company" (June 2023); Hansard OGGO testimony February–May 2023; PSPC Proactive Disclosure records; Access to Information releases</div>
-      </div>
-
-      <!-- 14. Baylis Medical Ventilators -->
-      <div class="pr-entry"
-        data-amount="237" data-year="2020" data-dept="cbsa-phac"
-        data-outcome="parliamentary"
-        data-search="baylis medical ventilators phac covid directed non-competitive contract former liberal mp frank baylis unused hospitals">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Baylis Medical — COVID Ventilators</span>
-          <span class="pr-amount medium">$237M</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Baylis Medical (founder: Frank Baylis, former Liberal MP)</span>
-          <span class="pr-dept-badge">PHAC / PSPC</span>
-          <span class="pr-year">2020</span>
-          <span class="pr-outcome-badge badge-parliamentary">Parliamentary Scrutiny</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> OGGO Committee Report — "McKinsey &amp; Company" (June 2023); Hansard OGGO testimony February–May 2023; PSPC Proactive Disclosure records; Access to Information releases</div>
+</div>
+<!-- 14. Baylis Medical Ventilators -->
+<div class="pr-entry" data-amount="237" data-dept="cbsa-phac" data-outcome="parliamentary" data-search="baylis medical ventilators phac covid directed non-competitive contract former liberal mp frank baylis unused hospitals" data-year="2020">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Baylis Medical — COVID Ventilators</span>
+<span class="pr-amount medium">$237M</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Baylis Medical (founder: Frank Baylis, former Liberal MP)</span>
+<span class="pr-dept-badge">PHAC / PSPC</span>
+<span class="pr-year">2020</span>
+<span class="pr-outcome-badge badge-parliamentary">Parliamentary Scrutiny</span>
+</div>
+<div class="pr-detail">
           During the COVID-19 pandemic, the federal government awarded Baylis Medical a <strong>$237 million directed (non-competitive) contract</strong> to manufacture ventilators. Baylis Medical's founder, Frank Baylis, was a former Liberal MP who had left Parliament shortly before the contract was awarded. The ventilators produced under this contract were <strong>not used by Canadian hospitals</strong> — they were found to be unsuitable for ICU patients, did not meet clinical requirements, and were placed in storage. Parliamentary scrutiny questioned the directed procurement, the selection process, and the vendor's political connections. The government maintained the contract was justified under emergency procurement authorities.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> OGGO Committee hearings 2020–2021; Hansard — Opposition questions on Baylis contract; PSPC contract disclosure database; Health Canada COVID-19 ventilator program review</div>
-      </div>
-
-      <!-- 10. Botler AI -->
-      <div class="pr-entry"
-        data-amount="6" data-year="2023" data-dept="dnd"
-        data-outcome="charges"
-        data-search="botler ai dnd rcmp charges breach of trust fraud dnd officials extortion 2023">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Botler AI — DND Procurement</span>
-          <span class="pr-amount">$6.8M</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Botler AI Inc.</span>
-          <span class="pr-dept-badge">DND</span>
-          <span class="pr-year">2019–2023</span>
-          <span class="pr-outcome-badge badge-charges">RCMP Charges (2023)</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> OGGO Committee hearings 2020–2021; Hansard — Opposition questions on Baylis contract; PSPC contract disclosure database; Health Canada COVID-19 ventilator program review</div>
+</div>
+<!-- 10. Botler AI -->
+<div class="pr-entry" data-amount="6" data-dept="dnd" data-outcome="charges" data-search="botler ai dnd rcmp charges breach of trust fraud dnd officials extortion 2023" data-year="2023">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Botler AI — DND Procurement</span>
+<span class="pr-amount">$6.8M</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Botler AI Inc.</span>
+<span class="pr-dept-badge">DND</span>
+<span class="pr-year">2019–2023</span>
+<span class="pr-outcome-badge badge-charges">RCMP Charges (2023)</span>
+</div>
+<div class="pr-detail">
           Botler AI was contracted by the Department of National Defence for a sexual harassment reporting AI system. In 2023, the RCMP <strong>charged two DND officials</strong> — a civilian director and a senior contractor — with breach of trust and fraud related to the contract. The Botler AI founders alleged that the DND officials had <strong>extorted</strong> them: demanding equity in the company and personal payments in exchange for the contract and renewals. The founders went public, triggering the RCMP investigation. The case exposed the vulnerability of small vendors dealing with procurement officials who control contract renewals. This is among the few federal procurement cases to result in actual criminal charges.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> RCMP press release — charges filed June 2023; Botler AI founders' public statements and affidavits 2022; CBC Investigations reporting 2022–2023; DND contract disclosure records</div>
-      </div>
-
-      <!-- 11. Vice-Admiral Norman -->
-      <div class="pr-entry"
-        data-amount="0" data-year="2017" data-dept="dnd"
-        data-outcome="ongoing"
-        data-search="vice admiral mark norman davie shipbuilding hmcs asterix supply ship prosecution stayed disclosure withheld dnd">
-        <div class="pr-entry-header">
-          <span class="pr-contract-name">Vice-Admiral Norman / Davie Supply Ship (HMCS Asterix)</span>
-          <span class="pr-amount">Contract value disputed</span>
-        </div>
-        <div class="pr-meta">
-          <span class="pr-vendor">Vendor: Davie Shipbuilding</span>
-          <span class="pr-dept-badge">DND / RCN</span>
-          <span class="pr-year">2015–2019</span>
-          <span class="pr-outcome-badge badge-stayed">Prosecution Stayed</span>
-        </div>
-        <div class="pr-detail">
+<div class="pr-source"><strong>Sources:</strong> RCMP press release — charges filed June 2023; Botler AI founders' public statements and affidavits 2022; CBC Investigations reporting 2022–2023; DND contract disclosure records</div>
+</div>
+<!-- 11. Vice-Admiral Norman -->
+<div class="pr-entry" data-amount="0" data-dept="dnd" data-outcome="ongoing" data-search="vice admiral mark norman davie shipbuilding hmcs asterix supply ship prosecution stayed disclosure withheld dnd" data-year="2017">
+<div class="pr-entry-header">
+<span class="pr-contract-name">Vice-Admiral Norman / Davie Supply Ship (HMCS Asterix)</span>
+<span class="pr-amount">Contract value disputed</span>
+</div>
+<div class="pr-meta">
+<span class="pr-vendor">Vendor: Davie Shipbuilding</span>
+<span class="pr-dept-badge">DND / RCN</span>
+<span class="pr-year">2015–2019</span>
+<span class="pr-outcome-badge badge-stayed">Prosecution Stayed</span>
+</div>
+<div class="pr-detail">
           Vice-Admiral Mark Norman, then second-highest ranking officer in the Canadian Armed Forces, was charged with breach of trust in 2018 — accused of leaking cabinet confidences to Davie Shipbuilding during procurement of an interim supply ship. The prosecution <strong>collapsed in 2019</strong> after Norman's defence team alleged the government withheld tens of thousands of documents that were relevant to his defence. The prosecution was stayed. Norman settled with the government for an undisclosed sum (believed to be in the millions). The government acknowledged improperly withholding documents. The interim supply ship (HMCS Asterix) was eventually delivered and serves the Royal Canadian Navy. The fundamental question — whether political interference derailed the procurement process — was never resolved in court.
         </div>
-        <div class="pr-source"><strong>Sources:</strong> R. v. Norman — stayed prosecution, May 2019; Norman settlement announcement 2019; Parliamentary testimony on document disclosure; Senate National Security Committee hearings 2018–2019</div>
-      </div>
-
-    </div><!-- /pr-entries -->
-
-    <div class="pr-empty hidden" id="pr-empty">
-      <p>No entries match your current filters. <button onclick="resetFilters()" class="tnt-style-244">Reset filters</button></p>
-    </div>
-
-    <!-- BOTTOM SECTION -->
-    <section class="tnt-style-72">
-      <div class="stat-callout">
-        <p class="big-number">$260B+</p>
-        <p>in documented federal procurement failures — every entry confirmed by the Auditor General of Canada, the Parliamentary Budget Officer, a parliamentary committee, or criminal court proceedings. <strong>Not one federal minister served prison time for procurement fraud.</strong></p>
-      </div>
-      <div class="verdict-box tnt-style-70">
-        <h3>The Pattern</h3>
-        <p class="tnt-style-79">
+<div class="pr-source"><strong>Sources:</strong> R. v. Norman — stayed prosecution, May 2019; Norman settlement announcement 2019; Parliamentary testimony on document disclosure; Senate National Security Committee hearings 2018–2019</div>
+</div>
+</div><!-- /pr-entries -->
+<div class="pr-empty hidden" id="pr-empty">
+<p>No entries match your current filters. <button class="tnt-style-244" onclick="resetFilters()">Reset filters</button></p>
+</div>
+<!-- BOTTOM SECTION -->
+<section class="tnt-style-72">
+<div class="stat-callout">
+<p class="big-number">$260B+</p>
+<p>in documented federal procurement failures — every entry confirmed by the Auditor General of Canada, the Parliamentary Budget Officer, a parliamentary committee, or criminal court proceedings. <strong>Not one federal minister served prison time for procurement fraud.</strong></p>
+</div>
+<div class="verdict-box tnt-style-70">
+<h3>The Pattern</h3>
+<p class="tnt-style-79">
           Every procurement failure above follows the same architecture: sole-sourced vendors, bypassed competitive processes, political connections to the contracting firms, documentation too poor to audit, and zero personal consequence for the officials who approved the contracts.
-          <br><br>
+          <br/><br/>
           The Auditor General cannot lay charges. Parliamentary committees cannot compel accountability. The RCMP investigates but rarely prosecutes. The Treasury Board writes new policies that are ignored. And then the same pattern repeats with a different vendor and a different department.
-          <br><br>
-          <strong>The only procurement failure that resulted in criminal convictions was the Sponsorship Scandal</strong> — and that required a full public Commission of Inquiry with a mandate to follow the money. Every other failure on this list was met with a report, a policy memo, and no consequence.
-          <br><br>
-          See also: <a href="accountability.html" class="nav-danger">📋 The 504</a> — the individual officials and politicians implicated in these and other failures.
+          <br/><br/>
+<strong>The only procurement failure that resulted in criminal convictions was the Sponsorship Scandal</strong> — and that required a full public Commission of Inquiry with a mandate to follow the money. Every other failure on this list was met with a report, a policy memo, and no consequence.
+          <br/><br/>
+          See also: <a class="nav-danger" href="accountability.html">📋 The 504</a> — the individual officials and politicians implicated in these and other failures.
         </p>
-      </div>
-    </section>
-
-  </div><!-- /content -->
-
-  <script>
+</div>
+</section>
+</div> /content 
+<script>
     // ═══ PROCUREMENT REGISTRY — FILTER, SORT, SEARCH ═══
     let currentOutcomeFilter = 'all';
     let currentSort = 'amount';
@@ -1076,60 +672,58 @@
     }
   </script>
 <div class="cap263-container-narrow">
-  <h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
-  <div class="cap263-grid-cards">
-    <a href="dnd-procurement.html" class="cap263-card-link">
-      <div class="cap263-tag">Defence</div>
-      <div class="cap263-bold-tight">DND Procurement</div>
-    </a>
-    <a href="arrivecan.html" class="cap263-card-link cap263-card-link--gray">
-      <div class="cap263-tag">Related</div>
-      <div class="cap263-bold-tight">Arrivecan</div>
-    </a>
-    <a href="indigenous-procurement-fraud.html" class="cap263-card-link cap263-card-link--gray">
-      <div class="cap263-tag">Related</div>
-      <div class="cap263-bold-tight">Indigenous Procurement Fraud</div>
-    </a>
-    <a href="arms-pipeline.html" class="cap263-card-link cap263-card-link--gold">
-      <div class="cap263-tag cap263-tag--gold">Defence</div>
-      <div class="cap263-bold-tight">Arms Pipeline</div>
-    </a>
-    <a href="follow-the-money.html" class="cap263-card-link">
-      <div class="cap263-tag">Financial</div>
-      <div class="cap263-bold-tight">Follow the Money</div>
-    </a>
-    <a href="corruption-map.html" class="cap263-card-link">
-      <div class="cap263-tag">Mapping</div>
-      <div class="cap263-bold-tight">Corruption Map</div>
-    </a>
-    <a href="institutional-capture.html" class="cap263-card-link cap263-card-link--red">
-      <div class="cap263-tag cap263-tag--red">Synthesis</div>
-      <div class="cap263-bold-tight">Institutional Capture</div>
-    </a>
-  </div>
+<h2 class="cap263-mono-accent">[CONNECTED INTELLIGENCE]</h2>
+<div class="cap263-grid-cards">
+<a class="cap263-card-link" href="dnd-procurement.html">
+<div class="cap263-tag">Defence</div>
+<div class="cap263-bold-tight">DND Procurement</div>
+</a>
+<a class="cap263-card-link cap263-card-link--gray" href="arrivecan.html">
+<div class="cap263-tag">Related</div>
+<div class="cap263-bold-tight">Arrivecan</div>
+</a>
+<a class="cap263-card-link cap263-card-link--gray" href="indigenous-procurement-fraud.html">
+<div class="cap263-tag">Related</div>
+<div class="cap263-bold-tight">Indigenous Procurement Fraud</div>
+</a>
+<a class="cap263-card-link cap263-card-link--gold" href="arms-pipeline.html">
+<div class="cap263-tag cap263-tag--gold">Defence</div>
+<div class="cap263-bold-tight">Arms Pipeline</div>
+</a>
+<a class="cap263-card-link" href="follow-the-money.html">
+<div class="cap263-tag">Financial</div>
+<div class="cap263-bold-tight">Follow the Money</div>
+</a>
+<a class="cap263-card-link" href="corruption-map.html">
+<div class="cap263-tag">Mapping</div>
+<div class="cap263-bold-tight">Corruption Map</div>
+</a>
+<a class="cap263-card-link cap263-card-link--red" href="institutional-capture.html">
+<div class="cap263-tag cap263-tag--red">Synthesis</div>
+<div class="cap263-bold-tight">Institutional Capture</div>
+</a>
+</div>
 </div>
 <div class="cap263-alert-card">
-  <p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
-  <p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a href="file-504.html" class="cap263-text-accent-bold">File charges →</a> | <a href="follow-the-money.html" class="cap263-text-gold-bold">Follow the Money →</a>
-    <a href="phoenix-pay.html" class="cap263-card-link">
-      <div class="cap263-tag">Related</div>
-      <div class="cap263-bold-tight">Phoenix Pay</div>
-    </a>
+<p class="cap263-headline-red">102 doctors. 373 kills each. These people must be arrested and put on trial immediately to stop further deaths.</p>
+<p class="cap263-meta">Rome Statute. Nuremberg Code. Criminal Code s.504. <a class="cap263-text-accent-bold" href="file-504.html">File charges →</a> | <a class="cap263-text-gold-bold" href="follow-the-money.html">Follow the Money →</a>
+<a class="cap263-card-link" href="phoenix-pay.html">
+<div class="cap263-tag">Related</div>
+<div class="cap263-bold-tight">Phoenix Pay</div>
+</a>
 </p>
 </div>
 <div id="read-next"></div>
-
-  <div id="site-footer-frame"></div>
-  <script src="shell.js?v=45"></script>
+<div id="site-footer-frame"></div>
 <script src="js/ux.js"></script>
 <script src="js/slate.js?v=42"></script>
 <script src="js/cinema.js?v=41"></script>
 <script src="js/flow.js?v=41"></script><script src="js/integrity.js?v=41"></script>
 <script src="js/i18n.js?v=4"></script>
-  <script defer src="/js/reading-mode.js?v=1" data-tnt-quantanium="reading-mode"></script>
-  <script defer src="/js/sprite-loader.js?v=1" data-tnt-quantanium="sprite-loader"></script>
-<!-- provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site -->
-<!-- liril:related-apparatus:start v1 -->
+<script data-tnt-quantanium="reading-mode" defer="" src="/js/reading-mode.js?v=1"></script>
+<script data-tnt-quantanium="sprite-loader" defer="" src="/js/sprite-loader.js?v=1"></script>
+ provenance stamp removed 2026-07-10: no internal Cap#/sator/EXECUTE on public site 
+ liril:related-apparatus:start v1 
 <style>
 /* Cap#231 Liril-routed related-apparatus footer — scoped, two-font lock */
 .liril-related{margin:3rem 0 0;padding:1.4rem 1.2rem 1.6rem;
@@ -1155,29 +749,60 @@
 @media (max-width:640px){.liril-related{padding:1rem .6rem 1.2rem}
   .liril-rel-link{font-size:.76rem;padding:.28rem .5rem}}
 </style>
-<nav class="liril-related" aria-label="Related apparatus">
-  <h2>Related Apparatus · pillar registries</h2>
-  <ul>
-      <li><a class="liril-rel-link" href="index.html">Home</a></li>
-      <li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
-      <li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
-      <li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
-      <li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
-      <li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
-      <li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
-      <li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
-      <li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
-      <li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
-      <li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
-      <li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
-      <li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
-      <li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
-  </ul>
+<nav aria-label="Related apparatus" class="liril-related">
+<h2>Related Apparatus · pillar registries</h2>
+<ul>
+<li><a class="liril-rel-link" href="index.html">Home</a></li>
+<li><a class="liril-rel-link" href="5gw-subversion.html">5GW</a></li>
+<li><a class="liril-rel-link" href="accountability-scorecard.html">Scorecard</a></li>
+<li><a class="liril-rel-link" href="mp-accountability-grid.html">MP Grid</a></li>
+<li><a class="liril-rel-link" href="appointments-registry.html">Appointments</a></li>
+<li><a class="liril-rel-link" href="judicial-councils.html">Judicial Councils</a></li>
+<li><a class="liril-rel-link" href="human-rights-commissions.html">HR Commissions</a></li>
+<li><a class="liril-rel-link" href="ombudsmen.html">Ombudsmen</a></li>
+<li><a class="liril-rel-link" href="mpcc.html">MPCC</a></li>
+<li><a class="liril-rel-link" href="law-societies.html">Law Societies</a></li>
+<li><a class="liril-rel-link" href="provincial-oversight.html">Prov Oversight</a></li>
+<li><a class="liril-rel-link" href="le-political-ties.html">LE Ties</a></li>
+<li><a class="liril-rel-link" href="nepotism-graph.html">Nepotism</a></li>
+<li><a class="liril-rel-link" href="methodology-transparency.html">Methodology</a></li>
+</ul>
 </nav>
-<!-- liril:related-apparatus:end -->
-<!-- t5:last-updated:auto -->
-<div class="t5-last-updated" data-t5-last-updated="auto" data-source="git" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
-<!-- /t5:last-updated:auto -->
+ liril:related-apparatus:end 
+ t5:last-updated:auto 
+<div class="t5-last-updated" data-source="git" data-t5-last-updated="auto" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">Last updated: <time datetime="2026-07-09">2026-07-09</time></div>
+ /t5:last-updated:auto 
+
+  </main>
+
+  <footer class="p-foot wide">
+    <span>TENET<sup>5</sup> · Powered by LIRIL AI · Public record only · © 2026</span>
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="about.html">About</a>
+    <a href="methodology-transparency.html">Method</a>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Basic entry animation for all unified pages
+      anime({
+        targets: '.unified-main',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutQuart'
+      });
+    });
+  </script>
+  <footer class="p-foot wide">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="take-action.html">Take action</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+
 </body>
 </html>
-
