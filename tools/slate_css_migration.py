@@ -200,16 +200,14 @@ def migrate_html(text: str, name: str = "") -> tuple[str, bool]:
         if 'class="p-foot"' not in text and "class='p-foot'" not in text:
             text = re.sub(r"</body>", PRODUCT_FOOT + "\n</body>", text, count=1, flags=re.I)
 
-    if "product-system-defense" not in text:
-        defense = (
-            '  <style id="product-system-defense">'
-            ".tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,"
-            ".liril-masthead,.liril-related,.cap230-poster,.brand-crest,"
-            ".ambient-glow,.grain-overlay,.vignette,"
-            'img[src*="crest"]{display:none!important}'
-            "</style>\n"
-        )
-        text = re.sub(r"(</head>)", defense + r"\1", text, count=1, flags=re.I)
+    defense = (
+        '  <style id="product-system-defense">'
+        ".tnt-pillar-nav,.tnt-breadcrumb,.theme-slider,#theme-slider,"
+        ".liril-masthead,.liril-related,.cap230-poster"
+        "{display:none!important}</style>\n"
+    )
+    text = re.sub(r'\s*<style id="product-system-defense">.*?</style>\s*', '\n', text, flags=re.I | re.S)
+    text = re.sub(r"(</head>)", defense + r"\1", text, count=1, flags=re.I)
 
     return text, text != original
 
