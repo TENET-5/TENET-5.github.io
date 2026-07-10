@@ -140,26 +140,14 @@
 
   function injectBackdrop() {
     if (!document.body || isFrameShell) return;
-    // Prefer QUANTANIUM ice substrate over legacy "data-science" theme class
+    // SHAKE FIX (2026-07-10): DISABLED. This loaded Three.js + a WebGL
+    // animated-background engine (v2-engine.js) that rendered every frame
+    // behind the content — continuous background motion read as viewport
+    // "shake" and burned the GPU. The ice-lake CSS ground IS the background;
+    // no WebGL scene, no video-bg, no frame-loop. Static and still.
     document.body.classList.add('theme-quantanium-ice');
     document.body.classList.remove('theme-v2-data-science');
-    
-    // Load Three.js and V2 Engine only when not reduced-motion
-    var reduce = false;
-    try {
-      reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    } catch (e) { /* ignore */ }
-    if (reduce) return;
-
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js')
-      .then(function() { return loadScript(BASE + 'js/v2-engine.js?v=2'); })
-      .then(function() {
-        // Load WebLLM Agent as an ES Module
-        var script = document.createElement('script');
-        script.type = 'module';
-        script.src = BASE + 'js/liril-frozen-agent.js?v=1';
-        document.body.appendChild(script);
-      });
+    return;
   }
 
   // ── Init ────────────────────────────────────────────────────────────────
@@ -182,9 +170,10 @@
       // INSIDE IFRAME — content page: only load content-level components
       // (no header/footer — parent frame provides those)
       loadScript(BASE + 'js/theme-slider.js?v=41');
-      loadScript(BASE + 'js/video-bg.js?v=2');
+      // SHAKE FIX (2026-07-10): removed video-bg.js, reveal.js, presentation.js
+      // (scroll-snap), perception.js — all sources of continuous or scroll-
+      // linked motion. Content pages are now STATIC: only data/util scripts.
       Promise.all([
-        loadScript(BASE + 'js/reveal.js?v=2'),
         loadScript(BASE + 'js/timeline.js?v=1'),
         loadScript(BASE + 'share.js?v=2'),
         loadScript(BASE + 'js/share-actions.js?v=2'),
@@ -193,16 +182,8 @@
         loadScript(BASE + 'js/breadcrumbs.js?v=2'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
       ]).then(function() {
-        return loadScript(BASE + 'js/presentation.js?v=41');
-      }).then(function() {
-        return loadScript(BASE + 'js/perception.js?v=2');
-      }).then(function() {
-        // SHAKE FIX (2026-07-10): liril-autoreader.js + liril-walkthrough.js
-        // were BOTH loaded here and BOTH auto-scrolled the page (autopilot
-        // persisted across pages). Two auto-scrollers fighting = viewport
-        // shake on every browsed page. liril-documentary.js is now the ONE
-        // narration/tour engine (user-initiated, own controls, no shake).
-        return loadScript(BASE + 'js/liril-documentary.js?v=2');
+        // liril-documentary.js is the ONE narration/tour engine (manual).
+        return loadScript(BASE + 'js/liril-documentary.js?v=4');
       }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
       .then(function() { return loadScript(BASE + 'readnext.js?v=41'); })
       .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
@@ -217,21 +198,16 @@
       ensureFrame('site-header-frame', 'div', 'prepend');
       ensureFrame('site-footer-frame', 'div', null);
 
-      loadScript(BASE + 'js/video-bg.js?v=2');
+      // SHAKE FIX (2026-07-10): no video-bg / reveal / presentation-snap /
+      // perception / auto-scroll engines here either. Static page.
       loadScript(BASE + 'nav.js?v=50')
         .then(function() { return loadScript(BASE + 'js/theme-slider.js?v=41'); })
         .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })
         .then(function() { return loadScript(BASE + 'js/config.js?v=41'); })
         .then(function() { return loadScript(BASE + 'js/auth-nav.js?v=1'); })
-        .then(function() { return loadScript(BASE + 'js/main.js?v=4'); })
-        .then(function() { return loadScript(BASE + 'js/reveal.js?v=2'); })
         .then(function() { return loadScript(BASE + 'js/timeline.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/liril-voice.js?v=41'); })
-        .then(function() { return loadScript(BASE + 'js/liril-autoreader.js?v=41'); })
-        .then(function() { return loadScript(BASE + 'js/presentation.js?v=41'); })
-        .then(function() { return loadScript(BASE + 'js/perception.js?v=2'); })
-        .then(function() { return loadScript(BASE + 'js/liril-walkthrough.js?v=41'); })
-        // walkthrough-enhancements.js neutralized — see comment above
+        .then(function() { return loadScript(BASE + 'js/liril-documentary.js?v=4'); })
         .then(function() { return loadScript(BASE + 'js/breadcrumbs.js?v=1'); })
         .then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
         .then(function() { return loadScript(BASE + 'share.js?v=2'); })

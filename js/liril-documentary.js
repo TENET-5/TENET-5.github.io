@@ -1,8 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   LIRIL DOCUMENTARY ENGINE v1.0
-   Fully guided website tour — watchable film + navigable chapters.
-   Loads data/documentary_chapters.json; uses LIRIL_VOICE when available.
+   LIRIL DOCUMENTARY ENGINE v4.0
+   Multi-hour Canada public-record film — entire history → this hour.
+   Loads data/documentary_chapters.json; eras + hours + localStorage progress.
    QUANTANIUM ice HUD via css/documentary-tour.css
+   Full film surface: /liril-film.html
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -10,16 +11,63 @@
   window.__LIRIL_DOCUMENTARY_LOADED = true;
 
   var CHAPTERS_URL = '/data/documentary_chapters.json';
-  var CSS_HREF = '/css/documentary-tour.css?v=2';
+  var CSS_HREF = '/css/documentary-tour.css?v=4';
+  var FULL_FILM_URL = '/liril-film.html';
+  var STORAGE_DEFAULT = 'liril_film_progress_v4';
   var state = {
     data: null,
     index: 0,
-    mode: 'watch', /* watch | navigate */
+    mode: 'watch', /* watch | navigate | research */
     playing: false,
     advanceTimer: null,
     root: null,
-    lastHighlight: null
+    lastHighlight: null,
+    storageKey: STORAGE_DEFAULT
   };
+
+  function fmtHours(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    var h = Math.floor(sec / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    if (h <= 0) return m + 'm';
+    return h + 'h ' + (m < 10 ? '0' : '') + m + 'm';
+  }
+
+  function totalDurationS(data) {
+    if (!data || !data.chapters) return 0;
+    if (data.totals && data.totals.duration_s) return data.totals.duration_s;
+    var t = 0;
+    for (var i = 0; i < data.chapters.length; i++) t += (data.chapters[i].duration_s || 30);
+    return t;
+  }
+
+  function elapsedToIndex(data, idx) {
+    if (!data || !data.chapters) return 0;
+    var t = 0;
+    var max = Math.min(idx, data.chapters.length);
+    for (var i = 0; i < max; i++) t += (data.chapters[i].duration_s || 30);
+    return t;
+  }
+
+  function saveProgress() {
+    try {
+      var key = (state.data && state.data.storage_key) || state.storageKey;
+      localStorage.setItem(key, JSON.stringify({
+        index: state.index,
+        ts: Date.now(),
+        version: (state.data && state.data.version) || '4.0.0'
+      }));
+    } catch (e) {}
+  }
+
+  function loadProgress() {
+    try {
+      var key = (state.data && state.data.storage_key) || state.storageKey;
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) { return null; }
+  }
 
   function injectCss() {
     if (document.getElementById('liril-doc-css')) return;
@@ -155,31 +203,37 @@
 
     var bar = el('div', 'doc-filmbar');
     bar.innerHTML =
-      '<span class="doc-brand">LIRIL · DOCUMENTARY</span>' +
-      '<div class="doc-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
+      '<span class="doc-brand">LIRIL · CANADA RECORD</span>' +
+      '<div class="doc-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="Time progress">' +
       '<div class="doc-fill"></div></div>' +
       '<span class="doc-count">—</span>' +
+      '<span class="doc-time" title="Elapsed / total film time">—</span>' +
       '<button type="button" class="doc-mode is-watch" data-act="mode">WATCH</button>' +
       '<button type="button" class="doc-ctrl" data-act="prev">PREV</button>' +
       '<button type="button" class="doc-ctrl" data-act="play">PLAY</button>' +
       '<button type="button" class="doc-ctrl" data-act="next">NEXT</button>' +
       '<button type="button" class="doc-ctrl danger" data-act="exit">EXIT</button>';
 
+    var eraRail = el('div', 'doc-era-rail');
+    eraRail.setAttribute('aria-label', 'Documentary eras / acts');
+
     var rail = el('div', 'doc-chapter-rail');
-    rail.setAttribute('aria-label', 'Documentary chapters');
+    rail.setAttribute('aria-label', 'Documentary chapters in current era');
 
     var cap = el('div', 'doc-caption');
     cap.innerHTML =
       '<div class="doc-kicker">—</div>' +
       '<h2 class="doc-title">—</h2>' +
       '<p class="doc-sub"></p>' +
+      '<div class="doc-sources" aria-label="Open government and social sources"></div>' +
       '<div class="doc-nav">' +
-      '<button type="button" data-act="prev">← Chapter</button>' +
+      '<button type="button" data-act="prev">← Beat</button>' +
       '<button type="button" data-act="play">Play / Pause</button>' +
-      '<button type="button" data-act="next">Chapter →</button>' +
+      '<button type="button" data-act="next">Beat →</button>' +
       '</div>';
 
     root.appendChild(bar);
+    root.appendChild(eraRail);
     root.appendChild(rail);
     root.appendChild(cap);
     document.body.appendChild(root);
@@ -197,16 +251,30 @@
       else if (act === 'goto') {
         var i = parseInt(t.getAttribute('data-i'), 10);
         if (!isNaN(i)) goChapter(i, true);
+      } else if (act === 'goto-act') {
+        var a = parseInt(t.getAttribute('data-act-n'), 10);
+        if (!isNaN(a) && state.data) {
+          for (var j = 0; j < state.data.chapters.length; j++) {
+            if ((state.data.chapters[j].act|0) === a) { goChapter(j, true); break; }
+          }
+        }
       }
     });
 
     bar.querySelector('.doc-track').addEventListener('click', function (ev) {
       if (!state.data || !state.data.chapters.length) return;
       var r = ev.currentTarget.getBoundingClientRect();
-      var pct = (ev.clientX - r.left) / r.width;
-      var i = Math.min(state.data.chapters.length - 1,
-        Math.max(0, Math.floor(pct * state.data.chapters.length)));
-      goChapter(i, true);
+      var pct = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+      /* scrub by time, not chapter index — multi-hour film */
+      var totalS = totalDurationS(state.data);
+      var targetS = pct * totalS;
+      var acc = 0;
+      var i = 0;
+      for (; i < state.data.chapters.length; i++) {
+        acc += (state.data.chapters[i].duration_s || 30);
+        if (acc >= targetS) break;
+      }
+      goChapter(Math.min(i, state.data.chapters.length - 1), true);
     });
   }
 
@@ -214,48 +282,112 @@
     if (!state.root || !state.data) return;
     var ch = state.data.chapters[state.index];
     var total = state.data.chapters.length;
-    var pct = total ? Math.round(((state.index + 1) / total) * 100) : 0;
+    var totalS = totalDurationS(state.data);
+    var elap = elapsedToIndex(state.data, state.index);
+    var pct = totalS ? Math.round((elap / totalS) * 100) : 0;
     var fill = state.root.querySelector('.doc-fill');
     var count = state.root.querySelector('.doc-count');
+    var timeEl = state.root.querySelector('.doc-time');
     var track = state.root.querySelector('.doc-track');
     if (fill) fill.style.width = pct + '%';
     if (count) count.textContent = (state.index + 1) + ' / ' + total;
+    if (timeEl) {
+      var totLabel = (state.data.totals && state.data.totals.duration_label) || fmtHours(totalS);
+      timeEl.textContent = fmtHours(elap) + ' / ' + totLabel;
+    }
     if (track) track.setAttribute('aria-valuenow', String(pct));
 
     var kick = state.root.querySelector('.doc-kicker');
     var title = state.root.querySelector('.doc-title');
     var sub = state.root.querySelector('.doc-sub');
-    if (kick) kick.textContent = ch.kicker || ('CHAPTER ' + (state.index + 1));
+    if (kick) {
+      var era = ch.era ? String(ch.era).toUpperCase() : '';
+      var years = ch.years ? ' · ' + ch.years : '';
+      kick.textContent = (ch.kicker || ('ACT ' + (ch.act != null ? ch.act : ''))) +
+        (era ? ' · ' + era : '') + years;
+    }
     if (title) title.textContent = ch.title || '';
     if (sub) sub.textContent = ch.narration || '';
 
+    /* sources + public social */
+    var srcBox = state.root.querySelector('.doc-sources');
+    if (srcBox) {
+      srcBox.innerHTML = '';
+      var all = [];
+      (ch.sources || []).forEach(function (s) {
+        all.push({ kind: 'GOV', label: s.label || s.url, url: s.url });
+      });
+      (ch.social || []).forEach(function (s) {
+        all.push({ kind: 'SOCIAL', label: s.label || s.url, url: s.url });
+      });
+      all.slice(0, 8).forEach(function (s) {
+        var a = el('a', 'doc-src-chip');
+        a.href = s.url || '#';
+        if (s.url && /^https?:/i.test(s.url)) a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.innerHTML = '<span class="doc-src-k">' + s.kind + '</span> ' + (s.label || '');
+        srcBox.appendChild(a);
+      });
+      if (!all.length) {
+        srcBox.innerHTML = '<span class="doc-src-empty">Primary sources attached at site destination</span>';
+      }
+    }
+
     var modeBtn = state.root.querySelector('.doc-mode');
     if (modeBtn) {
-      modeBtn.textContent = state.mode === 'watch' ? 'WATCH' : 'NAVIGATE';
+      modeBtn.textContent = state.mode === 'watch' ? 'WATCH' : (state.mode === 'research' ? 'RESEARCH' : 'NAVIGATE');
       modeBtn.classList.toggle('is-watch', state.mode === 'watch');
     }
     state.root.classList.toggle('doc-live', state.playing);
-    state.root.classList.toggle('doc-navigate', state.mode === 'navigate');
+    state.root.classList.toggle('doc-navigate', state.mode !== 'watch');
 
     var playBtn = state.root.querySelectorAll('[data-act="play"]');
     playBtn.forEach(function (b) {
       b.textContent = state.playing ? 'PAUSE' : 'PLAY';
     });
 
-    /* rail */
+    /* era rail */
+    var eraRail = state.root.querySelector('.doc-era-rail');
+    if (eraRail) {
+      eraRail.innerHTML = '';
+      var actsSeen = {};
+      var actOrder = [];
+      state.data.chapters.forEach(function (c) {
+        var a = c.act != null ? (c.act|0) : 0;
+        if (actsSeen[a] == null) {
+          actsSeen[a] = c.kicker || ('ACT ' + a);
+          actOrder.push(a);
+        }
+      });
+      var curAct = ch.act != null ? (ch.act|0) : 0;
+      actOrder.forEach(function (a) {
+        var b = el('button', 'era-item' + (a === curAct ? ' is-current' : ''));
+        b.type = 'button';
+        b.setAttribute('data-act', 'goto-act');
+        b.setAttribute('data-act-n', String(a));
+        b.textContent = 'A' + a;
+        b.title = actsSeen[a] || ('Act ' + a);
+        eraRail.appendChild(b);
+      });
+    }
+
+    /* chapter rail — only current act for multi-hour readability */
     var rail = state.root.querySelector('.doc-chapter-rail');
     if (rail) {
       rail.innerHTML = '';
+      var curA = ch.act != null ? (ch.act|0) : 0;
       state.data.chapters.forEach(function (c, i) {
+        if ((c.act|0) !== curA) return;
         var b = el('button', 'ch-item' + (i === state.index ? ' is-current' : ''));
         b.type = 'button';
         b.setAttribute('data-act', 'goto');
         b.setAttribute('data-i', String(i));
-        b.innerHTML = '<span class="ch-k">' + (c.kicker || '') + '</span>' +
+        b.innerHTML = '<span class="ch-k">' + (c.years || c.kicker || '') + '</span>' +
           '<span class="ch-t">' + (c.title || '') + '</span>';
         rail.appendChild(b);
       });
     }
+    saveProgress();
   }
 
   function playChapter() {
@@ -323,7 +455,10 @@
   }
 
   function toggleMode() {
-    state.mode = state.mode === 'watch' ? 'navigate' : 'watch';
+    /* watch → navigate → research → watch */
+    if (state.mode === 'watch') state.mode = 'navigate';
+    else if (state.mode === 'navigate') state.mode = 'research';
+    else state.mode = 'watch';
     updateHud();
   }
 
@@ -345,8 +480,23 @@
     var btn = el('button', 'liril-doc-start');
     btn.id = 'liril-doc-start';
     btn.type = 'button';
-    btn.setAttribute('aria-label', 'Start LIRIL documentary tour of the website');
-    btn.innerHTML = 'Documentary';
+    btn.setAttribute('aria-label', 'Open multi-hour LIRIL film of Canada');
+    btn.innerHTML = 'Full film';
+    btn.title = 'Multi-hour LIRIL film — origins to now';
+    btn.addEventListener('click', function (ev) {
+      /* Prefer full film over short site tour */
+      if (!ev.shiftKey) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        try {
+          if (window.top && window.top !== window) {
+            window.top.location.href = FULL_FILM_URL;
+            return;
+          }
+        } catch (e) {}
+        window.location.href = FULL_FILM_URL;
+      }
+    }, true);
     btn.setAttribute('title', 'Watchable + navigable guided tour of the record');
     btn.addEventListener('click', function () {
       start(true);
@@ -362,12 +512,15 @@
     function run() {
       state.playing = true;
       state.mode = 'watch';
-      /* resume chapter from query if present */
+      /* resume chapter from query if present, else localStorage */
       try {
         var q = new URLSearchParams(window.location.search || '');
         if (q.get('ch') != null) {
           var ci = parseInt(q.get('ch'), 10);
           if (!isNaN(ci)) state.index = ci;
+        } else {
+          var prog = loadProgress();
+          if (prog && typeof prog.index === 'number') state.index = prog.index;
         }
       } catch (e) {}
       updateHud();
@@ -381,14 +534,20 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         state.data = data;
+        if (data.storage_key) state.storageKey = data.storage_key;
         if (data.default_mode) state.mode = data.default_mode;
         if (fromUser && data.voice_intro) {
-          /* intro then chapter 0 */
+          /* intro then resume index */
           state.playing = true;
           renderHud();
+          var startIdx = 0;
+          try {
+            var prog = loadProgress();
+            if (prog && typeof prog.index === 'number') startIdx = prog.index;
+          } catch (e2) {}
           updateHud();
           speak(data.voice_intro, function () {
-            state.index = 0;
+            state.index = startIdx;
             playChapter();
           });
         } else {
@@ -444,11 +603,17 @@
       go: goChapter,
       toggleMode: toggleMode,
       getState: function () {
+        var tot = state.data ? totalDurationS(state.data) : 0;
+        var elap = state.data ? elapsedToIndex(state.data, state.index) : 0;
         return {
           index: state.index,
           playing: state.playing,
           mode: state.mode,
-          total: state.data ? state.data.chapters.length : 0
+          total: state.data ? state.data.chapters.length : 0,
+          duration_s: tot,
+          elapsed_s: elap,
+          duration_label: state.data && state.data.totals ? state.data.totals.duration_label : fmtHours(tot),
+          hours: tot / 3600
         };
       }
     };

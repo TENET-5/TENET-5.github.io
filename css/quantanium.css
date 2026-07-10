@@ -292,3 +292,53 @@ canvas { max-width: 100%; }
   .scrolly__steps { grid-column: 1; grid-row: auto; }
   .scrolly__steps section { min-height: 0; opacity: 1; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   § STABILIZE (2026-07-10) — DEAD-STILL GUARANTEE
+   ═══════════════════════════════════════════════════════════════════════
+   Loaded on every page (last in the quantanium layer). Neutralizes EVERY
+   mechanism that can make the viewport oscillate ("shake"), regardless of
+   which legacy stylesheet or script tries to reintroduce it. Owner directive:
+   the page must not move by itself. Hover transitions are kept (they can't
+   auto-oscillate); everything scroll-linked / auto-animating is killed.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 1. No smooth scroll, no scroll-snap — the two scroll-position feedback
+      loops. Match presentation.css's body.pres-active specificity + !important. */
+html, body,
+body.pres-active, body.nature-bg, body.topo, body.pres-active * {
+  scroll-behavior: auto !important;
+  scroll-snap-type: none !important;
+  scroll-snap-align: none !important;
+  background-attachment: scroll !important;
+  overscroll-behavior: none !important;
+}
+
+/* 2. No keyframe/scroll-timeline animation anywhere (animated grain, pulses,
+      scan lines, the scroll progress bar) — these are the auto-motion sources.
+      JS-driven count-ups use textContent, not CSS animation, so they survive. */
+*, *::before, *::after {
+  animation: none !important;
+  animation-timeline: auto !important;
+}
+
+/* 3. Reveal/entrance transforms render FINAL-STATE instantly. A transform that
+      fires near an IntersectionObserver threshold can re-trigger in a loop. */
+.q-rise, .reveal, .reveal .line, [class*="reveal"], [class*="fade-"],
+[data-narrate], .q-progress {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* 4. Remove decorative fixed full-viewport layers that force per-frame repaint. */
+.q-progress, .grain-overlay, .film-grain, .noise-overlay, .liril-scan,
+[class*="grain"], body::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* 5. Nothing may exceed the content width (100vw includes the scrollbar and
+      toggles the vertical scrollbar → width jitter). */
+html { overflow-x: clip; scrollbar-gutter: stable; }
+body { overflow-x: clip; max-width: 100%; }

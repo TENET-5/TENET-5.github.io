@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <script>
+    /* Standalone cinema — do not force shell frame (multi-hour player needs full viewport) */
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIRIL Film — The Full Record of Canada | TENET5</title>
+  <meta name="description" content="~22-hour LIRIL documentary of the entire open public record of Canada — history to this hour: statutes, commissions, AG reports, Hansard, open data, and public social OSINT. Watch, navigate, resume.">
+  <link rel="canonical" href="https://tenet-5.github.io/liril-film.html">
+  <meta property="og:title" content="LIRIL — The Full Record of Canada">
+  <meta property="og:description" content="Multi-hour public-record documentary. Origins to this hour. Primary sources and public social evidence.">
+  <meta property="og:site_name" content="TENET5">
+  <meta name="theme-color" content="#020408">
+  <link rel="stylesheet" href="/css/tokens.css?v=50-cin">
+  <link rel="stylesheet" href="/css/liril-film.css?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .lf-landing {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 20px 24px;
+      text-align: left;
+    }
+    .lf-landing h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin: 0 0 14px;
+    }
+    .lf-landing p {
+      color: #a8bcc8;
+      line-height: 1.65;
+      font-size: 1.02rem;
+      margin: 0 0 14px;
+    }
+    .lf-landing .meta {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #eef6fa;
+      margin-bottom: 18px;
+    }
+    .lf-landing .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 22px 0 8px;
+    }
+    .lf-landing a.btn, .lf-landing button.btn {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(238,246,250,0.3);
+      color: #f5fafc;
+      background: rgba(238,246,250,0.06);
+      cursor: pointer;
+    }
+    .lf-landing a.btn.p, .lf-landing button.btn.p {
+      background: #f5fafc;
+      color: #020408;
+      border-color: #f5fafc;
+      font-weight: 700;
+    }
+    .lf-landing .honest {
+      border-left: 2px solid rgba(168,188,200,0.35);
+      padding: 12px 14px;
+      margin: 20px 0;
+      color: #6a7f8c;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+    #liril-film-app.hidden-until-start { display: none; }
+    body.is-playing .lf-landing { display: none; }
+    body.is-playing #liril-film-app.hidden-until-start { display: block; }
+  </style>
+</head>
+<body>
+  <div class="lf-landing" id="lf-landing">
+    <p class="meta" id="lf-land-meta">LIRIL DOCUMENTARY · MULTI-HOUR · PUBLIC RECORD</p>
+    <h1>The full record of Canada</h1>
+    <p>
+      Not a fifteen-minute site tour. A meticulously ordered film from Indigenous nations and first contact
+      through Confederation, residential schools, war, the Charter, free trade, the security state,
+      pandemic emergency powers, MAID expansion, foreign interference findings, procurement failure,
+      media capture, and today’s open-source OSINT — including public social posts by institutions and named subjects.
+    </p>
+    <p>
+      Runtime includes narration plus on-screen dwell for every linked government source and public social artifact
+      so a complete playthrough takes <strong style="color:#fff" id="lf-hours">hours</strong>, not minutes.
+      Pause anytime. Resume tomorrow. Jump by act.
+    </p>
+    <div class="honest">
+      <strong style="color:#a8bcc8">Standard:</strong> FACT = primary / on-record.
+      REPORTING = secondary journalism. INFERENCE = labeled.
+      Social evidence = public posts and public handles only. No private doxxing.
+    </div>
+    <div class="row">
+      <button type="button" class="btn p" id="lf-start">Start film from beginning</button>
+      <button type="button" class="btn" id="lf-resume">Resume saved position</button>
+      <a class="btn" href="daily-briefing.html">Daily briefing instead</a>
+      <a class="btn" href="experience.html">A→B paths</a>
+    </div>
+    <p style="font-family:IBM Plex Mono,monospace;font-size:0.62rem;color:#6a7f8c;letter-spacing:0.08em;margin-top:28px">
+      CATALOG <span id="lf-stats">loading…</span>
+    </p>
+  </div>
+
+  <div id="liril-film-app" class="hidden-until-start"></div>
+
+  <script>
+    (function () {
+      function showPlayer(auto) {
+        document.body.classList.add('is-playing');
+        var app = document.getElementById('liril-film-app');
+        if (app) app.classList.remove('hidden-until-start');
+        if (auto) {
+          try {
+            var u = new URL(window.location.href);
+            u.searchParams.set('auto', '1');
+            history.replaceState({}, '', u.toString());
+          } catch (e) {}
+        }
+        if (!window.__LIRIL_FILM_BOOTED) {
+          window.__LIRIL_FILM_BOOTED = true;
+          var s = document.createElement('script');
+          s.src = '/js/liril-film-player.js?v=4';
+          document.body.appendChild(s);
+        }
+      }
+      document.getElementById('lf-start').addEventListener('click', function () {
+        try {
+          localStorage.removeItem('liril_film_progress_v3');
+          localStorage.removeItem('liril_film_progress_v4');
+        } catch (e) {}
+        showPlayer(true);
+      });
+      document.getElementById('lf-resume').addEventListener('click', function () {
+        showPlayer(false);
+      });
+      fetch('/data/film/manifest.json', { cache: 'no-cache' })
+        .then(function (r) { return r.json(); })
+        .then(function (m) {
+          var t = m.totals || {};
+          document.getElementById('lf-stats').textContent =
+            (t.acts || '—') + ' acts · ' + (t.segments || '—') + ' beats · ' + (t.duration_label || '—') +
+            ' complete playthrough · v' + (m.version || '');
+          document.getElementById('lf-hours').textContent = (t.duration_label || 'hours');
+          document.getElementById('lf-land-meta').textContent =
+            'LIRIL DOCUMENTARY · ' + (t.duration_label || 'MULTI-HOUR') + ' · PUBLIC RECORD';
+        })
+        .catch(function () {
+          document.getElementById('lf-stats').textContent = 'catalog missing — run tools/build_liril_film_catalog.py';
+        });
+      try {
+        var q = new URLSearchParams(window.location.search || '');
+        if (q.get('play') === '1' || q.get('auto') === '1') showPlayer(q.get('auto') === '1');
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

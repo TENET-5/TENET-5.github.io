@@ -38,6 +38,7 @@
             '<a href="/index.html" id="nav-home">Home</a>' +
             '<a href="/daily-briefing.html" id="nav-daily">Daily Brief</a>' +
             '<a href="/experience.html" id="nav-paths">A to B</a>' +
+            '<a href="/liril-film.html" id="nav-film">LIRIL Film</a>' +
             '<a href="/osint-dashboard.html" id="nav-osint">OSINT</a>' +
             '<a href="/findings.html" id="nav-findings">Findings</a>' +
           '</div>' +

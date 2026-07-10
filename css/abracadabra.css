@@ -1,6 +1,192 @@
-/* NOT the public product gateway.
-   TENET5 public entry is index.html (operational intelligence landing).
-   This file is a discarded experiment stub — do not link from production pages.
-   See data/site_intent_contract.json.
-*/
-.abracadabra-root { display: none !important; }
+/* =========================================================================
+   TENET5 — ABRACADABRA UI (Voice-First Root)
+   ========================================================================= */
+
+body.abracadabra-root {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #020408;
+  font-family: var(--slate-font-sans, "Atkinson Hyperlegible", sans-serif);
+  color: var(--slate-ink, #ffffff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ── Frozen Lake Background ── */
+.frozen-lake-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 120%, rgba(56, 189, 248, 0.1) 0%, #020408 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.frozen-lake-bg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: perspective(500px) rotateX(60deg) translateY(-100px) scale(3);
+  transform-origin: bottom center;
+  opacity: 0.4;
+  mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+}
+
+/* ── The Quantum Orb ── */
+.abra-orb-container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.abra-orb {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #1a1f2b 0%, #020408 80%);
+  box-shadow: 
+    inset 0 0 40px rgba(255,255,255,0.05),
+    0 0 50px rgba(56, 189, 248, 0.2),
+    0 0 100px rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.abra-orb::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(56, 189, 248, 0.5) 20%, transparent 40%);
+  z-index: -1;
+  animation: orbSpin 4s linear infinite;
+  opacity: 0; /* Only shows when listening/processing */
+  transition: opacity 0.3s ease;
+}
+
+.abra-orb.listening::before {
+  opacity: 1;
+  animation: orbSpin 2s linear infinite;
+}
+.abra-orb.processing::before {
+  opacity: 1;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(168, 85, 247, 0.5) 20%, transparent 40%); /* Purple for processing */
+  animation: orbSpin 0.5s linear infinite;
+}
+
+@keyframes orbSpin {
+  100% { transform: rotate(360deg); }
+}
+
+.abra-orb-core {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #020408;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+  transition: all 0.3s ease;
+  animation: orbPulse 4s ease-in-out infinite;
+}
+
+.abra-orb.listening .abra-orb-core {
+  animation: orbListen 0.5s ease-in-out infinite alternate;
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.8);
+}
+
+.abra-orb.processing .abra-orb-core {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.8);
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+@keyframes orbListen {
+  0% { transform: scale(1) scaleY(1); }
+  100% { transform: scale(1.2) scaleY(0.8); } /* Mimics a voice waveform bouncing */
+}
+
+
+/* ── Command Prompt UI ── */
+.abra-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 600px;
+}
+
+.abra-status {
+  font-family: var(--slate-font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--slate-ink-dim, rgba(255,255,255,0.5));
+  min-height: 20px;
+  transition: color 0.3s ease;
+}
+
+.abra-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.abra-input {
+  width: 100%;
+  background: rgba(2, 4, 8, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px 30px;
+  font-family: var(--slate-font-sans, "Atkinson Hyperlegible", sans-serif);
+  font-size: 1.5rem;
+  color: white;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.abra-input:focus {
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.1);
+  background: rgba(2, 4, 8, 0.8);
+}
+
+.abra-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+  font-weight: 300;
+}
+
+/* ── Routing Animation ── */
+.routing-flash {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: white;
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+}
