@@ -683,8 +683,7 @@ def render_catalog() -> str:
         if not tm:
             continue
         title = re.sub(r"\s*\|\s*TENET5\s*$", "", tm.group(1).strip())
-        dm = re.search(r'name="description"\s+content="([^"]*)"', html, re.I)
-        desc = (dm.group(1).strip() if dm else "")[:150]
+        desc = page_desc(html)
         if not title:
             continue
         entries.append((title, p.name, desc))
@@ -716,6 +715,23 @@ def render_catalog() -> str:
 </section>"""
 
 
+BOILERPLATE_DESC = "TENET5 is an investigative newsroom"
+
+def page_desc(html: str) -> str:
+    """A page's own one-line summary: its meta description, unless that is
+    the site-wide boilerplate a past audit stamped everywhere — then the
+    first real paragraph of body text."""
+    dm = re.search(r'name="description"\s+content="([^"]*)"', html, re.I)
+    desc = dm.group(1).strip() if dm else ""
+    if desc and not desc.startswith(BOILERPLATE_DESC):
+        return desc[:150]
+    for pm in re.finditer(r"<p\b[^>]*>(.*?)</p>", html, re.I | re.S):
+        text = re.sub(r"<[^>]+>", "", pm.group(1))
+        text = re.sub(r"\s+", " ", text).strip()
+        if len(text) >= 60 and not text.startswith(BOILERPLATE_DESC):
+            return text[:150]
+    return ""
+
 def page_meta(stem: str) -> tuple[str, str] | None:
     f = ROOT / f"{stem}.html"
     if not f.exists():
@@ -725,8 +741,7 @@ def page_meta(stem: str) -> tuple[str, str] | None:
     if not tm:
         return None
     title = re.sub(r"\s*\|\s*TENET5\s*$", "", tm.group(1).strip())
-    dm = re.search(r'name="description"\s+content="([^"]*)"', h, re.I)
-    return title, (dm.group(1).strip() if dm else "")[:150]
+    return title, page_desc(h)
 
 
 def build_acts() -> int:
@@ -755,11 +770,12 @@ def build_acts() -> int:
                 + (f'<span class="d">{esc(d)}</span>' if d else "") + "</a>")
         if not entries:
             continue
+        plural = "s" if len(entries) != 1 else ""
         section = (
             "<!-- ACT-EVIDENCE:BEGIN -->\n"
             f'<section class="catalog" id="evidence-file" data-line="The evidence file for this act — '
-            f'{len(entries)} sourced documents. Choose any one and I will read it with you.">\n'
-            f'<span class="kick">The Evidence File · {len(entries)} Documents · Rebuilt Daily</span>\n'
+            f'{len(entries)} sourced document{plural}. Choose any one and I will read it with you.">\n'
+            f'<span class="kick">The Evidence File · {len(entries)} Document{plural} · Rebuilt Daily</span>\n'
             f'<h2 style="margin-top:1.5vh">The record behind this act</h2>\n'
             '<p style="margin-top:1.5vh;max-width:720px;color:var(--ivory-dim);font-size:15px;line-height:1.7">'
             "Every document below is a sourced file on this site and part of the record for this act. "
