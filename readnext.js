@@ -70,9 +70,17 @@
     'cbc-5gw-media-vector.html': {
       current: 'CBC 5GW Vector',
       next: [
+        { href: 'cbc-social-amplification.html', label: 'CBC Social Pattern', desc: 'X/FB/Bluesky + sting case' },
         { href: 'media-capture.html', label: 'Media Capture', desc: 'Concentration + bailout stack' },
-        { href: '5gw-subversion.html', label: '5GW Overview', desc: 'Cognitive domain framing' },
         { href: 'genocide-evidence.html', label: 'Article II', desc: 'Policy harm map' },
+      ]
+    },
+    'cbc-social-amplification.html': {
+      current: 'CBC Social Pattern',
+      next: [
+        { href: 'cbc-5gw-media-vector.html', label: 'CBC 5GW Vector', desc: 'Funding + appointments' },
+        { href: 'media-capture.html', label: 'Media Capture', desc: 'Subsidy architecture' },
+        { href: '5gw-subversion.html', label: '5GW Overview', desc: 'Cognitive domain' },
       ]
     },
     'media-capture.html': {

@@ -189,7 +189,6 @@
         loadScript(BASE + 'share.js?v=2'),
         loadScript(BASE + 'js/share-actions.js?v=2'),
         loadScript(BASE + 'js/liril-voice.js?v=41'),
-        loadScript(BASE + 'js/liril-autoreader.js?v=41'),
         loadScript(BASE + 'js/figures.js?v=1'),
         loadScript(BASE + 'js/breadcrumbs.js?v=2'),
         loadScript(BASE + 'js/error-reporter.js?v=2')
@@ -198,14 +197,12 @@
       }).then(function() {
         return loadScript(BASE + 'js/perception.js?v=2');
       }).then(function() {
-        return loadScript(BASE + 'js/liril-walkthrough.js?v=41');
-      // walkthrough-enhancements.js was a purple duplicate bar at bottom:74px
-      // that rendered alongside the presentation.js indicator at bottom:16px,
-      // producing two visible walkthrough UIs. The file is now a no-op shim.
-      // Speed/autoplay/captions/transcript controls will be migrated into
-      // liril-walkthrough.js itself in a follow-up so there is ONE unified UI.
-      }).then(function() {
-        return loadScript(BASE + 'js/liril-documentary.js?v=1');
+        // SHAKE FIX (2026-07-10): liril-autoreader.js + liril-walkthrough.js
+        // were BOTH loaded here and BOTH auto-scrolled the page (autopilot
+        // persisted across pages). Two auto-scrollers fighting = viewport
+        // shake on every browsed page. liril-documentary.js is now the ONE
+        // narration/tour engine (user-initiated, own controls, no shake).
+        return loadScript(BASE + 'js/liril-documentary.js?v=2');
       }).then(function() { return loadScript(BASE + 'js/lang-switcher.js?v=1'); })
       .then(function() { return loadScript(BASE + 'readnext.js?v=41'); })
       .then(function() { return loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'); })

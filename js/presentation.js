@@ -177,6 +177,7 @@
     // ── 5GW / MEDIA VECTOR ──
     '5gw-subversion.html',
     'cbc-5gw-media-vector.html',
+    'cbc-social-amplification.html',
     'media-capture.html',
     'media-concentration.html',
 

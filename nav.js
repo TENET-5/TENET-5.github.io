@@ -51,7 +51,7 @@
           '<div class="nav-group">' +
             '<a href="/foreign-interference.html" id="nav-foreign">Foreign</a>' +
             '<a href="/cbc-5gw-media-vector.html" id="nav-cbc5gw">CBC 5GW</a>' +
-            '<a href="/media-capture.html" id="nav-media">Media</a>' +
+            '<a href="/cbc-social-amplification.html" id="nav-cbcsocial">CBC Social</a>' +
             '<a href="/evidence-index.html" id="nav-evidence">Evidence</a>' +
           '</div>' +
           '<div class="nav-group nav-tools">' +

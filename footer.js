@@ -25,6 +25,7 @@
           { label: 'OSINT Dashboard', href: 'osint-dashboard.html' },
           { label: 'Griffon GLLE file', href: 'griffon-glle-procurement.html' },
           { label: 'CBC 5GW vector', href: 'cbc-5gw-media-vector.html' },
+          { label: 'CBC social pattern', href: 'cbc-social-amplification.html' },
           { label: 'Evidence Index', href: 'evidence-index.html' },
         ]
       },

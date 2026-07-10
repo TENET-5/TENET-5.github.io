@@ -1400,23 +1400,13 @@
       else startBtn.style.display = 'none';
     };
 
-    // Auto-start if arriving via autopilot cross-page flow.
-    // Autopilot state is ONLY set when the user manually clicks the walkthrough
-    // button (startWalkthrough). It is never set on initial page load.
-    // This prevents "hallucinations" while still allowing full site tours.
-    var autopilotState = getAutopilotState();
-    if (autopilotState && autopilotState.autostart && points.length >= 2) {
-      // Expire autopilot after 30 minutes to prevent stale sessions
-      var age = Date.now() - (autopilotState.startedAt || 0);
-      if (age > 30 * 60 * 1000) {
-        clearAutopilot();
-        console.log('[LIRIL] Autopilot expired (>30min)');
-      } else {
-        // Arriving from a previous page's walkthrough — auto-continue
-        console.log('[LIRIL] Autopilot: continuing walkthrough from previous page');
-        setTimeout(function() { startWalkthrough(); }, 1500);
-      }
-    }
+    // SHAKE FIX (2026-07-10): cross-page auto-continue is DISABLED. A
+    // persisted autopilot flag made every page the user browsed auto-start
+    // the walkthrough and smooth-scroll element-to-element — which, running
+    // alongside the documentary engine, produced continuous viewport shake.
+    // The walkthrough is now manual-only (the button still works); the
+    // documentary engine (liril-documentary.js) is the guided auto-tour.
+    try { clearAutopilot(); } catch (e) {}
   }
 
   if (document.readyState === 'loading') {

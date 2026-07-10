@@ -457,7 +457,11 @@
     if (!isEligible()) return;
     if (!('speechSynthesis' in window)) return;
     buildPill();
-    tryAutoStart();
+    // SHAKE FIX (2026-07-10): NO eager auto-start. Auto-reading on every
+    // page load ran concurrently with other narration/scroll engines and
+    // contributed to viewport shake + double-speech. Manual only — the pill
+    // ▶ button still starts it on demand.
+    // tryAutoStart();
   }
 
   function whenReady(fn) {
