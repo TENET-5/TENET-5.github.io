@@ -213,6 +213,14 @@ def lap() -> dict:
     else:
         steps.append({"name": "press_rebuild", "ok": False, "detail": "press.py missing"})
 
+    # 2b) rebuild the Investigations hub (all pages grouped by subject)
+    invb = TOOLS / "build_investigations.py"
+    if invb.exists():
+        code, out = _run([sys.executable, str(invb)], timeout=120)
+        steps.append({"name": "investigations_hub", "ok": code == 0, "exit": code, "tail": out[-200:]})
+    else:
+        steps.append({"name": "investigations_hub", "ok": False, "detail": "build_investigations.py missing"})
+
     # 3) enforce one theme on all pages
     apply = TOOLS / "apply_one_theme.py"
     if apply.exists():
