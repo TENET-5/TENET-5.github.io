@@ -13,7 +13,7 @@ reverent. If a shot looks like a movie trailer, it is wrong.
   corridors, ledgers, documents, flags. **No human faces. No readable text. No logos.**
 - **Motion:** slow and deliberate only — dolly, forward tracking, gentle drift, macro pull.
   Symmetry and vanishing-point composition. Generous negative space. Never frenetic.
-- **Duration:** ~4s clips (97 frames @24fps), designed to loop as ambient b-roll.
+- **Duration:** Cohesive, narrative-driven documentary sequences dynamically scaled to article/chapter length. Generated beats are stitched to form full scenes with synchronized audio.
 
 ## Constraints (the negative, always applied)
 `text, watermark, logo, subtitles, cartoon, oversaturated, warped faces, distorted hands,
@@ -38,9 +38,8 @@ The film runs in acts (Prologue → the record → present). B-roll motifs by re
 - Output: `media/film/*.mp4` (individual shots) + `media/film/reel.mp4` (ambient loop).
 
 ## Integration
-- Ambient b-roll sits BEHIND the narration/player at low opacity — never competes with text,
-  never autoplays audio (muted, loop, playsinline). Reduced-motion users get a still.
-- Every clip is generated, on-spec, and re-generatable from the shot list — no stock footage.
+- Cohesive documentaries are embedded as high-tier cinema players (`.cinema-player`) at the head of every story and article. 
+- They include synchronized LIRIL TTS audio, cinematic scoring, and playback controls. They do NOT sit silently in the background.
 
 ## Roadmap — the p256 target (corrected 2026-07-11)
 Daniel's direction: generation runs on the **PRISM p256 dual-tower** pipeline. Honest status —

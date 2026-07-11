@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "206"
+THEME_VER = "207"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -360,6 +360,22 @@ def apply_page(path: Path) -> bool:
         ("local inference", "LIRIL analysis"),
     ]
     for _bad, _good in _LEAK:
+        text = text.replace(_bad, _good)
+
+    # ANTI-HALLUCINATION self-heal: the swarm writes prose describing features as if built
+    # ("charts summarize…", "open the case file under each card") when they were never made —
+    # a plan hallucinated as a plan-in-action. Rewrite those claims to match reality so the
+    # page never promises an element that isn't there. tools/claim_check.py gates the misses.
+    _CLAIM_FIX = [
+        ("set tone; charts summarize government series.", "set the tone."),
+        ("; charts summarize government series", ""),
+        ("charts summarize government series", "the record carries the series"),
+        ("Open the case file under each card for the cited numbers.", "Open each act for the cited numbers."),
+        ("Open the case file under each card", "Open each act"),
+        ("Six flow charts show the legislative pipeline as a circuit", "The legislative pipeline is traced as a circuit"),
+        ("Six flow charts show the legislative pipeline", "The legislative pipeline is traced"),
+    ]
+    for _bad, _good in _CLAIM_FIX:
         text = text.replace(_bad, _good)
 
     # Retired targeting apparatus (legal compliance): the email-campaign / mass-dispatch /

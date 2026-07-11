@@ -327,6 +327,17 @@ def lap() -> dict:
     else:
         steps.append({"name": "claim_check", "ok": True, "detail": "claim_check.py missing (skipped)"})
 
+    # 6a3-guard) IMAGE-PIPELINE guard — no low-tier images or missing aesthetic rules.
+    img_guard = TOOLS / "prism_image_guard.py"
+    if img_guard.exists():
+        code, out = _run([sys.executable, str(img_guard)], timeout=120)
+        steps.append({
+            "name": "image_guard", "ok": code == 0, "exit": code, "tail": (out or "")[-400:],
+            "job": "PRISM permanent — enforce single-collage rule and valid aesthetics (MONOCHROME, void, ivory, red)",
+        })
+    else:
+        steps.append({"name": "image_guard", "ok": True, "detail": "prism_image_guard.py missing (skipped)"})
+
     # 6b-guard) DESIGN-LOCK taste guardrail present + injected last on every page.
     dl = ROOT / "css" / "design-lock.css"
     try:
@@ -461,12 +472,20 @@ def _cinema_playback_integrity() -> dict:
             issues.append(f"unreadable_{name}")
             checks[name] = False
             continue
+        # Primary film = hero video OR hybrid doc-stage (documentary stitch)
+        has_primary = (
+            ("act-hero-video" in t and "data-force-play" in t)
+            or ('data-doc-video="media/film/' in t or "data-doc-video='media/film/" in t)
+            or ("tenet5-doc-player.js" in t and "doc-stage" in t)
+        )
         ok = (
             "act-cinema-page" in t
             and "tenet5-cinema-play.js?v=3" in t
-            and "act-hero-video" in t
-            and 'src="media/film/' in t
-            and "data-force-play" in t
+            and has_primary
+            and (
+                'src="media/film/' in t
+                or 'data-doc-video="media/film/' in t
+            )
         )
         checks[name] = ok
         if not ok:
