@@ -2536,6 +2536,104 @@ class BoardBuilder:
             per_bucket=4,
         )
 
+    def ingest_maid_office_holders(self) -> None:
+        """MAID policy office-holders only — no personal case material."""
+        path = DATA / "maid_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="maid_policy_hub",
+            hub_label="MAID policy accountability index",
+            hub_link="evidence-index.html",
+            categories=["osint", "evidence"],
+            buckets=[
+                "justice_ministers",
+                "health_ministers",
+                "senate_legal_affairs_committee_chairs",
+                "expert_panel_on_maid_and_mental_illness",
+                "additional_oversight_actors",
+            ],
+            origin="maid_office_holders",
+            claim_level="REPORTING",
+            per_bucket=5,
+            # court principals can be sensitive; keep short if present
+            skip_buckets=frozenset(),
+        )
+        # Cap truchon principal carefully as court case name only
+        raw = _load(path)
+        if not raw:
+            return
+        for row in (raw.get("truchon_ruling_principal") or [])[:2]:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            nid = self.add_node(
+                "person_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle="Court record principal (public judgment class)",
+                detail="Named in public court/legislation history class. Prefer primary judgments.",
+                link="evidence-index.html",
+                categories=["evidence", "osint"],
+                claim_level="FACT",
+                origin="maid_office_holders",
+            )
+            hub = "maid_policy_hub"
+            if nid and hub in self.nodes:
+                self.add_edge(
+                    nid,
+                    hub,
+                    label="court record class",
+                    strength=1,
+                    claim_level="FACT",
+                )
+
+    def ingest_opioid_dossier(self) -> None:
+        path = DATA / "opioid_crisis_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="opioid_crisis_hub",
+            hub_label="Opioid crisis accountability index",
+            hub_link="evidence-index.html",
+            categories=["osint", "authority"],
+            buckets=[
+                "federal_health_ministers",
+                "bc_health_ministers",
+                "chief_public_health_officers_canada",
+                "bc_pho_coroners",
+                "prime_ministers_of_record",
+                "pharmaceutical_counterparty",
+            ],
+            origin="opioid_dossier",
+            claim_level="REPORTING",
+            per_bucket=4,
+        )
+
+    def ingest_winnipeg_lab_dossier(self) -> None:
+        path = DATA / "winnipeg_lab_nml_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="winnipeg_nml_hub",
+            hub_label="Winnipeg NML accountability index",
+            hub_link="foreign-influence.html",
+            categories=["ccp", "osint", "authority"],
+            buckets=[
+                "phac_presidents",
+                "health_canada_deputy_ministers",
+                "public_safety_ministers",
+                "csis_directors",
+                "nsicop_chairs",
+                "speakers_of_house",
+                "prime_ministers_of_record",
+            ],
+            origin="winnipeg_lab_dossier",
+            claim_level="REPORTING",
+            per_bucket=4,
+            # skip individual_subjects if present as personal legal risk
+            skip_buckets=frozenset({"individual_subjects"}),
+        )
+
     def ingest_cfnis_command_light(self) -> None:
         """Sourced command-chain nodes only — careful public-record framing."""
         path = DATA / "cfnis_command_dossier.json"
@@ -3616,6 +3714,9 @@ class BoardBuilder:
         self.ingest_cfnis_accountability_dossier()
         self.ingest_indigenous_dossier()
         self.ingest_cfnis_command_light()
+        self.ingest_maid_office_holders()
+        self.ingest_opioid_dossier()
+        self.ingest_winnipeg_lab_dossier()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
