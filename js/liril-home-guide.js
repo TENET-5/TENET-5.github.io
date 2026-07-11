@@ -95,8 +95,13 @@
         onend: function () {
           if (dock) dock.classList.remove('speaking');
         },
-        onerror: function () {
+        onerror: function (e) {
           if (dock) dock.classList.remove('speaking');
+          // 'interrupted' / 'canceled' fire every time a new line preempts the
+          // current one — normal during the auto-walk, not a failure. Only a
+          // real synthesis failure warrants surfacing an error to the reader.
+          var kind = (e && e.error) || '';
+          if (kind === 'interrupted' || kind === 'canceled') return;
           setStatus('Voice error · text guide still active');
         }
       });

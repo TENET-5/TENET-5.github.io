@@ -216,6 +216,7 @@
      voice; false means no acceptable voice exists → stay silent. */
   function speak(text, opts) {
     if (!text || !window.speechSynthesis) return false;
+    if (window.__LIRIL_MUTED) return false;   // dock voice toggle — single point, site-wide
     var v = resolve();
     if (!isAcceptable(v)) {
       console.warn('[LIRIL-VOICE] speak() suppressed — no acceptable voice (never default).');
