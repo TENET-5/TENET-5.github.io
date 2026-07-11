@@ -189,15 +189,17 @@
 <div class="legend-item"><div class="legend-dot"></div>  Navigate</div>
 </div>
 <div class="board-foot">Investigation by Daniel Perry | Data: TENET5 | All sources public record</div>
-<script src="data/investigation_board.js"></script>
 <script>
 (async function() {
   'use strict';
 
-  // ── Load data (Offline CORS Bypass) ──
-  let DATA = window.BOARD_DATA;
-  if (!DATA) {
-    document.getElementById('board').innerHTML = '<p>Failed to load data. Ensure data/investigation_board.js is present.</p>';
+  // ── Load data ──
+  let DATA;
+  try {
+    const res = await fetch('data/investigation_board.json', {cache: 'no-cache'});
+    DATA = await res.json();
+  } catch (e) {
+    document.getElementById('board').innerHTML = '<p>Failed to load data. Ensure data/investigation_board.json is present.</p>';
     return;
   }
 

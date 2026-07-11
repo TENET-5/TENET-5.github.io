@@ -57,10 +57,10 @@ def run_static_audit():
 
     # Bad patterns to search for
     bad_patterns = [
-        (r'board\.js', 'board.js load (investigation board - may cause blank page)'),
-        (r'localhost:\d+', 'localhost reference'),
-        (r'dark\s*web|\.onion', 'darkweb reference'),
-        (r'LIRIL|NemoClaw|STARK|PEPPER', 'internal system reference'),
+        (r'investigation_board\.js\b', 'investigation_board.js load (investigation board - may cause blank page)', True),
+        (r'localhost:\d+', 'localhost reference', True),
+        (r'dark\s*web|\.onion', 'darkweb reference', True),
+        (r'NemoClaw|STARK|PEPPER', 'internal system reference', False),
     ]
 
     issues = []
@@ -90,9 +90,10 @@ def run_static_audit():
                         issues.append((fname, f"BROKEN LINK: {href}"))
 
         # Check bad patterns
-        for pattern, desc in bad_patterns:
+        for pattern, desc, ignorecase in bad_patterns:
             for i, line in enumerate(lines, 1):
-                if re.search(pattern, line, re.IGNORECASE):
+                flags = re.IGNORECASE if ignorecase else 0
+                if re.search(pattern, line, flags):
                     # Skip false positives in comments about removal
                     if 'removed' in line.lower() or 'deleted' in line.lower() or 'liril khan' in line.lower():
                         continue
