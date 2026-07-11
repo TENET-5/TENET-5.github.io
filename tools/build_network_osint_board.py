@@ -2454,6 +2454,180 @@ class BoardBuilder:
             per_bucket=5,
         )
 
+    def ingest_judicial_dossier(self) -> None:
+        path = DATA / "judicial_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="judicial_hub",
+            hub_label="Judicial accountability index",
+            hub_link="evidence-index.html",
+            categories=["osint", "authority"],
+            buckets=[
+                "chief_justices_of_canada",
+                "justice_ministers",
+                "judicial_oversight_bodies",
+                "trudeau_era_scc_appointees",
+                "prime_ministers_of_record",
+            ],
+            origin="judicial_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+        )
+
+    def ingest_veterans_dossier(self) -> None:
+        path = DATA / "veterans_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="veterans_hub",
+            hub_label="Veterans affairs accountability index",
+            hub_link="evidence-index.html",
+            categories=["osint", "authority"],
+            buckets=[
+                "veterans_affairs_ministers",
+                "deputy_ministers_vac",
+                "veterans_ombuds",
+                "prime_ministers_of_record",
+            ],
+            origin="veterans_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+            # skip vac_maid_documented_witnesses — sensitive personal cases
+            skip_buckets=frozenset({"vac_maid_documented_witnesses"}),
+        )
+
+    def ingest_cfnis_accountability_dossier(self) -> None:
+        path = DATA / "cfnis_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="cfnis_accountability_hub",
+            hub_label="Military justice accountability index",
+            hub_link="foreign-influence.html#cfnis",
+            categories=["cfnis", "osint"],
+            buckets=[
+                "chiefs_of_defence_staff",
+                "judge_advocates_general",
+                "canadian_forces_provost_marshals",
+                "defence_ministers",
+                "independent_review_bodies",
+            ],
+            origin="cfnis_accountability_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+        )
+
+    def ingest_indigenous_dossier(self) -> None:
+        path = DATA / "indigenous_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="indigenous_accountability_hub",
+            hub_label="Indigenous policy accountability index",
+            hub_link="evidence-index.html",
+            categories=["osint", "authority"],
+            buckets=[
+                "inquiry_commissioners",
+                "crown_indigenous_ministers",
+                "indigenous_services_ministers",
+                "justice_ministers_indigenous_file",
+                "afn_national_chiefs",
+                "prime_ministers_of_record",
+            ],
+            origin="indigenous_dossier",
+            claim_level="REPORTING",
+            per_bucket=4,
+        )
+
+    def ingest_cfnis_command_light(self) -> None:
+        """Sourced command-chain nodes only — careful public-record framing."""
+        path = DATA / "cfnis_command_dossier.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "cfnis",
+            label="CFNIS",
+            ntype="org",
+            subtitle="CF National Investigation Service",
+            detail="Military police investigative service. Oversight issues from public MPCC/court reporting.",
+            link="foreign-influence.html#cfnis",
+            categories=["cfnis"],
+            claim_level="BOARD_INDEX",
+            origin="cfnis_command_dossier",
+        )
+        blocks = (
+            ("bgen_simon_trudeau", "trudeau_bgen"),
+            ("lcol_eric_leblanc", "leblanc"),
+        )
+        for key, preferred_id in blocks:
+            block = raw.get(key) or {}
+            if not isinstance(block, dict):
+                continue
+            name = block.get("name") or ""
+            # strip rank prefix noise for label if needed
+            if not _ok_label(str(name).split("(")[0].strip()):
+                # try extract after rank words
+                name = re.sub(
+                    r"^(Major-General|Brigadier-General|BGen|LCol|Lieutenant-Colonel)\s+",
+                    "",
+                    str(name),
+                    flags=re.I,
+                )
+            if not _ok_label(str(name)):
+                continue
+            role = str(block.get("role") or "")
+            tenure = str(block.get("tenure") or "")
+            src = ""
+            for nest_key in ("obstruction_finding", "civilian_oversight_resistance", "vance_investigation"):
+                nest = block.get(nest_key) or {}
+                if isinstance(nest, dict):
+                    for sk in ("source_cbc", "source_global", "source", "source_cbc"):
+                        if str(nest.get(sk) or "").startswith("http"):
+                            src = str(nest[sk])
+                            break
+                if src:
+                    break
+            nid = self.add_node(
+                preferred_id,
+                label=str(name).split("(")[0].strip()[:50],
+                ntype="person",
+                subtitle=_soft(role.split("—")[0].strip() + (f" · {tenure}" if tenure else ""), 90),
+                detail="Named in public CFNIS command-chain reporting. Prefer primary oversight sources.",
+                link="foreign-influence.html#cfnis",
+                categories=["cfnis"],
+                claim_level="REPORTING",
+                origin="cfnis_command_dossier",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label="command chain (reporting)",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=src,
+                )
+            replaced = block.get("replaced_by")
+            if replaced and _ok_label(str(replaced)) and nid:
+                rid = self.add_node(
+                    "person_" + _slug(str(replaced)),
+                    label=str(replaced),
+                    ntype="person",
+                    subtitle="Successor (public record class)",
+                    detail="Named as replacement in command dossier public record.",
+                    link="foreign-influence.html#cfnis",
+                    categories=["cfnis"],
+                    claim_level="FACT",
+                    origin="cfnis_command_dossier",
+                )
+                if rid:
+                    self.add_edge(
+                        nid,
+                        rid,
+                        label="succeeded by",
+                        strength=1,
+                        claim_level="FACT",
+                    )
+
     def ingest_cansec_2025(self) -> None:
         path = DATA / "cansec_2025.json"
         raw = _load(path)
@@ -3437,6 +3611,11 @@ class BoardBuilder:
         self.ingest_corrections_dossier()
         self.ingest_rcmp_dossier()
         self.ingest_cansec_2025()
+        self.ingest_judicial_dossier()
+        self.ingest_veterans_dossier()
+        self.ingest_cfnis_accountability_dossier()
+        self.ingest_indigenous_dossier()
+        self.ingest_cfnis_command_light()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
