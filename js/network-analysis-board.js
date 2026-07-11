@@ -464,7 +464,19 @@
     var f = state.filter;
     var q = state.query;
     return state.nodes.filter(function (n) {
-      if (f && (n.categories || []).indexOf(f) < 0) return false;
+      if (f) {
+        var cats = n.categories || [];
+        var match = false;
+        for (var i = 0; i < cats.length; i++) {
+          var c = cats[i];
+          var lbl = CAT[c] ? (CAT[c].label || c) : c;
+          if (lbl === f) {
+            match = true;
+            break;
+          }
+        }
+        if (!match) return false;
+      }
       if (q) {
         var hay = (n.label + ' ' + (n.subtitle || '') + ' ' + (n.detail || '')).toLowerCase();
         if (hay.indexOf(q) < 0) return false;
@@ -927,19 +939,30 @@
 
   function buildChips() {
     while (chipsEl.firstChild) chipsEl.removeChild(chipsEl.firstChild);
-    var cats = Object.create(null);
+    var labelCounts = Object.create(null);
+    var labelColor = Object.create(null);
+
     state.nodes.forEach(function (n) {
+      var seenLabels = Object.create(null);
       (n.categories || []).forEach(function (c) {
-        if (CAT[c]) cats[c] = (cats[c] || 0) + 1;
+        if (CAT[c]) {
+          var lbl = CAT[c].label || c;
+          if (!seenLabels[lbl]) {
+            labelCounts[lbl] = (labelCounts[lbl] || 0) + 1;
+            seenLabels[lbl] = true;
+            labelColor[lbl] = CAT[c].color;
+          }
+        }
       });
     });
-    function addChip(key, label, active) {
-      var b = el('button', 'chip' + (active ? ' on' : ''), label);
+
+    function addChip(lbl, color, text, active) {
+      var b = el('button', 'chip' + (active ? ' on' : ''), text);
       b.type = 'button';
       b.setAttribute('aria-pressed', active ? 'true' : 'false');
-      if (key && CAT[key]) b.style.borderColor = CAT[key].color;
+      if (color) b.style.borderColor = color;
       b.addEventListener('click', function () {
-        state.filter = key;
+        state.filter = lbl;
         state.sel = null;
         applyLayout();
         buildChips();
@@ -955,9 +978,9 @@
       });
       chipsEl.appendChild(b);
     }
-    addChip(null, 'All', !state.filter);
-    Object.keys(cats).sort().forEach(function (c) {
-      addChip(c, (CAT[c].label || c) + ' · ' + cats[c], state.filter === c);
+    addChip(null, null, 'All', !state.filter);
+    Object.keys(labelCounts).sort().forEach(function (lbl) {
+      addChip(lbl, labelColor[lbl], lbl + ' · ' + labelCounts[lbl], state.filter === lbl);
     });
   }
 
