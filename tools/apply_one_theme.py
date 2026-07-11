@@ -313,6 +313,13 @@ def apply_page(path: Path) -> bool:
     for _bad, _good in _COMPLIANCE:
         text = text.replace(_bad, _good)
 
+    # Retired targeting apparatus (legal compliance): the email-campaign / mass-dispatch /
+    # send-to-named-officials pages are gone. Strip any anchor pointing at them so no dead
+    # links or CTAs to the harassment tooling remain.
+    text = re.sub(
+        r'<a\b[^>]*href="(?:\.\./)*(?:email-campaign|email-dispatch|grover-send)\.html"[^>]*>.*?</a>',
+        "", text, flags=re.I | re.S)
+
     # Bracket-literal headings read as tacky terminal cosplay ("[CONNECTED
     # INTELLIGENCE]"). Convert to the site's refined kicker label.
     text = re.sub(
