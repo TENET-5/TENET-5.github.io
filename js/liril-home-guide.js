@@ -184,7 +184,18 @@
     var isFuture = false;
 
     function getActiveChapters() {
-      return document.querySelectorAll(isFuture ? 'section.future-track' : 'section.past-track');
+      if (isFuture) {
+        var fut = document.querySelectorAll('section.future-track');
+        if (fut.length) return fut;
+      }
+      /* Home book: enter → wire chapters → stills/cinema → era → catalog */
+      var home = document.querySelectorAll(
+        'section#enter, section#thesis, section#now, section#week, section#month, section#year, section#stills, section#cinema, section#era, section#book'
+      );
+      if (home.length) return home;
+      var past = document.querySelectorAll('section.past-track');
+      if (past.length) return past;
+      return document.querySelectorAll('section.field[id][data-line], section.ch[id]');
     }
 
     function stopAutoScroll() {
@@ -253,12 +264,19 @@
     var begin = document.getElementById('begin-record') || document.querySelector('a.begin');
     if (begin) {
       begin.addEventListener('click', function () {
-        setLine('We enter this hour. Scroll to walk the record backwards.');
+        setLine('Four doors, then this hour. Scroll to walk the record backwards.');
         if (!greeted) {
           setStatus('Tap “Guide me” or Voice · On to hear LIRIL');
         }
       });
     }
+    /* Cover path shortcuts — LIRIL narrates the door you chose */
+    document.querySelectorAll('a.enter-card[href]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var title = (a.querySelector('h3') && a.querySelector('h3').textContent) || 'that door';
+        setLine('Opening ' + title.trim() + '. Every claim there still carries a source.');
+      });
+    });
 
     // Chapters: text always updates; voice when on
     var chIO = null;
@@ -267,8 +285,16 @@
       if (chIO) chIO.disconnect();
       
       var segs = {};
-      document.querySelectorAll(isFuture ? '.future-rail .seg' : '.past-rail .seg').forEach(function (s) {
+      var railSel = isFuture && document.querySelector('.future-rail')
+        ? '.future-rail .seg'
+        : (document.querySelector('.past-rail') ? '.past-rail .seg' : '.rail .seg');
+      document.querySelectorAll(railSel).forEach(function (s) {
         segs[s.getAttribute('data-ch')] = s;
+      });
+      /* always index main .rail for home enter/stills/cinema */
+      document.querySelectorAll('.rail .seg').forEach(function (s) {
+        var k = s.getAttribute('data-ch');
+        if (k && !segs[k]) segs[k] = s;
       });
 
       chIO = new IntersectionObserver(function (es) {
@@ -282,9 +308,9 @@
           var line = e.target.getAttribute('data-line') || '';
           if (line) speak(line, false);
         });
-      }, { threshold: 0.28, rootMargin: '0px 0px -10% 0px' });
+      }, { threshold: 0.22, rootMargin: '0px 0px -12% 0px' });
       
-      getActiveChapters().forEach(function (c) { chIO.observe(c); });
+      getActiveChapters().forEach(function (c) { if (c && c.id) chIO.observe(c); });
     }
     observeChapters();
 
