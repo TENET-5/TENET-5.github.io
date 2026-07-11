@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "97"
+THEME_VER = "200"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -40,8 +40,9 @@ def _fonts_block(prefix: str = "") -> str:
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{prefix}css/press-theme.css?v={THEME_VER}">
+  <link rel="stylesheet" href="{prefix}css/design-lock.css?v={THEME_VER}">
   <script>document.documentElement.classList.add('js');</script>
-  <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
+  <!-- ONE THEME: edit css/press-theme.css to restyle · css/design-lock.css is the LOCKED taste guardrail (loads last, do not edit) -->
 """
 
 def _dock() -> str:
