@@ -1045,6 +1045,8 @@ def build_briefing(site: dict) -> str:
   (function(){
     function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;
       if(text!=null)e.textContent=text;return e;}
+    /* glass inject after paint — add .in so theme never leaves cards at opacity 0 */
+    function show(n){if(n){n.classList.add('in');if(window.TENET5_reveal)window.TENET5_reveal(n);}return n;}
     function err(msg){document.getElementById('brief-err').innerHTML=
       '<p class="brief-err">'+msg+' The rest of the record is on the <a href="index.html" style="color:inherit;text-decoration:underline">front page</a>.</p>';}
     var BRIEF=null;
@@ -1059,21 +1061,24 @@ def build_briefing(site: dict) -> str:
         if(d.date)document.getElementById('brief-date').textContent='Briefing for '+d.date;
         var now=document.getElementById('brief-now');
         (d.happening_now||[]).forEach(function(h){
-          var c=el('article','brief-item glass');
+          var c=show(el('article','brief-item glass'));
           c.appendChild(el('span','kick red',h.domain||''));
-          c.appendChild(el('h3',null,h.headline||''));
+          var ht=el('h3',null,h.headline||'');
+          if(h.page){var a=el('a',null,h.headline||'');a.href=h.page;a.style.color='inherit';a.style.textDecoration='none';ht.textContent='';ht.appendChild(a);}
+          c.appendChild(ht);
           c.appendChild(el('p',null,h.body||''));
           if(h.status)c.appendChild(el('span','meta','status: '+h.status));
           now.appendChild(c);
         });
         var mt=document.getElementById('brief-metrics');
         (d.metrics||[]).forEach(function(m){
-          var t=el('div','tile glass '+(m.tone||''));
+          var t=show(el('div','tile glass '+(m.tone||'')));
           t.appendChild(el('div','v',m.value||''));
           t.appendChild(el('div','l',(m.label||'')+(m.unit?' · '+m.unit:'')));
           if(m.note)t.appendChild(el('div','n',m.note));
           mt.appendChild(t);
         });
+        if(window.TENET5_reveal){window.TENET5_reveal(now);window.TENET5_reveal(mt);}
       })
       .catch(function(){err('Today\\u2019s briefing data could not be loaded.');});
     fetch('data/govt_future_plans_map.json',{cache:'no-cache'})
@@ -1081,7 +1086,7 @@ def build_briefing(site: dict) -> str:
       .then(function(d){
         var st=document.getElementById('brief-stated');
         (d.stated_plans||[]).forEach(function(p){
-          var c=el('div','glass');
+          var c=show(el('div','glass'));
           c.appendChild(el('span','conf',p.confidence||'STATED'));
           c.appendChild(el('h4',null,p.label||''));
           if(p.near)c.appendChild(el('p',null,p.near));
@@ -1089,7 +1094,7 @@ def build_briefing(site: dict) -> str:
         });
         var inf=document.getElementById('brief-inferred');
         (d.inferred_trajectories||[]).forEach(function(p){
-          var c=el('div','glass');
+          var c=show(el('div','glass'));
           c.appendChild(el('span','conf',p.confidence||'INFERENCE'));
           c.appendChild(el('h4',null,p.label||''));
           if(p.claim)c.appendChild(el('p',null,p.claim));
@@ -1098,11 +1103,12 @@ def build_briefing(site: dict) -> str:
         var ct=document.getElementById('brief-contract');
         var wk=(d.daily_reader_contract&&d.daily_reader_contract.what_you_should_know)||[];
         if(wk.length||d.disclaimer){
-          ct.hidden=false;
+          ct.hidden=false;ct.classList.add('in');
           var b=el('b',null,'The reader contract');ct.appendChild(b);
           wk.forEach(function(w){ct.appendChild(el('div',null,'\\u2014 '+w));});
           if(d.disclaimer)ct.appendChild(el('div','n',d.disclaimer));
         }
+        if(window.TENET5_reveal){window.TENET5_reveal(st);window.TENET5_reveal(inf);}
       }).catch(function(){});
     document.getElementById('read-brief').addEventListener('click',function(){
       if(!(window.LIRIL_VOICE&&typeof window.LIRIL_VOICE.speak==='function'))return;
