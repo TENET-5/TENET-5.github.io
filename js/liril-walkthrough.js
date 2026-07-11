@@ -686,6 +686,7 @@
       styleEl.id = 'liril-styles';
       styleEl.innerHTML = `
         .liril-subtitle-bar {
+          display: none !important;
           position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
           width: 90%; max-width: 800px; text-align: center;
           z-index: 10000; pointer-events: none;
@@ -1391,6 +1392,17 @@
       if (currentPoint < points.length - 1) showPoint(currentPoint + 1);
       else endWalkthrough();
     });
+
+    var dockEl = document.getElementById('dock');
+    if (dockEl) {
+      dockEl.addEventListener('click', function(e) {
+        if (!isActive) return;
+        // Don't intercept button clicks inside dock
+        if (e.target.tagName === 'BUTTON') return;
+        if (currentPoint < points.length - 1) showPoint(currentPoint + 1);
+        else endWalkthrough();
+      });
+    }
 
     document.addEventListener('keydown', function(e) {
       if (!isActive) return;
