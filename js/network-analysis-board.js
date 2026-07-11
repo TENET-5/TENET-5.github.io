@@ -1,9 +1,9 @@
-/* network-analysis.html — force-layout board from OSINT / influence / defence data */
+/* network-analysis.html — neighborhood / cluster / force board (OSINT default = neighborhood) */
 (function () {
   'use strict';
 
   var NS = 'http://www.w3.org/2000/svg';
-  var W = 960, H = 560;
+  var W = 960, H = 600;
   var CAT = {
     israel: { label: 'Israel lobby track', color: '#d3a625' },
     ccp: { label: 'PRC / UFWD track', color: '#c8102e' },
@@ -45,8 +45,11 @@
     query: '',
     sel: null,
     meta: {},
-    loaded: false
+    loaded: false,
+    view: 'neighborhood', /* neighborhood | clusters | force */
+    deg: {}
   };
+  var hubsEl = document.getElementById('net-hubs');
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -170,7 +173,122 @@
     };
   }
 
-  function layout(nodes, edges) {
+  function primaryCat(n) {
+    var cats = n.categories || [];
+    for (var i = 0; i < cats.length; i++) {
+      if (CAT[cats[i]]) return cats[i];
+    }
+    return 'osint';
+  }
+
+  function recomputeDegree() {
+    var d = Object.create(null);
+    state.edges.forEach(function (t) {
+      d[t.from] = (d[t.from] || 0) + 1;
+      d[t.to] = (d[t.to] || 0) + 1;
+    });
+    state.deg = d;
+    return d;
+  }
+
+  function topHubId(nodes) {
+    var best = null, bestD = -1;
+    nodes.forEach(function (n) {
+      var dd = state.deg[n.id] || 0;
+      if (dd > bestD) {
+        bestD = dd;
+        best = n.id;
+      }
+    });
+    return best;
+  }
+
+  /** Stable category columns — no force hairball. */
+  function layoutClusters(nodes) {
+    var n = nodes.length;
+    if (!n) return;
+    var groups = Object.create(null);
+    var order = [];
+    nodes.forEach(function (node) {
+      var c = primaryCat(node);
+      if (!groups[c]) {
+        groups[c] = [];
+        order.push(c);
+      }
+      groups[c].push(node);
+    });
+    order.sort(function (a, b) {
+      return (groups[b].length - groups[a].length) || a.localeCompare(b);
+    });
+    order.forEach(function (c) {
+      groups[c].sort(function (a, b) {
+        return (state.deg[b.id] || 0) - (state.deg[a.id] || 0);
+      });
+    });
+    var cols = order.length || 1;
+    var colW = (W - 80) / cols;
+    order.forEach(function (c, ci) {
+      var list = groups[c];
+      var cx = 48 + colW * (ci + 0.5);
+      list.forEach(function (node, ri) {
+        var rows = list.length;
+        var yPad = 52;
+        var usable = H - yPad * 2;
+        var y = rows <= 1
+          ? H * 0.5
+          : yPad + (usable * ri) / Math.max(1, rows - 1);
+        node.x = cx + ((ri % 2) * 10 - 5);
+        node.y = y;
+        node.vx = 0;
+        node.vy = 0;
+        node._cluster = c;
+      });
+    });
+  }
+
+  /** Ego graph: selected hub at center, neighbors on a ring (default OSINT view). */
+  function layoutNeighborhood(nodes, hubId) {
+    var n = nodes.length;
+    if (!n) return;
+    var hub = null;
+    var others = [];
+    nodes.forEach(function (node) {
+      if (node.id === hubId) hub = node;
+      else others.push(node);
+    });
+    if (!hub) {
+      hub = nodes[0];
+      hubId = hub.id;
+      others = nodes.slice(1);
+    }
+    hub.x = W * 0.5;
+    hub.y = H * 0.5;
+    hub.vx = 0;
+    hub.vy = 0;
+    others.sort(function (a, b) {
+      var ca = primaryCat(a);
+      var cb = primaryCat(b);
+      if (ca !== cb) return ca.localeCompare(cb);
+      return (state.deg[b.id] || 0) - (state.deg[a.id] || 0);
+    });
+    var m = others.length;
+    var R = Math.min(W, H) * 0.36;
+    if (m > 24) R = Math.min(W, H) * 0.40;
+    if (m > 40) R = Math.min(W, H) * 0.42;
+    others.forEach(function (node, i) {
+      var ang = (2 * Math.PI * i) / Math.max(1, m) - Math.PI / 2;
+      var ring = R * (0.88 + 0.12 * (i % 3 === 0 ? 1 : 0.82));
+      node.x = hub.x + Math.cos(ang) * ring;
+      node.y = hub.y + Math.sin(ang) * ring * 0.92;
+      node.x = Math.max(40, Math.min(W - 40, node.x));
+      node.y = Math.max(36, Math.min(H - 36, node.y));
+      node.vx = 0;
+      node.vy = 0;
+    });
+  }
+
+  /** Legacy force layout — only for small boards or explicit toggle. */
+  function layoutForce(nodes, edges) {
     var n = nodes.length;
     if (!n) return;
     var i, j, e, a, b, dx, dy, dist, f, k, iter;
@@ -225,6 +343,39 @@
         if (move > maxMove) maxMove = move;
       }
       if (iter >= 40 && maxMove < 0.05) break;
+    }
+  }
+
+  function applyLayout() {
+    recomputeDegree();
+    var vis = visibleNodes();
+    if (state.view === 'neighborhood') {
+      var hub = state.sel || topHubId(vis);
+      if (hub && !state.sel) state.sel = hub;
+      var egoIds = Object.create(null);
+      if (hub) {
+        egoIds[hub] = 1;
+        state.edges.forEach(function (t) {
+          if (t.from === hub || t.to === hub) {
+            egoIds[t.from] = 1;
+            egoIds[t.to] = 1;
+          }
+        });
+      }
+      var egoNodes = vis.filter(function (n) { return egoIds[n.id]; });
+      if (!egoNodes.length) egoNodes = vis.slice(0, 1);
+      layoutNeighborhood(egoNodes, hub);
+      /* park non-ego off-canvas so draw can skip */
+      vis.forEach(function (n) {
+        if (!egoIds[n.id]) {
+          n.x = -999;
+          n.y = -999;
+        }
+      });
+    } else if (state.view === 'clusters') {
+      layoutClusters(vis);
+    } else {
+      layoutForce(vis, state.edges);
     }
   }
 
@@ -383,17 +534,32 @@
   }
 
   function degreeMap() {
-    var d = Object.create(null);
+    return state.deg && Object.keys(state.deg).length ? state.deg : recomputeDegree();
+  }
+
+  function neighborhoodIds(hubId) {
+    var ego = Object.create(null);
+    if (!hubId) return ego;
+    ego[hubId] = 1;
     state.edges.forEach(function (t) {
-      d[t.from] = (d[t.from] || 0) + 1;
-      d[t.to] = (d[t.to] || 0) + 1;
+      if (t.from === hubId || t.to === hubId) {
+        ego[t.from] = 1;
+        ego[t.to] = 1;
+      }
     });
-    return d;
+    return ego;
+  }
+
+  function drawNodesForView(vis) {
+    if (state.view !== 'neighborhood' || !state.sel) return vis;
+    var ego = neighborhoodIds(state.sel);
+    return vis.filter(function (n) { return ego[n.id] && n.x > -500; });
   }
 
   function draw() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    var vis = visibleNodes();
+    var visAll = visibleNodes();
+    var vis = drawNodesForView(visAll);
     var visIds = Object.create(null);
     vis.forEach(function (n) { visIds[n.id] = 1; });
     if (emptyEl) {
@@ -412,63 +578,105 @@
 
     var deg = degreeMap();
 
-    var ego = null;
-    if (state.sel) {
-      ego = Object.create(null);
-      ego[state.sel] = 1;
-      state.edges.forEach(function (t) {
-        if (t.from === state.sel || t.to === state.sel) {
-          ego[t.from] = 1;
-          ego[t.to] = 1;
-        }
+    /* Cluster headers */
+    if (state.view === 'clusters' && vis.length) {
+      var seenCol = Object.create(null);
+      vis.forEach(function (n) {
+        var c = n._cluster || primaryCat(n);
+        if (seenCol[c]) return;
+        seenCol[c] = 1;
+        var lab = (CAT[c] && CAT[c].label) || c;
+        var tx = document.createElementNS(NS, 'text');
+        tx.setAttribute('class', 'cluster-lab');
+        tx.setAttribute('x', n.x);
+        tx.setAttribute('y', 22);
+        tx.setAttribute('text-anchor', 'middle');
+        tx.textContent = lab.length > 18 ? lab.slice(0, 16) + '…' : lab;
+        svg.appendChild(tx);
       });
+    }
+
+    /* Neighborhood caption */
+    if (state.view === 'neighborhood' && state.sel && state.byId[state.sel]) {
+      var hubN = state.byId[state.sel];
+      var cap = document.createElementNS(NS, 'text');
+      cap.setAttribute('class', 'view-cap');
+      cap.setAttribute('x', 20);
+      cap.setAttribute('y', 24);
+      cap.setAttribute('text-anchor', 'start');
+      cap.textContent =
+        'Neighborhood · ' +
+        (hubN.label || hubN.id) +
+        ' · ' +
+        (vis.length - 1) +
+        ' neighbors';
+      svg.appendChild(cap);
+    }
+
+    var egoDim = null;
+    if (state.view !== 'neighborhood' && state.sel) {
+      egoDim = neighborhoodIds(state.sel);
     }
 
     state.edges.forEach(function (t) {
       if (!visIds[t.from] || !visIds[t.to]) return;
       var a = state.byId[t.from], b = state.byId[t.to];
       if (!a || !b) return;
+      if (a.x < -500 || b.x < -500) return;
       var line = document.createElementNS(NS, 'line');
       line.setAttribute('x1', a.x);
       line.setAttribute('y1', a.y);
       line.setAttribute('x2', b.x);
       line.setAttribute('y2', b.y);
-      line.setAttribute('stroke-width', Math.min(3.2, 0.9 + (t.strength || 1) * 0.55));
+      var sw = Math.min(3.2, 0.9 + (t.strength || 1) * 0.55);
+      if (state.view === 'neighborhood') sw = Math.min(3.6, 1.2 + (t.strength || 1) * 0.7);
+      line.setAttribute('stroke-width', sw);
       line.setAttribute('class', 'edge');
       if (state.sel && (t.from === state.sel || t.to === state.sel)) line.classList.add('hot');
-      else if (ego) line.classList.add('dim');
+      else if (egoDim) line.classList.add('dim');
       if (t.claim_level === 'REPORTING') line.setAttribute('stroke-dasharray', '4 3');
       svg.appendChild(line);
       t._el = line;
     });
 
     vis.forEach(function (n) {
+      if (n.x < -500) return;
       var g = document.createElementNS(NS, 'g');
       var ncls = 'node' + (state.sel === n.id ? ' sel' : '');
-      if (ego && !ego[n.id]) ncls += ' dim';
+      if (state.view === 'neighborhood' && state.sel === n.id) ncls += ' hub';
+      if (egoDim && !egoDim[n.id]) ncls += ' dim';
       g.setAttribute('class', ncls);
       g.setAttribute('aria-label', n.label);
       var c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', n.x);
       c.setAttribute('cy', n.y);
-      c.setAttribute('r', nodeRadius(n));
+      var r = nodeRadius(n);
+      if (state.view === 'neighborhood' && state.sel === n.id) r = Math.max(r, 12);
+      c.setAttribute('r', r);
       c.setAttribute('fill', nodeColor(n));
-      /* SVG title = hover tooltip */
       var tip = document.createElementNS(NS, 'title');
-      tip.textContent = n.label + (n.subtitle ? ' — ' + n.subtitle : '');
+      tip.textContent =
+        n.label +
+        (n.subtitle ? ' — ' + n.subtitle : '') +
+        ' · ' +
+        (deg[n.id] || 0) +
+        ' edges';
       g.appendChild(tip);
       g.appendChild(c);
       var showLabel =
+        state.view === 'neighborhood' ||
         state.sel === n.id ||
-        vis.length < 56 ||
-        (deg[n.id] || 0) >= 4 ||
+        vis.length < 48 ||
+        (deg[n.id] || 0) >= 3 ||
         n.claim_level === 'FACT';
       if (showLabel) {
         var tx = document.createElementNS(NS, 'text');
         tx.setAttribute('x', n.x);
-        tx.setAttribute('y', n.y - nodeRadius(n) - 6);
+        tx.setAttribute('y', n.y - r - 7);
         tx.setAttribute('text-anchor', 'middle');
-        tx.textContent = n.label.length > 22 ? n.label.slice(0, 20) + '…' : n.label;
+        var maxLen = state.view === 'neighborhood' ? 28 : 20;
+        tx.textContent =
+          n.label.length > maxLen ? n.label.slice(0, maxLen - 1) + '…' : n.label;
         g.appendChild(tx);
       }
       g.addEventListener('click', function (ev) {
@@ -482,7 +690,9 @@
 
   function select(n) {
     state.sel = n.id;
+    if (state.view === 'neighborhood') applyLayout();
     draw();
+    buildHubs();
     while (detail.firstChild) detail.removeChild(detail.firstChild);
     detail.appendChild(el('span', 'kick', (n.type || 'entity').replace(/_/g, ' ')));
     if (n.claim_level) {
@@ -580,10 +790,17 @@
       b.addEventListener('click', function () {
         state.filter = key;
         state.sel = null;
+        applyLayout();
         buildChips();
+        buildHubs();
         buildList();
         draw();
         updateStats();
+        /* auto-pick top hub after filter in neighborhood mode */
+        if (state.view === 'neighborhood') {
+          var hub = topHubId(visibleNodes());
+          if (hub && state.byId[hub]) select(state.byId[hub]);
+        }
       });
       chipsEl.appendChild(b);
     }
@@ -593,17 +810,78 @@
     });
   }
 
+  function buildHubs() {
+    if (!hubsEl) return;
+    while (hubsEl.firstChild) hubsEl.removeChild(hubsEl.firstChild);
+    var deg = degreeMap();
+    var ranked = visibleNodes().slice().sort(function (a, b) {
+      return (deg[b.id] || 0) - (deg[a.id] || 0);
+    });
+    var top = ranked.slice(0, 12);
+    if (!top.length) return;
+    var lab = el('span', 'hubs-lab', 'Most documented');
+    hubsEl.appendChild(lab);
+    top.forEach(function (n, i) {
+      var b = el(
+        'button',
+        'hub-chip' + (state.sel === n.id ? ' on' : ''),
+        (i + 1) + '. ' + (n.label.length > 28 ? n.label.slice(0, 26) + '…' : n.label) +
+          ' · ' + (deg[n.id] || 0)
+      );
+      b.type = 'button';
+      b.title = (n.label || n.id) + ' — ' + (deg[n.id] || 0) + ' documented edges';
+      b.addEventListener('click', function () {
+        if (state.view !== 'neighborhood') setViewMode('neighborhood', true);
+        select(n);
+      });
+      hubsEl.appendChild(b);
+    });
+  }
+
+  function setViewMode(mode, skipLayout) {
+    if (mode !== 'neighborhood' && mode !== 'clusters' && mode !== 'force') mode = 'neighborhood';
+    state.view = mode;
+    ['neighborhood', 'clusters', 'force'].forEach(function (k) {
+      var btn = document.getElementById('view-' + k);
+      if (!btn) return;
+      btn.classList.toggle('on', mode === k);
+      btn.setAttribute('aria-pressed', mode === k ? 'true' : 'false');
+    });
+    if (!skipLayout) {
+      if (mode === 'neighborhood' && !state.sel) {
+        var hub = topHubId(visibleNodes());
+        if (hub) state.sel = hub;
+      }
+      applyLayout();
+      draw();
+      buildHubs();
+      updateStats();
+      if (mode === 'neighborhood' && state.sel && state.byId[state.sel]) {
+        select(state.byId[state.sel]);
+      }
+    }
+  }
+
   function buildList() {
     while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+    var deg = degreeMap();
     visibleNodes().slice().sort(function (a, b) {
+      var da = deg[a.id] || 0;
+      var db = deg[b.id] || 0;
+      if (db !== da) return db - da;
       return (a.label || '').localeCompare(b.label || '');
     }).forEach(function (n) {
       var li = el('li');
       var lab = el('button', 'list-label', n.label || n.id);
       lab.type = 'button';
-      lab.addEventListener('click', function () { select(n); });
+      lab.addEventListener('click', function () {
+        if (state.view !== 'neighborhood') setViewMode('neighborhood', true);
+        select(n);
+      });
       li.appendChild(lab);
-      if (n.subtitle) li.appendChild(el('span', null, n.subtitle));
+      var sub = (deg[n.id] || 0) + ' edges';
+      if (n.subtitle) sub += ' · ' + n.subtitle;
+      li.appendChild(el('span', null, sub));
       if (n.link) {
         var a = el('a', 'list-open', 'Open file');
         a.href = n.link;
@@ -616,10 +894,17 @@
   function updateStats() {
     var m = state.meta || {};
     var vis = visibleNodes().length;
+    var drawn = drawNodesForView(visibleNodes()).length;
+    var viewLab =
+      state.view === 'neighborhood' ? 'neighborhood' :
+      state.view === 'clusters' ? 'clusters' : 'force';
     var html =
       '<b>' + state.nodes.length + '</b> entities · <b>' + state.edges.length + '</b> edges' +
-      (vis !== state.nodes.length ? ' · showing <b>' + vis + '</b>' : '') +
-      (m.updated ? ' · updated ' + m.updated : '') +
+      ' · view <b>' + viewLab + '</b>' +
+      (state.view === 'neighborhood'
+        ? ' · drawing <b>' + drawn + '</b> (hub + neighbors)'
+        : (vis !== state.nodes.length ? ' · showing <b>' + vis + '</b>' : '')) +
+      (m.updated ? ' · updated ' + String(m.updated).slice(0, 16) : '') +
       (m.sources ? ' · ' + String(m.sources).split(',').length + ' sources' : '');
     if (m.raw_nodes || m.capped) {
       var rawN = typeof m.raw_nodes === 'number' ? m.raw_nodes : null;
@@ -680,8 +965,19 @@
     state.query = '';
     state.loaded = true;
     if (searchEl) searchEl.value = '';
-    layout(state.nodes, state.edges);
+    recomputeDegree();
+    /* Dense OSINT/influence → neighborhood; small defence → clusters */
+    if (name === 'defence' && state.nodes.length <= 40) {
+      state.view = 'clusters';
+    } else {
+      state.view = 'neighborhood';
+    }
+    setViewMode(state.view, true);
+    var hub = topHubId(state.nodes);
+    if (hub) state.sel = hub;
+    applyLayout();
     buildChips();
+    buildHubs();
     buildList();
     draw();
     updateStats();
@@ -696,20 +992,24 @@
         'Defence procurement instruments: contracts, preferred suppliers, and partner paths. Preferred supplier is not a signed multi-hull production contract.';
     } else if (name === 'osint') {
       standEl.textContent =
-        'OSINT composite: TENET5 vault scrapes, public social/media pulls, appointment edges, and freezes — filtered for the public board.';
+        'OSINT composite in neighborhood view: pick a well-documented hub, then read only the edges that touch it. Full force layout is optional — and usually unreadable.';
     } else {
       standEl.textContent =
-        'Foreign-influence investigation board: people, organizations, votes, and filings from the public record.';
+        'Foreign-influence board in neighborhood view: one entity and its documented neighbors. Clusters group tracks without a hairball.';
     }
     standDefault = standEl.textContent || '';
     if (standTimer) {
       clearTimeout(standTimer);
       standTimer = null;
     }
-    while (detail.firstChild) detail.removeChild(detail.firstChild);
-    detail.appendChild(el('span', 'kick', 'Inspector'));
-    detail.appendChild(el('h3', null, 'Select a node'));
-    detail.appendChild(el('p', null, 'Edges are documented interactions. Open the case file for full citations.'));
+    if (hub && state.byId[hub]) {
+      select(state.byId[hub]);
+    } else {
+      while (detail.firstChild) detail.removeChild(detail.firstChild);
+      detail.appendChild(el('span', 'kick', 'Inspector'));
+      detail.appendChild(el('h3', null, 'Select a hub'));
+      detail.appendChild(el('p', null, 'Edges are documented interactions. Open the case file for full citations.'));
+    }
     if (opts.syncUrl !== false) setBoardDeepLink(name);
   }
 
@@ -719,6 +1019,14 @@
   if (tabOsint) tabOsint.addEventListener('click', function () { activateBoard('osint'); });
   if (tabInf) tabInf.addEventListener('click', function () { activateBoard('influence'); });
   if (tabDef) tabDef.addEventListener('click', function () { activateBoard('defence'); });
+  ['neighborhood', 'clusters', 'force'].forEach(function (k) {
+    var vb = document.getElementById('view-' + k);
+    if (vb) {
+      vb.addEventListener('click', function () {
+        setViewMode(k);
+      });
+    }
+  });
   var searchTimer = null;
   if (searchEl) {
     searchEl.addEventListener('input', function () {
@@ -727,18 +1035,28 @@
       if (searchTimer) clearTimeout(searchTimer);
       searchTimer = setTimeout(function () {
         searchTimer = null;
+        applyLayout();
+        buildHubs();
         buildList();
         draw();
         updateStats();
+        if (state.view === 'neighborhood') {
+          var hub = topHubId(visibleNodes());
+          if (hub && state.byId[hub]) select(state.byId[hub]);
+        }
       }, 120);
     });
   }
   svg.addEventListener('click', function () {
+    /* Keep hub selection in neighborhood mode — empty click does not wipe the map. */
+    if (state.view === 'neighborhood') return;
     state.sel = null;
+    applyLayout();
     draw();
+    buildHubs();
     while (detail.firstChild) detail.removeChild(detail.firstChild);
     detail.appendChild(el('span', 'kick', 'Inspector'));
-    detail.appendChild(el('h3', null, 'Select a node'));
+    detail.appendChild(el('h3', null, 'Select a hub'));
     detail.appendChild(el('p', null, 'Edges are documented interactions. Open the case file for full citations.'));
   });
 
