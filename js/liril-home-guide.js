@@ -5,8 +5,8 @@
  */
 (function () {
   'use strict';
-  if (window.__LIRIL_HOME_GUIDE_V >= 9) return;
-  window.__LIRIL_HOME_GUIDE_V = 9;
+  if (window.__LIRIL_HOME_GUIDE_V >= 10) return;
+  window.__LIRIL_HOME_GUIDE_V = 10;
 
   document.documentElement.classList.add('js');
 
@@ -179,9 +179,12 @@
       '<button type="button" class="guide-cta guide-cta-live" id="liril-pres-live">' +
         esc(onAir ? ui('stop_live_label', 'Stop live') : ui('live_label', 'Listen live')) +
       '</button>' +
+      '<button type="button" class="guide-cta guide-cta-station" id="liril-station-start">' +
+        'Leave station on</button>' +
       '<a class="begin begin-quiet" href="' + esc(pkgHref) + '"><span>Today\'s package</span></a>' +
       '<a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>' +
-      '</div>';
+      '</div>' +
+      '<p class="pres-station-note">Leave this page open — TENET5 runs like a news channel: desk, documentary, wire, week. Navigate anytime.</p>';
   }
 
   function tickClock() {
@@ -257,6 +260,7 @@
 
     function stopPresentation() {
       presenting = false;
+      document.querySelectorAll('.active-narration').forEach(function(el) { el.classList.remove('active-narration'); });
       if (presTimer) { clearTimeout(presTimer); presTimer = null; }
       if (guideBtn) {
         guideBtn.classList.remove('on');
@@ -269,6 +273,7 @@
       var segs = presentation.segments;
       if (presIndex >= segs.length) {
         presenting = false;
+        document.querySelectorAll('.active-narration').forEach(function(el) { el.classList.remove('active-narration'); });
         if (guideBtn) { guideBtn.classList.remove('on'); guideBtn.textContent = 'Guide me'; }
         /* After full package, auto-enter live if user started presentation with voice */
         if (voiceOn && window.LIRIL_REPORTER && !window.LIRIL_REPORTER.isLive()) {
@@ -293,7 +298,12 @@
       }
       var seg = segs[presIndex];
       presIndex++;
-      if (seg.scroll) scrollToId(seg.scroll);
+      document.querySelectorAll('.active-narration').forEach(function(el) { el.classList.remove('active-narration'); });
+      if (seg.scroll) {
+        scrollToId(seg.scroll);
+        var scrollEl = document.getElementById(seg.scroll);
+        if (scrollEl) scrollEl.classList.add('active-narration');
+      }
       speak(seg.text, true);
       setStatus('On air ' + presIndex + ' / ' + segs.length + ' · ' + (seg.role || seg.id || 'beat'));
       var wait = seg.wait_ms || Math.min(18000, 55 * (seg.text || '').length + 4000);
