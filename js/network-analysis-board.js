@@ -369,9 +369,17 @@
     });
   }
 
+  var standTimer = null;
+  var standDefault = '';
   function setStandNote(msg) {
     if (!standEl || !msg) return;
+    if (!standDefault) standDefault = standEl.textContent || '';
     standEl.textContent = msg;
+    if (standTimer) clearTimeout(standTimer);
+    standTimer = setTimeout(function () {
+      standTimer = null;
+      if (standDefault) standEl.textContent = standDefault;
+    }, 2800);
   }
 
   function degreeMap() {
@@ -526,7 +534,7 @@
             var src = el('a', 'con-src', 'source');
             src.href = t.source;
             src.target = '_blank';
-            src.rel = 'noopener';
+            src.rel = 'noopener noreferrer';
             row.appendChild(src);
           }
           box.appendChild(row);
@@ -548,6 +556,12 @@
       a.href = n.link;
       detail.appendChild(a);
     }
+    try {
+      if (detail && detail.scrollIntoView) {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        detail.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+      }
+    } catch (err) { /* ignore */ }
   }
 
   function buildChips() {
@@ -686,6 +700,11 @@
     } else {
       standEl.textContent =
         'Foreign-influence investigation board: people, organizations, votes, and filings from the public record.';
+    }
+    standDefault = standEl.textContent || '';
+    if (standTimer) {
+      clearTimeout(standTimer);
+      standTimer = null;
     }
     while (detail.firstChild) detail.removeChild(detail.firstChild);
     detail.appendChild(el('span', 'kick', 'Inspector'));

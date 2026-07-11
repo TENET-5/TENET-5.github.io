@@ -2166,6 +2166,342 @@ class BoardBuilder:
             if nid and hub:
                 self.add_edge(hub, nid, label="charity class", strength=2, claim_level="FACT")
 
+    def ingest_actor_tenures(self) -> None:
+        path = DATA / "actor_tenures.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        actors = raw.get("actors") or {}
+        if not isinstance(actors, dict):
+            return
+        n = 0
+        for name, roles in actors.items():
+            if n >= 45:
+                break
+            if not _ok_label(str(name)):
+                continue
+            pid = self.add_node(
+                "person_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle="Public tenure record",
+                detail="Federal/public tenure ranges from Gazette OIC / parliamentary bios class sources.",
+                link="evidence-index.html",
+                categories=["authority", "osint"],
+                claim_level="FACT",
+                origin="actor_tenures",
+            )
+            if not pid or not isinstance(roles, list):
+                continue
+            for r in roles[:4]:
+                if n >= 45:
+                    break
+                if not isinstance(r, dict):
+                    continue
+                role = str(r.get("role") or "")
+                if not role:
+                    continue
+                start = str(r.get("start") or "")
+                end = r.get("end")
+                end_s = str(end) if end else "present"
+                rid = self.add_node(
+                    "tenure_" + _slug(f"{name}_{role}_{start}"),
+                    label=_soft(role, 48),
+                    ntype="event",
+                    subtitle=f"{start} → {end_s}",
+                    detail=_soft(f"{name}: {role} ({start} to {end_s})"),
+                    link="evidence-index.html",
+                    categories=["authority", "evidence"],
+                    claim_level="FACT",
+                    origin="actor_tenures",
+                )
+                if rid and pid:
+                    self.add_edge(
+                        pid,
+                        rid,
+                        label="held office",
+                        strength=2,
+                        claim_level="FACT",
+                    )
+                    n += 1
+
+    def ingest_postmedia_ownership(self) -> None:
+        path = DATA / "postmedia_ownership.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        own = raw.get("ownership") or {}
+        post = self.add_node(
+            "postmedia",
+            label=str(own.get("company") or "Postmedia Network"),
+            ntype="org",
+            subtitle=_soft(str(own.get("papers") or "Canadian newspaper chain"), 80),
+            detail=_soft(
+                f"Flagships: {', '.join((own.get('flagships') or [])[:5])}. "
+                f"Ownership class: {own.get('owner')} ({own.get('ownership_pct')}%)."
+            ),
+            link="foreign-influence.html#postmedia",
+            categories=["media", "israel"],
+            claim_level="REPORTING",
+            origin="postmedia_ownership",
+        )
+        owner_name = str(own.get("owner") or "Chatham Asset Management")
+        chatham = self.add_node(
+            "chatham",
+            label=owner_name.split("(")[0].strip()[:50] or "Chatham Asset Management",
+            ntype="org",
+            subtitle=f"{own.get('ownership_pct', '')}% ownership class",
+            detail=_soft(str(own.get("restriction") or "Foreign ownership class note.")),
+            link="foreign-influence.html#postmedia",
+            categories=["media", "israel"],
+            claim_level="REPORTING",
+            origin="postmedia_ownership",
+        )
+        src = str(own.get("source") or "")
+        if post and chatham:
+            self.add_edge(
+                chatham,
+                post,
+                label=f"{own.get('ownership_pct', '')}% ownership class",
+                strength=3,
+                claim_level="REPORTING",
+                source_url=src if src.startswith("http") else "",
+            )
+        founding = raw.get("founding") or {}
+        if founding.get("founder"):
+            asper = self.add_node(
+                "person_" + _slug(str(founding["founder"])),
+                label=str(founding["founder"]),
+                ntype="person",
+                subtitle=_soft(str(founding.get("original") or "CanWest founding"), 70),
+                detail=_soft(str(founding.get("founder_desc") or founding.get("transition") or "")),
+                link="foreign-influence.html#postmedia",
+                categories=["media", "israel"],
+                claim_level="REPORTING",
+                origin="postmedia_ownership",
+            )
+            if asper and post:
+                self.add_edge(
+                    asper,
+                    post,
+                    label="founding lineage (CanWest→Postmedia)",
+                    strength=1,
+                    claim_level="REPORTING",
+                )
+        editorial = raw.get("editorial_direction") or {}
+        if editorial.get("finding") and post:
+            # attach soft editorial note as detail merge only — no guilt event node
+            self.add_node(
+                "postmedia",
+                label=str(own.get("company") or "Postmedia Network"),
+                ntype="org",
+                detail=_soft(str(editorial.get("finding") or "")),
+                claim_level="REPORTING",
+                origin="postmedia_ownership",
+            )
+        conn = raw.get("investigation_board_connections") or {}
+        mesh = (
+            ("lorrie_goldstein", "goldstein", "Lorrie Goldstein", "person", "Toronto Sun Editor Emeritus"),
+            ("ezra_levant", "levant", "Ezra Levant", "person", "Rebel News founder"),
+            ("rebel_news", "rebel_news", "Rebel News", "org", "Media outlet"),
+            ("jns", "jns", "JNS", "org", "Jewish News Syndicate"),
+        )
+        for key, nid0, lab, ntype, sub in mesh:
+            if key not in conn:
+                continue
+            nid = self.add_node(
+                nid0,
+                label=lab,
+                ntype=ntype,
+                subtitle=sub,
+                detail=_soft(str(conn.get(key) or "")),
+                link="foreign-influence.html#postmedia",
+                categories=["media", "israel"],
+                claim_level="BOARD_INDEX",
+                origin="postmedia_ownership",
+            )
+            if nid and post:
+                self.add_edge(
+                    post,
+                    nid,
+                    label="media mesh",
+                    strength=1,
+                    claim_level="BOARD_INDEX",
+                )
+        petition = raw.get("petition") or {}
+        if petition.get("number") and post:
+            pid = self.add_node(
+                "petition_" + _slug(str(petition["number"])),
+                label=f"Petition {petition['number']}",
+                ntype="event",
+                subtitle=_soft(str(petition.get("topic") or "Parliamentary petition"), 80),
+                detail="Parliamentary petition record (public).",
+                link=str(petition.get("url") or "foreign-influence.html#postmedia"),
+                categories=["evidence", "media"],
+                claim_level="FACT",
+                origin="postmedia_ownership",
+            )
+            if pid:
+                self.add_edge(
+                    post,
+                    pid,
+                    label="subject of petition",
+                    strength=1,
+                    claim_level="FACT",
+                    source_url=str(petition.get("url") or ""),
+                )
+
+    def ingest_cija_lobbying_update(self) -> None:
+        path = DATA / "cija_lobbying_update.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        reg = str(raw.get("registration") or "")
+        hub = self.add_node(
+            "org_cija",
+            label=str(raw.get("org") or "CIJA").split("(")[0].strip() or "CIJA",
+            ntype="org",
+            subtitle=f"CEO class: {raw.get('ceo') or '—'}",
+            detail="Lobbying pipeline update — contact counts are volume, not findings.",
+            link="foreign-influence.html#cija",
+            categories=["israel", "osint"],
+            claim_level="OSINT_REGISTRY",
+            origin="cija_lobbying_update",
+        )
+        if hub and reg.startswith("http"):
+            # re-touch with registry link via edge to self not needed
+            pass
+        for row in (raw.get("top_10_lobbied_mps") or [])[:12]:
+            name = row.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            contacts = int(row.get("contacts") or 0)
+            party = str(row.get("party") or "")
+            riding = str(row.get("riding") or "")
+            nid = self.add_node(
+                "cija_mp_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle=_soft(
+                    f"{contacts} contacts"
+                    + (f" · {party}" if party else "")
+                    + (f" · {riding}" if riding else ""),
+                    90,
+                ),
+                detail=_soft(str(row.get("note") or "Named in CIJA lobbying volume update.")),
+                link="lobbying-tracker.html",
+                categories=["israel", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="cija_lobbying_update",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{contacts} contacts",
+                    strength=3 if contacts >= 40 else (2 if contacts >= 15 else 1),
+                    claim_level="OSINT_REGISTRY",
+                    source_url=reg if reg.startswith("http") else "",
+                )
+
+    def ingest_cbc_influencer_registry(self) -> None:
+        path = DATA / "cbc_influencer_registry.json"
+        raw = _load(path)
+        if not raw or not isinstance(raw, dict):
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        tiers = raw.get("tiers") or {}
+        hub = self.add_node(
+            "cbc_amplify_hub",
+            label="CBC social amplification mesh",
+            ntype="event",
+            subtitle="Public handles · index only",
+            detail=_soft(
+                str(raw.get("disclaimer") or "Inclusion means relevance to public OSINT graph construction.")
+            ),
+            link="cbc-social-amplification.html",
+            categories=["media", "osint"],
+            claim_level="OSINT_INDEX",
+            origin="cbc_influencer_registry",
+        )
+        # Institutions first (FACT-ish public handles)
+        for row in (tiers.get("INSTITUTION") or [])[:8]:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or row.get("id") or ""
+            if not _ok_label(str(name)):
+                continue
+            handles = ((row.get("handles") or {}).get("x") or [])
+            handle0 = ""
+            if handles and isinstance(handles[0], dict):
+                handle0 = str(handles[0].get("handle") or "").lstrip("@")
+            nid = self.add_node(
+                "csg_" + _slug(str(row.get("id") or name)),
+                label=handle0 or str(name),
+                ntype="org",
+                subtitle=_soft(str(row.get("type") or "institution"), 60),
+                detail="Institutional public handle from CBC influencer registry.",
+                link="cbc-social-amplification.html",
+                categories=["media"],
+                claim_level="OSINT_PUBLIC",
+                origin="cbc_influencer_registry",
+            )
+            if nid and hub:
+                self.add_edge(hub, nid, label="institution", strength=2, claim_level="OSINT_PUBLIC")
+        # Cap amplifiers — public handles only
+        for row in (tiers.get("AMPLIFIER_WATCH") or [])[:18]:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or row.get("id") or ""
+            handles = ((row.get("handles") or {}).get("x") or [])
+            handle0 = ""
+            if handles and isinstance(handles[0], dict):
+                handle0 = str(handles[0].get("handle") or "").lstrip("@")
+            lab = handle0 or str(name)
+            if not _ok_label(lab):
+                continue
+            nid = self.add_node(
+                "scrape_" + _slug(lab),
+                label=lab,
+                ntype="person",
+                subtitle="Amplifier watch (public handle)",
+                detail="Public handle in amplifier-watch tier. Not a finding of wrongdoing.",
+                link="cbc-social-amplification.html",
+                categories=["media", "osint"],
+                claim_level="OSINT_INDEX",
+                origin="cbc_influencer_registry",
+            )
+            if nid and hub:
+                self.add_edge(hub, nid, label="amplifier watch", strength=1, claim_level="OSINT_INDEX")
+        for row in (tiers.get("CPC_POLITICAL") or [])[:8]:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or row.get("id") or ""
+            handles = ((row.get("handles") or {}).get("x") or [])
+            handle0 = ""
+            if handles and isinstance(handles[0], dict):
+                handle0 = str(handles[0].get("handle") or "").lstrip("@")
+            lab = handle0 or str(name)
+            if not _ok_label(lab):
+                continue
+            nid = self.add_node(
+                "media_" + _slug(str(row.get("id") or lab)),
+                label=lab,
+                ntype="person",
+                subtitle="Political account (public)",
+                detail="Public political handle in amplification mesh registry.",
+                link="cbc-social-amplification.html",
+                categories=["media", "osint"],
+                claim_level="OSINT_INDEX",
+                origin="cbc_influencer_registry",
+            )
+            if nid and hub:
+                self.add_edge(hub, nid, label="political amp", strength=1, claim_level="OSINT_INDEX")
+        # Skip CASE_NODE bulk to avoid over-weighting personal targets without edges
+
     def ingest_cbc_board_oic(self) -> None:
         path = DATA / "cbc_board_oic_public_records.json"
         raw = _load(path)
@@ -2414,6 +2750,10 @@ class BoardBuilder:
         self.ingest_foreign_interference_dossier()
         self.ingest_arms_pipeline_dossier()
         self.ingest_charity_pipeline()
+        self.ingest_postmedia_ownership()
+        self.ingest_cija_lobbying_update()
+        self.ingest_cbc_influencer_registry()
+        self.ingest_actor_tenures()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
