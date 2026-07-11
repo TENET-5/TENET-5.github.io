@@ -2415,6 +2415,130 @@ class BoardBuilder:
             per_bucket=4,
         )
 
+    def ingest_corrections_dossier(self) -> None:
+        path = DATA / "corrections_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="corrections_hub",
+            hub_label="Corrections accountability index",
+            hub_link="evidence-index.html",
+            categories=["osint", "authority"],
+            buckets=[
+                "csc_commissioners",
+                "public_safety_ministers_responsible_for_csc",
+                "oci_investigators",
+                "major_food_contractors",
+            ],
+            origin="corrections_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+        )
+
+    def ingest_rcmp_dossier(self) -> None:
+        path = DATA / "rcmp_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="rcmp_accountability_hub",
+            hub_label="RCMP accountability index",
+            hub_link="evidence-index.html",
+            categories=["cfnis", "osint"],
+            buckets=[
+                "rcmp_commissioners",
+                "public_safety_ministers",
+                "mass_casualty_commission",
+                "civilian_oversight_chair",
+                "prime_ministers",
+            ],
+            origin="rcmp_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+        )
+
+    def ingest_cansec_2025(self) -> None:
+        path = DATA / "cansec_2025.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "cansec_2025",
+            label="CANSEC 2025",
+            ntype="event",
+            subtitle=_soft(str(raw.get("event") or "Ottawa arms fair"), 70),
+            detail=_soft(
+                str(raw.get("exhibitors") or "Defence industry trade show. Index of public reporting only.")
+            ),
+            link="arms-pipeline.html",
+            categories=["defence", "israel", "osint"],
+            claim_level="REPORTING",
+            origin="cansec_2025",
+        )
+        gd = raw.get("general_dynamics_display") or {}
+        if gd.get("finding"):
+            gid = self.add_node(
+                "defcon_general_dynamics",
+                label="General Dynamics",
+                ntype="org",
+                subtitle="CANSEC exhibitor class",
+                detail=_soft(str(gd.get("finding") or gd.get("context") or "")),
+                link="arms-pipeline.html",
+                categories=["defence", "israel"],
+                claim_level="REPORTING",
+                origin="cansec_2025",
+            )
+            if gid and hub:
+                self.add_edge(
+                    hub,
+                    gid,
+                    label="exhibitor (reporting)",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=str(gd.get("source") or ""),
+                )
+        elbit = raw.get("elbit_display") or {}
+        if elbit.get("finding"):
+            eid = self.add_node(
+                "defcon_elbit_systems",
+                label="Elbit Systems",
+                ntype="org",
+                subtitle="CANSEC exhibitor class",
+                detail=_soft(str(elbit.get("finding") or "")),
+                link="foreign-influence.html#legal",
+                categories=["defence", "israel"],
+                claim_level="REPORTING",
+                origin="cansec_2025",
+            )
+            if eid and hub:
+                self.add_edge(
+                    hub,
+                    eid,
+                    label="exhibitor (reporting)",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=str(elbit.get("source") or ""),
+                )
+        # Named majors from exhibitors string only as soft org nodes
+        for name in ("Lockheed Martin", "BAE", "Boeing"):
+            nid = self.add_node(
+                "defcon_" + _slug(name),
+                label=name,
+                ntype="org",
+                subtitle="Named CANSEC exhibitor class",
+                detail="Named among CANSEC 2025 exhibitors in public reporting.",
+                link="arms-pipeline.html",
+                categories=["defence", "osint"],
+                claim_level="REPORTING",
+                origin="cansec_2025",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label="exhibitor class",
+                    strength=1,
+                    claim_level="REPORTING",
+                )
+
     def ingest_central_banking_actors(self) -> None:
         path = DATA / "central_banking_grover_decisionmakers.json"
         raw = _load(path)
@@ -3310,6 +3434,9 @@ class BoardBuilder:
         self.ingest_senator_woo_dossier()
         self.ingest_central_banking_actors()
         self.ingest_phoenix_pay_dossier()
+        self.ingest_corrections_dossier()
+        self.ingest_rcmp_dossier()
+        self.ingest_cansec_2025()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
