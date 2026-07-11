@@ -501,6 +501,37 @@
       unlockVoice: unlockVoice
     };
   }
+    // --- Global Idle TV Automation ---
+    (function initGlobalIdleAutomation() {
+      var idleTimer = null;
+      var IDLE_TIMEOUT = 60000;
+
+      function resetIdleTimer() {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(triggerIdleMode, IDLE_TIMEOUT);
+      }
+
+      function triggerIdleMode() {
+          var path = window.location.pathname;
+          var isIndex = path === '/' || path.endsWith('/index.html') || path.endsWith('/');
+          var isFilm = path.includes('liril-film.html');
+
+          if (isIndex) {
+              if (window.LIRIL_HOME_GUIDE && typeof window.LIRIL_HOME_GUIDE.start === 'function') {
+                  window.LIRIL_HOME_GUIDE.start();
+              } else if (!isFilm) {
+                  window.location.href = 'liril-film.html?auto=1';
+              }
+          } else if (!isFilm) {
+              window.location.href = 'liril-film.html?auto=1';
+          }
+      }
+
+      ['mousemove', 'scroll', 'keydown', 'click', 'touchstart'].forEach(function(evt) {
+          document.addEventListener(evt, resetIdleTimer, { passive: true });
+      });
+      resetIdleTimer();
+    })();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
