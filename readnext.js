@@ -343,11 +343,11 @@
       ]
     },
     'canada-map.html': {
-      current: 'Canada Map',
+      current: 'Municipal investigation',
       next: [
-        { href: 'municipal-accountability.html', label: 'Municipal Accountability', desc: 'Local government oversight tracker' },
-        { href: 'provincial-analysis.html', label: 'Provincial Analysis', desc: 'Province-by-province breakdown' },
-        { href: 'corruption-map.html', label: 'Corruption Map', desc: '37 documented procurement scandals' },
+        { href: 'network-analysis.html', label: 'Network analysis', desc: 'Documented edges across the public record' },
+        { href: 'provincial-analysis.html', label: 'Provincial analysis', desc: 'Province-by-province patterns' },
+        { href: 'follow-the-money.html', label: 'Follow the money', desc: 'Procurement and fiscal trails' },
       ]
     },
     'charges-sheet.html': {
