@@ -75,6 +75,24 @@ Use **theme classes**, not page-local `:root` or palette CSS.
 
 Atmosphere film is **not** proof. Hansard, statutes, and Health Canada reports are.
 
+### Media relevance law (hard)
+
+Every still, LTX clip, and chart must match the **claim beside it**. No orphan scandal art.
+
+| Subject | Prefer | Never use for |
+|---------|--------|----------------|
+| **Statute / intent / Hansard** | `parliament_ice`, `hall_of_record`, `empty_committee`, `flag_wind` | Phoenix Pay, ArriveCAN, offshore |
+| **Clinical MAID / Track 2 / care denied** | `hospital_corridor`, `corridor_power`, `maid_investigation` (+ bg) | procurement_binders, lobbying packshots |
+| **Volume / provisions** | `img/charts/maid_trajectory.png` only | immigration velocity as “Track 2” |
+| **Poverty / material deprivation** | `ledger_desk`, `ledger_turn`, `generational_attrition` | phoenix_pay, fintrac, panama |
+| **Housing / isolation** | `hospital_corridor`, corridor film, housing case links | demographic_velocity unless caption says intake capacity |
+| **Veterans / VAC / service** | `cfnis_military` (+ bg), committee + flag | ethics_violations packshot as default |
+| **Palliative gap** | hospital corridor + maid investigation | paper trail alone without clinical poster |
+| **Foreign interference / money** | `foreign_interference`, `lobbying_concentration`, panama | MAID hospital stills |
+
+**Continuum cards:** fixed identity map — I parliament · II hospital · III committee · IV ledger · V parliament/flag.  
+**Alt text:** never empty on continuum/gallery stills — name subject + act.
+
 **Tokens:** `--media-pane`, `--media-glint`, `--media-blur`, `--media-img-filter`, `--media-radius`, etc. in `:root` of `press-theme.css`.
 
 ### Home vs interior
