@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "74"
+THEME_VER = "75"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -276,6 +276,13 @@ def apply_page(path: Path) -> bool:
     text = RE_LINK.sub("", text)
     text = RE_THEME_COMMENT.sub("", text)
     text = RE_DEFENSE.sub("", text)
+
+    # Colour science (owner directive 2026-07-11): kill invisible text. Bespoke page
+    # styles were authored light-mode and use `color: var(--ink)` (near-black #0b0e10)
+    # which is invisible on the dark void. Repoint text-ink to ivory; NEVER touch
+    # `background: var(--ink)` (correctly dark). Negative lookbehind spares border-color.
+    text = re.sub(r"(?<![-\w])color:\s*var\(--ink\)", "color: var(--ivory)", text)
+    text = re.sub(r"(?<![-\w])color:\s*#0b0e10", "color: var(--ivory)", text, flags=re.I)
 
     # Retired components + leaked scaffold (owner directive 2026-07-11):
     # share bars are gone sitewide, and un-commented "═══ SECTION N — X ═══"
