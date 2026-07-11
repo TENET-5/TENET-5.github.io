@@ -1957,6 +1957,432 @@ class BoardBuilder:
                         claim_level="REPORTING",
                     )
 
+    def _ingest_role_buckets(
+        self,
+        *,
+        path: Path,
+        hub_id: str,
+        hub_label: str,
+        hub_link: str,
+        categories: list[str],
+        buckets: list[str],
+        origin: str,
+        claim_level: str = "REPORTING",
+        per_bucket: int = 6,
+        skip_buckets: frozenset[str] | None = None,
+    ) -> None:
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        skip = skip_buckets or frozenset()
+        hub = self.add_node(
+            hub_id,
+            label=hub_label,
+            ntype="event",
+            subtitle="Public-office tenure index",
+            detail="Named office-holders from public dossiers. Tenure is not a finding of wrongdoing.",
+            link=hub_link,
+            categories=categories,
+            claim_level=claim_level,
+            origin=origin,
+        )
+        for bucket in buckets:
+            if bucket in skip:
+                continue
+            for row in (raw.get(bucket) or [])[:per_bucket]:
+                if not isinstance(row, dict):
+                    continue
+                name = row.get("name") or ""
+                if not _ok_label(str(name)):
+                    continue
+                role = str(row.get("role") or bucket.replace("_", " "))
+                tenure = str(row.get("tenure") or "")
+                is_org = bool(
+                    re.search(
+                        r"\b(agency|department|commission|corporation|systems|industries|inc\.?)\b",
+                        str(name),
+                        re.I,
+                    )
+                    or row.get("role_category") in ("export_controls_institutions", "major_defence_exporters")
+                    or bucket.endswith("_institutions")
+                    or bucket.endswith("_exporters")
+                )
+                nid = self.add_node(
+                    ("org_" if is_org else "person_") + _slug(str(name)),
+                    label=str(name)[:60],
+                    ntype="org" if is_org else "person",
+                    subtitle=_soft(f"{role}" + (f" · {tenure}" if tenure else ""), 90),
+                    detail=_soft(str(row.get("notable") or role), 200),
+                    link=hub_link,
+                    categories=categories,
+                    claim_level=claim_level,
+                    origin=origin,
+                )
+                if nid and hub:
+                    self.add_edge(
+                        nid,
+                        hub,
+                        label=bucket.replace("_", " ")[:40],
+                        strength=2 if is_org else 1,
+                        claim_level=claim_level,
+                    )
+
+    def ingest_foreign_interference_dossier(self) -> None:
+        path = DATA / "foreign_interference_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="fi_dossier_hub",
+            hub_label="Foreign interference accountability index",
+            hub_link="foreign-influence.html",
+            categories=["ccp", "osint"],
+            buckets=[
+                "public_safety_ministers",
+                "csis_directors",
+                "pmo_security_advisors",
+                "oversight_bodies",
+                "parliamentarians_implicated_or_targeted",
+            ],
+            origin="foreign_interference_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+            skip_buckets=frozenset({"foreign_entities_grover_amplified"}),
+        )
+
+    def ingest_arms_pipeline_dossier(self) -> None:
+        path = DATA / "arms_pipeline_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="arms_pipeline_hub",
+            hub_label="Arms export accountability index",
+            hub_link="arms-pipeline.html",
+            categories=["israel", "defence", "osint"],
+            buckets=[
+                "foreign_affairs_ministers",
+                "international_trade_ministers",
+                "defence_ministers",
+                "major_defence_exporters",
+                "export_controls_institutions",
+            ],
+            origin="arms_pipeline_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+        )
+
+    def ingest_charity_pipeline(self) -> None:
+        path = DATA / "dossier_charity_pipeline.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "charity_pipeline",
+            label="$276M Charity Pipeline",
+            ntype="evidence",
+            subtitle="Canadian charities → Israel 2024 class",
+            detail=_soft(str(raw.get("pattern") or "Public charity-flow index. Prefer case files.")),
+            link="foreign-influence.html#legal",
+            categories=["israel", "evidence"],
+            claim_level="BOARD_INDEX",
+            origin="dossier_charity_pipeline",
+        )
+        for key, row in (raw.get("key_charities") or {}).items():
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or key
+            if not _ok_label(str(name)):
+                continue
+            src = str(row.get("source") or "")
+            if src and not src.startswith("http"):
+                src = ""
+            status = str(row.get("status") or "")
+            cl = "FACT" if "REVOKED" in status.upper() and src else ("FACT" if src else "REPORTING")
+            nid = self.add_node(
+                "charity_" + _slug(str(name)),
+                label=str(name)[:60],
+                ntype="org",
+                subtitle=_soft(status or "charity class", 70),
+                detail=_soft(
+                    str(row.get("cra_finding") or row.get("finding") or row.get("significance") or status),
+                    200,
+                ),
+                link="foreign-influence.html#legal",
+                categories=["israel", "evidence"],
+                claim_level=cl,
+                origin="dossier_charity_pipeline",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label="charity class",
+                    strength=2 if cl == "FACT" else 1,
+                    claim_level=cl,
+                    source_url=src,
+                )
+        idf = raw.get("idf_funding") or {}
+        for key, row in idf.items():
+            if key == "pattern" or not isinstance(row, dict):
+                continue
+            name = row.get("name") or key
+            if not _ok_label(str(name)):
+                continue
+            url = str(row.get("url") or row.get("source") or "")
+            if url and not url.startswith("http"):
+                url = ""
+            nid = self.add_node(
+                "charity_" + _slug(str(name)),
+                label=str(name)[:60],
+                ntype="org",
+                subtitle=_soft(str(row.get("function") or "IDF funding class"), 70),
+                detail=_soft(str(row.get("function") or row.get("status") or "")),
+                link="foreign-influence.html#legal",
+                categories=["israel", "evidence"],
+                claim_level="REPORTING",
+                origin="dossier_charity_pipeline",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label="IDF funding class",
+                    strength=1,
+                    claim_level="REPORTING",
+                    source_url=url,
+                )
+        neeman = raw.get("neeman_foundation") or {}
+        if isinstance(neeman, dict) and neeman.get("name"):
+            nid = self.add_node(
+                "charity_" + _slug(str(neeman["name"])),
+                label=str(neeman["name"])[:60],
+                ntype="org",
+                subtitle=_soft(str(neeman.get("status") or "charity"), 70),
+                detail="Named in charity pipeline dossier (revoke class where stated).",
+                link="foreign-influence.html#legal",
+                categories=["israel", "evidence"],
+                claim_level="FACT" if "REVOKED" in str(neeman.get("status") or "").upper() else "REPORTING",
+                origin="dossier_charity_pipeline",
+            )
+            if nid and hub:
+                self.add_edge(hub, nid, label="charity class", strength=2, claim_level="FACT")
+
+    def ingest_cbc_board_oic(self) -> None:
+        path = DATA / "cbc_board_oic_public_records.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        cbc = self.add_node(
+            "cbc_radio_canada",
+            label="CBC/Radio-Canada",
+            ntype="org",
+            subtitle="Public broadcaster · GIC board",
+            detail="Leadership appointments from Order-in-Council / Canadian Heritage public releases.",
+            link="cbc-accountability.html",
+            categories=["media", "authority"],
+            claim_level="FACT",
+            origin="cbc_board_oic",
+        )
+        heritage = self.add_node(
+            "inst_canadian_heritage",
+            label="Canadian Heritage",
+            ntype="org",
+            subtitle="Recommending department (GIC appointments)",
+            detail="Recommending minister class for CBC board appointments.",
+            link="cbc-accountability.html",
+            categories=["authority", "media"],
+            claim_level="FACT",
+            origin="cbc_board_oic",
+        )
+        if cbc and heritage:
+            self.add_edge(
+                heritage,
+                cbc,
+                label="GIC appointment path",
+                strength=2,
+                claim_level="FACT",
+            )
+        for ap in (raw.get("appointments") or [])[:8]:
+            if not isinstance(ap, dict):
+                continue
+            name = ap.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            role = str(ap.get("role") or "CBC board role")
+            cl = str(ap.get("claim_level") or "FACT")
+            if cl.upper().startswith("FACT"):
+                cl = "FACT"
+            elif cl.upper().startswith("REPORT"):
+                cl = "REPORTING"
+            else:
+                cl = "FACT"
+            srcs = ap.get("sources") or []
+            src_url = ""
+            for s in srcs:
+                if isinstance(s, dict) and str(s.get("url") or "").startswith("http"):
+                    src_url = str(s["url"])
+                    break
+            nid = self.add_node(
+                "cbc_appt_" + _slug(str(name)),
+                label=str(name).split(",")[0].strip()[:60],
+                ntype="person",
+                subtitle=_soft(
+                    role
+                    + (
+                        f" · {ap.get('effective') or ap.get('oic_date') or ''}"
+                        if ap.get("effective") or ap.get("oic_date")
+                        else ""
+                    ),
+                    90,
+                ),
+                detail=_soft(
+                    f"{role}. "
+                    + (
+                        f"Replaces {ap.get('replaces')}. "
+                        if ap.get("replaces")
+                        else ""
+                    )
+                    + (str(ap.get("term") or "")),
+                    220,
+                ),
+                link="cbc-accountability.html",
+                categories=["media", "authority"],
+                claim_level=cl,
+                origin="cbc_board_oic",
+            )
+            if nid and cbc:
+                self.add_edge(
+                    cbc,
+                    nid,
+                    label=role[:50],
+                    strength=3 if "CEO" in role or "Chair" in role else 2,
+                    claim_level=cl,
+                    source_url=src_url,
+                )
+            if nid and heritage:
+                self.add_edge(
+                    heritage,
+                    nid,
+                    label="recommending path",
+                    strength=1,
+                    claim_level=cl,
+                    source_url=src_url,
+                )
+            replaces = ap.get("replaces")
+            if replaces and _ok_label(str(replaces)) and nid:
+                rid = self.add_node(
+                    "cbc_appt_" + _slug(str(replaces)),
+                    label=str(replaces),
+                    ntype="person",
+                    subtitle="Prior CBC leadership (public record)",
+                    detail="Named as replaced appointee in OIC/Heritage release class.",
+                    link="cbc-accountability.html",
+                    categories=["media", "authority"],
+                    claim_level="FACT",
+                    origin="cbc_board_oic",
+                )
+                if rid:
+                    self.add_edge(
+                        nid,
+                        rid,
+                        label="succeeds",
+                        strength=2,
+                        claim_level="FACT",
+                        source_url=src_url,
+                    )
+        for dname in (raw.get("board_directors_seed") or [])[:10]:
+            if not _ok_label(str(dname)):
+                continue
+            did = self.add_node(
+                "cbc_dir_" + _slug(str(dname)),
+                label=str(dname),
+                ntype="person",
+                subtitle="CBC board director seed",
+                detail="Named in public CBC board director seed list. PC numbers may be incomplete.",
+                link="cbc-accountability.html",
+                categories=["media", "authority"],
+                claim_level="REPORTING",
+                origin="cbc_board_oic",
+            )
+            if did and cbc:
+                self.add_edge(
+                    cbc,
+                    did,
+                    label="board director",
+                    strength=1,
+                    claim_level="REPORTING",
+                )
+
+    def ingest_appointments_events(self) -> None:
+        """FACT appointment events — edges only where entity ids already known or created lightly."""
+        path = DATA / "appointments.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        # Prefer edges that attach to already-loaded entity nodes; add thin nodes for top 40
+        added = 0
+        for ap in (raw.get("appointments") or [])[:50]:
+            if added >= 40:
+                break
+            if not isinstance(ap, dict):
+                continue
+            if ap.get("event_type") not in ("appointment", "interim", None):
+                # skip pure resignations for edge budget unless both ends exist
+                if ap.get("event_type") == "resignation":
+                    continue
+            eid = str(ap.get("entity_id") or "")
+            office = str(ap.get("office") or "")
+            body = str(ap.get("body") or "")
+            label = office.split(",")[0].strip() if office else body
+            # resolve person label from existing entity node if present
+            person_lab = ""
+            if eid in self.nodes:
+                person_lab = str(self.nodes[eid].get("label") or "")
+            if not person_lab:
+                # thin synthetic from office holder pattern already in entities
+                continue
+            srcs = ap.get("sources") or []
+            src_url = ""
+            for s in srcs:
+                if isinstance(s, dict) and str(s.get("url") or "").startswith("http"):
+                    src_url = str(s["url"])
+                    break
+            body_id = None
+            if body and _ok_label(body):
+                body_id = self.add_node(
+                    "inst_" + _slug(body),
+                    label=body[:60],
+                    ntype="org",
+                    subtitle="Institution (appointment body)",
+                    detail="Named body on public appointment event.",
+                    link=src_url or "evidence-index.html",
+                    categories=["authority"],
+                    claim_level="FACT",
+                    origin="appointments",
+                )
+            if body_id and eid in self.nodes:
+                self.add_edge(
+                    body_id,
+                    eid,
+                    label=_soft(office or "appointment", 50),
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=src_url,
+                )
+                added += 1
+            appointer = str(ap.get("appointed_by") or "")
+            if appointer and appointer in self.nodes and eid in self.nodes:
+                self.add_edge(
+                    appointer,
+                    eid,
+                    label="appointed",
+                    strength=1,
+                    claim_level="FACT",
+                    source_url=src_url,
+                )
+                added += 1
+
     def build(self) -> dict[str, Any]:
         self.ingest_investigation_board()
         self.ingest_entities_edges()
@@ -1983,6 +2409,11 @@ class BoardBuilder:
         self.ingest_lobbying_analysis()
         self.ingest_foreign_lobbying_scan()
         self.ingest_atlas_fraser()
+        self.ingest_cbc_board_oic()
+        self.ingest_appointments_events()
+        self.ingest_foreign_interference_dossier()
+        self.ingest_arms_pipeline_dossier()
+        self.ingest_charity_pipeline()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
@@ -2005,6 +2436,8 @@ class BoardBuilder:
                 "maid_lobbying_crossref",
                 "cpc_top_donors",
                 "cbc_social_graph",
+                "cbc_board_oic",
+                "appointments",
             }
             for nid, n in self.nodes.items():
                 if n.get("origin") in core_origins:

@@ -620,6 +620,7 @@
       });
       if (parts.length) html += ' · claims: ' + parts.join(', ');
     }
+    html += ' · Export uses current filter';
     statsEl.innerHTML = html;
   }
 
@@ -837,6 +838,10 @@
     if (deep) preferred = deep;
 
     activateBoard(preferred);
+    /* After activate: honour #defence / loaded defence pack if deep-link or sole board. */
+    if (deep === 'defence' && boards.defence.nodes.length && state.board !== 'defence') {
+      activateBoard('defence');
+    }
     if (!osintRaw && !influenceRaw) {
       standEl.textContent =
         'Primary boards could not load. Showing the defence-instruments network from local freezes.';
@@ -847,9 +852,17 @@
     boards.osint = boards.defence;
     var deepFail = parseBoardDeepLink();
     activateBoard(deepFail || 'defence');
+    if (deepFail === 'defence' && state.board !== 'defence') activateBoard('defence');
     standEl.textContent =
       'Primary boards could not load. Showing the defence-instruments network from local freezes.';
-    statsEl.textContent = 'Fallback board · defence instruments only';
+    statsEl.textContent = 'Fallback board · defence instruments only · Export uses current filter';
+  });
+
+  window.addEventListener('hashchange', function () {
+    var h = parseBoardDeepLink();
+    if (h && h !== state.board && boards[h] && boards[h].nodes && boards[h].nodes.length) {
+      activateBoard(h);
+    }
   });
 
   /* Initial empty-state while fetches settle */

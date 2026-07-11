@@ -636,7 +636,7 @@
       next: [
         { href: 'demographics-to-death.html', label: 'Demographics-to-Death', desc: 'How immigration feeds the MAID pipeline' },
         { href: 'institutional-capture.html', label: 'Institutional Capture', desc: 'Connecting the exploitation nodes' },
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'Explore the full corruption graph' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'OSINT composite board — documented edges' },
       ]
     },
     'demographics-to-death.html': {
