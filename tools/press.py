@@ -31,13 +31,13 @@ STORY_DIR = ROOT / "story"
 # ── time buckets: the linear-backwards spine ─────────────────────────────
 BUCKETS = [
     ("now",   2 * 24 * 3600,        "I",   "This <em>hour.</em>",
-     "The wire · updated continuously"),
+     "Second · minute · hour · TENET5 desk + multi-source RSS"),
     ("week",  14 * 24 * 3600,       "II",  "Seven days <em>back.</em>",
-     "The week's investigations"),
+     "Week · active investigations"),
     ("month", 62 * 24 * 3600,       "III", "The claims<br>v. the <em>record.</em>",
-     "Claim check · verdicts cite documents, never opinions"),
+     "Month · claim check · documents over opinions"),
     ("year",  366 * 24 * 3600,      "IV",  "The year's<br><em>case files.</em>",
-     "Published dossiers"),
+     "Year · published dossiers"),
 ]
 
 FUTURE_BUCKETS = [
@@ -518,8 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=208">
-<link rel="stylesheet" href="css/design-lock.css?v=208">
+<link rel="stylesheet" href="css/press-theme.css?v=209">
+<link rel="stylesheet" href="css/design-lock.css?v=209">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -566,21 +566,21 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
     """LIRIL system guide chrome: rail + always-on dock + voice/guide scripts."""
     rail = """
 <nav class="rail" aria-label="Timeline">
-  <a class="seg" href="#newsdesk" data-ch="newsdesk"><span class="lbl">Desk</span><span class="dot"></span></a>
-  <a class="seg" href="#enter" data-ch="enter"><span class="lbl">Enter</span><span class="dot"></span></a>
-  <a class="seg" href="#now" data-ch="now"><span class="lbl">This Hour</span><span class="dot"></span></a>
-  <a class="seg" href="#week" data-ch="week"><span class="lbl">This Week</span><span class="dot"></span></a>
-  <a class="seg" href="#month" data-ch="month"><span class="lbl">This Month</span><span class="dot"></span></a>
-  <a class="seg" href="#year" data-ch="year"><span class="lbl">This Year</span><span class="dot"></span></a>
+  <a class="seg" href="#newsdesk" data-ch="newsdesk"><span class="lbl">Day</span><span class="dot"></span></a>
+  <a class="seg" href="#now" data-ch="now"><span class="lbl">Hour</span><span class="dot"></span></a>
+  <a class="seg" href="#week" data-ch="week"><span class="lbl">Week</span><span class="dot"></span></a>
+  <a class="seg" href="#month" data-ch="month"><span class="lbl">Month</span><span class="dot"></span></a>
+  <a class="seg" href="#year" data-ch="year"><span class="lbl">Year</span><span class="dot"></span></a>
   <a class="seg" href="#doc-stage" data-ch="doc"><span class="lbl">Film</span><span class="dot"></span></a>
-  <a class="seg" href="#era" data-ch="era"><span class="lbl">The Era</span><span class="dot"></span></a>
+  <a class="seg" href="#era" data-ch="era"><span class="lbl">Era</span><span class="dot"></span></a>
 </nav>""" if with_rail else ""
     home_cine = ""
     if with_rail:
-        # Force-play cover broll + hybrid documentary player
+        # Force-play cover broll + hybrid documentary + submarine time dial
         home_cine = """
 <script src="js/tenet5-cinema-play.js?v=3"></script>
-<script src="js/tenet5-doc-player.js?v=1"></script>"""
+<script src="js/tenet5-doc-player.js?v=1"></script>
+<script src="js/tenet5-time-dial.js?v=1"></script>"""
     # Cover inject: Guide me button inside liril-intro (patched after build if needed)
     return rail + f"""
 <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
@@ -602,6 +602,57 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
 
 
 # ══ INDEX ═══════════════════════════════════════════════════════════════════
+
+def load_home_wire() -> dict:
+    """RSS + briefing wire for the hour continuum (objective external sources)."""
+    p = ROOT / "data" / "home_wire.json"
+    if p.is_file():
+        try:
+            return load_json(p)
+        except Exception:
+            pass
+    return {"wire": [], "briefing": []}
+
+
+def render_rss_external_wire(limit: int = 6) -> str:
+    """External multi-source RSS cards — labeled, never TENET5 verdicts."""
+    doc = load_home_wire()
+    items = list(doc.get("wire") or [])[:limit]
+    if not items:
+        return (
+            '<p class="wire-empty">External wire is refreshing. '
+            'Open the <a href="daily-briefing.html">daily briefing</a> for TENET5-labeled analysis.</p>'
+        )
+    cards = []
+    for i, p in enumerate(items):
+        lead = " lead-card" if i == 0 else ""
+        t = ""
+        try:
+            t = datetime.fromisoformat(str(p.get("date", "")).replace("Z", "+00:00")).strftime("%H:%M ET")
+        except Exception:
+            t = p.get("horizon") or ""
+        src = esc(p.get("source") or "External")
+        url = esc(p.get("source_url") or "#")
+        title = esc(p.get("title") or "")
+        summary = esc(p.get("summary") or "")
+        label = esc(p.get("label") or "EXTERNAL SOURCE")
+        cards.append(
+            f"""
+      <article class="glass{lead} wire-external">
+        <time>{esc(t)}</time>
+        <span class="kick">{label}</span>
+        <h3><a href="{url}" rel="noopener noreferrer" target="_blank">{title}</a></h3>
+        <p>{summary}</p>
+        <div class="meta">{src} · not a TENET5 verdict · open primary coverage</div>
+      </article>"""
+        )
+    return (
+        '<div class="wire-split">'
+        '<p class="wire-note">Multi-source RSS intake · balanced Canadian + global wires · '
+        '<b>external reporting is not our analysis</b>. TENET5 claims stay on briefing &amp; case files.</p>'
+        f'<div class="wire">{"".join(cards)}</div></div>'
+    )
+
 
 def render_wire(posts: list[dict]) -> str:
     cards = []
@@ -892,8 +943,23 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     for k in buckets:
         buckets[k].sort(key=lambda x: x.get("date", ""), reverse=True)
 
+    # Hour chapter = TENET5 desk wire + multi-source RSS (external labeled)
+    tenet_wire = render_wire(buckets["now"][:4])
+    rss_wire = render_rss_external_wire(6)
+    now_body = (
+        '<div class="time-chapter-split">'
+        '<div class="time-chapter-col">'
+        '<span class="kick">TENET5 desk · this hour</span>'
+        f"{tenet_wire}"
+        "</div>"
+        '<div class="time-chapter-col">'
+        '<span class="kick">Global + Canadian RSS · multi-source</span>'
+        f"{rss_wire}"
+        "</div>"
+        "</div>"
+    )
     ch_bodies = {
-        "now": render_wire(buckets["now"][:6]),
+        "now": now_body,
         "week": render_features(buckets["week"]),
         "month": render_claims(buckets["month"]),
         "year": render_dossiers(buckets["year"]),
@@ -1078,11 +1144,13 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
 </header>"""
 
     newsdesk = """
+<div class="time-dial-sticky" data-time-dial aria-label="Submarine time dial"></div>
 <section class="newsdesk field" id="newsdesk" data-line="News desk. Briefing first. Investigations second. Analysis third. Always cited.">
   <div class="wrapx rv">
-    <span class="kick">News desk · Canada · this hour</span>
+    <span class="kick">News desk · Canada · time continuum</span>
     <h2 class="thesis-title" style="margin-top:1.2vh">Active investigation. Objective <em>analysis.</em></h2>
-    <p class="newsdesk-lede">Three tracks, one standard: primary sources first, inference labeled, AI as guide only.</p>
+    <p class="newsdesk-lede">Time is the spine: second → minute → hour → day → week → month → year → era.
+    Primary sources first, inference labeled, AI as guide only. External RSS is never our verdict.</p>
     <div class="newsdesk-grid">
       <a class="newsdesk-card glass newsdesk-lead" href="daily-briefing.html">
         <span class="kick">01 · Live</span>
