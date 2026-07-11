@@ -106,6 +106,67 @@ def build() -> int:
             secs.append(section(cid, c, items))
     if other:
         secs.append(section("other", "Further Investigations", other))
+    acts_board = """
+<section class="act-gallery" id="five-acts" aria-labelledby="inv-acts-h"
+         data-line="The five-act genocide argument — cinema stages with primary sources.">
+  <span class="kick">The argument · cinema stages</span>
+  <h2 id="inv-acts-h">Five acts before the <em>shelf.</em></h2>
+  <p class="stand" style="margin-top:0.6em;max-width:62ch">
+    Genocide by policy, act by act under Article 6. LTX atmosphere and charts on each stage;
+    Hansard, coroner files, and Health Canada are the proof.
+  </p>
+  <div class="media-grid media-grid-3" role="list">
+    <a class="media-card glass is-cine" href="act-i.html" role="listitem">
+      <div class="media-frame is-cine">
+        <video muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-act-cine aria-hidden="true">
+          <source src="media/film/hall_of_record.mp4" type="video/mp4">
+        </video>
+        <span class="media-tag">ACT I</span>
+      </div>
+      <div class="media-body">
+        <span class="kick">Intent</span>
+        <h3>Intent to Destroy</h3>
+        <p>Bill C-7 · Article 6(a)</p>
+        <span class="media-more">Stage →</span>
+      </div>
+    </a>
+    <a class="media-card glass is-cine" href="act-ii.html" role="listitem">
+      <div class="media-frame is-cine">
+        <video muted loop playsinline preload="auto" poster="media/landing/hospital_corridor.jpg" data-act-cine aria-hidden="true">
+          <source src="media/film/corridor_power.mp4" type="video/mp4">
+        </video>
+        <span class="media-tag">ACT II</span>
+      </div>
+      <div class="media-body">
+        <span class="kick">Killing</span>
+        <h3>The Killing Fields</h3>
+        <p>Track 2 · coroner record</p>
+        <span class="media-more">Stage →</span>
+      </div>
+    </a>
+    <a class="media-card glass is-cine" href="argument.html" role="listitem">
+      <div class="media-frame is-cine">
+        <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-act-cine aria-hidden="true">
+          <source src="media/film/flag_wind.mp4" type="video/mp4">
+        </video>
+        <span class="media-tag">HUB · III–V</span>
+      </div>
+      <div class="media-body">
+        <span class="kick">Full case</span>
+        <h3>Five-act board</h3>
+        <p>Harm · conditions · coercion</p>
+        <span class="media-more">Open hub →</span>
+      </div>
+    </a>
+  </div>
+  <p style="margin-top:1.2em">
+    <a class="media-more" href="argument.html">Argument hub →</a>
+    <a class="media-more" href="elements-analysis.html" style="margin-left:1.2em">Elements →</a>
+    <a class="media-more" href="demographic-trajectory.html" style="margin-left:1.2em">Charts →</a>
+  </p>
+</section>
+<script src="js/tenet5-cinema-play.js?v=1"></script>
+"""
     body = f"""<!doctype html>
 <html lang="en-GB">
 <head>
@@ -121,6 +182,7 @@ def build() -> int:
 <p class="hero-sub">Every file on TENET5 — {total} investigations, editorials, dossiers and
 datasets — grouped by subject. Each entry is a sourced page. LIRIL can read any of them to you.
 For the full A-to-Z, see <a href="index.html">the whole book</a>.</p>
+{acts_board}
 {"".join(secs)}
 </main>
 </body>

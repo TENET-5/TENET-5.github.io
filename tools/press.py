@@ -518,8 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=201">
-<link rel="stylesheet" href="css/design-lock.css?v=200">
+<link rel="stylesheet" href="css/press-theme.css?v=204">
+<link rel="stylesheet" href="css/design-lock.css?v=204">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -577,28 +577,9 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
 </nav>""" if with_rail else ""
     home_cine = ""
     if with_rail:
+        # Sitewide force-play for LTX / gallery / cover broll (muted + loop)
         home_cine = """
-<script>
-(function(){
-  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  function arm(v){
-    if(!v||v.dataset.armed)return;v.dataset.armed='1';
-    v.muted=true;v.playsInline=true;
-  }
-  var nodes=document.querySelectorAll('video[data-home-cine], .enter-card video, .cover .home-broll');
-  if(!('IntersectionObserver' in window)){
-    nodes.forEach(function(v){arm(v);try{v.play()}catch(e){}});return;
-  }
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      var v=en.target;arm(v);
-      if(en.isIntersecting){try{v.play()}catch(e){}}
-      else{try{v.pause()}catch(e){}}
-    });
-  },{rootMargin:'80px',threshold:0.2});
-  nodes.forEach(function(v){io.observe(v)});
-})();
-</script>"""
+<script src="js/tenet5-cinema-play.js?v=1"></script>"""
     # Cover inject: Guide me button inside liril-intro (patched after build if needed)
     return rail + f"""
 <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
@@ -717,7 +698,7 @@ CATALOG_SKIP = re.compile(
     r"test-|layout\.|gateway|permalink)", re.I)
 
 def render_catalog() -> str:
-    """The whole book — every public file, A to Z, from each page's own
+    """The whole book — every public file, categorized by theme, from each page's own
     title and description. LIRIL narrates entries via data-narrate."""
     entries = []
     for p in sorted(ROOT.glob("*.html")):
@@ -732,30 +713,55 @@ def render_catalog() -> str:
         if not title:
             continue
         entries.append((title, p.name, desc))
-    entries.sort(key=lambda e: e[0].upper())
-    items, letter = [], ""
-    for title, href, desc in entries:
-        first = title[0].upper()
-        if not first.isalpha():
-            first = "#"
-        if first != letter:
-            letter = first
-            items.append(f'<div class="cat-letter">{letter}</div>')
-        items.append(
-            f'<a class="cat-item" href="{esc(href)}" data-narrate="{esc(title)}. {esc(desc)}">'
-            f'<span class="t">{esc(title)}</span>'
-            + (f'<span class="d">{esc(desc)}</span>' if desc else "")
-            + "</a>")
+    
+    CATS = [
+        ("MAID & Euthanasia", re.compile(r"maid|euthan|assisted dying|carter|foley|palliat", re.I)),
+        ("Foreign Interference", re.compile(r"foreign|interference|china|beijing|\bprc\b|hogue|nsicop|cija|arms pipeline|convoy", re.I)),
+        ("Military, Veterans & CFNIS", re.compile(r"cfnis|military|veteran|ppcli|defence|\bforces\b|mpcc|rcmp|kit shop|submarine|arms export", re.I)),
+        ("Procurement & Waste", re.compile(r"procurement|arrivecan|contract|waste|mckinsey|consult|phoenix|payroll|vendor|boondoggle", re.I)),
+        ("Foreign Influence & Money", re.compile(r"brookfield|donation|charity|aga khan|financial|banking", re.I)),
+        ("Media & Information Operations", re.compile(r"\bcbc\b|media|5gw|social amplif|narrative|psyop|radio-canada", re.I)),
+        ("Legal, Charter & Genocide", re.compile(r"charter|criminal code|genocide|rome statute|law societ|human rights|article [0-9]|prosecut", re.I)),
+        ("Parliament & Accountability", re.compile(r"hansard|parliament|\bmp\b|voting|committee|auditor|\bag\b|accountab|ethics|lobby|appointment|scorecard|ombuds", re.I)),
+    ]
+    
+    categorized = {cat_name: [] for cat_name, _ in CATS}
+    categorized["Other Investigations"] = []
+    
+    for title, href, desc in sorted(entries, key=lambda e: e[0].upper()):
+        text_to_search = f"{title} {desc}"
+        matched = False
+        for cat_name, cat_re in CATS:
+            if cat_re.search(text_to_search):
+                categorized[cat_name].append((title, href, desc))
+                matched = True
+                break
+        if not matched:
+            categorized["Other Investigations"].append((title, href, desc))
+
+    items = []
+    for cat_name, cat_entries in categorized.items():
+        if not cat_entries:
+            continue
+        items.append(f'<h3 class="cat-section-title">{esc(cat_name)}</h3>')
+        items.append('<div class="cat-group">')
+        for title, href, desc in cat_entries:
+            items.append(
+                f'<a class="cat-item" href="{esc(href)}" data-narrate="{esc(title)}. {esc(desc)}">'
+                f'<span class="t">{esc(title)}</span>'
+                + (f'<span class="d">{esc(desc)}</span>' if desc else "")
+                + "</a>")
+        items.append('</div>')
+
     return f"""
-<section class="catalog field" id="book" data-line="The whole book — {len(entries)} files, A to Z, federal to municipal. Choose any page and I will read it with you.">
+<section class="catalog field" id="book" data-line="The whole book — {len(entries)} files, mapped by structure. Choose any page and I will read it with you.">
   <div class="wrapx rv">
     <span class="kick">The Whole Book · {len(entries)} Files · Updated Daily</span>
-    <h2 class="thesis-title" style="margin-top:2vh">Everything, <em>listed.</em></h2>
+    <h2 class="thesis-title" style="margin-top:2vh">Everything, <em>mapped.</em></h2>
     <p style="margin-top:2vh;max-width:720px;color:var(--ivory-dim);font-size:15px;line-height:1.7">
-    Every investigation, editorial, dossier and dataset on this site — federal, provincial,
-    municipal — in one table of contents. Each entry is a sourced file. LIRIL can read any of
+    Every investigation, editorial, dossier and dataset on this site — categorized by organizational domain. Each entry is a sourced file. LIRIL can read any of
     them to you.</p>
-    <div class="cat-grid">{''.join(items)}</div>
+    <div class="cat-layout">{''.join(items)}</div>
   </div>
 </section>"""
 
@@ -828,6 +834,18 @@ def build_acts() -> int:
             f'<div class="cat-grid">{"".join(entries)}</div>\n</section>\n'
             "<!-- ACT-EVIDENCE:END -->")
         html_txt = page.read_text(encoding="utf-8", errors="replace")
+        # Cinema act pages own a curated .act-paths board — do not inject the
+        # mega ACT-EVIDENCE catalog (it thrash-rewrites the cinema stage).
+        if "act-cinema-page" in html_txt or 'data-act="' in html_txt:
+            if "ACT-EVIDENCE:BEGIN" in html_txt:
+                html_txt = re.sub(
+                    r"<!-- ACT-EVIDENCE:BEGIN -->.*?<!-- ACT-EVIDENCE:END -->\s*",
+                    "",
+                    html_txt,
+                    flags=re.S,
+                )
+                page.write_text(html_txt, encoding="utf-8", newline="\n")
+            continue
         if "ACT-EVIDENCE:BEGIN" in html_txt:
             html_txt = re.sub(r"<!-- ACT-EVIDENCE:BEGIN -->.*?<!-- ACT-EVIDENCE:END -->",
                               lambda _m: section, html_txt, flags=re.S)
@@ -938,10 +956,69 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       </div>
     </div>
     <div class="links">
-      <a href="act-i.html">Open the case: Acts I&ndash;V</a>
+      <a href="argument.html">Open the case: Acts I&ndash;V</a>
+      <a href="act-i.html">Begin ACT I cinema</a>
       <a href="5gw-subversion.html">Read the full thesis</a>
       <a href="axes-index.html">The axes of capture</a>
       <a href="accountability.html">The findings</a>
+    </div>
+    <div class="media-grid media-grid-4" style="margin-top:3.5vh" role="list">
+      <a class="media-card glass is-cine" href="act-i.html" role="listitem">
+        <div class="media-frame is-cine">
+          <video muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-home-cine aria-hidden="true">
+            <source src="media/film/hall_of_record.mp4" type="video/mp4">
+          </video>
+          <span class="media-tag">ACT I</span>
+        </div>
+        <div class="media-body">
+          <span class="kick">Intent · 6(a)</span>
+          <h3>Intent to Destroy</h3>
+          <p>Bill C-7 on the parliamentary record.</p>
+          <span class="media-more">Stage →</span>
+        </div>
+      </a>
+      <a class="media-card glass is-cine" href="act-ii.html" role="listitem">
+        <div class="media-frame is-cine">
+          <video muted loop playsinline preload="auto" poster="media/landing/hospital_corridor.jpg" data-home-cine aria-hidden="true">
+            <source src="media/film/corridor_power.mp4" type="video/mp4">
+          </video>
+          <span class="media-tag">ACT II</span>
+        </div>
+        <div class="media-body">
+          <span class="kick">Killing · 6(a)</span>
+          <h3>The Killing Fields</h3>
+          <p>Track 2 · coroner files.</p>
+          <span class="media-more">Stage →</span>
+        </div>
+      </a>
+      <a class="media-card glass is-cine" href="act-iii.html" role="listitem">
+        <div class="media-frame is-cine">
+          <video muted loop playsinline preload="auto" poster="media/landing/committee_empty.jpg" data-home-cine aria-hidden="true">
+            <source src="media/film/empty_committee.mp4" type="video/mp4">
+          </video>
+          <span class="media-tag">ACT III</span>
+        </div>
+        <div class="media-body">
+          <span class="kick">Harm · 6(b)</span>
+          <h3>Bodily &amp; Mental Harm</h3>
+          <p>VAC · Foley · care denied.</p>
+          <span class="media-more">Stage →</span>
+        </div>
+      </a>
+      <a class="media-card glass is-cine" href="argument.html" role="listitem">
+        <div class="media-frame is-cine">
+          <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-home-cine aria-hidden="true">
+            <source src="media/film/flag_wind.mp4" type="video/mp4">
+          </video>
+          <span class="media-tag">IV · V · HUB</span>
+        </div>
+        <div class="media-body">
+          <span class="kick">Conditions · Coercion</span>
+          <h3>Full five-act board</h3>
+          <p>Acts IV–V and the citation shelf.</p>
+          <span class="media-more">Open hub →</span>
+        </div>
+      </a>
     </div>
   </div>
 </section>
@@ -1106,7 +1183,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <figure class="cinema-cell glass">
         <div class="cine-frame">
           <span class="cine-tag">REEL</span>
-          <video muted loop playsinline preload="metadata" poster="media/landing/parliament_ice.jpg" data-home-cine>
+          <video muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-home-cine>
             <source src="media/film/hall_of_record.mp4" type="video/mp4">
           </video>
         </div>
@@ -1115,7 +1192,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <figure class="cinema-cell glass">
         <div class="cine-frame">
           <span class="cine-tag">REEL</span>
-          <video muted loop playsinline preload="metadata" poster="media/landing/ledger_desk.jpg" data-home-cine>
+          <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-home-cine>
             <source src="media/film/paper_trail.mp4" type="video/mp4">
           </video>
         </div>
@@ -1124,7 +1201,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <figure class="cinema-cell glass">
         <div class="cine-frame">
           <span class="cine-tag">REEL</span>
-          <video muted loop playsinline preload="metadata" poster="media/landing/committee_empty.jpg" data-home-cine>
+          <video muted loop playsinline preload="auto" poster="media/landing/committee_empty.jpg" data-home-cine>
             <source src="media/film/empty_committee.mp4" type="video/mp4">
           </video>
         </div>
@@ -1133,7 +1210,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <figure class="cinema-cell glass">
         <div class="cine-frame">
           <span class="cine-tag">REEL</span>
-          <video muted loop playsinline preload="metadata" poster="media/landing/ledger_desk.jpg" data-home-cine>
+          <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-home-cine>
             <source src="media/film/ledger_turn.mp4" type="video/mp4">
           </video>
         </div>
@@ -1142,7 +1219,8 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     </div>
     <div class="cinema-cta">
       <a class="go-film" href="liril-film.html">&#9654; Open the guided film</a>
-      <span class="alt" style="margin-top:0">or <a href="media/film/reel.mp4">the composite reel</a> · <a href="#now">this hour&#x27;s wire</a></span>
+      <a class="go-film" href="argument.html" style="margin-left:0.8rem">Five-act cinema case</a>
+      <span class="alt" style="margin-top:0">or <a href="act-i.html">ACT I stage</a> · <a href="media/film/reel.mp4">the composite reel</a> · <a href="#now">this hour&#x27;s wire</a></span>
     </div>
   </div>
 </section>"""
