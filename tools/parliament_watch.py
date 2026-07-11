@@ -19,13 +19,71 @@ Output:
   data/parliament_watch_trace.jsonl     — append-only provenance trace (every step + source)
 """
 from __future__ import annotations
-import json, glob, sys, hashlib
+import json, glob, sys, re, urllib.request, urllib.error
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OP = "https://openparliament.ca"
+API = "https://api.openparliament.ca"
+UA = "TENET5-parliament-watch/1.0 (public accountability research; contact: tenet5)"
 NOW = datetime.now(timezone.utc)
+
+
+def _api_get(path: str) -> dict:
+    req = urllib.request.Request(API + path,
+                                 headers={"Accept": "application/json", "User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+def _strip_html(h: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h or "")).strip()
+
+
+# Factual, check-worthy patterns — numbers/superlatives/absolutes are where spin hides.
+_CHECKWORTHY = re.compile(
+    r"\b\d[\d,.]*\s*(?:%|per cent|percent|billion|million|thousand|dollars|jobs|deaths|homes)\b"
+    r"|\b(?:highest|lowest|largest|record|never|always|every|no other|first time|unprecedented)\b",
+    re.I)
+
+
+def fetch_speeches(limit: int, traces: list) -> list[dict]:
+    """Pull recent PUBLIC Hansard speeches from OpenParliament; quarantine raw; index them."""
+    out, offset = [], 0
+    raw_dir = ROOT / "data" / "parliament_fetch"
+    raw_dir.mkdir(exist_ok=True)
+    while len(out) < limit:
+        try:
+            page = _api_get(f"/speeches/?limit=50&offset={offset}&format=json")
+        except (urllib.error.URLError, TimeoutError) as e:
+            traces.append(trace("fetch_error", API + "/speeches/", str(e)[:120]))
+            break
+        objs = page.get("objects", [])
+        if not objs:
+            break
+        for o in objs:
+            speaker = (o.get("attribution") or {}).get("en", "")
+            text = _strip_html((o.get("content") or {}).get("en", ""))
+            if len(text) < 80:
+                continue
+            claims = _CHECKWORTHY.findall(text)
+            out.append({
+                "speaker": speaker,
+                "text": text[:1200],
+                "checkworthy": bool(claims),
+                "source": OP + (o.get("url") or o.get("document_url") or ""),
+                "time": o.get("time"),
+            })
+            if len(out) >= limit:
+                break
+        offset += 50
+    # quarantine the raw index (not published; curate first)
+    stamp = NOW.strftime("%Y%m%dT%H%M%SZ")
+    (raw_dir / f"speeches_{stamp}.json").write_text(
+        json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+    traces.append(trace("fetch", API + "/speeches/", f"{len(out)} speeches pulled, quarantined"))
+    return out
 
 
 def trace(step: str, source: str, detail: str) -> dict:
@@ -97,6 +155,18 @@ def main() -> int:
 
     findings = analyse_votes(votes, traces)
     findings.sort(key=lambda x: x.get("date", ""), reverse=True)
+
+    # --fetch N : pull live speech text for the "what they SAID" layer (check-worthy claims)
+    speeches = []
+    if "--fetch" in sys.argv:
+        i = sys.argv.index("--fetch")
+        n = int(sys.argv[i + 1]) if i + 1 < len(sys.argv) and sys.argv[i + 1].isdigit() else 60
+        speeches = fetch_speeches(n, traces)
+        cw = [s for s in speeches if s["checkworthy"]]
+        print(f"[fetch] {len(speeches)} speeches, {len(cw)} carry check-worthy factual claims")
+        for s in cw[:6]:
+            print(f"  {s['speaker'][:34]:34} <- {s['source']}")
+            print(f"     \"{s['text'][:110]}...\"")
 
     brief = {
         "generated": NOW.isoformat(),

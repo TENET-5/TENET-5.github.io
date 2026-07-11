@@ -43,6 +43,14 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 OUT_BOARD = DATA / "network_osint_board.json"
 OUT_PROOF = DATA / "analysis" / "network_osint_build_last.json"
+OUT_SWARM = DATA / "analysis" / "network_swarm_registry_last.json"
+
+# Static swarm: declarative role-bucket freezes (extend here instead of new methods).
+# Each row is public-safe office-holder lists only — no personal legal dumps.
+SWARM_ROLE_BUCKETS: list[dict[str, Any]] = [
+    # Already covered by dedicated methods — registry documents the swarm map.
+    # New freezes can be added here and will auto-run via ingest_swarm_role_buckets.
+]
 
 # Labels that are registry noise, not people/orgs for the public board
 _JUNK_LABEL = re.compile(
@@ -2634,6 +2642,278 @@ class BoardBuilder:
             skip_buckets=frozenset({"individual_subjects"}),
         )
 
+    def ingest_swarm_role_buckets(self) -> None:
+        """Registry-driven freezes — add rows to SWARM_ROLE_BUCKETS to scale the swarm."""
+        for spec in SWARM_ROLE_BUCKETS:
+            path = DATA / str(spec.get("file") or "")
+            if not path.is_file():
+                continue
+            self._ingest_role_buckets(
+                path=path,
+                hub_id=str(spec.get("hub_id") or "swarm_hub"),
+                hub_label=str(spec.get("hub_label") or "Accountability index"),
+                hub_link=str(spec.get("hub_link") or "evidence-index.html"),
+                categories=list(spec.get("categories") or ["osint"]),
+                buckets=list(spec.get("buckets") or []),
+                origin=str(spec.get("origin") or "swarm_registry"),
+                claim_level=str(spec.get("claim_level") or "REPORTING"),
+                per_bucket=int(spec.get("per_bucket") or 4),
+                skip_buckets=frozenset(spec.get("skip_buckets") or []),
+            )
+
+    def ingest_cpc_multiplatform_map(self) -> None:
+        path = DATA / "cpc_cbc_amplifier_multiplatform_map.json"
+        raw = _load(path)
+        if not raw or not isinstance(raw, dict):
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "cbc_amplify_hub",
+            label="CBC social amplification mesh",
+            ntype="event",
+            subtitle="Multi-platform public handles",
+            detail=_soft(
+                str(raw.get("disclaimer") or "Presence on a platform is not a finding of coordination.")
+            ),
+            link="cbc-social-amplification.html",
+            categories=["media", "osint"],
+            claim_level="OSINT_INDEX",
+            origin="cpc_multiplatform_map",
+        )
+        for n in (raw.get("nodes") or [])[:20]:
+            if not isinstance(n, dict):
+                continue
+            sid = str(n.get("id") or "")
+            xh = n.get("x") or {}
+            handle = ""
+            if isinstance(xh, dict):
+                handle = str(xh.get("handle") or "")
+                if not handle and isinstance(xh.get("handles"), list) and xh["handles"]:
+                    handle = str(xh["handles"][0])
+            lab = (handle or sid).lstrip("@")
+            if not _ok_label(lab):
+                continue
+            role = str(n.get("role") or n.get("outlet") or "public handle")
+            # soften military/info-domain jargon for public board
+            role = role.replace("T0 ", "").replace("amp", "amplifier")
+            platforms = []
+            for pk in ("x", "facebook", "youtube", "bluesky", "instagram", "rumble"):
+                if n.get(pk):
+                    platforms.append(pk)
+            nid = self.add_node(
+                "media_" + _slug(sid or lab),
+                label=lab,
+                ntype="person" if "CBC" not in lab and "News" not in lab else "org",
+                subtitle=_soft(role, 70),
+                detail=_soft(
+                    "Public multi-platform seed. Platforms: "
+                    + (", ".join(platforms) if platforms else "x-class")
+                    + ". Not a finding of coordination."
+                ),
+                link="cbc-social-amplification.html",
+                categories=["media", "osint"],
+                claim_level="OSINT_INDEX",
+                origin="cpc_multiplatform_map",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label="multi-platform seed",
+                    strength=1,
+                    claim_level="OSINT_INDEX",
+                )
+
+    def ingest_carney_conflicts_light(self) -> None:
+        path = DATA / "carney_conflicts_dossier.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        # Never surface our_database_note / internal scores / roster language
+        profile = raw.get("profile") or {}
+        name = str(profile.get("name") or "Mark Carney")
+        carney = self.add_node(
+            "person_mark_carney",
+            label=name,
+            ntype="person",
+            subtitle=_soft(str(profile.get("role") or "public office"), 70),
+            detail=_soft(
+                "Public ethics/conflict screen class. Prefer Ethics Commissioner primary records."
+            ),
+            link="carney-brookfield.html",
+            categories=["osint", "authority"],
+            claim_level="REPORTING",
+            origin="carney_conflicts_light",
+        )
+        bf = raw.get("brookfield") or {}
+        if bf.get("company"):
+            src = str(bf.get("source") or "")
+            bfid = self.add_node(
+                "org_brookfield",
+                label=str(bf.get("company") or "Brookfield").split("Ltd")[0].strip()[:50],
+                ntype="org",
+                subtitle=_soft(str(bf.get("carney_role") or "asset manager"), 70),
+                detail=_soft(str(bf.get("conflict_scope") or bf.get("investments") or "")),
+                link="carney-brookfield.html",
+                categories=["osint", "evidence"],
+                claim_level="REPORTING",
+                origin="carney_conflicts_light",
+            )
+            if carney and bfid:
+                self.add_edge(
+                    carney,
+                    bfid,
+                    label="prior leadership (public record)",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=src if src.startswith("http") else "",
+                )
+        ethics = raw.get("ethics_issues") or {}
+        eth_srcs = ethics.get("sources") or []
+        eth0 = next((s for s in eth_srcs if isinstance(s, str) and s.startswith("http")), "")
+        if ethics:
+            eid = self.add_node(
+                "carney_ethics_screen",
+                label="Ethics screen / conflict class",
+                ntype="event",
+                subtitle=_soft(str(ethics.get("recusals") or "conflict-of-interest class"), 70),
+                detail=_soft(
+                    f"{ethics.get('screen_applied') or ''} {ethics.get('blind_trust') or ''}".strip()
+                ),
+                link="carney-brookfield.html",
+                categories=["evidence", "osint"],
+                claim_level="REPORTING",
+                origin="carney_conflicts_light",
+            )
+            if carney and eid:
+                self.add_edge(
+                    carney,
+                    eid,
+                    label="ethics class (reporting)",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=eth0,
+                )
+        boards = raw.get("other_boards") or {}
+        for key, lab in (("stripe", "Stripe Inc."), ("pimco", "PIMCO")):
+            if key not in boards:
+                continue
+            oid = self.add_node(
+                "hold_org_" + _slug(lab),
+                label=lab,
+                ntype="org",
+                subtitle="named board/advisory class",
+                detail=_soft(str(boards.get(key) or "")),
+                link="carney-brookfield.html",
+                categories=["osint"],
+                claim_level="REPORTING",
+                origin="carney_conflicts_light",
+            )
+            if carney and oid:
+                self.add_edge(
+                    carney,
+                    oid,
+                    label="board/advisory class",
+                    strength=1,
+                    claim_level="REPORTING",
+                )
+        maple = raw.get("maple_fund") or {}
+        if maple.get("name"):
+            mid = self.add_node(
+                "org_" + _slug(str(maple["name"])),
+                label=str(maple["name"])[:50],
+                ntype="org",
+                subtitle=_soft(str(maple.get("timing") or "fund class"), 60),
+                detail="Named Brookfield Maple Fund class from public reporting.",
+                link="carney-brookfield.html",
+                categories=["osint", "evidence"],
+                claim_level="REPORTING",
+                origin="carney_conflicts_light",
+            )
+            if carney and mid:
+                self.add_edge(
+                    carney,
+                    mid,
+                    label="fund class (reporting)",
+                    strength=1,
+                    claim_level="REPORTING",
+                )
+
+    def ingest_cds_appointment_light(self) -> None:
+        """CDS appointment FACT only — never criminal-code / charge framing on public board."""
+        path = DATA / "cds_carignan_dossier.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        sub = raw.get("subject") or {}
+        name = str(sub.get("name") or "Jennie Carignan")
+        cds = self.add_node(
+            "person_" + _slug(name),
+            label=name,
+            ntype="person",
+            subtitle=_soft(
+                f"{sub.get('role') or 'Chief of the Defence Staff'}"
+                + (f" · appointed {sub.get('appointed')}" if sub.get("appointed") else ""),
+                90,
+            ),
+            detail=_soft(
+                f"Previous: {sub.get('previous_role') or '—'}. "
+                "Public appointment class only — prefer DND primary releases."
+            ),
+            link="dnd-procurement.html",
+            categories=["cfnis", "authority"],
+            claim_level="FACT",
+            origin="cds_appointment_light",
+        )
+        dnd = self.add_node(
+            "dnd",
+            label="National Defence",
+            ntype="department",
+            subtitle="department · authority",
+            detail="Department of National Defence.",
+            link="dnd-procurement.html",
+            categories=["authority", "defence"],
+            claim_level="FACT",
+            origin="cds_appointment_light",
+        )
+        if cds and dnd:
+            self.add_edge(
+                dnd,
+                cds,
+                label="CDS appointment class",
+                strength=2,
+                claim_level="FACT",
+            )
+        dm = str(sub.get("dnd_deputy_minister") or "")
+        # only take name before parenthesis
+        dm_name = dm.split("(")[0].strip()
+        if dm_name and _ok_label(dm_name):
+            # strip leading title fragments if any
+            dm_name = re.sub(r"^.*?\b(Christiane Fox)\b.*$", r"\1", dm_name) if "Fox" in dm_name else dm_name
+            if "Christiane Fox" in dm:
+                dm_name = "Christiane Fox"
+            did = self.add_node(
+                "person_" + _slug(dm_name),
+                label=dm_name,
+                ntype="person",
+                subtitle="DND Deputy Minister class",
+                detail="Named DND deputy minister in public appointment/reporting class.",
+                link="dnd-procurement.html",
+                categories=["authority", "defence"],
+                claim_level="REPORTING",
+                origin="cds_appointment_light",
+            )
+            if did and dnd:
+                self.add_edge(
+                    dnd,
+                    did,
+                    label="deputy minister class",
+                    strength=1,
+                    claim_level="REPORTING",
+                )
+
     def ingest_cfnis_command_light(self) -> None:
         """Sourced command-chain nodes only — careful public-record framing."""
         path = DATA / "cfnis_command_dossier.json"
@@ -3717,6 +3997,10 @@ class BoardBuilder:
         self.ingest_maid_office_holders()
         self.ingest_opioid_dossier()
         self.ingest_winnipeg_lab_dossier()
+        self.ingest_cpc_multiplatform_map()
+        self.ingest_carney_conflicts_light()
+        self.ingest_cds_appointment_light()
+        self.ingest_swarm_role_buckets()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
