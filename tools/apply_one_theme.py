@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "75"
+THEME_VER = "77"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -284,6 +284,17 @@ def apply_page(path: Path) -> bool:
     text = re.sub(r"(?<![-\w])color:\s*var\(--ink\)", "color: var(--ivory)", text)
     text = re.sub(r"(?<![-\w])color:\s*#0b0e10", "color: var(--ivory)", text, flags=re.I)
 
+    # Bracket-literal headings read as tacky terminal cosplay ("[CONNECTED
+    # INTELLIGENCE]"). Convert to the site's refined kicker label.
+    text = re.sub(
+        r'<h([1-4])[^>]*class="[^"]*cap263-mono-accent[^"]*"[^>]*>\s*\[([^\]<]{2,60})\]\s*</h\1>',
+        lambda m: f'<span class="kick">{m.group(2).strip()}</span>',
+        text)
+    text = re.sub(
+        r'<h([1-4])[^>]*>\s*\[\s*([A-Z][^\]<]{2,60}?)\s*\]\s*</h\1>',
+        lambda m: f'<span class="kick">{m.group(2).strip()}</span>',
+        text)
+
     # Retired components + leaked scaffold (owner directive 2026-07-11):
     # share bars are gone sitewide, and un-commented "═══ SECTION N — X ═══"
     # scaffold banners must never render as visible text.
@@ -405,7 +416,7 @@ def apply_page(path: Path) -> bool:
         if "liril-dock.js" not in text:
             canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=1"></script>')
         if "liril-radio.js" not in text:
-            canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=1"></script>')
+            canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
         if "reading-mode.js" not in text:
             canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
         if canon:

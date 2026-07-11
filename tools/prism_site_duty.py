@@ -61,6 +61,7 @@ PROJECT = {
     "jobs": [
         "one_theme_press",
         "press_rebuild",
+        "network_osint_board",
         "css_quantum_precision",
         "liril_guide_home",
         "visual_acuity_pc_mobile",
@@ -220,6 +221,22 @@ def lap() -> dict:
         steps.append({"name": "investigations_hub", "ok": code == 0, "exit": code, "tail": out[-200:]})
     else:
         steps.append({"name": "investigations_hub", "ok": False, "detail": "build_investigations.py missing"})
+
+    # 2c) rebuild OSINT composite network board (scrapers/vault → network_osint_board.json)
+    netb = TOOLS / "build_network_osint_board.py"
+    if netb.exists():
+        code, out = _run([sys.executable, str(netb)], timeout=120)
+        steps.append(
+            {
+                "name": "network_osint_board",
+                "ok": code == 0,
+                "exit": code,
+                "tail": out[-300:],
+                "out": "data/network_osint_board.json",
+            }
+        )
+    else:
+        steps.append({"name": "network_osint_board", "ok": False, "detail": "build_network_osint_board.py missing"})
 
     # 3) enforce one theme on all pages
     apply = TOOLS / "apply_one_theme.py"
