@@ -30,7 +30,7 @@
   --media-aspect-still:16/10;
   --media-aspect-cine:16/9;
   --theme-source:"index.html · press-theme.css · QUANTANIUM pristine-ice-lake";
-  --theme-ver:"203";
+  --theme-ver:"204";
 }
 
 /* ΓòÉΓòÉΓòÉ LEGACY COMPONENT HEAL ΓÇö restored 2026-07-10 ΓòÉΓòÉΓòÉ
@@ -3387,14 +3387,13 @@ body.press-interior [class*=" hero-"]:not(.hero-sub):not(.hero-tag){
 /* Film-page ambient b-roll (director spec: behind narration, low opacity, never competes
    with text; muted/loop; reduced-motion users get stillness). Generated LTX documentary reel. */
 .film-broll{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
-  opacity:.42;pointer-events:none;
-  /* delicate projection: dim + slightly defocused (a projector is never razor-sharp);
-     dark areas melt into the void, a soft radial beam feathers the edges. */
-  filter:grayscale(.3) brightness(.6) contrast(1.06) blur(.7px);
+  opacity:.52;pointer-events:none;
+  /* delicate projection: readable motion; light defocus */
+  filter:grayscale(.2) brightness(.68) contrast(1.06) blur(.4px);
   -webkit-mask-image:radial-gradient(135% 95% at 50% 26%, #000 38%, rgba(0,0,0,.35) 70%, transparent 100%);
   mask-image:radial-gradient(135% 95% at 50% 26%, #000 38%, rgba(0,0,0,.35) 70%, transparent 100%)}
 /* faint gate-flicker so it reads as PROJECTED light, not a flat loop ΓÇö barely perceptible */
-@keyframes broll-flicker{0%,100%{opacity:.42}47%{opacity:.39}62%{opacity:.44}}
+@keyframes broll-flicker{0%,100%{opacity:.52}47%{opacity:.48}62%{opacity:.55}}
 .film-broll{animation:broll-flicker 5.5s ease-in-out infinite}
 /* the veil now only protects the reading text at the bottom ΓÇö projection lives in the hero */
 .film-broll-veil{position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -4011,14 +4010,14 @@ body.press-interior .stamp.warn {
 .cover{isolation:isolate}
 .cover .home-broll{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  z-index:0;pointer-events:none;opacity:.38;
-  filter:grayscale(.25) brightness(.55) contrast(1.08) saturate(.85);
+  z-index:0;pointer-events:none;opacity:.55;
+  filter:grayscale(.15) brightness(.62) contrast(1.08) saturate(.9);
 }
 .cover .home-broll-veil{
   position:absolute;inset:0;z-index:1;pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(5,7,8,.55) 0%,rgba(5,7,8,.35) 35%,rgba(5,7,8,.75) 78%,var(--void) 100%),
-    radial-gradient(90% 70% at 70% 20%,rgba(63,124,140,.12),transparent 60%);
+    linear-gradient(180deg,rgba(5,7,8,.42) 0%,rgba(5,7,8,.28) 35%,rgba(5,7,8,.68) 78%,var(--void) 100%),
+    radial-gradient(90% 70% at 70% 20%,rgba(63,124,140,.14),transparent 60%);
 }
 .cover > .ghost5,.cover > .cover-bar,.cover > .cover-core,.cover > .cover-foot{position:relative;z-index:3}
 
@@ -4042,7 +4041,7 @@ a.enter-card .enter-media{
 }
 a.enter-card .enter-media img,
 a.enter-card .enter-media video{
-  width:100%;height:100%;object-fit:cover;display:block;
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
   filter:grayscale(.15) brightness(.88) contrast(1.05);
   transition:transform .5s ease,filter .4s ease;
 }
@@ -4141,8 +4140,8 @@ figure.cinema-cell .cine-frame{
   position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--ink)
 }
 figure.cinema-cell video{
-  width:100%;height:100%;object-fit:cover;display:block;
-  filter:grayscale(.2) brightness(.75) contrast(1.08)
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(.12) brightness(.82) contrast(1.06)
 }
 figure.cinema-cell .cine-tag{
   position:absolute;top:12px;left:12px;z-index:2;
@@ -4326,13 +4325,15 @@ body.press-interior .media-card:hover,
 /* Frame (image / video) */
 .media-frame{
   position:relative;overflow:hidden;background:var(--ink);
-  border-bottom:1px solid rgba(154,219,232,.1);line-height:0;aspect-ratio:var(--media-aspect-still)
+  border-bottom:1px solid rgba(154,219,232,.1);line-height:0;aspect-ratio:var(--media-aspect-still);
+  min-height:180px
 }
 .media-frame.is-cine,
 .media-card.is-cine .media-frame{aspect-ratio:var(--media-aspect-cine)}
+/* Absolute fill — % height on <video> collapses to 0 before metadata loads */
 .media-frame img,
 .media-frame video{
-  width:100%;height:100%;object-fit:cover;display:block;
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
   filter:var(--media-img-filter);
   transition:transform .45s ease,filter .35s ease
 }
@@ -4476,30 +4477,30 @@ body:not(.press-interior) .dt-card.glass{
 body.act-cinema-page{
   position:relative;background:var(--void);min-height:100vh
 }
-/* Fixed LTX page background */
+/* Fixed LTX page background — visible motion (was blacked out at brightness .28 + 90% veil) */
 .act-page-bg{
   position:fixed;inset:0;width:100%;height:100%;object-fit:cover;
-  z-index:0;pointer-events:none;
-  filter:grayscale(.28) brightness(.28) contrast(1.08) saturate(.75)
+  z-index:0;pointer-events:none;opacity:1;
+  filter:grayscale(.18) brightness(.52) contrast(1.06) saturate(.9)
 }
 .act-page-veil{
   position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(5,7,8,.72) 0%,rgba(5,7,8,.82) 40%,rgba(5,7,8,.94) 100%),
-    radial-gradient(70% 50% at 50% 0%,rgba(63,124,140,.1),transparent 60%)
+    linear-gradient(180deg,rgba(5,7,8,.48) 0%,rgba(5,7,8,.55) 38%,rgba(5,7,8,.78) 100%),
+    radial-gradient(70% 50% at 50% 0%,rgba(63,124,140,.14),transparent 60%)
 }
-/* Forward surface — soft paper-trail vignette, lower-right */
+/* Forward surface — soft paper-trail vignette, lower-right (readable motion) */
 .act-page-fg{
   position:fixed;right:0;bottom:0;z-index:1;pointer-events:none;
   width:min(46vw,520px);height:min(40vh,360px);
-  opacity:.28;
+  opacity:.48;
   -webkit-mask-image:radial-gradient(ellipse 90% 85% at 100% 100%,#000 0%,transparent 72%);
   mask-image:radial-gradient(ellipse 90% 85% at 100% 100%,#000 0%,transparent 72%)
 }
 .act-page-fg-video,
 .act-page-fg video{
   width:100%;height:100%;object-fit:cover;display:block;
-  filter:grayscale(.35) brightness(.45) contrast(1.05)
+  filter:grayscale(.2) brightness(.62) contrast(1.05)
 }
 /* Chrome above cinema layers */
 body.act-cinema-page .press-bar,
