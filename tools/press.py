@@ -583,7 +583,7 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
   </div>
 </div>
 <script src="js/rv-reveal.js?v=1" defer></script>
-<script src="js/liril-radio.js?v=1" defer></script>
+<script src="js/liril-radio.js?v=2" defer></script>
 <script src="js/liril-voice.js?v=43" defer></script>
 <script src="js/liril-home-guide.js?v=4" defer></script>
 </body>
