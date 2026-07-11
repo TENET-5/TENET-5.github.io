@@ -5,6 +5,48 @@
 **Interior taste lock (last cascade):** `css/design-lock.css` — do not edit for thrash; change doctrine here first.  
 **Machine contract:** `css/QUANTANIUM.json` + `css/PRESS_THEME_QUANTUM_CONTRACT.json`
 
+## Awwwards research (2026-07-11) — adopt / reject
+
+Curated against [Awwwards storytelling](https://www.awwwards.com/awwwards/collections/storytelling/), [black / dark mode](https://www.awwwards.com/websites/black/), [magazine-newspaper](https://www.awwwards.com/websites/magazine-newspaper-blog/), and memorial SOTDs (e.g. [The Armenian Genocide](https://www.awwwards.com/sites/the-armenian-genocide), Sakharov Space, Into the Storm–class docs).  
+**Bar:** ProPublica / Foreign Affairs restraint — award craft without cyber cosplay.
+
+### ADOPT (maps to TENET5)
+
+| Pattern | Why it wins on Awwwards | TENET5 application |
+|---------|-------------------------|-------------------|
+| **Video as b-roll under type** | Film supports narrative; text stays king | Fixed page film + hero player; muted/loop; “Film playing” badge |
+| **Chaptered scroll story** | Acts/beats, not infinite gimmick | Five-act argument + continuum cards |
+| **Editorial type hierarchy** | Display + mono meta | Fraunces titles · IBM Plex Mono kickers |
+| **Dark void + sparse accent** | Black collections / dark mode elegance | `--void` / ivory ladder / ice labels only |
+| **Memorial tone over spectacle** | Non-commercial cultural SOTDs | No WebGL trauma porn; atmosphere ≠ proof |
+| **Honest media presence** | Fullscreen video *readable* | No pure-black LTX; YAVG gate on bg clips |
+| **Primary path clear** | Storytelling collections reward orientation | argument hub → acts → Health Canada / Hansard |
+
+### REJECT (Awwwards glitter that fails our law)
+
+| Pattern | Why |
+|---------|-----|
+| Neon HUD / cyber grids / matrix | Instant taste fail (public doctrine) |
+| WebGL for its own sake | Competes with the record |
+| Horizontal infinite gimmick scroll as default | Breaks LIRIL read + accessibility |
+| Face-forward stock emotion | FILM_DIRECTOR_SPEC: empty institutions only |
+| Share/social chrome | Retired; newsroom not growth-hack |
+| Page-local palettes / cyan accents | Tokens only |
+
+### Reference links (research, not endorsement)
+
+- Storytelling collection: https://www.awwwards.com/awwwards/collections/storytelling/  
+- Armenian Genocide SOTD (cultural memorial): https://www.awwwards.com/sites/the-armenian-genocide  
+- Magazine / newspaper: https://www.awwwards.com/websites/magazine-newspaper-blog/  
+- Black / dark: https://www.awwwards.com/websites/black/  
+- Sites of the Year index: https://www.awwwards.com/websites/sites_of_the_year/  
+
+### Next craft bets (small, measured)
+
+1. Keep **hero film player** visible on every act (already shipping).  
+2. Prefer **bright `media/film/*`** over crushed bg encodes (YAVG check).  
+3. Optional later: scroll chapter progress on acts only — mono ice, no neon.
+
 ## Palette law (ice lake)
 
 | Token | Role |
