@@ -190,7 +190,7 @@
       }
       /* Home book: enter → wire chapters → stills/cinema → era → catalog */
       var home = document.querySelectorAll(
-        'section#enter, section#thesis, section#now, section#week, section#month, section#year, section#stills, section#cinema, section#era, section#book'
+        'section#enter, section#thesis, section#scale, section#now, section#week, section#month, section#year, section#stills, section#cinema, section#era, section#book'
       );
       if (home.length) return home;
       var past = document.querySelectorAll('section.past-track');
@@ -209,7 +209,10 @@
       var el = chapters[autoScrollIndex];
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       autoScrollIndex++;
-      autoScrollTimer = setTimeout(stepAutoScroll, 15000); // Wait 15 seconds per chapter
+      /* Media-heavy sections get a little longer so stills/cinema can land */
+      var id = el.id || '';
+      var wait = (id === 'stills' || id === 'cinema' || id === 'enter') ? 18000 : 14000;
+      autoScrollTimer = setTimeout(stepAutoScroll, wait);
     }
 
     function startAutoScroll() {
