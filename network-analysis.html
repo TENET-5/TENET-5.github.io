@@ -2,196 +2,115 @@
 <html lang="en-CA" data-press="1" data-press-interior="1">
 <head>
 <meta charset="utf-8">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/press-theme.css?v=77">
-  <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Network | TENET5</title>
-<meta name="description" content="Documented connections across the public record — every edge cites its file. Centrality is not guilt; open the sources.">
+<meta name="description" content="Documented connections from the public record. Every edge is a file. Centrality is not guilt.">
 <meta property="og:site_name" content="TENET5">
 <meta property="og:title" content="The Network | TENET5">
-<meta property="og:description" content="Documented connections across the public record — every edge cites its file. Centrality is not guilt; open the sources.">
+<meta property="og:description" content="Documented connections from the public record. Every edge is a file. Centrality is not guilt.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
 <meta name="theme-color" content="#050708">
 <meta name="liril-role" content="system-guide">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/press-theme.css?v=77">
+<link rel="stylesheet" href="css/network-analysis.css?v=2">
 </head>
 <body class="press-interior">
 
-  <header class="press-bar" role="banner">
-    <a class="wm" href="index.html">TENET<sup>5</sup></a>
-    <nav aria-label="Primary">
-      <a href="index.html">Home</a>
-      <a href="daily-briefing.html">Briefing</a>
-      <a href="investigations.html">Investigations</a>
-      <a href="evidence-index.html">Evidence</a>
-      <a href="liril-film.html">Guided</a>
-      <a href="about.html">About</a>
-    </nav>
-  </header>
-<main class="press-main">
-    <p class="kick">Documented connections only · every edge cites its file</p>
-    <h1>The network, <em>documented.</em></h1>
-    <p class="stand" id="net-stand">Loading the board&hellip;</p>
-    <span class="meta" id="net-meta"></span>
+<header class="press-bar" role="banner">
+  <a class="wm" href="index.html">TENET<sup>5</sup></a>
+  <nav aria-label="Primary">
+    <a href="index.html">Home</a>
+    <a href="daily-briefing.html">Briefing</a>
+    <a href="investigations.html" class="is-on">Investigations</a>
+    <a href="evidence-index.html">Evidence</a>
+    <a href="liril-film.html">Guided</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
 
-  <div class="chips" id="net-chips"></div>
+<main class="press-main net-main">
+  <p class="kick">Public record · documented edges only</p>
+  <h1>The network, <em>documented.</em></h1>
+  <p class="stand" id="net-stand">A map of named entities and the public files that connect them. Centrality is concentration of paper, not a verdict.</p>
+
+  <div class="net-toolbar">
+    <div class="net-tabs" role="tablist" aria-label="Board dataset">
+      <button type="button" class="on" id="tab-osint" data-board="osint" role="tab" aria-selected="true">OSINT composite</button>
+      <button type="button" id="tab-influence" data-board="influence" role="tab" aria-selected="false">Foreign-influence</button>
+      <button type="button" id="tab-defence" data-board="defence" role="tab" aria-selected="false">Defence instruments</button>
+    </div>
+    <input type="search" id="net-search" placeholder="Search entities…" autocomplete="off" aria-label="Search entities">
+  </div>
+
+  <p class="net-stats" id="net-stats">Preparing the board…</p>
+  <div class="chips" id="net-chips" aria-label="Filter by category"></div>
+
   <div class="board-wrap">
-    <div class="board glass"><svg id="net-svg" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"
-      role="img" aria-label="Documented connection board"></svg></div>
-    <aside class="detail glass" id="net-detail">
-      <span class="kick">Select an entity</span>
-      <h3>Click any node</h3>
-      <p>Each dot is a person, organization, event or piece of evidence from the public
-      record. Each line is a documented interaction — a lobbying contact, a filing,
-      a ruling — never an insinuation.</p>
+    <div class="board" id="board">
+      <svg id="net-svg" viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Documented connection board"></svg>
+      <div class="empty-msg" id="net-empty" hidden>No entities match this filter.</div>
+    </div>
+    <aside class="detail" id="net-detail">
+      <span class="kick">Inspector</span>
+      <h3>Select a node</h3>
+      <p>Each node is a person, organization, program, or event named in public records. Each line is a documented interaction — not an accusation.</p>
     </aside>
   </div>
+
   <div class="guide">
-    <div class="glass"><b>An edge is a document</b>Every line on this board is a recorded
-    interaction: a registry entry, a court filing, a committee appearance. If there is
-    no document, there is no line.</div>
-    <div class="glass"><b>Centrality is not guilt</b>A well-connected node is a
-    well-documented node. The board shows where the paper concentrates — conclusions
-    belong to the case files.</div>
-    <div class="glass"><b>Open the file</b>Every entity links into its case page and the
-    evidence shelf. Read what we read, then decide.</div>
+    <div class="glass">
+      <b>An edge is a document</b>
+      Lines appear only where the desk can point to a public instrument: a lobbying contact, a vote, a contract, a commission finding.
+    </div>
+    <div class="glass">
+      <b>Centrality is not guilt</b>
+      A busy node is a well-documented node. Conclusions live in the case files, not in the geometry.
+    </div>
+    <div class="glass">
+      <b>Three boards</b>
+      OSINT composite merges vault scrapes and freezes. Foreign-influence is the curated board. Defence instruments is the procurement cluster.
+    </div>
   </div>
+
+  <section class="list-fallback" aria-labelledby="list-h">
+    <h2 id="list-h">Entities on this board</h2>
+    <ul id="net-list"></ul>
+  </section>
+
+  <p class="disclaimer" id="net-disclaimer">
+    Force layout is for readability only. OSINT composite is rebuilt via
+    <code>tools/build_network_osint_board.py</code> (also on site duty). Prefer case files over the map.
+  </p>
 </main>
-<script>
-  (function(){
-    var NS='http://www.w3.org/2000/svg';
-    var COLORS={israel:'#d3a625',ccp:'#c8102e',cfnis:'#9adbe8',media:'#a89f90',
-      india:'#7fbf9a',disinfo:'#c8102e',evidence:'#ece7dc'};
-    var R={org:1.35,person:1.05,event:.85,evidence:1.0};
-    var svg=document.getElementById('net-svg');
-    var state={nodes:[],threads:[],byId:{},filter:null,sel:null};
-    function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;
-      if(text!=null)e.textContent=text;return e;}
-    function color(n){var c=(n.categories||[]).find(function(c){return COLORS[c];});
-      return COLORS[c]||'#9adbe8';}
-    function draw(){
-      while(svg.firstChild)svg.removeChild(svg.firstChild);
-      state.threads.forEach(function(t){
-        var a=state.byId[t.from],b=state.byId[t.to];if(!a||!b)return;
-        var l=document.createElementNS(NS,'line');
-        l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);
-        l.setAttribute('x2',b.x);l.setAttribute('y2',b.y);
-        l.setAttribute('stroke-width',(t.strength||1)*.12);
-        l.setAttribute('class','edge');l.setAttribute('data-from',t.from);
-        l.setAttribute('data-to',t.to);
-        svg.appendChild(l);t._el=l;
-      });
-      state.nodes.forEach(function(n){
-        var g=document.createElementNS(NS,'g');g.setAttribute('class','node');
-        var c=document.createElementNS(NS,'circle');
-        c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);
-        c.setAttribute('r',R[n.type]||1);c.setAttribute('fill',color(n));
-        g.appendChild(c);
-        var tx=document.createElementNS(NS,'text');
-        tx.setAttribute('x',n.x);tx.setAttribute('y',n.y-((R[n.type]||1)+0.8));
-        tx.setAttribute('text-anchor','middle');tx.textContent=n.label;
-        g.appendChild(tx);
-        g.addEventListener('click',function(){select(n,g);});
-        svg.appendChild(g);n._el=g;
-      });
-      applyFilter();
-    }
-    function select(n,g){
-      state.sel=n.id;
-      state.nodes.forEach(function(m){if(m._el)m._el.classList.toggle('sel',m.id===n.id);});
-      state.threads.forEach(function(t){
-        if(t._el)t._el.classList.toggle('hot',t.from===n.id||t.to===n.id);});
-      var d=document.getElementById('net-detail');
-      while(d.firstChild)d.removeChild(d.firstChild);
-      d.appendChild(el('span','kick',(n.type||'entity').toUpperCase()));
-      d.appendChild(el('h3',null,n.label||''));
-      if(n.subtitle)d.appendChild(el('div','sub',n.subtitle));
-      if(n.detail)d.appendChild(el('p',null,n.detail));
-      var cons=state.threads.filter(function(t){return t.from===n.id||t.to===n.id;});
-      if(cons.length){
-        var box=el('div','cons');
-        cons.slice(0,10).forEach(function(t){
-          var other=state.byId[t.from===n.id?t.to:t.from]||{};
-          var row=el('div');
-          var b=el('b',null,other.label||'?');row.appendChild(b);
-          row.appendChild(document.createTextNode(' — '+(t.label||'documented link')));
-          box.appendChild(row);
-        });
-        d.appendChild(box);
-      }
-      if(n.link){var a=el('a','open','Open the file \u2192');a.href=n.link;d.appendChild(a);}
-    }
-    function applyFilter(){
-      var f=state.filter;
-      state.nodes.forEach(function(n){
-        var on=!f||(n.categories||[]).indexOf(f)>=0;
-        if(n._el)n._el.classList.toggle('dim',!on);
-      });
-      state.threads.forEach(function(t){
-        var a=state.byId[t.from]||{},b=state.byId[t.to]||{};
-        var on=!f||((a.categories||[]).indexOf(f)>=0&&(b.categories||[]).indexOf(f)>=0);
-        if(t._el)t._el.classList.toggle('dim',!on);
-      });
-    }
-    fetch('data/investigation_board.json',{cache:'no-cache'})
-      .then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){
-        state.nodes=d.nodes||[];state.threads=d.threads||[];
-        state.nodes.forEach(function(n){state.byId[n.id]=n;});
-        document.getElementById('net-stand').textContent=
-          state.nodes.length+' entities and '+state.threads.length+
-          ' documented connections, drawn only from the public record.';
-        var m=d.meta||{};
-        document.getElementById('net-meta').textContent=
-          (m.sources?('Sources: '+m.sources+' · '):'')+(m.updated?('updated '+m.updated):'');
-        var cats={};
-        state.nodes.forEach(function(n){(n.categories||[]).forEach(function(c){
-          if(COLORS[c])cats[c]=1;});});
-        var chips=document.getElementById('net-chips');
-        var all=el('button','chip on','All');all.type='button';
-        all.addEventListener('click',function(){state.filter=null;setChips(all);applyFilter();});
-        chips.appendChild(all);
-        Object.keys(cats).forEach(function(c){
-          var b=el('button','chip',c.toUpperCase());b.type='button';
-          b.style.borderColor=COLORS[c];
-          b.addEventListener('click',function(){state.filter=c;setChips(b);applyFilter();});
-          chips.appendChild(b);
-        });
-        function setChips(active){
-          chips.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===active);});
-        }
-        draw();
-      })
-      .catch(function(){
-        document.getElementById('net-stand').textContent=
-          'The board data could not be loaded — the case files remain on the front page.';
-      });
-  })();
-</script>
-  <footer class="press-foot" role="contentinfo">
-    <span>TENET5 · Powered by LIRIL AI</span>
-    <a href="methodology-transparency.html">Methodology</a>
-    <a href="about.html">About</a>
-    <a href="legal.html">Legal</a>
-  </footer>
+
+<footer class="press-foot" role="contentinfo">
+  <span>TENET5 · Powered by LIRIL AI</span>
+  <a href="methodology-transparency.html">Methodology</a>
+  <a href="about.html">About</a>
+  <a href="legal.html">Legal</a>
+  <a href="evidence-index.html">Evidence</a>
+  <a href="daily-briefing.html">Briefing</a>
+  <a href="griffon-glle-procurement.html">Griffon file</a>
+</footer>
+
 <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
   <div class="dock-in">
     <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="say"><b>LIRIL</b><span id="liril-line">We begin at this hour.</span></div>
-    <button id="liril-guide-btn" type="button" title="Start LIRIL as your guide through the record">Guide me</button>
-    <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice narration">Voice · Off</button>
-    <div class="liril-status" id="liril-status">LIRIL loading…</div>
+    <div class="say"><b>LIRIL</b><span id="liril-line">Every line is a file. Read the edge, then the source.</span></div>
+    <button id="liril-guide-btn" type="button" title="Start LIRIL as your guide">Guide me</button>
+    <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice">Voice · Off</button>
+    <div class="liril-status" id="liril-status">LIRIL ready</div>
   </div>
 </div>
+
+<script src="js/network-analysis-board.js?v=2" defer></script>
 <script src="js/rv-reveal.js?v=1" defer></script>
 <script src="js/liril-radio.js?v=2" defer></script>
 <script src="js/liril-voice.js?v=43" defer></script>
 <script src="js/liril-home-guide.js?v=4" defer></script>
-<script src="js/liril-walkthrough.js?v=3"></script>
-<script defer src="js/liril-dock.js?v=1"></script>
-<script defer src="js/reading-mode.js?v=2"></script>
 </body>
 </html>
