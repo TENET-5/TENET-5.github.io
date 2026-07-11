@@ -115,18 +115,8 @@
   }
 
   function setLiveBadge(v, state) {
-    var frame = v.closest('.media-frame') || v.closest('.act-hero-still') || v.parentElement;
-    if (!frame) return;
-    var badge = frame.querySelector('.act-film-live');
-    if (!badge && frame.classList && frame.classList.contains('media-frame')) {
-      badge = document.createElement('span');
-      badge.className = 'act-film-live';
-      badge.setAttribute('aria-hidden', 'true');
-      frame.appendChild(badge);
-    }
-    if (!badge) return;
-    badge.setAttribute('data-state', state);
-    badge.textContent = state === 'play' ? 'Film playing' : (state === 'wait' ? 'Tap to play' : 'Film');
+    // Disabled per user request (no reason to show film playing)
+    return;
   }
 
   function ensurePlayGate(v) {

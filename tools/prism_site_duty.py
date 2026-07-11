@@ -60,6 +60,7 @@ PROJECT = {
     "digress": False,
     "jobs": [
         "one_theme_press",
+        "rss_home_wire",             # multi-source RSS → hour continuum (objective)
         "press_rebuild",
         "network_osint_board",
         "design_lock_guardrail",     # crystal-clear taste contract, loads last (swarm-proof)
@@ -209,6 +210,37 @@ def lap() -> dict:
             "tokens": "root_void_ice_serif",
         }
     )
+
+    # 1b) RSS → objective home wire (multi-source; not TENET5 verdicts)
+    rss_wire = TOOLS / "build_rss_home_wire.py"
+    if rss_wire.exists():
+        # Prefer rebuild from existing feed; full --scan is slower (network)
+        code, out = _run([sys.executable, str(rss_wire)], timeout=120)
+        steps.append({
+            "name": "rss_home_wire",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-300:],
+            "job": "PRISM permanent — multi-source RSS into home hour continuum",
+            "proof": r"C:\PRISM\log\rss_home_wire_last.json",
+        })
+    else:
+        steps.append({"name": "rss_home_wire", "ok": True, "detail": "build_rss_home_wire.py missing (skipped)"})
+
+    # 1c) LIRIL front-page news presentation script (AI-generated desk package)
+    liril_pres = TOOLS / "build_liril_news_presentation.py"
+    if liril_pres.exists():
+        code, out = _run([sys.executable, str(liril_pres)], timeout=60)
+        steps.append({
+            "name": "liril_news_presentation",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-300:],
+            "job": "PRISM permanent — LIRIL explains TENET5 + what is going on today",
+            "proof": r"C:\PRISM\log\liril_news_presentation_last.json",
+        })
+    else:
+        steps.append({"name": "liril_news_presentation", "ok": True, "detail": "skipped"})
 
     # 2) rebuild press surfaces (index + evidence + story) — owns LIRIL dock
     press = TOOLS / "press.py"
