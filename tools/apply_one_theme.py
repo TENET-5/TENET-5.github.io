@@ -459,7 +459,7 @@ def apply_page(path: Path) -> bool:
         if "liril-radio.js" not in text:
             canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
         if "rv-reveal.js" not in text:
-            canon.append(f'<script defer src="{prefix}js/rv-reveal.js?v=1"></script>')
+            canon.append(f'<script defer src="{prefix}js/rv-reveal.js?v=2"></script>')
         if "reading-mode.js" not in text:
             canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
         if canon:
