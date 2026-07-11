@@ -518,8 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=213">
-<link rel="stylesheet" href="css/design-lock.css?v=213">
+<link rel="stylesheet" href="css/press-theme.css?v=214">
+<link rel="stylesheet" href="css/design-lock.css?v=214">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -1148,30 +1148,35 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
 <div class="time-dial-sticky" data-time-dial aria-label="Submarine time dial"></div>
 <section class="newsdesk field" id="newsdesk" data-line="News desk. Briefing first. Investigations second. Analysis third. Always cited.">
   <div class="wrapx rv">
-    <span class="kick">News desk · Canada · time continuum</span>
+    <span class="kick">News desk · Canada · time continuum · slate-spec visual</span>
     <h2 class="thesis-title" style="margin-top:1.2vh">Active investigation. Objective <em>analysis.</em></h2>
     <p class="newsdesk-lede">Time is the spine: second → minute → hour → day → week → month → year → era.
-    Primary sources first, inference labeled, AI as guide only. External RSS is never our verdict.</p>
-    <div class="newsdesk-grid">
-      <a class="newsdesk-card glass newsdesk-lead" href="daily-briefing.html">
+    Primary sources first, inference labeled, AI as guide only. External RSS is never our verdict.
+    Images below are ice-lake stills and case charts — atmosphere is not proof.</p>
+    <div class="newsdesk-grid newsdesk-grid-visual">
+      <a class="newsdesk-card glass newsdesk-lead has-thumb" href="daily-briefing.html">
+        <div class="newsdesk-thumb"><img src="media/landing/ledger_desk.jpg" alt="" width="640" height="360" loading="eager"></div>
         <span class="kick">01 · Live</span>
         <h3>Daily briefing</h3>
         <p>What Ottawa is doing now — stated plans, published numbers, and labeled inference. Start here every day.</p>
         <span class="meta">Open briefing →</span>
       </a>
-      <a class="newsdesk-card glass" href="investigations.html">
+      <a class="newsdesk-card glass has-thumb" href="investigations.html">
+        <div class="newsdesk-thumb"><img src="media/generated/maid_investigation.png" alt="" width="640" height="360" loading="lazy"></div>
         <span class="kick">02 · Active</span>
         <h3>Investigations hub</h3>
         <p>Live files: procurement, MAID, interference, capture axes — grouped so you can follow the paper trail.</p>
-        <span class="meta">Open investigations →</span>
+        <span class="meta">Open hub →</span>
       </a>
-      <a class="newsdesk-card glass" href="argument.html">
+      <a class="newsdesk-card glass has-thumb" href="argument.html">
+        <div class="newsdesk-thumb"><img src="media/landing/parliament_ice.jpg" alt="" width="640" height="360" loading="lazy"></div>
         <span class="kick">03 · Case</span>
         <h3>Gov analysis · five acts</h3>
         <p>Rome Statute frame against Canadian public records. Hybrid documentary + act stages. Atmosphere is not proof.</p>
         <span class="meta">Open argument →</span>
       </a>
-      <a class="newsdesk-card glass" href="maid-accountability.html">
+      <a class="newsdesk-card glass has-thumb" href="maid-accountability.html">
+        <div class="newsdesk-thumb"><img src="img/charts/maid_trajectory.png" alt="" width="640" height="360" loading="lazy"></div>
         <span class="kick">04 · File</span>
         <h3>MAID accountability</h3>
         <p>Health Canada series, Track 2 share, report film with optional narration. Tables before tone.</p>
@@ -1267,63 +1272,131 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
 </section>"""
 
     visual_media = """
-<section class="stills field" id="stills" data-line="Stills from the record — generated for the landing, charts from the case files.">
+<section class="stills field slate-spec" id="stills" data-line="Slate-spec visual ledger — ice stills, case charts, investigation boards. Atmosphere is not proof.">
   <div class="wrapx rv">
-    <span class="kick">Visual ledger · ice stills + case charts</span>
+    <span class="kick">Visual ledger · slate-spec · ice stills + case boards</span>
     <h2 class="thesis-title" style="margin-top:2vh">The record, <em>seen.</em></h2>
-    <p style="margin-top:2vh;max-width:640px;color:var(--ivory-dim);font-size:15.5px;line-height:1.7">
-      Cold stills set the tone of the newsroom. Charts below are from the published case files —
-      open any file for the underlying tables and sources.</p>
-    <div class="stills-grid stills-grid-5">
+    <p style="margin-top:2vh;max-width:720px;color:var(--ivory-dim);font-size:15.5px;line-height:1.7">
+      Dense visual newsroom: cold landing stills, published case charts, and investigation boards.
+      Every tile opens a file with tables and sources. Film and stills set tone — they never replace a document.</p>
+    <div class="stills-grid stills-grid-9">
       <figure class="still-card glass">
         <div class="still-frame"><img src="media/landing/parliament_ice.jpg" alt="Parliament buildings in cold ice-grey light" width="800" height="500" loading="lazy"></div>
         <figcaption><b>Parliament · ice lake</b>Cover still for the public record — memorial tone, not spectacle.</figcaption>
       </figure>
       <figure class="still-card glass">
         <div class="still-frame"><img src="media/landing/ledger_desk.jpg" alt="Open ledgers and paper dossiers on a dark desk" width="800" height="500" loading="lazy"></div>
-        <figcaption><b>Ledgers · paper trail</b>Every claim on this site is meant to end in a document you can open.</figcaption>
+        <figcaption><b>Ledgers · paper trail</b>Every claim is meant to end in a document you can open.</figcaption>
       </figure>
       <figure class="still-card glass">
         <div class="still-frame"><img src="media/landing/committee_empty.jpg" alt="Empty committee room at night" width="800" height="500" loading="lazy"></div>
-        <figcaption><b>Committee · after hours</b>Testimony and publication timestamps are on the record. We keep the chairs empty so the sources speak.</figcaption>
+        <figcaption><b>Committee · after hours</b>Testimony timestamps stay on the record.</figcaption>
       </figure>
       <figure class="still-card glass">
         <div class="still-frame"><img src="media/landing/hospital_corridor.jpg" alt="Empty hospital corridor in cold light" width="800" height="500" loading="lazy"></div>
-        <figcaption><b>Corridor · conditions of life</b>Healthcare and MAID files live here — open the numbers, not the mood alone. <a href="maid-accountability.html">MAID file</a></figcaption>
+        <figcaption><b>Corridor · conditions</b>Healthcare and MAID — open the numbers. <a href="maid-accountability.html">MAID file</a></figcaption>
       </figure>
       <figure class="still-card glass">
         <div class="still-frame"><img src="media/landing/procurement_binders.jpg" alt="Defence procurement binders on a steel table" width="800" height="500" loading="lazy"></div>
-        <figcaption><b>Binders · procurement</b>Named contracts and preferred suppliers — map the paper trail. <a href="griffon-glle-procurement.html">Griffon dossier</a></figcaption>
+        <figcaption><b>Binders · procurement</b>Named contracts and preferred suppliers. <a href="griffon-glle-procurement.html">Griffon</a></figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/generated/maid_investigation.png" alt="MAID investigation visual board" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>MAID · investigation board</b>Case visual from the published file set. <a href="investigations.html">Hub</a></figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/generated/foreign_interference.png" alt="Foreign interference investigation board" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Interference · board</b>Public-record foreign influence thread. <a href="foreign-interference.html">File</a></figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/generated/lobbying_concentration.png" alt="Lobbying concentration chart board" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Lobbying · concentration</b>Registry-derived board. <a href="lobbying-deepdive.html">Deep dive</a></figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/generated/phoenix_pay.png" alt="Phoenix pay system investigation board" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Phoenix · pay failure</b>Procurement waste pattern. <a href="phoenix-pay.html">File</a></figcaption>
       </figure>
     </div>
-    <div class="charts-row">
+    <span class="kick" style="display:block;margin-top:2.4em">Case charts · open the tables</span>
+    <div class="charts-row charts-row-8">
       <a class="chart-tile glass" href="maid-accountability.html">
-        <div class="chart-frame"><img src="img/charts/maid_trajectory.png" alt="" width="400" height="300" loading="lazy"></div>
+        <div class="chart-frame"><img src="img/charts/maid_trajectory.png" alt="MAID trajectory chart" width="400" height="300" loading="lazy"></div>
         <span class="lbl">MAID trajectory</span>
       </a>
       <a class="chart-tile glass" href="demographic-trajectory.html">
-        <div class="chart-frame"><img src="img/charts/demographic_velocity.png" alt="" width="400" height="300" loading="lazy"></div>
+        <div class="chart-frame"><img src="img/charts/demographic_velocity.png" alt="Demographic velocity chart" width="400" height="300" loading="lazy"></div>
         <span class="lbl">Demographic velocity</span>
       </a>
       <a class="chart-tile glass" href="demographic-trajectory.html">
-        <div class="chart-frame"><img src="img/charts/generational_attrition.png" alt="" width="400" height="300" loading="lazy"></div>
+        <div class="chart-frame"><img src="img/charts/generational_attrition.png" alt="Generational attrition chart" width="400" height="300" loading="lazy"></div>
         <span class="lbl">Generational attrition</span>
       </a>
+      <a class="chart-tile glass" href="demographic-trajectory.html">
+        <div class="chart-frame"><img src="img/charts/opioid_trajectory.png" alt="Opioid trajectory chart" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">Opioid trajectory</span>
+      </a>
       <a class="chart-tile glass" href="follow-the-money.html">
-        <div class="chart-frame"><img src="img/infographics/follow_the_money.png" alt="" width="400" height="300" loading="lazy"></div>
+        <div class="chart-frame"><img src="img/infographics/follow_the_money.png" alt="Follow the money infographic" width="400" height="300" loading="lazy"></div>
         <span class="lbl">Follow the money</span>
+      </a>
+      <a class="chart-tile glass" href="infographics.html">
+        <div class="chart-frame"><img src="img/infographics/maid_death_timeline.png" alt="MAID death timeline" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">MAID death timeline</span>
+      </a>
+      <a class="chart-tile glass" href="accountability-scorecard.html">
+        <div class="chart-frame"><img src="img/infographics/scorecard_1080.png" alt="Accountability scorecard" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">Accountability scorecard</span>
+      </a>
+      <a class="chart-tile glass" href="maid-accountability.html">
+        <div class="chart-frame"><img src="media/generated/track2_share.png" alt="Track 2 share board" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">Track 2 share</span>
+      </a>
+    </div>
+    <span class="kick" style="display:block;margin-top:2.4em">Investigation boards · more of the desk</span>
+    <div class="media-grid media-grid-4 slate-board-grid" role="list">
+      <a class="media-card glass" href="arrivecan.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/arrivecan_scandal.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">Procurement</span><h3>ArriveCAN</h3><span class="media-more">Open file →</span></div>
+      </a>
+      <a class="media-card glass" href="ethics-failures.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/ethics_violations.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">Ethics</span><h3>Commissioner findings</h3><span class="media-more">Open file →</span></div>
+      </a>
+      <a class="media-card glass" href="panama-papers.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/panama_papers.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">Finance</span><h3>Offshore / Panama</h3><span class="media-more">Open file →</span></div>
+      </a>
+      <a class="media-card glass" href="financial-crime-policy-2026.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/offshore_finance.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">Finance</span><h3>Financial crime policy</h3><span class="media-more">Open file →</span></div>
+      </a>
+      <a class="media-card glass" href="cfnis.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/cfnis_military.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">Military</span><h3>CFNIS record</h3><span class="media-more">Open file →</span></div>
+      </a>
+      <a class="media-card glass" href="504-database.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/s504_charges.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">Legal</span><h3>s.504 pathway</h3><span class="media-more">Open file →</span></div>
+      </a>
+      <a class="media-card glass" href="maid-numbers.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/maid_provisions.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">MAID</span><h3>Provisions board</h3><span class="media-more">Open file →</span></div>
+      </a>
+      <a class="media-card glass" href="follow-the-money.html" role="listitem">
+        <div class="media-frame"><img src="media/generated/fintrac_defunded.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="media-body"><span class="kick">Finance</span><h3>Money trail board</h3><span class="media-more">Open file →</span></div>
       </a>
     </div>
   </div>
 </section>
 <section class="cinema field" id="cinema" data-line="Short atmospheric loops — atmosphere for the film of the record. The full guided film is next.">
   <div class="wrapx rv">
-    <span class="kick">Cinema · guided record atmosphere</span>
+    <span class="kick">Cinema · guided record atmosphere · slate-spec</span>
     <h2 class="thesis-title" style="margin-top:2vh">The film of the <em>record.</em></h2>
     <p style="margin-top:2vh;max-width:640px;color:var(--ivory-dim);font-size:15.5px;line-height:1.7">
-      Short atmospheric loops from the documentary reel. Not entertainment —
-      a quieter frame so the guided walkthrough can hold attention on sources.</p>
-    <div class="cinema-grid cinema-grid-4">
+      Atmospheric chapter loops from the documentary reel. Not entertainment —
+      a quieter frame so the hybrid walkthrough can hold attention on sources.</p>
+    <div class="cinema-grid cinema-grid-6">
       <figure class="cinema-cell glass">
         <div class="cine-frame">
           <span class="cine-tag">CH 01</span>
@@ -1331,7 +1404,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
             <source src="media/film/docs/ch_01_intent.mp4" type="video/mp4">
           </video>
         </div>
-        <figcaption><b>Intent chapter</b>Parliamentary ice — ACT I atmosphere.</figcaption>
+        <figcaption><b>Intent</b>ACT I atmosphere.</figcaption>
       </figure>
       <figure class="cinema-cell glass">
         <div class="cine-frame">
@@ -1340,7 +1413,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
             <source src="media/film/docs/ch_02_killing.mp4" type="video/mp4">
           </video>
         </div>
-        <figcaption><b>Killing fields</b>Clinical frame for Track 2 volume files.</figcaption>
+        <figcaption><b>Killing</b>Track 2 frame.</figcaption>
       </figure>
       <figure class="cinema-cell glass">
         <div class="cine-frame">
@@ -1349,7 +1422,25 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
             <source src="media/film/docs/ch_03_harm.mp4" type="video/mp4">
           </video>
         </div>
-        <figcaption><b>Harm chapter</b>Empty chamber — testimony after hours.</figcaption>
+        <figcaption><b>Harm</b>Empty chamber.</figcaption>
+      </figure>
+      <figure class="cinema-cell glass">
+        <div class="cine-frame">
+          <span class="cine-tag">CH 04</span>
+          <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-home-cine>
+            <source src="media/film/docs/ch_04_conditions.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><b>Conditions</b>Ledgers · life conditions.</figcaption>
+      </figure>
+      <figure class="cinema-cell glass">
+        <div class="cine-frame">
+          <span class="cine-tag">CH 05</span>
+          <video muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-home-cine>
+            <source src="media/film/docs/ch_05_coercion.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><b>Coercion</b>Close of the five acts.</figcaption>
       </figure>
       <figure class="cinema-cell glass">
         <div class="cine-frame">
@@ -1358,7 +1449,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
             <source src="media/film/docs/maid_report_loop.mp4" type="video/mp4">
           </video>
         </div>
-        <figcaption><b>Report loop</b>Documentary stitch for the news desk.</figcaption>
+        <figcaption><b>Report loop</b>News desk stitch.</figcaption>
       </figure>
     </div>
     <div class="cinema-cta">
