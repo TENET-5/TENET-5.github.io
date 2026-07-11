@@ -8,29 +8,79 @@
 <style data-heal="legacy-20260710">
 
     
+    .map-page { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-md); }
+    .map-toc {
+      display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem;
+      margin: 0 0 var(--s-lg);
+      padding: 0 0 var(--s-md);
+      border-bottom: 1px solid var(--border, var(--hair));
+      font-family: var(--font-mono, var(--mono));
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+    }
+    .map-toc a { color: var(--text-secondary, var(--ivory-dim)); text-decoration: none; }
+    .map-toc a:hover { color: var(--ice); }
+    .map-section { margin: 0 0 var(--s-xl); padding: 0 0 var(--s-lg); }
+    .map-section > h2 { margin: 0 0 var(--s-sm); }
+    .map-section > .lede {
+      max-width: 40rem; margin: 0 0 var(--s-md);
+      color: var(--ivory-dim); line-height: 1.65; font-size: 0.95rem;
+    }
     .map-layout {
       display: grid;
       grid-template-columns: 1fr;
       gap: var(--s-lg);
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 var(--s-md) var(--s-xl);
+      align-items: start;
     }
-
     @media (min-width: 1024px) {
       .map-layout {
-        grid-template-columns: 220px 1fr;
-        align-items: start;
+        grid-template-columns: 200px minmax(0, 1fr);
       }
     }
-
+    .prov-group {
+      margin: 0 0 var(--s-lg);
+    }
+    .prov-group-h {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+      margin: 0 0 var(--s-sm);
+      padding: 0 0 0.4rem;
+      border-bottom: 1px solid var(--border, var(--hair));
+      font-family: var(--font-mono, var(--mono));
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-quaternary);
+    }
+    .prov-group-h strong { color: var(--text-primary); font-weight: 600; letter-spacing: 0.06em; }
+    .filter-rows { display: flex; flex-direction: column; gap: 0.55rem; width: 100%; }
+    .filter-row {
+      display: flex; flex-wrap: wrap; gap: var(--s-xs); align-items: center;
+    }
+    .filter-label {
+      font-family: var(--font-mono, var(--mono));
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-quaternary);
+      min-width: 3.2rem;
+    }
+    .directory-panel {
+      min-width: 0;
+    }
+    .directory-head {
+      display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+      gap: 0.5rem 1rem; margin: 0 0 var(--s-sm);
+    }
+    .directory-head h3 {
+      margin: 0; font-size: 1rem; font-weight: 600; color: var(--text-primary);
+    }
 
     
     .stats-bar {
       display: flex;
       flex-wrap: wrap;
       gap: var(--s-sm);
-      justify-content: center;
+      justify-content: flex-start;
       margin-top: var(--s-md);
     }
 
@@ -56,18 +106,21 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: var(--bg-secondary, var(--hair));
-      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--void, #050708) 88%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       padding: var(--s-sm) var(--s-md);
+      margin: 0 0 var(--s-md);
     }
 
     .filter-inner {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--s-xs);
-      align-items: center;
-      max-width: 1280px;
-      margin: 0 auto;
+      flex-direction: column;
+      gap: 0.55rem;
+      max-width: none;
+      margin: 0;
     }
 
     .filter-bar input[type="search"] {
@@ -190,9 +243,11 @@
     
     .muni-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: var(--s-md);
     }
+    .muni-groups { display: flex; flex-direction: column; gap: var(--s-md); }
+    .muni-groups .muni-grid { margin-top: 0.35rem; }
 
     .muni-card {
       background: var(--bg-card, var(--hair-lit));
@@ -793,12 +848,14 @@
     </nav>
   </header>
 <main class="press-main" id="main" role="main">
-<header class="press-hero" style="max-width:1280px;margin:0 auto;padding:var(--s-xl) var(--s-md) var(--s-lg);">
+<div class="map-page">
+
+<header class="press-hero">
   <span class="kick">The Record · Municipal</span>
   <h1>Municipal record map</h1>
-  <p class="dek" style="max-width:42rem;color:var(--ivory-dim);line-height:1.65;">
+  <p class="dek">
     Cities and towns scored from the public record — auditor reports, inquiries, procurement disclosures, and on-the-record findings.
-    Filter by province or severity. Every card links to sources or a deeper investigation where one exists.
+    Start with the directory, then read the cross-city patterns.
   </p>
   <div class="stats-bar" aria-label="Index totals">
     <div class="stat-pill"><span id="stat-muni">—</span> municipalities</div>
@@ -808,147 +865,178 @@
   </div>
 </header>
 
-<div class="filter-bar" id="filter-bar">
-<div class="filter-inner">
-<input autocomplete="off" id="search" placeholder="Search city, province, finding…" type="search" aria-label="Search municipalities"/>
-<select id="province-select" aria-label="Province">
-<option value="ALL">All Provinces</option>
-<option value="ON">ON — Ontario</option>
-<option value="BC">BC — British Columbia</option>
-<option value="AB">AB — Alberta</option>
-<option value="QC">QC — Québec</option>
-<option value="MB">MB — Manitoba</option>
-<option value="SK">SK — Saskatchewan</option>
-<option value="NS">NS — Nova Scotia</option>
-<option value="NB">NB — New Brunswick</option>
-<option value="NL">NL — Newfoundland</option>
-<option value="PE">PE — PEI</option>
-<option value="NT">NT — Northwest Territories</option>
-<option value="YT">YT — Yukon</option>
-<option value="NU">NU — Nunavut</option>
-</select>
-<div class="sev-btns" id="sev-btns" role="group" aria-label="Severity">
-<button type="button" class="sev-btn active" data-sev="ALL">All</button>
-<button type="button" class="sev-btn" data-sev="CRITICAL">Critical</button>
-<button type="button" class="sev-btn" data-sev="HIGH">High</button>
-<button type="button" class="sev-btn" data-sev="MODERATE">Moderate</button>
-<button type="button" class="sev-btn" data-sev="MONITORED">Monitored</button>
-</div>
-<select id="sort-select" aria-label="Sort">
-<option value="score">Highest risk score</option>
-<option value="pop">Population</option>
-<option value="budget">Budget</option>
-<option value="alpha">Alphabetical</option>
-</select>
-</div>
-<div class="results-line" id="results-line">Loading…</div>
-</div>
+<nav class="map-toc" aria-label="On this page">
+  <a href="#directory">01 Directory</a>
+  <a href="#patterns">02 Patterns</a>
+  <a href="#contribute">03 Contribute</a>
+  <a href="#related">04 Related</a>
+</nav>
 
-<div class="map-layout">
-<aside class="province-sidebar" id="province-sidebar">
-<div class="sidebar-title">Province</div>
-<div id="prov-list"></div>
-</aside>
-<div>
-<div class="muni-grid" id="muni-grid">
-<div class="empty-state">Loading municipalities…</div>
-</div>
-</div>
-</div>
+<!-- 01 Directory: primary product surface -->
+<section class="map-section" id="directory" aria-labelledby="directory-h">
+  <h2 id="directory-h"><span class="section-num">01</span> Directory</h2>
+  <p class="lede">Browse every municipality in the index. Use the province list, severity filters, or search. Cards open a full investigation when one exists, or a detail drawer with sourced findings.</p>
 
-<section class="networks-section" aria-labelledby="networks-h">
-<h2 id="networks-h"><span class="section-num">01</span> Cross-municipal patterns</h2>
-<p>These patterns span multiple municipalities and point to systemic failures — shared vendors, repeated overrun mechanics, and weakened oversight — not one-off scandals.</p>
-<div class="network-grid">
-<div class="network-card">
-<div class="network-title">SNC-Lavalin / Federal Procurement Network</div>
-<div class="network-nodes">
-<span class="network-node">Montréal</span>
-<span class="network-node">Ottawa LRT</span>
-<span class="network-node">Hamilton LRT</span>
-<span class="network-node">Calgary</span>
-<span class="network-node">Federal Crown Corps</span>
-</div>
-<div class="network-desc">SNC-Lavalin (now AtkinsRéalis) appears as vendor or sub-contractor across federal and municipal LRT projects. Corporate deferred prosecution agreement (2019) covered $127.7M in fraud on Libyan contracts. Federal political interference in SNC prosecution documented by Wilson-Raybould.</div>
-</div>
-<div class="network-card">
-<div class="network-title">Developer Donation Web</div>
-<div class="network-nodes">
-<span class="network-node">Vancouver ABC $1.3M</span>
-<span class="network-node">Brampton developers</span>
-<span class="network-node">Mississauga McCallion era</span>
-<span class="network-node">Calgary East Village TIF</span>
-</div>
-<div class="network-desc">Development industry systematically funds municipal election campaigns in exchange for favourable zoning, upzoning, and TIF financing. Vancouver's $1.3M ABC donations came despite 2018 provincial donation reform. Pattern repeats from Halifax to Victoria.</div>
-</div>
-<div class="network-card">
-<div class="network-title">LRT Cost Overrun Pattern — Systemic</div>
-<div class="network-nodes">
-<span class="network-node">Ottawa $2.1B</span>
-<span class="network-node">Toronto Crosstown $12.5B</span>
-<span class="network-node">Hamilton $130M cancelled</span>
-<span class="network-node">Edmonton $3.1B</span>
-<span class="network-node">Calgary Green Line</span>
-</div>
-<div class="network-desc">Every major Canadian LRT project has gone dramatically over budget and schedule. Common contractors, shared consultants (Stantec, AECOM, WSP), and federal cost-sharing agreements create perverse incentives to lowball initial estimates. Ottawa inquiry found systemic management failures; Toronto Crosstown contractor placed in default 2023.</div>
-</div>
-<div class="network-card">
-<div class="network-title">Coordinated Police Budget Expansion</div>
-<div class="network-nodes">
-<span class="network-node">Vancouver +19%</span>
-<span class="network-node">Ottawa +9.2%</span>
-<span class="network-node">Toronto +7%</span>
-<span class="network-node">Hamilton 34% of tax levy</span>
-<span class="network-node">Thunder Bay OHRT finding</span>
-</div>
-<div class="network-desc">Police budgets have expanded faster than any other municipal service category while civilian oversight mechanisms are simultaneously defunded or weakened. Thunder Bay's 2018 OHRT systemic racism finding shows accountability gap. Coordinated growth suggests lobbying by police associations.</div>
-</div>
-<div class="network-card">
-<div class="network-title">Charbonneau Commission Spillover — QC</div>
-<div class="network-nodes">
-<span class="network-node">Montréal (Vaillancourt)</span>
-<span class="network-node">Laval ($8M bribes)</span>
-<span class="network-node">Longueuil</span>
-<span class="network-node">Mascouche</span>
-<span class="network-node">Rizzuto network</span>
-</div>
-<div class="network-desc">The 2015 Charbonneau Commission documented a province-wide Mafia-construction-political nexus. Laval Mayor Vaillancourt ran a 2.5% kickback scheme for 20+ years. Despite the commission, oversight mechanisms were subsequently weakened and new procurement irregularities have emerged in REM transit contracts.</div>
-</div>
-<div class="network-card">
-<div class="network-title">Executive Pay / Sunshine List Inflation</div>
-<div class="network-nodes">
-<span class="network-node">Toronto 4,500 staff $100K+</span>
-<span class="network-node">Calgary CAO $454K</span>
-<span class="network-node">Ottawa + Winnipeg</span>
-</div>
-<div class="network-desc">Executive compensation at Canadian cities has grown 2-3x faster than inflation over 10 years. The Ontario Sunshine List (salaries &gt;$100K) has become a baseline rather than an exception in large cities. CUPE and management salary benchmarking creates self-reinforcing pay escalation.</div>
-</div>
-</div>
+  <div class="filter-bar" id="filter-bar">
+    <div class="filter-inner">
+      <div class="filter-row">
+        <span class="filter-label">Search</span>
+        <input autocomplete="off" id="search" placeholder="City, province, finding, vendor…" type="search" aria-label="Search municipalities"/>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Place</span>
+        <select id="province-select" aria-label="Province">
+          <option value="ALL">All provinces &amp; territories</option>
+          <option value="ON">ON — Ontario</option>
+          <option value="BC">BC — British Columbia</option>
+          <option value="AB">AB — Alberta</option>
+          <option value="QC">QC — Québec</option>
+          <option value="MB">MB — Manitoba</option>
+          <option value="SK">SK — Saskatchewan</option>
+          <option value="NS">NS — Nova Scotia</option>
+          <option value="NB">NB — New Brunswick</option>
+          <option value="NL">NL — Newfoundland</option>
+          <option value="PE">PE — PEI</option>
+          <option value="NT">NT — Northwest Territories</option>
+          <option value="YT">YT — Yukon</option>
+          <option value="NU">NU — Nunavut</option>
+        </select>
+        <select id="sort-select" aria-label="Sort">
+          <option value="score">Sort: highest risk</option>
+          <option value="pop">Sort: population</option>
+          <option value="budget">Sort: budget</option>
+          <option value="alpha">Sort: A–Z</option>
+        </select>
+        <label class="sev-btn" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="group-by-prov" checked style="accent-color:var(--ice);"/>
+          Group by province
+        </label>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Severity</span>
+        <div class="sev-btns" id="sev-btns" role="group" aria-label="Severity">
+          <button type="button" class="sev-btn active" data-sev="ALL">All</button>
+          <button type="button" class="sev-btn" data-sev="CRITICAL">Critical</button>
+          <button type="button" class="sev-btn" data-sev="HIGH">High</button>
+          <button type="button" class="sev-btn" data-sev="MODERATE">Moderate</button>
+          <button type="button" class="sev-btn" data-sev="MONITORED">Monitored</button>
+        </div>
+      </div>
+    </div>
+    <div class="results-line" id="results-line">Loading…</div>
+  </div>
+
+  <div class="map-layout">
+    <aside class="province-sidebar" id="province-sidebar" aria-label="Province directory">
+      <div class="sidebar-title">Jump to province</div>
+      <div id="prov-list"></div>
+    </aside>
+    <div class="directory-panel">
+      <div class="directory-head">
+        <h3>Municipalities</h3>
+        <span class="results-line" id="results-line-side" style="padding:0;"></span>
+      </div>
+      <div class="muni-grid" id="muni-grid">
+        <div class="empty-state">Loading municipalities…</div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<div class="map-cta">
-<div class="cta-box glass panel">
-<h3>Help investigate a municipality</h3>
-<p>Tips, procurement data, council records, or audit findings — every submission is reviewed against primary sources.</p>
-<a class="card-btn btn-investigate" href="community.html">Get involved</a>
-</div>
-<div class="cta-box glass panel">
-<h3>Whistleblowers</h3>
-<p>Municipal staff, contractors, and councillors: use secure channels. We do not burn sources.</p>
-<a class="card-btn btn-investigate" href="whistleblower-guide.html">Secure submission guide</a>
-</div>
-</div>
+<!-- 02 Patterns -->
+<section class="map-section networks-section" id="patterns" aria-labelledby="patterns-h">
+  <h2 id="patterns-h"><span class="section-num">02</span> Cross-municipal patterns</h2>
+  <p class="lede">Systemic threads that span cities — shared vendors, repeated overrun mechanics, weakened oversight. Not one-off scandals.</p>
+  <div class="network-grid">
+    <article class="network-card">
+      <div class="network-title">SNC-Lavalin / federal procurement</div>
+      <div class="network-nodes">
+        <span class="network-node">Montréal</span>
+        <span class="network-node">Ottawa LRT</span>
+        <span class="network-node">Hamilton LRT</span>
+        <span class="network-node">Calgary</span>
+        <span class="network-node">Federal Crown corps</span>
+      </div>
+      <div class="network-desc">SNC-Lavalin (now AtkinsRéalis) appears as vendor or sub-contractor across federal and municipal LRT projects. Corporate deferred prosecution agreement (2019) covered $127.7M in fraud on Libyan contracts. Federal political interference in SNC prosecution documented by Wilson-Raybould.</div>
+    </article>
+    <article class="network-card">
+      <div class="network-title">Developer donation web</div>
+      <div class="network-nodes">
+        <span class="network-node">Vancouver ABC $1.3M</span>
+        <span class="network-node">Brampton developers</span>
+        <span class="network-node">Mississauga McCallion era</span>
+        <span class="network-node">Calgary East Village TIF</span>
+      </div>
+      <div class="network-desc">Development industry systematically funds municipal election campaigns in exchange for favourable zoning, upzoning, and TIF financing. Vancouver&rsquo;s $1.3M ABC donations came despite 2018 provincial donation reform. Pattern repeats from Halifax to Victoria.</div>
+    </article>
+    <article class="network-card">
+      <div class="network-title">LRT cost overruns — systemic</div>
+      <div class="network-nodes">
+        <span class="network-node">Ottawa $2.1B</span>
+        <span class="network-node">Toronto Crosstown $12.5B</span>
+        <span class="network-node">Hamilton $130M cancelled</span>
+        <span class="network-node">Edmonton $3.1B</span>
+        <span class="network-node">Calgary Green Line</span>
+      </div>
+      <div class="network-desc">Every major Canadian LRT project has gone dramatically over budget and schedule. Common contractors, shared consultants (Stantec, AECOM, WSP), and federal cost-sharing agreements create perverse incentives to lowball initial estimates. Ottawa inquiry found systemic management failures; Toronto Crosstown contractor placed in default 2023.</div>
+    </article>
+    <article class="network-card">
+      <div class="network-title">Police budget expansion</div>
+      <div class="network-nodes">
+        <span class="network-node">Vancouver +19%</span>
+        <span class="network-node">Ottawa +9.2%</span>
+        <span class="network-node">Toronto +7%</span>
+        <span class="network-node">Hamilton 34% of tax levy</span>
+        <span class="network-node">Thunder Bay OHRT</span>
+      </div>
+      <div class="network-desc">Police budgets have expanded faster than any other municipal service category while civilian oversight mechanisms are simultaneously defunded or weakened. Thunder Bay&rsquo;s 2018 OHRT systemic racism finding shows the accountability gap.</div>
+    </article>
+    <article class="network-card">
+      <div class="network-title">Charbonneau spillover — Québec</div>
+      <div class="network-nodes">
+        <span class="network-node">Montréal (Vaillancourt)</span>
+        <span class="network-node">Laval ($8M bribes)</span>
+        <span class="network-node">Longueuil</span>
+        <span class="network-node">Mascouche</span>
+        <span class="network-node">Rizzuto network</span>
+      </div>
+      <div class="network-desc">The 2015 Charbonneau Commission documented a province-wide construction–political nexus. Laval Mayor Vaillancourt ran a 2.5% kickback scheme for 20+ years. Oversight was later weakened; new procurement irregularities have emerged in REM transit contracts.</div>
+    </article>
+    <article class="network-card">
+      <div class="network-title">Executive pay / Sunshine List</div>
+      <div class="network-nodes">
+        <span class="network-node">Toronto 4,500 staff $100K+</span>
+        <span class="network-node">Calgary CAO $454K</span>
+        <span class="network-node">Ottawa · Winnipeg</span>
+      </div>
+      <div class="network-desc">Executive compensation at Canadian cities has grown 2–3× faster than inflation over 10 years. The Ontario Sunshine List (salaries &gt;$100K) has become a baseline rather than an exception in large cities.</div>
+    </article>
+  </div>
+</section>
 
-<div aria-modal="true" class="modal-backdrop" id="modal-backdrop" role="dialog" aria-labelledby="modal-title">
-<div class="modal-box" id="modal-box">
-<button type="button" aria-label="Close" class="modal-close" id="modal-close">×</button>
-<div id="modal-content"></div>
-</div>
-</div>
+<!-- 03 Contribute -->
+<section class="map-section" id="contribute" aria-labelledby="contribute-h">
+  <h2 id="contribute-h"><span class="section-num">03</span> Contribute</h2>
+  <p class="lede">The index grows from primary sources and tip lines. Submissions are checked against the record before they ship.</p>
+  <div class="map-cta" style="margin:0;padding:0;">
+    <div class="cta-box glass panel">
+      <h3>Help investigate a municipality</h3>
+      <p>Tips, procurement data, council records, or audit findings.</p>
+      <a class="card-btn btn-investigate" href="community.html">Get involved</a>
+    </div>
+    <div class="cta-box glass panel">
+      <h3>Whistleblowers</h3>
+      <p>Municipal staff, contractors, and councillors: use secure channels.</p>
+      <a class="card-btn btn-investigate" href="whistleblower-guide.html">Secure submission guide</a>
+    </div>
+  </div>
+</section>
 
-<section class="related-section" style="max-width:1280px;margin:0 auto;padding:var(--s-xl) var(--s-md);">
-  <h2><span class="section-num">02</span> Related in the record</h2>
-  <div class="muni-grid" style="margin-top:var(--s-md);">
+<!-- 04 Related -->
+<section class="map-section related-section" id="related" aria-labelledby="related-h">
+  <h2 id="related-h"><span class="section-num">04</span> Related in the record</h2>
+  <p class="lede">Wider national files that sit beside this municipal index.</p>
+  <div class="muni-grid">
     <a class="muni-card" href="provincial-analysis.html" style="text-decoration:none;color:inherit;">
       <div class="card-header"><div class="card-city">Provincial analysis</div></div>
       <div class="card-summary">Province-level patterns in the public record.</div>
@@ -965,16 +1053,28 @@
       <div class="card-header"><div class="card-city">Network analysis</div></div>
       <div class="card-summary">Shared vendors, donors, and institutional links.</div>
     </a>
+    <a class="muni-card" href="follow-the-money.html" style="text-decoration:none;color:inherit;">
+      <div class="card-header"><div class="card-city">Follow the money</div></div>
+      <div class="card-summary">Procurement, foundations, and financial capture.</div>
+    </a>
+    <a class="muni-card" href="primary-sources.html" style="text-decoration:none;color:inherit;">
+      <div class="card-header"><div class="card-city">Primary sources</div></div>
+      <div class="card-summary">Government databases used across TENET5.</div>
+    </a>
   </div>
-  <p style="margin-top:var(--s-lg);color:var(--ivory-dim);font-size:0.95rem;max-width:40rem;">
-    Related health and MAID findings warrant independent review.
-    <a href="follow-the-money.html">Follow the money</a> ·
-    <a href="primary-sources.html">Primary sources</a>
-  </p>
 </section>
-<div id="read-next"></div>
 
-<script src="js/canada-municipalities.js?v=42"></script>
+<div aria-modal="true" class="modal-backdrop" id="modal-backdrop" role="dialog" aria-labelledby="modal-title">
+  <div class="modal-box" id="modal-box">
+    <button type="button" aria-label="Close" class="modal-close" id="modal-close">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<div id="read-next"></div>
+</div><!-- .map-page -->
+
+<script src="js/canada-municipalities.js?v=43"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const data = window.CANADA_MUNICIPALITIES || [];
@@ -1009,7 +1109,12 @@
       allBtn.className = 'prov-item' + (provinceFilter === 'ALL' ? ' active' : '');
       allBtn.textContent = 'All Provinces';
       allBtn.dataset.prov = 'ALL';
-      allBtn.addEventListener('click', () => { provinceFilter = 'ALL'; document.getElementById('province-select').value = 'ALL'; render(); });
+      allBtn.addEventListener('click', () => {
+        provinceFilter = 'ALL';
+        document.getElementById('province-select').value = 'ALL';
+        render();
+        document.getElementById('directory')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
       provList.appendChild(allBtn);
       const sorted = Object.entries(provCounts).sort((a,b) => b[1] - a[1]);
       sorted.forEach(([prov, count]) => {
@@ -1017,11 +1122,13 @@
         const div = document.createElement('div');
         div.className = 'prov-item' + (provinceFilter === prov ? ' active' : '');
         div.dataset.prov = prov;
-        div.innerHTML = `<span>${prov}</span><span class="prov-count">${count} <span class="prov-avg" title="Average score">${avg}</span></span>`;
+        const label = PROV_NAMES[prov] ? `${prov} · ${PROV_NAMES[prov]}` : prov;
+        div.innerHTML = `<span title="${label}">${prov}</span><span class="prov-count">${count} <span class="prov-avg" title="Average score">${avg}</span></span>`;
         div.addEventListener('click', () => {
           provinceFilter = prov;
           document.getElementById('province-select').value = prov;
           render();
+          document.getElementById('directory')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         provList.appendChild(div);
       });
@@ -1043,6 +1150,14 @@
     let provinceFilter = 'ALL';
     let severityFilter = 'ALL';
     let sortMode = 'score';
+    let groupByProv = true;
+
+    const PROV_NAMES = {
+      ON: 'Ontario', BC: 'British Columbia', AB: 'Alberta', QC: 'Québec',
+      MB: 'Manitoba', SK: 'Saskatchewan', NS: 'Nova Scotia', NB: 'New Brunswick',
+      NL: 'Newfoundland & Labrador', PE: 'Prince Edward Island',
+      NT: 'Northwest Territories', YT: 'Yukon', NU: 'Nunavut'
+    };
 
     function getFilteredData() {
       return data
@@ -1054,7 +1169,8 @@
                  (m.region || '').toLowerCase().includes(q) ||
                  (m.summary || '').toLowerCase().includes(q) ||
                  (m.categories || []).some(c => c.includes(q)) ||
-                 (m.findings || []).some(f => (f.title || '').toLowerCase().includes(q));
+                 (m.findings || []).some(f => (f.title || '').toLowerCase().includes(q)) ||
+                 (m.shared_vendors || []).some(v => String(v).toLowerCase().includes(q));
         })
         .filter(m => provinceFilter === 'ALL' || m.province === provinceFilter)
         .filter(m => severityFilter === 'ALL' || m.badge === severityFilter)
@@ -1064,6 +1180,30 @@
           if (sortMode === 'budget') return (b.budget_b || 0) - (a.budget_b || 0);
           return a.name.localeCompare(b.name);
         });
+    }
+
+    function groupByProvince(list) {
+      const order = Object.keys(PROV_NAMES);
+      const buckets = {};
+      list.forEach(m => {
+        const p = m.province || '??';
+        if (!buckets[p]) buckets[p] = [];
+        buckets[p].push(m);
+      });
+      return Object.keys(buckets)
+        .sort((a, b) => {
+          const ia = order.indexOf(a);
+          const ib = order.indexOf(b);
+          if (ia === -1 && ib === -1) return a.localeCompare(b);
+          if (ia === -1) return 1;
+          if (ib === -1) return -1;
+          return ia - ib;
+        })
+        .map(code => ({
+          code,
+          name: PROV_NAMES[code] || code,
+          items: buckets[code]
+        }));
     }
 
     function scoreColor(score) {
@@ -1123,16 +1263,30 @@
         </article>`;
     }
 
+    function setResultsLine(filtered) {
+      const msg = !data.length
+        ? 'No municipality data loaded.'
+        : `Showing ${filtered.length} of ${data.length} municipalities`
+          + (provinceFilter !== 'ALL' ? ` · ${provinceFilter}` : '')
+          + (severityFilter !== 'ALL' ? ` · ${severityFilter}` : '')
+          + (searchText ? ` · “${searchText}”` : '');
+      ['results-line', 'results-line-side'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = msg;
+      });
+    }
+
+    function wireDetailButtons(root) {
+      root.querySelectorAll('.btn-details').forEach(btn => {
+        btn.addEventListener('click', () => openModal(btn.dataset.id));
+      });
+    }
+
     function render() {
       const filtered = getFilteredData();
       const grid = document.getElementById('muni-grid');
       if (!grid) return;
-      const rl = document.getElementById('results-line');
-      if (rl) {
-        rl.textContent = data.length
-          ? `Showing ${filtered.length} of ${data.length} municipalities`
-          : 'No municipality data loaded.';
-      }
+      setResultsLine(filtered);
 
       if (!data.length) {
         grid.innerHTML = '<div class="empty-state">Municipality index failed to load. Refresh the page.</div>';
@@ -1140,11 +1294,25 @@
       }
       if (filtered.length === 0) {
         grid.innerHTML = '<div class="empty-state">No municipalities match your filters. Try broadening your search.</div>';
+      } else if (groupByProv && provinceFilter === 'ALL') {
+        const groups = groupByProvince(filtered);
+        grid.innerHTML = groups.map(g => `
+          <div class="prov-group" id="prov-${escapeHtml(g.code)}">
+            <div class="prov-group-h">
+              <strong>${escapeHtml(g.code)} · ${escapeHtml(g.name)}</strong>
+              <span>${g.items.length} ${g.items.length === 1 ? 'city' : 'cities'}</span>
+            </div>
+            <div class="muni-grid">${g.items.map(renderCard).join('')}</div>
+          </div>`).join('');
+        // Nested grids: outer container should not also be muni-grid when grouped
+        grid.classList.remove('muni-grid');
+        grid.classList.add('muni-groups');
+        wireDetailButtons(grid);
       } else {
+        grid.classList.add('muni-grid');
+        grid.classList.remove('muni-groups');
         grid.innerHTML = filtered.map(renderCard).join('');
-        grid.querySelectorAll('.btn-details').forEach(btn => {
-          btn.addEventListener('click', () => openModal(btn.dataset.id));
-        });
+        wireDetailButtons(grid);
       }
 
       buildProvinceSidebar(filtered);
@@ -1238,9 +1406,16 @@
       sortMode = e.target.value;
       render();
     });
-    document.querySelectorAll('.sev-btn').forEach(btn => {
+    const groupCb = document.getElementById('group-by-prov');
+    if (groupCb) {
+      groupCb.addEventListener('change', () => {
+        groupByProv = !!groupCb.checked;
+        render();
+      });
+    }
+    document.querySelectorAll('.sev-btn[data-sev]').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.sev-btn[data-sev]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         severityFilter = btn.dataset.sev;
         render();
