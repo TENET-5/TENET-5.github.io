@@ -49,6 +49,7 @@ def _nav(prefix: str = "") -> str:
     <nav aria-label="Primary">
       <a href="{prefix}index.html">Home</a>
       <a href="{prefix}daily-briefing.html">Briefing</a>
+      <a href="{prefix}investigations.html">Investigations</a>
       <a href="{prefix}evidence-index.html">Evidence</a>
       <a href="{prefix}liril-film.html">Guided</a>
       <a href="{prefix}about.html">About</a>

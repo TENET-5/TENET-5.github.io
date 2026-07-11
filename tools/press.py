@@ -529,6 +529,7 @@ def press_nav(active: str = "") -> str:
     items = [
         ("Home", "index.html", "home"),
         ("Briefing", "daily-briefing.html", "briefing"),
+        ("Investigations", "investigations.html", "investigations"),
         ("Evidence", "evidence-index.html", "evidence"),
         ("Guided", "liril-film.html", "film"),
         ("About", "about.html", "about"),
