@@ -3,9 +3,9 @@
    All voice engines MUST delegate to window.LIRIL_VOICE.
    DO NOT duplicate voice logic elsewhere.
 
-   HARD RULE (CEO directive 2026-07-09): LIRIL speaks with a
-   high-quality BRITISH FEMALE voice. If no acceptable voice
-   exists on the visitor's system, LIRIL stays SILENT.
+   HARD RULE: LIRIL speaks with a CANADIAN FEMALE voice. 
+   If no acceptable voice exists on the visitor's system, 
+   LIRIL stays SILENT.
    NEVER let an utterance fall through to the browser/OS
    default voice — that is how the "robot male" bug happened.
    Use LIRIL_VOICE.speak() (guarded) instead of calling
@@ -17,35 +17,27 @@
 
   var VOICE_STORAGE_KEY = 'liril-voice-name';
 
-  /* ── VOICE PERSONALITY — pissed off, stern, urgent ────── */
+  /* ── VOICE PERSONALITY — newsroom desk: calm, precise, Canadian ──────
+     Matches data/liril_reporter_persona.json voice_posture (not hype, not angry). */
   var VOICE_PARAMS = {
-    rate: 1.1,     /* Faster, more urgent cadence */
-    pitch: 0.85,   /* Lower pitch for a stern, pissed-off lock */
-    volume: 1.0    /* Full volume */
+    rate: 1.02,    /* Slightly deliberate news-reader cadence */
+    pitch: 0.95,   /* Natural female range; not cartoon-high, not growled */
+    volume: 1.0
   };
 
-  /* ── TARGET VOICES — British neural female, highest quality first ──
-     Edge ships the Microsoft *Online (Natural)* en-GB voices;
-     Chrome ships Google UK English Female. Both are acceptable.
-     Clara (en-CA) is a legacy fallback only — no longer the target. */
+  /* ── TARGET VOICES — Canadian neural female, highest quality first ──
+     Edge ships the Microsoft Clara Online (Natural) en-CA voice; */
   var TARGET_VOICES = [
-    'microsoft sonia online (natural)',
-    'microsoft libby online (natural)',
-    'microsoft maisie online (natural)',
-    'microsoft sonia online',
-    'microsoft libby online',
-    'microsoft hazel online (natural)',
-    'microsoft hazel online',
-    'google uk english female'
-  ];
-  /* Secondary fallbacks ONLY if no British neural female exists */
-  var FALLBACK_VOICES = [
     'microsoft clara online (natural)',
     'microsoft clara online',
+    'google uk english female', /* fallback if no Canadian */
+    'microsoft sonia online (natural)',
+    'microsoft libby online (natural)'
+  ];
+  /* Secondary fallbacks */
+  var FALLBACK_VOICES = [
     'microsoft jenny online (natural)',
-    'microsoft jenny online',
-    'microsoft aria online (natural)',
-    'microsoft aria online'
+    'microsoft aria online (natural)'
   ];
 
   /* ── CANONICAL BLOCKLIST — maintain here ONLY ────── */
@@ -104,16 +96,20 @@
     var n = nameOf(v);
     var score = 0;
     if (isFemale(v)) score += 30;
-    if (isEnGB(v)) score += 60;                 /* British first */
-    else if (isEnCA(v)) score += 30;
+    
+    if (isEnCA(v)) score += 60;                 /* Canadian first */
+    else if (isEnGB(v)) score += 30;
     else if (isEn(v)) score += 20;
+    
     if (isNeural(v)) score += 90;
     else score -= 140;
+    
     if (v.localService === false) score += 20;
-    if (/(sonia|libby|maisie)/i.test(n)) score += 220;   /* British neural targets */
-    if (n.indexOf('google uk english female') >= 0) score += 210; /* Chrome's British female */
-    if (n.indexOf('hazel') >= 0 && isNeural(v)) score += 160;
-    if (n.indexOf('clara') >= 0) score += 100;  /* legacy fallback */
+    
+    if (n.indexOf('clara') >= 0 && isNeural(v)) score += 220; /* Canadian neural target */
+    if (/(sonia|libby|maisie)/i.test(n)) score += 100;
+    if (n.indexOf('google uk english female') >= 0) score += 90;
+    if (n.indexOf('hazel') >= 0 && isNeural(v)) score += 80;
     if (/(jenny|aria)/i.test(n)) score += 80;
     return score;
   }
@@ -122,12 +118,12 @@
   var resolved = false;
   var isTarget = false;
 
-  /* Target = a British female voice we consider "the LIRIL voice" */
+  /* Target = a Canadian female voice we consider "the LIRIL voice" */
   function isTargetVoice(v) {
     if (!v || isMale(v)) return false;
     var n = nameOf(v);
-    if (n.indexOf('google uk english female') >= 0) return true;
-    return isEnGB(v) && isFemale(v) && isNeural(v);
+    if (n.indexOf('clara') >= 0) return true;
+    return isEnCA(v) && isFemale(v) && isNeural(v);
   }
 
   /* A voice we will ALLOW to speak at all (target or acceptable fallback).
@@ -148,7 +144,7 @@
         var restored = voices.find(function(v) { return v.name === saved; });
         if (restored && isTargetVoice(restored)) {
           cached = restored; resolved = true; isTarget = true;
-          console.log('[LIRIL-VOICE] Restored British target:', cached.name);
+          console.log('[LIRIL-VOICE] Restored Canadian target:', cached.name);
           return cached;
         } else {
           sessionStorage.removeItem(VOICE_STORAGE_KEY);
@@ -169,7 +165,7 @@
         cached = voices.find(function(v) { return nameOf(v).indexOf(partial) >= 0 && !isMale(v); });
       }
     }
-    /* P0.5: any British neural female */
+    /* P0.5: any Canadian neural female */
     if (!cached) {
       cached = voices.find(function(v) { return isTargetVoice(v); });
     }
@@ -181,7 +177,7 @@
       cached = null;
     }
 
-    /* P1+: no British target available — best acceptable English female,
+    /* P1+: no Canadian target available — best acceptable English female,
        else silence. NEVER a male, NEVER a Desktop SAPI voice. */
     if (!cached && voices.length > 0) {
       var rankedFemale = voices
@@ -205,7 +201,7 @@
     if (cached) {
       isTarget = isTargetVoice(cached);
       try { sessionStorage.setItem(VOICE_STORAGE_KEY, cached.name); } catch(e) {}
-      console.log('[LIRIL-VOICE] Selected:', cached.name, '(' + cached.lang + ')', isTarget ? '★ BRITISH TARGET' : '⚠ FALLBACK');
+      console.log('[LIRIL-VOICE] Selected:', cached.name, '(' + cached.lang + ')', isTarget ? '★ CANADIAN TARGET' : '⚠ FALLBACK');
     }
     resolved = true;
     return cached;
@@ -224,7 +220,8 @@
     }
     var u = new SpeechSynthesisUtterance(text);
     u.voice = v;
-    u.lang = v.lang || 'en-GB';
+    /* Prefer the voice's own locale; default Canadian English for LIRIL desk */
+    u.lang = v.lang || 'en-CA';
     u.rate = (opts && opts.rate) || VOICE_PARAMS.rate;
     u.pitch = (opts && opts.pitch) || VOICE_PARAMS.pitch;
     u.volume = (opts && opts.volume != null) ? opts.volume : VOICE_PARAMS.volume;
@@ -232,6 +229,10 @@
       if (opts.onend) u.onend = opts.onend;
       if (opts.onerror) u.onerror = opts.onerror;
       if (opts.onboundary) u.onboundary = opts.onboundary;
+    }
+    /* Cancel only stale queue if not mid-guide multi-utterance chain with keepQueue */
+    if (!(opts && opts.keepQueue) && window.speechSynthesis.speaking) {
+      try { window.speechSynthesis.cancel(); } catch (e0) { /* */ }
     }
     window.speechSynthesis.speak(u);
     return true;
@@ -253,7 +254,7 @@
     cached = null; resolved = false; isTarget = false;
     var v = resolve();
     if (v && isTargetVoice(v)) {
-      console.log('[LIRIL-VOICE] ★ British target locked:', v.name, 'after', retryCount, 'retries');
+      console.log('[LIRIL-VOICE] ★ Canadian target locked:', v.name, 'after', retryCount, 'retries');
       return;
     }
     retryCount++;
@@ -267,7 +268,7 @@
         console.warn('[LIRIL-VOICE] Rejecting male after 40 retries:', v2.name);
         cached = null; resolved = false;
       } else if (v2) {
-        console.warn('[LIRIL-VOICE] British target unavailable, using fallback:', v2.name);
+        console.warn('[LIRIL-VOICE] Canadian target unavailable, using fallback:', v2.name);
       } else {
         console.warn('[LIRIL-VOICE] No suitable voice found — silence mode');
       }
@@ -283,7 +284,7 @@
       }
       var targetNow = voices.some(function(v) { return isTargetVoice(v); });
       if (targetNow || !cached) {
-        console.log('[LIRIL-VOICE] voiceschanged: re-resolving', targetNow ? '(British target detected)' : '(no voice yet)');
+        console.log('[LIRIL-VOICE] voiceschanged: re-resolving', targetNow ? '(Canadian target detected)' : '(no voice yet)');
         cached = null; resolved = false; isTarget = false;
         resolve();
       }
