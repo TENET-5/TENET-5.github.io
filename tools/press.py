@@ -518,8 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=212">
-<link rel="stylesheet" href="css/design-lock.css?v=212">
+<link rel="stylesheet" href="css/press-theme.css?v=213">
+<link rel="stylesheet" href="css/design-lock.css?v=213">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -579,7 +579,7 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
         # Force-play cover broll + hybrid documentary + submarine time dial
         home_cine = """
 <script src="js/tenet5-cinema-play.js?v=3"></script>
-<script src="js/tenet5-doc-player.js?v=1"></script>
+<script src="js/tenet5-doc-player.js?v=2"></script>
 <script src="js/tenet5-time-dial.js?v=1"></script>"""
     # Cover inject: Guide me button inside liril-intro (patched after build if needed)
     return rail + f"""
@@ -1205,11 +1205,13 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
 <section class="doc-stage home-doc" id="doc-stage"
          data-doc-video="media/film/docs/maid_argument.mp4"
          data-doc-audio="audio/genocide-evidence.mp3"
+         data-doc-vtt="audio/genocide-evidence.vtt"
+         data-doc-manifest="data/film/hybrid_maid_argument.json"
          data-doc-poster="media/landing/parliament_ice.jpg"
          data-doc-title="Documentary · five-act public record"
-         data-doc-caption="Stitched memorial film for the MAID argument. Turn Sound on for narration. Primary sources remain in the briefing, investigations, and act stages."
+         data-doc-caption="Hybrid: film + LIRIL captions + chapter navigation. Narration on for audio. Atmosphere is not proof — open each act for sources."
          data-force-play
-         aria-label="Homepage documentary stage"></section>"""
+         aria-label="Homepage hybrid documentary stage"></section>"""
 
     enter = """
 <section class="enter field" id="enter" data-line="Four doors into the same newsroom. Pick a door; every line still cites its source.">
