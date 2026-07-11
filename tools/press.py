@@ -518,7 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=70">
+<link rel="stylesheet" href="css/press-theme.css?v=201">
+<link rel="stylesheet" href="css/design-lock.css?v=200">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -565,12 +566,39 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
     """LIRIL system guide chrome: rail + always-on dock + voice/guide scripts."""
     rail = """
 <nav class="rail" aria-label="Timeline">
+  <a class="seg" href="#enter" data-ch="enter"><span class="lbl">Enter</span><span class="dot"></span></a>
   <a class="seg" href="#now" data-ch="now"><span class="lbl">This Hour</span><span class="dot"></span></a>
   <a class="seg" href="#week" data-ch="week"><span class="lbl">This Week</span><span class="dot"></span></a>
   <a class="seg" href="#month" data-ch="month"><span class="lbl">This Month</span><span class="dot"></span></a>
   <a class="seg" href="#year" data-ch="year"><span class="lbl">This Year</span><span class="dot"></span></a>
+  <a class="seg" href="#stills" data-ch="stills"><span class="lbl">Seen</span><span class="dot"></span></a>
+  <a class="seg" href="#cinema" data-ch="cinema"><span class="lbl">Film</span><span class="dot"></span></a>
   <a class="seg" href="#era" data-ch="era"><span class="lbl">The Era</span><span class="dot"></span></a>
 </nav>""" if with_rail else ""
+    home_cine = ""
+    if with_rail:
+        home_cine = """
+<script>
+(function(){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  function arm(v){
+    if(!v||v.dataset.armed)return;v.dataset.armed='1';
+    v.muted=true;v.playsInline=true;
+  }
+  var nodes=document.querySelectorAll('video[data-home-cine], .enter-card video, .cover .home-broll');
+  if(!('IntersectionObserver' in window)){
+    nodes.forEach(function(v){arm(v);try{v.play()}catch(e){}});return;
+  }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      var v=en.target;arm(v);
+      if(en.isIntersecting){try{v.play()}catch(e){}}
+      else{try{v.pause()}catch(e){}}
+    });
+  },{rootMargin:'80px',threshold:0.2});
+  nodes.forEach(function(v){io.observe(v)});
+})();
+</script>"""
     # Cover inject: Guide me button inside liril-intro (patched after build if needed)
     return rail + f"""
 <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
@@ -585,7 +613,8 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
 <script src="js/rv-reveal.js?v=1" defer></script>
 <script src="js/liril-radio.js?v=2" defer></script>
 <script src="js/liril-voice.js?v=43" defer></script>
-<script src="js/liril-home-guide.js?v=4" defer></script>
+<script src="js/liril-home-guide.js?v=6" defer></script>
+{home_cine}
 </body>
 </html>"""
 
@@ -656,17 +685,30 @@ def render_claims(posts: list[dict]) -> str:
     return f'<div class="exhibits">{"".join(out)}</div>'
 
 
+# Landing stills cycle for year-dossier thumbs (ice-lake Flux set)
+_DOSSIER_THUMBS = (
+    "media/landing/procurement_binders.jpg",
+    "media/landing/committee_empty.jpg",
+    "media/landing/ledger_desk.jpg",
+    "media/generated/lobbying_concentration.png",
+    "media/landing/hospital_corridor.jpg",
+    "media/landing/parliament_ice.jpg",
+)
+
+
 def render_dossiers(posts: list[dict]) -> str:
     out = []
     for i, p in enumerate(posts[:6]):
         href = p.get("link") or (f'story/{esc(p["slug"])}.html' if p.get("body") else "#")
+        thumb = _DOSSIER_THUMBS[i % len(_DOSSIER_THUMBS)]
         out.append(f"""
-    <a class="dossier glass" href="{href}">
+    <a class="dossier glass dossier-media" href="{href}">
+      <div class="dossier-thumb"><img src="{thumb}" alt="" width="280" height="180" loading="lazy"></div>
       <span class="no">{i+1:03d}</span>
       <div><h3>{esc(p["title"])}</h3><p>{esc(p.get("dek",""))}</p></div>
       <span class="meta">{esc(p.get("status","Published"))}</span>
     </a>""")
-    return "".join(out)
+    return f'<div class="dossier-stack">{"".join(out)}</div>'
 
 
 CATALOG_SKIP = re.compile(
@@ -861,7 +903,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
   <div class="era rv">
     <h3>One agent. The <em>entire</em> public record.</h3>
     <p>{esc(site["era_blurb"])}</p>
-    <div class="stats" id="film-stats">Agentic walkthrough · guided by LIRIL</div>
+    <div class="stats" id="film-stats">Guided walkthrough · by LIRIL</div>
     <a class="go-film" href="liril-film.html">&#9654; Read the book aloud</a>
     <span class="alt">or take today only: <a href="daily-briefing.html">the daily briefing</a> ·
     <a href="osint-dashboard.html">the live dashboard</a> · <a href="evidence-index.html">the evidence shelf</a></span>
@@ -869,14 +911,22 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
 </section>"""
 
     thesis = f"""
-<section class="thesis field">
+<section class="thesis field" id="thesis" data-line="The thesis. Genocide by policy — diagnosis and treatment, filed from the public record.">
   <div class="wrapx rv">
     <span class="kick red">The Thesis · Documented From The Public Record</span>
-    <h2 class="thesis-title" style="margin-top:2vh">The charge: <em>genocide,</em><br>by policy.</h2>
-    <p style="margin-top:2.5vh;max-width:760px;color:var(--ivory-dim);font-size:16px;line-height:1.7">
-    A quiet, fifth-generation war — waged by the Government of Canada under Justin Trudeau
-    through policy, procurement, capture and silence. The record of intent is parliamentary,
-    public, and filed here, act by act.</p>
+    <div class="thesis-hero">
+      <div class="thesis-copy">
+        <h2 class="thesis-title" style="margin-top:2vh">The charge: <em>genocide,</em><br>by policy.</h2>
+        <p style="margin-top:2.5vh;max-width:760px;color:var(--ivory-dim);font-size:16px;line-height:1.7">
+        A quiet, fifth-generation war — waged by the Government of Canada under Justin Trudeau
+        through policy, procurement, capture and silence. The record of intent is parliamentary,
+        public, and filed here, act by act.</p>
+      </div>
+      <figure class="thesis-still glass">
+        <div class="still-frame"><img src="media/landing/hospital_corridor.jpg" alt="" width="720" height="450" loading="lazy"></div>
+        <figcaption><b>On the record</b>Conditions of life · open the Acts, not the still alone.</figcaption>
+      </figure>
+    </div>
     <div class="thesis-grid">
       <div class="panel glass dx">
         <h4>Diagnosis</h4>
@@ -894,15 +944,31 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <a href="accountability.html">The findings</a>
     </div>
   </div>
+</section>
+<section class="scale field" id="scale" data-line="Scale of the book. Hundreds of files. Primary sources. One guided walkthrough.">
+  <div class="wrapx rv">
+    <span class="kick">Scale of the record</span>
+    <div class="scale-grid">
+      <div class="scale-tile glass"><span class="v">380+</span><span class="l">Public files</span><span class="n">Investigations, dossiers, datasets</span></div>
+      <div class="scale-tile glass"><span class="v">5</span><span class="l">Acts of the case</span><span class="n">Intent through coercion · cited</span></div>
+      <div class="scale-tile glass"><span class="v">19</span><span class="l">Accountability axes</span><span class="n">Capture mapped across institutions</span></div>
+      <div class="scale-tile glass"><span class="v">1</span><span class="l">Guided film</span><span class="n">LIRIL reads the book aloud</span></div>
+    </div>
+  </div>
 </section>"""
 
     cover = f"""
 <header class="cover" id="top">
+  <video class="home-broll" autoplay muted loop playsinline preload="metadata" poster="media/landing/parliament_ice.jpg" aria-hidden="true">
+    <source src="media/film/hall_of_record.mp4" type="video/mp4">
+    <source src="media/film/reel.mp4" type="video/mp4">
+  </video>
+  <div class="home-broll-veil" aria-hidden="true"></div>
   <span class="ghost5" aria-hidden="true">5</span>
   <div class="cover-bar">
     <span class="brand"><span class="wm">TENET<sup>5</sup></span></span>
     <span id="dateline">&mdash;</span>
-    <span>Agentic Interface · Active</span>
+    <span>Guided by LIRIL</span>
   </div>
   <div class="cover-core">
     <div class="cover-kick">The Public Record of Canada · Guided by LIRIL</div>
@@ -919,15 +985,172 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <p>&ldquo;{esc(site["liril_cover"])}&rdquo;</p>
       <div class="guide-actions">
         <button type="button" class="guide-cta" id="liril-guide-btn-cover">Guide me</button>
-        <a class="begin" href="#now" id="begin-record"><span>Begin the record</span><span class="arrow"></span></a>
+        <a class="begin" href="#enter" id="begin-record"><span>Begin the record</span><span class="arrow"></span></a>
+        <a class="begin begin-quiet" href="#cinema"><span>See the film</span></a>
       </div>
     </div>
   </div>
 </header>"""
 
+    enter = """
+<section class="enter field" id="enter" data-line="Four doors into the same book. Pick a door; every line still cites its source.">
+  <div class="wrapx rv">
+    <span class="kick">Four doors · same book</span>
+    <h2 class="thesis-title" style="margin-top:2vh">Enter the <em>record.</em></h2>
+    <p style="margin-top:2vh;max-width:640px;color:var(--ivory-dim);font-size:15.5px;line-height:1.7">
+      Today&#x27;s wire, the network of documented edges, the guided film, or the evidence shelf.
+      Same sources. Different ways to read.</p>
+    <div class="enter-grid">
+      <a class="enter-card glass" href="daily-briefing.html">
+        <div class="enter-media"><img src="media/landing/ledger_desk.jpg" alt="" width="640" height="400" loading="eager"></div>
+        <div class="enter-body">
+          <span class="kick">Today</span>
+          <h3>Daily briefing</h3>
+          <p>Happening now, the numbers, stated plans versus labeled inference — read aloud by LIRIL.</p>
+          <span class="meta">Open briefing →</span>
+        </div>
+      </a>
+      <a class="enter-card glass" href="network-analysis.html">
+        <div class="enter-media"><img src="media/generated/foreign_interference.png" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="enter-body">
+          <span class="kick">Near / far</span>
+          <h3>The network</h3>
+          <p>Documented connections only. Start with one hub. Centrality is citation — not guilt.</p>
+          <span class="meta">Open board →</span>
+        </div>
+      </a>
+      <a class="enter-card glass" href="liril-film.html">
+        <div class="enter-media">
+          <video muted loop playsinline preload="metadata" poster="media/landing/parliament_ice.jpg" aria-hidden="true">
+            <source src="media/film/reel.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="enter-body">
+          <span class="kick">Guided film</span>
+          <h3>Read the book aloud</h3>
+          <p>Memorial walkthrough of the public record — pause, resume, every claim meant to be checked.</p>
+          <span class="meta">Begin film →</span>
+        </div>
+      </a>
+      <a class="enter-card glass" href="evidence-index.html">
+        <div class="enter-media"><img src="media/landing/committee_empty.jpg" alt="" width="640" height="400" loading="lazy"></div>
+        <div class="enter-body">
+          <span class="kick">Sources</span>
+          <h3>Evidence shelf</h3>
+          <p>Primary records and derived files in one shelf. Open the citation, not the summary alone.</p>
+          <span class="meta">Open shelf →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>"""
+
+    visual_media = """
+<section class="stills field" id="stills" data-line="Stills from the record — generated for the landing, charts from the case files.">
+  <div class="wrapx rv">
+    <span class="kick">Visual ledger · ice stills + case charts</span>
+    <h2 class="thesis-title" style="margin-top:2vh">The record, <em>seen.</em></h2>
+    <p style="margin-top:2vh;max-width:640px;color:var(--ivory-dim);font-size:15.5px;line-height:1.7">
+      Cold stills set the tone of the newsroom. Charts below are from the published case files —
+      open any file for the underlying tables and sources.</p>
+    <div class="stills-grid stills-grid-5">
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/landing/parliament_ice.jpg" alt="Parliament buildings in cold ice-grey light" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Parliament · ice lake</b>Cover still for the public record — memorial tone, not spectacle.</figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/landing/ledger_desk.jpg" alt="Open ledgers and paper dossiers on a dark desk" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Ledgers · paper trail</b>Every claim on this site is meant to end in a document you can open.</figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/landing/committee_empty.jpg" alt="Empty committee room at night" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Committee · after hours</b>Testimony and publication timestamps are on the record. We keep the chairs empty so the sources speak.</figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/landing/hospital_corridor.jpg" alt="Empty hospital corridor in cold light" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Corridor · conditions of life</b>Healthcare and MAID files live here — open the numbers, not the mood alone. <a href="maid-accountability.html">MAID file</a></figcaption>
+      </figure>
+      <figure class="still-card glass">
+        <div class="still-frame"><img src="media/landing/procurement_binders.jpg" alt="Defence procurement binders on a steel table" width="800" height="500" loading="lazy"></div>
+        <figcaption><b>Binders · procurement</b>Named contracts and preferred suppliers — map the paper trail. <a href="griffon-glle-procurement.html">Griffon dossier</a></figcaption>
+      </figure>
+    </div>
+    <div class="charts-row">
+      <a class="chart-tile glass" href="maid-accountability.html">
+        <div class="chart-frame"><img src="img/charts/maid_trajectory.png" alt="" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">MAID trajectory</span>
+      </a>
+      <a class="chart-tile glass" href="demographic-trajectory.html">
+        <div class="chart-frame"><img src="img/charts/demographic_velocity.png" alt="" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">Demographic velocity</span>
+      </a>
+      <a class="chart-tile glass" href="demographic-trajectory.html">
+        <div class="chart-frame"><img src="img/charts/generational_attrition.png" alt="" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">Generational attrition</span>
+      </a>
+      <a class="chart-tile glass" href="follow-the-money.html">
+        <div class="chart-frame"><img src="img/infographics/follow_the_money.png" alt="" width="400" height="300" loading="lazy"></div>
+        <span class="lbl">Follow the money</span>
+      </a>
+    </div>
+  </div>
+</section>
+<section class="cinema field" id="cinema" data-line="Short atmospheric loops — atmosphere for the film of the record. The full guided film is next.">
+  <div class="wrapx rv">
+    <span class="kick">Cinema · guided record atmosphere</span>
+    <h2 class="thesis-title" style="margin-top:2vh">The film of the <em>record.</em></h2>
+    <p style="margin-top:2vh;max-width:640px;color:var(--ivory-dim);font-size:15.5px;line-height:1.7">
+      Short atmospheric loops from the documentary reel. Not entertainment —
+      a quieter frame so the guided walkthrough can hold attention on sources.</p>
+    <div class="cinema-grid cinema-grid-4">
+      <figure class="cinema-cell glass">
+        <div class="cine-frame">
+          <span class="cine-tag">REEL</span>
+          <video muted loop playsinline preload="metadata" poster="media/landing/parliament_ice.jpg" data-home-cine>
+            <source src="media/film/hall_of_record.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><b>Hall of record</b>Corridor atmosphere for the guided film.</figcaption>
+      </figure>
+      <figure class="cinema-cell glass">
+        <div class="cine-frame">
+          <span class="cine-tag">REEL</span>
+          <video muted loop playsinline preload="metadata" poster="media/landing/ledger_desk.jpg" data-home-cine>
+            <source src="media/film/paper_trail.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><b>Paper trail</b>Documents in motion — citation, not spectacle.</figcaption>
+      </figure>
+      <figure class="cinema-cell glass">
+        <div class="cine-frame">
+          <span class="cine-tag">REEL</span>
+          <video muted loop playsinline preload="metadata" poster="media/landing/committee_empty.jpg" data-home-cine>
+            <source src="media/film/empty_committee.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><b>Empty committee</b>Where testimony is filed after the room goes quiet.</figcaption>
+      </figure>
+      <figure class="cinema-cell glass">
+        <div class="cine-frame">
+          <span class="cine-tag">REEL</span>
+          <video muted loop playsinline preload="metadata" poster="media/landing/ledger_desk.jpg" data-home-cine>
+            <source src="media/film/ledger_turn.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><b>Ledger turn</b>The book itself — page by page, source by source.</figcaption>
+      </figure>
+    </div>
+    <div class="cinema-cta">
+      <a class="go-film" href="liril-film.html">&#9654; Open the guided film</a>
+      <span class="alt" style="margin-top:0">or <a href="media/film/reel.mp4">the composite reel</a> · <a href="#now">this hour&#x27;s wire</a></span>
+    </div>
+  </div>
+</section>"""
+
     return (head("The Record, Read Backwards",
                  "Begin at this hour. Walk backwards through the public record of Canada — guided by LIRIL, every line cited.")
-            + cover + thesis + "".join(chapters) + era + render_catalog() + footer_html(site)
+            + cover + enter + thesis + "".join(chapters) + visual_media + era
+            + render_catalog() + footer_html(site)
             + dock_and_script(site, with_rail=True))
 
 
