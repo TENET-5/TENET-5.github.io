@@ -986,11 +986,15 @@
         var currentVoice = resolveVoice() || voice;
         var params = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || { rate: 1.08, pitch: 0.92, volume: 1.0 };
         if (!currentVoice) {
-          // NEVER speak with the OS default voice — end the walkthrough audio.
-          console.warn('[LIRIL-WALK] No acceptable voice — stopping narration.');
+          // No acceptable voice: never use the OS default. But DON'T stall/flash —
+          // dwell for this point's reading time (text-length based) so the readout
+          // advances at a human reading pace, then continue to the next point.
+          var _remaining = [chunk].concat(chunkQueue).join(' ');
+          var _readMs = Math.min(14000, Math.max(3200, _remaining.length * 48));
+          chunkQueue = [];
           speakingChunks = false;
           stopKeepalive();
-          if (onDone) onDone();
+          setTimeout(function () { if (onDone) onDone(); }, _readMs);
           return;
         }
         var u = new SpeechSynthesisUtterance(chunk);
@@ -1096,6 +1100,15 @@
       var textNode = document.createElement('span');
       textNode.textContent = point.text;
       subtitleText.appendChild(textNode);
+
+      // Mirror the current narration into the DOCK readout so LIRIL's line visibly
+      // moves with each section/paragraph (not just the small subtitle bar).
+      try {
+        var _dl = document.getElementById('liril-line');
+        if (_dl) _dl.textContent = point.text;
+        var _st = document.getElementById('liril-status');
+        if (_st) _st.textContent = 'LIRIL reading · ' + (idx + 1) + '/' + points.length;
+      } catch (e) {}
 
       var counter = document.createElement('div');
       counter.className = 'liril-counter';
