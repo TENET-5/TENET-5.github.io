@@ -64,6 +64,7 @@ PROJECT = {
         "network_osint_board",
         "design_lock_guardrail",     # crystal-clear taste contract, loads last (swarm-proof)
         "zero_internals_leak_gate",  # public site names NO engine/model/kernel/path/seed
+        "anti_hallucination_gate",   # prose that CLAIMS an element must actually have it
         "cinema_playback_integrity", # act film src + cinema-play v3 + baseline mp4
         "css_quantum_precision",
         "liril_guide_home",
@@ -312,6 +313,19 @@ def lap() -> dict:
         })
     else:
         steps.append({"name": "leak_scan", "ok": True, "detail": "leak_scanner.py missing (skipped)"})
+
+    # 6a2-guard) ANTI-HALLUCINATION gate — prose that CLAIMS an element/feature must have it.
+    # Catches the swarm's plan-as-if-done hallucinations (charts/case-files/video described but
+    # never built). apply_one_theme self-heals the known ones; this traces any new one. Hard gate.
+    claim = TOOLS / "claim_check.py"
+    if claim.exists():
+        code, out = _run([sys.executable, str(claim)], timeout=120)
+        steps.append({
+            "name": "claim_check", "ok": code == 0, "exit": code, "tail": (out or "")[-400:],
+            "job": "PRISM permanent — no hallucinated claims (prose element must exist in the DOM)",
+        })
+    else:
+        steps.append({"name": "claim_check", "ok": True, "detail": "claim_check.py missing (skipped)"})
 
     # 6b-guard) DESIGN-LOCK taste guardrail present + injected last on every page.
     dl = ROOT / "css" / "design-lock.css"
