@@ -40,6 +40,7 @@ def _fonts_block(prefix: str = "") -> str:
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{prefix}css/press-theme.css?v={THEME_VER}">
+  <script>document.documentElement.classList.add('js');</script>
   <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 """
 
@@ -457,6 +458,8 @@ def apply_page(path: Path) -> bool:
             canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=1"></script>')
         if "liril-radio.js" not in text:
             canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
+        if "rv-reveal.js" not in text:
+            canon.append(f'<script defer src="{prefix}js/rv-reveal.js?v=1"></script>')
         if "reading-mode.js" not in text:
             canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
         if canon:
