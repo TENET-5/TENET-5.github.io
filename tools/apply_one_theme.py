@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "202"
+THEME_VER = "203"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -164,10 +164,18 @@ def _strip_bom(text: str) -> str:
 
 
 def _force_html_attrs(text: str, home: bool) -> str:
+    m = re.search(r"<html\b([^>]*)>", text, flags=re.I)
+    keep = ""
+    if m:
+        # Preserve act / cinema page markers used by genocide-argument stages
+        for attr in ("data-act", "data-cinema"):
+            am = re.search(rf'\b{attr}=["\']([^"\']+)["\']', m.group(1), flags=re.I)
+            if am:
+                keep += f' {attr}="{am.group(1)}"'
     if home:
         text = re.sub(
             r"<html\b[^>]*>",
-            '<html lang="en-CA" data-press="1">',
+            f'<html lang="en-CA" data-press="1"{keep}>',
             text,
             count=1,
             flags=re.I,
@@ -175,7 +183,7 @@ def _force_html_attrs(text: str, home: bool) -> str:
     else:
         text = re.sub(
             r"<html\b[^>]*>",
-            '<html lang="en-CA" data-press="1" data-press-interior="1">',
+            f'<html lang="en-CA" data-press="1" data-press-interior="1"{keep}>',
             text,
             count=1,
             flags=re.I,
@@ -183,14 +191,31 @@ def _force_html_attrs(text: str, home: bool) -> str:
     return text
 
 
+# Body classes allowed alongside press-interior (act cinema, film pages, etc.)
+_BODY_KEEP_CLASSES = frozenset({
+    "act-cinema-page",
+    "film-page",
+    "guide-ready",
+})
+
+
 def _force_body(text: str, home: bool) -> str:
     if home:
         # leave press home body bare (press.py owns it)
         text = re.sub(r"<body\b[^>]*>", "<body>", text, count=1, flags=re.I)
     else:
+        m = re.search(r"<body\b([^>]*)>", text, flags=re.I)
+        extra = []
+        if m:
+            cm = re.search(r'class=["\']([^"\']*)["\']', m.group(1), flags=re.I)
+            if cm:
+                for part in cm.group(1).split():
+                    if part in _BODY_KEEP_CLASSES and part not in extra:
+                        extra.append(part)
+        classes = " ".join(["press-interior"] + extra)
         text = re.sub(
             r"<body\b[^>]*>",
-            '<body class="press-interior">',
+            f'<body class="{classes}">',
             text,
             count=1,
             flags=re.I,
