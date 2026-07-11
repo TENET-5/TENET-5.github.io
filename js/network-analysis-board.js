@@ -4,21 +4,27 @@
 
   var NS = 'http://www.w3.org/2000/svg';
   var W = 960, H = 600;
+  /* Ice-lake tokens only; hue reserved for severity (critical / money track). */
+  var ICE = '#9adbe8';
+  var IVORY = '#ece7dc';
+  var SILVER = '#a89f90';
+  var GOLD = '#d3a625';
+  var ALERT = '#c8102e';
   var CAT = {
-    israel: { label: 'Israel lobby track', color: '#d3a625' },
-    ccp: { label: 'PRC / UFWD track', color: '#c8102e' },
-    cfnis: { label: 'Military justice', color: '#9adbe8' },
-    media: { label: 'Media', color: '#a89f90' },
-    india: { label: 'India track', color: '#7fbf9a' },
-    disinfo: { label: 'Amplification', color: '#c8102e' },
-    evidence: { label: 'Evidence', color: '#ece7dc' },
-    defence: { label: 'Defence instruments', color: '#9adbe8' },
-    authority: { label: 'Authority', color: '#a89f90' },
-    air: { label: 'Tactical aviation', color: '#9adbe8' },
-    sea: { label: 'Undersea', color: '#7fbf9a' },
-    north: { label: 'Northern surveillance', color: '#d3a625' },
-    air_isr: { label: 'Airborne ISR', color: '#ece7dc' },
-    osint: { label: 'OSINT harvest', color: '#9adbe8' }
+    israel: { label: 'Lobby track', color: GOLD },
+    ccp: { label: 'Foreign influence', color: ALERT },
+    cfnis: { label: 'Military justice', color: ICE },
+    media: { label: 'Media', color: SILVER },
+    india: { label: 'Foreign influence', color: ALERT },
+    disinfo: { label: 'Amplification', color: ALERT },
+    evidence: { label: 'Evidence', color: IVORY },
+    defence: { label: 'Defence', color: ICE },
+    authority: { label: 'Authority', color: SILVER },
+    air: { label: 'Defence', color: ICE },
+    sea: { label: 'Defence', color: ICE },
+    north: { label: 'Defence', color: ICE },
+    air_isr: { label: 'Defence', color: ICE },
+    osint: { label: 'Public record', color: ICE }
   };
 
   var svg = document.getElementById('net-svg');
@@ -63,15 +69,16 @@
     for (var i = 0; i < cats.length; i++) {
       if (CAT[cats[i]]) return CAT[cats[i]].color;
     }
-    return '#9adbe8';
+    return ICE;
   }
 
   function nodeRadius(n) {
     var t = n.type || '';
-    if (t === 'org' || t === 'agency' || t === 'department' || t === 'state') return 9;
-    if (t === 'contract' || t === 'program') return 8;
-    if (t === 'event' || t === 'evidence') return 7;
-    return 6.5;
+    /* Slightly quieter than the old “bubble chart” look */
+    if (t === 'org' || t === 'agency' || t === 'department' || t === 'state') return 7.5;
+    if (t === 'contract' || t === 'program') return 7;
+    if (t === 'event' || t === 'evidence') return 6.5;
+    return 6;
   }
 
   function softDetail(s) {
@@ -891,13 +898,13 @@
     });
     var top = ranked.slice(0, 12);
     if (!top.length) return;
-    var lab = el('span', 'hubs-lab', 'Most documented');
+    var lab = el('span', 'hubs-lab', 'Most cited');
     hubsEl.appendChild(lab);
     top.forEach(function (n, i) {
       var b = el(
         'button',
         'hub-chip' + (state.sel === n.id ? ' on' : ''),
-        (i + 1) + '. ' + (n.label.length > 28 ? n.label.slice(0, 26) + '…' : n.label) +
+        (n.label.length > 32 ? n.label.slice(0, 30) + '…' : n.label) +
           ' · ' + (deg[n.id] || 0)
       );
       b.type = 'button';
@@ -1061,13 +1068,13 @@
     });
     if (name === 'defence') {
       standEl.textContent =
-        'Defence procurement instruments: contracts, preferred suppliers, and partner paths. Preferred supplier is not a signed multi-hull production contract.';
+        'Defence instruments from public freezes: contracts, suppliers, and partner paths. A preferred supplier is not a multi-hull production award.';
     } else if (name === 'osint') {
       standEl.textContent =
-        'OSINT composite in neighborhood view: pick a well-documented hub, then read only the edges that touch it. Full force layout is optional — and usually unreadable.';
+        'Start with one well-cited entity. Neighbors are documented links only — not a verdict. Open the case file for sources.';
     } else {
       standEl.textContent =
-        'Foreign-influence board in neighborhood view: one entity and its documented neighbors. Clusters group tracks without a hairball.';
+        'Foreign-influence board: people, organizations, and filings from the public record. One hub and its documented edges at a time.';
     }
     standDefault = standEl.textContent || '';
     if (standTimer) {
