@@ -61,6 +61,19 @@ Use **theme classes**, not page-local `:root` or palette CSS.
 | `.scale-grid` / `.scale-tile` | Metric tiles |
 | `.dossier-media` / `.dossier-thumb` | Year case rows with stills |
 | `.home-broll` / `.cinema-cell` | LTX atmosphere (home + film pages) |
+| `.act-cinema-page` + `.act-page-bg` / `.act-page-fg` | Genocide-argument acts: fixed LTX bg + forward vignette |
+| `.act-cinema-host` / walkthrough `still`+`video` | Per-scene media in `data/scenes/act-*.json` |
+| `.act-gallery` / `.act-continuum` | Evidence boards + next-act cards |
+
+**Act cinema stack (intelligent media):**
+
+1. **Page bg** — `media/backgrounds/*_bg.mp4` (LTX), veiled for readability  
+2. **Page fg** — soft corner vignette (`media/film/*`) — atmosphere only  
+3. **Stage** — `TENET5UnifiedWalkthrough` v3: each scene `still` + optional `video` + chart fg when path matches charts/generated  
+4. **Gallery** — `.media-card` stills/charts/film cells → case files  
+5. **Continuum** — acts II–V as media cards  
+
+Atmosphere film is **not** proof. Hansard, statutes, and Health Canada reports are.
 
 **Tokens:** `--media-pane`, `--media-glint`, `--media-blur`, `--media-img-filter`, `--media-radius`, etc. in `:root` of `press-theme.css`.
 
