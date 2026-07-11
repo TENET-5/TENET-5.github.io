@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "72"
+THEME_VER = "74"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -42,6 +42,21 @@ def _fonts_block(prefix: str = "") -> str:
   <link rel="stylesheet" href="{prefix}css/press-theme.css?v={THEME_VER}">
   <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 """
+
+def _dock() -> str:
+    # Same LIRIL guide bar the homepage carries, on every interior page.
+    # Driven by js/liril-dock.js (bridges to the walkthrough engine).
+    return """  <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
+    <div class="dock-in">
+      <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="say"><b>LIRIL</b><span id="liril-line">I can read this page with you.</span></div>
+      <button id="liril-guide-btn" type="button" title="LIRIL reads this page aloud">Guide me</button>
+      <button id="voice-btn" type="button" aria-pressed="true" title="Toggle LIRIL voice narration">Voice · On</button>
+      <div class="liril-status" id="liril-status">LIRIL ready</div>
+    </div>
+  </div>
+"""
+
 
 def _nav(prefix: str = "") -> str:
     return f"""  <header class="press-bar" role="banner">
@@ -262,6 +277,16 @@ def apply_page(path: Path) -> bool:
     text = RE_THEME_COMMENT.sub("", text)
     text = RE_DEFENSE.sub("", text)
 
+    # Retired components + leaked scaffold (owner directive 2026-07-11):
+    # share bars are gone sitewide, and un-commented "═══ SECTION N — X ═══"
+    # scaffold banners must never render as visible text.
+    text = re.sub(r'[ \t]*<div [^>]*class="share-bar"[^>]*>.*?</div>\s*</div>\s*', "", text, flags=re.S)
+    _parts = re.split(r"(<!--.*?-->)", text, flags=re.S)
+    for _i in range(0, len(_parts), 2):
+        _parts[_i] = re.sub(r"═{4,}[ \t]*\n[^<>]{0,120}?\n?[ \t]*═{4,}[ \t]*\n?", "\n", _parts[_i], flags=re.M)
+        _parts[_i] = re.sub(r"^[ \t]*(SECTION[ ]?\d+[ ]?[—-][^<>\n]{0,60}|SHARE BAR)[ \t]*$\n?", "", _parts[_i], flags=re.M)
+    text = "".join(_parts)
+
     def _strip_theme_style(m: re.Match[str]) -> str:
         body = m.group(0)
         # data-heal blocks are the restored legacy component styles (2026-07-10
@@ -293,6 +318,16 @@ def apply_page(path: Path) -> bool:
         text = re.sub(r"(<head\b[^>]*>)", r"\1\n" + _fonts_block(prefix), text, count=1, flags=re.I)
     else:
         return False
+
+    # Page-scoped companion stylesheets the theme strip must NOT orphan:
+    # the Guided player's UI lives in css/liril-film.css (48 lf-* rules).
+    PAGE_CSS = {"liril-film.html": "css/liril-film.css?v=2"}
+    extra_css = PAGE_CSS.get(path.name)
+    if extra_css and extra_css.split("?")[0] not in text:
+        text = re.sub(
+            r'(<link rel="stylesheet" href="[^"]*press-theme[^"]*">)',
+            r"\1\n  " + f'<link rel="stylesheet" href="{prefix}{extra_css}">',
+            text, count=1)
 
     # theme-color
     if re.search(r'name=["\']theme-color["\']', text, re.I):
@@ -357,13 +392,22 @@ def apply_page(path: Path) -> bool:
             text = RE_WIDGET_JS.sub("", text)
         canon = []
         if "js/liril-voice.js" not in text:
-            canon.append(f'<script src="{prefix}js/liril-voice.js?v=42"></script>')
+            canon.append(f'<script src="{prefix}js/liril-voice.js?v=43"></script>')
         if "liril-walkthrough.js" not in text:
             canon.append(f'<script src="{prefix}js/liril-walkthrough.js?v=3"></script>')
+        if "liril-dock.js" not in text:
+            canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=1"></script>')
+        if "liril-radio.js" not in text:
+            canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=1"></script>')
         if "reading-mode.js" not in text:
             canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
         if canon:
             text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
+
+        # The persistent LIRIL guide bar (home parity). position:fixed, so DOM
+        # order is irrelevant — inject once before </body>.
+        if 'id="dock"' not in text:
+            text = re.sub(r"</body>", _dock() + "</body>", text, count=1, flags=re.I)
 
         # data-heal styles yield to the theme: relocate them BEFORE the theme
         # <link> so press-theme.css wins every tie — page CSS only fills
