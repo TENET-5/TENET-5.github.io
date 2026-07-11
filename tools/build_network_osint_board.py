@@ -68,11 +68,30 @@ def _slug(s: str) -> str:
 
 
 def _soft(s: str, n: int = 280) -> str:
-    s = re.sub(r"\s+", " ", (s or "").strip())
+    s = _clean_text(s or "")
+    s = re.sub(r"\s+", " ", s.strip())
     return s if len(s) <= n else s[: n - 1] + "…"
 
 
+def _clean_text(s: str) -> str:
+    """Scrub common mojibake / control noise from registry dumps."""
+    if not s:
+        return ""
+    # latin-1 misread as cp1252 class replacements
+    s = (
+        s.replace("\ufffd", "")
+        .replace("Fran�ois", "François")
+        .replace("D�put�", "Député")
+        .replace("Senateur", "Senator")
+        .replace("\x00", "")
+    )
+    # drop leftover replacement-char sequences
+    s = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", s)
+    return s
+
+
 def _ok_label(label: str) -> bool:
+    label = _clean_text(label or "")
     if not label or len(label) < 2:
         return False
     if _JUNK_LABEL.search(label):
@@ -81,6 +100,9 @@ def _ok_label(label: str) -> bool:
         return False
     # reject pure punctuation / single-char noise from broken graphs
     if not re.search(r"[A-Za-zÀ-ÿ0-9]", label):
+        return False
+    # reject labels still carrying replacement garbage mid-word
+    if "\ufffd" in label or "�" in label:
         return False
     return True
 
@@ -106,6 +128,8 @@ class BoardBuilder:
         claim_level: str = "OSINT_INDEX",
         origin: str = "",
     ) -> str | None:
+        label = _clean_text(label)
+        subtitle = _clean_text(subtitle)
         if not _ok_label(label):
             self.stats["nodes_rejected"] += 1
             return None
@@ -1126,6 +1150,218 @@ class BoardBuilder:
                     claim_level="OSINT_INDEX",
                 )
 
+    def ingest_defense_nexus(self) -> None:
+        path = DATA / "defense_nexus.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "defense_nexus_hub",
+            label="Defence contractor lobby nexus",
+            ntype="event",
+            subtitle=str((raw.get("defense_lobbying_total") or {}).get("combined_total") or "registry volume"),
+            detail="Lobbying communications + public contract class from defense_nexus freeze. Volume is not guilt.",
+            link="dnd-procurement.html",
+            categories=["defence", "osint"],
+            claim_level="OSINT_REGISTRY",
+            origin="defense_nexus",
+        )
+        totals = raw.get("defense_lobbying_total") or {}
+        for key, row in totals.items():
+            if key == "combined_total" or not isinstance(row, dict):
+                continue
+            lab = key.replace("_", " ").title()
+            if key == "general_dynamics":
+                lab = "General Dynamics"
+            elif key == "l3harris":
+                lab = "L3Harris"
+            elif key == "lockheed":
+                lab = "Lockheed Martin"
+            elif key == "northrop":
+                lab = "Northrop Grumman"
+            elif key == "elbit":
+                lab = "Elbit Systems"
+            elif key == "mda":
+                lab = "MDA"
+            elif key == "irving":
+                lab = "Irving Shipbuilding"
+            elif key == "cae":
+                lab = "CAE"
+            elif key == "raytheon":
+                lab = "Raytheon"
+            comms = row.get("comms")
+            try:
+                c_int = int(comms) if not isinstance(comms, str) else 0
+            except (TypeError, ValueError):
+                c_int = 0
+            nid = self.add_node(
+                "defcon_" + _slug(lab),
+                label=lab,
+                ntype="org",
+                subtitle=_soft(str(row.get("contract") or "defence contractor"), 80),
+                detail=_soft(
+                    f"Registry communications: {comms}. Contract class: {row.get('contract')}"
+                ),
+                link="dnd-procurement.html",
+                categories=["defence", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="defense_nexus",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{comms} lobby comms" if c_int else "contract class",
+                    strength=3 if c_int >= 500 else (2 if c_int >= 200 else 1),
+                    claim_level="OSINT_REGISTRY",
+                )
+        dual = raw.get("irving_dual_donations") or {}
+        irving_id = "defcon_irving_shipbuilding"
+        for name in (dual.get("liberal_recipients") or [])[:6]:
+            if not _ok_label(str(name)):
+                continue
+            pid = self.add_node(
+                "donor_recv_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle="Named EC recipient (Irving dual-party pattern)",
+                detail="Named recipient in dual-party donation pattern note. Not a finding of wrongdoing.",
+                link="elections-finance.html",
+                categories=["osint"],
+                claim_level="PUBLIC_EC_OPEN_DATA",
+                origin="defense_nexus",
+            )
+            if pid and irving_id in self.nodes:
+                self.add_edge(
+                    irving_id,
+                    pid,
+                    label="family donation (public EC class)",
+                    strength=1,
+                    claim_level="PUBLIC_EC_OPEN_DATA",
+                )
+        for name in (dual.get("conservative_recipients") or [])[:4]:
+            if not _ok_label(str(name)):
+                continue
+            pid = self.add_node(
+                "donor_recv_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle="Named EC recipient (Irving dual-party pattern)",
+                detail="Named recipient in dual-party donation pattern note.",
+                link="elections-finance.html",
+                categories=["osint"],
+                claim_level="PUBLIC_EC_OPEN_DATA",
+                origin="defense_nexus",
+            )
+            if pid and irving_id in self.nodes:
+                self.add_edge(
+                    irving_id,
+                    pid,
+                    label="family donation (public EC class)",
+                    strength=1,
+                    claim_level="PUBLIC_EC_OPEN_DATA",
+                )
+        door = raw.get("revolving_door_summary") or {}
+        for key, bio in door.items():
+            lab = key.replace("_", " ").title()
+            nid = self.add_node(
+                "lobbyist_" + _slug(lab),
+                label=lab,
+                ntype="person",
+                subtitle="Revolving-door summary (registry class)",
+                detail=_soft(str(bio)),
+                link="lobbying-deepdive.html",
+                categories=["osint", "defence"],
+                claim_level="OSINT_REGISTRY",
+                origin="defense_nexus",
+            )
+            if nid and hub:
+                self.add_edge(
+                    nid,
+                    hub,
+                    label="lobbyist summary",
+                    strength=1,
+                    claim_level="OSINT_REGISTRY",
+                )
+        elbit = raw.get("elbit_hermes_900") or {}
+        if elbit:
+            eid = self.add_node(
+                "defcon_elbit_systems",
+                label="Elbit Systems",
+                ntype="org",
+                subtitle=_soft(str(elbit.get("contract") or "Hermes 900 class"), 80),
+                detail=_soft(str(elbit.get("description") or "")),
+                link="foreign-influence.html#legal",
+                categories=["defence", "israel"],
+                claim_level="REPORTING",
+                origin="defense_nexus",
+            )
+            if eid and hub:
+                self.add_edge(
+                    hub,
+                    eid,
+                    label="Hermes 900 class",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=str(elbit.get("source") or ""),
+                )
+
+    def ingest_carney_dossier(self) -> None:
+        path = DATA / "carney_brookfield_dossier.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "org_brookfield",
+            label="Brookfield",
+            ntype="org",
+            subtitle="asset manager hub",
+            detail="Public-record tenure graph from Carney–Brookfield dossier (offices, not findings).",
+            link="carney-brookfield.html",
+            categories=["osint", "evidence"],
+            claim_level="REPORTING",
+            origin="carney_brookfield_dossier",
+        )
+        buckets = (
+            "central_figure",
+            "brookfield_corporate",
+            "finance_ministers",
+            "bank_of_canada_governors",
+            "financial_regulators",
+            "ethics_commissioners",
+        )
+        for bucket in buckets:
+            for row in (raw.get(bucket) or [])[:8]:
+                if not isinstance(row, dict):
+                    continue
+                name = row.get("name") or ""
+                if not _ok_label(str(name)):
+                    continue
+                role = str(row.get("role") or bucket.replace("_", " "))
+                tenure = str(row.get("tenure") or "")
+                is_org = "Brookfield" in str(name) and "Carney" not in str(name)
+                nid = self.add_node(
+                    ("org_" if is_org else "person_") + _slug(str(name)),
+                    label=str(name),
+                    ntype="org" if is_org else "person",
+                    subtitle=_soft(f"{role}" + (f" · {tenure}" if tenure else ""), 90),
+                    detail=_soft(str(row.get("notable") or role), 220),
+                    link="carney-brookfield.html",
+                    categories=["osint", "authority"] if "minister" in bucket or "governor" in bucket else ["osint"],
+                    claim_level="REPORTING",
+                    origin="carney_brookfield_dossier",
+                )
+                if nid and hub and nid != hub:
+                    self.add_edge(
+                        nid,
+                        hub,
+                        label=bucket.replace("_", " "),
+                        strength=2 if bucket == "central_figure" else 1,
+                        claim_level="REPORTING",
+                    )
+
     def build(self) -> dict[str, Any]:
         self.ingest_investigation_board()
         self.ingest_entities_edges()
@@ -1144,6 +1380,8 @@ class BoardBuilder:
         self.ingest_cija_lobbying()
         self.ingest_cpc_media_graph()
         self.ingest_osint_network_graph()
+        self.ingest_defense_nexus()
+        self.ingest_carney_dossier()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)

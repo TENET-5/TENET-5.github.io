@@ -1313,7 +1313,14 @@ def main() -> int:
     (ROOT / "index.html").write_text(build_index(site, posts, now), encoding="utf-8")
     (ROOT / "evidence-index.html").write_text(build_evidence(site, evidence), encoding="utf-8")
     (ROOT / "daily-briefing.html").write_text(build_briefing(site), encoding="utf-8")
-    (ROOT / "network-analysis.html").write_text(build_network(site), encoding="utf-8")
+    # Preserve the product OSINT board shell (external JS/CSS + three tabs).
+    # Legacy build_network() is a single-board inline graph and must not clobber it.
+    net_path = ROOT / "network-analysis.html"
+    existing_net = net_path.read_text(encoding="utf-8") if net_path.is_file() else ""
+    if "network-analysis-board.js" in existing_net and "tab-osint" in existing_net:
+        print("[press] skip network-analysis.html (product board shell present)")
+    else:
+        net_path.write_text(build_network(site), encoding="utf-8")
     STORY_DIR.mkdir(exist_ok=True)
     n_stories = 0
     for p in posts:

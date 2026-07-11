@@ -284,6 +284,35 @@ def apply_page(path: Path) -> bool:
     text = re.sub(r"(?<![-\w])color:\s*var\(--ink\)", "color: var(--ivory)", text)
     text = re.sub(r"(?<![-\w])color:\s*#0b0e10", "color: var(--ivory)", text, flags=re.I)
 
+    # LEGAL COMPLIANCE PASS (SLATE core, Daniel 2026-07-11): the site argues from
+    # sourced facts and percentages, NEVER accusations of crime against identifiable
+    # people or calls for their arrest. AI is the compliance guardrail. Reframe the
+    # murder/arrest language to defensible accountability-journalism wording.
+    _COMPLIANCE = [
+        ("These people must be arrested and put on trial immediately to stop further deaths.",
+         "These findings warrant independent review and accountability."),
+        ("must be arrested and put on trial immediately to stop further deaths",
+         "warrant independent review and accountability"),
+        ("must be arrested and put on trial immediately", "warrant independent review and accountability"),
+        ("must be arrested and put on trial", "warrant independent review"),
+        ("These people must be arrested", "These findings warrant independent review"),
+        ("must be arrested", "warrant independent review"),
+        ("373 kills each on average", "373 provisions each on average"),
+        ("373 kills each", "373 provisions each"),
+        ("373 Kills Each", "373 Provisions Each"),
+        (" kills each", " provisions each"),
+        ("The Administrative Harvesters", "the documented administrative pattern"),
+        ("THE ADMINISTRATIVE HARVESTERS", "THE DOCUMENTED ADMINISTRATIVE PATTERN"),
+        ("Administrative Harvesters", "documented administrative pattern"),
+        ('"Administrative Harvester"', "documented administrative pattern"),
+        ("Administrative Harvester", "documented administrative pattern"),
+        ("Harvester mechanism", "documented policy mechanism"),
+        ("Harvester matrix", "documented policy pattern"),
+        ("Campaign Launch Dashboard", "Public Record Dashboard"),
+    ]
+    for _bad, _good in _COMPLIANCE:
+        text = text.replace(_bad, _good)
+
     # Bracket-literal headings read as tacky terminal cosplay ("[CONNECTED
     # INTELLIGENCE]"). Convert to the site's refined kicker label.
     text = re.sub(
@@ -341,7 +370,7 @@ def apply_page(path: Path) -> bool:
     # the Guided player's UI lives in css/liril-film.css (48 lf-* rules).
     PAGE_CSS = {
         "liril-film.html": "css/liril-film.css?v=2",
-        "network-analysis.html": "css/network-analysis.css?v=3",
+        "network-analysis.html": "css/network-analysis.css?v=5",
     }
     extra_css = PAGE_CSS.get(path.name)
     if extra_css and extra_css.split("?")[0] not in text:

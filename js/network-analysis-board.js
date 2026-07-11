@@ -241,6 +241,139 @@
     });
   }
 
+  /** Visible nodes + edges between them only. */
+  function exportVisibleGraph() {
+    var vis = visibleNodes();
+    var visIds = Object.create(null);
+    var nodes = vis.map(function (n) {
+      visIds[n.id] = 1;
+      return {
+        id: n.id,
+        type: n.type || '',
+        label: n.label || n.id,
+        subtitle: n.subtitle || '',
+        categories: (n.categories || []).slice(),
+        claim_level: n.claim_level || '',
+        link: n.link || ''
+      };
+    });
+    var edges = state.edges.filter(function (e) {
+      return e && visIds[e.from] && visIds[e.to];
+    }).map(function (e) {
+      return {
+        from: e.from,
+        to: e.to,
+        label: e.label || 'documented link',
+        strength: e.strength || 1,
+        claim_level: e.claim_level || '',
+        source: e.source || ''
+      };
+    });
+    return {
+      nodes: nodes,
+      edges: edges,
+      meta: {
+        board: state.board,
+        filter: state.filter || null,
+        query: state.query || '',
+        exported_at: new Date().toISOString().slice(0, 19) + 'Z',
+        node_count: nodes.length,
+        edge_count: edges.length,
+        title: (state.meta && state.meta.title) || 'TENET5 network',
+        note: 'Visible slice only. Centrality is concentration of paper, not a verdict.'
+      }
+    };
+  }
+
+  function mermaidId(id) {
+    var s = String(id || 'n').replace(/[^A-Za-z0-9_]/g, '_');
+    if (!/^[A-Za-z]/.test(s)) s = 'n_' + s;
+    return s;
+  }
+
+  function mermaidLabel(label) {
+    return String(label || '')
+      .replace(/["\[\]]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 48);
+  }
+
+  /**
+   * flowchart LR for packs with <=40 nodes.
+   * Returns { ok:true, text } or { ok:false, reason }.
+   */
+  function toMermaid(pack) {
+    var nodes = (pack && pack.nodes) || [];
+    if (nodes.length > 40) {
+      return {
+        ok: false,
+        reason: 'Too dense for Mermaid — exported JSON only'
+      };
+    }
+    if (!nodes.length) {
+      return { ok: false, reason: 'No visible nodes to export' };
+    }
+    var lines = ['flowchart LR'];
+    var seen = Object.create(null);
+    nodes.forEach(function (n) {
+      var mid = mermaidId(n.id);
+      seen[n.id] = mid;
+      lines.push('  ' + mid + '["' + mermaidLabel(n.label || n.id) + '"]');
+    });
+    (pack.edges || []).forEach(function (e) {
+      var a = seen[e.from];
+      var b = seen[e.to];
+      if (!a || !b) return;
+      var lab = mermaidLabel(e.label || 'link');
+      if (lab) lines.push('  ' + a + ' -->|"' + lab + '"| ' + b);
+      else lines.push('  ' + a + ' --> ' + b);
+    });
+    lines.push('');
+    lines.push('%% TENET5 · documented edges only · not a verdict');
+    return { ok: true, text: lines.join('\n') };
+  }
+
+  function downloadJson(filename, obj) {
+    var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename || 'network-visible.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) resolve();
+        else reject(new Error('copy failed'));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  function setStandNote(msg) {
+    if (!standEl || !msg) return;
+    standEl.textContent = msg;
+  }
+
   function degreeMap() {
     var d = Object.create(null);
     state.edges.forEach(function (t) {
@@ -271,6 +404,18 @@
 
     var deg = degreeMap();
 
+    var ego = null;
+    if (state.sel) {
+      ego = Object.create(null);
+      ego[state.sel] = 1;
+      state.edges.forEach(function (t) {
+        if (t.from === state.sel || t.to === state.sel) {
+          ego[t.from] = 1;
+          ego[t.to] = 1;
+        }
+      });
+    }
+
     state.edges.forEach(function (t) {
       if (!visIds[t.from] || !visIds[t.to]) return;
       var a = state.byId[t.from], b = state.byId[t.to];
@@ -283,6 +428,7 @@
       line.setAttribute('stroke-width', Math.min(3.2, 0.9 + (t.strength || 1) * 0.55));
       line.setAttribute('class', 'edge');
       if (state.sel && (t.from === state.sel || t.to === state.sel)) line.classList.add('hot');
+      else if (ego) line.classList.add('dim');
       if (t.claim_level === 'REPORTING') line.setAttribute('stroke-dasharray', '4 3');
       svg.appendChild(line);
       t._el = line;
@@ -290,7 +436,9 @@
 
     vis.forEach(function (n) {
       var g = document.createElementNS(NS, 'g');
-      g.setAttribute('class', 'node' + (state.sel === n.id ? ' sel' : ''));
+      var ncls = 'node' + (state.sel === n.id ? ' sel' : '');
+      if (ego && !ego[n.id]) ncls += ' dim';
+      g.setAttribute('class', ncls);
       g.setAttribute('aria-label', n.label);
       var c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', n.x);
@@ -538,7 +686,44 @@
   svg.addEventListener('click', function () {
     state.sel = null;
     draw();
+    while (detail.firstChild) detail.removeChild(detail.firstChild);
+    detail.appendChild(el('span', 'kick', 'Inspector'));
+    detail.appendChild(el('h3', null, 'Select a node'));
+    detail.appendChild(el('p', null, 'Edges are documented interactions. Open the case file for full citations.'));
   });
+
+  var btnJson = document.getElementById('btn-export-json');
+  var btnMermaid = document.getElementById('btn-export-mermaid');
+  if (btnJson) {
+    btnJson.addEventListener('click', function () {
+      var pack = exportVisibleGraph();
+      downloadJson('network-visible.json', pack);
+      setStandNote(
+        'Exported ' + pack.meta.node_count + ' entities and ' +
+        pack.meta.edge_count + ' edges (visible slice).'
+      );
+    });
+  }
+  if (btnMermaid) {
+    btnMermaid.addEventListener('click', function () {
+      var pack = exportVisibleGraph();
+      var mer = toMermaid(pack);
+      if (!mer.ok) {
+        downloadJson('network-visible.json', pack);
+        setStandNote(mer.reason || 'Too dense for Mermaid — exported JSON only');
+        return;
+      }
+      copyText(mer.text).then(function () {
+        setStandNote(
+          'Mermaid flowchart copied (' + pack.meta.node_count +
+          ' nodes). Paste into any Mermaid renderer.'
+        );
+      }).catch(function () {
+        downloadJson('network-visible.json', pack);
+        setStandNote('Clipboard blocked — downloaded network-visible.json instead.');
+      });
+    });
+  }
 
   var DEFENCE_FALLBACK = {
     title: 'Defence procurement velocity cluster',
