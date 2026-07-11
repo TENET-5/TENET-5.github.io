@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "77"
+THEME_VER = "78"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -458,6 +458,12 @@ def apply_page(path: Path) -> bool:
             canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=1"></script>')
         if "liril-radio.js" not in text:
             canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
+        # always pin reveal to MutationObserver build (late glass inject)
+        text = re.sub(
+            r'js/rv-reveal\.js\?v=\d+',
+            'js/rv-reveal.js?v=2',
+            text,
+        )
         if "rv-reveal.js" not in text:
             canon.append(f'<script defer src="{prefix}js/rv-reveal.js?v=2"></script>')
         if "reading-mode.js" not in text:
