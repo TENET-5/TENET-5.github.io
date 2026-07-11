@@ -623,7 +623,36 @@
     statsEl.innerHTML = html;
   }
 
-  function activateBoard(name) {
+  var BOARD_IDS = { osint: 1, influence: 1, defence: 1 };
+
+  function parseBoardDeepLink() {
+    var hash = (location.hash || '').replace(/^#/, '').toLowerCase();
+    hash = hash.split(/[?&/]/)[0];
+    if (BOARD_IDS[hash]) return hash;
+    try {
+      var params = new URLSearchParams(location.search || '');
+      var board = (params.get('board') || '').toLowerCase().trim();
+      if (BOARD_IDS[board]) return board;
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  function setBoardDeepLink(name) {
+    if (!BOARD_IDS[name]) return;
+    var nextHash = '#' + name;
+    if ((location.hash || '') === nextHash) return;
+    try {
+      var url = location.pathname + (location.search || '') + nextHash;
+      if (history.replaceState) history.replaceState(null, '', url);
+      else location.hash = name;
+    } catch (e) {
+      try { location.hash = name; } catch (e2) { /* ignore */ }
+    }
+  }
+
+  function activateBoard(name, opts) {
+    if (!BOARD_IDS[name]) name = 'osint';
+    opts = opts || {};
     state.board = name;
     var pack = boards[name] || { nodes: [], edges: [], meta: {} };
     state.nodes = pack.nodes || [];
@@ -661,6 +690,7 @@
     detail.appendChild(el('span', 'kick', 'Inspector'));
     detail.appendChild(el('h3', null, 'Select a node'));
     detail.appendChild(el('p', null, 'Edges are documented interactions. Open the case file for full citations.'));
+    if (opts.syncUrl !== false) setBoardDeepLink(name);
   }
 
   var tabOsint = document.getElementById('tab-osint');
@@ -802,6 +832,10 @@
     if (!boards.osint.nodes.length) boards.osint = fallbackPack;
     if (!boards.influence.nodes.length) boards.influence = fallbackPack;
 
+    /* Deep-link wins after packs settle: #defence / #osint / #influence or ?board= */
+    var deep = parseBoardDeepLink();
+    if (deep) preferred = deep;
+
     activateBoard(preferred);
     if (!osintRaw && !influenceRaw) {
       standEl.textContent =
@@ -811,7 +845,8 @@
     boards.defence = normalizeDefence(DEFENCE_FALLBACK);
     boards.influence = boards.defence;
     boards.osint = boards.defence;
-    activateBoard('defence');
+    var deepFail = parseBoardDeepLink();
+    activateBoard(deepFail || 'defence');
     standEl.textContent =
       'Primary boards could not load. Showing the defence-instruments network from local freezes.';
     statsEl.textContent = 'Fallback board · defence instruments only';

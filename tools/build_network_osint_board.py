@@ -16,6 +16,10 @@ Reads (when present):
   - data/corruption_map_top80.json         degree sample
   - data/pmo_lobbying_analysis.json        PMO registry volume
   - data/blackrock_brookfield_connection.json  public filings / WEF
+  - data/defense_nexus.json / carney_brookfield_dossier.json
+  - data/cbc_social_graph_last.json            CBC production/social seed
+  - data/business_holdings_dossier.json        OECC/SEDI holdings
+  - data/politician_kinship_dossier.json       public-record kinship
 
 Writes:
   - data/network_osint_board.json          page format (nodes + threads)
@@ -1362,6 +1366,265 @@ class BoardBuilder:
                         claim_level="REPORTING",
                     )
 
+    def ingest_cbc_social_graph(self) -> None:
+        path = DATA / "cbc_social_graph_last.json"
+        raw = _load(path)
+        if not raw or not isinstance(raw, dict):
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        # Soften internal edge verbs for public newsroom board
+        edge_soft = {
+            "DECEIVES_TARGETS": "named target (on record)",
+            "DECEIVES_TARGETS_CLASS": "named target class",
+            "DECEPTIVE_OUTREACH": "reported outreach",
+            "ALLEGED_MISREP": "alleged misrepresentation",
+            "FALSE_FRONT": "shell watch",
+            "FUNDS": "funds",
+            "FUNDS_PROJECT": "funds project",
+            "CO_PRODUCES": "co-produces",
+            "AMPLIFIES_CRITIQUE": "amplifies critique",
+            "AMPLIFIES": "amplifies",
+            "AMPLIFIES_TARGET": "amplifies target",
+            "DEMANDS_ACCOUNTABILITY": "demands accountability",
+            "DEMANDS_INQUIRY": "demands inquiry",
+            "DEMANDS_ANSWER": "demands answer",
+            "EXPOSES": "exposes",
+            "EXPOSES_SHELL": "exposes shell",
+            "CONDEMNS": "condemns",
+            "SUPPORTS": "supports",
+            "BREAKS_CONFIRMATION": "breaks confirmation",
+            "COUNTER_FRAME": "counter frame",
+            "TACTICS": "tactics (reporting)",
+        }
+        type_cat = {
+            "INSTITUTION": "media",
+            "PRODUCTION": "media",
+            "TARGET": "media",
+            "TARGET_WAVE2": "media",
+            "AMPLIFIER": "media",
+            "AMPLIFIER_INSTITUTION": "media",
+            "AMPLIFIER_JOURNALIST": "media",
+            "AMPLIFIER_OUTLET": "media",
+            "AMPLIFIER_INVESTIGATIVE": "media",
+            "POLITICAL_AMPLIFIER": "osint",
+            "POLITICAL_ACCOUNTABILITY": "authority",
+            "COUNTER_FRAME": "disinfo",
+            "OPERATIVE": "osint",
+            "OPERATIVE_ALIAS": "osint",
+            "OPERATIVE_WATCH": "osint",
+            "FALSE_FRONT": "osint",
+            "SHELL_WATCH": "osint",
+            "INSTITUTION_RESPONSE": "authority",
+        }
+
+        def map_claim(cl: str) -> str:
+            cl = (cl or "").upper()
+            if cl.startswith("FACT"):
+                return "FACT"
+            if cl.startswith("REPORTING"):
+                return "REPORTING"
+            if cl.startswith("OBSERVED"):
+                return "OSINT_PUBLIC"
+            return "OSINT_INDEX"
+
+        for n in (raw.get("nodes") or [])[:32]:
+            if not isinstance(n, dict):
+                continue
+            sid = str(n.get("id") or "")
+            lab = str(n.get("label") or sid).lstrip("@")
+            if not _ok_label(lab):
+                continue
+            ntype_raw = str(n.get("type") or "person")
+            # Soft type labels for public subtitle
+            sub = ntype_raw.replace("_", " ").title()
+            if "FALSE_FRONT" in ntype_raw or "SHELL" in ntype_raw:
+                sub = "Shell watch · reporting"
+            elif "OPERATIVE" in ntype_raw:
+                sub = "Named in reporting"
+            elif "TARGET" in ntype_raw:
+                sub = "Named target"
+            cl = map_claim(str(n.get("claim_level") or ""))
+            if ntype_raw == "INSTITUTION" and not n.get("claim_level"):
+                cl = "FACT" if sid in ("heritage", "iso", "cbc_news", "cbc_ent", "aptn") else cl
+            self.add_node(
+                "csg_" + _slug(sid or lab),
+                label=lab,
+                ntype="org" if ntype_raw in (
+                    "INSTITUTION", "PRODUCTION", "FALSE_FRONT", "SHELL_WATCH",
+                    "AMPLIFIER_OUTLET", "AMPLIFIER_INSTITUTION", "INSTITUTION_RESPONSE",
+                ) else "person",
+                subtitle=sub,
+                detail="From CBC social seed graph (public handles and on-record production chain). Index only.",
+                link="cbc-social-amplification.html",
+                categories=[type_cat.get(ntype_raw, "media"), "media"],
+                claim_level=cl,
+                origin="cbc_social_graph",
+            )
+        for e in (raw.get("edges") or [])[:30]:
+            if not isinstance(e, dict):
+                continue
+            frm = "csg_" + _slug(str(e.get("from") or ""))
+            to = "csg_" + _slug(str(e.get("to") or ""))
+            et = str(e.get("type") or "linked")
+            lab = edge_soft.get(et, et.replace("_", " ").lower())
+            cl = map_claim(str(e.get("claim_level") or ""))
+            src = str(e.get("source") or "")
+            # only pass public http sources
+            if src and not src.startswith("http"):
+                src = ""
+            if frm in self.nodes and to in self.nodes:
+                w = e.get("weight")
+                strength = 1
+                if isinstance(w, (int, float)) and w >= 5000:
+                    strength = 3
+                elif isinstance(w, (int, float)) and w >= 1000:
+                    strength = 2
+                elif cl == "FACT":
+                    strength = 2
+                self.add_edge(
+                    frm,
+                    to,
+                    label=lab[:60],
+                    strength=strength,
+                    claim_level=cl,
+                    source_url=src,
+                )
+
+    def ingest_business_holdings(self) -> None:
+        path = DATA / "business_holdings_dossier.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        added = 0
+        for rec in (raw.get("records") or []):
+            if added >= 34:
+                break
+            if not isinstance(rec, dict):
+                continue
+            holdings = rec.get("holdings") or []
+            if not holdings:
+                continue
+            principal = rec.get("principal") or ""
+            if not _ok_label(str(principal)):
+                continue
+            pid = self.add_node(
+                "person_" + _slug(str(principal)),
+                label=str(principal),
+                ntype="person",
+                subtitle="Public holdings record",
+                detail="Holdings from public OECC / SEDI / disclosure class sources. Empty holdings elsewhere are not findings.",
+                link="carney-brookfield.html" if "Carney" in str(principal) else "evidence-index.html",
+                categories=["osint", "evidence"],
+                claim_level="FACT",
+                origin="business_holdings",
+            )
+            if not pid:
+                continue
+            for h in holdings[:4]:
+                if not isinstance(h, dict):
+                    continue
+                ent = h.get("entity") or ""
+                if not _ok_label(str(ent)):
+                    continue
+                # merge known Brookfield/BlackRock ids
+                elab = str(ent)
+                if "Brookfield" in elab:
+                    oid = "org_brookfield"
+                elif "BlackRock" in elab:
+                    oid = "org_blackrock"
+                else:
+                    oid = "hold_org_" + _slug(elab)
+                sources = h.get("sources") or []
+                cl = "FACT" if sources else "REPORTING"
+                oid = self.add_node(
+                    oid,
+                    label=elab[:60],
+                    ntype="org",
+                    subtitle=_soft(f"{h.get('type') or 'holding'} · {h.get('role') or ''}", 80),
+                    detail=_soft(str(h.get("accountability_relevance") or h.get("role") or ""), 200),
+                    link="evidence-index.html",
+                    categories=["osint", "evidence"],
+                    claim_level=cl,
+                    origin="business_holdings",
+                )
+                if oid and pid:
+                    self.add_edge(
+                        pid,
+                        oid,
+                        label=_soft(f"{h.get('type') or 'holding'} · {h.get('role') or ''}", 60),
+                        strength=2 if cl == "FACT" else 1,
+                        claim_level=cl,
+                    )
+                    added += 1
+
+    def ingest_politician_kinship(self) -> None:
+        path = DATA / "politician_kinship_dossier.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        n_edges = 0
+        for rec in (raw.get("records") or []):
+            if n_edges >= 25:
+                break
+            if not isinstance(rec, dict):
+                continue
+            kin = rec.get("kin") or []
+            if not kin:
+                continue
+            principal = rec.get("principal") or ""
+            if not _ok_label(str(principal)):
+                continue
+            # do not surface axes as categories
+            pid = self.add_node(
+                "person_" + _slug(str(principal)),
+                label=str(principal),
+                ntype="person",
+                subtitle="Public-record kinship principal",
+                detail="Kinship edges are public-record family links with cited sources where available.",
+                link="evidence-index.html",
+                categories=["osint"],
+                claim_level="FACT",
+                origin="politician_kinship",
+            )
+            if not pid:
+                continue
+            for k in kin[:4]:
+                if n_edges >= 25:
+                    break
+                if not isinstance(k, dict):
+                    continue
+                kname = k.get("name") or ""
+                if not _ok_label(str(kname)):
+                    continue
+                sources = k.get("sources") or []
+                cl = "FACT" if sources else "OSINT_INDEX"
+                kid = self.add_node(
+                    "kin_" + _slug(str(kname)),
+                    label=str(kname),
+                    ntype="person",
+                    subtitle=_soft(
+                        f"{k.get('relation') or 'kin'}"
+                        + (f" · {k.get('notable_role')}" if k.get("notable_role") else ""),
+                        90,
+                    ),
+                    detail=_soft(str(k.get("notable_role") or "Public-record kinship link."), 180),
+                    link="evidence-index.html",
+                    categories=["osint"],
+                    claim_level=cl,
+                    origin="politician_kinship",
+                )
+                if kid and pid:
+                    self.add_edge(
+                        pid,
+                        kid,
+                        label=str(k.get("relation") or "kin")[:40],
+                        strength=2 if cl == "FACT" else 1,
+                        claim_level=cl,
+                    )
+                    n_edges += 1
+
     def build(self) -> dict[str, Any]:
         self.ingest_investigation_board()
         self.ingest_entities_edges()
@@ -1382,6 +1645,9 @@ class BoardBuilder:
         self.ingest_osint_network_graph()
         self.ingest_defense_nexus()
         self.ingest_carney_dossier()
+        self.ingest_cbc_social_graph()
+        self.ingest_business_holdings()
+        self.ingest_politician_kinship()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
@@ -1396,21 +1662,49 @@ class BoardBuilder:
             deg[e["from"]] += 1
             deg[e["to"]] += 1
         if len(self.nodes) > 220:
-            keep = {nid for nid, _ in deg.most_common(180)}
-            # always keep FACT-origin / high-trust nodes
+            keep = {nid for nid, _ in deg.most_common(140)}
+            # always keep FACT / EC open data if connected (degree≥1) or core origins
+            core_origins = {
+                "defence_cluster",
+                "entities_edges",
+                "maid_lobbying_crossref",
+                "cpc_top_donors",
+                "cbc_social_graph",
+            }
             for nid, n in self.nodes.items():
-                if n.get("claim_level") in ("FACT", "PUBLIC_EC_OPEN_DATA") or n.get(
-                    "origin"
-                ) in (
-                    "defence_cluster",
-                    "entities_edges",
-                    "maid_lobbying_crossref",
-                    "cpc_top_donors",
-                ):
+                if n.get("origin") in core_origins:
+                    keep.add(nid)
+                elif n.get("claim_level") in ("FACT", "PUBLIC_EC_OPEN_DATA") and deg.get(
+                    nid, 0
+                ) >= 1:
                     keep.add(nid)
             self.nodes = {k: v for k, v in self.nodes.items() if k in keep}
             ids = set(self.nodes)
             self.edges = [e for e in self.edges if e["from"] in ids and e["to"] in ids]
+            # hard ceiling for browser layout — trim lowest-degree non-core
+            if len(self.nodes) > 260:
+                deg2: Counter[str] = Counter()
+                for e in self.edges:
+                    deg2[e["from"]] += 1
+                    deg2[e["to"]] += 1
+                ranked = sorted(
+                    self.nodes.keys(),
+                    key=lambda i: (
+                        1 if self.nodes[i].get("origin") in core_origins else 0,
+                        1
+                        if self.nodes[i].get("claim_level")
+                        in ("FACT", "PUBLIC_EC_OPEN_DATA")
+                        else 0,
+                        deg2.get(i, 0),
+                    ),
+                    reverse=True,
+                )
+                keep2 = set(ranked[:260])
+                self.nodes = {k: v for k, v in self.nodes.items() if k in keep2}
+                ids = set(self.nodes)
+                self.edges = [
+                    e for e in self.edges if e["from"] in ids and e["to"] in ids
+                ]
             self.stats["capped"] = 1
             self.stats["raw_nodes"] = raw_nodes
             self.stats["raw_edges"] = raw_edges
