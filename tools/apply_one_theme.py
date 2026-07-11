@@ -23,11 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
-SKIP_NAMES = {
-    "index_legacy.html",
-    "index_backup.html",
-    "index-legacy-cap222-shell.html",
-}
+SKIP_NAMES: set[str] = set()
 THEME_VER = "72"
 
 def _rel_prefix(path: Path) -> str:

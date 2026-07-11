@@ -667,8 +667,8 @@ def render_dossiers(posts: list[dict]) -> str:
 
 
 CATALOG_SKIP = re.compile(
-    r"^(index|404|auth-callback|archive-shell|index_backup|index_legacy|"
-    r"index-legacy-cap222-shell|chalkboard|campaign-generator|search|"
+    r"^(index|404|auth-callback|archive-shell|"
+    r"chalkboard|campaign-generator|search|"
     r"test-|layout\.|gateway|permalink)", re.I)
 
 def render_catalog() -> str:
