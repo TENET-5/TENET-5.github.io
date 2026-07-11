@@ -2166,6 +2166,261 @@ class BoardBuilder:
             if nid and hub:
                 self.add_edge(hub, nid, label="charity class", strength=2, claim_level="FACT")
 
+    def ingest_northland_production_chain(self) -> None:
+        path = DATA / "cbc_northland_tales_production_chain.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        prod = raw.get("production") or {}
+        company = prod.get("company") or {}
+        cname = str(company.get("legal_name") or "NLT1 PRODUCTIONS INC.")
+        srcs = company.get("sources") or []
+        src0 = ""
+        for s in srcs:
+            if isinstance(s, dict) and str(s.get("url") or "").startswith("http"):
+                src0 = str(s["url"])
+                break
+        nlt1 = self.add_node(
+            "csg_nlt1",
+            label=cname,
+            ntype="org",
+            subtitle=_soft(
+                f"corp {company.get('corporation_number') or ''} · dir {company.get('director') or ''}",
+                80,
+            ),
+            detail=_soft(
+                f"Working titles: {', '.join((prod.get('working_titles') or [])[:3])}. "
+                f"{prod.get('format') or ''}"
+            ),
+            link="cbc-social-amplification.html",
+            categories=["media", "osint"],
+            claim_level="FACT",
+            origin="northland_production_chain",
+        )
+        director = company.get("director")
+        if director and _ok_label(str(director)):
+            did = self.add_node(
+                "person_" + _slug(str(director)),
+                label=str(director),
+                ntype="person",
+                subtitle="NLT1 director (corporate directory)",
+                detail="Named director on public company registry / ISO listing class.",
+                link="cbc-social-amplification.html",
+                categories=["media", "osint"],
+                claim_level="FACT",
+                origin="northland_production_chain",
+            )
+            if did and nlt1:
+                self.add_edge(
+                    did,
+                    nlt1,
+                    label="director",
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=src0,
+                )
+        for row in (prod.get("key_creatives_iso") or [])[:8]:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            aff = str(row.get("affiliation") or "")
+            cid = self.add_node(
+                "person_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle=_soft("ISO creative" + (f" · {aff}" if aff else ""), 80),
+                detail="Named on ISO 2024-25 production recipients listing class.",
+                link="cbc-social-amplification.html",
+                categories=["media", "osint"],
+                claim_level="FACT",
+                origin="northland_production_chain",
+            )
+            if cid and nlt1:
+                self.add_edge(
+                    cid,
+                    nlt1,
+                    label="creative (ISO)",
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=src0,
+                )
+        for row in (prod.get("co_producers") or [])[:4]:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            cl = "FACT" if "FACT" in str(row.get("claim_level") or "").upper() else "REPORTING"
+            oid = self.add_node(
+                "org_" + _slug(str(name).split("(")[0].strip()),
+                label=str(name).split("(")[0].strip()[:50],
+                ntype="org",
+                subtitle="co-producer (on-record class)",
+                detail=_soft(str(row.get("note") or "Named co-producer in public statements.")),
+                link="cbc-accountability.html" if "CBC" in str(name) else "cbc-social-amplification.html",
+                categories=["media"],
+                claim_level=cl,
+                origin="northland_production_chain",
+            )
+            if oid and nlt1:
+                self.add_edge(
+                    oid,
+                    nlt1,
+                    label="co-produces",
+                    strength=3 if cl == "FACT" else 1,
+                    claim_level=cl,
+                )
+        funding = prod.get("funding") or {}
+        iso_batch = funding.get("iso_story_fund_batch") or {}
+        if iso_batch:
+            iso = self.add_node(
+                "org_indigenous_screen_office",
+                label="Indigenous Screen Office",
+                ntype="org",
+                subtitle=_soft(
+                    f"Story Fund batch CAD {iso_batch.get('amount')} · {iso_batch.get('year')}",
+                    80,
+                ),
+                detail=_soft(str(iso_batch.get("note") or "ISO public recipients batch.")),
+                link="cbc-social-amplification.html",
+                categories=["media", "authority"],
+                claim_level="FACT",
+                origin="northland_production_chain",
+            )
+            fund_src = str(iso_batch.get("source") or src0)
+            if iso and nlt1:
+                self.add_edge(
+                    iso,
+                    nlt1,
+                    label="funds project (batch class)",
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=fund_src if fund_src.startswith("http") else "",
+                )
+        heritage = funding.get("canadian_heritage") or {}
+        if heritage:
+            hid = self.add_node(
+                "inst_canadian_heritage",
+                label="Canadian Heritage",
+                ntype="org",
+                subtitle=_soft(str(heritage.get("role") or "upstream funder class"), 70),
+                detail="Upstream cultural funding class for ISO programs.",
+                link="cbc-accountability.html",
+                categories=["authority", "media"],
+                claim_level="FACT",
+                origin="northland_production_chain",
+            )
+            if hid and self.nodes.get("org_indigenous_screen_office"):
+                self.add_edge(
+                    hid,
+                    "org_indigenous_screen_office",
+                    label="upstream funder class",
+                    strength=1,
+                    claim_level="FACT",
+                )
+        # Soft targets from wave_1 — REPORTING only, no method detail dump
+        wave = (raw.get("waves") or {}).get("wave_1_commentators") or {}
+        for tname in (wave.get("targets") or [])[:6]:
+            lab = str(tname).split("(")[0].strip()
+            if not _ok_label(lab):
+                continue
+            tid = self.add_node(
+                "person_" + _slug(lab),
+                label=lab,
+                ntype="person",
+                subtitle="Named in public production-chain reporting",
+                detail="Named in public secondary reporting about production outreach. Index only — not a legal finding.",
+                link="cbc-social-amplification.html",
+                categories=["media", "osint"],
+                claim_level="REPORTING",
+                origin="northland_production_chain",
+            )
+            if tid and nlt1:
+                self.add_edge(
+                    nlt1,
+                    tid,
+                    label="named target (reporting)",
+                    strength=1,
+                    claim_level="REPORTING",
+                )
+
+    def ingest_csis_oversight_dossier(self) -> None:
+        path = DATA / "csis_oversight_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="csis_oversight_hub",
+            hub_label="CSIS oversight accountability index",
+            hub_link="foreign-influence.html#nsicop",
+            categories=["cfnis", "ccp", "osint"],
+            buckets=[
+                "csis_directors",
+                "public_safety_ministers",
+                "nsira_chairs",
+                "nsicop_chairs",
+                "prime_ministers",
+            ],
+            origin="csis_oversight_dossier",
+            claim_level="REPORTING",
+            per_bucket=5,
+        )
+
+    def ingest_meta_actors_light(self) -> None:
+        """Person enrichment only — no amp scores as guilt, no internal axis jargon as categories."""
+        path = DATA / "meta_actors.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        axis_to_cat = {
+            "arms": "israel",
+            "foreign": "ccp",
+            "csis_oversight": "cfnis",
+            "cfnis": "cfnis",
+            "carney": "osint",
+            "maid": "osint",
+            "central_banking": "osint",
+            "climate_environment": "osint",
+            "canadian_surface_combatant": "defence",
+            "political_business_influence": "osint",
+        }
+        added = 0
+        for row in (raw.get("actors") or []):
+            if added >= 30:
+                break
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            axis_count = int(row.get("axis_count") or 0)
+            if axis_count < 4:
+                continue
+            axes = row.get("axes") or []
+            cats = set()
+            for a in axes[:8]:
+                c = axis_to_cat.get(str(a))
+                if c:
+                    cats.add(c)
+            if not cats:
+                cats.add("osint")
+            # Never surface amp scores in public detail
+            nid = self.add_node(
+                "person_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle=f"Cross-file index · {axis_count} public-record threads",
+                detail="Appears across multiple public investigation threads. Thread count is documentation density, not guilt.",
+                link="evidence-index.html",
+                categories=sorted(cats)[:4],
+                claim_level="OSINT_INDEX",
+                origin="meta_actors",
+            )
+            if nid:
+                added += 1
+
     def ingest_actor_tenures(self) -> None:
         path = DATA / "actor_tenures.json"
         raw = _load(path)
@@ -2754,6 +3009,9 @@ class BoardBuilder:
         self.ingest_cija_lobbying_update()
         self.ingest_cbc_influencer_registry()
         self.ingest_actor_tenures()
+        self.ingest_northland_production_chain()
+        self.ingest_csis_oversight_dossier()
+        self.ingest_meta_actors_light()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
@@ -2778,6 +3036,8 @@ class BoardBuilder:
                 "cbc_social_graph",
                 "cbc_board_oic",
                 "appointments",
+                "northland_production_chain",
+                "actor_tenures",
             }
             for nid, n in self.nodes.items():
                 if n.get("origin") in core_origins:
