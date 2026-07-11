@@ -200,7 +200,7 @@
     var guideBtn = $('liril-guide-btn');
     var guideBtnCover = $('liril-guide-btn-cover');
     var statusEl = $('liril-status');
-    var voiceOn = false;
+    var voiceOn = true;
     var lastCh = null;
     var presenting = false;
     var presTimer = null;
