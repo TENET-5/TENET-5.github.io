@@ -12,7 +12,7 @@
   window.__TENET5_RV_REVEAL = true;
 
   function run() {
-    var els = [].slice.call(document.querySelectorAll('.rv'));
+    var els = [].slice.call(document.querySelectorAll('.rv, .glass:not(.rv)'));
     if (!els.length) return;
 
     function reveal(el) { el.classList.add('in'); }
