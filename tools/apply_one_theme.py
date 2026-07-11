@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "87"
+THEME_VER = "88"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -396,7 +396,7 @@ def apply_page(path: Path) -> bool:
     # the Guided player's UI lives in css/liril-film.css (48 lf-* rules).
     PAGE_CSS = {
         "liril-film.html": "css/liril-film.css?v=2",
-        "network-analysis.html": "css/network-analysis.css?v=9",
+        "network-analysis.html": "css/network-analysis.css?v=10",
         "canada-map.html": "css/intel-report.css?v=4",
     }
     extra_css = PAGE_CSS.get(path.name)
