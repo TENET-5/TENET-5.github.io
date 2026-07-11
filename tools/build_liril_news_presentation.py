@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build LIRIL front-page news presentation script from live data.
 
-News-anchor style: explain TENET5, what happened today, how to read the desk.
+News-anchor style: explain TENET5, what happened today, AI desk articles, how to read the desk.
 Epistemic: TENET5 claims labeled; external RSS labeled EXTERNAL SOURCE.
 
 Outputs:
@@ -21,6 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BRIEF = ROOT / "data" / "govt_daily_briefing.json"
 WIRE = ROOT / "data" / "home_wire.json"
+ARTS = ROOT / "data" / "liril_news_articles.json"
+PERSONA = ROOT / "data" / "liril_reporter_persona.json"
 OUT = ROOT / "data" / "liril_news_presentation.json"
 PROOF = Path(r"C:\PRISM\log\liril_news_presentation_last.json")
 
@@ -44,30 +46,47 @@ def _clean(s: str, n: int = 220) -> str:
 def build() -> dict:
     brief = _load(BRIEF)
     wire = _load(WIRE)
+    arts = _load(ARTS)
+    persona = _load(PERSONA)
     now = datetime.now(timezone.utc)
-    date_lab = brief.get("date") or now.strftime("%Y-%m-%d")
+    date_lab = brief.get("date") or arts.get("date") or now.strftime("%Y-%m-%d")
 
-    one = _clean(brief.get("one_line") or "The public record is open. Start at the briefing.")
+    one = _clean(
+        brief.get("one_line")
+        or arts.get("one_line")
+        or "The public record is open. Start at the briefing."
+    )
     happening = list(brief.get("happening_now") or [])[:4]
     external = list(wire.get("wire") or [])[:4]
-    threat = brief.get("threat_level") or "WATCH"
+    threat = brief.get("threat_level") or arts.get("threat_level") or "WATCH"
+    articles = list(arts.get("articles") or [])
+    features = [a for a in articles if a.get("type") == "feature"][:5]
+    daily = next((a for a in features if a.get("is_daily_package")), features[0] if features else None)
+
+    sign_on = (
+        (persona.get("sign_on") or "")
+        .replace("{greeting}", "Good day.")
+        .replace("{powered_by}", persona.get("powered_by") or "Powered by LIRIL AI")
+    )
+    if not sign_on.strip():
+        sign_on = (
+            "Good day. I am LIRIL, desk reporter for TENET5 — an independent Canadian "
+            "investigative newsroom and government-analysis desk. I read the public record "
+            "as it moves. Powered by LIRIL AI. You verify."
+        )
 
     segs: list[dict] = []
 
-    # 1 — cold open: what is TENET5
+    # 1 — desk reporter sign-on (AI persona)
     segs.append(
         {
             "id": "open",
             "role": "anchor_open",
             "scroll": "top",
-            "wait_ms": 16000,
-            "text": (
-                "Good day. I am LIRIL, your guide on TENET5 — "
-                "an independent Canadian investigative newsroom and government-analysis desk. "
-                "We read the public record: statutes, Hansard, contracts, Health Canada tables, "
-                "and multi-source wires. Every TENET5 claim is meant to open a source you can check. "
-                "I am powered by LIRIL AI. You verify."
-            ),
+            "wait_ms": 17000,
+            "text": sign_on,
+            "persona": persona.get("public_name") or "LIRIL",
+            "role_label": persona.get("role") or "Desk reporter",
         }
     )
 
@@ -77,19 +96,19 @@ def build() -> dict:
             "id": "how",
             "role": "desk_tour",
             "scroll": "newsdesk",
-            "wait_ms": 15000,
+            "wait_ms": 16000,
             "text": (
-                "Here is how TENET5 is structured. Time is the spine. "
+                "Here is how the website is structured — time is the spine. "
                 "The submarine dial marks second, minute, hour, day, week, month, year, and era. "
                 "Day is the news desk: daily briefing, investigations hub, five-act argument, and the MAID file. "
-                "Hour is the live wire. Week holds active investigations. "
-                "Month checks claims against documents. Year holds case files. "
-                "Atmosphere film is memorial tone — not proof."
+                "Hour is the live wire — TENET5 desk beside multi-source external RSS. "
+                "Week holds active investigations. Month checks viral claims against documents. "
+                "Year holds case files. Atmosphere film is memorial tone — not proof."
             ),
         }
     )
 
-    # 3 — today's lead
+    # 3 — today's lead bulletin
     segs.append(
         {
             "id": "today_lead",
@@ -104,7 +123,51 @@ def build() -> dict:
         }
     )
 
-    # 4 — happening now items (TENET5 labeled)
+    # 4 — AI desk package (the news website article-gen product)
+    if daily:
+        segs.append(
+            {
+                "id": "ai_package",
+                "role": "desk_package",
+                "scroll": "newsdesk",
+                "wait_ms": 15000,
+                "text": (
+                    "Our AI desk has published today's news package from the live briefing and wire. "
+                    f"Open: { _clean(daily.get('title') or 'today desk package', 140) }. "
+                    f"{_clean(daily.get('dek') or one, 160)} "
+                    "Each article labels TENET5 analysis versus external sources. "
+                    "No invented facts — only restructuring of cited inputs."
+                ),
+                "href": daily.get("href") or "daily-briefing.html",
+                "label": "TENET5 · AI DESK",
+            }
+        )
+
+    # 5 — rundown of AI features
+    if len(features) > 1:
+        rundown = "; ".join(
+            _clean(a.get("title") or "", 70)
+            for a in features[1:4]
+            if a.get("title")
+        )
+        if rundown:
+            segs.append(
+                {
+                    "id": "ai_rundown",
+                    "role": "rundown",
+                    "scroll": "week",
+                    "wait_ms": 14000,
+                    "text": (
+                        "Also in today's AI desk rundown: "
+                        f"{rundown}. "
+                        "Those pieces sit under this week on the home continuum, "
+                        "and as full story pages with source shelves."
+                    ),
+                    "label": "TENET5 · AI DESK",
+                }
+            )
+
+    # 6 — happening now items (TENET5 labeled)
     for i, h in enumerate(happening):
         hl = _clean(h.get("headline") or "", 140)
         body = _clean(h.get("body") or "", 200)
@@ -126,7 +189,7 @@ def build() -> dict:
             }
         )
 
-    # 5 — external wire (clearly labeled)
+    # 7 — external wire
     if external:
         heads = "; ".join(_clean(x.get("title") or "", 90) for x in external[:3])
         segs.append(
@@ -144,7 +207,7 @@ def build() -> dict:
             }
         )
 
-    # 6 — documentary / argument
+    # 8 — documentary / argument
     segs.append(
         {
             "id": "argument",
@@ -161,7 +224,7 @@ def build() -> dict:
         }
     )
 
-    # 7 — how to use AI guide
+    # 9 — signoff
     segs.append(
         {
             "id": "close",
@@ -169,6 +232,7 @@ def build() -> dict:
             "scroll": "now",
             "wait_ms": 12000,
             "text": (
+                "That is today's presentation of the TENET5 website and desk. "
                 "I will walk you down the time continuum: desk, hour wire, week investigations, "
                 "month claim-check, year case files. Toggle Voice for narration. "
                 "Bring skepticism. If a claim cannot open a source, do not accept it. "
@@ -180,25 +244,41 @@ def build() -> dict:
     doc = {
         "ts": now.isoformat(),
         "doctrine": "liril_news_presentation",
+        "persona_id": persona.get("id") or "liril_desk_reporter",
+        "persona_name": persona.get("public_name") or "LIRIL",
+        "persona_role": persona.get("role") or "Desk reporter",
         "date": date_lab,
         "threat_level": threat,
-        "title": "TENET5 evening desk — LIRIL presentation",
+        "title": f"TENET5 desk presentation — {date_lab}",
         "one_line": one,
         "segments": segs,
         "segment_count": len(segs),
+        "articles": [
+            {
+                "title": a.get("title"),
+                "href": a.get("href"),
+                "type": a.get("type"),
+                "epistemic": a.get("epistemic"),
+                "is_daily_package": bool(a.get("is_daily_package")),
+            }
+            for a in articles[:8]
+        ],
+        "article_count": len(articles),
         "inputs": {
             "briefing": BRIEF.name if BRIEF.is_file() else None,
             "home_wire": WIRE.name if WIRE.is_file() else None,
+            "articles": ARTS.name if ARTS.is_file() else None,
             "happening_n": len(happening),
             "external_n": len(external),
+            "articles_n": len(articles),
         },
         "ok": True,
         "verdict": "LIRIL_NEWS_PRESENTATION_OK",
     }
-    OUT.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+    OUT.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     try:
         PROOF.parent.mkdir(parents=True, exist_ok=True)
-        PROOF.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+        PROOF.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     except OSError:
         pass
     return doc
@@ -211,6 +291,7 @@ def main() -> int:
             {
                 "verdict": doc["verdict"],
                 "segments": doc["segment_count"],
+                "articles": doc.get("article_count", 0),
                 "date": doc["date"],
                 "out": str(OUT),
             },

@@ -518,8 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=210">
-<link rel="stylesheet" href="css/design-lock.css?v=210">
+<link rel="stylesheet" href="css/press-theme.css?v=212">
+<link rel="stylesheet" href="css/design-lock.css?v=212">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -586,16 +586,17 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
 <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
   <div class="dock-in">
     <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="say"><b>LIRIL</b><span id="liril-line">{esc(site.get("liril_default", "Tap Guide me — I will present TENET5 and what is going on today."))}</span></div>
-    <button id="liril-guide-btn" type="button" title="Start LIRIL as your guide through the record">Guide me</button>
+    <div class="say"><b>LIRIL · Reporter</b><span id="liril-line">{esc(site.get("liril_default", "I am LIRIL, your desk reporter. Tap Guide me or Listen live — the news moves with time."))}</span></div>
+    <button id="liril-guide-btn" type="button" title="Start LIRIL desk reporter news presentation">Guide me</button>
     <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice narration">Voice · Off</button>
-    <div class="liril-status" id="liril-status">LIRIL loading…</div>
+    <div class="liril-status" id="liril-status">LIRIL desk reporter loading…</div>
   </div>
 </div>
 <script src="js/rv-reveal.js?v=1" defer></script>
 <script src="js/liril-radio.js?v=2" defer></script>
 <script src="js/liril-voice.js?v=43" defer></script>
-<script src="js/liril-home-guide.js?v=7" defer></script>
+<script src="js/liril-reporter.js?v=1" defer></script>
+<script src="js/liril-home-guide.js?v=9" defer></script>
 {home_cine}
 </body>
 </html>"""
@@ -1185,13 +1186,17 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <a class="newsdesk-pill" href="network-analysis.html" role="listitem">Network board</a>
       <a class="newsdesk-pill" href="key-facts.html" role="listitem">Key facts</a>
     </div>
-    <div class="liril-presentation glass" id="liril-presentation" aria-label="LIRIL news presentation">
-      <span class="kick">LIRIL · live desk presentation</span>
+    <div class="liril-presentation glass" id="liril-presentation" aria-label="LIRIL desk reporter — live news">
+      <div class="pres-byline">
+        <span class="pres-air" id="liril-air-pill">DESK READY</span>
+        <span class="kick">LIRIL · desk reporter</span>
+      </div>
       <h2 class="thesis-title" style="margin-top:0.6em">What is going on <em>today.</em></h2>
-      <p class="pres-lede">Loading today&#x27;s briefing and multi-source wire…</p>
-      <p class="pres-meta">Tap Guide me — LIRIL explains TENET5, the time desk, and today&#x27;s active files.</p>
+      <p class="pres-lede">Loading live desk package — briefing, multi-source wire, AI articles…</p>
+      <p class="pres-meta">LIRIL reads the news as time moves. Guide me for the package. Listen live for the continuous wire.</p>
       <div class="pres-actions">
         <button type="button" class="guide-cta" id="liril-pres-start">Start news presentation</button>
+        <button type="button" class="guide-cta guide-cta-live" id="liril-pres-live">Listen live</button>
         <a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>
       </div>
     </div>

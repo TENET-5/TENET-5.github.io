@@ -61,6 +61,9 @@ PROJECT = {
     "jobs": [
         "one_theme_press",
         "rss_home_wire",             # multi-source RSS → hour continuum (objective)
+        "liril_news_articles",       # AI desk articles from briefing + wire
+        "liril_news_presentation",   # LIRIL front-page news presentation script
+        "liril_desk_reporter",       # AI reporter persona + live wire (always-new news)
         "press_rebuild",
         "network_osint_board",
         "design_lock_guardrail",     # crystal-clear taste contract, loads last (swarm-proof)
@@ -212,22 +215,41 @@ def lap() -> dict:
     )
 
     # 1b) RSS → objective home wire (multi-source; not TENET5 verdicts)
+    # Always-new news: every 4th lap runs --scan to pull fresh feeds (network).
     rss_wire = TOOLS / "build_rss_home_wire.py"
     if rss_wire.exists():
-        # Prefer rebuild from existing feed; full --scan is slower (network)
-        code, out = _run([sys.executable, str(rss_wire)], timeout=120)
+        lap_n = int(os.environ.get("PRISM_SITE_DUTY_LAP", "1") or "1")
+        do_scan = (lap_n % 4 == 1) or ("--scan" in sys.argv)
+        cmd = [sys.executable, str(rss_wire)] + (["--scan"] if do_scan else [])
+        code, out = _run(cmd, timeout=300 if do_scan else 120)
         steps.append({
             "name": "rss_home_wire",
             "ok": code == 0,
             "exit": code,
+            "scan": do_scan,
             "tail": (out or "")[-300:],
-            "job": "PRISM permanent — multi-source RSS into home hour continuum",
+            "job": "PRISM permanent — multi-source RSS; scan every 4th lap for always-new wire",
             "proof": r"C:\PRISM\log\rss_home_wire_last.json",
         })
     else:
         steps.append({"name": "rss_home_wire", "ok": True, "detail": "build_rss_home_wire.py missing (skipped)"})
 
-    # 1c) LIRIL front-page news presentation script (AI-generated desk package)
+    # 1c) AI desk articles (briefing + wire → content/posts + catalog)
+    liril_arts = TOOLS / "build_liril_news_articles.py"
+    if liril_arts.exists():
+        code, out = _run([sys.executable, str(liril_arts)], timeout=90)
+        steps.append({
+            "name": "liril_news_articles",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-300:],
+            "job": "PRISM permanent — AI news articles from briefing + multi-source wire",
+            "proof": r"C:\PRISM\log\liril_news_articles_last.json",
+        })
+    else:
+        steps.append({"name": "liril_news_articles", "ok": True, "detail": "skipped"})
+
+    # 1d) LIRIL front-page news presentation script (explains site + today)
     liril_pres = TOOLS / "build_liril_news_presentation.py"
     if liril_pres.exists():
         code, out = _run([sys.executable, str(liril_pres)], timeout=60)
@@ -236,7 +258,7 @@ def lap() -> dict:
             "ok": code == 0,
             "exit": code,
             "tail": (out or "")[-300:],
-            "job": "PRISM permanent — LIRIL explains TENET5 + what is going on today",
+            "job": "PRISM permanent — LIRIL presents TENET5 website + what is going on today",
             "proof": r"C:\PRISM\log\liril_news_presentation_last.json",
         })
     else:
@@ -639,6 +661,7 @@ def main() -> int:
         )
         while not _stop_requested():
             n += 1
+            os.environ["PRISM_SITE_DUTY_LAP"] = str(n)
             doc = lap()
             print(f"[prism_site_duty] lap={n} {doc['verdict']}", flush=True)
             for _ in range(max(1, loop)):
