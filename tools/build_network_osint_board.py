@@ -2166,6 +2166,300 @@ class BoardBuilder:
             if nid and hub:
                 self.add_edge(hub, nid, label="charity class", strength=2, claim_level="FACT")
 
+    def ingest_foreign_interference_commission(self) -> None:
+        path = DATA / "foreign_interference_commission.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hogue = raw.get("hogue_final_report") or {}
+        srcs = hogue.get("sources") or []
+        src0 = next((s for s in srcs if isinstance(s, str) and s.startswith("http")), "")
+        hub = self.add_node(
+            "hogue_commission",
+            label="Foreign Interference Commission (Hogue)",
+            ntype="event",
+            subtitle=_soft(str(hogue.get("date") or "public inquiry"), 40),
+            detail=_soft(
+                "Public inquiry final report class. Key findings summarized for index only — prefer primary PDFs."
+            ),
+            link="foreign-influence.html#nsicop",
+            categories=["ccp", "evidence", "osint"],
+            claim_level="FACT",
+            origin="foreign_interference_commission",
+        )
+        if hub and src0:
+            # attach source via edge to bill c70 later
+            pass
+        for i, finding in enumerate((hogue.get("key_findings") or [])[:3]):
+            fid = self.add_node(
+                f"hogue_finding_{i}",
+                label=_soft(str(finding), 55),
+                ntype="evidence",
+                subtitle="Hogue finding (public report)",
+                detail=_soft(str(finding), 220),
+                link="foreign-influence.html#nsicop",
+                categories=["evidence", "ccp"],
+                claim_level="FACT",
+                origin="foreign_interference_commission",
+            )
+            if fid and hub:
+                self.add_edge(
+                    hub,
+                    fid,
+                    label="report finding",
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=src0,
+                )
+        c70 = raw.get("bill_c70") or {}
+        if c70:
+            c70src = next(
+                (s for s in (c70.get("sources") or []) if isinstance(s, str) and s.startswith("http")),
+                "",
+            )
+            bill = self.add_node(
+                "bill_c70",
+                label="Bill C-70",
+                ntype="event",
+                subtitle=_soft(
+                    f"Royal assent {c70.get('royal_assent') or ''} · FITAA registry",
+                    70,
+                ),
+                detail=_soft(str(c70.get("purpose") or "Foreign Influence Transparency and Accountability Act.")),
+                link="foreign-influence.html#nsicop",
+                categories=["ccp", "israel", "event"],
+                claim_level="FACT",
+                origin="foreign_interference_commission",
+            )
+            if bill and hub:
+                self.add_edge(
+                    hub,
+                    bill,
+                    label="legislative response class",
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=c70src or src0,
+                )
+        clearance = (hogue.get("poilievre_clearance") or {})
+        if clearance.get("finding"):
+            pid = self.add_node(
+                "poilievre",
+                label="Pierre Poilievre",
+                ntype="person",
+                subtitle="Party leader · security clearance class",
+                detail=_soft(str(clearance.get("finding") or "")),
+                link="foreign-influence.html",
+                categories=["osint", "israel"],
+                claim_level="REPORTING",
+                origin="foreign_interference_commission",
+            )
+            if pid and hub:
+                self.add_edge(
+                    hub,
+                    pid,
+                    label="clearance note (reporting)",
+                    strength=1,
+                    claim_level="REPORTING",
+                    source_url=str(clearance.get("source") or src0),
+                )
+
+    def ingest_senator_woo_dossier(self) -> None:
+        path = DATA / "dossier_senator_woo.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        # Public profile + sourced REPORTING edges only — no "treason" / influence-node guilt labels
+        woo = self.add_node(
+            "woo",
+            label=str(raw.get("name") or "Senator Yuen Pau Woo"),
+            ntype="person",
+            subtitle=_soft(
+                f"{raw.get('chamber') or 'Senate'} · {raw.get('group') or 'ISG'}",
+                80,
+            ),
+            detail=_soft(
+                f"Appointed {raw.get('appointed')}. "
+                f"Background: {(raw.get('background') or {}).get('previous_role') or ''}"
+            ),
+            link=str(raw.get("profile") or "foreign-influence.html#woo"),
+            categories=["ccp", "osint"],
+            claim_level="FACT",
+            origin="dossier_senator_woo",
+        )
+        isg = self.add_node(
+            "isg",
+            label="ISG",
+            ntype="org",
+            subtitle=f"Independent Senators Group · {raw.get('isg_size') or ''} members",
+            detail="Senate parliamentary group.",
+            link="foreign-influence.html#woo",
+            categories=["ccp"],
+            claim_level="FACT",
+            origin="dossier_senator_woo",
+        )
+        if woo and isg:
+            self.add_edge(woo, isg, label="facilitator class", strength=2, claim_level="FACT")
+        fic = raw.get("foreign_interference_commission") or {}
+        if fic.get("testimony") or fic.get("position"):
+            hub = self.add_node(
+                "hogue_commission",
+                label="Foreign Interference Commission (Hogue)",
+                ntype="event",
+                subtitle="Public inquiry",
+                detail=_soft(str(fic.get("position") or "Commission testimony / position class.")),
+                link="foreign-influence.html#nsicop",
+                categories=["ccp", "evidence"],
+                claim_level="FACT",
+                origin="dossier_senator_woo",
+            )
+            if woo and hub:
+                self.add_edge(
+                    woo,
+                    hub,
+                    label="testimony / position class",
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=str(fic.get("testimony") or ""),
+                )
+        esp = raw.get("espionage_meeting") or {}
+        if esp.get("source"):
+            # Soft REPORTING event — use careful newsroom language
+            eid = self.add_node(
+                "woo_meeting_class",
+                label="UFWD-linked meeting class (reporting)",
+                ntype="event",
+                subtitle=_soft(str(esp.get("timing") or "public reporting"), 60),
+                detail=_soft(
+                    str(esp.get("event") or "")
+                    + " "
+                    + str(esp.get("speech") or "")
+                ),
+                link="foreign-influence.html#woo",
+                categories=["ccp", "osint"],
+                claim_level="REPORTING",
+                origin="dossier_senator_woo",
+            )
+            if woo and eid:
+                self.add_edge(
+                    woo,
+                    eid,
+                    label="named in reporting",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=str(esp.get("source") or ""),
+                )
+        vote = raw.get("uyghur_genocide_vote") or {}
+        if vote.get("voted"):
+            vid = self.add_node(
+                "uyghur_genocide_vote",
+                label="Uyghur genocide recognition vote",
+                ntype="event",
+                subtitle=_soft(str(vote.get("voted") or ""), 50),
+                detail="Senate vote class (public record).",
+                link="foreign-influence.html#woo",
+                categories=["ccp", "evidence"],
+                claim_level="FACT",
+                origin="dossier_senator_woo",
+            )
+            if woo and vid:
+                self.add_edge(
+                    woo,
+                    vid,
+                    label=str(vote.get("voted") or "vote")[:40],
+                    strength=2,
+                    claim_level="FACT",
+                )
+        adv = raw.get("advocacy_group_ufwd") or {}
+        if adv.get("source"):
+            aid = self.add_node(
+                "woo_advocacy_group",
+                label="Advocacy group UFWD-link class",
+                ntype="org",
+                subtitle="Public reporting class",
+                detail=_soft(str(adv.get("finding") or adv.get("significance") or "")),
+                link="foreign-influence.html#woo",
+                categories=["ccp", "osint"],
+                claim_level="REPORTING",
+                origin="dossier_senator_woo",
+            )
+            if woo and aid:
+                self.add_edge(
+                    woo,
+                    aid,
+                    label="named association (reporting)",
+                    strength=2,
+                    claim_level="REPORTING",
+                    source_url=str(adv.get("source") or ""),
+                )
+
+    def ingest_phoenix_pay_dossier(self) -> None:
+        path = DATA / "phoenix_pay_accountability_dossier.json"
+        self._ingest_role_buckets(
+            path=path,
+            hub_id="phoenix_pay_hub",
+            hub_label="Phoenix pay accountability index",
+            hub_link="evidence-index.html",
+            categories=["osint", "authority"],
+            buckets=[
+                "pspc_ministers",
+                "treasury_board_presidents",
+                "pspc_deputy_ministers",
+                "auditor_general_oversight",
+                "prime_ministers_of_record",
+                "contract_counterparty",
+            ],
+            origin="phoenix_pay_dossier",
+            claim_level="REPORTING",
+            per_bucket=4,
+        )
+
+    def ingest_central_banking_actors(self) -> None:
+        path = DATA / "central_banking_grover_decisionmakers.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "central_banking_hub",
+            label="Central banking accountability index",
+            ntype="event",
+            subtitle="BoC / OSFI office-holder class",
+            detail="Public-office holders in central banking / financial stability axis. Scores omitted — tenure class only.",
+            link="carney-brookfield.html",
+            categories=["osint", "authority"],
+            claim_level="REPORTING",
+            origin="central_banking_actors",
+        )
+        for row in (raw.get("marked_actors") or [])[:16]:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            role = str(row.get("role_cat") or "office").replace("_", " ")
+            period = str(row.get("period") or "")
+            nid = self.add_node(
+                "person_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle=_soft(f"{role}" + (f" · {period}" if period else ""), 90),
+                detail="Named in central banking public-record accountability set. No model score published.",
+                link="carney-brookfield.html",
+                categories=["authority", "osint"],
+                claim_level="REPORTING",
+                origin="central_banking_actors",
+            )
+            if nid and hub:
+                self.add_edge(
+                    nid,
+                    hub,
+                    label=role[:40],
+                    strength=2 if "governor" in role else 1,
+                    claim_level="REPORTING",
+                )
+
     def ingest_northland_production_chain(self) -> None:
         path = DATA / "cbc_northland_tales_production_chain.json"
         raw = _load(path)
@@ -3012,6 +3306,10 @@ class BoardBuilder:
         self.ingest_northland_production_chain()
         self.ingest_csis_oversight_dossier()
         self.ingest_meta_actors_light()
+        self.ingest_foreign_interference_commission()
+        self.ingest_senator_woo_dossier()
+        self.ingest_central_banking_actors()
+        self.ingest_phoenix_pay_dossier()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
