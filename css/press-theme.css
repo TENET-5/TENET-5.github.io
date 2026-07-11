@@ -4615,6 +4615,50 @@ video.act-hero-video[controls]{
     radial-gradient(70% 50% at 50% 0%,rgba(63,124,140,.08),transparent 60%) !important
 }
 
+/* Ken Burns CSS layer — even if an MP4 is a frozen still, the frame drifts (product gate).
+   Real motion encodes (prism_film_motion_rebuild) remain primary; this is UX insurance. */
+@keyframes tenet5KenBurnsA{
+  0%{transform:scale(1.06) translate3d(0,0,0)}
+  100%{transform:scale(1.18) translate3d(-2.4%,-1.6%,0)}
+}
+@keyframes tenet5KenBurnsB{
+  0%{transform:scale(1.16) translate3d(-1.8%,1.2%,0)}
+  100%{transform:scale(1.05) translate3d(1.4%,-0.8%,0)}
+}
+video.act-page-bg,
+video.act-page-fg-video,
+video.home-broll,
+video.film-broll,
+video.act-hero-video,
+video[data-act-cine],
+video[data-force-play],
+.media-frame.is-cine video,
+.doc-stage-video{
+  transform-origin:center center;
+  will-change:transform;
+  animation:tenet5KenBurnsA 22s ease-in-out infinite alternate
+}
+video.act-page-fg-video,
+.act-page-fg video{
+  animation-name:tenet5KenBurnsB;
+  animation-duration:26s
+}
+/* Prefer-reduced-motion: freeze CSS drift; force-play heroes still may play audio/controls */
+@media (prefers-reduced-motion: reduce){
+  video.act-page-bg,
+  video.act-page-fg-video,
+  video.home-broll,
+  video.film-broll,
+  video.act-hero-video,
+  video[data-act-cine],
+  video[data-force-play],
+  .media-frame.is-cine video,
+  .doc-stage-video{
+    animation:none !important;
+    transform:none !important
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    SUBMARINE TIME DIAL  ·  THEME_VER 209
    Horizontal continuum: sec · min · hour · day · week · month · year · era
