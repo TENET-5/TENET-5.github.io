@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "83"
+THEME_VER = "85"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -342,23 +342,23 @@ def apply_page(path: Path) -> bool:
     _parts = re.split(r"(<!--.*?-->)", text, flags=re.S)
     for _i in range(0, len(_parts), 2):
         _parts[_i] = re.sub(r"═{4,}[ \t]*\n[^<>]{0,120}?\n?[ \t]*═{4,}[ \t]*\n?", "\n", _parts[_i], flags=re.M)
-        # "— CAMPAIGN SHARE BAR —" and any lone "— LABEL —" / "SECTION N — X" scaffold banner
-        _parts[_i] = re.sub(r"^[ \t]*[—-]{1,3}[ \t]*(SECTION[ ]?\d+[ ]?[—-][^<>\n]{0,60}|SHARE BAR|CAMPAIGN SHARE BAR|[A-Z][A-Z ]{2,40})[ \t]*[—-]{0,3}[ \t]*$\n?", "", _parts[_i], flags=re.M)
+        # "── CAMPAIGN SHARE BAR ──" and any lone "─ LABEL ─" / "SECTION N — X" scaffold banner.
+        # Dash class covers hyphen, en/em-dash, horizontal bar, and box-drawing lines (U+2500-2501).
+        _DASH = r"\-‒-―─━"
+        _parts[_i] = re.sub(
+            r"^[ \t]*[" + _DASH + r"]{1,6}[ \t]*(SECTION[ ]?\d+[ ]?[" + _DASH + r"][^<>\n]{0,60}|SHARE BAR|CAMPAIGN SHARE BAR|[A-Z][A-Z0-9 ]{2,44})[ \t]*[" + _DASH + r"]{0,6}[ \t]*$\n?",
+            "", _parts[_i], flags=re.M)
     text = "".join(_parts)
 
-    # Clip-art EMOJI in headings/labels read as tacky and break the refined register.
-    # Strip leading emoji from headings and from kicker/label text (owner: elegant, no 90s clip-art).
-    _EMOJI = (
-        "\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF"
-        "\U00002190-\U000021FF\U00002B00-\U00002BFF\U0000FE0F\U0000200D\U000024C2"
-        "\U0001F900-\U0001F9FF\U00002000-\U0000206F"
-    )
-    def _strip_lead_emoji(m):
-        inner = re.sub(r"^[\s" + _EMOJI + r"]+", "", m.group(2))
-        return m.group(1) + inner
-    text = re.sub(r"(<h[1-6][^>]*>)([\s\S]*?)(?=</h[1-6]>)",
-                  lambda m: m.group(1) + re.sub(r"^(?:[️‍\U0001F000-\U0001FAFF☀-➿⬀-⯿←-⇿]|\s)+", "", m.group(2)),
-                  text)
+    # Clip-art EMOJI read as tacky 90s and break the refined register — strip them everywhere
+    # in visible text (owner directive: elegant, no clip-art). Ranges cover pictographs,
+    # symbols, dingbats, flags, arrows-as-emoji, and the variation-selector/ZWJ joiners.
+    # (arrows U+2190-21FF / U+2B00-2BFF deliberately EXCLUDED — the site uses "->" affordances)
+    _EMOJI_RE = re.compile(
+        "[\U0001F000-\U0001FAFF\U00002600-\U000026FF\U00002700-\U000027BF"
+        "\U0001F1E6-\U0001F1FF\U0000FE00-\U0000FE0F\U0000200D\U000024C2]",
+        re.UNICODE)
+    text = _EMOJI_RE.sub("", text)
 
     def _strip_theme_style(m: re.Match[str]) -> str:
         body = m.group(0)
