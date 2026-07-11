@@ -12598,76 +12598,102 @@
   }
 
   /* ── State ── */
+  const PAGE_SIZE = 40;
   let currentFilter = 'all';
+  let currentPage = 1;
   const searchInput = document.getElementById('search');
   const recordsContainer = document.getElementById('records');
   const statsEl = document.getElementById('stats');
+  const allRecords = recordsContainer ? Array.prototype.slice.call(recordsContainer.querySelectorAll('.record')) : [];
+  const allDividers = recordsContainer ? Array.prototype.slice.call(recordsContainer.querySelectorAll('.section-divider')) : [];
 
-  /* ── Filter logic ── */
-  window.setFilter = function (btn) {
-    document.querySelectorAll('.db-filter').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.getAttribute('data-filter');
-    filterDB();
-  };
+  /* ── Pager elements (top + bottom of the record list) ── */
+  function makePager() { const p = document.createElement('div'); p.className = 'db-pager'; return p; }
+  const pagerTop = makePager();
+  const pagerBottom = makePager();
+  if (statsEl && statsEl.parentNode) statsEl.parentNode.insertBefore(pagerTop, statsEl.nextSibling);
+  if (recordsContainer && recordsContainer.parentNode) recordsContainer.parentNode.insertBefore(pagerBottom, recordsContainer.nextSibling);
 
-  window.filterDB = function () {
+  function recordPasses(rec, query) {
+    const type = rec.getAttribute('data-type') || '';
+    const level = rec.getAttribute('data-level') || '';
+    const search = (rec.getAttribute('data-search') || '').toLowerCase();
+    const nameEl = rec.querySelector('.rec-name');
+    const name = (nameEl ? nameEl.textContent : '').toLowerCase();
+    if (currentFilter !== 'all') {
+      if (currentFilter === 'federal' || currentFilter === 'provincial' || currentFilter === 'municipal') {
+        if (level !== currentFilter) return false;
+      } else if (type !== currentFilter) return false;
+    }
+    if (query && search.indexOf(query) === -1 && name.indexOf(query) === -1) return false;
+    return true;
+  }
+
+  function renderPager(el, totalPages) {
+    el.innerHTML = '';
+    if (totalPages <= 1) return;
+    const mk = function (label, page, disabled) {
+      const b = document.createElement('button');
+      b.className = 'db-page';
+      b.type = 'button';
+      b.textContent = label;
+      if (disabled) b.disabled = true;
+      else b.addEventListener('click', function () { goToPage(page); });
+      return b;
+    };
+    el.appendChild(mk('‹ Prev', currentPage - 1, currentPage <= 1));
+    const info = document.createElement('span');
+    info.className = 'db-page-info';
+    info.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+    el.appendChild(info);
+    el.appendChild(mk('Next ›', currentPage + 1, currentPage >= totalPages));
+  }
+
+  function goToPage(p) {
+    currentPage = p;
+    apply();
+    if (recordsContainer) recordsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function apply() {
     const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-    const records = recordsContainer.querySelectorAll('.record');
-    const dividers = recordsContainer.querySelectorAll('.section-divider');
-    let visible = 0;
+    const passing = allRecords.filter(function (r) { return recordPasses(r, query); });
+    const total = passing.length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    const pageSet = new Set(passing.slice(start, end));
 
-    records.forEach(rec => {
-      const type = rec.getAttribute('data-type') || '';
-      const level = rec.getAttribute('data-level') || '';
-      const search = (rec.getAttribute('data-search') || '').toLowerCase();
-      const name = (rec.querySelector('.rec-name')?.textContent || '').toLowerCase();
+    allRecords.forEach(function (rec) { rec.style.display = pageSet.has(rec) ? '' : 'none'; });
 
-      let show = true;
-
-      /* Type / level filter */
-      if (currentFilter !== 'all') {
-        if (currentFilter === 'federal' || currentFilter === 'provincial' || currentFilter === 'municipal') {
-          if (level !== currentFilter) show = false;
-        } else {
-          if (type !== currentFilter) show = false;
-        }
-      }
-
-      /* Text search */
-      if (show && query) {
-        if (!search.includes(query) && !name.includes(query)) show = false;
-      }
-
-      rec.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-
-    /* Show/hide section dividers based on whether they have visible siblings */
-    dividers.forEach(div => {
-      let next = div.nextElementSibling;
-      let hasVisible = false;
+    /* dividers: show only if a visible (on-page) record follows before the next divider */
+    allDividers.forEach(function (div) {
+      let next = div.nextElementSibling, hasVisible = false;
       while (next && !next.classList.contains('section-divider')) {
-        if (next.classList.contains('record') && next.style.display !== 'none') {
-          hasVisible = true;
-          break;
-        }
+        if (next.classList.contains('record') && next.style.display !== 'none') { hasVisible = true; break; }
         next = next.nextElementSibling;
       }
       div.style.display = hasVisible ? '' : 'none';
     });
 
-    /* Stats */
-    if (statsEl) {
-      const total = records.length;
-      statsEl.textContent = visible + ' of ' + total + ' records shown';
-    }
-  };
+    if (statsEl) statsEl.textContent = total ? ((start + 1) + '–' + Math.min(end, total) + ' of ' + total + ' records') : 'No records match';
+    renderPager(pagerTop, totalPages);
+    renderPager(pagerBottom, totalPages);
+  }
 
-  /* ── Init stats on load ── */
-  document.addEventListener('DOMContentLoaded', function () {
-    filterDB();
-  });
+  window.setFilter = function (btn) {
+    document.querySelectorAll('.db-filter').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentFilter = btn.getAttribute('data-filter');
+    currentPage = 1;
+    apply();
+  };
+  window.filterDB = function () { currentPage = 1; apply(); };
+
+  document.addEventListener('DOMContentLoaded', apply);
+  apply();
 
   /* ── Smooth scroll ── */
   document.documentElement.style.scrollBehavior = 'smooth';
