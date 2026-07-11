@@ -341,7 +341,7 @@ def apply_page(path: Path) -> bool:
     # the Guided player's UI lives in css/liril-film.css (48 lf-* rules).
     PAGE_CSS = {
         "liril-film.html": "css/liril-film.css?v=2",
-        "network-analysis.html": "css/network-analysis.css?v=2",
+        "network-analysis.html": "css/network-analysis.css?v=3",
     }
     extra_css = PAGE_CSS.get(path.name)
     if extra_css and extra_css.split("?")[0] not in text:

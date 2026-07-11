@@ -44,7 +44,8 @@
     filter: null,
     query: '',
     sel: null,
-    meta: {}
+    meta: {},
+    loaded: false
   };
 
   function el(tag, cls, text) {
@@ -232,12 +233,34 @@
     });
   }
 
+  function degreeMap() {
+    var d = Object.create(null);
+    state.edges.forEach(function (t) {
+      d[t.from] = (d[t.from] || 0) + 1;
+      d[t.to] = (d[t.to] || 0) + 1;
+    });
+    return d;
+  }
+
   function draw() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var vis = visibleNodes();
     var visIds = Object.create(null);
     vis.forEach(function (n) { visIds[n.id] = 1; });
-    if (emptyEl) emptyEl.hidden = vis.length > 0;
+    if (emptyEl) {
+      if (!state.loaded) {
+        emptyEl.hidden = true;
+      } else {
+        emptyEl.hidden = vis.length > 0;
+        emptyEl.textContent = vis.length
+          ? ''
+          : (state.nodes.length
+            ? 'No entities match this filter or search.'
+            : 'Board data did not load. Try Defence instruments or refresh.');
+      }
+    }
+
+    var deg = degreeMap();
 
     state.edges.forEach(function (t) {
       if (!visIds[t.from] || !visIds[t.to]) return;
@@ -259,13 +282,22 @@
     vis.forEach(function (n) {
       var g = document.createElementNS(NS, 'g');
       g.setAttribute('class', 'node' + (state.sel === n.id ? ' sel' : ''));
+      g.setAttribute('aria-label', n.label);
       var c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', n.x);
       c.setAttribute('cy', n.y);
       c.setAttribute('r', nodeRadius(n));
       c.setAttribute('fill', nodeColor(n));
+      /* SVG title = hover tooltip */
+      var tip = document.createElementNS(NS, 'title');
+      tip.textContent = n.label + (n.subtitle ? ' — ' + n.subtitle : '');
+      g.appendChild(tip);
       g.appendChild(c);
-      var showLabel = state.sel === n.id || vis.length < 48;
+      var showLabel =
+        state.sel === n.id ||
+        vis.length < 56 ||
+        (deg[n.id] || 0) >= 4 ||
+        n.claim_level === 'FACT';
       if (showLabel) {
         var tx = document.createElementNS(NS, 'text');
         tx.setAttribute('x', n.x);
@@ -382,15 +414,16 @@
 
   function activateBoard(name) {
     state.board = name;
-    var pack = boards[name];
-    state.nodes = pack.nodes;
-    state.edges = pack.edges;
+    var pack = boards[name] || { nodes: [], edges: [], meta: {} };
+    state.nodes = pack.nodes || [];
+    state.edges = pack.edges || [];
     state.meta = pack.meta || {};
     state.byId = Object.create(null);
     state.nodes.forEach(function (n) { state.byId[n.id] = n; });
     state.filter = null;
     state.sel = null;
     state.query = '';
+    state.loaded = true;
     if (searchEl) searchEl.value = '';
     layout(state.nodes, state.edges);
     buildChips();
