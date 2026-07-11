@@ -62,6 +62,8 @@ PROJECT = {
         "one_theme_press",
         "press_rebuild",
         "network_osint_board",
+        "design_lock_guardrail",     # crystal-clear taste contract, loads last (swarm-proof)
+        "zero_internals_leak_gate",  # public site names NO engine/model/kernel/path/seed
         "css_quantum_precision",
         "liril_guide_home",
         "visual_acuity_pc_mobile",
@@ -297,6 +299,31 @@ def lap() -> dict:
         samples.append({"page": name, "ok": ok})
         interior_ok = interior_ok and ok
     steps.append({"name": "interiors", "ok": interior_ok, "samples": samples})
+
+    # 6a-guard) ZERO-INTERNALS leak gate — public site names NO engine/model/kernel/path/seed.
+    # apply_one_theme self-heals known leaks; this catches any the swarm invents. Hard gate.
+    leak = TOOLS / "leak_scanner.py"
+    if leak.exists():
+        code, out = _run([sys.executable, str(leak)], timeout=120)
+        steps.append({
+            "name": "leak_scan", "ok": code == 0, "exit": code, "tail": (out or "")[-400:],
+            "job": "PRISM permanent — public site names NO internals ('Powered by LIRIL AI' only)",
+        })
+    else:
+        steps.append({"name": "leak_scan", "ok": True, "detail": "leak_scanner.py missing (skipped)"})
+
+    # 6b-guard) DESIGN-LOCK taste guardrail present + injected last on every page.
+    dl = ROOT / "css" / "design-lock.css"
+    try:
+        about = (ROOT / "about.html").read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        about = ""
+    dl_ok = dl.exists() and "design-lock.css" in about
+    steps.append({
+        "name": "design_lock", "ok": dl_ok,
+        "detail": "design-lock.css present + linked" if dl_ok else "design-lock missing or not injected",
+        "job": "PRISM permanent — crystal-clear taste guardrail (loads last, swarm-proof)",
+    })
 
     # 6b) CSS quantum precision — exact tokens, WCAG, Ising ground state (+ C++ bench when not fast)
     fast = (

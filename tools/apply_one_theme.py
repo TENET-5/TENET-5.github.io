@@ -343,6 +343,25 @@ def apply_page(path: Path) -> bool:
     for _bad, _good in _COMPLIANCE:
         text = text.replace(_bad, _good)
 
+    # ZERO-INTERNALS self-heal (owner directive): the public site names NO AI model/engine/
+    # kernel. The swarm's cinema/gallery prose keeps re-leaking model names (LTX, FLUX, P256,
+    # "local inference"). Relabel to sanctioned wording every lap — "Powered by LIRIL AI" is
+    # the only sanctioned AI reference. tools/leak_scanner.py is the gate that catches misses.
+    _LEAK = [
+        ("LTX loops", "atmospheric loops"), ("LTX atmosphere", "cold atmosphere"),
+        ("LTX b-roll", "atmospheric b-roll"), ("LTX investigation loop", "investigation loop"),
+        ("per-scene LTX + stills", "per-scene film + stills"), ("per-scene LTX", "per-scene film"),
+        ("LTX + stills", "film + stills"), ("LTX bg/fg", "film bg/fg"), ("LTX / gallery", "film / gallery"),
+        ("Flux stills and LTX loops", "documentary stills and atmospheric loops"),
+        ("Flux stills", "documentary stills"), ("Flux and LTX", "film"),
+        ('cine-tag">LTX', 'cine-tag">REEL'),
+        ("P256-GEN // OSINT", "FIELD REEL · OSINT"), ("P256-GEN", "FIELD-GEN"),
+        ("the local inference engine", "LIRIL"), ("local inference engine", "LIRIL"),
+        ("local inference", "LIRIL analysis"),
+    ]
+    for _bad, _good in _LEAK:
+        text = text.replace(_bad, _good)
+
     # Retired targeting apparatus (legal compliance): the email-campaign / mass-dispatch /
     # send-to-named-officials pages are gone. Strip any anchor pointing at them so no dead
     # links or CTAs to the harassment tooling remain.
