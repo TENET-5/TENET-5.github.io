@@ -6,14 +6,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/press-theme.css?v=77">
-  <link rel="stylesheet" href="css/intel-report.css?v=2">
+  <link rel="stylesheet" href="css/intel-report.css?v=3">
   <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Municipal Risk — Data Science Report | TENET5</title>
-<meta name="description" content="Data science report on Canadian municipal risk: 30 cities, 52 findings. Score distributions, provincial aggregates, category prevalence, size–risk correlations.">
+<title>How Canadian Cities Keep Failing the Public | TENET5</title>
+<meta name="description" content="Investigative report: 52 documented failures across 30 Canadian cities — transit overruns, sole-source deals, developer money, police budgets, and Québec’s unfinished Charbonneau map.">
 <meta property="og:site_name" content="TENET5">
-<meta property="og:title" content="Municipal Risk — Data Science Report | TENET5">
-<meta property="og:description" content="Quantitative municipal risk analysis: scores, findings density, province tables, vendor multi-homing. Primary sources only.">
+<meta property="og:title" content="How Canadian Cities Keep Failing the Public | TENET5">
+<meta property="og:description" content="A national investigation of municipal failure — from Montréal to Iqaluit. Public records only.">
 <meta property="og:url" content="https://tenet-5.github.io/canada-map.html">
 <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
 <meta property="og:type" content="article">
@@ -33,975 +33,718 @@
     </nav>
   </header>
 <main class="press-main" id="main" role="main">
-<article class="report ds">
+<article class="report longread">
 
 <header class="press-hero">
-  <span class="kick">Data science report · Municipal Canada</span>
-  <p class="dateline">TENET5 · n=30 municipalities · 52 findings · public record extract</p>
-  <h1>Municipal risk:<br>a <em>measured</em> national pattern</h1>
+  <span class="kick">Investigation · Municipal Canada</span>
+  <p class="dateline">TENET5 · Public records · 30 cities · 52 findings</p>
+  <h1>How Canadian cities<br>keep failing the public</h1>
   <p class="lead">
-    This report treats Canadian municipal failures as a <strong>structured dataset</strong>,
-    not a scandal scrapbook. Unit of analysis: municipality. Outcomes: composite risk score
-    (0–100) and discrete findings from auditors-general, commissions, human-rights tribunals,
-    elections filings, and council records. Below: summary statistics, distributions,
-    provincial aggregates, size–risk relationships, category prevalence, multi-city vendors,
-    and the full observation table with sources in the city file appendix.
+    Across the country, the same story keeps writing itself in auditor reports and
+    commission findings: transit projects that blow past budgets and schedules,
+    contracts awarded without a real competition, developers who fund campaigns and
+    shape the skyline, police budgets that grow while oversight shrinks — and in
+    Québec, a construction–political system a royal commission mapped years ago and
+    that never fully closed.
   </p>
+  <p class="lead second">
+    This is not a database. It is an investigation of what governments have already
+    admitted on paper — 52 findings in 30 municipalities, from Montréal’s
+    Charbonneau file to Iqaluit’s fuel-spill cover-up.
+  </p>
+  <div class="nums" aria-label="At a glance">
+    <div><b>16</b><span>cities at Critical or High risk</span></div>
+    <div><b>52</b><span>documented findings</span></div>
+    <div><b>21</b><span>cities with procurement issues</span></div>
+    <div><b>13</b><span>cities with transit failures</span></div>
+  </div>
 </header>
 
 <nav class="toc" aria-label="Contents">
-  <a href="#headline">Headline numbers</a>
-  <a href="#distributions">Distributions</a>
-  <a href="#province">By province</a>
-  <a href="#size">Size &amp; risk</a>
-  <a href="#categories">Categories</a>
-  <a href="#vendors">Vendor multi-home</a>
-  <a href="#findings">Findings model</a>
-  <a href="#table">Observation table</a>
-  <a href="#appendix">City files</a>
-  <a href="#method">Method</a>
+  <a href="#findings">What we found</a>
+  <a href="#transit">Transit</a>
+  <a href="#procurement">Contracts</a>
+  <a href="#developers">Developers</a>
+  <a href="#police">Police</a>
+  <a href="#quebec">Québec</a>
+  <a href="#critical">Critical cities</a>
+  <a href="#high">High-risk cities</a>
+  <a href="#elsewhere">Elsewhere</a>
+  <a href="#method">How we built this</a>
 </nav>
 
-<section id="headline">
-  <p class="kicker">Section 01 · Descriptive statistics</p>
-  <h2>Headline numbers</h2>
-  <div class="stat-grid">
-    <div class="stat-card"><div class="sv">30</div><div class="sl">Municipalities (n)</div></div>
-    <div class="stat-card"><div class="sv">52</div><div class="sl">Findings total</div></div>
-    <div class="stat-card"><div class="sv">61.9</div><div class="sl">Mean risk score</div></div>
-    <div class="stat-card"><div class="sv">61</div><div class="sl">Median score</div></div>
-    <div class="stat-card"><div class="sv">15.3</div><div class="sl">Std. dev. (σ)</div></div>
-    <div class="stat-card"><div class="sv">35–91</div><div class="sl">Score range</div></div>
-    <div class="stat-card"><div class="sv">1.73</div><div class="sl">Mean findings / city</div></div>
-    <div class="stat-card"><div class="sv">53%</div><div class="sl">Critical + High share</div></div>
-    <div class="stat-card"><div class="sv">75.0</div><div class="sl">Pop-weighted mean score</div></div>
-    <div class="stat-card"><div class="sv">15.5M</div><div class="sl">Population covered</div></div>
-    <div class="stat-card"><div class="sv">$60B</div><div class="sl">Budget sum (extract)</div></div>
-    <div class="stat-card"><div class="sv">4</div><div class="sl">Zero-finding cities</div></div>
-  </div>
-  <div class="callout">
-    <p>
-      <strong>Read.</strong> 16 of 30 cities (53%) sit at Critical or High.
-      Mean score 61.9 exceeds median 61 — a right-skewed risk tail
-      (Montréal 91, Whitehorse 35). Population-weighted mean
-      (75.0) is higher than the
-      unweighted mean: large cities pull risk up.
-      Finding density averages 1.73 per city; 4 cities have empty extracts
-      (missing data ≠ clean books).
-    </p>
-  </div>
-</section>
-
-<section id="distributions">
-  <p class="kicker">Section 02 · Distributions</p>
-  <h2>Score, badge, and finding severity</h2>
-  <h3>Risk score histogram</h3>
-  <p>Bin counts for composite score (0–100). Modal mass sits in the 50–70 band; Critical is a thin upper tail.</p>
-  <div class="bar-chart">
-    <div class="bar-row"><div class="bar-lab">0–39</div><div class="bar-track"><div class="bar-fill" style="width:28.6%"></div></div><div class="bar-val">2</div></div>
-<div class="bar-row"><div class="bar-lab">40–49</div><div class="bar-track"><div class="bar-fill" style="width:85.7%"></div></div><div class="bar-val">6</div></div>
-<div class="bar-row"><div class="bar-lab">50–59</div><div class="bar-track"><div class="bar-fill" style="width:71.4%"></div></div><div class="bar-val">5</div></div>
-<div class="bar-row"><div class="bar-lab">60–69</div><div class="bar-track"><div class="bar-fill" style="width:100.0%"></div></div><div class="bar-val">7</div></div>
-<div class="bar-row"><div class="bar-lab">70–79</div><div class="bar-track"><div class="bar-fill" style="width:71.4%"></div></div><div class="bar-val">5</div></div>
-<div class="bar-row"><div class="bar-lab">80–100</div><div class="bar-track"><div class="bar-fill" style="width:71.4%"></div></div><div class="bar-val">5</div></div>
-  </div>
-  <h3>Badge distribution</h3>
-  <div class="bar-chart">
-    <div class="bar-row"><div class="bar-lab">Critical</div><div class="bar-track"><div class="bar-fill" style="width:16.7%"></div></div><div class="bar-val">5 · 17%</div></div>
-<div class="bar-row"><div class="bar-lab">High</div><div class="bar-track"><div class="bar-fill" style="width:36.7%"></div></div><div class="bar-val">11 · 37%</div></div>
-<div class="bar-row"><div class="bar-lab">Moderate</div><div class="bar-track"><div class="bar-fill" style="width:36.7%"></div></div><div class="bar-val">11 · 37%</div></div>
-<div class="bar-row"><div class="bar-lab">Monitored</div><div class="bar-track"><div class="bar-fill" style="width:10.0%"></div></div><div class="bar-val">3 · 10%</div></div>
-  </div>
-  <h3>Finding severity (n=52 findings)</h3>
-  <div class="bar-chart">
-    <div class="bar-row"><div class="bar-lab">Critical</div><div class="bar-track"><div class="bar-fill" style="width:70.0%"></div></div><div class="bar-val">14 · 27%</div></div>
-<div class="bar-row"><div class="bar-lab">High</div><div class="bar-track"><div class="bar-fill" style="width:100.0%"></div></div><div class="bar-val">20 · 38%</div></div>
-<div class="bar-row"><div class="bar-lab">Moderate</div><div class="bar-track"><div class="bar-fill" style="width:90.0%"></div></div><div class="bar-val">18 · 35%</div></div>
-  </div>
-</section>
-
-<section id="province">
-  <p class="kicker">Section 03 · Geographic aggregation</p>
-  <h2>Provincial means</h2>
-  <p>
-    Sorted by mean municipal score. Small-n provinces are unstable estimators — report n beside
-    every mean. Québec’s high mean is driven by Montréal and Laval (Charbonneau-era Critical
-    observations), not a large sample of Québec cities.
-  </p>
-  <div class="rank-wrap">
-    <table class="rank ds-table">
-      <thead>
-        <tr>
-          <th>Prov</th>
-          <th>n</th>
-          <th>Mean score</th>
-          <th>Max</th>
-          <th>Findings</th>
-          <th>Find/city</th>
-          <th>Pop (sum)</th>
-        </tr>
-      </thead>
-      <tbody>
-<tr><td class="mono">MB</td><td class="num">1</td><td class="num score">77.0</td><td class="num">77</td><td class="num">2</td><td class="num">2.00</td><td class="num">0.75M</td></tr>
-<tr><td class="mono">QC</td><td class="num">3</td><td class="num score">75.3</td><td class="num">91</td><td class="num">5</td><td class="num">1.67</td><td class="num">3.09M</td></tr>
-<tr><td class="mono">AB</td><td class="num">2</td><td class="num score">72.5</td><td class="num">74</td><td class="num">5</td><td class="num">2.50</td><td class="num">2.35M</td></tr>
-<tr><td class="mono">ON</td><td class="num">10</td><td class="num score">68.5</td><td class="num">88</td><td class="num">25</td><td class="num">2.50</td><td class="num">6.60M</td></tr>
-<tr><td class="mono">NU</td><td class="num">1</td><td class="num score">66.0</td><td class="num">66</td><td class="num">2</td><td class="num">2.00</td><td class="num">0.01M</td></tr>
-<tr><td class="mono">BC</td><td class="num">4</td><td class="num score">62.5</td><td class="num">79</td><td class="num">7</td><td class="num">1.75</td><td class="num">1.48M</td></tr>
-<tr><td class="mono">NS</td><td class="num">1</td><td class="num score">56.0</td><td class="num">56</td><td class="num">2</td><td class="num">2.00</td><td class="num">0.44M</td></tr>
-<tr><td class="mono">SK</td><td class="num">2</td><td class="num score">49.5</td><td class="num">51</td><td class="num">2</td><td class="num">1.00</td><td class="num">0.49M</td></tr>
-<tr><td class="mono">NL</td><td class="num">1</td><td class="num score">49.0</td><td class="num">49</td><td class="num">1</td><td class="num">1.00</td><td class="num">0.11M</td></tr>
-<tr><td class="mono">NB</td><td class="num">2</td><td class="num score">45.0</td><td class="num">46</td><td class="num">0</td><td class="num">0.00</td><td class="num">0.14M</td></tr>
-<tr><td class="mono">NT</td><td class="num">1</td><td class="num score">40.0</td><td class="num">40</td><td class="num">1</td><td class="num">1.00</td><td class="num">0.02M</td></tr>
-<tr><td class="mono">PE</td><td class="num">1</td><td class="num score">38.0</td><td class="num">38</td><td class="num">0</td><td class="num">0.00</td><td class="num">0.04M</td></tr>
-<tr><td class="mono">YT</td><td class="num">1</td><td class="num score">35.0</td><td class="num">35</td><td class="num">0</td><td class="num">0.00</td><td class="num">0.03M</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="footnote">
-    Highest mean: <strong>MB</strong>
-    (77.0, n=1) · Most findings absolute: see table.
-  </p>
-</section>
-
-<section id="size">
-  <p class="kicker">Section 04 · Covariates</p>
-  <h2>Size, budget, and risk</h2>
-  <p>
-    Pearson correlations on the full n=30 extract (linear association only; not causal):
-  </p>
-  <div class="rank-wrap">
-    <table class="rank ds-table">
-      <thead>
-        <tr><th>Pair</th><th>r</th><th>Interpretation</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Score × findings count</td><td class="num mono">+0.77</td><td>More documented findings track higher scores</td></tr>
-        <tr><td>Score × population</td><td class="num mono">+0.69</td><td>Larger cities associate with higher risk scores</td></tr>
-        <tr><td>Score × budget ($B)</td><td class="num mono">+0.60</td><td>Budget scale co-moves with risk score</td></tr>
-        <tr><td>Findings × population</td><td class="num mono">+0.48</td><td>Finding volume rises with city size</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <h3>Mean score by population tier</h3>
-  <div class="rank-wrap">
-    <table class="rank ds-table">
-      <thead>
-        <tr><th>Pop tier</th><th>n</th><th>Mean score</th><th>Findings</th><th>Find/city</th></tr>
-      </thead>
-      <tbody>
-<tr><td>≥1M</td><td class="num">4</td><td class="num score">81.0</td><td class="num">10</td><td class="num">2.50</td></tr>
-<tr><td>500k–1M</td><td class="num">8</td><td class="num score">69.5</td><td class="num">18</td><td class="num">2.25</td></tr>
-<tr><td>100k–500k</td><td class="num">8</td><td class="num score">60.1</td><td class="num">12</td><td class="num">1.50</td></tr>
-<tr><td>&lt;100k</td><td class="num">10</td><td class="num score">49.5</td><td class="num">12</td><td class="num">1.20</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="callout">
-    <p>
-      <strong>Model note.</strong> Scores are composite indexes built from documented severity —
-      they are not independent of finding count by design. Correlation between score and findings
-      (+0.77) is partly structural. Population and budget correlations test whether
-      risk concentrates in large fiscal systems; interpret with n and selection (this is a curated
-      national sample, not a random draw of all Canadian municipalities).
-    </p>
-  </div>
-</section>
-
-<section id="categories">
-  <p class="kicker">Section 05 · Feature prevalence</p>
-  <h2>Category rates (cities carrying each tag)</h2>
-  <p>
-    Binary tags per city (multi-label). Rate = cities with tag / n. Dominant feature:
-    <strong>Procurement / sole-source</strong> in 21/30 cities
-    (70%).
-  </p>
-  <div class="bar-chart">
-    <div class="bar-row"><div class="bar-lab">Procurement / sole-source</div><div class="bar-track"><div class="bar-fill" style="width:100.0%"></div></div><div class="bar-val">21 · 70%</div></div>
-<div class="bar-row"><div class="bar-lab">Transparency gaps</div><div class="bar-track"><div class="bar-fill" style="width:81.0%"></div></div><div class="bar-val">17 · 57%</div></div>
-<div class="bar-row"><div class="bar-lab">Integrity / conflict</div><div class="bar-track"><div class="bar-fill" style="width:66.7%"></div></div><div class="bar-val">14 · 47%</div></div>
-<div class="bar-row"><div class="bar-lab">Transit / LRT / BRT</div><div class="bar-track"><div class="bar-fill" style="width:61.9%"></div></div><div class="bar-val">13 · 43%</div></div>
-<div class="bar-row"><div class="bar-lab">Developer influence</div><div class="bar-track"><div class="bar-fill" style="width:42.9%"></div></div><div class="bar-val">9 · 30%</div></div>
-<div class="bar-row"><div class="bar-lab">Police budgets</div><div class="bar-track"><div class="bar-fill" style="width:38.1%"></div></div><div class="bar-val">8 · 27%</div></div>
-<div class="bar-row"><div class="bar-lab">Housing / shelter</div><div class="bar-track"><div class="bar-fill" style="width:38.1%"></div></div><div class="bar-val">8 · 27%</div></div>
-<div class="bar-row"><div class="bar-lab">Audit findings</div><div class="bar-track"><div class="bar-fill" style="width:38.1%"></div></div><div class="bar-val">8 · 27%</div></div>
-<div class="bar-row"><div class="bar-lab">Executive pay</div><div class="bar-track"><div class="bar-fill" style="width:23.8%"></div></div><div class="bar-val">5 · 17%</div></div>
-  </div>
-  <p>
-    Co-occurrence pattern in the narrative layer: Critical cities stack <em>procurement + integrity</em>;
-    High cities often stack <em>transit + developer-influence</em> or <em>police-budget + transparency</em>.
-    Categories are not mutually exclusive — a city can load multiple failure modes.
-  </p>
-</section>
-
-<section id="vendors">
-  <p class="kicker">Section 06 · Network signal</p>
-  <h2>Vendors / networks multi-homed across cities</h2>
-  <p>
-    Shared named vendors appearing in ≥2 municipal files. Multi-homing is a weak graph signal
-    for contractor concentration — not proof of collusion by itself.
-  </p>
-  <div class="rank-wrap">
-    <table class="rank ds-table">
-      <thead>
-        <tr><th>Vendor / network</th><th>Cities</th><th>Municipalities</th></tr>
-      </thead>
-      <tbody>
-<tr><td>SNC-Lavalin</td><td class="num">3</td><td class="cats">City of Laval · City of Montréal · City of Ottawa</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
 <section id="findings">
-  <p class="kicker">Section 07 · Outcome model</p>
-  <h2>What the numbers support</h2>
-  <ol class="judgments">
-    <li>
-      <strong>J1 — Critical/High is not rare.</strong>
-      16/30 (53%) of the sample is Critical or High. Under a null of
-      “isolated bad apples,” this concentration is hard to reconcile without shared institutions
-      (procurement law, transit funding, campaign finance).
-    </li>
-    <li>
-      <strong>J2 — Category mass is procurement and transparency.</strong>
-      Procurement / sole-source tags 21 cities;
-      Transparency gaps tags 17. Transit
-      (13) and integrity (14) form the next tier.
-    </li>
-    <li>
-      <strong>J3 — Size correlates but does not monopolize risk.</strong>
-      Score×population r=+0.69. Mid-size Ontario and northern High cases
-      (Belleville, Iqaluit, Thunder Bay) show risk outside megacity fiscal systems.
-    </li>
-    <li>
-      <strong>J4 — Missing findings are data gaps.</strong>
-      4 cities have zero discrete findings but still carry composite scores and category
-      tags. Treat them as censored observations, not controls.
-    </li>
-    <li>
-      <strong>J5 — Québec Critical pole is high-leverage.</strong>
-      Two Critical observations (Montréal 91, Laval 83) dominate the provincial mean — classic
-      leverage points. National inference should not collapse to those two rows alone.
-    </li>
-  </ol>
-</section>
+  <p class="kicker">The findings</p>
+  <h2>What the public record shows</h2>
 
-<section id="table">
-  <p class="kicker">Section 08 · Microdata</p>
-  <h2>Observation table (n=30)</h2>
-  <p>Sorted by score descending. Click municipality for city file with findings and sources.</p>
-  <div class="rank-wrap wide">
-    <table class="rank ds-table compact">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Score</th>
-          <th>Level</th>
-          <th>Prov</th>
-          <th>Municipality</th>
-          <th>Findings</th>
-          <th>Pop</th>
-          <th>Budget $B</th>
-          <th>Categories</th>
-        </tr>
-      </thead>
-      <tbody>
-<tr><td class="num">1</td><td class="num score">91</td><td><span class="badge badge-CRITICAL">CRITICAL</span></td><td class="mono">QC</td><td class="city"><a href="#montreal-qc">City of Montréal</a></td><td class="num">2</td><td class="num">2,100,000</td><td class="num">6.6</td><td class="cats">procurement, integrity, developer-influence, audit-findings</td></tr>
-<tr><td class="num">2</td><td class="num score">88</td><td><span class="badge badge-CRITICAL">CRITICAL</span></td><td class="mono">ON</td><td class="city"><a href="#toronto-on">City of Toronto</a></td><td class="num">3</td><td class="num">2,930,000</td><td class="num">16.1</td><td class="cats">procurement, transit, housing, executive-pay, audit-findings</td></tr>
-<tr><td class="num">3</td><td class="num score">83</td><td><span class="badge badge-CRITICAL">CRITICAL</span></td><td class="mono">QC</td><td class="city"><a href="#laval-qc">City of Laval</a></td><td class="num">2</td><td class="num">440,000</td><td class="num">1.2</td><td class="cats">procurement, integrity, developer-influence, audit-findings</td></tr>
-<tr><td class="num">4</td><td class="num score">82</td><td><span class="badge badge-CRITICAL">CRITICAL</span></td><td class="mono">ON</td><td class="city"><a href="#ottawa-on">City of Ottawa</a></td><td class="num">3</td><td class="num">994,000</td><td class="num">4.5</td><td class="cats">transit, procurement, audit-findings, transparency</td></tr>
-<tr><td class="num">5</td><td class="num score">80</td><td><span class="badge badge-CRITICAL">CRITICAL</span></td><td class="mono">ON</td><td class="city"><a href="#thunder-bay-on">City of Thunder Bay</a></td><td class="num">2</td><td class="num">121,000</td><td class="num">0.5</td><td class="cats">police-budget, integrity, transparency, audit-findings</td></tr>
-<tr><td class="num">6</td><td class="num score">79</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">BC</td><td class="city"><a href="#vancouver-bc">City of Vancouver</a></td><td class="num">3</td><td class="num">675,000</td><td class="num">2.2</td><td class="cats">developer-influence, procurement, campaign-finance, transparency</td></tr>
-<tr><td class="num">7</td><td class="num score">77</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">MB</td><td class="city"><a href="#winnipeg-mb">City of Winnipeg</a></td><td class="num">2</td><td class="num">749,000</td><td class="num">2.1</td><td class="cats">procurement, executive-pay, integrity, police-budget</td></tr>
-<tr><td class="num">8</td><td class="num score">74</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">AB</td><td class="city"><a href="#calgary-ab">City of Calgary</a></td><td class="num">3</td><td class="num">1,336,000</td><td class="num">4.9</td><td class="cats">transit, developer-influence, audit-findings, procurement</td></tr>
-<tr><td class="num">9</td><td class="num score">73</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">BC</td><td class="city"><a href="#surrey-bc">City of Surrey</a></td><td class="num">2</td><td class="num">568,000</td><td class="num">1.6</td><td class="cats">police-budget, transparency, integrity, procurement</td></tr>
-<tr><td class="num">10</td><td class="num score">71</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">AB</td><td class="city"><a href="#edmonton-ab">City of Edmonton</a></td><td class="num">2</td><td class="num">1,010,000</td><td class="num">4.1</td><td class="cats">transit, developer-influence, integrity, executive-pay</td></tr>
-<tr><td class="num">11</td><td class="num score">68</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">ON</td><td class="city"><a href="#hamilton-on">City of Hamilton</a></td><td class="num">3</td><td class="num">569,353</td><td class="num">3.1</td><td class="cats">transit, police-budget, housing, integrity</td></tr>
-<tr><td class="num">12</td><td class="num score">66</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">NU</td><td class="city"><a href="#iqaluit-nu">City of Iqaluit</a></td><td class="num">2</td><td class="num">8,000</td><td class="num">0.2</td><td class="cats">procurement, housing, integrity, transparency</td></tr>
-<tr><td class="num">13</td><td class="num score">65</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">ON</td><td class="city"><a href="#brampton-on">City of Brampton</a></td><td class="num">2</td><td class="num">656,000</td><td class="num">1.4</td><td class="cats">developer-influence, integrity, transit, procurement</td></tr>
-<tr><td class="num">14</td><td class="num score">62</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">ON</td><td class="city"><a href="#niagara-falls-on">City of Niagara Falls</a></td><td class="num">2</td><td class="num">88,000</td><td class="num">0.3</td><td class="cats">integrity, developer-influence, procurement, executive-pay</td></tr>
-<tr><td class="num">15</td><td class="num score">61</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">ON</td><td class="city"><a href="#belleville-on">City of Belleville</a></td><td class="num">3</td><td class="num">55,000</td><td class="num">0.2</td><td class="cats">police-budget, procurement, integrity, transparency</td></tr>
-<tr><td class="num">16</td><td class="num score">61</td><td><span class="badge badge-HIGH">HIGH</span></td><td class="mono">ON</td><td class="city"><a href="#london-on">City of London</a></td><td class="num">2</td><td class="num">422,000</td><td class="num">1.6</td><td class="cats">transit, housing, procurement, integrity</td></tr>
-<tr><td class="num">17</td><td class="num score">60</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">ON</td><td class="city"><a href="#mississauga-on">City of Mississauga</a></td><td class="num">2</td><td class="num">717,000</td><td class="num">1.8</td><td class="cats">developer-influence, executive-pay, transit, integrity</td></tr>
-<tr><td class="num">18</td><td class="num score">58</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">ON</td><td class="city"><a href="#quinte-west-on">City of Quinte West</a></td><td class="num">3</td><td class="num">45,000</td><td class="num">0.1</td><td class="cats">integrity, audit-findings, transparency</td></tr>
-<tr><td class="num">19</td><td class="num score">56</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">NS</td><td class="city"><a href="#halifax-ns">Halifax Regional Municipality</a></td><td class="num">2</td><td class="num">439,000</td><td class="num">1.0</td><td class="cats">procurement, police-budget, transit, transparency</td></tr>
-<tr><td class="num">20</td><td class="num score">53</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">BC</td><td class="city"><a href="#kelowna-bc">City of Kelowna</a></td><td class="num">1</td><td class="num">144,000</td><td class="num">0.5</td><td class="cats">developer-influence, transparency, housing</td></tr>
-<tr><td class="num">21</td><td class="num score">52</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">QC</td><td class="city"><a href="#quebec-city-qc">City of Québec</a></td><td class="num">1</td><td class="num">549,000</td><td class="num">2.0</td><td class="cats">transit, procurement, transparency</td></tr>
-<tr><td class="num">22</td><td class="num score">51</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">SK</td><td class="city"><a href="#regina-sk">City of Regina</a></td><td class="num">1</td><td class="num">228,000</td><td class="num">0.8</td><td class="cats">procurement, transit, audit-findings</td></tr>
-<tr><td class="num">23</td><td class="num score">49</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">NL</td><td class="city"><a href="#st-johns-nl">City of St. John&#x27;s</a></td><td class="num">1</td><td class="num">113,000</td><td class="num">0.5</td><td class="cats">procurement, infrastructure, transparency</td></tr>
-<tr><td class="num">24</td><td class="num score">48</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">SK</td><td class="city"><a href="#saskatoon-sk">City of Saskatoon</a></td><td class="num">1</td><td class="num">266,000</td><td class="num">0.9</td><td class="cats">procurement, police-budget, transit</td></tr>
-<tr><td class="num">25</td><td class="num score">46</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">NB</td><td class="city"><a href="#moncton-nb">City of Moncton</a></td><td class="num">0</td><td class="num">79,000</td><td class="num">0.4</td><td class="cats">transparency, transit</td></tr>
-<tr><td class="num">26</td><td class="num score">45</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">BC</td><td class="city"><a href="#victoria-bc">City of Victoria</a></td><td class="num">1</td><td class="num">92,000</td><td class="num">0.5</td><td class="cats">housing, transparency, police-budget</td></tr>
-<tr><td class="num">27</td><td class="num score">44</td><td><span class="badge badge-MODERATE">MODERATE</span></td><td class="mono">NB</td><td class="city"><a href="#fredericton-nb">City of Fredericton</a></td><td class="num">0</td><td class="num">63,000</td><td class="num">0.3</td><td class="cats">transparency, procurement</td></tr>
-<tr><td class="num">28</td><td class="num score">40</td><td><span class="badge badge-MONITORED">MONITORED</span></td><td class="mono">NT</td><td class="city"><a href="#yellowknife-nt">City of Yellowknife</a></td><td class="num">1</td><td class="num">20,000</td><td class="num">0.2</td><td class="cats">transparency, procurement, housing</td></tr>
-<tr><td class="num">29</td><td class="num score">38</td><td><span class="badge badge-MONITORED">MONITORED</span></td><td class="mono">PE</td><td class="city"><a href="#charlottetown-pe">City of Charlottetown</a></td><td class="num">0</td><td class="num">40,000</td><td class="num">0.2</td><td class="cats">transparency, procurement</td></tr>
-<tr><td class="num">30</td><td class="num score">35</td><td><span class="badge badge-MONITORED">MONITORED</span></td><td class="mono">YT</td><td class="city"><a href="#whitehorse-yt">City of Whitehorse</a></td><td class="num">0</td><td class="num">28,000</td><td class="num">0.2</td><td class="cats">transparency, housing</td></tr>
-      </tbody>
-    </table>
+  <div class="finding-block">
+    <h3>1. Transit is where the public loses the most money</h3>
+    <p>
+      Ottawa’s $2.1-billion LRT inquiry found city managers gave council “incomplete
+      and misleading” information. Toronto’s Eglinton Crosstown has run more than a
+      decade late on a $12.5-billion project. Calgary cut its Green Line from 46
+      kilometres to 8 while the budget stayed near $4.9 billion. Edmonton’s Valley
+      Line is years late. Hamilton spent $130 million planning an LRT the province
+      then cancelled. London’s bus rapid transit has overrun. Québec City’s tramway
+      climbed from $1.8 billion toward $3.3 billion.
+    </p>
+    <p>
+      Different cities. Same shape: optimistic opening bids, shared consultant
+      networks, federal cost-sharing that rewards under-pricing, and years of
+      overrun before anyone is held to account.
+    </p>
+  </div>
+
+  <div class="finding-block">
+    <h3>2. Competitive bidding is optional when it matters</h3>
+    <p>
+      Toronto awarded about $500 million in shelter-hotel contracts without a public
+      tender. Vancouver’s auditor found roughly 40 percent of sampled contracts
+      bypassed competitive process. Ottawa sole-sourced elements of a $332-million
+      Lansdowne redevelopment. Calgary’s auditor caught contracts gamed just under
+      the sole-source threshold. Belleville approved sole-source awards without
+      required council ratification. Winnipeg’s police headquarters ballooned from
+      $137 million to $214 million under mismanagement a forensic audit later laid out.
+    </p>
+  </div>
+
+  <div class="finding-block">
+    <h3>3. Developer money still buys land-use outcomes</h3>
+    <p>
+      ABC Vancouver took $1.3 million from real-estate and construction donors in one
+      election cycle — after provincial “reform.” Top developers captured most
+      rezoning approvals. Mississauga still lives in the shadow of a judicial inquiry
+      into the McCallion-era developer nexus. Brampton’s growth agenda has tracked
+      developer interests for years. Calgary and Edmonton parked hundreds of millions
+      — and billions — of public land value into TIF deals that primarily benefit
+      private developers. Kelowna’s official plan is treated as a suggestion.
+    </p>
+  </div>
+
+  <div class="finding-block">
+    <h3>4. Police budgets expand as legitimacy contracts</h3>
+    <p>
+      Hamilton spends more than a third of its tax levy on police. Belleville’s police
+      budget jumped 15.6 percent in a single year with no matching public-safety gain.
+      Halifax puts about 15 percent of operating money into policing. Surrey burned
+      more than $95 million flipping between an RCMP model and a municipal service.
+      In Thunder Bay, the Human Rights Tribunal found systemic racism in how Indigenous
+      deaths were investigated — and the police chief denied it until the province
+      forced a review.
+    </p>
+  </div>
+
+  <div class="finding-block">
+    <h3>5. Québec’s Charbonneau map is unfinished business</h3>
+    <p>
+      The commission documented a province-wide construction–Mafia–political machine.
+      Laval’s mayor took roughly $8 million in bribes over two decades and fled the
+      country. Montréal’s contracts were rigged with the Rizzuto network. Contractors
+      were convicted. Oversight was then weakened. By 2023 the city’s inspector-general
+      was again documenting procurement irregularities on REM-era work. The commission
+      proved the system. It did not dismantle it.
+    </p>
+  </div>
+
+  <div class="finding-block">
+    <h3>6. Oversight often dies at the council table</h3>
+    <p>
+      Quinte West voted not to implement integrity-commissioner remedies — twice.
+      Niagara’s regional CAO was fired amid expense and procurement allegations that
+      touched every lower-tier city. Iqaluit was slow to tell residents a fuel leak had
+      contaminated drinking water. Where civilian review exists, political power
+      routinely nullifies it.
+    </p>
   </div>
 </section>
 
-<section id="appendix">
-  <p class="kicker">Section 09 · Appendix</p>
-  <h2>City files — all findings &amp; sources</h2>
+<section id="transit">
+  <p class="kicker">Pattern</p>
+  <h2>The national transit machine</h2>
   <p>
-    Each observation’s raw findings. Severity labels are from the extract. Sources are primary
-    or primary-citing journalism as logged.
+    13 cities in this investigation carry a transit failure tag.
+    The projects differ — LRT, BRT, tramway — but the incentives do not. Lowball the
+    opening number. Win federal matching money. Renegotiate later. The public pays
+    the difference in taxes and delayed service.
+  </p>
+  <p>
+    Ottawa is the clearest paper trail: a full commission of inquiry. Toronto is the
+    largest dollar figure. Calgary is the purest unit-cost explosion — same budget,
+    fewer kilometres. Hamilton is the political cancel after sunk design costs.
+    Together they are not a coincidence. They are a financing culture.
+  </p>
+</section>
+
+<section id="procurement">
+  <p class="kicker">Pattern</p>
+  <h2>When competition is theatre</h2>
+  <p>
+    Procurement rules exist on every city website. The record shows how often they
+    fail in practice. 21 municipalities in this set carry
+    procurement findings — the single most common failure mode.
+  </p>
+  <p>
+    The mechanisms repeat: emergency sole-source during COVID that never returned to
+    competition; thresholds gamed by splitting work; “preferred” vendors who appear
+    across cities; audits that document the breach years after the money is gone.
+  </p>
+</section>
+
+<section id="developers">
+  <p class="kicker">Pattern</p>
+  <h2>Who shapes the skyline</h2>
+  <p>
+    Municipal power is zoning power. Developer capital still finds its way into
+    campaigns, councils, and TIF districts that socialize infrastructure costs while
+    privatizing upside. Vancouver’s disclosure filings, Mississauga’s inquiry,
+    Calgary’s East Village TIF, Edmonton’s Blatchford, and Brampton’s growth votes
+    are chapters of one continental story: the municipal real-estate state.
+  </p>
+</section>
+
+<section id="police">
+  <p class="kicker">Pattern</p>
+  <h2>Force without accountability</h2>
+  <p>
+    Police spending is the budget line that almost never shrinks. In mid-size Ontario
+    cities it can dominate the tax levy. In Thunder Bay the failure is not only fiscal
+    — it is investigative. An OHRT finding of systemic racism in death investigations,
+    denied by leadership, required provincial intervention. That is what “oversight
+    failure” looks like when the stakes are lives, not change orders.
+  </p>
+</section>
+
+<section id="quebec">
+  <p class="kicker">Pattern</p>
+  <h2>What Charbonneau proved — and what remained</h2>
+  <p>
+    No other Canadian province has put municipal corruption on the record with the
+    same forensic clarity. Montréal (score 91) and Laval (83) sit at the top of this
+    investigation for a reason. The Rizzuto-linked cartels, the kickback percentages,
+    the political machine, the convictions — then the slow erosion of the watchdog
+    culture that followed. When REM-era irregularities reappear in inspector-general
+    files, that is continuity, not nostalgia.
+  </p>
+</section>
+
+<section id="critical">
+  <p class="kicker">The cities · Critical</p>
+  <h2>Five cities at the edge</h2>
+  <p class="section-lede">
+    Critical means a composite risk score of 80 or higher — enough documented severity
+    that the file cannot be waved away as ordinary municipal friction.
   </p>
   
-    <article class="assess" id="montreal-qc">
+    <article class="city-story lead-city" id="montreal-qc">
       <header>
         <span class="badge badge-CRITICAL">CRITICAL</span>
         <span class="score">91/100</span>
-        <span class="nfind">2 findings · pop 2,100,000 · budget $6.6B</span>
-        <h3>City of Montréal <span class="prov">(QC)</span></h3>
+        <h3>City of Montréal <span class="prov">QC</span></h3>
       </header>
-      <p class="sum">Charbonneau Commission documented systemic Mafia-construction collusion; $1B+ in overcharges to taxpayers</p>
+      <p class="dek">Charbonneau Commission documented systemic Mafia-construction collusion; $1B+ in overcharges to taxpayers</p>
       
-        <div class="finding">
-          <div class="ft">Charbonneau Commission (2011-2015) <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Commission documented systemic corruption: municipal contracts rigged with Vito Rizzuto Mafia network. Former Mayor Gilles Vaillancourt fled with $8M in corrupt proceeds. Multiple contractors convicted.</p>
-          <div class="src">Source: Charbonneau Commission Final Report 2015</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Ongoing Procurement Issues <span class="sev sev-high">HIGH</span></div>
-          <p>Post-Charbonneau oversight weakened by 2020. New procurement irregularities in REM transit and infrastructure contracts</p>
-          <div class="src">Source: Bureau de l&#x27;inspecteur général Montréal 2023</div>
-        </div>
-      <p class="meta">Vendors: SNC-Lavalin · Rizzuto network contractors</p>
+      <figure class="fact">
+        <figcaption>Charbonneau Commission (2011-2015)</figcaption>
+        <p>Commission documented systemic corruption: municipal contracts rigged with Vito Rizzuto Mafia network. Former Mayor Gilles Vaillancourt fled with $8M in corrupt proceeds. Multiple contractors convicted.</p>
+        <cite>Source: Charbonneau Commission Final Report 2015</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Ongoing Procurement Issues</figcaption>
+        <p>Post-Charbonneau oversight weakened by 2020. New procurement irregularities in REM transit and infrastructure contracts</p>
+        <cite>Source: Bureau de l&#x27;inspecteur général Montréal 2023</cite>
+      </figure>
+      <p class="vend">Named in the record: SNC-Lavalin · Rizzuto network contractors</p>
     </article>
 
-    <article class="assess" id="toronto-on">
+    <article class="city-story lead-city" id="toronto-on">
       <header>
         <span class="badge badge-CRITICAL">CRITICAL</span>
         <span class="score">88/100</span>
-        <span class="nfind">3 findings · pop 2,930,000 · budget $16.1B</span>
-        <h3>City of Toronto <span class="prov">(ON)</span></h3>
+        <h3>City of Toronto <span class="prov">ON</span></h3>
       </header>
-      <p class="sum">$500M shelter hotel contracts awarded without tender; $12.5B Crosstown LRT 11 years delayed</p>
+      <p class="dek">$500M shelter hotel contracts awarded without tender; $12.5B Crosstown LRT 11 years delayed</p>
       
-        <div class="finding">
-          <div class="ft">Shelter hotel contracts — no tender <span class="sev sev-critical">CRITICAL</span></div>
-          <p>$500M in contracts for shelter hotels awarded without competitive process during COVID-19</p>
-          <div class="src">Source: City Auditor General 2021</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Crosstown LRT — 11-year delay <span class="sev sev-critical">CRITICAL</span></div>
-          <p>$12.5B Eglinton Crosstown LRT projected 11 years behind original schedule; cost overruns exceed $2B</p>
-          <div class="src">Source: Infrastructure Ontario / Auditor General of Ontario 2023</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Executive compensation growth <span class="sev sev-high">HIGH</span></div>
-          <p>City manager and top-100 salaries grew 42% over 10 years vs 18% CPI</p>
-          <div class="src">Source: Ontario Sunshine List 2023</div>
-        </div>
-      <p class="meta">Vendors: EllisDon · Crosslinx Transit Solutions · Bondfield Construction · <a href="toronto.html">Full investigation</a></p>
+      <figure class="fact">
+        <figcaption>Shelter hotel contracts — no tender</figcaption>
+        <p>$500M in contracts for shelter hotels awarded without competitive process during COVID-19</p>
+        <cite>Source: City Auditor General 2021</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Crosstown LRT — 11-year delay</figcaption>
+        <p>$12.5B Eglinton Crosstown LRT projected 11 years behind original schedule; cost overruns exceed $2B</p>
+        <cite>Source: Infrastructure Ontario / Auditor General of Ontario 2023</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Executive compensation growth</figcaption>
+        <p>City manager and top-100 salaries grew 42% over 10 years vs 18% CPI</p>
+        <cite>Source: Ontario Sunshine List 2023</cite>
+      </figure>
+      <p class="vend">Named in the record: EllisDon · Crosslinx Transit Solutions · Bondfield Construction</p> <a class="more" href="toronto.html">Full investigation →</a>
     </article>
 
-    <article class="assess" id="laval-qc">
+    <article class="city-story lead-city" id="laval-qc">
       <header>
         <span class="badge badge-CRITICAL">CRITICAL</span>
         <span class="score">83/100</span>
-        <span class="nfind">2 findings · pop 440,000 · budget $1.2B</span>
-        <h3>City of Laval <span class="prov">(QC)</span></h3>
+        <h3>City of Laval <span class="prov">QC</span></h3>
       </header>
-      <p class="sum">Charbonneau Commission: former Mayor Vaillancourt took $8M in bribes; systemic Mafia-contractor network</p>
+      <p class="dek">Charbonneau Commission: former Mayor Vaillancourt took $8M in bribes; systemic Mafia-contractor network</p>
       
-        <div class="finding">
-          <div class="ft">Gilles Vaillancourt $8M Bribe Scheme <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Charbonneau Commission found former Laval Mayor Vaillancourt operated systematic bribe scheme with Mafia and contractors for 20+ years. Fled country with ~$8M. Returned, sentenced 6 years (2016)</p>
-          <div class="src">Source: Charbonneau Commission Report 2015 / Court records</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Construction Cartel <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Entire municipal construction sector in Laval found to be controlled by Rizzuto Mafia cartel with 2.5% kickback on all contracts</p>
-          <div class="src">Source: Charbonneau Commission testimony 2012</div>
-        </div>
-      <p class="meta">Vendors: Rizzuto network · SNC-Lavalin</p>
+      <figure class="fact">
+        <figcaption>Gilles Vaillancourt $8M Bribe Scheme</figcaption>
+        <p>Charbonneau Commission found former Laval Mayor Vaillancourt operated systematic bribe scheme with Mafia and contractors for 20+ years. Fled country with ~$8M. Returned, sentenced 6 years (2016)</p>
+        <cite>Source: Charbonneau Commission Report 2015 / Court records</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Construction Cartel</figcaption>
+        <p>Entire municipal construction sector in Laval found to be controlled by Rizzuto Mafia cartel with 2.5% kickback on all contracts</p>
+        <cite>Source: Charbonneau Commission testimony 2012</cite>
+      </figure>
+      <p class="vend">Named in the record: Rizzuto network · SNC-Lavalin</p>
     </article>
 
-    <article class="assess" id="ottawa-on">
+    <article class="city-story lead-city" id="ottawa-on">
       <header>
         <span class="badge badge-CRITICAL">CRITICAL</span>
         <span class="score">82/100</span>
-        <span class="nfind">3 findings · pop 994,000 · budget $4.5B</span>
-        <h3>City of Ottawa <span class="prov">(ON)</span></h3>
+        <h3>City of Ottawa <span class="prov">ON</span></h3>
       </header>
-      <p class="sum">$2.1B LRT Rideau inquiry found &#x27;incomplete oversight&#x27;; $332M Lansdowne 2.0 sole-source elements</p>
+      <p class="dek">$2.1B LRT Rideau inquiry found &#x27;incomplete oversight&#x27;; $332M Lansdowne 2.0 sole-source elements</p>
       
-        <div class="finding">
-          <div class="ft">LRT Stage 1 — systemic oversight failure <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Rideau Transit Group inquiry found city management provided &#x27;incomplete and misleading&#x27; information to council on $2.1B LRT project</p>
-          <div class="src">Source: Justice William Hourigan Commission of Inquiry 2022</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Lansdowne 2.0 — sole-source elements <span class="sev sev-high">HIGH</span></div>
-          <p>$332M Lansdowne Park redevelopment contained sole-sourced components not subject to competitive bid</p>
-          <div class="src">Source: Ottawa City Auditor 2023</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Integrity Commissioner complaints — councillors <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Multiple sitting councillors subject to integrity commissioner investigations 2021-2024</p>
-          <div class="src">Source: City of Ottawa Integrity Commissioner Reports</div>
-        </div>
-      <p class="meta">Vendors: Rideau Transit Group · SNC-Lavalin · OSEG (Ottawa Sports &amp; Entertainment Group) · <a href="ottawa.html">Full investigation</a></p>
+      <figure class="fact">
+        <figcaption>LRT Stage 1 — systemic oversight failure</figcaption>
+        <p>Rideau Transit Group inquiry found city management provided &#x27;incomplete and misleading&#x27; information to council on $2.1B LRT project</p>
+        <cite>Source: Justice William Hourigan Commission of Inquiry 2022</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Lansdowne 2.0 — sole-source elements</figcaption>
+        <p>$332M Lansdowne Park redevelopment contained sole-sourced components not subject to competitive bid</p>
+        <cite>Source: Ottawa City Auditor 2023</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Integrity Commissioner complaints — councillors</figcaption>
+        <p>Multiple sitting councillors subject to integrity commissioner investigations 2021-2024</p>
+        <cite>Source: City of Ottawa Integrity Commissioner Reports</cite>
+      </figure>
+      <p class="vend">Named in the record: Rideau Transit Group · SNC-Lavalin · OSEG (Ottawa Sports &amp; Entertainment Group)</p> <a class="more" href="ottawa.html">Full investigation →</a>
     </article>
 
-    <article class="assess" id="thunder-bay-on">
+    <article class="city-story lead-city" id="thunder-bay-on">
       <header>
         <span class="badge badge-CRITICAL">CRITICAL</span>
         <span class="score">80/100</span>
-        <span class="nfind">2 findings · pop 121,000 · budget $0.5B</span>
-        <h3>City of Thunder Bay <span class="prov">(ON)</span></h3>
+        <h3>City of Thunder Bay <span class="prov">ON</span></h3>
       </header>
-      <p class="sum">TBPS systemic racism finding by Human Rights Tribunal; multiple Indigenous deaths uninvestigated; OIPRD review</p>
+      <p class="dek">TBPS systemic racism finding by Human Rights Tribunal; multiple Indigenous deaths uninvestigated; OIPRD review</p>
       
-        <div class="finding">
-          <div class="ft">Systemic Racism — TBPS <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Ontario Human Rights Tribunal 2018: Thunder Bay Police Service found to have systemic racism in investigating Indigenous deaths. 9 Indigenous people found dead in suspicious circumstances, investigations inadequate</p>
-          <div class="src">Source: OHRT Decision 2018 / OIPRD Review 2018</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Chief Denied Findings <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Police Chief J.P. Levesque repeatedly denied systemic racism findings. Civilian oversight undermined. Province had to order review</p>
-          <div class="src">Source: OIPRD / CBC Thunder Bay investigations</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
+      <figure class="fact">
+        <figcaption>Systemic Racism — TBPS</figcaption>
+        <p>Ontario Human Rights Tribunal 2018: Thunder Bay Police Service found to have systemic racism in investigating Indigenous deaths. 9 Indigenous people found dead in suspicious circumstances, investigations inadequate</p>
+        <cite>Source: OHRT Decision 2018 / OIPRD Review 2018</cite>
+      </figure>
 
-    <article class="assess" id="vancouver-bc">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">79/100</span>
-        <span class="nfind">3 findings · pop 675,000 · budget $2.2B</span>
-        <h3>City of Vancouver <span class="prov">(BC)</span></h3>
-      </header>
-      <p class="sum">$1.3M developer donations to ABC party; 40% of city contracts bypassed competitive process</p>
+      <figure class="fact">
+        <figcaption>Chief Denied Findings</figcaption>
+        <p>Police Chief J.P. Levesque repeatedly denied systemic racism findings. Civilian oversight undermined. Province had to order review</p>
+        <cite>Source: OIPRD / CBC Thunder Bay investigations</cite>
+      </figure>
       
-        <div class="finding">
-          <div class="ft">Developer donations — ABC Vancouver <span class="sev sev-critical">CRITICAL</span></div>
-          <p>ABC Vancouver party received $1.3M from real estate developers and construction firms in 2022 election cycle</p>
-          <div class="src">Source: Elections BC disclosure filings 2022</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Contract bypass rate — 40% <span class="sev sev-high">HIGH</span></div>
-          <p>City auditor found approximately 40% of sampled contracts bypassed competitive procurement in 2021-2023 review</p>
-          <div class="src">Source: Vancouver City Auditor 2023</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Housing approval — developer concentration <span class="sev sev-high">HIGH</span></div>
-          <p>Top 5 developers received approval for 68% of all rezoning permits 2020-2023</p>
-          <div class="src">Source: Vancouver Planning Department data / The Tyee investigation 2023</div>
-        </div>
-      <p class="meta">Vendors: Bosa Properties · Westbank Corp · Polygon Homes · <a href="vancouver.html">Full investigation</a></p>
-    </article>
-
-    <article class="assess" id="winnipeg-mb">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">77/100</span>
-        <span class="nfind">2 findings · pop 749,000 · budget $2.1B</span>
-        <h3>City of Winnipeg <span class="prov">(MB)</span></h3>
-      </header>
-      <p class="sum">Police HQ $214M cost overrun; former CAO resigned amid scandal; KPMG found systematic mismanagement</p>
-      
-        <div class="finding">
-          <div class="ft">Police HQ Cost Overrun <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Winnipeg Police Headquarters budget ballooned from $137M to $214M. KPMG forensic audit found mismanagement, lack of oversight, undisclosed change orders</p>
-          <div class="src">Source: KPMG Forensic Audit 2015 / City of Winnipeg</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Former CAO Philip Sheegl <span class="sev sev-critical">CRITICAL</span></div>
-          <p>CAO resigned 2013 amid influence investigation related to police HQ contract. City recovered $7.1M from contractor Caspian Construction</p>
-          <div class="src">Source: CBC investigation / Winnipeg Free Press</div>
-        </div>
-      <p class="meta">Vendors: Caspian Construction · KPMG</p>
-    </article>
-
-    <article class="assess" id="calgary-ab">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">74/100</span>
-        <span class="nfind">3 findings · pop 1,336,000 · budget $4.9B</span>
-        <h3>City of Calgary <span class="prov">(AB)</span></h3>
-      </header>
-      <p class="sum">Green Line LRT $4.9B scope cut 3x; $600M East Village TIF subsidy to private developers</p>
-      
-        <div class="finding">
-          <div class="ft">Green Line LRT — scope cuts <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Green Line LRT reduced from 46km to 18km to 8km while budget held at $4.9B; unit cost tripled</p>
-          <div class="src">Source: Calgary City Council budget reviews 2021-2024</div>
-        </div>
-        <div class="finding">
-          <div class="ft">East Village TIF — developer subsidy <span class="sev sev-high">HIGH</span></div>
-          <p>$600M Tax Increment Financing district primarily benefited private developer Brookfield Residential; public cost-benefit analysis never released</p>
-          <div class="src">Source: Calgary Economic Development / Pembina Institute analysis 2022</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Procurement — sole-source threshold abuse <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Audit found repeated use of sole-source exceptions for contracts just below $75K threshold</p>
-          <div class="src">Source: City of Calgary Auditor 2022</div>
-        </div>
-      <p class="meta">Vendors: Stoney Trail Contractors · Brookfield Residential · Graham Construction · <a href="calgary.html">Full investigation</a></p>
-    </article>
-
-    <article class="assess" id="surrey-bc">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">73/100</span>
-        <span class="nfind">2 findings · pop 568,000 · budget $1.6B</span>
-        <h3>City of Surrey <span class="prov">(BC)</span></h3>
-      </header>
-      <p class="sum">Surrey Police Service debacle: $95M+ wasted flip-flopping on RCMP replacement; McCallum criminal charges</p>
-      
-        <div class="finding">
-          <div class="ft">Surrey Police Service Fiasco <span class="sev sev-critical">CRITICAL</span></div>
-          <p>Former Mayor McCallum spent $50M creating Surrey Police Service then replacement Mayor Locke reversed it at further cost. Total wasted: $95M+. McCallum faced criminal charges (acquitted) during tenure</p>
-          <div class="src">Source: BC RCMP transition reports / CBC 2022-2024</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Doug McCallum Criminal Charge <span class="sev sev-high">HIGH</span></div>
-          <p>Former Mayor McCallum charged with public mischief (2021) related to RCMP dispute. Acquitted 2022 but controversy deepened public distrust</p>
-          <div class="src">Source: Court records / Surrey Now-Leader</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="edmonton-ab">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">71/100</span>
-        <span class="nfind">2 findings · pop 1,010,000 · budget $4.1B</span>
-        <h3>City of Edmonton <span class="prov">(AB)</span></h3>
-      </header>
-      <p class="sum">Valley Line LRT $3.1B 2-year delay; Blatchford TIF $2.4B; Police Commission controversy</p>
-      
-        <div class="finding">
-          <div class="ft">Valley Line LRT Phase 2 Delay <span class="sev sev-high">HIGH</span></div>
-          <p>$3.1B Valley Line West LRT, 2+ year construction delays, contractor disputes. Original 2023 opening pushed to 2025+</p>
-          <div class="src">Source: City of Edmonton LRT reports 2023</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Blatchford Redevelopment TIF <span class="sev sev-moderate">MODERATE</span></div>
-          <p>$2.4B Tax Increment Financing on former City Centre Airport lands. Private developer subsidies from public land asset</p>
-          <div class="src">Source: City of Edmonton Blatchford reports</div>
-        </div>
-      <p class="meta">Vendors: TransEd Partners</p>
-    </article>
-
-    <article class="assess" id="hamilton-on">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">68/100</span>
-        <span class="nfind">3 findings · pop 569,353 · budget $3.1B</span>
-        <h3>City of Hamilton <span class="prov">(ON)</span></h3>
-      </header>
-      <p class="sum">LRT cancelled after $130M spent on planning; police budget 34% of tax levy; $500M+ deferred lead pipe replacement</p>
-      
-        <div class="finding">
-          <div class="ft">LRT Cancellation <span class="sev sev-high">HIGH</span></div>
-          <p>Ford government cancelled Hamilton LRT in 2019 after $130M spent on planning/design. City lost $1B+ in federal funding. Controversy over political interference</p>
-          <div class="src">Source: Metrolinx / Hamilton Spectator 2019</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Police Budget Dominance <span class="sev sev-high">HIGH</span></div>
-          <p>HPS budget $200M+ = 34% of tax levy. Per-capita highest in Ontario mid-size cities. Civilian oversight complaints dismissed</p>
-          <div class="src">Source: City of Hamilton 2024 Budget</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Lead Water Pipes <span class="sev sev-moderate">MODERATE</span></div>
-          <p>$500M+ lead pipe replacement deferred repeatedly. Lower-income neighbourhoods disproportionately affected</p>
-          <div class="src">Source: City of Hamilton Infrastructure Reports</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="iqaluit-nu">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">66/100</span>
-        <span class="nfind">2 findings · pop 8,000 · budget $0.2B</span>
-        <h3>City of Iqaluit <span class="prov">(NU)</span></h3>
-      </header>
-      <p class="sum">Fuel spill contamination cover-up 2021; water quality crisis; northern procurement premium abuse</p>
-      
-        <div class="finding">
-          <div class="ft">Fuel Spill Cover-up <span class="sev sev-critical">CRITICAL</span></div>
-          <p>2021: Large fuel leak contaminated Iqaluit&#x27;s drinking water supply. City officials slow to inform public. Water boil advisories for months</p>
-          <div class="src">Source: CBC North / Nunavut court records 2021</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Northern Procurement Premium <span class="sev sev-high">HIGH</span></div>
-          <p>Infrastructure costs 3-5x southern rates. Audit found procurement not consistently using competitive processes</p>
-          <div class="src">Source: Nunavut Auditor General 2022</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="brampton-on">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">65/100</span>
-        <span class="nfind">2 findings · pop 656,000 · budget $1.4B</span>
-        <h3>City of Brampton <span class="prov">(ON)</span></h3>
-      </header>
-      <p class="sum">Developer-heavy council; Patrick Brown leadership fraud allegations; LRT funding lost due to provincial politics</p>
-      
-        <div class="finding">
-          <div class="ft">Patrick Brown Controversy <span class="sev sev-high">HIGH</span></div>
-          <p>Former Mayor Patrick Brown faced Conservative Party fraud allegations. Removed from CPC leadership race 2022. Brampton council often developer-aligned</p>
-          <div class="src">Source: CPC leadership investigation 2022</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Developer Council Alignment <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Brampton council repeatedly approved growth targets favoring developer clients despite infrastructure capacity warnings from staff</p>
-          <div class="src">Source: Brampton council records 2019-2024</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="niagara-falls-on">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">62/100</span>
-        <span class="nfind">2 findings · pop 88,000 · budget $0.3B</span>
-        <h3>City of Niagara Falls <span class="prov">(ON)</span></h3>
-      </header>
-      <p class="sum">Casino expansion conflicts of interest; developer-aligned council; Niagara Region CAO fired amid expense scandal</p>
-      
-        <div class="finding">
-          <div class="ft">Casino Expansion Conflicts <span class="sev sev-high">HIGH</span></div>
-          <p>Mayor Jim Diodati linked to casino expansion advocates. Development decisions benefiting connected landowners near expanded entertainment district</p>
-          <div class="src">Source: Niagara Falls council records 2022-2024</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Niagara Region CAO Scandal <span class="sev sev-high">HIGH</span></div>
-          <p>Regional CAO Carmen D&#x27;Angelo fired 2019 amid expense account allegations and procurement irregularities at regional level affecting all Niagara municipalities</p>
-          <div class="src">Source: Niagara Region audit reports 2019</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="belleville-on">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">61/100</span>
-        <span class="nfind">3 findings · pop 55,000 · budget $0.2B</span>
-        <h3>City of Belleville <span class="prov">(ON)</span></h3>
-      </header>
-      <p class="sum">15.6% police budget spike; procurement transparency failures; integrity commissioner complaints</p>
-      
-        <div class="finding">
-          <div class="ft">Police budget — 15.6% one-year spike <span class="sev sev-high">HIGH</span></div>
-          <p>Belleville Police Service budget increased 15.6% in a single year with no corresponding public safety metric improvement</p>
-          <div class="src">Source: City of Belleville Budget 2023</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Integrity commissioner complaints <span class="sev sev-high">HIGH</span></div>
-          <p>Multiple integrity commissioner complaints filed against council members; findings partially withheld from public</p>
-          <div class="src">Source: City of Belleville Integrity Commissioner 2022-2023</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Procurement transparency gaps <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Sole-source contracts above threshold approved without required council ratification in 2022-2023 period</p>
-          <div class="src">Source: City of Belleville Audit Committee 2023</div>
-        </div>
-      <p class="meta">Vendors: — · <a href="belleville.html">Full investigation</a></p>
-    </article>
-
-    <article class="assess" id="london-on">
-      <header>
-        <span class="badge badge-HIGH">HIGH</span>
-        <span class="score">61/100</span>
-        <span class="nfind">2 findings · pop 422,000 · budget $1.6B</span>
-        <h3>City of London <span class="prov">(ON)</span></h3>
-      </header>
-      <p class="sum">BRT $500M cost overruns; Mayor Josh Morgan developer background; encampment crisis $30M/yr shelter spending</p>
-      
-        <div class="finding">
-          <div class="ft">BRT Cost Overruns <span class="sev sev-high">HIGH</span></div>
-          <p>Bus Rapid Transit project $500M+, significant cost escalation. Contractor issues, scope changes. Council approved overruns without adequate public consultation</p>
-          <div class="src">Source: London BRT oversight reports 2021-2024</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Developer Mayor <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Mayor Josh Morgan has development industry background. Planning decisions scrutinized for conflicts with planning staff recommendations</p>
-          <div class="src">Source: London Free Press analysis 2022-2024</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="mississauga-on">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">60/100</span>
-        <span class="nfind">2 findings · pop 717,000 · budget $1.8B</span>
-        <h3>City of Mississauga <span class="prov">(ON)</span></h3>
-      </header>
-      <p class="sum">Hazel McCallion era 36 years of developer deals; Bonnie Crombie ran for Liberal leadership with developer backing</p>
-      
-        <div class="finding">
-          <div class="ft">McCallion Developer Conflicts <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Former Mayor Hazel McCallion (1978-2014) — son Peter McCallion&#x27;s real estate deals intersected with city decisions. Judicial inquiry 2011 found conflict of interest but no personal benefit</p>
-          <div class="src">Source: Mississauga Judicial Inquiry 2011</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Bonnie Crombie Political Ambition <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Mayor Crombie ran for federal Liberal leadership while mayor, with developer-funded campaign. City&#x27;s relationship with Metrolinx Hurontario LRT under scrutiny</p>
-          <div class="src">Source: Elections Ontario 2023</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="quinte-west-on">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">58/100</span>
-        <span class="nfind">3 findings · pop 45,000 · budget $0.1B</span>
-        <h3>City of Quinte West <span class="prov">(ON)</span></h3>
-      </header>
-      <p class="sum">Integrity Commissioner violations ignored; 18.6% cumulative tax increases; $12.4M infrastructure deficit</p>
-      
-        <div class="finding">
-          <div class="ft">Integrity Commissioner — findings ignored <span class="sev sev-high">HIGH</span></div>
-          <p>Council voted to not implement integrity commissioner remediation recommendations on two separate findings</p>
-          <div class="src">Source: City of Quinte West Integrity Commissioner 2022-2023</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Tax increases — 18.6% cumulative <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Residential property taxes increased 18.6% cumulatively over 4 years, significantly above inflation</p>
-          <div class="src">Source: City of Quinte West Budget Documents 2020-2024</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Infrastructure deficit — $12.4M <span class="sev sev-moderate">MODERATE</span></div>
-          <p>City&#x27;s infrastructure deficit identified at $12.4M with no funded remediation plan</p>
-          <div class="src">Source: City of Quinte West Asset Management Plan 2023</div>
-        </div>
-      <p class="meta">Vendors: — · <a href="quinte-west.html">Full investigation</a></p>
-    </article>
-
-    <article class="assess" id="halifax-ns">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">56/100</span>
-        <span class="nfind">2 findings · pop 439,000 · budget $1.0B</span>
-        <h3>Halifax Regional Municipality <span class="prov">(NS)</span></h3>
-      </header>
-      <p class="sum">Cogswell Interchange $187M budget creep; police 15% of operating budget; peninsula vs suburban planning tensions</p>
-      
-        <div class="finding">
-          <div class="ft">Cogswell Interchange Overruns <span class="sev sev-moderate">MODERATE</span></div>
-          <p>$187M Cogswell Interchange redevelopment, significant budget creep from original estimates. Scope changes not adequately disclosed</p>
-          <div class="src">Source: HRM Audit Committee 2022</div>
-        </div>
-        <div class="finding">
-          <div class="ft">Police Budget Growth <span class="sev sev-moderate">MODERATE</span></div>
-          <p>HRP budget $100M+ = 15% of HRM operating budget. Per-capita above Maritime average</p>
-          <div class="src">Source: HRM 2024 Budget</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="kelowna-bc">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">53/100</span>
-        <span class="nfind">1 finding · pop 144,000 · budget $0.5B</span>
-        <h3>City of Kelowna <span class="prov">(BC)</span></h3>
-      </header>
-      <p class="sum">OCP violations in development approvals; developer-council relationships under scrutiny; water security deferred</p>
-      
-        <div class="finding">
-          <div class="ft">OCP Variances <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Multiple Official Community Plan variances approved for developers, pattern of exceptions undermining planning integrity</p>
-          <div class="src">Source: Kelowna council records 2020-2024</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="quebec-city-qc">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">52/100</span>
-        <span class="nfind">1 finding · pop 549,000 · budget $2.0B</span>
-        <h3>City of Québec <span class="prov">(QC)</span></h3>
-      </header>
-      <p class="sum">Tramway project $3.3B cost escalation; procurement office findings; construction management concerns</p>
-      
-        <div class="finding">
-          <div class="ft">Tramway Cost Escalation <span class="sev sev-high">HIGH</span></div>
-          <p>Quebec City tramway budget grew from $1.8B to $3.3B+ under Mayor Marchand. Federal funding secured but local cost-share disputed</p>
-          <div class="src">Source: Quebec City council records 2021-2024</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="regina-sk">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">51/100</span>
-        <span class="nfind">1 finding · pop 228,000 · budget $0.8B</span>
-        <h3>City of Regina <span class="prov">(SK)</span></h3>
-      </header>
-      <p class="sum">Globe Theatre $40M overrun; police headquarters relocation $110M; procurement audit findings</p>
-      
-        <div class="finding">
-          <div class="ft">Globe Theatre Renovation Overrun <span class="sev sev-moderate">MODERATE</span></div>
-          <p>$40M cost overrun on Globe Theatre renovation. Project management failures documented</p>
-          <div class="src">Source: City of Regina Auditor 2022</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="st-johns-nl">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">49/100</span>
-        <span class="nfind">1 finding · pop 113,000 · budget $0.5B</span>
-        <h3>City of St. John&#x27;s <span class="prov">(NL)</span></h3>
-      </header>
-      <p class="sum">Infrastructure deficit $900M+; procurement audit findings; roads and water systems deferred</p>
-      
-        <div class="finding">
-          <div class="ft">Infrastructure Deficit <span class="sev sev-high">HIGH</span></div>
-          <p>$900M+ infrastructure deficit. Roads, water, sewer systems in critical state. Provincial audit found capital planning inadequate</p>
-          <div class="src">Source: St. John&#x27;s Capital Works Reports 2022</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="saskatoon-sk">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">48/100</span>
-        <span class="nfind">1 finding · pop 266,000 · budget $0.9B</span>
-        <h3>City of Saskatoon <span class="prov">(SK)</span></h3>
-      </header>
-      <p class="sum">BRT procurement questioned; police costs above national average; downtown development corporation subsidies</p>
-      
-        <div class="finding">
-          <div class="ft">Bus Rapid Transit Procurement <span class="sev sev-moderate">MODERATE</span></div>
-          <p>BRT project procurement process questioned by city auditor. Change orders and scope creep documented</p>
-          <div class="src">Source: Saskatoon Auditor Report 2023</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="moncton-nb">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">46/100</span>
-        <span class="nfind">0 findings · pop 79,000 · budget $0.4B</span>
-        <h3>City of Moncton <span class="prov">(NB)</span></h3>
-      </header>
-      <p class="sum">Transit expansion procurement; development zone conflicts; infrastructure deficit building</p>
-      <div class="finding muted"><p>No discrete findings in extract (zero-count row).</p></div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="victoria-bc">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">45/100</span>
-        <span class="nfind">1 finding · pop 92,000 · budget $0.5B</span>
-        <h3>City of Victoria <span class="prov">(BC)</span></h3>
-      </header>
-      <p class="sum">Homelessness crisis despite $40M+ annual spending; Victoria Police $100M budget 20% of city operating budget</p>
-      
-        <div class="finding">
-          <div class="ft">Homelessness Spending vs Outcomes <span class="sev sev-moderate">MODERATE</span></div>
-          <p>Victoria spends $40M+/yr on homelessness programs yet has highest per-capita encampment rate in BC. Audit found coordination failures</p>
-          <div class="src">Source: Victoria Auditor / BC Ombudsman 2023</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="fredericton-nb">
-      <header>
-        <span class="badge badge-MODERATE">MODERATE</span>
-        <span class="score">44/100</span>
-        <span class="nfind">0 findings · pop 63,000 · budget $0.3B</span>
-        <h3>City of Fredericton <span class="prov">(NB)</span></h3>
-      </header>
-      <p class="sum">Procurement transparency gaps; FOI responsiveness concerns; council expense reporting inconsistencies</p>
-      <div class="finding muted"><p>No discrete findings in extract (zero-count row).</p></div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="yellowknife-nt">
-      <header>
-        <span class="badge badge-MONITORED">MONITORED</span>
-        <span class="score">40/100</span>
-        <span class="nfind">1 finding · pop 20,000 · budget $0.2B</span>
-        <h3>City of Yellowknife <span class="prov">(NT)</span></h3>
-      </header>
-      <p class="sum">Giant Mine remediation $4.38B federal liability; housing crisis; limited Indigenous governance integration</p>
-      
-        <div class="finding">
-          <div class="ft">Giant Mine Federal Liability <span class="sev sev-moderate">MODERATE</span></div>
-          <p>$4.38B Giant Mine remediation — largest environmental cleanup in Canadian history. Federal responsibility but municipal infrastructure impact ongoing</p>
-          <div class="src">Source: Crown-Indigenous Relations 2024</div>
-        </div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="charlottetown-pe">
-      <header>
-        <span class="badge badge-MONITORED">MONITORED</span>
-        <span class="score">38/100</span>
-        <span class="nfind">0 findings · pop 40,000 · budget $0.2B</span>
-        <h3>City of Charlottetown <span class="prov">(PE)</span></h3>
-      </header>
-      <p class="sum">Small city, limited public procurement data; development pressure on heritage areas; FOI compliance concerns</p>
-      <div class="finding muted"><p>No discrete findings in extract (zero-count row).</p></div>
-      <p class="meta">Vendors: —</p>
-    </article>
-
-    <article class="assess" id="whitehorse-yt">
-      <header>
-        <span class="badge badge-MONITORED">MONITORED</span>
-        <span class="score">35/100</span>
-        <span class="nfind">0 findings · pop 28,000 · budget $0.2B</span>
-        <h3>City of Whitehorse <span class="prov">(YT)</span></h3>
-      </header>
-      <p class="sum">Northern housing crisis; limited municipal data transparency; territorial governance overlap</p>
-      <div class="finding muted"><p>No discrete findings in extract (zero-count row).</p></div>
-      <p class="meta">Vendors: —</p>
     </article>
 </section>
 
+<section id="high">
+  <p class="kicker">The cities · High risk</p>
+  <h2>Where the same patterns run without a national inquiry</h2>
+  <p class="section-lede">
+    High is not “less serious.” It is where the same failures appear without a
+    commission of inquiry to brand them for the country.
+  </p>
+  
+    <article class="city-story" id="vancouver-bc">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">79/100</span>
+        <h3>City of Vancouver <span class="prov">BC</span></h3>
+      </header>
+      <p class="dek">$1.3M developer donations to ABC party; 40% of city contracts bypassed competitive process</p>
+      
+      <figure class="fact">
+        <figcaption>Developer donations — ABC Vancouver</figcaption>
+        <p>ABC Vancouver party received $1.3M from real estate developers and construction firms in 2022 election cycle</p>
+        <cite>Source: Elections BC disclosure filings 2022</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Contract bypass rate — 40%</figcaption>
+        <p>City auditor found approximately 40% of sampled contracts bypassed competitive procurement in 2021-2023 review</p>
+        <cite>Source: Vancouver City Auditor 2023</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Housing approval — developer concentration</figcaption>
+        <p>Top 5 developers received approval for 68% of all rezoning permits 2020-2023</p>
+        <cite>Source: Vancouver Planning Department data / The Tyee investigation 2023</cite>
+      </figure>
+      <p class="vend">Named in the record: Bosa Properties · Westbank Corp · Polygon Homes</p> <a class="more" href="vancouver.html">Full investigation →</a>
+    </article>
+
+    <article class="city-story" id="winnipeg-mb">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">77/100</span>
+        <h3>City of Winnipeg <span class="prov">MB</span></h3>
+      </header>
+      <p class="dek">Police HQ $214M cost overrun; former CAO resigned amid scandal; KPMG found systematic mismanagement</p>
+      
+      <figure class="fact">
+        <figcaption>Police HQ Cost Overrun</figcaption>
+        <p>Winnipeg Police Headquarters budget ballooned from $137M to $214M. KPMG forensic audit found mismanagement, lack of oversight, undisclosed change orders</p>
+        <cite>Source: KPMG Forensic Audit 2015 / City of Winnipeg</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Former CAO Philip Sheegl</figcaption>
+        <p>CAO resigned 2013 amid influence investigation related to police HQ contract. City recovered $7.1M from contractor Caspian Construction</p>
+        <cite>Source: CBC investigation / Winnipeg Free Press</cite>
+      </figure>
+      <p class="vend">Named in the record: Caspian Construction · KPMG</p>
+    </article>
+
+    <article class="city-story" id="calgary-ab">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">74/100</span>
+        <h3>City of Calgary <span class="prov">AB</span></h3>
+      </header>
+      <p class="dek">Green Line LRT $4.9B scope cut 3x; $600M East Village TIF subsidy to private developers</p>
+      
+      <figure class="fact">
+        <figcaption>Green Line LRT — scope cuts</figcaption>
+        <p>Green Line LRT reduced from 46km to 18km to 8km while budget held at $4.9B; unit cost tripled</p>
+        <cite>Source: Calgary City Council budget reviews 2021-2024</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>East Village TIF — developer subsidy</figcaption>
+        <p>$600M Tax Increment Financing district primarily benefited private developer Brookfield Residential; public cost-benefit analysis never released</p>
+        <cite>Source: Calgary Economic Development / Pembina Institute analysis 2022</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Procurement — sole-source threshold abuse</figcaption>
+        <p>Audit found repeated use of sole-source exceptions for contracts just below $75K threshold</p>
+        <cite>Source: City of Calgary Auditor 2022</cite>
+      </figure>
+      <p class="vend">Named in the record: Stoney Trail Contractors · Brookfield Residential · Graham Construction</p> <a class="more" href="calgary.html">Full investigation →</a>
+    </article>
+
+    <article class="city-story" id="surrey-bc">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">73/100</span>
+        <h3>City of Surrey <span class="prov">BC</span></h3>
+      </header>
+      <p class="dek">Surrey Police Service debacle: $95M+ wasted flip-flopping on RCMP replacement; McCallum criminal charges</p>
+      
+      <figure class="fact">
+        <figcaption>Surrey Police Service Fiasco</figcaption>
+        <p>Former Mayor McCallum spent $50M creating Surrey Police Service then replacement Mayor Locke reversed it at further cost. Total wasted: $95M+. McCallum faced criminal charges (acquitted) during tenure</p>
+        <cite>Source: BC RCMP transition reports / CBC 2022-2024</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Doug McCallum Criminal Charge</figcaption>
+        <p>Former Mayor McCallum charged with public mischief (2021) related to RCMP dispute. Acquitted 2022 but controversy deepened public distrust</p>
+        <cite>Source: Court records / Surrey Now-Leader</cite>
+      </figure>
+      
+    </article>
+
+    <article class="city-story" id="edmonton-ab">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">71/100</span>
+        <h3>City of Edmonton <span class="prov">AB</span></h3>
+      </header>
+      <p class="dek">Valley Line LRT $3.1B 2-year delay; Blatchford TIF $2.4B; Police Commission controversy</p>
+      
+      <figure class="fact">
+        <figcaption>Valley Line LRT Phase 2 Delay</figcaption>
+        <p>$3.1B Valley Line West LRT, 2+ year construction delays, contractor disputes. Original 2023 opening pushed to 2025+</p>
+        <cite>Source: City of Edmonton LRT reports 2023</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Blatchford Redevelopment TIF</figcaption>
+        <p>$2.4B Tax Increment Financing on former City Centre Airport lands. Private developer subsidies from public land asset</p>
+        <cite>Source: City of Edmonton Blatchford reports</cite>
+      </figure>
+      <p class="vend">Named in the record: TransEd Partners</p>
+    </article>
+
+    <article class="city-story" id="hamilton-on">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">68/100</span>
+        <h3>City of Hamilton <span class="prov">ON</span></h3>
+      </header>
+      <p class="dek">LRT cancelled after $130M spent on planning; police budget 34% of tax levy; $500M+ deferred lead pipe replacement</p>
+      
+      <figure class="fact">
+        <figcaption>LRT Cancellation</figcaption>
+        <p>Ford government cancelled Hamilton LRT in 2019 after $130M spent on planning/design. City lost $1B+ in federal funding. Controversy over political interference</p>
+        <cite>Source: Metrolinx / Hamilton Spectator 2019</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Police Budget Dominance</figcaption>
+        <p>HPS budget $200M+ = 34% of tax levy. Per-capita highest in Ontario mid-size cities. Civilian oversight complaints dismissed</p>
+        <cite>Source: City of Hamilton 2024 Budget</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Lead Water Pipes</figcaption>
+        <p>$500M+ lead pipe replacement deferred repeatedly. Lower-income neighbourhoods disproportionately affected</p>
+        <cite>Source: City of Hamilton Infrastructure Reports</cite>
+      </figure>
+      
+    </article>
+
+    <article class="city-story" id="iqaluit-nu">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">66/100</span>
+        <h3>City of Iqaluit <span class="prov">NU</span></h3>
+      </header>
+      <p class="dek">Fuel spill contamination cover-up 2021; water quality crisis; northern procurement premium abuse</p>
+      
+      <figure class="fact">
+        <figcaption>Fuel Spill Cover-up</figcaption>
+        <p>2021: Large fuel leak contaminated Iqaluit&#x27;s drinking water supply. City officials slow to inform public. Water boil advisories for months</p>
+        <cite>Source: CBC North / Nunavut court records 2021</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Northern Procurement Premium</figcaption>
+        <p>Infrastructure costs 3-5x southern rates. Audit found procurement not consistently using competitive processes</p>
+        <cite>Source: Nunavut Auditor General 2022</cite>
+      </figure>
+      
+    </article>
+
+    <article class="city-story" id="brampton-on">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">65/100</span>
+        <h3>City of Brampton <span class="prov">ON</span></h3>
+      </header>
+      <p class="dek">Developer-heavy council; Patrick Brown leadership fraud allegations; LRT funding lost due to provincial politics</p>
+      
+      <figure class="fact">
+        <figcaption>Patrick Brown Controversy</figcaption>
+        <p>Former Mayor Patrick Brown faced Conservative Party fraud allegations. Removed from CPC leadership race 2022. Brampton council often developer-aligned</p>
+        <cite>Source: CPC leadership investigation 2022</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Developer Council Alignment</figcaption>
+        <p>Brampton council repeatedly approved growth targets favoring developer clients despite infrastructure capacity warnings from staff</p>
+        <cite>Source: Brampton council records 2019-2024</cite>
+      </figure>
+      
+    </article>
+
+    <article class="city-story" id="niagara-falls-on">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">62/100</span>
+        <h3>City of Niagara Falls <span class="prov">ON</span></h3>
+      </header>
+      <p class="dek">Casino expansion conflicts of interest; developer-aligned council; Niagara Region CAO fired amid expense scandal</p>
+      
+      <figure class="fact">
+        <figcaption>Casino Expansion Conflicts</figcaption>
+        <p>Mayor Jim Diodati linked to casino expansion advocates. Development decisions benefiting connected landowners near expanded entertainment district</p>
+        <cite>Source: Niagara Falls council records 2022-2024</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Niagara Region CAO Scandal</figcaption>
+        <p>Regional CAO Carmen D&#x27;Angelo fired 2019 amid expense account allegations and procurement irregularities at regional level affecting all Niagara municipalities</p>
+        <cite>Source: Niagara Region audit reports 2019</cite>
+      </figure>
+      
+    </article>
+
+    <article class="city-story" id="belleville-on">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">61/100</span>
+        <h3>City of Belleville <span class="prov">ON</span></h3>
+      </header>
+      <p class="dek">15.6% police budget spike; procurement transparency failures; integrity commissioner complaints</p>
+      
+      <figure class="fact">
+        <figcaption>Police budget — 15.6% one-year spike</figcaption>
+        <p>Belleville Police Service budget increased 15.6% in a single year with no corresponding public safety metric improvement</p>
+        <cite>Source: City of Belleville Budget 2023</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Integrity commissioner complaints</figcaption>
+        <p>Multiple integrity commissioner complaints filed against council members; findings partially withheld from public</p>
+        <cite>Source: City of Belleville Integrity Commissioner 2022-2023</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Procurement transparency gaps</figcaption>
+        <p>Sole-source contracts above threshold approved without required council ratification in 2022-2023 period</p>
+        <cite>Source: City of Belleville Audit Committee 2023</cite>
+      </figure>
+       <a class="more" href="belleville.html">Full investigation →</a>
+    </article>
+
+    <article class="city-story" id="london-on">
+      <header>
+        <span class="badge badge-HIGH">HIGH</span>
+        <span class="score">61/100</span>
+        <h3>City of London <span class="prov">ON</span></h3>
+      </header>
+      <p class="dek">BRT $500M cost overruns; Mayor Josh Morgan developer background; encampment crisis $30M/yr shelter spending</p>
+      
+      <figure class="fact">
+        <figcaption>BRT Cost Overruns</figcaption>
+        <p>Bus Rapid Transit project $500M+, significant cost escalation. Contractor issues, scope changes. Council approved overruns without adequate public consultation</p>
+        <cite>Source: London BRT oversight reports 2021-2024</cite>
+      </figure>
+
+      <figure class="fact">
+        <figcaption>Developer Mayor</figcaption>
+        <p>Mayor Josh Morgan has development industry background. Planning decisions scrutinized for conflicts with planning staff recommendations</p>
+        <cite>Source: London Free Press analysis 2022-2024</cite>
+      </figure>
+      
+    </article>
+</section>
+
+<section id="elsewhere">
+  <p class="kicker">The cities · Moderate &amp; monitored</p>
+  <h2>The rest of the map</h2>
+  <p class="section-lede">
+    Lower scores often mean thinner public extracts — fewer forensic audits in the
+    open — not a clean bill of health. Mississauga’s developer history, Quinte West’s
+    ignored integrity findings, Halifax’s Cogswell overruns, and St. John’s
+    infrastructure deficit still sit in the record.
+  </p>
+  <div class="rank-wrap">
+    <table class="rank">
+      <thead>
+        <tr>
+          <th>Score</th>
+          <th>Level</th>
+          <th>Prov.</th>
+          <th>City</th>
+          <th>What the record shows</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td class="score">60</td><td>MODERATE</td><td>ON</td><td class="city">City of Mississauga</td><td>Hazel McCallion era 36 years of developer deals; Bonnie Crombie ran for Liberal leadership with developer backing <span class="src">2 findings</span></td></tr>
+<tr><td class="score">58</td><td>MODERATE</td><td>ON</td><td class="city">City of Quinte West</td><td>Integrity Commissioner violations ignored; 18.6% cumulative tax increases; $12.4M infrastructure deficit <span class="src">3 findings</span></td></tr>
+<tr><td class="score">56</td><td>MODERATE</td><td>NS</td><td class="city">Halifax Regional Municipality</td><td>Cogswell Interchange $187M budget creep; police 15% of operating budget; peninsula vs suburban planning tensions <span class="src">2 findings</span></td></tr>
+<tr><td class="score">53</td><td>MODERATE</td><td>BC</td><td class="city">City of Kelowna</td><td>OCP violations in development approvals; developer-council relationships under scrutiny; water security deferred <span class="src">1 findings</span></td></tr>
+<tr><td class="score">52</td><td>MODERATE</td><td>QC</td><td class="city">City of Québec</td><td>Tramway project $3.3B cost escalation; procurement office findings; construction management concerns <span class="src">1 findings</span></td></tr>
+<tr><td class="score">51</td><td>MODERATE</td><td>SK</td><td class="city">City of Regina</td><td>Globe Theatre $40M overrun; police headquarters relocation $110M; procurement audit findings <span class="src">1 findings</span></td></tr>
+<tr><td class="score">49</td><td>MODERATE</td><td>NL</td><td class="city">City of St. John&#x27;s</td><td>Infrastructure deficit $900M+; procurement audit findings; roads and water systems deferred <span class="src">1 findings</span></td></tr>
+<tr><td class="score">48</td><td>MODERATE</td><td>SK</td><td class="city">City of Saskatoon</td><td>BRT procurement questioned; police costs above national average; downtown development corporation subsidies <span class="src">1 findings</span></td></tr>
+<tr><td class="score">46</td><td>MODERATE</td><td>NB</td><td class="city">City of Moncton</td><td>Transit expansion procurement; development zone conflicts; infrastructure deficit building</td></tr>
+<tr><td class="score">45</td><td>MODERATE</td><td>BC</td><td class="city">City of Victoria</td><td>Homelessness crisis despite $40M+ annual spending; Victoria Police $100M budget 20% of city operating budget <span class="src">1 findings</span></td></tr>
+<tr><td class="score">44</td><td>MODERATE</td><td>NB</td><td class="city">City of Fredericton</td><td>Procurement transparency gaps; FOI responsiveness concerns; council expense reporting inconsistencies</td></tr>
+<tr><td class="score">40</td><td>MONITORED</td><td>NT</td><td class="city">City of Yellowknife</td><td>Giant Mine remediation $4.38B federal liability; housing crisis; limited Indigenous governance integration <span class="src">1 findings</span></td></tr>
+<tr><td class="score">38</td><td>MONITORED</td><td>PE</td><td class="city">City of Charlottetown</td><td>Small city, limited public procurement data; development pressure on heritage areas; FOI compliance concerns</td></tr>
+<tr><td class="score">35</td><td>MONITORED</td><td>YT</td><td class="city">City of Whitehorse</td><td>Northern housing crisis; limited municipal data transparency; territorial governance overlap</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="ranking">
+  <p class="kicker">Full ranking</p>
+  <h2>All 30 municipalities</h2>
+  <div class="rank-wrap">
+    <table class="rank">
+      <thead>
+        <tr>
+          <th>Score</th>
+          <th>Level</th>
+          <th>Prov.</th>
+          <th>City</th>
+          <th>Summary</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td class="score">91</td><td>CRITICAL</td><td>QC</td><td class="city"><a href="#montreal-qc">City of Montréal</a></td><td>Charbonneau Commission documented systemic Mafia-construction collusion; $1B+ in overcharges to taxpayers</td></tr>
+<tr><td class="score">88</td><td>CRITICAL</td><td>ON</td><td class="city"><a href="#toronto-on">City of Toronto</a></td><td>$500M shelter hotel contracts awarded without tender; $12.5B Crosstown LRT 11 years delayed</td></tr>
+<tr><td class="score">83</td><td>CRITICAL</td><td>QC</td><td class="city"><a href="#laval-qc">City of Laval</a></td><td>Charbonneau Commission: former Mayor Vaillancourt took $8M in bribes; systemic Mafia-contractor network</td></tr>
+<tr><td class="score">82</td><td>CRITICAL</td><td>ON</td><td class="city"><a href="#ottawa-on">City of Ottawa</a></td><td>$2.1B LRT Rideau inquiry found &#x27;incomplete oversight&#x27;; $332M Lansdowne 2.0 sole-source elements</td></tr>
+<tr><td class="score">80</td><td>CRITICAL</td><td>ON</td><td class="city"><a href="#thunder-bay-on">City of Thunder Bay</a></td><td>TBPS systemic racism finding by Human Rights Tribunal; multiple Indigenous deaths uninvestigated; OIPRD review</td></tr>
+<tr><td class="score">79</td><td>HIGH</td><td>BC</td><td class="city"><a href="#vancouver-bc">City of Vancouver</a></td><td>$1.3M developer donations to ABC party; 40% of city contracts bypassed competitive process</td></tr>
+<tr><td class="score">77</td><td>HIGH</td><td>MB</td><td class="city"><a href="#winnipeg-mb">City of Winnipeg</a></td><td>Police HQ $214M cost overrun; former CAO resigned amid scandal; KPMG found systematic mismanagement</td></tr>
+<tr><td class="score">74</td><td>HIGH</td><td>AB</td><td class="city"><a href="#calgary-ab">City of Calgary</a></td><td>Green Line LRT $4.9B scope cut 3x; $600M East Village TIF subsidy to private developers</td></tr>
+<tr><td class="score">73</td><td>HIGH</td><td>BC</td><td class="city"><a href="#surrey-bc">City of Surrey</a></td><td>Surrey Police Service debacle: $95M+ wasted flip-flopping on RCMP replacement; McCallum criminal charges</td></tr>
+<tr><td class="score">71</td><td>HIGH</td><td>AB</td><td class="city"><a href="#edmonton-ab">City of Edmonton</a></td><td>Valley Line LRT $3.1B 2-year delay; Blatchford TIF $2.4B; Police Commission controversy</td></tr>
+<tr><td class="score">68</td><td>HIGH</td><td>ON</td><td class="city"><a href="#hamilton-on">City of Hamilton</a></td><td>LRT cancelled after $130M spent on planning; police budget 34% of tax levy; $500M+ deferred lead pipe replacement</td></tr>
+<tr><td class="score">66</td><td>HIGH</td><td>NU</td><td class="city"><a href="#iqaluit-nu">City of Iqaluit</a></td><td>Fuel spill contamination cover-up 2021; water quality crisis; northern procurement premium abuse</td></tr>
+<tr><td class="score">65</td><td>HIGH</td><td>ON</td><td class="city"><a href="#brampton-on">City of Brampton</a></td><td>Developer-heavy council; Patrick Brown leadership fraud allegations; LRT funding lost due to provincial politics</td></tr>
+<tr><td class="score">62</td><td>HIGH</td><td>ON</td><td class="city"><a href="#niagara-falls-on">City of Niagara Falls</a></td><td>Casino expansion conflicts of interest; developer-aligned council; Niagara Region CAO fired amid expense scandal</td></tr>
+<tr><td class="score">61</td><td>HIGH</td><td>ON</td><td class="city"><a href="#belleville-on">City of Belleville</a></td><td>15.6% police budget spike; procurement transparency failures; integrity commissioner complaints</td></tr>
+<tr><td class="score">61</td><td>HIGH</td><td>ON</td><td class="city"><a href="#london-on">City of London</a></td><td>BRT $500M cost overruns; Mayor Josh Morgan developer background; encampment crisis $30M/yr shelter spending</td></tr>
+<tr><td class="score">60</td><td>MODERATE</td><td>ON</td><td class="city">City of Mississauga</td><td>Hazel McCallion era 36 years of developer deals; Bonnie Crombie ran for Liberal leadership with developer backing</td></tr>
+<tr><td class="score">58</td><td>MODERATE</td><td>ON</td><td class="city">City of Quinte West</td><td>Integrity Commissioner violations ignored; 18.6% cumulative tax increases; $12.4M infrastructure deficit</td></tr>
+<tr><td class="score">56</td><td>MODERATE</td><td>NS</td><td class="city">Halifax Regional Municipality</td><td>Cogswell Interchange $187M budget creep; police 15% of operating budget; peninsula vs suburban planning tensions</td></tr>
+<tr><td class="score">53</td><td>MODERATE</td><td>BC</td><td class="city">City of Kelowna</td><td>OCP violations in development approvals; developer-council relationships under scrutiny; water security deferred</td></tr>
+<tr><td class="score">52</td><td>MODERATE</td><td>QC</td><td class="city">City of Québec</td><td>Tramway project $3.3B cost escalation; procurement office findings; construction management concerns</td></tr>
+<tr><td class="score">51</td><td>MODERATE</td><td>SK</td><td class="city">City of Regina</td><td>Globe Theatre $40M overrun; police headquarters relocation $110M; procurement audit findings</td></tr>
+<tr><td class="score">49</td><td>MODERATE</td><td>NL</td><td class="city">City of St. John&#x27;s</td><td>Infrastructure deficit $900M+; procurement audit findings; roads and water systems deferred</td></tr>
+<tr><td class="score">48</td><td>MODERATE</td><td>SK</td><td class="city">City of Saskatoon</td><td>BRT procurement questioned; police costs above national average; downtown development corporation subsidies</td></tr>
+<tr><td class="score">46</td><td>MODERATE</td><td>NB</td><td class="city">City of Moncton</td><td>Transit expansion procurement; development zone conflicts; infrastructure deficit building</td></tr>
+<tr><td class="score">45</td><td>MODERATE</td><td>BC</td><td class="city">City of Victoria</td><td>Homelessness crisis despite $40M+ annual spending; Victoria Police $100M budget 20% of city operating budget</td></tr>
+<tr><td class="score">44</td><td>MODERATE</td><td>NB</td><td class="city">City of Fredericton</td><td>Procurement transparency gaps; FOI responsiveness concerns; council expense reporting inconsistencies</td></tr>
+<tr><td class="score">40</td><td>MONITORED</td><td>NT</td><td class="city">City of Yellowknife</td><td>Giant Mine remediation $4.38B federal liability; housing crisis; limited Indigenous governance integration</td></tr>
+<tr><td class="score">38</td><td>MONITORED</td><td>PE</td><td class="city">City of Charlottetown</td><td>Small city, limited public procurement data; development pressure on heritage areas; FOI compliance concerns</td></tr>
+<tr><td class="score">35</td><td>MONITORED</td><td>YT</td><td class="city">City of Whitehorse</td><td>Northern housing crisis; limited municipal data transparency; territorial governance overlap</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <section id="method">
-  <p class="kicker">Section 10 · Method</p>
-  <h2>Data model, scoring, limits</h2>
+  <p class="kicker">Method</p>
+  <h2>How we built this</h2>
   <p>
-    <strong>Unit.</strong> Municipality (n=30). Fields: score, badge, province, population,
-    budget_b, categories[], findings[] (title, detail, source, severity), shared_vendors[].
+    Every finding on this page comes from a public source: city or provincial auditors,
+    commissions of inquiry, human-rights and police-oversight decisions, elections
+    disclosures, sunshine lists, council budget books, or reporting that cites those
+    documents. Each fact block carries a source line.
   </p>
   <p>
-    <strong>Score.</strong> Composite 0–100 from documented severity and finding load
-    (procurement, transit, integrity, transparency, police, developer influence). Badges:
-    Critical ≥80, High 60–79, Moderate ~45–59, Monitored below. Scores are not survey
-    opinion and not criminal guilt.
+    Risk scores are a composite of documented severity — not public opinion and not a
+    criminal verdict. Critical is 80 and above; High is 60–79. Courts decide guilt.
+    This investigation maps what governments already put on paper.
   </p>
   <p>
-    <strong>Stats in this page.</strong> Mean, median, population std. dev., Pearson r on
-    extract pairs, group means by province and population tier, category prevalence rates,
-    multi-city vendor counts. No machine-learning classifier; no out-of-sample prediction.
-  </p>
-  <p>
-    <strong>Selection bias.</strong> Curated national sample biased toward known risk and
-    available audits. Not a census of all Canadian municipalities. Zero-finding rows may
-    reflect thin public extracts.
-  </p>
-  <p>
-    <strong>Sources.</strong> City/provincial AGs, commissions (Charbonneau, Hourigan),
-    OHRT/OIPRD, Elections BC/Ontario, sunshine lists, council books, named reporting that
-    cites primary documents. Each finding line carries a source.
+    This is a curated national sample of major and mid-size cities with available
+    public findings. It is not a census of every Canadian municipality. Cities with
+    few or no discrete findings may simply have thinner open records.
   </p>
   <p class="footnote">
-    Corrections: <a href="community.html">community desk</a> ·
-    <a href="whistleblower-guide.html">whistleblower guide</a> ·
+    Tips and corrections: <a href="community.html">community desk</a> ·
+    Secure channels: <a href="whistleblower-guide.html">whistleblower guide</a> ·
     <a href="methodology-transparency.html">methodology</a> ·
     Related: <a href="network-analysis.html">network analysis</a>,
     <a href="follow-the-money.html">follow the money</a>,
@@ -1027,7 +770,7 @@
 <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
   <div class="dock-in">
     <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="say"><b>LIRIL</b><span id="liril-line">I can walk the numbers with you.</span></div>
+    <div class="say"><b>LIRIL</b><span id="liril-line">I can read this investigation with you.</span></div>
     <button id="liril-guide-btn" type="button" title="LIRIL reads this page aloud">Guide me</button>
     <button id="voice-btn" type="button" aria-pressed="true" title="Toggle LIRIL voice narration">Voice · On</button>
     <div class="liril-status" id="liril-status">LIRIL ready</div>
