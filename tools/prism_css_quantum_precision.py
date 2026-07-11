@@ -49,7 +49,7 @@ CANON = {
     "ink": "#0b0e10",
     "ivory": "#ece7dc",
     "ivory_dim": "#a89f90",
-    "ivory_faint": "#6b6459",
+    "ivory_faint": "#827a6d",
     "hair": "#26221c",
     "hair_lit": "#3a342b",
     "ice": "#9adbe8",
