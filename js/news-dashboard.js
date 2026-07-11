@@ -44,6 +44,59 @@
             card.appendChild(header);
             card.appendChild(body);
             
+            // Check for Swarm-generated documentary
+            if (item.documentary_video) {
+              var docContainer = el('div', 'news-doc-container');
+              docContainer.style.position = 'relative';
+              docContainer.style.marginTop = 'var(--space-4)';
+              
+              var vid = el('video', '');
+              vid.src = item.documentary_video;
+              vid.controls = true;
+              vid.style.width = '100%';
+              vid.style.border = '1px solid var(--bd-dim)';
+              
+              var overlay = el('div', 'cinema-text-overlay');
+              overlay.style.position = 'absolute';
+              overlay.style.bottom = '10%';
+              overlay.style.left = '5%';
+              overlay.style.right = '5%';
+              overlay.style.pointerEvents = 'none';
+              
+              docContainer.appendChild(vid);
+              docContainer.appendChild(overlay);
+              card.appendChild(docContainer);
+              
+              if (item.documentary_manifest) {
+                // Fetch the manifest and hook up the sync engine locally to this video
+                (function(v, ov, manifestUrl) {
+                  fetch(manifestUrl)
+                    .then(function(res) { return res.json(); })
+                    .then(function(manifest) {
+                      var activeBeatId = null;
+                      v.addEventListener('timeupdate', function() {
+                        var t = v.currentTime;
+                        var currentBeat = null;
+                        for (var i = 0; i < manifest.length; i++) {
+                          if (t >= manifest[i].start_time && t < manifest[i].end_time) {
+                            currentBeat = manifest[i]; break;
+                          }
+                        }
+                        if (currentBeat) {
+                          if (currentBeat.beat_id !== activeBeatId) {
+                            activeBeatId = currentBeat.beat_id;
+                            ov.innerHTML = '<span class="kinetic-text" style="font-size:clamp(1rem, 2vw, 1.5rem);">' + currentBeat.narration + '</span>';
+                          }
+                        } else {
+                          if (activeBeatId !== null) { ov.innerHTML = ''; activeBeatId = null; }
+                        }
+                      });
+                    })
+                    .catch(function(e) { console.warn('Missing documentary manifest:', manifestUrl); });
+                })(vid, overlay, item.documentary_manifest);
+              }
+            }
+            
             if (item.sources && item.sources.length > 0) {
               var sources = el('div', 'news-sources');
               sources.appendChild(el('strong', '', 'SOURCES: '));
