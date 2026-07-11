@@ -17,10 +17,10 @@
 
   var VOICE_STORAGE_KEY = 'liril-voice-name';
 
-  /* ── VOICE PERSONALITY — composed British narrator ────── */
+  /* ── VOICE PERSONALITY — pissed off, stern, urgent ────── */
   var VOICE_PARAMS = {
-    rate: 0.9,     /* Premium narration cadence */
-    pitch: 1.1,    /* Clear, natural female lock */
+    rate: 1.1,     /* Faster, more urgent cadence */
+    pitch: 0.85,   /* Lower pitch for a stern, pissed-off lock */
     volume: 1.0    /* Full volume */
   };
 

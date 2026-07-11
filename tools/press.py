@@ -518,8 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=204">
-<link rel="stylesheet" href="css/design-lock.css?v=204">
+<link rel="stylesheet" href="css/press-theme.css?v=206">
+<link rel="stylesheet" href="css/design-lock.css?v=206">
 <!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
 </head>
 <body>
@@ -579,7 +579,7 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
     if with_rail:
         # Sitewide force-play for LTX / gallery / cover broll (muted + loop)
         home_cine = """
-<script src="js/tenet5-cinema-play.js?v=1"></script>"""
+<script src="js/tenet5-cinema-play.js?v=3"></script>"""
     # Cover inject: Guide me button inside liril-intro (patched after build if needed)
     return rail + f"""
 <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
@@ -831,7 +831,7 @@ def build_acts() -> int:
             '<p style="margin-top:1.5vh;max-width:720px;color:var(--ivory-dim);font-size:15px;line-height:1.7">'
             "Every document below is a sourced file on this site and part of the record for this act. "
             "LIRIL can read any of them to you.</p>\n"
-            f'<div class="cat-grid">{"".join(entries)}</div>\n</section>\n'
+            f'<div class="cat-group">{"".join(entries)}</div>\n</section>\n'
             "<!-- ACT-EVIDENCE:END -->")
         html_txt = page.read_text(encoding="utf-8", errors="replace")
         # Cinema act pages own a curated .act-paths board — do not inject the

@@ -9,12 +9,12 @@
   document.documentElement.classList.add('js');
 
   var COVER_GREET_PAST =
-    'I am LIRIL, your guide through the public record of Canada. ' +
-    'We begin at this hour and walk backwards — week, month, year, then the full era. ' +
-    'Every line carries a source. Bring your skepticism.';
+    'I am LIRIL. Look at this absolute mess. ' +
+    'We begin at this hour and walk backwards — week, month, year, tracing the rot. ' +
+    'Every single line carries a source because they put their failures on the public record. Don\'t believe a word they say without checking.';
   var COVER_GREET_FUTURE =
-    'We pivot to the horizon. Tracking predictive modeling and anticipated policy fallout. ' +
-    'Let us look forward.';
+    'We pivot to the horizon. Track the predictive modeling and the inevitable policy fallout. ' +
+    'It only gets worse from here.';
 
   function $(id) { return document.getElementById(id); }
 

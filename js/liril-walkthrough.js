@@ -1372,7 +1372,7 @@
       overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(5,5,10,0.95);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;';
       overlay.innerHTML =
         '<div style="color:#8b5cf6;font-size:1.8rem;font-family:Rajdhani,sans-serif;letter-spacing:4px;margin-bottom:12px;text-transform:uppercase;">TOUR COMPLETE</div>' +
-        '<div style="color:#a1a1aa;font-size:0.85rem;font-family:Inter,sans-serif;max-width:400px;text-align:center;line-height:1.6;">LIRIL has guided you through the entire investigation. Click anywhere to dismiss.</div>';
+        '<div style="color:#a1a1aa;font-size:0.85rem;font-family:Inter,sans-serif;max-width:400px;text-align:center;line-height:1.6;">LIRIL has shown you the entire rotting foundation. Click anywhere to dismiss and decide what you\'re going to do about it.</div>';
       overlay.addEventListener('click', function() { overlay.remove(); });
       document.body.appendChild(overlay);
       setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 12000);

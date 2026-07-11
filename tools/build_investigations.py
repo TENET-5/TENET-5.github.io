@@ -92,7 +92,7 @@ def section(cid: str, kicker: str, items: list[tuple[str, str, str]]) -> str:
     return (
         f'<section class="catalog" id="{cid}">\n'
         f'<span class="kick">{esc(kicker)} · {len(items)} Files</span>\n'
-        f'<div class="cat-grid">{"".join(cards)}</div>\n</section>')
+        f'<div class="cat-group">{"".join(cards)}</div>\n</section>')
 
 
 def build() -> int:

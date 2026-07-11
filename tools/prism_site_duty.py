@@ -64,6 +64,7 @@ PROJECT = {
         "network_osint_board",
         "design_lock_guardrail",     # crystal-clear taste contract, loads last (swarm-proof)
         "zero_internals_leak_gate",  # public site names NO engine/model/kernel/path/seed
+        "cinema_playback_integrity", # act film src + cinema-play v3 + baseline mp4
         "css_quantum_precision",
         "liril_guide_home",
         "visual_acuity_pc_mobile",
@@ -325,6 +326,9 @@ def lap() -> dict:
         "job": "PRISM permanent — crystal-clear taste guardrail (loads last, swarm-proof)",
     })
 
+    # 6a2) Cinema playback integrity — act film must survive theme/apply thrash
+    steps.append(_cinema_playback_integrity())
+
     # 6b) CSS quantum precision — exact tokens, WCAG, Ising ground state (+ C++ bench when not fast)
     fast = (
         "--fast" in sys.argv
@@ -420,6 +424,91 @@ def lap() -> dict:
     ok = all(s.get("ok") for s in steps)
     verdict = "SITE_DUTY_PASS" if ok else "SITE_DUTY_FAIL"
     return _finish(ts, steps, verdict)
+
+
+def _cinema_playback_integrity() -> dict:
+    """Hard gate: genocide-act film must remain playable after theme thrash.
+
+    Checks act-i…v markup + cinema-play v3 + H.264 film bytes.
+    Atmosphere is not proof — but broken film is a product defect (Daniel).
+    """
+    checks: dict[str, object] = {}
+    issues: list[str] = []
+    acts = ("act-i.html", "act-ii.html", "act-iii.html", "act-iv.html", "act-v.html")
+    for name in acts:
+        p = ROOT / name
+        if not p.is_file():
+            issues.append(f"missing_{name}")
+            checks[name] = False
+            continue
+        try:
+            t = p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            issues.append(f"unreadable_{name}")
+            checks[name] = False
+            continue
+        ok = (
+            "act-cinema-page" in t
+            and "tenet5-cinema-play.js?v=3" in t
+            and "act-hero-video" in t
+            and 'src="media/film/' in t
+            and "data-force-play" in t
+        )
+        checks[name] = ok
+        if not ok:
+            issues.append(f"cinema_markup_{name}")
+
+    play = ROOT / "js" / "tenet5-cinema-play.js"
+    play_ok = False
+    if play.is_file():
+        try:
+            js = play.read_text(encoding="utf-8", errors="replace")
+            play_ok = "__v: 3" in js or "__v >= 3" in js
+            play_ok = play_ok and "act-play-gate" in js
+        except OSError:
+            play_ok = False
+    checks["cinema_play_js_v3"] = play_ok
+    if not play_ok:
+        issues.append("cinema_play_js_v3")
+
+    films = (
+        "hall_of_record.mp4",
+        "corridor_power.mp4",
+        "empty_committee.mp4",
+        "paper_trail.mp4",
+        "ledger_turn.mp4",
+        "flag_wind.mp4",
+    )
+    film_ok = True
+    film_sizes: dict[str, int] = {}
+    for fn in films:
+        fp = ROOT / "media" / "film" / fn
+        sz = fp.stat().st_size if fp.is_file() else 0
+        film_sizes[fn] = sz
+        if sz < 20_000:
+            film_ok = False
+            issues.append(f"film_small_{fn}")
+    checks["films"] = film_sizes
+    checks["films_ok"] = film_ok
+
+    theme = ""
+    try:
+        theme = (ROOT / "css" / "press-theme.css").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        pass
+    theme_ok = ("act-play-gate" in theme and "act-hero-video" in theme and "theme-ver" in theme)
+    checks["theme_cinema_css"] = theme_ok
+    if not theme_ok:
+        issues.append("theme_cinema_css")
+
+    ok = not issues
+    return {
+        "name": "cinema_playback_integrity",
+        "ok": ok,
+        "checks": checks,
+        "issues": issues[:24],
+        "job": "PRISM permanent — act film src + cinema-play v3 + play gate (zero broken video)",
+    }
 
 
 def _stop_requested() -> bool:
