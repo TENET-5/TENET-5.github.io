@@ -80,14 +80,14 @@ RE_DEFENSE = re.compile(
 )
 # Product/homepage chrome wrongly reused on interiors
 RE_HEADER = re.compile(
-    r"<header\b[^>]*(?:cover-bar|p-top|press-bar|site-header|p-header)[^>]*>.*?</header>\s*",
+    r"[ \t]*<header\b[^>]*(?:cover-bar|p-top|press-bar|site-header|p-header)[^>]*>.*?</header>\s*",
     re.I | re.S,
 )
 RE_FOOTER_P = re.compile(
-    r"<footer\b[^>]*(?:p-foot|press-foot|site-footer|class=\"[^\"]*foot)[^>]*>.*?</footer>\s*",
+    r"[ \t]*<footer\b[^>]*(?:p-foot|press-foot|site-footer|class=\"[^\"]*foot)[^>]*>.*?</footer>\s*",
     re.I | re.S,
 )
-RE_FOOTER_ANY = re.compile(r"<footer\b[^>]*>.*?</footer>\s*", re.I | re.S)
+RE_FOOTER_ANY = re.compile(r"[ \t]*<footer\b[^>]*>.*?</footer>\s*", re.I | re.S)
 RE_SOUP_NODES = re.compile(
     r"\s*<(?:div|span)\b[^>]*(?:"
     r"ambient-glow|grain-overlay|vignette|site-header-frame|site-footer-frame|"
