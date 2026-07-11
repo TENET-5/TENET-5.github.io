@@ -253,8 +253,11 @@
     });
   }
 
-  /** Max neighbors drawn on the board (inspector still lists all). Keeps dense hubs readable. */
-  var MAX_NEIGH_DRAW = 16;
+  /**
+   * Max neighbors on the board (inspector lists all).
+   * Hairball research + ProPublica simplicity: fewer marks, clearer near view.
+   */
+  var MAX_NEIGH_DRAW = 12;
 
   /** Score a neighbor for draw priority: FACT edges + own degree. */
   function neighborPriority(hubId, node) {
@@ -312,29 +315,57 @@
     });
     draw.forEach(function (node) { node._parked = false; });
     var m = draw.length;
-    var R1 = Math.min(W, H) * 0.32;
-    var R2 = Math.min(W, H) * 0.42;
-    /* Two rings when many: first 10 inner, rest outer */
-    var innerN = m <= 10 ? m : Math.min(10, Math.ceil(m * 0.55));
+    var R1 = Math.min(W, H) * 0.30;
+    var R2 = Math.min(W, H) * 0.41;
+    /* Proximity: same primary category sits on contiguous arc (not random twist) */
+    var catOrder = Object.create(null);
+    var catSeq = 0;
+    draw.forEach(function (node) {
+      var c = primaryCat(node);
+      if (catOrder[c] == null) catOrder[c] = catSeq++;
+    });
+    draw.sort(function (a, b) {
+      var ca = catOrder[primaryCat(a)] || 0;
+      var cb = catOrder[primaryCat(b)] || 0;
+      if (ca !== cb) return ca - cb;
+      return neighborPriority(hubId, b) - neighborPriority(hubId, a);
+    });
+    /* Two rings when many: first 8 inner (highest priority), rest outer */
+    var innerN = m <= 8 ? m : Math.min(8, Math.ceil(m * 0.55));
+    state._neighR1 = R1;
+    state._neighR2 = m > innerN ? R2 : R1;
+    state._hubXY = { x: hub.x, y: hub.y };
     draw.forEach(function (node, i) {
       var onOuter = i >= innerN;
       var ringLen = onOuter ? (m - innerN) : innerN;
       var ringIdx = onOuter ? (i - innerN) : i;
       var R = onOuter ? R2 : R1;
-      if (m <= 8) R = Math.min(W, H) * 0.34;
+      if (m <= 6) R = Math.min(W, H) * 0.30;
+      /* Even spacing within ring; category sort already groups tracks */
       var ang = (2 * Math.PI * ringIdx) / Math.max(1, ringLen) - Math.PI / 2;
-      /* slight category twist so same-track nodes cluster on the arc */
-      var cat = primaryCat(node);
-      var catNudge = (cat.charCodeAt(0) % 7) * 0.04;
-      ang += catNudge;
       node.x = hub.x + Math.cos(ang) * R;
-      node.y = hub.y + Math.sin(ang) * R * 0.90;
-      node.x = Math.max(44, Math.min(W - 44, node.x));
-      node.y = Math.max(44, Math.min(H - 40, node.y));
+      node.y = hub.y + Math.sin(ang) * R * 0.88;
+      node.x = Math.max(48, Math.min(W - 48, node.x));
+      node.y = Math.max(48, Math.min(H - 44, node.y));
       node.vx = 0;
       node.vy = 0;
       node._labelSide = (Math.cos(ang) >= 0) ? 1 : -1;
+      node._ring = onOuter ? 2 : 1;
     });
+  }
+
+  /** Soft quadratic curve hub→neighbor (newsroom arcs, not force hairball). */
+  function egoEdgePath(ax, ay, bx, by) {
+    var mx = (ax + bx) * 0.5;
+    var my = (ay + by) * 0.5;
+    var dx = bx - ax;
+    var dy = by - ay;
+    var len = Math.sqrt(dx * dx + dy * dy) || 1;
+    /* Bow outward slightly for readability; scale with span */
+    var bow = Math.min(28, len * 0.12);
+    var cx = mx - (dy / len) * bow;
+    var cy = my + (dx / len) * bow;
+    return 'M' + ax + ',' + ay + ' Q' + cx + ',' + cy + ' ' + bx + ',' + by;
   }
 
   /** Legacy force layout — only for small boards or explicit toggle. */
@@ -656,23 +687,43 @@
       });
     }
 
-    /* Neighborhood caption */
+    /* Soft guide rings — near view structure without HUD chrome */
+    if (state.view === 'neighborhood' && state._hubXY) {
+      [state._neighR1, state._neighR2].forEach(function (rr) {
+        if (!rr) return;
+        var ring = document.createElementNS(NS, 'ellipse');
+        ring.setAttribute('class', 'guide-ring');
+        ring.setAttribute('cx', state._hubXY.x);
+        ring.setAttribute('cy', state._hubXY.y);
+        ring.setAttribute('rx', rr);
+        ring.setAttribute('ry', rr * 0.88);
+        svg.appendChild(ring);
+      });
+    }
+
+    /* Annotation layer (ProPublica near view) */
     if (state.view === 'neighborhood' && state.sel && state.byId[state.sel]) {
       var hubN = state.byId[state.sel];
       var drawnN = Math.max(0, vis.length - 1);
       var totalN = typeof state._neighTotal === 'number' ? state._neighTotal : drawnN;
       var cap = document.createElementNS(NS, 'text');
-      cap.setAttribute('class', 'view-cap');
-      cap.setAttribute('x', 20);
-      cap.setAttribute('y', 24);
+      cap.setAttribute('class', 'view-cap view-cap-strong');
+      cap.setAttribute('x', 18);
+      cap.setAttribute('y', 22);
       cap.setAttribute('text-anchor', 'start');
-      var capTxt =
-        'Neighborhood · ' + (hubN.label || hubN.id) + ' · ' + drawnN + ' on board';
+      cap.textContent = 'Near · ' + (hubN.label || hubN.id);
+      svg.appendChild(cap);
+      var cap2 = document.createElementNS(NS, 'text');
+      cap2.setAttribute('class', 'view-cap');
+      cap2.setAttribute('x', 18);
+      cap2.setAttribute('y', 38);
+      cap2.setAttribute('text-anchor', 'start');
+      var capTxt = drawnN + ' neighbors on board';
       if (totalN > drawnN) {
         capTxt += ' · ' + (totalN - drawnN) + ' more in inspector';
       }
-      cap.textContent = capTxt;
-      svg.appendChild(cap);
+      cap2.textContent = capTxt;
+      svg.appendChild(cap2);
     }
 
     var egoDim = null;
@@ -685,20 +736,33 @@
       var a = state.byId[t.from], b = state.byId[t.to];
       if (!a || !b) return;
       if (a.x < -500 || b.x < -500) return;
-      var line = document.createElementNS(NS, 'line');
-      line.setAttribute('x1', a.x);
-      line.setAttribute('y1', a.y);
-      line.setAttribute('x2', b.x);
-      line.setAttribute('y2', b.y);
-      var sw = Math.min(3.2, 0.9 + (t.strength || 1) * 0.55);
-      if (state.view === 'neighborhood') sw = Math.min(3.6, 1.2 + (t.strength || 1) * 0.7);
-      line.setAttribute('stroke-width', sw);
-      line.setAttribute('class', 'edge');
-      if (state.sel && (t.from === state.sel || t.to === state.sel)) line.classList.add('hot');
-      else if (egoDim) line.classList.add('dim');
-      if (t.claim_level === 'REPORTING') line.setAttribute('stroke-dasharray', '4 3');
-      svg.appendChild(line);
-      t._el = line;
+      var isHot = state.sel && (t.from === state.sel || t.to === state.sel);
+      var isEgo =
+        state.view === 'neighborhood' &&
+        state.sel &&
+        (t.from === state.sel || t.to === state.sel);
+      var elEdge;
+      if (isEgo) {
+        elEdge = document.createElementNS(NS, 'path');
+        elEdge.setAttribute('d', egoEdgePath(a.x, a.y, b.x, b.y));
+      } else {
+        elEdge = document.createElementNS(NS, 'line');
+        elEdge.setAttribute('x1', a.x);
+        elEdge.setAttribute('y1', a.y);
+        elEdge.setAttribute('x2', b.x);
+        elEdge.setAttribute('y2', b.y);
+      }
+      var sw = Math.min(2.8, 0.75 + (t.strength || 1) * 0.45);
+      if (state.view === 'neighborhood') sw = Math.min(2.6, 0.95 + (t.strength || 1) * 0.5);
+      elEdge.setAttribute('stroke-width', sw);
+      elEdge.setAttribute('class', 'edge');
+      if (isHot) {
+        elEdge.classList.add('hot');
+        if (t.claim_level === 'FACT') elEdge.classList.add('fact-hot');
+      } else if (egoDim) elEdge.classList.add('dim');
+      if (t.claim_level === 'REPORTING') elEdge.setAttribute('stroke-dasharray', '4 3');
+      svg.appendChild(elEdge);
+      t._el = elEdge;
     });
 
     vis.forEach(function (n) {
@@ -709,11 +773,19 @@
       if (egoDim && !egoDim[n.id]) ncls += ' dim';
       g.setAttribute('class', ncls);
       g.setAttribute('aria-label', n.label);
+      var r = nodeRadius(n);
+      if (state.view === 'neighborhood' && state.sel === n.id) r = Math.max(r, 13);
+      if (state.view === 'neighborhood' && state.sel === n.id) {
+        var halo = document.createElementNS(NS, 'circle');
+        halo.setAttribute('class', 'hub-halo');
+        halo.setAttribute('cx', n.x);
+        halo.setAttribute('cy', n.y);
+        halo.setAttribute('r', r + 7);
+        g.appendChild(halo);
+      }
       var c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', n.x);
       c.setAttribute('cy', n.y);
-      var r = nodeRadius(n);
-      if (state.view === 'neighborhood' && state.sel === n.id) r = Math.max(r, 12);
       c.setAttribute('r', r);
       c.setAttribute('fill', nodeColor(n));
       var tip = document.createElementNS(NS, 'title');
@@ -728,23 +800,23 @@
       var showLabel =
         state.view === 'neighborhood' ||
         state.sel === n.id ||
-        vis.length < 48 ||
-        (deg[n.id] || 0) >= 3 ||
+        vis.length < 40 ||
+        (deg[n.id] || 0) >= 4 ||
         n.claim_level === 'FACT';
       if (showLabel) {
         var tx = document.createElementNS(NS, 'text');
-        var maxLen = state.view === 'neighborhood' ? 26 : 18;
+        var maxLen = state.view === 'neighborhood' ? 24 : 16;
         var lab =
           n.label.length > maxLen ? n.label.slice(0, maxLen - 1) + '…' : n.label;
         if (state.view === 'neighborhood' && state.sel !== n.id && n._labelSide) {
           /* Side labels reduce radial pile-up on the ring */
           var side = n._labelSide;
-          tx.setAttribute('x', n.x + side * (r + 8));
-          tx.setAttribute('y', n.y + 4);
+          tx.setAttribute('x', n.x + side * (r + 9));
+          tx.setAttribute('y', n.y + 3.5);
           tx.setAttribute('text-anchor', side > 0 ? 'start' : 'end');
         } else {
           tx.setAttribute('x', n.x);
-          tx.setAttribute('y', n.y - r - 8);
+          tx.setAttribute('y', n.y - r - 9);
           tx.setAttribute('text-anchor', 'middle');
         }
         tx.textContent = lab;

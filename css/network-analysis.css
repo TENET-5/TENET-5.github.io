@@ -1,21 +1,43 @@
-/* network-analysis.html companion — layout only (press tokens own palette) */
+/* network-analysis.html companion — layout + glass chrome (press tokens own palette)
+   Aesthetics: ProPublica near/far + hairball avoidance (Cambridge / Munzner).
+   No page-local :root. Severity hue only via --red / --gold. */
 body.press-interior .press-main.net-main{
   max-width:min(1180px,100%);
   padding-bottom:120px;
 }
-body.press-interior .press-main.net-main > .stand{max-width:68ch}
+body.press-interior .press-main.net-main > .kick{
+  margin-bottom:0.55rem;
+}
+body.press-interior .press-main.net-main > .stand{
+  max-width:62ch;
+  color:var(--ivory-dim);
+}
+/* Proximity: one visual unit for board chrome */
+.net-chrome{
+  margin:2rem 0 1.15rem;
+  padding:1.1rem 1.15rem 1rem;
+  border-radius:12px;
+  background:linear-gradient(168deg,rgba(255,255,255,.035),rgba(5,7,8,.42));
+  border:1px solid rgba(154,219,232,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
 .net-toolbar{
   display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;
-  margin:2.2rem 0 1.2rem;
+  margin:0 0 0.85rem;
 }
+/* “Do something” affordance — ice border on the action that filters the far→near */
 .net-toolbar input[type="search"]{
   flex:1 1 220px;min-width:180px;max-width:360px;
-  background:rgba(9,13,16,.55);border:1px solid rgba(154,219,232,.18);
+  background:rgba(9,13,16,.55);border:1px solid rgba(154,219,232,.28);
   color:var(--ivory);font-family:var(--mono);font-size:12px;
   padding:10px 14px;border-radius:8px;outline:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
 }
 .net-toolbar input[type="search"]::placeholder{color:var(--ivory-faint)}
-.net-toolbar input[type="search"]:focus{border-color:rgba(154,219,232,.45)}
+.net-toolbar input[type="search"]:focus{
+  border-color:rgba(154,219,232,.55);
+  box-shadow:0 0 0 1px rgba(154,219,232,.2), inset 0 1px 0 rgba(255,255,255,.05);
+}
 .net-tabs{display:flex;gap:8px;flex-wrap:wrap}
 .net-tabs button{
   font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
@@ -25,6 +47,12 @@ body.press-interior .press-main.net-main > .stand{max-width:68ch}
 }
 .net-tabs button.on,.net-tabs button:hover{
   color:var(--void);background:var(--ice);border-color:var(--ice);
+}
+.net-tabs button:focus-visible,
+.net-view button:focus-visible,
+.hub-chip:focus-visible,
+.chip:focus-visible{
+  outline:1px solid var(--ice);outline-offset:2px;
 }
 .net-export{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .net-export button{
@@ -36,16 +64,21 @@ body.press-interior .press-main.net-main > .stand{max-width:68ch}
 .net-export button:focus-visible{outline:1px solid var(--ice);outline-offset:2px}
 .net-stats{
   font-family:var(--mono);font-size:11px;letter-spacing:.06em;
-  color:var(--ivory-faint);margin:0 0 1.2rem;
+  color:var(--ivory-faint);margin:0 0 0.35rem;
 }
 .net-stats b{color:var(--ice);font-weight:500}
 .board-wrap{
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);
-  gap:20px;align-items:start;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(268px,328px);
+  gap:22px;align-items:start;
 }
 @media(max-width:900px){.board-wrap{grid-template-columns:1fr}}
 .net-view{
-  display:flex;flex-wrap:wrap;gap:8px;margin:0 0 0.85rem;
+  display:flex;flex-wrap:wrap;gap:8px;margin:0 0 0.75rem;
+  align-items:center;
+}
+.net-view .view-hint{
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  color:var(--ivory-faint);margin-left:4px;
 }
 .net-view button{
   font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
@@ -57,12 +90,12 @@ body.press-interior .press-main.net-main > .stand{max-width:68ch}
   color:var(--void);background:var(--ice);border-color:var(--ice);
 }
 .net-view button.quiet{
-  opacity:.72;border-style:dashed;
+  opacity:.65;border-style:dashed;
 }
 .net-view button.quiet.on{opacity:1;border-style:solid}
 /* Legend — press tokens only, no inline hex */
 .net-legend{
-  display:flex;flex-wrap:wrap;gap:10px 18px;margin:0 0 1rem;
+  display:flex;flex-wrap:wrap;gap:10px 18px;margin:0.15rem 0 0.85rem;
   font-family:var(--mono);font-size:10px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ivory-faint);
 }
@@ -78,7 +111,7 @@ body.press-interior .press-main.net-main > .stand{max-width:68ch}
 .net-legend .lg-ivory i{background:var(--ivory);box-shadow:inset 0 0 0 1px rgba(5,7,8,.35)}
 .net-hubs{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;
-  margin:0 0 1.1rem;max-height:6.5rem;overflow:auto;
+  margin:0 0 1.15rem;max-height:6.5rem;overflow:auto;
   padding-bottom:2px;
 }
 .net-hubs .hubs-lab{
@@ -94,49 +127,78 @@ body.press-interior .press-main.net-main > .stand{max-width:68ch}
 }
 .net-hubs .hub-chip:hover{border-color:rgba(154,219,232,.32);color:var(--ice)}
 .net-hubs .hub-chip.on{
-  border-color:rgba(154,219,232,.45);color:var(--ivory);
-  background:rgba(154,219,232,.06);
+  border-color:rgba(154,219,232,.5);color:var(--void);
+  background:var(--ice);
 }
+/* Board surface — cold glass, white top-glint (Quantanium) */
 .board{
-  padding:14px 12px;min-height:460px;position:relative;
-  background:rgba(5,7,8,.55);
-  backdrop-filter:blur(20px) saturate(1.05);
-  border:1px solid rgba(154,219,232,.12);
-  border-radius:10px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  padding:16px 14px;min-height:480px;position:relative;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.045) 0%,transparent 28%),
+    rgba(5,7,8,.62);
+  backdrop-filter:blur(22px) saturate(1.08);
+  border:1px solid rgba(154,219,232,.14);
+  border-radius:12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 12px 40px rgba(0,0,0,.28);
   overflow:hidden;
 }
-.board svg{display:block;width:100%;height:auto;min-height:440px;touch-action:manipulation}
-.board .edge{stroke:rgba(154,219,232,.2);stroke-linecap:round}
-.board .edge.hot{stroke:rgba(154,219,232,.65)}
-.board .edge.dim{opacity:.04}
+.board svg{display:block;width:100%;height:auto;min-height:460px;touch-action:manipulation}
+/* Edges: quiet by default (invisibility); hot = contrast only on selection */
+.board .edge{
+  stroke:rgba(154,219,232,.16);
+  stroke-linecap:round;
+  fill:none;
+}
+.board .edge.hot{stroke:rgba(154,219,232,.55)}
+.board .edge.fact-hot{stroke:rgba(154,219,232,.62)}
+.board .edge.dim{opacity:.035}
+.board .guide-ring{
+  fill:none;
+  stroke:rgba(154,219,232,.07);
+  stroke-width:1;
+  stroke-dasharray:2 6;
+  pointer-events:none;
+}
 .board .node{cursor:pointer}
 .board .node circle{
-  stroke:rgba(5,7,8,.9);stroke-width:1;
-  transition:stroke .15s ease;
+  stroke:rgba(5,7,8,.92);stroke-width:1.1;
+  transition:stroke .12s ease, r .12s ease;
+}
+.board .node .hub-halo{
+  fill:none;
+  stroke:rgba(154,219,232,.28);
+  stroke-width:1;
+  pointer-events:none;
 }
 .board .node text{
   font-family:var(--mono);font-size:10.5px;fill:var(--ivory-dim);
-  pointer-events:none;paint-order:stroke;stroke:rgba(5,7,8,.88);stroke-width:3px;
+  pointer-events:none;paint-order:stroke;stroke:rgba(5,7,8,.9);stroke-width:3.2px;
 }
 .board .node.sel circle,.board .node:hover circle{
   stroke:var(--ice);
 }
 .board .node.hub circle{
-  stroke:var(--ice);stroke-width:1.75;
+  stroke:var(--ice);stroke-width:2;
+  filter:drop-shadow(0 0 6px rgba(154,219,232,.22));
 }
 .board .node.sel text,.board .node:hover text,.board .node.hub text{fill:var(--ivory)}
 @media(min-width:900px){
-  .board .node.hub text{font-size:12px}
+  .board .node.hub text{font-size:12.5px;font-weight:500}
 }
-.board .node.dim{opacity:.16}
+.board .node.dim{opacity:.14}
 .board .cluster-lab{
   font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
   fill:var(--ivory-faint);
 }
+/* Annotation layer (Amanda Cox / ProPublica) — near the data, not a HUD */
 .board .view-cap{
-  font-family:var(--mono);font-size:11px;letter-spacing:.04em;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
   fill:var(--ivory-faint);
+}
+.board .view-cap-strong{
+  fill:var(--ivory-dim);
 }
 .board .empty-msg{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
