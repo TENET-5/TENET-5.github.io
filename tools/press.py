@@ -1068,6 +1068,16 @@ def build_briefing(site: dict) -> str:
           c.appendChild(ht);
           c.appendChild(el('p',null,h.body||''));
           if(h.status)c.appendChild(el('span','meta','status: '+h.status));
+          var srcs=h.sources||[];
+          if(srcs.length){
+            var sm=el('div','meta');
+            srcs.slice(0,3).forEach(function(s,i){
+              if(i)sm.appendChild(document.createTextNode(' · '));
+              if(s.url){var sa=el('a',null,s.label||s.url);sa.href=s.url;sa.rel='noopener noreferrer';sa.target='_blank';sm.appendChild(sa);}
+              else sm.appendChild(document.createTextNode(s.label||''));
+            });
+            c.appendChild(sm);
+          }
           now.appendChild(c);
         });
         var mt=document.getElementById('brief-metrics');
