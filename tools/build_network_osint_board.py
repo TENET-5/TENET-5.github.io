@@ -1625,6 +1625,338 @@ class BoardBuilder:
                     )
                     n_edges += 1
 
+    def ingest_lobbying_analysis(self) -> None:
+        path = DATA / "lobbying_analysis.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "ocl_registry_hub",
+            label="Federal lobbying registry",
+            ntype="event",
+            subtitle=f"{raw.get('total_communications', '')} communications class",
+            detail="Top-volume officials and organizations from OCL aggregate analysis. Volume is not guilt.",
+            link="lobbying-deepdive.html",
+            categories=["osint", "authority"],
+            claim_level="OSINT_REGISTRY",
+            origin="lobbying_analysis",
+        )
+        for row in (raw.get("top_lobbied_officials") or [])[:25]:
+            name = row.get("name") or ""
+            if not _ok_label(str(name)):
+                continue
+            meetings = int(row.get("meetings") or 0)
+            title = str(row.get("title") or "")
+            inst = str(row.get("institution") or "")
+            nid = self.add_node(
+                "lobby_dpoh_" + _slug(str(name)),
+                label=str(name),
+                ntype="person",
+                subtitle=_soft(
+                    (title[:36] + " · " if title else "")
+                    + f"{meetings} meetings"
+                    + (f" · {inst.split('(')[0].strip()}" if inst else ""),
+                    90,
+                ),
+                detail=_soft(f"Institution: {inst}" if inst else "Named in lobbying volume aggregate."),
+                link="lobbying-tracker.html",
+                categories=["authority", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="lobbying_analysis",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{meetings} meetings",
+                    strength=3 if meetings >= 900 else (2 if meetings >= 600 else 1),
+                    claim_level="OSINT_REGISTRY",
+                )
+        for row in (raw.get("top_organizations") or [])[:20]:
+            org = row.get("name") or row.get("org") or ""
+            if not _ok_label(str(org)):
+                continue
+            comms = int(row.get("communications") or row.get("comms") or 0)
+            oid = self.add_node(
+                "lobby_org_" + _slug(str(org)),
+                label=str(org)[:60],
+                ntype="org",
+                subtitle=f"{comms} communications" if comms else "lobby registrant",
+                detail="Organization volume in federal lobbying aggregate.",
+                link="lobbying-deepdive.html",
+                categories=["osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="lobbying_analysis",
+            )
+            if oid and hub:
+                self.add_edge(
+                    oid,
+                    hub,
+                    label="registry communications",
+                    strength=2 if comms >= 500 else 1,
+                    claim_level="OSINT_REGISTRY",
+                )
+
+    def ingest_foreign_lobbying_scan(self) -> None:
+        path = DATA / "foreign_lobbying_deep_scan.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "foreign_lobby_scan_hub",
+            label="Foreign-linked lobbying scan",
+            ntype="event",
+            subtitle="Registry volume ratios (index)",
+            detail="Aggregate foreign-linked lobbying volumes and revolving-door summaries. Counts are not findings of wrongdoing.",
+            link="foreign-influence.html",
+            categories=["osint", "israel"],
+            claim_level="OSINT_REGISTRY",
+            origin="foreign_lobbying_deep_scan",
+        )
+        fogel = raw.get("fogel_ranking") or {}
+        if fogel:
+            fid = self.add_node(
+                "person_shimon_fogel",
+                label="Shimon Fogel",
+                ntype="person",
+                subtitle=f"CIJA · {fogel.get('communications', '')} registry communications",
+                detail=_soft(str(fogel.get("finding") or "Named in lobbying rank summary.")),
+                link="lobbying-deepdive.html",
+                categories=["israel", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="foreign_lobbying_deep_scan",
+            )
+            if fid and hub:
+                self.add_edge(
+                    hub,
+                    fid,
+                    label=f"rank {fogel.get('rank', '?')}",
+                    strength=3,
+                    claim_level="OSINT_REGISTRY",
+                )
+            cija = self.add_node(
+                "org_cija",
+                label="CIJA",
+                ntype="org",
+                subtitle="Centre for Israel & Jewish Affairs",
+                detail="Linked via Fogel ranking in foreign lobbying scan.",
+                link="foreign-influence.html#cija",
+                categories=["israel", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="foreign_lobbying_deep_scan",
+            )
+            if fid and cija:
+                self.add_edge(fid, cija, label="CEO class", strength=2, claim_level="OSINT_REGISTRY")
+        ratios = raw.get("israel_vs_all") or {}
+        for key, lab, cat in (
+            ("israel", "Israel-linked lobbying volume", "israel"),
+            ("us_defense", "US defence lobbying volume", "defence"),
+            ("uae", "UAE-linked lobbying volume", "osint"),
+            ("china", "China-linked lobbying volume", "ccp"),
+            ("india_actual", "India-linked lobbying volume", "india"),
+        ):
+            if key not in ratios:
+                continue
+            vol = ratios.get(key)
+            nid = self.add_node(
+                "flobby_" + key,
+                label=lab,
+                ntype="event",
+                subtitle=f"{vol} communications class",
+                detail=_soft(str(ratios.get("finding") or "Foreign-linked volume class from deep scan.")),
+                link="foreign-influence.html",
+                categories=[cat, "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="foreign_lobbying_deep_scan",
+            )
+            if nid and hub:
+                try:
+                    v = int(vol or 0)
+                except (TypeError, ValueError):
+                    v = 0
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{vol} class",
+                    strength=3 if v >= 1000 else (2 if v >= 100 else 1),
+                    claim_level="OSINT_REGISTRY",
+                )
+        pratt = raw.get("revolving_door_pratt") or {}
+        if pratt.get("name"):
+            pid = self.add_node(
+                "lobbyist_" + _slug(str(pratt["name"])),
+                label=str(pratt["name"]),
+                ntype="person",
+                subtitle=_soft(str(pratt.get("former_role") or "revolving door"), 80),
+                detail=_soft(str(pratt.get("finding") or pratt.get("pattern") or "")),
+                link="lobbying-deepdive.html",
+                categories=["defence", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="foreign_lobbying_deep_scan",
+            )
+            for client in (pratt.get("clients") or [])[:4]:
+                if not _ok_label(str(client)):
+                    continue
+                cid = self.add_node(
+                    "defcon_" + _slug(str(client).split("(")[0].strip()),
+                    label=str(client).split("(")[0].strip()[:50],
+                    ntype="org",
+                    subtitle="client (registry)",
+                    detail="Named client in revolving-door summary.",
+                    link="dnd-procurement.html",
+                    categories=["defence", "osint"],
+                    claim_level="OSINT_REGISTRY",
+                    origin="foreign_lobbying_deep_scan",
+                )
+                if pid and cid:
+                    self.add_edge(
+                        pid,
+                        cid,
+                        label="represents",
+                        strength=2,
+                        claim_level="OSINT_REGISTRY",
+                    )
+        evershed = raw.get("revolving_door_evershed") or {}
+        if evershed.get("clients"):
+            eid = self.add_node(
+                "lobbyist_robert_evershed",
+                label="Robert Evershed",
+                ntype="person",
+                subtitle=f"{evershed.get('total_communications', '')} communications",
+                detail=_soft(str(evershed.get("finding") or evershed.get("pattern") or "")),
+                link="lobbying-deepdive.html",
+                categories=["defence", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="foreign_lobbying_deep_scan",
+            )
+            for client in (evershed.get("clients") or [])[:4]:
+                if not _ok_label(str(client)):
+                    continue
+                cid = self.add_node(
+                    "defcon_" + _slug(str(client).split()[0] + " " + (str(client).split()[1] if len(str(client).split()) > 1 else "")),
+                    label=str(client).split("(")[0].strip()[:50],
+                    ntype="org",
+                    subtitle="client (registry)",
+                    detail="Named client in multi-contractor representation summary.",
+                    link="dnd-procurement.html",
+                    categories=["defence", "osint"],
+                    claim_level="OSINT_REGISTRY",
+                    origin="foreign_lobbying_deep_scan",
+                )
+                if eid and cid:
+                    self.add_edge(eid, cid, label="represents", strength=2, claim_level="OSINT_REGISTRY")
+        irving = raw.get("irving_shipbuilding") or {}
+        if irving:
+            iid = self.add_node(
+                "defcon_irving_shipbuilding",
+                label="Irving Shipbuilding",
+                ntype="org",
+                subtitle=f"{irving.get('total_communications', '')} lobby communications",
+                detail=_soft(str(irving.get("finding") or irving.get("context") or "")),
+                link="canadian-surface-combatant.html",
+                categories=["defence", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="foreign_lobbying_deep_scan",
+            )
+            if iid and hub:
+                self.add_edge(
+                    hub,
+                    iid,
+                    label="shipbuilding lobby volume",
+                    strength=3,
+                    claim_level="OSINT_REGISTRY",
+                )
+
+    def ingest_atlas_fraser(self) -> None:
+        path = DATA / "atlas_fraser_funding_crosswalk_2026-07-10.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        atlas = self.add_node(
+            "org_atlas_network",
+            label="Atlas Network",
+            ntype="org",
+            subtitle="US infrastructure layer · grants/academy",
+            detail=_soft(
+                str((raw.get("pipeline_model") or {}).get("infrastructure_layer") or "Think-tank network infrastructure.")
+            ),
+            link="fraser-atlas-network.html",
+            categories=["osint", "evidence"],
+            claim_level="FACT",
+            origin="atlas_fraser",
+        )
+        for n in (raw.get("nodes") or [])[:12]:
+            if not isinstance(n, dict):
+                continue
+            name = n.get("name") or n.get("id") or ""
+            if not _ok_label(str(name)):
+                continue
+            alink = n.get("atlas_link") or {}
+            srcs = (alink.get("sources") or []) if isinstance(alink, dict) else []
+            src0 = ""
+            if srcs and isinstance(srcs[0], str) and srcs[0].startswith("http"):
+                src0 = srcs[0]
+            nid = self.add_node(
+                "thinktank_" + _slug(str(n.get("id") or name)),
+                label=str(name)[:60],
+                ntype="org",
+                subtitle=_soft(
+                    (str(n.get("type") or "think tank").replace("_", " "))
+                    + (
+                        " · Atlas membership"
+                        if isinstance(alink, dict) and alink.get("membership")
+                        else ""
+                    ),
+                    80,
+                ),
+                detail=_soft(
+                    str(alink.get("dual_role") if isinstance(alink, dict) else "")
+                    or "Canadian downstream node in public funding crosswalk."
+                ),
+                link="fraser-atlas-network.html",
+                categories=["osint", "evidence"],
+                claim_level="FACT" if src0 or (isinstance(alink, dict) and alink.get("membership")) else "REPORTING",
+                origin="atlas_fraser",
+            )
+            if nid and atlas:
+                self.add_edge(
+                    atlas,
+                    nid,
+                    label="Atlas membership class" if isinstance(alink, dict) and alink.get("membership") else "pipeline",
+                    strength=2,
+                    claim_level="FACT",
+                    source_url=src0,
+                )
+            funding = (n.get("funding_public") or {}).get("named_us_grants_class") or []
+            for g in funding[:3]:
+                if not isinstance(g, dict):
+                    continue
+                funder = g.get("funder") or ""
+                if not _ok_label(str(funder)):
+                    continue
+                fid = self.add_node(
+                    "funder_" + _slug(str(funder)),
+                    label=str(funder)[:50],
+                    ntype="org",
+                    subtitle=_soft(str(g.get("amount_class") or "grant class"), 60),
+                    detail="Named US grant class from public secondary sources (InfluenceWatch/Candid class).",
+                    link="fraser-atlas-network.html",
+                    categories=["osint"],
+                    claim_level="REPORTING",
+                    origin="atlas_fraser",
+                )
+                if fid and nid:
+                    self.add_edge(
+                        fid,
+                        nid,
+                        label="grant class",
+                        strength=1,
+                        claim_level="REPORTING",
+                    )
+
     def build(self) -> dict[str, Any]:
         self.ingest_investigation_board()
         self.ingest_entities_edges()
@@ -1648,6 +1980,9 @@ class BoardBuilder:
         self.ingest_cbc_social_graph()
         self.ingest_business_holdings()
         self.ingest_politician_kinship()
+        self.ingest_lobbying_analysis()
+        self.ingest_foreign_lobbying_scan()
+        self.ingest_atlas_fraser()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)

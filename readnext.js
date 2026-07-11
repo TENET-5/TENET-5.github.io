@@ -181,7 +181,7 @@
     'dossier-viewer.html': {
       current: 'Intelligence Dossiers',
       next: [
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'OSINT composite board — documented edges' },
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'The full influence investigation' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data' },
       ]
@@ -189,7 +189,7 @@
     'corruption-map.html': {
       current: 'Corruption Map',
       next: [
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'OSINT composite board — documented edges' },
         { href: 'follow-the-money.html', label: 'Follow the Money', desc: 'The MAID-Brookfield-FINTRAC fiscal pipeline' },
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
       ]
@@ -277,7 +277,7 @@
     'acelephius-report.html': {
       current: 'Acelephius Report',
       next: [
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'OSINT composite board — documented edges' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data yourself' },
       ]
     },
@@ -369,7 +369,7 @@
     'conspiracy-board.html': {
       current: 'Conspiracy Board',
       next: [
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'OSINT composite board — documented edges' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search the source data yourself' },
         { href: 'foreign-influence.html', label: 'Foreign Influence', desc: 'CIJA, CCP, media ownership, NSICOP' },
       ]
@@ -419,7 +419,7 @@
       current: 'Entity Viewer',
       next: [
         { href: 'dossier-viewer.html', label: 'Intelligence Dossiers', desc: '12 profiles on persons of interest' },
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'OSINT composite board — documented edges' },
         { href: 'osint-dashboard.html', label: 'OSINT Dashboard', desc: 'Search 6.8M records yourself' },
       ]
     },
@@ -1392,7 +1392,7 @@
       next: [
         { href: 'findings.html', label: 'Cross-Reference Findings', desc: '26+ findings from 7M government records' },
         { href: 'evidence-index.html', label: 'Evidence Index', desc: 'Full index of sourced evidence' },
-        { href: 'network-analysis.html', label: 'Network Analysis', desc: '94 nodes, 169 connections mapped' },
+        { href: 'network-analysis.html', label: 'Network Analysis', desc: 'OSINT composite board — documented edges' },
       ]
     },
     'mp-analysis.html': {
