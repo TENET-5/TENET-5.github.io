@@ -534,7 +534,7 @@ def _cinema_playback_integrity() -> dict:
         )
         ok = (
             "act-cinema-page" in t
-            and "tenet5-cinema-play.js?v=3" in t
+            and ("tenet5-cinema-play.js?v=3" in t or "tenet5-cinema-play.js?v=4" in t)
             and has_primary
             and (
                 'src="media/film/' in t
@@ -550,7 +550,7 @@ def _cinema_playback_integrity() -> dict:
     if play.is_file():
         try:
             js = play.read_text(encoding="utf-8", errors="replace")
-            play_ok = "__v: 3" in js or "__v >= 3" in js
+            play_ok = "__v: 3" in js or "__v >= 3" in js or "__v: 4" in js or "__v >= 4" in js
             play_ok = play_ok and "act-play-gate" in js
         except OSError:
             play_ok = False
