@@ -10,6 +10,12 @@ Reads (when present):
   - data/osint_vault/cbc_public_osint_last.json
   - data/osint_vault/*_osint*.json         light entity harvest
   - data/osint_scrapes/**/*.json           scrape entity tags (public)
+  - data/maid_lobbying_crossref.json       MAID × lobbying registry
+  - data/connections.json                  MP–bill sponsorship (MAID-biased)
+  - data/cpc_top_donors_2023_2025.json     EC open data donors
+  - data/corruption_map_top80.json         degree sample
+  - data/pmo_lobbying_analysis.json        PMO registry volume
+  - data/blackrock_brookfield_connection.json  public filings / WEF
 
 Writes:
   - data/network_osint_board.json          page format (nodes + threads)
@@ -17,6 +23,7 @@ Writes:
 
 Filters: drops punctuation-only labels, EC aggregate donor buckets,
 orphan edges, and uncapped mega-graphs. Prefer sourced edges.
+Public meta strips host paths; claim_counts + capped/raw for UI.
 """
 from __future__ import annotations
 
@@ -518,6 +525,607 @@ class BoardBuilder:
                             claim_level="OSINT_SCRAPE",
                         )
 
+    def ingest_maid_lobbying(self) -> None:
+        path = DATA / "maid_lobbying_crossref.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "maid_lobbying_hub",
+            label="MAID lobbying cross-ref",
+            ntype="event",
+            subtitle="Registry contacts near MAID policy",
+            detail=f"total_lobbying_contacts={raw.get('total_lobbying_contacts')} · mps={raw.get('total_maid_in_registry')}",
+            link="lobbying-deepdive.html",
+            categories=["osint", "evidence"],
+            claim_level="OSINT_REGISTRY",
+            origin="maid_lobbying_crossref",
+        )
+        for mp in (raw.get("mps") or [])[:35]:
+            name = mp.get("name") or ""
+            contacts = int(mp.get("lobbying_contacts") or 0)
+            nid = self.add_node(
+                "lobby_mp_" + _slug(name),
+                label=name,
+                ntype="person",
+                subtitle=f"{contacts} lobbying contacts",
+                detail=_soft(
+                    "Institutions: " + ", ".join((mp.get("institutions") or [])[:5])
+                ),
+                link="lobbying-tracker.html",
+                categories=["osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="maid_lobbying_crossref",
+            )
+            if nid and hub:
+                strength = 3 if contacts >= 1000 else (2 if contacts >= 500 else 1)
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{contacts} contacts",
+                    strength=strength,
+                    claim_level="OSINT_REGISTRY",
+                )
+            for inst in (mp.get("institutions") or [])[:4]:
+                iid = self.add_node(
+                    "inst_" + _slug(inst),
+                    label=inst.split("(")[0].strip()[:60],
+                    ntype="org",
+                    subtitle="Federal institution",
+                    detail="Named as lobbying target institution in MAID cross-ref.",
+                    link="lobbying-deepdive.html",
+                    categories=["authority", "osint"],
+                    claim_level="OSINT_REGISTRY",
+                    origin="maid_lobbying_crossref",
+                )
+                if nid and iid:
+                    self.add_edge(
+                        nid,
+                        iid,
+                        label="lobbied",
+                        strength=1,
+                        claim_level="OSINT_REGISTRY",
+                    )
+
+    def ingest_mp_bill_connections(self) -> None:
+        path = DATA / "connections.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        # Prefer MAID/health-related bills + high-degree MPs
+        nodes_by_id = {n["id"]: n for n in (raw.get("nodes") or []) if n.get("id")}
+        edges = raw.get("edges") or []
+        maid_bills = {
+            n["id"]
+            for n in nodes_by_id.values()
+            if n.get("type") == "bill"
+            and re.search(
+                r"medical assistance|maid|organ donor|mental|health|dying",
+                n.get("label") or "",
+                re.I,
+            )
+        }
+        # count mp degrees on maid bills only, else all
+        mp_deg: Counter[str] = Counter()
+        selected_edges = []
+        for e in edges:
+            frm, to = e.get("from") or e.get("source"), e.get("to") or e.get("target")
+            if not frm or not to:
+                continue
+            if maid_bills and not (frm in maid_bills or to in maid_bills):
+                continue
+            selected_edges.append((frm, to, e.get("type") or "sponsored"))
+            if str(frm).startswith("mp:"):
+                mp_deg[frm] += 1
+            if str(to).startswith("mp:"):
+                mp_deg[to] += 1
+        if not selected_edges:
+            selected_edges = [
+                (e.get("from"), e.get("to"), e.get("type") or "sponsored")
+                for e in edges[:80]
+                if e.get("from") and e.get("to")
+            ]
+        keep_mps = {m for m, _ in mp_deg.most_common(40)}
+        for nid, n in nodes_by_id.items():
+            if n.get("type") == "mp" and nid in keep_mps:
+                self.add_node(
+                    nid,
+                    label=n.get("label") or nid,
+                    ntype="person",
+                    subtitle="MP · bill sponsorship graph",
+                    detail="From data/connections.json MP–bill sponsorship edges.",
+                    link="mp-voting-records.html",
+                    categories=["osint"],
+                    claim_level="OSINT_INDEX",
+                    origin="connections",
+                )
+            elif n.get("type") == "bill" and (
+                nid in maid_bills or any(nid in (a, b) for a, b, _ in selected_edges[:60])
+            ):
+                lab = n.get("label") or nid
+                short = lab.split(":")[0] if lab.startswith("C-") or lab.startswith("bill:") else lab[:48]
+                if lab.startswith("C-") or "C-" in lab[:8]:
+                    short = lab.split(":")[0] if ":" in lab else lab[:20]
+                else:
+                    short = (lab[:50] + "…") if len(lab) > 50 else lab
+                self.add_node(
+                    nid,
+                    label=short,
+                    ntype="event",
+                    subtitle="Bill",
+                    detail=_soft(lab),
+                    link="legislative-timeline.html",
+                    categories=["evidence", "osint"],
+                    claim_level="OSINT_INDEX",
+                    origin="connections",
+                )
+        for frm, to, typ in selected_edges:
+            if frm in self.nodes and to in self.nodes:
+                self.add_edge(
+                    frm,
+                    to,
+                    label=str(typ),
+                    strength=1,
+                    claim_level="OSINT_INDEX",
+                )
+
+    def ingest_cpc_donors_top(self) -> None:
+        path = DATA / "cpc_top_donors_2023_2025.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "cpc_donor_hub",
+            label="CPC top donors 2023–25",
+            ntype="org",
+            subtitle="Elections Canada open data (ranked)",
+            detail=_soft(raw.get("corpus_note") or "Named monetary contributors to CPC."),
+            link="elections-finance.html",
+            categories=["osint", "evidence"],
+            claim_level="PUBLIC_EC_OPEN_DATA",
+            origin="cpc_top_donors",
+        )
+        for row in (raw.get("top_contributors") or [])[:20]:
+            name = row.get("name") or ""
+            if not _ok_label(name):
+                continue
+            total = row.get("total_cad")
+            nid = self.add_node(
+                "donor_" + _slug(name),
+                label=name,
+                ntype="person",
+                subtitle=f"CPC donor · ${total:,.0f}" if isinstance(total, (int, float)) else "CPC donor",
+                detail=_soft(
+                    f"Monetary total CAD {total} · count={row.get('count')} · years={row.get('years_seen')}"
+                ),
+                link="elections-finance.html",
+                categories=["osint"],
+                claim_level="PUBLIC_EC_OPEN_DATA",
+                origin="cpc_top_donors",
+            )
+            if nid and hub:
+                self.add_edge(
+                    nid,
+                    hub,
+                    label="monetary contribution",
+                    strength=2 if isinstance(total, (int, float)) and total >= 5000 else 1,
+                    claim_level="PUBLIC_EC_OPEN_DATA",
+                )
+
+    def ingest_corruption_map_top(self) -> None:
+        path = DATA / "corruption_map_top80.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        seen_lab: set[str] = set()
+        for n in (raw.get("nodes") or [])[:80]:
+            lab = n.get("label") or n.get("id") or ""
+            if not _ok_label(lab):
+                continue
+            key = lab.lower()
+            if key in seen_lab:
+                continue
+            seen_lab.add(key)
+            deg = n.get("degree") or 0
+            self.add_node(
+                n.get("id") or _slug(lab),
+                label=lab if lab[0].isupper() or " " in lab else lab.replace("_", " ").title(),
+                ntype=n.get("type") or "org",
+                subtitle=f"centrality degree {deg}",
+                detail="From corruption_map_top80 (degree-centrality sample). Index only.",
+                link="corruption-map.html",
+                categories=["osint"],
+                claim_level="OSINT_INDEX",
+                origin="corruption_map_top80",
+            )
+            if len(seen_lab) >= 45:
+                break
+
+    def ingest_pmo_lobbying(self) -> None:
+        path = DATA / "pmo_lobbying_analysis.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "pmo_lobby_hub",
+            label="PMO lobbying (registry)",
+            ntype="org",
+            subtitle=f"{raw.get('total_pmo_contacts', '')} contacts · open registry",
+            detail=_soft(
+                raw.get("title")
+                or "Top staff and organizations from federal lobbying registry PMO contacts."
+            ),
+            link="lobbying-deepdive.html",
+            categories=["authority", "osint"],
+            claim_level="OSINT_REGISTRY",
+            origin="pmo_lobbying_analysis",
+        )
+        for row in (raw.get("top_pmo_staff") or [])[:12]:
+            name = row.get("name") or ""
+            if not _ok_label(name):
+                continue
+            contacts = int(row.get("contacts") or 0)
+            nid = self.add_node(
+                "pmo_staff_" + _slug(name),
+                label=name,
+                ntype="person",
+                subtitle=str(row.get("title") or "PMO") + f" · {contacts} contacts",
+                detail="Named as lobbied PMO contact in registry analysis (count is volume, not finding).",
+                link="lobbying-tracker.html",
+                categories=["authority", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="pmo_lobbying_analysis",
+            )
+            if nid and hub:
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{contacts} contacts",
+                    strength=3 if contacts >= 500 else (2 if contacts >= 300 else 1),
+                    claim_level="OSINT_REGISTRY",
+                )
+        for row in (raw.get("who_lobbies_pmo_most") or [])[:15]:
+            org = row.get("org") or ""
+            if not _ok_label(org):
+                continue
+            contacts = int(row.get("contacts") or 0)
+            oid = self.add_node(
+                "pmo_org_" + _slug(org),
+                label=org,
+                ntype="org",
+                subtitle=f"{contacts} PMO contacts",
+                detail="Organization volume toward PMO in lobbying registry analysis.",
+                link="lobbying-deepdive.html",
+                categories=["osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="pmo_lobbying_analysis",
+            )
+            if oid and hub:
+                self.add_edge(
+                    oid,
+                    hub,
+                    label="lobbied PMO",
+                    strength=2 if contacts >= 100 else 1,
+                    claim_level="OSINT_REGISTRY",
+                )
+
+    def ingest_blackrock_brookfield(self) -> None:
+        path = DATA / "blackrock_brookfield_connection.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        br = self.add_node(
+            "org_blackrock",
+            label="BlackRock",
+            ntype="org",
+            subtitle=str((raw.get("blackrock") or {}).get("aum_display") or "asset manager"),
+            detail=_soft(
+                "Public filings and lobby registry: asset manager with Brookfield stake and Canadian healthcare practice."
+            ),
+            link="carney-brookfield.html",
+            categories=["osint", "evidence"],
+            claim_level="REPORTING",
+            origin="blackrock_brookfield",
+        )
+        bf = self.add_node(
+            "org_brookfield",
+            label="Brookfield",
+            ntype="org",
+            subtitle="asset manager",
+            detail=_soft((raw.get("combined") or {}).get("relationship") or ""),
+            link="carney-brookfield.html",
+            categories=["osint", "evidence"],
+            claim_level="REPORTING",
+            origin="blackrock_brookfield",
+        )
+        br_shares = (raw.get("blackrock") or {}).get("brookfield_shares") or {}
+        if br and bf:
+            self.add_edge(
+                br,
+                bf,
+                label=str(br_shares.get("filing") or "13F stake"),
+                strength=2,
+                claim_level="REPORTING",
+                source_url=str(br_shares.get("source") or ""),
+            )
+        fink = self.add_node(
+            "person_larry_fink",
+            label="Larry Fink",
+            ntype="person",
+            subtitle="BlackRock · WEF board concurrent",
+            detail=_soft((raw.get("fink_carney_wef") or {}).get("wef_board") or ""),
+            link="carney-brookfield.html",
+            categories=["osint"],
+            claim_level="REPORTING",
+            origin="blackrock_brookfield",
+        )
+        carney = self.add_node(
+            "person_mark_carney",
+            label="Mark Carney",
+            ntype="person",
+            subtitle="WEF board concurrent · Brookfield history",
+            detail=_soft((raw.get("fink_carney_wef") or {}).get("davos_2026") or ""),
+            link="carney-brookfield.html",
+            categories=["osint", "authority"],
+            claim_level="REPORTING",
+            origin="blackrock_brookfield",
+        )
+        wef_src = str((raw.get("fink_carney_wef") or {}).get("source_wef") or "")
+        if fink and br:
+            self.add_edge(fink, br, label="CEO/chair class", strength=2, claim_level="REPORTING")
+        if fink and carney:
+            self.add_edge(
+                fink,
+                carney,
+                label="WEF board concurrent",
+                strength=2,
+                claim_level="REPORTING",
+                source_url=wef_src,
+            )
+        if carney and bf:
+            self.add_edge(
+                carney,
+                bf,
+                label="prior leadership (public record)",
+                strength=2,
+                claim_level="REPORTING",
+            )
+        lobby = (raw.get("blackrock") or {}).get("lobbying_canada") or {}
+        if lobby.get("entity") and br:
+            ent = self.add_node(
+                "org_" + _slug(str(lobby.get("entity"))),
+                label=str(lobby.get("entity"))[:60],
+                ntype="org",
+                subtitle="Canadian lobby registrant",
+                detail=_soft(str(lobby.get("targets") or "")),
+                link="lobbying-tracker.html",
+                categories=["osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="blackrock_brookfield",
+            )
+            if ent:
+                self.add_edge(
+                    br,
+                    ent,
+                    label="Canadian entity",
+                    strength=1,
+                    claim_level="OSINT_REGISTRY",
+                    source_url=str(lobby.get("source") or ""),
+                )
+
+    def ingest_most_lobbied_officials(self) -> None:
+        path = DATA / "most_lobbied_officials.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "most_lobbied_hub",
+            label="Most-lobbied officials",
+            ntype="event",
+            subtitle="Commissioner of Lobbying export (top 50)",
+            detail="Meeting volume from Communication_DpohExport aggregate. Volume is not a finding of wrongdoing.",
+            link="lobbying-deepdive.html",
+            categories=["osint", "authority"],
+            claim_level="OSINT_REGISTRY",
+            origin="most_lobbied_officials",
+        )
+        for row in (raw.get("top_50") or [])[:30]:
+            name = row.get("name") or ""
+            if not _ok_label(name):
+                continue
+            meetings = int(row.get("total_meetings") or 0)
+            inst = str(row.get("institution") or "")
+            nid = self.add_node(
+                "lobby_dpoh_" + _slug(name),
+                label=name,
+                ntype="person",
+                subtitle=f"{meetings} meetings" + (f" · {inst.split('(')[0].strip()}" if inst else ""),
+                detail=_soft(f"Institution: {inst}" if inst else "Named in most-lobbied officials export."),
+                link="lobbying-tracker.html",
+                categories=["authority", "osint"],
+                claim_level="OSINT_REGISTRY",
+                origin="most_lobbied_officials",
+            )
+            if nid and hub:
+                strength = 3 if meetings >= 1500 else (2 if meetings >= 800 else 1)
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{meetings} meetings",
+                    strength=strength,
+                    claim_level="OSINT_REGISTRY",
+                )
+            if inst and nid:
+                iid = self.add_node(
+                    "inst_" + _slug(inst.split("(")[0].strip()),
+                    label=inst.split("(")[0].strip()[:60],
+                    ntype="org",
+                    subtitle="Federal institution",
+                    detail="Institution of record for lobbied official.",
+                    link="lobbying-deepdive.html",
+                    categories=["authority", "osint"],
+                    claim_level="OSINT_REGISTRY",
+                    origin="most_lobbied_officials",
+                )
+                if iid:
+                    self.add_edge(
+                        nid,
+                        iid,
+                        label="posted at",
+                        strength=1,
+                        claim_level="OSINT_REGISTRY",
+                    )
+
+    def ingest_cija_lobbying(self) -> None:
+        path = DATA / "cija_lobbying_detail.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        hub = self.add_node(
+            "org_cija",
+            label="CIJA",
+            ntype="org",
+            subtitle=f"{raw.get('total_cija_communications', '')} registry communications",
+            detail=_soft(
+                f"Lobbying registry: {raw.get('unique_contacts')} unique contacts. "
+                "Meeting counts are volume, not findings."
+            ),
+            link="lobbying-deepdive.html",
+            categories=["israel", "osint"],
+            claim_level="OSINT_REGISTRY",
+            origin="cija_lobbying_detail",
+        )
+        for row in (raw.get("top_contacts") or [])[:35]:
+            name = row.get("name") or ""
+            if not _ok_label(name):
+                continue
+            meetings = int(row.get("meetings") or 0)
+            title = str(row.get("title") or "")
+            inst = str(row.get("institution") or "")
+            nid = self.add_node(
+                "cija_contact_" + _slug(name),
+                label=name,
+                ntype="person",
+                subtitle=(title[:40] + " · " if title else "") + f"{meetings} meetings",
+                detail=_soft(f"{inst}" if inst else "Named CIJA registry contact."),
+                link="lobbying-tracker.html",
+                categories=["osint", "israel"],
+                claim_level="OSINT_REGISTRY",
+                origin="cija_lobbying_detail",
+            )
+            if nid and hub:
+                strength = 3 if meetings >= 40 else (2 if meetings >= 20 else 1)
+                self.add_edge(
+                    hub,
+                    nid,
+                    label=f"{meetings} OCL communications",
+                    strength=strength,
+                    claim_level="OSINT_REGISTRY",
+                )
+
+    def ingest_cpc_media_graph(self) -> None:
+        path = DATA / "cpc_media_political_graph.json"
+        raw = _load(path)
+        if not raw or not isinstance(raw, dict):
+            return
+        # never surface framework_tools_discovered (local paths)
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        type_to_cat = {
+            "CPC_LEADER": "osint",
+            "CPC_DEPUTY": "osint",
+            "CPC_MP": "osint",
+            "CPC_MP_FI": "ccp",
+            "CPC_MP_CASE": "media",
+            "MEDIA_AMP": "media",
+            "MEDIA": "media",
+            "INSTITUTION": "media",
+        }
+        for n in (raw.get("nodes") or [])[:40]:
+            if not isinstance(n, dict):
+                continue
+            nid = str(n.get("id") or "")
+            handle = str(n.get("handle") or "").lstrip("@")
+            lab = handle or nid
+            if not _ok_label(lab):
+                continue
+            ntype_raw = str(n.get("type") or "person")
+            cat = type_to_cat.get(ntype_raw, "media")
+            role = str(n.get("role") or n.get("outlet") or "")
+            self.add_node(
+                "media_" + _slug(nid or lab),
+                label=lab,
+                ntype="person" if "MP" in ntype_raw or "LEADER" in ntype_raw else "org",
+                subtitle=_soft(role, 80) or ntype_raw.replace("_", " "),
+                detail="Public handle from CPC media/political mesh. Relation labels are index only.",
+                link="cbc-social-amplification.html",
+                categories=[cat, "media"],
+                claim_level="OSINT_INDEX",
+                origin="cpc_media_political_graph",
+            )
+        for e in (raw.get("edges") or [])[:40]:
+            if not isinstance(e, dict):
+                continue
+            frm = "media_" + _slug(str(e.get("from") or ""))
+            to = "media_" + _slug(str(e.get("to") or ""))
+            rel = str(e.get("relation") or e.get("label") or "linked")
+            if frm in self.nodes and to in self.nodes:
+                self.add_edge(
+                    frm,
+                    to,
+                    label=rel.replace("_", " ")[:60],
+                    strength=1,
+                    claim_level="OSINT_INDEX",
+                )
+
+    def ingest_osint_network_graph(self) -> None:
+        path = DATA / "osint_network_graph.json"
+        raw = _load(path)
+        if not raw:
+            return
+        self.sources_used.append(str(path.relative_to(ROOT)))
+        cat_map = {
+            "foreign_org": "ccp",
+            "corporation": "osint",
+            "institution": "authority",
+            "politician": "osint",
+            "party": "osint",
+        }
+        for n in (raw.get("nodes") or [])[:20]:
+            lab = n.get("label") or n.get("id") or ""
+            if not _ok_label(str(lab)):
+                continue
+            # skip guilt framing from risk scores — soft index only
+            self.add_node(
+                "ong_" + _slug(str(n.get("id") or lab)),
+                label=str(lab),
+                ntype="person" if n.get("category") == "politician" else "org",
+                subtitle="OSINT composite index node",
+                detail="From osint_network_graph. Composite scores are not findings of wrongdoing.",
+                link="foreign-influence.html",
+                categories=[cat_map.get(str(n.get("category") or ""), "osint"), "osint"],
+                claim_level="OSINT_INDEX",
+                origin="osint_network_graph",
+            )
+        for e in (raw.get("edges") or [])[:20]:
+            frm = "ong_" + _slug(str(e.get("source") or e.get("from") or ""))
+            to = "ong_" + _slug(str(e.get("target") or e.get("to") or ""))
+            if frm in self.nodes and to in self.nodes:
+                self.add_edge(
+                    frm,
+                    to,
+                    label=str(e.get("label") or "linked")[:60],
+                    strength=min(3, int(e.get("weight") or 1) if str(e.get("weight") or "").replace(".", "").isdigit() else 1),
+                    claim_level="OSINT_INDEX",
+                )
+
     def build(self) -> dict[str, Any]:
         self.ingest_investigation_board()
         self.ingest_entities_edges()
@@ -526,31 +1134,54 @@ class BoardBuilder:
         self.ingest_cbc_public_osint()
         self.ingest_vault_osint_light()
         self.ingest_scrape_tags()
+        self.ingest_maid_lobbying()
+        self.ingest_mp_bill_connections()
+        self.ingest_cpc_donors_top()
+        self.ingest_corruption_map_top()
+        self.ingest_pmo_lobbying()
+        self.ingest_blackrock_brookfield()
+        self.ingest_most_lobbied_officials()
+        self.ingest_cija_lobbying()
+        self.ingest_cpc_media_graph()
+        self.ingest_osint_network_graph()
 
         # drop orphan edges again after all merges
         ids = set(self.nodes)
         self.edges = [e for e in self.edges if e["from"] in ids and e["to"] in ids]
+
+        raw_nodes = len(self.nodes)
+        raw_edges = len(self.edges)
 
         # cap board size for public UI — highest degree first
         deg: Counter[str] = Counter()
         for e in self.edges:
             deg[e["from"]] += 1
             deg[e["to"]] += 1
-        if len(self.nodes) > 160:
-            keep = {nid for nid, _ in deg.most_common(140)}
-            # always keep FACT-origin nodes
+        if len(self.nodes) > 220:
+            keep = {nid for nid, _ in deg.most_common(180)}
+            # always keep FACT-origin / high-trust nodes
             for nid, n in self.nodes.items():
-                if n.get("claim_level") == "FACT" or n.get("origin") in (
+                if n.get("claim_level") in ("FACT", "PUBLIC_EC_OPEN_DATA") or n.get(
+                    "origin"
+                ) in (
                     "defence_cluster",
                     "entities_edges",
+                    "maid_lobbying_crossref",
+                    "cpc_top_donors",
                 ):
                     keep.add(nid)
             self.nodes = {k: v for k, v in self.nodes.items() if k in keep}
             ids = set(self.nodes)
             self.edges = [e for e in self.edges if e["from"] in ids and e["to"] in ids]
             self.stats["capped"] = 1
+            self.stats["raw_nodes"] = raw_nodes
+            self.stats["raw_edges"] = raw_edges
 
-        # strip internal origin field for public board (optional keep for proof)
+        claim_counts: Counter[str] = Counter()
+        for n in self.nodes.values():
+            claim_counts[str(n.get("claim_level") or "OSINT_INDEX")] += 1
+
+        # strip internal origin; public-safe source basenames only
         public_nodes = []
         for n in self.nodes.values():
             public_nodes.append(
@@ -566,13 +1197,22 @@ class BoardBuilder:
                 }
             )
 
+        public_sources = []
+        for s in self.sources_used[:32]:
+            # basenames only — never expose full host paths
+            public_sources.append(Path(s).name.replace("\\", "/").split("/")[-1])
+
         board = {
             "meta": {
                 "title": "TENET5 OSINT composite network",
                 "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
-                "sources": ", ".join(self.sources_used[:24]),
-                "builder": "tools/build_network_osint_board.py",
-                "note": "Composite of investigation board + appointment edges + defence freezes + OSINT vault/scrapes. Centrality is not guilt. Prefer case files.",
+                "sources": ", ".join(public_sources),
+                "source_count": len(self.sources_used),
+                "capped": bool(self.stats.get("capped")),
+                "raw_nodes": raw_nodes,
+                "raw_edges": raw_edges,
+                "claim_counts": dict(claim_counts),
+                "note": "Composite of investigation board + appointment edges + defence freezes + OSINT vault/scrapes + lobbying/donor open data. Centrality is not guilt. Prefer case files.",
             },
             "nodes": sorted(public_nodes, key=lambda x: x["label"].lower()),
             "threads": self.edges,

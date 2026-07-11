@@ -118,7 +118,8 @@
         to: e.to,
         label: e.label || e.rel || 'documented link',
         strength: e.strength || 1,
-        claim_level: e.claim_level || 'BOARD_INDEX'
+        claim_level: e.claim_level || 'BOARD_INDEX',
+        source: e.source || e.source_url || ''
       };
     });
     return { nodes: nodes, edges: edges, meta: raw.meta || {} };
@@ -173,6 +174,9 @@
     var n = nodes.length;
     if (!n) return;
     var i, j, e, a, b, dx, dy, dist, f, k, iter;
+    var maxIter = 220;
+    if (n > 120) maxIter = 80;
+    else if (n > 80) maxIter = 100;
     var byId = Object.create(null);
     nodes.forEach(function (node, idx) {
       var ang = (2 * Math.PI * idx) / n - Math.PI / 2;
@@ -187,7 +191,7 @@
       return { a: byId[ed.from], b: byId[ed.to], s: ed.strength || 1 };
     }).filter(function (L) { return L.a && L.b; });
 
-    for (iter = 0; iter < 220; iter++) {
+    for (iter = 0; iter < maxIter; iter++) {
       for (i = 0; i < n; i++) {
         for (j = i + 1; j < n; j++) {
           a = nodes[i]; b = nodes[j];
@@ -208,6 +212,7 @@
         a.vx += dx; a.vy += dy;
         b.vx -= dx; b.vy -= dy;
       }
+      var maxMove = 0;
       for (i = 0; i < n; i++) {
         a = nodes[i];
         a.vx += (W * 0.5 - a.x) * 0.004;
@@ -216,7 +221,10 @@
         a.x += a.vx; a.y += a.vy;
         a.x = Math.max(36, Math.min(W - 36, a.x));
         a.y = Math.max(28, Math.min(H - 28, a.y));
+        var move = Math.abs(a.vx) + Math.abs(a.vy);
+        if (move > maxMove) maxMove = move;
       }
+      if (iter >= 40 && maxMove < 0.05) break;
     }
   }
 
@@ -249,7 +257,8 @@
     vis.forEach(function (n) { visIds[n.id] = 1; });
     if (emptyEl) {
       if (!state.loaded) {
-        emptyEl.hidden = true;
+        emptyEl.hidden = false;
+        emptyEl.textContent = 'Loading board…';
       } else {
         emptyEl.hidden = vis.length > 0;
         emptyEl.textContent = vis.length
@@ -335,19 +344,55 @@
     var cons = state.edges.filter(function (t) {
       return t.from === n.id || t.to === n.id;
     });
+    detail.appendChild(el('div', 'degree', 'Documented edges: ' + cons.length));
+
     if (cons.length) {
       var box = el('div', 'cons');
       box.appendChild(el('h4', null, 'Connections (' + cons.length + ')'));
-      cons.slice(0, 14).forEach(function (t) {
-        var other = state.byId[t.from === n.id ? t.to : t.from] || {};
-        var row = el('div');
-        row.appendChild(el('b', null, other.label || '?'));
-        row.appendChild(document.createTextNode(' — ' + (t.label || 'link')));
-        if (t.claim_level && t.claim_level !== 'BOARD_INDEX') {
-          row.appendChild(document.createTextNode(' · ' + t.claim_level));
+      var limit = 14;
+
+      function renderCons(all) {
+        while (box.childNodes.length > 1) box.removeChild(box.lastChild);
+        var list = all ? cons : cons.slice(0, limit);
+        list.forEach(function (t) {
+          var otherId = t.from === n.id ? t.to : t.from;
+          var other = state.byId[otherId];
+          var row = el('div', 'con-row');
+          if (other) {
+            var btn = el('button', 'con-link', other.label || otherId);
+            btn.type = 'button';
+            btn.addEventListener('click', function (ev) {
+              ev.preventDefault();
+              select(other);
+            });
+            row.appendChild(btn);
+          } else {
+            row.appendChild(el('b', null, otherId || '?'));
+          }
+          row.appendChild(document.createTextNode(' — ' + (t.label || 'link')));
+          if (t.claim_level && t.claim_level !== 'BOARD_INDEX') {
+            row.appendChild(document.createTextNode(' · ' + t.claim_level));
+          }
+          if (t.source) {
+            row.appendChild(document.createTextNode(' · '));
+            var src = el('a', 'con-src', 'source');
+            src.href = t.source;
+            src.target = '_blank';
+            src.rel = 'noopener';
+            row.appendChild(src);
+          }
+          box.appendChild(row);
+        });
+        if (!all && cons.length > limit) {
+          var more = el('button', 'con-more', 'Show all (' + cons.length + ')');
+          more.type = 'button';
+          more.addEventListener('click', function () {
+            renderCons(true);
+          });
+          box.appendChild(more);
         }
-        box.appendChild(row);
-      });
+      }
+      renderCons(false);
       detail.appendChild(box);
     }
     if (n.link) {
@@ -368,11 +413,13 @@
     function addChip(key, label, active) {
       var b = el('button', 'chip' + (active ? ' on' : ''), label);
       b.type = 'button';
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
       if (key && CAT[key]) b.style.borderColor = CAT[key].color;
       b.addEventListener('click', function () {
         state.filter = key;
         state.sel = null;
         buildChips();
+        buildList();
         draw();
         updateStats();
       });
@@ -386,18 +433,20 @@
 
   function buildList() {
     while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
-    state.nodes.slice().sort(function (a, b) {
+    visibleNodes().slice().sort(function (a, b) {
       return (a.label || '').localeCompare(b.label || '');
     }).forEach(function (n) {
       var li = el('li');
+      var lab = el('button', 'list-label', n.label || n.id);
+      lab.type = 'button';
+      lab.addEventListener('click', function () { select(n); });
+      li.appendChild(lab);
+      if (n.subtitle) li.appendChild(el('span', null, n.subtitle));
       if (n.link) {
-        var a = el('a', null, n.label);
+        var a = el('a', 'list-open', 'Open file');
         a.href = n.link;
         li.appendChild(a);
-      } else {
-        li.appendChild(document.createTextNode(n.label));
       }
-      if (n.subtitle) li.appendChild(el('span', null, n.subtitle));
       listEl.appendChild(li);
     });
   }
@@ -405,11 +454,25 @@
   function updateStats() {
     var m = state.meta || {};
     var vis = visibleNodes().length;
-    statsEl.innerHTML =
+    var html =
       '<b>' + state.nodes.length + '</b> entities · <b>' + state.edges.length + '</b> edges' +
       (vis !== state.nodes.length ? ' · showing <b>' + vis + '</b>' : '') +
       (m.updated ? ' · updated ' + m.updated : '') +
       (m.sources ? ' · ' + String(m.sources).split(',').length + ' sources' : '');
+    if (m.raw_nodes || m.capped) {
+      var rawN = typeof m.raw_nodes === 'number' ? m.raw_nodes : null;
+      html += ' · <span class="capped-note">board capped' +
+        (rawN != null && rawN !== state.nodes.length ? ' from ' + rawN + ' raw nodes' : '') +
+        '</span>';
+    }
+    if (m.claim_counts && typeof m.claim_counts === 'object') {
+      var parts = [];
+      Object.keys(m.claim_counts).forEach(function (k) {
+        parts.push(k + ' ' + m.claim_counts[k]);
+      });
+      if (parts.length) html += ' · claims: ' + parts.join(', ');
+    }
+    statsEl.innerHTML = html;
   }
 
   function activateBoard(name) {
@@ -458,12 +521,18 @@
   if (tabOsint) tabOsint.addEventListener('click', function () { activateBoard('osint'); });
   if (tabInf) tabInf.addEventListener('click', function () { activateBoard('influence'); });
   if (tabDef) tabDef.addEventListener('click', function () { activateBoard('defence'); });
+  var searchTimer = null;
   if (searchEl) {
     searchEl.addEventListener('input', function () {
       state.query = (searchEl.value || '').trim().toLowerCase();
       state.sel = null;
-      draw();
-      updateStats();
+      if (searchTimer) clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () {
+        searchTimer = null;
+        buildList();
+        draw();
+        updateStats();
+      }, 120);
     });
   }
   svg.addEventListener('click', function () {
@@ -509,23 +578,50 @@
     ]
   };
 
+  function softFetch(url) {
+    return fetch(url, { cache: 'no-cache' }).then(function (r) {
+      return r.ok ? r.json() : null;
+    }).catch(function () { return null; });
+  }
+
   Promise.all([
-    fetch('data/investigation_board.json', { cache: 'no-cache' }).then(function (r) {
-      if (!r.ok) throw new Error('board');
-      return r.json();
-    }),
-    fetch('data/analysis/defence_cluster_network.json', { cache: 'no-cache' }).then(function (r) {
-      return r.ok ? r.json() : null;
-    }).catch(function () { return null; }),
-    fetch('data/network_osint_board.json', { cache: 'no-cache' }).then(function (r) {
-      return r.ok ? r.json() : null;
-    }).catch(function () { return null; })
+    softFetch('data/investigation_board.json'),
+    softFetch('data/analysis/defence_cluster_network.json'),
+    softFetch('data/network_osint_board.json')
   ]).then(function (triple) {
-    boards.influence = normalizeInfluence(triple[0]);
-    boards.defence = normalizeDefence(triple[1] || DEFENCE_FALLBACK);
-    boards.osint = triple[2] ? normalizeInfluence(triple[2]) : boards.influence;
-    if (triple[2] && triple[2].meta) boards.osint.meta = triple[2].meta;
-    activateBoard(triple[2] ? 'osint' : 'influence');
+    var influenceRaw = triple[0];
+    var defenceRaw = triple[1];
+    var osintRaw = triple[2];
+
+    boards.defence = normalizeDefence(defenceRaw || DEFENCE_FALLBACK);
+    boards.influence = influenceRaw
+      ? normalizeInfluence(influenceRaw)
+      : { nodes: [], edges: [], meta: {} };
+    boards.osint = osintRaw
+      ? normalizeInfluence(osintRaw)
+      : { nodes: [], edges: [], meta: {} };
+    if (osintRaw && osintRaw.meta) boards.osint.meta = osintRaw.meta;
+
+    /* Prefer a board that actually has nodes; never let one 404 wipe the rest. */
+    var preferred = 'defence';
+    if (boards.osint.nodes.length) preferred = 'osint';
+    else if (boards.influence.nodes.length) preferred = 'influence';
+    else if (boards.defence.nodes.length) preferred = 'defence';
+    else {
+      boards.defence = normalizeDefence(DEFENCE_FALLBACK);
+      preferred = 'defence';
+    }
+
+    /* Fill empty boards from the strongest available pack so tabs still work. */
+    var fallbackPack = boards[preferred];
+    if (!boards.osint.nodes.length) boards.osint = fallbackPack;
+    if (!boards.influence.nodes.length) boards.influence = fallbackPack;
+
+    activateBoard(preferred);
+    if (!osintRaw && !influenceRaw) {
+      standEl.textContent =
+        'Primary boards could not load. Showing the defence-instruments network from local freezes.';
+    }
   }).catch(function () {
     boards.defence = normalizeDefence(DEFENCE_FALLBACK);
     boards.influence = boards.defence;
@@ -535,4 +631,10 @@
       'Primary boards could not load. Showing the defence-instruments network from local freezes.';
     statsEl.textContent = 'Fallback board · defence instruments only';
   });
+
+  /* Initial empty-state while fetches settle */
+  if (emptyEl) {
+    emptyEl.hidden = false;
+    emptyEl.textContent = 'Loading board…';
+  }
 })();
