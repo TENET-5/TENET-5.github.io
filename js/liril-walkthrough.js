@@ -1107,7 +1107,12 @@
         var _dl = document.getElementById('liril-line');
         if (_dl) _dl.textContent = point.text;
         var _st = document.getElementById('liril-status');
-        if (_st) _st.textContent = 'LIRIL reading · ' + (idx + 1) + '/' + points.length;
+        if (_st) {
+          _st.textContent = 'LIRIL reading — ' + (idx + 1) + '/' + points.length;
+          _st.classList.add('show');
+          if (_st._tm) clearTimeout(_st._tm);
+          _st._tm = setTimeout(function(){ _st.classList.remove('show'); }, 4000);
+        }
       } catch (e) {}
 
       var counter = document.createElement('div');

@@ -28,7 +28,15 @@
     var lineEl = $('liril-line');
     var statusEl = $('liril-status');
 
-    function setStatus(t) { if (statusEl) statusEl.textContent = t; }
+    var statusTimer = null;
+    function setStatus(t) {
+      if (statusEl) {
+        statusEl.textContent = t;
+        statusEl.classList.add('show');
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(function(){ statusEl.classList.remove('show'); }, 4000);
+      }
+    }
     function setLine(t) { if (lineEl && t) lineEl.textContent = t; }
 
     // The walkthrough button is created asynchronously; poll briefly for it.

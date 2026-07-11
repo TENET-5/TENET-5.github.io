@@ -477,6 +477,9 @@ def main() -> int:
             print(f"[prism_site_duty] lap={n+1}/{max_laps} {doc['verdict']}", flush=True)
             time.sleep(loop)
         return 0
+    if _stop_requested():
+        print("[prism_site_duty] STOP flag present — one-shot lap skipped", flush=True)
+        return 0
     doc = lap()
     return 0 if doc.get("ok") else 1
 

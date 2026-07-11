@@ -74,8 +74,14 @@
     // Always show dock as the system guide chrome
     if (dock) dock.classList.add('up', 'guide-ready');
 
+    var statusTimer = null;
     function setStatus(msg) {
-      if (statusEl) statusEl.textContent = msg;
+      if (statusEl) {
+        statusEl.textContent = msg;
+        statusEl.classList.add('show');
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(function() { statusEl.classList.remove('show'); }, 4000);
+      }
     }
 
     function setLine(text) {
