@@ -3,12 +3,12 @@
  */
 (function () {
   'use strict';
-  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 4) return;
+  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 5) return;
 
   function $(id) { return document.getElementById(id); }
 
   function lead() {
-    return $('news-air-video');
+    return $('tls-video') || $('news-air-video');
   }
 
   function setNow(meta) {
@@ -85,6 +85,23 @@
   }
 
   function playId(id) {
+    /* Prefer continuous station if mounted */
+    if (window.TENET5_LIVE && typeof window.TENET5_LIVE.playAt === 'function' && window.TENET5_LIVE.getSchedule) {
+      var sch = window.TENET5_LIVE.getSchedule();
+      if (sch && sch.linear) {
+        for (var i = 0; i < sch.linear.length; i++) {
+          if (sch.linear[i].id === id) {
+            window.TENET5_LIVE.playAt(i, 0, true);
+            document.querySelectorAll('.news-seg.is-on').forEach(function (el) {
+              el.classList.remove('is-on');
+            });
+            var cardOn = document.querySelector('[data-news-seg="' + id + '"]');
+            if (cardOn) cardOn.classList.add('is-on');
+            return;
+          }
+        }
+      }
+    }
     var card = document.querySelector('[data-news-seg="' + id + '"]');
     if (!card) return;
     var src = card.getAttribute('data-video') || '';
@@ -156,9 +173,12 @@
   }
 
   window.TENET5_NEWS_AIR = {
-    __v: 4,
+    __v: 5,
     playId: playId,
-    playAll: playAll,
+    playAll: function () {
+      if (window.TENET5_LIVE && window.TENET5_LIVE.join) window.TENET5_LIVE.join();
+      else playAll();
+    },
     playSrc: playSrc
   };
 })();
