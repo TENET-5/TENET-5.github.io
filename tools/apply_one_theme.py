@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "215"
+THEME_VER = "220"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -47,12 +47,12 @@ def _fonts_block(prefix: str = "") -> str:
 
 def _dock() -> str:
     # Same LIRIL guide bar the homepage carries, on every interior page.
-    # Driven by js/liril-dock.js (bridges to the walkthrough engine).
+    # Driven by js/liril-page-voice.js (page-matched VO) + js/liril-dock.js.
     return """  <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
     <div class="dock-in">
       <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="say"><b>LIRIL</b><span id="liril-line">I can read this page with you.</span></div>
-      <button id="liril-guide-btn" type="button" title="LIRIL reads this page aloud">Guide me</button>
+      <div class="say"><b>LIRIL</b><span id="liril-line">I can guide this page — voice matches what is on the record here.</span></div>
+      <button id="liril-guide-btn" type="button" title="LIRIL reads this page aloud, matched to the record">Guide me</button>
       <button id="voice-btn" type="button" aria-pressed="true" title="Toggle LIRIL voice narration">Voice · On</button>
       <div class="liril-status" id="liril-status">LIRIL ready</div>
     </div>
@@ -66,6 +66,8 @@ def _nav(prefix: str = "") -> str:
     <nav aria-label="Primary">
       <a href="{prefix}index.html">Home</a>
       <a href="{prefix}daily-briefing.html">Briefing</a>
+      <a href="{prefix}press-wire.html">Wire</a>
+      <a href="{prefix}newsletter.html">Newsletter</a>
       <a href="{prefix}investigations.html">Investigations</a>
       <a href="{prefix}evidence-index.html">Evidence</a>
       <a href="{prefix}liril-film.html">Guided</a>
@@ -525,16 +527,45 @@ def apply_page(path: Path) -> bool:
 
         # ONE widget system: strip era-specific floating-UI scripts (each page
         # had a different set — progress bars, cursor glow, subtitle bars),
-        # then guarantee the canonical trio on every interior.
+        # then guarantee the canonical guide stack on every interior:
+        # voice → page-voice (match) → walkthrough → dock → radio.
         if path.name not in WIDGET_KEEP:
             text = RE_WIDGET_JS.sub("", text)
+        # Pin cache-bust versions (page-matched VO stack)
+        text = re.sub(
+            r'js/liril-voice\.js\?v=\d+',
+            'js/liril-voice.js?v=44',
+            text,
+            flags=re.I,
+        )
+        text = re.sub(
+            r'js/liril-page-voice\.js\?v=\d+',
+            'js/liril-page-voice.js?v=1',
+            text,
+            flags=re.I,
+        )
+        text = re.sub(
+            r'js/liril-dock\.js\?v=\d+',
+            'js/liril-dock.js?v=2',
+            text,
+            flags=re.I,
+        )
+        text = re.sub(
+            r'js/liril-walkthrough\.js\?v=\d+',
+            'js/liril-walkthrough.js?v=4',
+            text,
+            flags=re.I,
+        )
         canon = []
         if "js/liril-voice.js" not in text:
-            canon.append(f'<script src="{prefix}js/liril-voice.js?v=43"></script>')
+            canon.append(f'<script src="{prefix}js/liril-voice.js?v=44"></script>')
+        if "liril-page-voice.js" not in text:
+            # Must load before dock so Guide me uses page-matched VO
+            canon.append(f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>')
         if "liril-walkthrough.js" not in text:
             canon.append(f'<script src="{prefix}js/liril-walkthrough.js?v=4"></script>')
         if "liril-dock.js" not in text:
-            canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=1"></script>')
+            canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=2"></script>')
         if "liril-radio.js" not in text:
             canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
         # always pin reveal to MutationObserver build (late glass inject)
@@ -548,7 +579,35 @@ def apply_page(path: Path) -> bool:
         if "reading-mode.js" not in text:
             canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
         if canon:
-            text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
+            # Insert page-voice immediately before dock when dock already present
+            if "liril-page-voice.js" in "\n".join(canon) and "liril-dock.js" in text:
+                text = re.sub(
+                    r'(<script[^>]*liril-dock\.js[^>]*>\s*</script>)',
+                    f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>\n\\1',
+                    text,
+                    count=1,
+                    flags=re.I,
+                )
+                canon = [c for c in canon if "liril-page-voice" not in c]
+            if canon:
+                text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
+        # Guarantee page-voice before dock even when both were already listed
+        if "liril-page-voice.js" not in text and "liril-dock.js" in text:
+            text = re.sub(
+                r'(<script[^>]*liril-dock\.js[^>]*>\s*</script>)',
+                f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>\n\\1',
+                text,
+                count=1,
+                flags=re.I,
+            )
+        elif "liril-page-voice.js" not in text and "js/liril-voice.js" in text:
+            text = re.sub(
+                r'(<script[^>]*liril-voice\.js[^>]*>\s*</script>)',
+                f'\\1\n<script src="{prefix}js/liril-page-voice.js?v=1"></script>',
+                text,
+                count=1,
+                flags=re.I,
+            )
 
         # The persistent LIRIL guide bar (home parity). position:fixed, so DOM
         # order is irrelevant — inject once before </body>.

@@ -530,6 +530,8 @@ def press_nav(active: str = "") -> str:
     items = [
         ("Home", "index.html", "home"),
         ("Briefing", "daily-briefing.html", "briefing"),
+        ("Wire", "press-wire.html", "wire"),
+        ("Newsletter", "newsletter.html", "newsletter"),
         ("Investigations", "investigations.html", "investigations"),
         ("Evidence", "evidence-index.html", "evidence"),
         ("Guided", "liril-film.html", "film"),
@@ -1116,6 +1118,8 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <span class="brand"><span class="wm">TENET<sup>5</sup></span></span>
     <nav class="cover-nav" aria-label="Primary">
       <a href="daily-briefing.html">Briefing</a>
+      <a href="press-wire.html">Wire</a>
+      <a href="newsletter.html">Newsletter</a>
       <a href="investigations.html">Investigations</a>
       <a href="argument.html">Argument</a>
       <a href="evidence-index.html">Evidence</a>
@@ -1163,34 +1167,35 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
         <p>What Ottawa is doing now — stated plans, published numbers, and labeled inference. Start here every day.</p>
         <span class="meta">Open briefing →</span>
       </a>
+      <a class="newsdesk-card glass has-thumb" href="press-wire.html">
+        <div class="newsdesk-thumb"><img src="media/landing/committee_empty.jpg" alt="" width="640" height="360" loading="lazy"></div>
+        <span class="kick">02 · Wire</span>
+        <h3>LIRIL Press Wire</h3>
+        <p>Multi-outlet compare — same story, different framing. Report cards on newsrooms.</p>
+        <span class="meta">Open press wire →</span>
+      </a>
+      <a class="newsdesk-card glass has-thumb" href="newsletter.html">
+        <div class="newsdesk-thumb"><img src="media/landing/parliament_ice.jpg" alt="" width="640" height="360" loading="lazy"></div>
+        <span class="kick">03 · Inbox</span>
+        <h3>Newsletter · Substack</h3>
+        <p>LIRIL packages briefing, wire, and investigations for Substack. Subscribe; sources stay on TENET5.</p>
+        <span class="meta">Open newsletter →</span>
+      </a>
       <a class="newsdesk-card glass has-thumb" href="investigations.html">
         <div class="newsdesk-thumb"><img src="media/generated/maid_investigation.png" alt="" width="640" height="360" loading="lazy"></div>
-        <span class="kick">02 · Active</span>
+        <span class="kick">04 · Active</span>
         <h3>Investigations hub</h3>
         <p>Live files: procurement, MAID, interference, capture axes — grouped so you can follow the paper trail.</p>
         <span class="meta">Open hub →</span>
       </a>
-      <a class="newsdesk-card glass has-thumb" href="argument.html">
-        <div class="newsdesk-thumb"><img src="media/landing/parliament_ice.jpg" alt="" width="640" height="360" loading="lazy"></div>
-        <span class="kick">03 · Case</span>
-        <h3>Gov analysis · five acts</h3>
-        <p>Rome Statute frame against Canadian public records. Hybrid documentary + act stages. Atmosphere is not proof.</p>
-        <span class="meta">Open argument →</span>
-      </a>
-      <a class="newsdesk-card glass has-thumb" href="maid-accountability.html">
-        <div class="newsdesk-thumb"><img src="img/charts/maid_trajectory.png" alt="" width="640" height="360" loading="lazy"></div>
-        <span class="kick">04 · File</span>
-        <h3>MAID accountability</h3>
-        <p>Health Canada series, Track 2 share, report film with optional narration. Tables before tone.</p>
-        <span class="meta">Open MAID file →</span>
-      </a>
     </div>
     <div class="newsdesk-strip" role="list">
+      <a class="newsdesk-pill" href="press-wire.html" role="listitem">Press wire · outlets</a>
+      <a class="newsdesk-pill" href="newsletter.html" role="listitem">Newsletter · Substack</a>
       <a class="newsdesk-pill" href="#now" role="listitem">This hour&#x27;s wire</a>
       <a class="newsdesk-pill" href="#week" role="listitem">Week&#x27;s investigations</a>
       <a class="newsdesk-pill" href="#month" role="listitem">Claim vs record</a>
       <a class="newsdesk-pill" href="evidence-index.html" role="listitem">Evidence shelf</a>
-      <a class="newsdesk-pill" href="network-analysis.html" role="listitem">Network board</a>
       <a class="newsdesk-pill" href="key-facts.html" role="listitem">Key facts</a>
     </div>
     <div class="liril-presentation glass" id="liril-presentation" aria-label="LIRIL desk reporter — live news">
@@ -1550,9 +1555,33 @@ def build_evidence(site: dict, evidence: list[dict]) -> str:
 # ══ DAILY BRIEFING ══════════════════════════════════════════════════════════
 
 def build_briefing(site: dict) -> str:
-    """Press-designed shell; content populates at runtime from the daily JSONs
-    (the automation refreshes those without needing a press rebuild)."""
+    """Press-designed shell; content from daily JSONs.
+    Media (still+video) is stamped every cycle by prism_daily_briefing_cycle.py —
+    prefer that tool for full media rebuild. This shell keeps media card hooks.
+    """
+    # Prefer cycle-owned HTML if present and media-aware (avoid wiping media lap)
+    cycle_html = ROOT / "daily-briefing.html"
+    if cycle_html.is_file():
+        try:
+            existing = cycle_html.read_text(encoding="utf-8", errors="replace")
+            if "brief-media" in existing and "page-media-band" in existing:
+                return existing
+        except OSError:
+            pass
     body = press_nav("briefing") + """
+<!-- PRISM_PAGE_MEDIA_SLATE -->
+<section class="page-media-band" aria-label="Visual record">
+  <div class="page-media-band-inner glass">
+    <div class="media-frame is-cine page-media-cine">
+      <video class="page-media-video" muted loop playsinline preload="metadata"
+        poster="media/landing/ledger_desk.jpg" data-force-play aria-hidden="true">
+        <source src="media/film/ledger_turn.mp4" type="video/mp4">
+      </video>
+      <img class="page-media-still" src="media/landing/ledger_desk.jpg" alt="" width="960" height="540" loading="eager">
+    </div>
+    <p class="page-media-cap"><span class="kick">Visual record</span> Daily briefing atmosphere. Run prism_daily_briefing_cycle for per-item media. Powered by LIRIL AI.</p>
+  </div>
+</section>
 <main class="press-main">
     <p class="kick">The Daily Briefing · every line cited · read by LIRIL</p>
     <h1>Today, in the <em>record.</em></h1>
@@ -1600,12 +1629,22 @@ def build_briefing(site: dict) -> str:
         var now=document.getElementById('brief-now');
         (d.happening_now||[]).forEach(function(h){
           var c=show(el('article','brief-item glass'));
-          c.appendChild(el('span','kick red',h.domain||''));
+          /* per-item still + video when cycle stamped media */
+          var still=h.poster||h.image||(h.media&&h.media.still);
+          var vid=h.documentary_video||(h.media&&h.media.video);
+          if(still||vid){
+            var mw=el('div','brief-media');
+            if(still){var im=document.createElement('img');im.src=still;im.alt='';im.loading='lazy';mw.appendChild(im);}
+            if(vid){var vv=document.createElement('video');vv.muted=true;vv.loop=true;vv.playsInline=true;vv.preload='metadata';vv.poster=still||'';var ss=document.createElement('source');ss.src=vid;ss.type='video/mp4';vv.appendChild(ss);mw.appendChild(vv);try{vv.play();}catch(e){}}
+            c.appendChild(mw);
+          }
+          var body=el('div','brief-body');
+          body.appendChild(el('span','kick red',h.domain||''));
           var ht=el('h3',null,h.headline||'');
           if(h.page){var a=el('a',null,h.headline||'');a.href=h.page;a.style.color='inherit';a.style.textDecoration='none';ht.textContent='';ht.appendChild(a);}
-          c.appendChild(ht);
-          c.appendChild(el('p',null,h.body||''));
-          if(h.status)c.appendChild(el('span','meta','status: '+h.status));
+          body.appendChild(ht);
+          body.appendChild(el('p',null,h.body||''));
+          if(h.status)body.appendChild(el('span','meta','status: '+h.status));
           var srcs=h.sources||[];
           if(srcs.length){
             var sm=el('div','meta');
@@ -1614,8 +1653,9 @@ def build_briefing(site: dict) -> str:
               if(s.url){var sa=el('a',null,s.label||s.url);sa.href=s.url;sa.rel='noopener noreferrer';sa.target='_blank';sm.appendChild(sa);}
               else sm.appendChild(document.createTextNode(s.label||''));
             });
-            c.appendChild(sm);
+            body.appendChild(sm);
           }
+          c.appendChild(body);
           now.appendChild(c);
         });
         var mt=document.getElementById('brief-metrics');

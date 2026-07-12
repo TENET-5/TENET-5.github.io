@@ -61,6 +61,9 @@ PROJECT = {
     "jobs": [
         "one_theme_press",
         "rss_home_wire",             # multi-source RSS → hour continuum (objective)
+        "daily_briefing_cycle",      # daily briefing refresh + still/video every update
+        "liril_outlet_desk",         # LIRIL Press Wire — multi-outlet compare + outlet cards
+        "liril_substack",            # Substack outbox drafts + newsletter.html + feed pull
         "liril_news_articles",       # AI desk articles from briefing + wire
         "liril_news_presentation",   # LIRIL front-page news presentation script
         "liril_desk_reporter",       # AI reporter persona + live wire (always-new news)
@@ -72,6 +75,9 @@ PROJECT = {
         "cinema_playback_integrity", # act film src + cinema-play v3 + baseline mp4
         "css_quantum_precision",
         "liril_guide_home",
+        "liril_voice_match",         # page-matched VO packs — Guide me matches each page
+        "site_seo_slate",            # Google SEO + AI Overviews surface on every page
+        "github_pages_publish",      # surgical commit + push to TENET-5.github.io
         "visual_acuity_pc_mobile",
         "cpp_quantum_coding_bench",
         "self_heal",
@@ -234,6 +240,58 @@ def lap() -> dict:
     else:
         steps.append({"name": "rss_home_wire", "ok": True, "detail": "build_rss_home_wire.py missing (skipped)"})
 
+    # 1b1) Daily briefing cycle — always refresh media (still + video) on every lap
+    brief_cycle = TOOLS / "prism_daily_briefing_cycle.py"
+    if brief_cycle.exists():
+        code, out = _run([sys.executable, str(brief_cycle), "--json", "--apply"], timeout=120)
+        steps.append({
+            "name": "daily_briefing_cycle",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-400:],
+            "job": "LIRIL/PRISM — daily briefing update with still+video on every item",
+            "proof": r"C:\PRISM\log\prism_daily_briefing_cycle_last.json",
+            "owner": "LIRIL",
+        })
+    else:
+        steps.append({"name": "daily_briefing_cycle", "ok": True, "detail": "prism_daily_briefing_cycle.py missing (skipped)"})
+
+    # 1b2) LIRIL Press Wire — multi-outlet compare + outlet report cards (better than Drudge)
+    # LIRIL swarm owns this: clusters external coverage, scores newsrooms, gaps vs desk topics.
+    outlet_desk = TOOLS / "prism_liril_outlet_desk.py"
+    if outlet_desk.exists():
+        code, out = _run([sys.executable, str(outlet_desk), "--json", "--apply"], timeout=180)
+        steps.append({
+            "name": "liril_outlet_desk",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-400:],
+            "job": "LIRIL swarm — multi-outlet press wire + outlet report cards + press-wire.html",
+            "proof": r"C:\PRISM\log\prism_liril_outlet_desk_last.json",
+            "owner": "LIRIL",
+        })
+    else:
+        steps.append({"name": "liril_outlet_desk", "ok": True, "detail": "prism_liril_outlet_desk.py missing (skipped)"})
+
+    # 1b3) LIRIL Substack — newsletter drafts outbox + public newsletter page + RSS pull
+    substack = TOOLS / "prism_liril_substack.py"
+    if substack.exists():
+        code, out = _run(
+            [sys.executable, str(substack), "--json", "--apply", "--fetch-feed"],
+            timeout=180,
+        )
+        steps.append({
+            "name": "liril_substack",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-400:],
+            "job": "LIRIL swarm — Substack draft outbox + newsletter.html + publication feed",
+            "proof": r"C:\PRISM\log\prism_liril_substack_last.json",
+            "owner": "LIRIL",
+        })
+    else:
+        steps.append({"name": "liril_substack", "ok": True, "detail": "prism_liril_substack.py missing (skipped)"})
+
     # 1c) AI desk articles (briefing + wire → content/posts + catalog)
     liril_arts = TOOLS / "build_liril_news_articles.py"
     if liril_arts.exists():
@@ -340,8 +398,97 @@ def lap() -> dict:
             "missing": liril["missing"],
             "proof": r"C:\PRISM\log\prism_liril_guide_last.json",
             "job": "PRISM permanent — LIRIL as system/user guide on main page",
+            "owner": "LIRIL",
         }
     )
+
+    # 5b) LIRIL page-voice match swarm — every page pack for Guide me
+    voice_match = TOOLS / "prism_liril_voice_match.py"
+    if voice_match.exists():
+        # packs only here (theme already applied this lap); full --theme on flag path via pickup
+        code, out = _run([sys.executable, str(voice_match), "--json", "--apply"], timeout=300)
+        steps.append({
+            "name": "liril_voice_match",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-400:],
+            "job": "LIRIL swarm — page-matched VO packs + match scores for dock Guide me",
+            "proof": r"C:\PRISM\log\prism_liril_voice_match_last.json",
+            "owner": "LIRIL",
+        })
+    else:
+        steps.append({"name": "liril_voice_match", "ok": True, "detail": "prism_liril_voice_match.py missing (skipped)"})
+
+    # 5c) Google SEO full slate — LIRIL keeps every page Search/AI-Overview eligible
+    # Every 2nd lap full apply (head rewrites); other laps sitemap/robots refresh only.
+    seo = TOOLS / "prism_site_seo_slate.py"
+    if seo.exists():
+        lap_n = int(os.environ.get("PRISM_SITE_DUTY_LAP", "1") or "1")
+        full_seo = (lap_n % 2 == 1) or ("--seo-full" in sys.argv)
+        if full_seo:
+            code, out = _run(
+                [sys.executable, str(seo), "--json", "--apply", "--sitemap"],
+                timeout=600,
+            )
+        else:
+            code, out = _run(
+                [sys.executable, str(seo), "--json", "--sitemap"],
+                timeout=120,
+            )
+        steps.append({
+            "name": "site_seo_slate",
+            "ok": code == 0,
+            "exit": code,
+            "full_apply": full_seo,
+            "tail": (out or "")[-400:],
+            "job": "LIRIL swarm — Google SEO + JSON-LD + sitemap/robots/llms on every page",
+            "proof": r"C:\PRISM\log\prism_site_seo_slate_last.json",
+            "owner": "LIRIL",
+        })
+    else:
+        steps.append({"name": "site_seo_slate", "ok": True, "detail": "prism_site_seo_slate.py missing (skipped)"})
+
+    # 5d) GitHub Pages publish — surgical commit + push so live site matches PRISM
+    # Skip when PRISM_SITE_DUTY_NO_PUBLISH=1 or STOP publish flag.
+    pub = TOOLS / "prism_site_github_pages_publish.py"
+    no_pub = os.environ.get("PRISM_SITE_DUTY_NO_PUBLISH", "").strip() in ("1", "true", "yes")
+    stop_pub = Path(r"C:\PRISM\data\.prism_site_github_pages_publish_stop").is_file()
+    if pub.exists() and not no_pub and not stop_pub:
+        # forever sticky or website_first → publish; else dry-run log only
+        sticky = False
+        for fl in (
+            Path(r"C:\PRISM\data\.prism_site_github_pages_publish"),
+            Path(r"C:\PRISM\data\.prism_website_first"),
+        ):
+            if fl.is_file():
+                try:
+                    b = fl.read_text(encoding="utf-8", errors="replace").strip().lower()
+                    if b in ("forever", "sticky", "1forever", "1", "true", "yes"):
+                        sticky = True
+                except OSError:
+                    sticky = True
+        args = [sys.executable, str(pub), "--json", "--full-public"]
+        if sticky or "--publish" in sys.argv:
+            args.append("--apply")
+        else:
+            args.append("--dry-run")
+        code, out = _run(args, timeout=300)
+        steps.append({
+            "name": "github_pages_publish",
+            "ok": code == 0,
+            "exit": code,
+            "apply_push": sticky or "--publish" in sys.argv,
+            "tail": (out or "")[-500:],
+            "job": "PRISM — surgical git commit + push to TENET-5.github.io (GitHub Pages)",
+            "proof": r"C:\PRISM\log\prism_site_github_pages_publish_last.json",
+            "owner": "PRISM",
+        })
+    else:
+        steps.append({
+            "name": "github_pages_publish",
+            "ok": True,
+            "detail": "skipped" if (no_pub or stop_pub or not pub.exists()) else "n/a",
+        })
 
     # 6) sample interiors
     interior_ok = True

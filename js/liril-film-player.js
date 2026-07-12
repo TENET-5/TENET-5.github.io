@@ -442,17 +442,48 @@
     renderSegment();
     if (!state.playing) return;
     var s = state.flat[state.index];
-    var text = (s && s.narration) || '';
-    var speakMs = ((s && s.speak_s) || 40) * 1000;
     var advanced = false;
     var afterSpeak = function () {
       if (advanced || !state.playing) return;
       advanced = true;
       advancePhase();
     };
-    speak(text, afterSpeak);
-    /* hard ceiling if TTS silent */
-    state.timer = setTimeout(afterSpeak, speakMs + 2500);
+
+    var brollVid = document.querySelector('.film-broll');
+    var vidPath = 'media/film/docs/film_' + (s.id || state.index) + '_documentary.mp4';
+
+    fetch(vidPath, { method: 'HEAD', cache: 'no-cache' }).then(function(res) {
+      if (res.ok) {
+        if (brollVid) {
+          brollVid.src = vidPath;
+          brollVid.muted = false;
+          brollVid.loop = false;
+          brollVid.onended = afterSpeak;
+          brollVid.play().catch(function() { fallbackSpeak(); });
+        } else {
+          fallbackSpeak();
+        }
+      } else {
+        fallbackSpeak();
+      }
+    }).catch(function() {
+      fallbackSpeak();
+    });
+
+    function fallbackSpeak() {
+      if (brollVid) {
+        brollVid.src = 'media/film/reel.mp4';
+        brollVid.muted = true;
+        brollVid.loop = true;
+        brollVid.onended = null;
+        brollVid.play().catch(function(){});
+      }
+      var text = (s && s.narration) || '';
+      var speakMs = ((s && s.speak_s) || 40) * 1000;
+      speak(text, afterSpeak);
+      /* hard ceiling if TTS silent */
+      state.timer = setTimeout(afterSpeak, speakMs + 2500);
+    }
   }
 
   function go(i, user) {

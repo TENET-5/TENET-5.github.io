@@ -115,7 +115,8 @@
       beatIndex: -1,
       soundOn: true,
       narrateBeats: true,
-      lastSpokenBeat: -1
+      lastSpokenBeat: -1,
+      userPlayed: false
     };
 
     /* ── DOM ── */
@@ -264,6 +265,7 @@
 
     function speakBeat(idx, force) {
       if (!state.soundOn || !state.narrateBeats) return;
+      if (!force && !state.userPlayed && !v.dataset.userUnmuted) return;
       if (idx < 0 || idx >= state.beats.length) return;
       if (!force && idx === state.lastSpokenBeat) return;
       var b = state.beats[idx];
@@ -330,6 +332,7 @@
     }
 
     function playAll() {
+      state.userPlayed = true;
       armVideo(v);
       var p = v.play();
       if (p && p.catch) p.catch(function () {});
@@ -487,9 +490,10 @@
               var p = v.play();
               if (p && p.catch) p.catch(function () {});
             } else {
+              var wasPlaying = !v.paused;
               try { v.pause(); } catch (e) { /* */ }
               if (audio) try { audio.pause(); } catch (e2) { /* */ }
-              if (!en.isIntersecting) stopSpeak();
+              if (wasPlaying) stopSpeak();
             }
           });
         }, { threshold: 0.35 });

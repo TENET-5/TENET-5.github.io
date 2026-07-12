@@ -80,7 +80,38 @@ Rules:
 - Public AI line only: **Powered by LIRIL AI**
 - No hardware, ports, model files, or swarm internals on public pages.
 
+## LIRIL Press Wire (better than Drudge)
+
+**Product page:** `press-wire.html` · data `data/liril_outlet_desk.json`  
+**Builder:** `tools/prism_liril_outlet_desk.py` · flag `.prism_liril_outlet_desk`
+
+Drudge = single-editor link dump. TENET5 Press Wire:
+
+| Capability | Purpose |
+|------------|---------|
+| Multi-outlet story clusters | Same facts, side-by-side headlines + frame tags |
+| Outlet report cards | Volume, frames, rhetoric flags, multi-cluster share, relative gaps |
+| Desk topic vs wire | Which TENET5 investigation topics the external wire is thin on |
+| Epistemic labels | Every external item is **EXTERNAL SOURCE** — not a TENET5 verdict |
+| LIRIL Guide me | Page-voice rundown of comparison + outlet reports |
+
+Never collapse outlet framing analysis into a claim about ground truth without a primary doc.
+
+## Substack integration (LIRIL swarm)
+
+| Asset | Role |
+|-------|------|
+| `tools/prism_liril_substack.py` | Build outbox drafts + `newsletter.html` + RSS pull |
+| `data/substack_outbox/*.md` | Paste-ready editions (draft only; no auto-publish) |
+| `data/liril_substack_config.json` | Publication / subscribe / feed URLs |
+| `newsletter.html` | Public subscribe CTA + edition cards |
+
+Sources for editions: daily briefing, desk package, press wire, priority investigations.
+EXTERNAL SOURCE and STATED/INFERRED labels preserved. No invented facts.
+
 ## Swarm flags
 - `.prism_website_first=forever`
-- Site duty: `rss_home_wire` → `liril_news_articles` → `liril_news_presentation` → `press_rebuild`
+- `.prism_liril_outlet_desk=forever` — rebuild press wire each pickup
+- `.prism_liril_substack=forever` — Substack outbox + newsletter page
+- Site duty: `rss_home_wire` → `liril_outlet_desk` → `liril_substack` → `liril_news_articles` → `liril_news_presentation` → `press_rebuild`
 - Manual: `python tools/nemoclaw_news_scanner.py` then articles → presentation → `python tools/press.py`

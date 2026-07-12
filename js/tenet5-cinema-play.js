@@ -1,11 +1,11 @@
 /* TENET5 cinema force-play — sitewide film / gallery / page bg.
- * v3: direct src + load(); hero never paused; click-to-play gate; controls fallback;
- *      absolute root-relative media paths; unmute-safe volume 0; kill reduced-motion race.
+ * v4: Ken Burns class on still-frame encodes; direct src + load(); hero force-play;
+ *      click-to-play gate; absolute root-relative media paths; reduced-motion race kill.
  * Muted + loop + playsinline. Retries after load, visibility, and first gesture.
  */
 (function () {
   'use strict';
-  if (window.TENET5CinemaPlay && window.TENET5CinemaPlay.__v >= 3) return;
+  if (window.TENET5CinemaPlay && window.TENET5CinemaPlay.__v >= 4) return;
 
   var SEL = [
     'video.act-page-bg',
@@ -90,6 +90,34 @@
     return finalSrc || raw;
   }
 
+  /** Tag likely still-frame encodes so CSS Ken Burns always drifts the picture. */
+  function markStillRisk(v) {
+    if (!v) return;
+    try {
+      var dur = Number(v.duration);
+      // Frozen stills were shipped as long durations with almost no bitrate;
+      // after load, tiny decoded frame rate or zero seekable change → still risk.
+      if (isFinite(dur) && dur > 8 && v.videoWidth > 0) {
+        // Sample: if current frame never changes, browser still advances time.
+        // Heuristic: very short buffered ranges after canplay often = static encode.
+        var br = 0;
+        try {
+          if (v.buffered && v.buffered.length) {
+            br = v.buffered.end(0) - v.buffered.start(0);
+          }
+        } catch (e0) { /* */ }
+        if (br > 0 && br < 0.05 && dur > 20) {
+          v.classList.add('is-still-encode');
+          v.dataset.stillEncode = '1';
+        }
+      }
+      // Always apply motion class for decorative cinema (CSS handles animation)
+      if (isDecorativeBg(v) || isHero(v) || v.hasAttribute('data-force-play')) {
+        v.classList.add('tenet5-ken-burns');
+      }
+    } catch (e) { /* */ }
+  }
+
   function arm(v) {
     if (!v || v.nodeName !== 'VIDEO') return;
     try {
@@ -107,6 +135,7 @@
     v.preload = 'auto';
     v.setAttribute('preload', 'auto');
     ensureSrc(v);
+    markStillRisk(v);
     /* Hero / forced: native controls so user can always start playback */
     if (isHero(v) && !v.hasAttribute('data-no-controls')) {
       v.setAttribute('controls', '');
@@ -220,8 +249,9 @@
       setLiveBadge(v, 'wait');
       if (isHero(v) || v.closest('.media-frame.is-cine')) showGate(v, true);
     });
-    v.addEventListener('loadeddata', function () { tryPlay(v); });
-    v.addEventListener('canplay', function () { tryPlay(v); });
+    v.addEventListener('loadeddata', function () { markStillRisk(v); tryPlay(v); });
+    v.addEventListener('canplay', function () { markStillRisk(v); tryPlay(v); });
+    v.addEventListener('loadedmetadata', function () { markStillRisk(v); });
     v.addEventListener('error', function () {
       setLiveBadge(v, 'wait');
       showGate(v, true);
@@ -298,6 +328,7 @@
     arm: arm,
     tryPlay: tryPlay,
     ensureSrc: ensureSrc,
-    __v: 3
+    markStillRisk: markStillRisk,
+    __v: 4
   };
 })();
