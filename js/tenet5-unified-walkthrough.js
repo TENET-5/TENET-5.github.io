@@ -81,14 +81,9 @@
     media.appendChild(el('div', { cls: 'tunw-media-veil' }));
     slide.appendChild(media);
 
-    // Optional small foreground still (when both video + still and still is a chart)
-    if (video && still && /\.(png|jpg|webp)$/i.test(still) && /charts|generated/i.test(still)) {
-      var fg = el('div', { cls: 'tunw-media-fg' });
-      fg.appendChild(el('img', {
-        attrs: { src: still, alt: '', loading: 'lazy' }
-      }));
-      slide.appendChild(fg);
-    }
+    /* Never float chart/generated stills as a foreground overlay.
+       Composite "vector" charts and AI stills read as symbol noise on ice-lake acts.
+       Photo stills remain background only when video is absent (branch above). */
   }
 
   function renderScene(scene, idx, total, manifest) {
