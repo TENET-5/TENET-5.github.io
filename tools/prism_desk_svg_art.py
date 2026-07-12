@@ -324,9 +324,17 @@ def apply() -> dict[str, Any]:
     if CARTOON_CAT.is_file():
         cat = json.loads(CARTOON_CAT.read_text(encoding="utf-8-sig"))
         items = cat.get("items") or []
+        # Never overwrite high-quality editorial art with SVG placeholders.
+        # HQ lock: art_kind editorial_hq OR existing .jpg/.png image path.
         for it in items:
             if it.get("status") != "ready":
                 continue
+            img = str(it.get("image") or "")
+            kind = str(it.get("art_kind") or "")
+            if kind == "editorial_hq" or img.endswith((".jpg", ".jpeg", ".png", ".webp")):
+                cartoons += 0  # preserved
+                continue
+            # Legacy fallback only when no HQ art is locked in
             fn = f"{it['id']}.svg"
             path = CARTOON_DIR / fn
             path.write_text(cartoon_svg(it), encoding="utf-8")

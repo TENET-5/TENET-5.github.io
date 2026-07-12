@@ -362,13 +362,55 @@ def build(n: int = 8) -> dict[str, Any]:
     }
 
 
+def _hq_locked() -> bool:
+    """True when live catalog already ships high-quality editorial art — do not clobber."""
+    if not OUT.is_file():
+        return False
+    try:
+        cat = json.loads(OUT.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    items = cat.get("items") or []
+    if not items:
+        return False
+    hq = 0
+    for it in items:
+        img = str(it.get("image") or "")
+        kind = str(it.get("art_kind") or "")
+        if kind == "editorial_hq" or img.endswith((".jpg", ".jpeg", ".png", ".webp")):
+            hq += 1
+    return hq >= max(1, len(items) // 2)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--n", type=int, default=8)
     ap.add_argument("--from-wire", action="store_true", help="ignored — wire chalkboards killed jokes")
+    ap.add_argument("--force", action="store_true", help="overwrite even when HQ editorial art is locked")
     args = ap.parse_args()
+    if args.apply and _hq_locked() and not args.force:
+        # Preserve shipped editorial ink; write proof only
+        try:
+            existing = json.loads(OUT.read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError):
+            existing = {"ok": True, "verdict": "CARTOON_HQ_LOCKED", "items": []}
+        proof = {
+            "ok": True,
+            "verdict": "CARTOON_HQ_LOCKED",
+            "ts": _utc(),
+            "note": "HQ editorial art locked — skipped regenerate. Use --force to rebuild metadata only after deliberate wipe.",
+            "n": existing.get("n"),
+            "passed": existing.get("passed"),
+            "public_page": "cartoon-desk.html",
+        }
+        PROOF.write_text(json.dumps(proof, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(proof, indent=2, ensure_ascii=False))
+        else:
+            print("CARTOON_HQ_LOCKED", existing.get("n"))
+        return 0
     doc = build(args.n)
     if args.apply:
         OUT.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

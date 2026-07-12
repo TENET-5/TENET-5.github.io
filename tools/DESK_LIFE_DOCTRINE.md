@@ -29,15 +29,14 @@ Atmosphere is not proof; market and sports predictions are **labeled models**, n
 - Cite public data sources (league sites, exchange, SEDAR+ when filing-based).
 - Not investment advice. Not gambling advice. Desk analysis only.
 
-### Press Ink (cartoons) — must actually land
-- **3-second rule:** if the gag needs a paragraph, it fails. One visual + one knife caption.
-- **Specific Canadian public record** — Phoenix, ArriveCAN, ATIP, MAID capacity, VAC, interference process, media subsidy, ethics fines, PSDPA, procurement. No generic “politician with balloon.”
-- **Public offices / institutions only.** Punch the system, never patients, veterans’ dignity, or private life.
-- **Caption is the joke** (card headline = punchline). No academic “laugh_engine” titles.
-- No racial/religious hate, sexual humiliation, gore, or identity mockery.
-- Style: broadsheet ink, readable labels in-frame, ice-lake paper, single crimson accent on the lie.
-- Humor gate **≥70** with specificity + tight punch + labels + record anchor. Ban banal clichés.
-- Optional **animated short** (3–8s LTX): same gag, one motion beat.
+### Press Ink (cartoons) — high-quality editorial only
+- **Ship editorial ink art** (`.jpg` / `.png` broadsheet quality). **SVG placeholders are banned** on the public desk.
+- **HQ lock:** once `art_kind: editorial_hq` is in `cartoon_desk.json`, forge + SVG tools must not overwrite.
+- **3-second rule:** gag reads at a glance. One visual + one knife caption under the art.
+- **Specific Canadian public record** — Phoenix, ArriveCAN, ATIP, MAID capacity, VAC, interference, media subsidy, ethics, PSDPA, daycare, defence, two-tier justice.
+- **Public offices / institutions only.** Punch the system. Faceless silhouettes / roles — no softcore, no hate art.
+- **Caption is the card headline.** Record hook is one line under.
+- Optional **animated short** (3–8s LTX) later from the same gag.
 
 ## Generation owners
 
