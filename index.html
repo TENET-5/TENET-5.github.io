@@ -5,8 +5,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/press-theme.css?v=228">
-  <link rel="stylesheet" href="css/design-lock.css?v=228">
+  <link rel="stylesheet" href="css/press-theme.css?v=229">
+  <link rel="stylesheet" href="css/design-lock.css?v=229">
   <script>document.documentElement.classList.add('js');</script>
   <!-- ONE THEME: edit css/press-theme.css to restyle · css/design-lock.css is the LOCKED taste guardrail (loads last, do not edit) -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,8 +18,6 @@
 
 <meta name="theme-color" content="#050708">
 <meta name="liril-role" content="system-guide">
-
-
 <!-- TENET5 SEO SLATE -->
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
@@ -167,19 +165,47 @@
     </div>
   </div>
 </section>
-<section class="news-air field tls-home" id="news-air" data-line="TENET5 LIVE — continuous news channel. Join mid-air.">
+<section class="news-air field tls-home" id="news-air" data-line="TENET5 LIVE — live station with time and topic navigation.">
   <div class="wrapx rv">
     <div class="broadcast-head">
-      <span class="kick">TENET5 LIVE · continuous news channel</span>
+      <span class="kick">TENET5 LIVE · news station</span>
+      <span class="tls-mode-badge live" id="tls-mode-badge">LIVE FEED</span>
       <span class="broadcast-clock" id="tls-clock" aria-live="polite">— ET</span>
     </div>
-    <h2 class="thesis-title" style="margin-top:0.6vh">You are watching the <em>desk.</em></h2>
+    <h2 class="thesis-title" style="margin-top:0.6vh">Watch live. Navigate by <em>time</em> and <em>topic.</em></h2>
     <p class="news-air-lede" id="tls-oneline">
-      Not a clip gallery. A <strong>live station</strong>: desk hits → report block → case film → loop.
-      Wall-clock join (you land mid-air). Neural LIRIL voice in the files. Unmute. Then open the source.</p>
+      Default is a <strong>live channel</strong> (wall-clock join, auto-advance).
+      Or explore: scrub the time rail, filter by desk topic, jump dayparts — then <strong>Join live</strong> to snap back on air.</p>
     <p class="tls-tagline" id="tls-tagline">Canadian public-record news channel · Powered by LIRIL AI · You verify</p>
+    <p class="tls-count" id="tls-count"></p>
 
-    <div class="tls glass" id="tls-root">
+    <div class="tls-nav-bar glass">
+      <div class="tls-mode-toggle" role="group" aria-label="Station mode">
+        <button type="button" class="tls-mode-btn is-on" data-tls-mode="live">Live feed</button>
+        <button type="button" class="tls-mode-btn" data-tls-mode="explore">Time / topic</button>
+      </div>
+      <div class="tls-topics" id="tls-topics" aria-label="Topics"></div>
+    </div>
+
+    <div class="tls-time-wrap glass">
+      <div class="tls-time-meta">
+        <span id="tls-pack-time">0:00 / 0:00</span>
+        <span id="tls-wall-time">LIVE @ 0:00</span>
+      </div>
+      <div class="tls-time-rail" id="tls-time-rail" title="Click to jump in package time">
+        <div class="tls-time-segs" id="tls-time-segs"></div>
+        <div class="tls-time-fill" id="tls-time-fill"></div>
+        <div class="tls-live-mark" id="tls-live-mark" title="Wall-clock live position"></div>
+      </div>
+      <div class="tls-time-legend">
+        <span class="tl-desk">Desk</span>
+        <span class="tl-reports">Reports</span>
+        <span class="tl-case">Case film</span>
+        <span class="tl-live">◆ live now</span>
+      </div>
+    </div>
+
+    <div class="tls glass" id="tls-root" data-mode="live">
       <div class="tls-stage">
         <div class="tls-frame">
           <video id="tls-video" controls playsinline preload="metadata"
@@ -207,13 +233,13 @@
             <button type="button" class="guide-cta" id="tls-unmute">Unmute</button>
             <button type="button" class="guide-cta" id="tls-prev">Prev</button>
             <button type="button" class="guide-cta" id="tls-next">Next</button>
+            <a class="begin begin-quiet" id="tls-open-source" href="canada-map.html"><span>Open source</span></a>
             <a class="begin begin-quiet" href="live.html"><span>Full station</span></a>
-            <a class="begin begin-quiet" href="daily-briefing.html"><span>Briefing</span></a>
           </div>
-          <div class="tls-playlist" id="tls-playlist" aria-label="Station playlist"></div>
+          <div class="tls-playlist" id="tls-playlist" aria-label="Station playlist by topic"></div>
         </div>
       </div>
-      <div class="broadcast-ticker" aria-hidden="true"><span>SEG 01 MUNICIPAL: How Canadian cities keep failing the public — na  ·  SEG 02 DEFENCE: NATO 2026 partnerships: missiles, Arctic SATCOM,  ·  SEG 03 PROCUREMENT: CH-146 Griffon GLLE ~$800M paused for reassessme  ·  SEG 04 ARCTIC: Multi-decade Arctic defence infrastructure wave  ·  SEG 05 INDUSTRIAL: Defence Investment Agency + Industrial Strategy   ·  SEG 06 5GW MEDIA: CBC social amplification / harassment pattern —   ·  SEG 07 5GW MEDIA: CBC 5GW information-vector dossier (funding/appo  ·  SEG 08 ACCOUNTABILITY: TENET5 record continues primary-source mapping  ·  DESK HITS  ·  REPORT BLOCK  ·  CASE FILM  ·  TENET5 LIVE  ·  SEG 01 MUNICIPAL: How Canadian cities keep failing the public — na  ·  SEG 02 DEFENCE: NATO 2026 partnerships: missiles, Arctic SATCOM,  ·  SEG 03 PROCUREMENT: CH-146 Griffon GLLE ~$800M paused for reassessme  ·  SEG 04 ARCTIC: Multi-decade Arctic defence infrastructure wave  ·  SEG 05 INDUSTRIAL: Defence Investment Agency + Industrial Strategy   ·  SEG 06 5GW MEDIA: CBC social amplification / harassment pattern —   ·  SEG 07 5GW MEDIA: CBC 5GW information-vector dossier (funding/appo  ·  SEG 08 ACCOUNTABILITY: TENET5 record continues primary-source mapping</span></div>
+      <div class="broadcast-ticker" aria-hidden="true"><span>SEG 01 MUNICIPAL: How Canadian cities keep failing the public — na  ·  SEG 02 DEFENCE: NATO 2026 partnerships: missiles, Arctic SATCOM,  ·  SEG 03 PROCUREMENT: CH-146 Griffon GLLE ~$800M paused for reassessme  ·  SEG 04 ARCTIC: Multi-decade Arctic defence infrastructure wave  ·  SEG 05 INDUSTRIAL: Defence Investment Agency + Industrial Strategy   ·  SEG 06 5GW MEDIA: CBC social amplification / harassment pattern —   ·  SEG 07 5GW MEDIA: CBC 5GW information-vector dossier (funding/appo  ·  SEG 08 ACCOUNTABILITY: TENET5 record continues primary-source mapping  ·  LIVE  ·  TIME NAV  ·  TOPIC NAV  ·  TENET5  ·  SEG 01 MUNICIPAL: How Canadian cities keep failing the public — na  ·  SEG 02 DEFENCE: NATO 2026 partnerships: missiles, Arctic SATCOM,  ·  SEG 03 PROCUREMENT: CH-146 Griffon GLLE ~$800M paused for reassessme  ·  SEG 04 ARCTIC: Multi-decade Arctic defence infrastructure wave  ·  SEG 05 INDUSTRIAL: Defence Investment Agency + Industrial Strategy   ·  SEG 06 5GW MEDIA: CBC social amplification / harassment pattern —   ·  SEG 07 5GW MEDIA: CBC 5GW information-vector dossier (funding/appo  ·  SEG 08 ACCOUNTABILITY: TENET5 record continues primary-source mapping</span></div>
     </div>
 
     <div class="news-seg-grid" role="list">
@@ -356,13 +382,13 @@
 </button>
     </div>
     <p class="news-air-foot">
-      Station order: desk hits → report packages → five-act case film → loop.
-      Open sources on every claim. Atmosphere is never proof.
-      <a href="live.html">Full-screen station →</a>
+      Live feed follows wall-clock ET. Time rail + topics let you jump without leaving the station.
+      Keys: ← → prev/next · L join live · T explore.
+      <a href="live.html">Full station →</a>
     </p>
   </div>
 </section>
-<script src="js/tenet5-live-station.js?v=1" defer></script>
+<script src="js/tenet5-live-station.js?v=2" defer></script>
 <script src="js/tenet5-news-air.js?v=5" defer></script>
 <section class="enter field" id="enter" data-line="Four doors into the same newsroom. Pick a door; every line still cites its source.">
   <div class="wrapx rv">
@@ -836,4 +862,26 @@
   <a class="seg" href="#news-air" data-ch="news-air"><span class="lbl">Air</span><span class="dot"></span></a>
   <a class="seg" href="#era" data-ch="era"><span class="lbl">Era</span><span class="dot"></span></a>
 </nav>
-<div class="dock guide-ready up" id="dock" role="region" aria-label="LI
+<div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
+  <div class="dock-in">
+    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="say"><b>LIRIL · Station</b><span id="liril-line">We begin at this hour.</span></div>
+    <button id="liril-guide-btn" type="button" title="Start LIRIL desk reporter news presentation">Guide me</button>
+    <button id="liril-station-btn" type="button" aria-pressed="false" title="Always-on news station — auto-presents while you browse">Station · Off</button>
+    <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice narration">Voice · Off</button>
+    <div class="liril-status" id="liril-status">LIRIL ready</div>
+  </div>
+</div>
+<script src="js/rv-reveal.js?v=1" defer></script>
+<script src="js/liril-radio.js?v=2" defer></script>
+<script src="js/liril-voice.js?v=45" defer></script>
+<script src="js/liril-live.js?v=1"></script>
+<script src="js/liril-reporter.js?v=1" defer></script>
+<script src="js/liril-station.js?v=1" defer></script>
+<script src="js/liril-home-guide.js?v=12" defer></script>
+
+<script src="js/tenet5-cinema-play.js?v=3"></script>
+<script src="js/tenet5-doc-player.js?v=2"></script>
+<script src="js/tenet5-time-dial.js?v=1"></script>
+</body>
+</html>

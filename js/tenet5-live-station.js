@@ -1,32 +1,47 @@
-/* TENET5 LIVE — continuous news station player.
- * Wall-clock join + auto-advance + always-on broadcast chrome.
- * Like flipping to a channel mid-air — not a clip gallery.
+/* TENET5 LIVE v2 — live news station + real-time time/topic navigation.
+ *
+ * Default = LIVE (wall-clock join, auto-advance, like a channel).
+ * Explore = navigate by time rail + topic chips without leaving the station.
+ * Join live snaps back to wall-clock position.
  */
 (function () {
   'use strict';
-  if (window.TENET5_LIVE && window.TENET5_LIVE.__v >= 1) return;
+  if (window.TENET5_LIVE && window.TENET5_LIVE.__v >= 2) return;
 
   var schedule = null;
   var idx = 0;
   var playing = false;
   var joined = false;
   var seekPending = 0;
+  var mode = 'live'; /* live | explore */
+  var topicFilter = 'ALL';
+  var followLive = true; /* when true, periodically re-sync to wall clock if drifted */
 
   function $(id) { return document.getElementById(id); }
   function video() { return $('tls-video'); }
+
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
 
   function etClock() {
     try {
       return new Date().toLocaleString('en-CA', {
         timeZone: 'America/Toronto',
         weekday: 'short',
+        month: 'short',
+        day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
         hour12: false
       }) + ' ET';
     } catch (e) {
-      return new Date().toLocaleTimeString();
+      return new Date().toLocaleString();
     }
   }
 
@@ -34,10 +49,7 @@
     try {
       var parts = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Toronto',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        hour12: false
+        hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false
       }).formatToParts(new Date());
       var h = 0, m = 0, s = 0;
       parts.forEach(function (p) {
@@ -52,20 +64,27 @@
     }
   }
 
-  function items() {
-    return (schedule && schedule.linear) || [];
+  function items() { return (schedule && schedule.linear) || []; }
+  function totalDur() { return (schedule && schedule.total_duration_s) || 0; }
+
+  function fmtTime(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
   }
 
-  function totalDur() {
-    return (schedule && schedule.total_duration_s) || 0;
+  function wallPos() {
+    var T = totalDur();
+    if (T <= 0) return 0;
+    return etSeconds() % T;
   }
 
-  function findJoinIndex() {
+  function findAtPackageTime(pos) {
     var list = items();
     if (!list.length) return { index: 0, offset: 0 };
     var T = totalDur();
-    if (T <= 0) return { index: 0, offset: 0 };
-    var pos = etSeconds() % T;
+    pos = Math.max(0, Math.min(T - 0.05, pos));
     for (var i = 0; i < list.length; i++) {
       var a = list[i].start_s || 0;
       var b = list[i].end_s || (a + (list[i].duration_s || 0));
@@ -73,7 +92,40 @@
         return { index: i, offset: Math.max(0, pos - a) };
       }
     }
-    return { index: 0, offset: 0 };
+    return { index: list.length - 1, offset: 0 };
+  }
+
+  function findJoinIndex() {
+    return findAtPackageTime(wallPos());
+  }
+
+  function topics() {
+    var set = {};
+    var order = [];
+    items().forEach(function (it) {
+      var d = (it.desk || 'DESK').toUpperCase();
+      if (!set[d]) { set[d] = true; order.push(d); }
+    });
+    return order;
+  }
+
+  function setMode(m) {
+    mode = m === 'explore' ? 'explore' : 'live';
+    followLive = mode === 'live';
+    var root = $('tls-root');
+    if (root) {
+      root.setAttribute('data-mode', mode);
+      root.classList.toggle('is-explore', mode === 'explore');
+      root.classList.toggle('is-live', mode === 'live');
+    }
+    document.querySelectorAll('[data-tls-mode]').forEach(function (btn) {
+      btn.classList.toggle('is-on', btn.getAttribute('data-tls-mode') === mode);
+    });
+    var badge = $('tls-mode-badge');
+    if (badge) {
+      badge.textContent = mode === 'live' ? 'LIVE FEED' : 'TIME / TOPIC NAV';
+      badge.className = 'tls-mode-badge ' + (mode === 'live' ? 'live' : 'explore');
+    }
   }
 
   function setHud(item, status) {
@@ -85,9 +137,16 @@
     var nowNext = $('tls-now-next');
     var prog = $('tls-prog');
     var clock = $('tls-clock');
+    var st = $('tls-status');
+    var open = $('tls-open-source');
     if (clock) clock.textContent = etClock();
     if (!item) return;
-    if (live) live.classList.toggle('on', !!playing);
+    if (live) {
+      live.classList.toggle('on', mode === 'live' && playing);
+      live.innerHTML = mode === 'live'
+        ? '<i></i> LIVE'
+        : '<i></i> NAV';
+    }
     if (desk) desk.textContent = 'TENET5 · ' + (item.desk || 'DESK');
     if (block) {
       var bl = (item.block || item.kind || 'desk').toUpperCase();
@@ -97,8 +156,12 @@
       block.textContent = bl;
     }
     if (title) title.textContent = item.title || '';
-    if (lede) lede.textContent = item.lede || schedule.one_line || '';
+    if (lede) lede.textContent = item.lede || (schedule && schedule.one_line) || '';
     if (prog) prog.textContent = (idx + 1) + ' / ' + items().length;
+    if (open) {
+      open.href = item.href || 'daily-briefing.html';
+      open.style.display = '';
+    }
     if (nowNext) {
       var list = items();
       var next = list[(idx + 1) % list.length];
@@ -106,20 +169,65 @@
         '<div><span class="tls-nn-lab">NOW</span> ' + esc(item.title || '') + '</div>' +
         (next ? '<div><span class="tls-nn-lab">NEXT</span> ' + esc(next.title || '') + '</div>' : '');
     }
-    // highlight playlist
+    if (st) {
+      if (status) st.textContent = status;
+      else if (mode === 'explore') st.textContent = 'NAVIGATING · NOT LIVE';
+      else st.textContent = playing ? 'ON AIR' : 'STANDBY';
+    }
     document.querySelectorAll('.tls-pl-item').forEach(function (el) {
       el.classList.toggle('is-on', el.getAttribute('data-id') === item.id);
     });
-    var st = $('tls-status');
-    if (st) st.textContent = status || (playing ? 'ON AIR' : 'STANDBY');
+    document.querySelectorAll('.tls-topic').forEach(function (el) {
+      var t = el.getAttribute('data-topic');
+      el.classList.toggle('is-on', t === topicFilter || (topicFilter === 'ALL' && t === 'ALL'));
+    });
+    paintTimeRail();
   }
 
-  function esc(s) {
-    return String(s || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+  function paintTopics() {
+    var host = $('tls-topics');
+    if (!host) return;
+    var html = '<button type="button" class="tls-topic is-on" data-topic="ALL">ALL</button>';
+    html += '<button type="button" class="tls-topic" data-topic="desk" data-block="desk">DESK</button>';
+    html += '<button type="button" class="tls-topic" data-topic="reports" data-block="reports">REPORTS</button>';
+    html += '<button type="button" class="tls-topic" data-topic="case" data-block="case">CASE</button>';
+    topics().forEach(function (t) {
+      html += '<button type="button" class="tls-topic" data-topic="' + esc(t) + '">' + esc(t) + '</button>';
+    });
+    host.innerHTML = html;
+    host.querySelectorAll('.tls-topic').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var t = btn.getAttribute('data-topic');
+        var block = btn.getAttribute('data-block');
+        if (block) {
+          /* jump to first item of daypart block */
+          setMode('explore');
+          topicFilter = 'ALL';
+          var list = items();
+          for (var i = 0; i < list.length; i++) {
+            if (list[i].block === block) {
+              playAt(i, 0, true);
+              paintPlaylist();
+              return;
+            }
+          }
+          return;
+        }
+        topicFilter = t || 'ALL';
+        setMode('explore');
+        paintPlaylist();
+        /* jump to first matching topic */
+        if (topicFilter !== 'ALL') {
+          var list2 = items();
+          for (var j = 0; j < list2.length; j++) {
+            if ((list2[j].desk || '').toUpperCase() === topicFilter) {
+              playAt(j, 0, true);
+              return;
+            }
+          }
+        }
+      });
+    });
   }
 
   function paintPlaylist() {
@@ -129,38 +237,81 @@
     var html = '';
     var lastBlock = '';
     list.forEach(function (it, i) {
+      if (topicFilter !== 'ALL' && (it.desk || '').toUpperCase() !== topicFilter) return;
       if (it.block !== lastBlock) {
         lastBlock = it.block;
         var lab = lastBlock === 'desk' ? 'DESK HITS' : lastBlock === 'reports' ? 'REPORT BLOCK' : 'CASE FILM';
         html += '<div class="tls-pl-head">' + esc(lab) + '</div>';
       }
-      var mm = Math.floor((it.duration_s || 0) / 60);
-      var ss = Math.floor((it.duration_s || 0) % 60);
       html +=
         '<button type="button" class="tls-pl-item" data-id="' + esc(it.id) + '" data-idx="' + i + '">' +
         '<span class="tls-pl-desk">' + esc(it.desk || '') + '</span>' +
         '<span class="tls-pl-title">' + esc(it.title || '') + '</span>' +
-        '<span class="tls-pl-dur">' + mm + ':' + (ss < 10 ? '0' : '') + ss + '</span>' +
+        '<span class="tls-pl-dur">' + fmtTime(it.duration_s) + '</span>' +
         '</button>';
     });
+    if (!html) html = '<div class="tls-pl-empty">No hits for this topic.</div>';
     host.innerHTML = html;
     host.querySelectorAll('.tls-pl-item').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        setMode('explore');
         var i = parseInt(btn.getAttribute('data-idx'), 10);
         playAt(i, 0, true);
       });
     });
   }
 
+  function paintTimeRail() {
+    var rail = $('tls-time-rail');
+    var fill = $('tls-time-fill');
+    var liveMark = $('tls-live-mark');
+    var packLab = $('tls-pack-time');
+    var wallLab = $('tls-wall-time');
+    var T = totalDur();
+    if (!T) return;
+    var list = items();
+    var item = list[idx];
+    var v = video();
+    var cur = 0;
+    if (item) {
+      cur = (item.start_s || 0) + (v && !isNaN(v.currentTime) ? v.currentTime : 0);
+    }
+    var pct = Math.min(100, (cur / T) * 100);
+    var livePct = Math.min(100, (wallPos() / T) * 100);
+    if (fill) fill.style.width = pct + '%';
+    if (liveMark) liveMark.style.left = livePct + '%';
+    if (packLab) packLab.textContent = fmtTime(cur) + ' / ' + fmtTime(T);
+    if (wallLab) wallLab.textContent = 'LIVE @ ' + fmtTime(wallPos());
+    /* daypart segments on rail */
+    var segs = $('tls-time-segs');
+    if (segs && !segs.dataset.built) {
+      var html = '';
+      list.forEach(function (it) {
+        var left = ((it.start_s || 0) / T) * 100;
+        var w = ((it.duration_s || 0) / T) * 100;
+        var cls = 'tls-tseg tls-tseg-' + (it.block || 'desk');
+        html += '<button type="button" class="' + cls + '" style="left:' + left + '%;width:' + Math.max(w, 0.4) + '%" data-idx="' +
+          items().indexOf(it) + '" title="' + esc(it.title) + '"></button>';
+      });
+      segs.innerHTML = html;
+      segs.dataset.built = '1';
+      segs.querySelectorAll('.tls-tseg').forEach(function (b) {
+        b.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          setMode('explore');
+          playAt(parseInt(b.getAttribute('data-idx'), 10) || 0, 0, true);
+        });
+      });
+    }
+  }
+
   function loadSrc(item) {
     var v = video();
     if (!v || !item) return;
-    var src = item.video;
     var s = v.querySelector('source') || document.createElement('source');
-    s.src = src;
+    s.src = item.video;
     s.type = 'video/mp4';
     if (!s.parentNode) v.appendChild(s);
-    // captions
     v.querySelectorAll('track').forEach(function (t) { t.remove(); });
     if (item.vtt) {
       var tr = document.createElement('track');
@@ -179,14 +330,15 @@
     if (!list.length) return;
     idx = ((i % list.length) + list.length) % list.length;
     var item = list[idx];
+    if (user) setMode('explore');
     loadSrc(item);
-    setHud(item, user ? 'ON AIR · MANUAL' : 'ON AIR');
+    setHud(item, user ? 'NAVIGATING' : (mode === 'live' ? 'ON AIR' : 'NAVIGATING'));
     var v = video();
     if (!v) return;
     seekPending = offset || 0;
     var onMeta = function () {
       v.removeEventListener('loadedmetadata', onMeta);
-      if (seekPending > 0.5 && seekPending < (item.duration_s || 999) - 1) {
+      if (seekPending > 0.4 && seekPending < (item.duration_s || 999) - 0.5) {
         try { v.currentTime = seekPending; } catch (e) { /* */ }
       }
       seekPending = 0;
@@ -197,12 +349,12 @@
           v.muted = true;
           v.play().catch(function () {});
           var st = $('tls-status');
-          if (st) st.textContent = 'ON AIR · TAP TO UNMUTE';
+          if (st) st.textContent = (mode === 'live' ? 'ON AIR' : 'NAV') + ' · TAP UNMUTE';
         });
       }
       playing = true;
       joined = true;
-      setHud(item, 'ON AIR');
+      setHud(item);
     };
     if (v.readyState >= 1) onMeta();
     else v.addEventListener('loadedmetadata', onMeta);
@@ -211,26 +363,38 @@
   function advance() {
     var list = items();
     if (!list.length) return;
-    playAt(idx + 1, 0, false);
+    /* In live mode after end of package, re-join wall clock; else next item */
+    if (mode === 'live' && idx >= list.length - 1) {
+      joinLive();
+      return;
+    }
+    playAt(idx + 1, 0, mode === 'explore');
   }
 
   function joinLive() {
+    setMode('live');
+    topicFilter = 'ALL';
+    paintPlaylist();
     var j = findJoinIndex();
     playAt(j.index, j.offset, false);
     var st = $('tls-status');
     if (st) st.textContent = 'JOINED LIVE';
   }
 
+  function seekPackageTime(pos) {
+    setMode('explore');
+    var j = findAtPackageTime(pos);
+    playAt(j.index, j.offset, true);
+  }
+
   function bindVideo() {
     var v = video();
     if (!v) return;
-    v.addEventListener('ended', function () {
-      advance();
-    });
+    v.addEventListener('ended', function () { advance(); });
     v.addEventListener('play', function () {
       playing = true;
       var item = items()[idx];
-      if (item) setHud(item, 'ON AIR');
+      if (item) setHud(item);
     });
     v.addEventListener('pause', function () {
       if (!v.ended) {
@@ -238,15 +402,26 @@
         if (st) st.textContent = 'PAUSED';
       }
     });
+    v.addEventListener('timeupdate', function () {
+      paintTimeRail();
+      var bar = $('tls-bar');
+      if (bar && v.duration) {
+        bar.style.width = Math.min(100, (v.currentTime / v.duration) * 100) + '%';
+      }
+    });
   }
 
   function bindControls() {
     var go = $('tls-join');
-    if (go) go.addEventListener('click', function () { joinLive(); });
+    if (go) go.addEventListener('click', joinLive);
     var next = $('tls-next');
-    if (next) next.addEventListener('click', function () { advance(); });
+    if (next) next.addEventListener('click', function () {
+      setMode('explore');
+      advance();
+    });
     var prev = $('tls-prev');
     if (prev) prev.addEventListener('click', function () {
+      setMode('explore');
       playAt(idx - 1, 0, true);
     });
     var mute = $('tls-unmute');
@@ -256,34 +431,72 @@
       v.muted = false;
       v.play().catch(function () {});
     });
+    document.querySelectorAll('[data-tls-mode]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var m = btn.getAttribute('data-tls-mode');
+        if (m === 'live') joinLive();
+        else setMode('explore');
+      });
+    });
+    var rail = $('tls-time-rail');
+    if (rail) {
+      rail.addEventListener('click', function (ev) {
+        var rect = rail.getBoundingClientRect();
+        var x = (ev.clientX - rect.left) / Math.max(1, rect.width);
+        seekPackageTime(x * totalDur());
+      });
+    }
+    /* keyboard: arrows = prev/next, L = live, T = explore */
+    document.addEventListener('keydown', function (ev) {
+      if (!document.getElementById('tls-root')) return;
+      var tag = (ev.target && ev.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (ev.key === 'ArrowRight') { setMode('explore'); advance(); }
+      if (ev.key === 'ArrowLeft') { setMode('explore'); playAt(idx - 1, 0, true); }
+      if (ev.key === 'l' || ev.key === 'L') joinLive();
+      if (ev.key === 't' || ev.key === 'T') setMode('explore');
+    });
   }
 
   function tick() {
     var clock = $('tls-clock');
     if (clock) clock.textContent = etClock();
-    // progress within item
-    var v = video();
-    var bar = $('tls-bar');
-    if (v && bar && v.duration) {
-      var pct = Math.min(100, (v.currentTime / v.duration) * 100);
-      bar.style.width = pct + '%';
+    paintTimeRail();
+    /* gentle live follow: if user is in live mode and drifted >12s, rejoin */
+    if (mode === 'live' && followLive && playing) {
+      var list = items();
+      var item = list[idx];
+      var v = video();
+      if (item && v && !v.paused) {
+        var cur = (item.start_s || 0) + (v.currentTime || 0);
+        var live = wallPos();
+        if (Math.abs(cur - live) > 18) {
+          var j = findJoinIndex();
+          if (j.index !== idx || Math.abs((v.currentTime || 0) - j.offset) > 8) {
+            playAt(j.index, j.offset, false);
+          }
+        }
+      }
     }
   }
 
   function boot(sched) {
     schedule = sched;
+    paintTopics();
     paintPlaylist();
     bindVideo();
     bindControls();
-    setInterval(tick, 250);
-    // auto-join live shortly after load (user gesture may still force mute)
+    setMode('live');
+    setInterval(tick, 400);
     setTimeout(function () {
       if (!joined) joinLive();
-    }, 400);
+    }, 350);
     var one = $('tls-oneline');
     if (one && schedule.one_line) one.textContent = schedule.one_line;
     var tag = $('tls-tagline');
     if (tag && schedule.tagline) tag.textContent = schedule.tagline;
+    var n = $('tls-count');
+    if (n) n.textContent = schedule.item_count + ' hits · ' + fmtTime(schedule.total_duration_s) + ' loop';
   }
 
   function load() {
@@ -312,15 +525,21 @@
   }
 
   window.TENET5_LIVE = {
-    __v: 1,
+    __v: 2,
     join: joinLive,
     next: advance,
     playAt: playAt,
+    seekTime: seekPackageTime,
+    setTopic: function (t) {
+      topicFilter = t || 'ALL';
+      setMode('explore');
+      paintPlaylist();
+    },
     load: load,
-    getSchedule: function () { return schedule; }
+    getSchedule: function () { return schedule; },
+    getMode: function () { return mode; }
   };
 
-  // Compatibility: news-air playAll drives station if present
   window.TENET5_NEWS_AIR = window.TENET5_NEWS_AIR || {};
   window.TENET5_NEWS_AIR.playAll = function () { joinLive(); };
   window.TENET5_NEWS_AIR.playId = function (id) {
