@@ -348,8 +348,13 @@ def apply() -> dict[str, Any]:
     if SUNROOM_CAT.is_file():
         cat = json.loads(SUNROOM_CAT.read_text(encoding="utf-8-sig"))
         items = cat.get("items") or []
+        # HARD BAN: never overwrite HQ fashion stills with SVG. Never Comfy/Flux path.
         for i, it in enumerate(items):
-            # Gentlemen's silhouette placeholders until Flux photoreal stills ship.
+            img = str(it.get("image") or "")
+            kind = str(it.get("art_kind") or "")
+            if kind == "editorial_hq" or img.endswith((".jpg", ".jpeg", ".png", ".webp")):
+                continue
+            # SVG fallback only if no HQ art locked (should not ship publicly)
             fn = f"{it.get('id') or f'sun_{i}'}.svg"
             path = SUNROOM_DIR / fn
             path.write_text(sunroom_svg(it, i), encoding="utf-8")

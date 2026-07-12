@@ -5,6 +5,10 @@ For gentlemen: confident summer women, fully clothed, fashion-first.
 Sundress / resort / swim-as-clothing. Composition turns the face
 away as magazine craft — never privacy-thriller or softcore.
 
+HARD BAN: never ComfyUI, never Flux, never local SD pipelines for this desk.
+HQ art is editorial fashion stills only (art_kind editorial_hq). Do not
+overwrite locked JPGs with SVG placeholders.
+
   python tools/prism_sunroom_gen.py --json --apply --n 8
 """
 from __future__ import annotations
@@ -131,10 +135,28 @@ def build(n: int = 8, seed: int = 42) -> dict[str, Any]:
         "items": items,
         "public_page": "sunroom.html",
         "note": (
-            "Gentlemen's summer desk. Flux/Comfy prompts. "
-            "Fully clothed, face not the subject, never softcore, never creep."
+            "Gentlemen's summer desk. NEVER ComfyUI/Flux. "
+            "HQ editorial fashion stills only. Fully clothed, never softcore."
         ),
     }
+
+
+def _hq_locked() -> bool:
+    """True when catalog already ships HQ fashion stills — never clobber with prompts/SVG."""
+    if not OUT.is_file():
+        return False
+    try:
+        cat = json.loads(OUT.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    items = cat.get("items") or []
+    hq = 0
+    for it in items:
+        img = str(it.get("image") or "")
+        kind = str(it.get("art_kind") or "")
+        if kind == "editorial_hq" or img.endswith((".jpg", ".jpeg", ".png", ".webp")):
+            hq += 1
+    return hq >= max(1, len(items) // 2) if items else False
 
 
 def main() -> int:
@@ -143,7 +165,27 @@ def main() -> int:
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--n", type=int, default=8)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--force", action="store_true", help="overwrite even when HQ art is locked")
     args = ap.parse_args()
+    if args.apply and _hq_locked() and not args.force:
+        try:
+            existing = json.loads(OUT.read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError):
+            existing = {"ok": True, "n": 0}
+        proof = {
+            "ok": True,
+            "verdict": "SUNROOM_HQ_LOCKED",
+            "ts": _utc(),
+            "note": "HQ fashion stills locked. ComfyUI/Flux banned. Use --force only after deliberate wipe.",
+            "n": existing.get("n"),
+            "public_page": "sunroom.html",
+        }
+        PROOF.write_text(json.dumps(proof, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(proof, indent=2, ensure_ascii=False))
+        else:
+            print("SUNROOM_HQ_LOCKED", existing.get("n"))
+        return 0
     doc = build(args.n, args.seed)
     if args.apply:
         OUT.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

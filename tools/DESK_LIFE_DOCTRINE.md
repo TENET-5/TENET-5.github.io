@@ -21,6 +21,7 @@ Atmosphere is not proof; market and sports predictions are **labeled models**, n
 - **Maxim energy, elite ice-lake taste** — body language open and assured; wardrobe and place are the story.
 - **Face not the subject** — turn, hat silhouette, over-shoulder as *magazine craft*, never “identity obscured” / hands-over-face thriller.
 - **No tattoos, logos, neon, cyber, softcore, creep, surveillance language.**
+- **HARD BAN — ComfyUI / Flux / local SD for this desk.** Never. HQ fashion stills only (`art_kind: editorial_hq`). No SVG placeholders on the public page.
 - Caption: *Sunroom · gentlemen’s summer · Powered by LIRIL AI*
 - Copy must sound like Maxim for grown men who read the newsroom — never “are these real?”
 
@@ -47,7 +48,7 @@ Atmosphere is not proof; market and sports predictions are **labeled models**, n
 | Markets | `tools/prism_markets_desk.py` → `data/markets_desk.json` |
 | Cartoons | `tools/prism_cartoon_forge.py` → `data/cartoon_desk.json` |
 
-Still/video models: site Comfy/Flux + LTX when GPU free (KP41). Prompts only on public site — never engine internals.
+**ComfyUI is BANNED** for public life desks (Sunroom, Press Ink stills). Ship HQ editorial art only. LTX film paths are separate and not for fashion desks.
 
 ## Home placement
 Newsdesk row or pills: Sunroom · Sports · Markets · Press Ink.

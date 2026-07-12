@@ -38,6 +38,9 @@
 
 
 
+
+
+
 <!-- TENET5 SEO SLATE -->
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
@@ -126,15 +129,13 @@
 <script>
   fetch('data/sunroom_catalog.json',{cache:'no-cache'}).then(function(r){return r.json()}).then(function(doc){
     var g=document.getElementById('sr-grid');
-    (doc.items||[]).forEach(function(it){
+    (doc.items||[]).filter(function(it){return it.image && (it.status==='ready'||it.status==='prompt_ready');}).forEach(function(it){
       var a=document.createElement('article');
       a.className='glass sr-card';
-      var ph = it.image
-        ? '<img src="'+it.image+'" alt="Sunroom gentlemen\'s summer fashion" width="600" height="800" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">'
-        : '<span class="sr-meta">'+ (it.setting||'').slice(0,48) +'</span>';
-      a.innerHTML='<div class="sr-ph">'+ph+'</div>'+
+      a.innerHTML=
+        '<div class="sr-ph"><img src="'+it.image+'" alt="Sunroom gentlemen summer fashion" width="600" height="800" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
         '<div class="b"><span class="kick">Gentlemen\'s summer</span><h3>'+ (it.wardrobe||'').slice(0,72) +'</h3>'+
-        '<p class="sr-meta">'+ (it.pose||'') +'</p>'+
+        '<p class="sr-meta">'+ (it.setting||'') +'</p>'+
         '<p class="sr-meta">'+ (it.caption||'') +'</p></div>';
       g.appendChild(a);
     });
