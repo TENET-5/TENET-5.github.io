@@ -1,15 +1,43 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   LIRIL FILM PLAYER v4 — multi-hour entire Canada open-record history
+   LIRIL FILM PLAYER v6 — multi-hour entire Canada open-record history
    Prefers data/documentary_chapters.json (full spine); falls back to film acts.
-   Speak + long source dwell. Progress localStorage v4. Press theme (css/press-theme.css).
+   B-roll: real media/film/video/film_* clips (min size) + LTX act pool; ignore 1-byte stubs.
+   Speak + source dwell. Progress localStorage v4. Press theme (css/press-theme.css).
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
   if (window.__LIRIL_FILM_PLAYER) return;
   window.__LIRIL_FILM_PLAYER = true;
 
-  var MANIFEST_URL = '/data/film/manifest.json';
-  var CHAPTERS_URL = '/data/documentary_chapters.json';
+  var MANIFEST_URL = 'data/film/manifest.json';
+  var CHAPTERS_URL = 'data/documentary_chapters.json';
+  var MIN_VIDEO_BYTES = 80000;
+  /* Act → atmospheric LTX / cinema when beat file missing */
+  var ACT_BROLL = {
+    0: 'media/film/hall_of_record.mp4',
+    1: 'media/film/ledger_turn.mp4',
+    2: 'media/film/chamber_dawn.mp4',
+    3: 'media/film/empty_committee.mp4',
+    4: 'media/film/vault_door.mp4',
+    5: 'media/film/paper_trail.mp4',
+    6: 'media/film/corridor_power.mp4',
+    7: 'media/film/waiting_room.mp4',
+    8: 'media/film/hall_of_record.mp4',
+    9: 'media/film/empty_committee.mp4',
+    10: 'media/film/chamber_dawn.mp4'
+  };
+  var BROLL_POOL = [
+    'media/film/hall_of_record.mp4',
+    'media/film/corridor_power.mp4',
+    'media/film/empty_committee.mp4',
+    'media/film/ledger_turn.mp4',
+    'media/film/paper_trail.mp4',
+    'media/film/chamber_dawn.mp4',
+    'media/film/vault_door.mp4',
+    'media/film/waiting_room.mp4',
+    'media/film/ltx/ltx_waiting_room.mp4',
+    'media/film/ltx/ltx_hall_of_record.mp4'
+  ];
   var state = {
     manifest: null,
     acts: [],
@@ -105,6 +133,60 @@
     });
   }
 
+  function headOk(url) {
+    return fetch(url, { method: 'HEAD', cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) return false;
+        var len = parseInt(r.headers.get('content-length') || '0', 10);
+        /* GitHub Pages may omit content-length; probe range if missing */
+        if (!len || isNaN(len)) {
+          return fetch(url, {
+            method: 'GET',
+            headers: { Range: 'bytes=0-1' },
+            cache: 'no-cache'
+          }).then(function (r2) {
+            return r2.ok || r2.status === 206;
+          }).catch(function () { return false; });
+        }
+        return len >= MIN_VIDEO_BYTES;
+      })
+      .catch(function () { return false; });
+  }
+
+  function candidateVideos(seg) {
+    var id = (seg && seg.id) || '';
+    var act = (seg && seg.act != null) ? seg.act : 0;
+    var list = [];
+    if (id) {
+      list.push('media/film/video/film_' + id + '_mux.mp4');
+      list.push('media/film/video/film_' + id + '.mp4');
+      list.push('media/film/docs/film_' + id + '_documentary.mp4');
+    }
+    if (ACT_BROLL[act]) list.push(ACT_BROLL[act]);
+    list.push(BROLL_POOL[act % BROLL_POOL.length]);
+    list.push('media/film/reel.mp4');
+    /* de-dupe */
+    var seen = {};
+    return list.filter(function (u) {
+      if (!u || seen[u]) return false;
+      seen[u] = true;
+      return true;
+    });
+  }
+
+  function resolveBroll(seg) {
+    var cands = candidateVideos(seg);
+    var i = 0;
+    function next() {
+      if (i >= cands.length) return Promise.resolve('media/film/reel.mp4');
+      var u = cands[i++];
+      return headOk(u).then(function (ok) {
+        return ok ? u : next();
+      });
+    }
+    return next();
+  }
+
   function loadAll() {
     /* Primary: full rebuilt catalog (history spine + long dwell = multi-hour) */
     return fetchJson(CHAPTERS_URL).then(function (doc) {
@@ -116,8 +198,8 @@
           totals: doc.totals || man.totals,
           runtime_model: man.runtime_model || {
             speak_wpm: 145,
-            source_dwell_s: 200,
-            social_dwell_s: 90
+            source_dwell_s: 90,
+            social_dwell_s: 45
           },
           acts: man.acts || []
         });
@@ -150,6 +232,7 @@
             });
           });
         }
+        if (!state.flat.length) throw new Error('empty_chapters');
         return state.manifest;
       });
     }).catch(function () {
@@ -157,8 +240,9 @@
       return fetchJson(MANIFEST_URL).then(function (man) {
         state.manifest = man;
         var files = (man.acts || []).map(function (a) {
-          var url = a.file;
-          if (url && url.charAt(0) !== '/') url = '/' + url;
+          var url = a.file || '';
+          /* relative paths for GitHub Pages */
+          if (url.charAt(0) === '/') url = url.slice(1);
           return fetchJson(url);
         });
         return Promise.all(files).then(function (acts) {
@@ -172,6 +256,7 @@
               state.flat.push(s);
             });
           });
+          if (!state.flat.length) throw new Error('empty_acts');
           return man;
         });
       });
@@ -186,9 +271,9 @@
     root.id = 'liril-film-root';
     root.innerHTML =
       '<header class="lf-top">' +
-        '<div class="lf-brand">LIRIL · FULL RECORD</div>' +
+        '<div class="lf-brand">LIRIL · THE GUIDED RECORD</div>' +
         '<div class="lf-runtime" id="lf-runtime">—</div>' +
-        '<div class="lf-track" id="lf-track" role="progressbar" aria-valuemin="0" aria-valuemax="100">' +
+        '<div class="lf-track" id="lf-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Film progress">' +
           '<div class="lf-fill" id="lf-fill"></div>' +
         '</div>' +
         '<div class="lf-clock" id="lf-clock">0:00 / 0:00</div>' +
@@ -199,6 +284,10 @@
       '</header>' +
       '<aside class="lf-acts" id="lf-acts" aria-label="Acts"></aside>' +
       '<main class="lf-stage">' +
+        '<div class="lf-cinema" id="lf-cinema" aria-hidden="true">' +
+          '<video class="lf-cinema-video" id="lf-cinema-video" playsinline preload="auto" poster="media/landing/parliament_ice.jpg"></video>' +
+          '<div class="lf-cinema-veil" aria-hidden="true"></div>' +
+        '</div>' +
         '<div class="lf-kicker" id="lf-kicker">—</div>' +
         '<h1 class="lf-title" id="lf-title">Loading film…</h1>' +
         '<p class="lf-years" id="lf-years"></p>' +
@@ -210,13 +299,14 @@
       '</main>' +
       '<aside class="lf-rail" id="lf-rail" aria-label="Segments in act"></aside>' +
       '<footer class="lf-foot">' +
-        '<span id="lf-status">Primary sources · open social · claim levels labeled</span>' +
+        '<span id="lf-status">Primary sources · claim levels labeled · atmosphere is not the proof</span>' +
         '<a class="lf-foot-a" href="daily-briefing.html">Daily briefing</a>' +
-        '<a class="lf-foot-a" href="experience.html">A→B paths</a>' +
-        '<a class="lf-foot-a" href="osint-dashboard.html">OSINT</a>' +
+        '<a class="lf-foot-a" href="argument.html">Five-act case</a>' +
+        '<a class="lf-foot-a" href="evidence-index.html">Evidence shelf</a>' +
       '</footer>';
     mount.appendChild(root);
     state.root = root;
+    state.cinema = root.querySelector('#lf-cinema-video');
 
     root.addEventListener('click', function (ev) {
       var t = ev.target.closest('[data-act]');
@@ -449,41 +539,50 @@
       advancePhase();
     };
 
-    var brollVid = document.querySelector('.film-broll');
-    var vidPath = 'media/film/docs/film_' + (s.id || state.index) + '_documentary.mp4';
+    var stageVid = state.cinema || document.getElementById('lf-cinema-video');
+    var pageBroll = document.querySelector('.film-broll');
 
-    fetch(vidPath, { method: 'HEAD', cache: 'no-cache' }).then(function(res) {
-      if (res.ok) {
-        if (brollVid) {
-          brollVid.src = vidPath;
-          brollVid.muted = false;
-          brollVid.loop = false;
-          brollVid.onended = afterSpeak;
-          brollVid.play().catch(function() { fallbackSpeak(); });
-        } else {
-          fallbackSpeak();
-        }
-      } else {
-        fallbackSpeak();
-      }
-    }).catch(function() {
-      fallbackSpeak();
-    });
+    function setBroll(path, opts) {
+      opts = opts || {};
+      var vids = [stageVid, pageBroll].filter(Boolean);
+      vids.forEach(function (v) {
+        try {
+          v.muted = opts.muted !== false; /* default muted for autoplay policy */
+          v.loop = !!opts.loop;
+          v.onended = opts.onended || null;
+          if (v.getAttribute('src') !== path && v.src.indexOf(path) < 0) {
+            v.src = path;
+            try { v.load(); } catch (e1) {}
+          }
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});
+        } catch (e) {}
+      });
+    }
 
-    function fallbackSpeak() {
-      if (brollVid) {
-        brollVid.src = 'media/film/reel.mp4';
-        brollVid.muted = true;
-        brollVid.loop = true;
-        brollVid.onended = null;
-        brollVid.play().catch(function(){});
-      }
+    resolveBroll(s).then(function (path) {
+      var isBeatClip = path.indexOf('/video/film_') >= 0 || path.indexOf('film_' + (s.id || '')) >= 0;
+      /* Atmosphere b-roll loops under VO; dedicated beat clips can drive timing if short */
+      setBroll(path, {
+        muted: true,
+        loop: true,
+        onended: null
+      });
       var text = (s && s.narration) || '';
       var speakMs = ((s && s.speak_s) || 40) * 1000;
       speak(text, afterSpeak);
-      /* hard ceiling if TTS silent */
       state.timer = setTimeout(afterSpeak, speakMs + 2500);
-    }
+      if (isBeatClip && stageVid) {
+        /* optional: keep stage video visible for beat identity */
+        try { stageVid.setAttribute('data-beat', s.id || ''); } catch (e2) {}
+      }
+    }).catch(function () {
+      setBroll('media/film/reel.mp4', { muted: true, loop: true });
+      var text = (s && s.narration) || '';
+      var speakMs = ((s && s.speak_s) || 40) * 1000;
+      speak(text, afterSpeak);
+      state.timer = setTimeout(afterSpeak, speakMs + 2500);
+    });
   }
 
   function go(i, user) {
@@ -510,29 +609,54 @@
     buildShell();
     loadAll().then(function () {
       var tot = state.manifest.totals || {};
-      $('#lf-runtime').textContent = tot.duration_label || fmt(totalDuration());
+      var beats = tot.segments || state.flat.length;
+      var actsN = (state.manifest.acts && state.manifest.acts.length) || state.acts.length;
+      var dur = tot.duration_label || fmt(totalDuration());
+      $('#lf-runtime').textContent = dur;
       $('#lf-status').textContent =
-        (tot.segments || state.flat.length) + ' beats · ' +
-        (tot.acts || state.acts.length) + ' acts · ' +
-        (tot.duration_label || '') + ' complete playthrough';
+        beats + ' beats · ' + actsN + ' acts · ' + dur + ' complete playthrough';
+      var stats = document.getElementById('lf-stats');
+      if (stats) stats.textContent = actsN + ' acts · ' + beats + ' beats · ' + dur;
+      var hours = document.getElementById('lf-hours');
+      if (hours) hours.textContent = dur;
       renderActs();
       var prog = loadProgress();
       if (prog && typeof prog.index === 'number') state.index = prog.index;
       if (prog && prog.mode) state.mode = prog.mode;
       $('#lf-mode').textContent = state.mode.toUpperCase();
       renderSegment();
-      /* auto-start if ?auto=1 */
+      document.body.classList.add('is-playing', 'lf-ready');
+      var mount = document.getElementById('liril-film-app');
+      if (mount) {
+        mount.hidden = false;
+        mount.classList.remove('hidden-until-start');
+      }
+      var fb = document.getElementById('lf-fallback');
+      if (fb) fb.hidden = true;
+      /* auto-start watch unless user prefers navigate */
       try {
         var q = new URLSearchParams(window.location.search || '');
-        if (q.get('auto') === '1') {
+        var auto = q.get('auto') === '1' || q.get('play') === '1' || q.get('auto') !== '0';
+        if (auto && state.mode === 'watch') {
           state.playing = true;
           $('#lf-play').textContent = 'PAUSE';
           playCurrent();
         }
-      } catch (e) {}
+      } catch (e) {
+        state.playing = true;
+        $('#lf-play').textContent = 'PAUSE';
+        playCurrent();
+      }
+      if (typeof window.__LIRIL_FILM_ON_READY === 'function') {
+        try { window.__LIRIL_FILM_ON_READY(state); } catch (e2) {}
+      }
     }).catch(function (err) {
       $('#lf-title').textContent = 'Film catalog failed to load';
-      $('#lf-narration').textContent = String(err);
+      $('#lf-narration').textContent = String(err && err.message ? err.message : err);
+      var fb = document.getElementById('lf-fallback');
+      if (fb) fb.hidden = false;
+      var stats = document.getElementById('lf-stats');
+      if (stats) stats.textContent = 'Film temporarily unavailable';
     });
   }
 
