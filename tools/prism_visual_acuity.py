@@ -167,7 +167,7 @@ def capture(base: str, stamp: str, out_dir: Path) -> list[dict]:
                         "jpg_rel": f"data/visual_acuity/{jpg_name}",
                     }
                     try:
-                        page.goto(url, wait_until="networkidle", timeout=45000)
+                        page.goto(url, wait_until="load", timeout=45000)
                         # Reveal .rv chapters (JS starts them opacity:0) so acuity is real, not pure black
                         page.evaluate(
                             """() => {

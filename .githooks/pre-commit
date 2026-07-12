@@ -55,4 +55,11 @@ if [ -f "$ROOT/css/press-theme.css" ]; then
     exit 1
   fi
 fi
+
+# ZERO-INTERNALS LEAK GATE (owner directive): no leaked AI scaffold / eval garbage on the public
+# site. Hard-fails any commit that ADDS the scaffold patterns — catches page-swarm regeneration too.
+if git diff --cached -U0 -- '*.html' 2>/dev/null | grep -qiE '^\+.*(sweep_synthesis|Synthesize these OSINT|second smallest value|Manual review recommend|Collection Method:[[:space:]]*OSINT|[0-9]+% confidence.*threat)'; then
+  echo "[pre-commit] BLOCKED: leaked AI scaffold / eval garbage in staged HTML (zero-internals). Scrub it before commit."
+  exit 1
+fi
 exit 0

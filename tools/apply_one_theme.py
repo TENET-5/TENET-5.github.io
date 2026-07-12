@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "222"
+THEME_VER = "223"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -110,6 +110,10 @@ RE_SOUP_NODES = re.compile(
     r"theme-slider|tnt-pillar-nav|tnt-breadcrumb"
     r")[^>]*>\s*(?:</(?:div|span)>)?",
     re.I,
+)
+RE_MEDIA_BAND = re.compile(
+    r"\s*<section\b[^>]*class=[\"'][^\"']*page-media-band[^\"']*[\"'][^>]*>.*?</section>\s*",
+    re.I | re.S,
 )
 RE_SKIP = re.compile(r"\s*<a\b[^>]*class=\"[^\"]*skip-link[^\"]*\"[^>]*>.*?</a>\s*", re.I | re.S)
 # Retired chrome injectors: nav.js/footer.js build the old unstyled mega-nav at
@@ -300,6 +304,28 @@ def apply_page(path: Path) -> bool:
     foot = _foot(prefix)
 
     text = _strip_bom(text)
+
+    # Leaked design-pass scaffold before <!doctype> (live 2026-07-12: "CUT cinema 3711b…")
+    # Visible text before doctype = absolute garbage — strip hard every theme pass.
+    text = re.sub(
+        r"^(?:(?!\s*<!doctype)[\s\S])*?(?=<!doctype)",
+        "",
+        text,
+        count=1,
+        flags=re.I,
+    )
+    text = re.sub(
+        r"CUT\s+(?:cinema|stills|enter)\s+\d+b\s*",
+        "",
+        text,
+        flags=re.I,
+    )
+    text = re.sub(
+        r"<!--\s*HOME_DESIGN_PASS[^>]*-->\s*",
+        "",
+        text,
+        flags=re.I,
+    )
 
     # Remove all <link ...> then re-inject the one legal block after charset
     text = RE_LINK.sub("", text)
@@ -521,6 +547,7 @@ def apply_page(path: Path) -> bool:
         text = text.replace("var(--slate-ice-edge)", "rgba(154,219,232,.16)")
 
         # Strip product soup shells
+        text = RE_MEDIA_BAND.sub("\n", text)
         text = RE_SOUP_NODES.sub("\n", text)
         text = RE_SKIP.sub("\n", text)
         text = RE_LEGACY_CHROME_JS.sub("", text)

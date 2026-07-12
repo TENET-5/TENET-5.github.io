@@ -31,16 +31,54 @@ CATS = [
 ]
 
 
+_BOILER = re.compile(
+    r"TENET5 is an investigative newsroom|"
+    r"Investigative coverage of|"
+    r"primary sources, statutes, and on-the-record|"
+    r"TENET5 newsroom\s*[·.]|"
+    r"Powered by LIRIL AI\s*$",
+    re.I,
+)
+
+
+def _clean_desc(t: str) -> str:
+    t = re.sub(r"\s+", " ", t).strip()
+    t = re.sub(r"&amp;", "&", t)
+    t = re.sub(r"&#x27;|&#39;", "'", t)
+    if not t or _BOILER.search(t):
+        return ""
+    if len(t) < 28:
+        return ""
+    return t[:140].rstrip(" .") + ("…" if len(t) > 140 else "")
+
+
 def page_desc(s: str) -> str:
-    boiler = "TENET5 is an investigative newsroom"
+    """Prefer real page lede over SEO meta spam (Daniel: investigations hub was garbage)."""
+    # 1) First standfirst / lede / stand paragraph in body
+    for cls in ("stand", "lede", "newsdesk-lede", "pres-lede", "deck"):
+        m = re.search(
+            rf'<p[^>]*class="[^"]*\b{cls}\b[^"]*"[^>]*>(.*?)</p>',
+            s, re.I | re.S,
+        )
+        if m:
+            t = _clean_desc(re.sub(r"<[^>]+>", "", m.group(1)))
+            if t:
+                return t
+    # 2) First substantial body paragraph (skip nav/chrome)
+    body = s
+    bm = re.search(r"<main\b[^>]*>(.*)</main>", s, re.I | re.S)
+    if bm:
+        body = bm.group(1)
+    for pm in re.finditer(r"<p\b[^>]*>(.*?)</p>", body, re.I | re.S):
+        t = _clean_desc(re.sub(r"<[^>]+>", "", pm.group(1)))
+        if t and len(t) >= 40:
+            return t
+    # 3) Meta description only if not SEO boiler
     dm = re.search(r'name="description"\s+content="([^"]*)"', s, re.I)
-    d = dm.group(1).strip() if dm else ""
-    if d and not d.startswith(boiler):
-        return d[:150]
-    for pm in re.finditer(r"<p\b[^>]*>(.*?)</p>", s, re.I | re.S):
-        t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", pm.group(1))).strip()
-        if len(t) >= 60 and not t.startswith(boiler):
-            return t[:150]
+    if dm:
+        t = _clean_desc(dm.group(1))
+        if t:
+            return t
     return ""
 
 
@@ -83,15 +121,18 @@ def esc(s: str) -> str:
 def section(cid: str, kicker: str, items: list[tuple[str, str, str]]) -> str:
     cards = []
     for name, title, desc in items:
+        narr = f"{title}. {desc}" if desc else title
         cards.append(
-            f'<a class="cat-item" href="{esc(name)}" '
-            f'data-narrate="{esc(title)}. {esc(desc)}">'
+            f'<a class="cat-item glass" href="{esc(name)}" '
+            f'data-narrate="{esc(narr)}">'
             f'<span class="t">{esc(title)}</span>'
-            + (f'<span class="d">{esc(desc)}</span>' if desc else "")
+            + (f'<span class="d">{esc(desc)}</span>' if desc else
+               f'<span class="d">Open the file · primary sources on the page.</span>')
             + "</a>")
     return (
         f'<section class="catalog" id="{cid}">\n'
-        f'<span class="kick">{esc(kicker)} · {len(items)} Files</span>\n'
+        f'<span class="kick section-num">{esc(kicker)}</span>'
+        f'<span class="kick-meta"> · {len(items)} files</span>\n'
         f'<div class="cat-group">{"".join(cards)}</div>\n</section>')
 
 

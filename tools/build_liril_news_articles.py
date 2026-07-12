@@ -292,7 +292,7 @@ def wire_context_note(item: dict, date: str, et_now: datetime, idx: int) -> dict
     }
 
 
-def purge_old_desk_posts(keep_slugs: set[str]) -> int:
+def purge_old_desk_posts(keep_filenames: set[str]) -> int:
     """Remove prior AI desk posts not in this run (idempotent refresh)."""
     n = 0
     if not POSTS.is_dir():
@@ -307,10 +307,10 @@ def purge_old_desk_posts(keep_slugs: set[str]) -> int:
         if p.get("generator") != "build_liril_news_articles.py":
             continue
         slug = p.get("slug") or ""
-        if slug in keep_slugs:
-            continue
         # Only delete desk-prefixed AI posts
         if not str(slug).startswith(DESK_PREFIX):
+            continue
+        if f.name in keep_filenames:
             continue
         try:
             f.unlink()
@@ -361,8 +361,12 @@ def build(max_features: int = 5, max_wire: int = 3) -> dict:
             posts.append(note)
             w_count += 1
 
-    keep = {p["slug"] for p in posts}
-    purged = purge_old_desk_posts(keep)
+    keep_filenames = set()
+    for p in posts:
+        d = (p.get("date") or "")[:10] or et_now.strftime("%Y-%m-%d")
+        keep_filenames.add(f"{d}-{p['slug']}.json")
+
+    purged = purge_old_desk_posts(keep_filenames)
     written: list[str] = []
     for p in posts:
         path = write_post(p)
