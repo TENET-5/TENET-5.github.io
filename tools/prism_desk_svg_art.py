@@ -284,12 +284,15 @@ def apply() -> dict[str, Any]:
     if SUNROOM_CAT.is_file():
         cat = json.loads(SUNROOM_CAT.read_text(encoding="utf-8-sig"))
         items = cat.get("items") or []
-        for it in items:
-            # FLAG: Banned SVG generation for sunroom. High quality only.
-            if "image" in it:
-                del it["image"]
-            if "art_kind" in it:
-                del it["art_kind"]
+        for i, it in enumerate(items):
+            # Gentlemen's silhouette placeholders until Flux photoreal stills ship.
+            fn = f"{it.get('id') or f'sun_{i}'}.svg"
+            path = SUNROOM_DIR / fn
+            path.write_text(sunroom_svg(it, i), encoding="utf-8")
+            it["image"] = f"media/sunroom/{fn}"
+            it["art_kind"] = "svg_silhouette"
+            suns += 1
+            written.append(str(path))
         cat["ts_art"] = _utc()
         SUNROOM_CAT.write_text(json.dumps(cat, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -300,7 +303,7 @@ def apply() -> dict[str, Any]:
         "cartoons": cartoons,
         "sunroom": suns,
         "written_n": len(written),
-        "note": "Elite SVG placeholders until Flux/LTX pixels ship. Taste locked.",
+        "note": "Gentlemen sunroom silhouettes + cartoon ink until Flux/LTX. Taste locked.",
     }
     PROOF.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return doc
