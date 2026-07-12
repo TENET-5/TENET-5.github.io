@@ -251,10 +251,11 @@
     if (!text) return false;
     if (window.__LIRIL_MUTED && !opts.force) return false;
     if (!window.LIRIL_VOICE || typeof window.LIRIL_VOICE.speak !== 'function') return false;
-    // Prefer newsroom cadence for page guides
+    // Inherit LIRIL natural cadence (do not force 1.0 — that sounds robotic)
+    var base = (window.LIRIL_VOICE && window.LIRIL_VOICE.params) || {};
     var o = {
-      rate: opts.rate != null ? opts.rate : 1.0,
-      pitch: opts.pitch != null ? opts.pitch : 1.0,
+      rate: opts.rate != null ? opts.rate : (base.rate != null ? base.rate : 0.94),
+      pitch: opts.pitch != null ? opts.pitch : (base.pitch != null ? base.pitch : 1.0),
       keepQueue: !!opts.keepQueue,
       onend: opts.onend,
       onerror: opts.onerror

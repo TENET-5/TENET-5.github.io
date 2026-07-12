@@ -17,12 +17,64 @@
 
   var VOICE_STORAGE_KEY = 'liril-voice-name';
 
-  /* ── VOICE PERSONALITY — newsroom desk: calm, precise, Canadian ──────
-     Matches data/liril_reporter_persona.json voice_posture (not hype, not angry). */
+  /* ── VOICE PERSONALITY — newsroom desk: calm, human, Canadian ──────
+     Slightly under 1.0 rate reads more natural on neural voices (Clara/Sonia).
+     Matches data/liril_reporter_persona.json voice_posture. */
   var VOICE_PARAMS = {
-    rate: 1.02,    /* Slightly deliberate news-reader cadence */
-    pitch: 0.95,   /* Natural female range; not cartoon-high, not growled */
+    rate: 0.94,    /* Natural news-reader — not rushed robot */
+    pitch: 1.0,    /* Neutral pitch; let the neural voice do the work */
     volume: 1.0
+  };
+
+  /* Words browsers spell letter-by-letter unless expanded for speech. */
+  var SPEECH_WORDS = {
+    /* Brand / product */
+    'TENET5': 'Tenet Five',
+    'TENET 5': 'Tenet Five',
+    'LIRIL': 'Liril',
+    'LIRIL AI': 'Liril A.I.',
+    /* Canadian institutions & statutes (common on this site) */
+    'MAID': 'maid',
+    'MAiD': 'maid',
+    'ATIP': 'A-tip',
+    'VAC': 'Vee A C',
+    'RCMP': 'R C M P',
+    'CSIS': 'see-sis',
+    'CAF': 'C A F',
+    'CFNIS': 'C F Niss',
+    'PSDPA': 'P S D P A',
+    'TSX': 'T S X',
+    'TSXV': 'T S X Venture',
+    'NATO': 'NATO',
+    'PMO': 'P M O',
+    'MP': 'M P',
+    'MPs': 'M P\'s',
+    'AG': 'Auditor General',
+    'DIA': 'D I A',
+    'CBSA': 'C B S A',
+    'CRA': 'C R A',
+    'CBC': 'C B C',
+    'WEF': 'W E F',
+    'ICC': 'I C C',
+    'UN': 'U N',
+    'G7': 'G seven',
+    'GIC': 'G I C',
+    'PHAC': 'P hack',
+    'NSICOP': 'N-sick-op',
+    'SEDAR': 'See-dar',
+    'CFL': 'C F L',
+    'NHL': 'N H L',
+    'NBA': 'N B A',
+    'MLB': 'M L B',
+    'MLS': 'M L S',
+    'RSS': 'R S S',
+    'API': 'A P I',
+    'URL': 'U R L',
+    'PDF': 'P D F',
+    'HTML': 'H T M L',
+    'CSS': 'C S S',
+    'JSON': 'Jason',
+    'AI': 'A.I.'
   };
 
   /* ── TARGET VOICES — Canadian neural female, highest quality first ──
@@ -207,47 +259,164 @@
     return cached;
   }
 
+  /* ── NATURALIZE FOR SPEECH ──
+     Browser TTS spells ALL-CAPS acronyms letter-by-letter and stumbles on
+     money, bills, and scaffold chrome. Expand to spoken English first. */
+  function naturalize(text) {
+    if (!text) return '';
+    var s = String(text);
+
+    /* Kill HTML / markdown / scaffold that should never be spoken */
+    s = s.replace(/<[^>]+>/g, ' ');
+    s = s.replace(/&nbsp;/gi, ' ');
+    s = s.replace(/&amp;/gi, ' and ');
+    s = s.replace(/&[a-z]+;/gi, ' ');
+    s = s.replace(/&#x27;|&#39;|&apos;/gi, "'");
+    s = s.replace(/[·•▪▸►▶■□●○]/g, ' ');
+    s = s.replace(/[═─–—―_|\\/]+/g, ' ');
+    s = s.replace(/\s*→\s*/g, ' to ');
+    s = s.replace(/\s*←\s*/g, ' from ');
+    s = s.replace(/\s*…\s*/g, '. ');
+    s = s.replace(/\.{3,}/g, '. ');
+    s = s.replace(/#{1,6}\s*/g, '');
+    s = s.replace(/\*{1,3}/g, '');
+    s = s.replace(/`+/g, '');
+    s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); /* markdown links */
+    s = s.replace(/https?:\/\/\S+/gi, ' ');
+    s = s.replace(/\bwww\.\S+/gi, ' ');
+    s = s.replace(/\S+@\S+\.\S+/g, ' ');
+
+    /* Bill / Act / section numbers before generic digit rules */
+    s = s.replace(/\bBill\s*C[-\s]?(\d+)\b/gi, function(_, n) {
+      return 'Bill C ' + n.split('').join(' ');
+    });
+    s = s.replace(/\bACT\s*([IVX]+)\b/gi, function(_, rom) {
+      var map = { I: 'one', II: 'two', III: 'three', IV: 'four', V: 'five', VI: 'six' };
+      return 'Act ' + (map[rom.toUpperCase()] || rom);
+    });
+    s = s.replace(/\bAct\s*([1-5])\b/gi, 'Act $1');
+    s = s.replace(/\bArticle\s*6\(([a-c])\)/gi, 'Article 6 $1');
+    s = s.replace(/\bs\.?\s*504\b/gi, 'section five oh four');
+    s = s.replace(/\bTrack\s*2\b/gi, 'Track two');
+    s = s.replace(/\bTrack\s*1\b/gi, 'Track one');
+
+    /* Money: $54M, $1.2B, $797.6 million patterns */
+    s = s.replace(/\$(\d+(?:\.\d+)?)\s*[Bb](?:illion)?\b/g, '$1 billion dollars');
+    s = s.replace(/\$(\d+(?:\.\d+)?)\s*[Mm](?:illion)?\b/g, '$1 million dollars');
+    s = s.replace(/\$(\d+(?:\.\d+)?)\s*[Kk]\b/g, '$1 thousand dollars');
+    s = s.replace(/\$(\d{1,3}(?:,\d{3})+(?:\.\d+)?)/g, function(_, n) {
+      return n.replace(/,/g, '') + ' dollars';
+    });
+    s = s.replace(/\$(\d+(?:\.\d+)?)/g, '$1 dollars');
+    s = s.replace(/\bCAD\s*/gi, 'Canadian ');
+    s = s.replace(/\b(\d+(?:\.\d+)?)\s*%/g, '$1 percent');
+
+    /* Years stay natural; big counts lose commas so synth doesn't pause oddly */
+    s = s.replace(/\b(\d{1,3}),(\d{3}),(\d{3})\b/g, '$1$2$3');
+    s = s.replace(/\b(\d{1,3}),(\d{3})\b/g, '$1$2');
+
+    /* Known lexicon (longest keys first so "LIRIL AI" wins over "LIRIL") */
+    var keys = Object.keys(SPEECH_WORDS).sort(function(a, b) { return b.length - a.length; });
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      var esc = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      s = s.replace(new RegExp('\\b' + esc + '\\b', 'g'), SPEECH_WORDS[k]);
+    }
+
+    /* Remaining 2–5 letter ALL-CAPS tokens → spaced letters (not shouted words) */
+    s = s.replace(/\b([A-Z]{2,5})\b/g, function(m) {
+      if (SPEECH_WORDS[m]) return SPEECH_WORDS[m];
+      /* Keep short English words that happen to be caps in titles */
+      if (/^(THE|AND|FOR|OF|TO|IN|ON|OR|A|AN|IS|IT|AS|AT|BY|BE|WE|US|NO|YES|NOT|BUT|IF|SO)$/.test(m)) {
+        return m.toLowerCase();
+      }
+      return m.split('').join(' ');
+    });
+
+    /* Soften title case shouting: "THIS HOUR" already handled; collapse whitespace */
+    s = s.replace(/\s+/g, ' ').trim();
+    /* Prefer period pauses over run-ons for natural breath */
+    s = s.replace(/\s*;\s*/g, '. ');
+    s = s.replace(/\s*—\s*|\s*–\s*/g, ', ');
+    return s;
+  }
+
+  /* Split into speakable breaths (sentences) so neural voices don't flatline. */
+  function splitBreaths(text) {
+    var t = naturalize(text);
+    if (!t) return [];
+    /* No lookbehind — older WebViews choke; split on punctuation then re-attach. */
+    var raw = t.split(/([.!?]+)\s+/);
+    var parts = [];
+    for (var r = 0; r < raw.length; r++) {
+      if (!raw[r] || !raw[r].replace(/[^a-zA-Z0-9]/g, '').length) continue;
+      if (/^[.!?]+$/.test(raw[r])) {
+        if (parts.length) parts[parts.length - 1] += raw[r];
+        continue;
+      }
+      parts.push(raw[r]);
+    }
+    if (!parts.length) return [t];
+    /* Merge tiny fragments so we don't over-chop */
+    var out = [];
+    var buf = '';
+    for (var i = 0; i < parts.length; i++) {
+      buf = buf ? buf + ' ' + parts[i] : parts[i];
+      if (buf.length >= 48 || i === parts.length - 1) {
+        out.push(buf);
+        buf = '';
+      }
+    }
+    return out.length ? out : [t];
+  }
+
   /* ── GUARDED SPEAK — the ONLY sanctioned way to speak ──
      Returns true if the utterance was dispatched with an acceptable
      voice; false means no acceptable voice exists → stay silent. */
   function speak(text, opts) {
     if (!text || !window.speechSynthesis) return false;
     if (window.__LIRIL_MUTED) return false;   // dock voice toggle — single point, site-wide
-    text = text.replace(/TENET5/gi, 'Tenet Five');
     var v = resolve();
     if (!isAcceptable(v)) {
       console.warn('[LIRIL-VOICE] speak() suppressed — no acceptable voice (never default).');
       return false;
     }
-    var u = new SpeechSynthesisUtterance(text);
-    u.voice = v;
-    /* Prefer the voice's own locale; default Canadian English for LIRIL desk */
-    u.lang = v.lang || 'en-CA';
-    u.rate = (opts && opts.rate) || VOICE_PARAMS.rate;
-    u.pitch = (opts && opts.pitch) || VOICE_PARAMS.pitch;
-    u.volume = (opts && opts.volume != null) ? opts.volume : VOICE_PARAMS.volume;
-    if (opts) {
-      if (opts.onend) u.onend = opts.onend;
-      if (opts.onerror) u.onerror = opts.onerror;
-      if (opts.onboundary) u.onboundary = opts.onboundary;
-    }
+
+    var breaths = (opts && opts.raw) ? [String(text)] : splitBreaths(text);
+    if (!breaths.length) return false;
+
     /* Cancel only stale queue if not mid-guide multi-utterance chain with keepQueue */
     if (!(opts && opts.keepQueue) && window.speechSynthesis.speaking) {
       try { window.speechSynthesis.cancel(); } catch (e0) { /* */ }
     }
-    
-    // Fix Chrome garbage collection bug where utterances die mid-sentence
-    window.__liril_utterances = window.__liril_utterances || [];
-    window.__liril_utterances.push(u);
-    // Keep array from growing infinitely
-    if (window.__liril_utterances.length > 20) window.__liril_utterances.shift();
 
     // Fix Chrome stuck-in-paused-state bug
     if (window.speechSynthesis.paused) {
       try { window.speechSynthesis.resume(); } catch (e1) { /* */ }
     }
-    
-    window.speechSynthesis.speak(u);
+
+    window.__liril_utterances = window.__liril_utterances || [];
+    var rate = (opts && opts.rate != null) ? opts.rate : VOICE_PARAMS.rate;
+    var pitch = (opts && opts.pitch != null) ? opts.pitch : VOICE_PARAMS.pitch;
+    var volume = (opts && opts.volume != null) ? opts.volume : VOICE_PARAMS.volume;
+    var last = breaths.length - 1;
+
+    for (var i = 0; i < breaths.length; i++) {
+      var u = new SpeechSynthesisUtterance(breaths[i]);
+      u.voice = v;
+      u.lang = v.lang || 'en-CA';
+      u.rate = rate;
+      u.pitch = pitch;
+      u.volume = volume;
+      if (i === last && opts) {
+        if (opts.onend) u.onend = opts.onend;
+        if (opts.onerror) u.onerror = opts.onerror;
+        if (opts.onboundary) u.onboundary = opts.onboundary;
+      }
+      window.__liril_utterances.push(u);
+      if (window.__liril_utterances.length > 40) window.__liril_utterances.shift();
+      window.speechSynthesis.speak(u);
+    }
     return true;
   }
 
@@ -310,6 +479,8 @@
   window.LIRIL_VOICE = {
     get: resolve,
     speak: speak,
+    naturalize: naturalize,
+    splitBreaths: splitBreaths,
     guardUtterance: guardUtterance,
     isAcceptable: isAcceptable,
     params: VOICE_PARAMS,

@@ -534,7 +534,7 @@ def apply_page(path: Path) -> bool:
         # Pin cache-bust versions (page-matched VO stack)
         text = re.sub(
             r'js/liril-voice\.js\?v=\d+',
-            'js/liril-voice.js?v=44',
+            'js/liril-voice.js?v=45',
             text,
             flags=re.I,
         )
@@ -559,7 +559,7 @@ def apply_page(path: Path) -> bool:
         if path.name not in WIDGET_KEEP:
             canon = []
             if "js/liril-voice.js" not in text:
-                canon.append(f'<script src="{prefix}js/liril-voice.js?v=44"></script>')
+                canon.append(f'<script src="{prefix}js/liril-voice.js?v=45"></script>')
             if "liril-page-voice.js" not in text:
                 # Must load before dock so Guide me uses page-matched VO
                 canon.append(f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>')
