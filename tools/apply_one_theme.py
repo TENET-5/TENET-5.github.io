@@ -556,31 +556,44 @@ def apply_page(path: Path) -> bool:
             text,
             flags=re.I,
         )
-        canon = []
-        if "js/liril-voice.js" not in text:
-            canon.append(f'<script src="{prefix}js/liril-voice.js?v=44"></script>')
-        if "liril-page-voice.js" not in text:
-            # Must load before dock so Guide me uses page-matched VO
-            canon.append(f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>')
-        if "liril-walkthrough.js" not in text:
-            canon.append(f'<script src="{prefix}js/liril-walkthrough.js?v=4"></script>')
-        if "liril-dock.js" not in text:
-            canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=2"></script>')
-        if "liril-radio.js" not in text:
-            canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
-        # always pin reveal to MutationObserver build (late glass inject)
-        text = re.sub(
-            r'js/rv-reveal\.js\?v=\d+',
-            'js/rv-reveal.js?v=2',
-            text,
-        )
-        if "rv-reveal.js" not in text:
-            canon.append(f'<script defer src="{prefix}js/rv-reveal.js?v=2"></script>')
-        if "reading-mode.js" not in text:
-            canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
-        if canon:
-            # Insert page-voice immediately before dock when dock already present
-            if "liril-page-voice.js" in "\n".join(canon) and "liril-dock.js" in text:
+        if path.name not in WIDGET_KEEP:
+            canon = []
+            if "js/liril-voice.js" not in text:
+                canon.append(f'<script src="{prefix}js/liril-voice.js?v=44"></script>')
+            if "liril-page-voice.js" not in text:
+                # Must load before dock so Guide me uses page-matched VO
+                canon.append(f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>')
+            if "liril-walkthrough.js" not in text:
+                canon.append(f'<script src="{prefix}js/liril-walkthrough.js?v=4"></script>')
+            if "liril-dock.js" not in text:
+                canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=2"></script>')
+            if "liril-radio.js" not in text:
+                canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
+            # always pin reveal to MutationObserver build (late glass inject)
+            text = re.sub(
+                r'js/rv-reveal\.js\?v=\d+',
+                'js/rv-reveal.js?v=2',
+                text,
+            )
+            if "rv-reveal.js" not in text:
+                canon.append(f'<script defer src="{prefix}js/rv-reveal.js?v=2"></script>')
+            if "reading-mode.js" not in text:
+                canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
+            if canon:
+                # Insert page-voice immediately before dock when dock already present
+                if "liril-page-voice.js" in "\n".join(canon) and "liril-dock.js" in text:
+                    text = re.sub(
+                        r'(<script[^>]*liril-dock\.js[^>]*>\s*</script>)',
+                        f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>\n\\1',
+                        text,
+                        count=1,
+                        flags=re.I,
+                    )
+                    canon = [c for c in canon if "liril-page-voice" not in c]
+                if canon:
+                    text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
+            # Guarantee page-voice before dock even when both were already listed
+            if "liril-page-voice.js" not in text and "liril-dock.js" in text:
                 text = re.sub(
                     r'(<script[^>]*liril-dock\.js[^>]*>\s*</script>)',
                     f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>\n\\1',
@@ -588,31 +601,19 @@ def apply_page(path: Path) -> bool:
                     count=1,
                     flags=re.I,
                 )
-                canon = [c for c in canon if "liril-page-voice" not in c]
-            if canon:
-                text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
-        # Guarantee page-voice before dock even when both were already listed
-        if "liril-page-voice.js" not in text and "liril-dock.js" in text:
-            text = re.sub(
-                r'(<script[^>]*liril-dock\.js[^>]*>\s*</script>)',
-                f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>\n\\1',
-                text,
-                count=1,
-                flags=re.I,
-            )
-        elif "liril-page-voice.js" not in text and "js/liril-voice.js" in text:
-            text = re.sub(
-                r'(<script[^>]*liril-voice\.js[^>]*>\s*</script>)',
-                f'\\1\n<script src="{prefix}js/liril-page-voice.js?v=1"></script>',
-                text,
-                count=1,
-                flags=re.I,
-            )
-
-        # The persistent LIRIL guide bar (home parity). position:fixed, so DOM
-        # order is irrelevant — inject once before </body>.
-        if 'id="dock"' not in text:
-            text = re.sub(r"</body>", _dock() + "</body>", text, count=1, flags=re.I)
+            elif "liril-page-voice.js" not in text and "js/liril-voice.js" in text:
+                text = re.sub(
+                    r'(<script[^>]*liril-voice\.js[^>]*>\s*</script>)',
+                    f'\\1\n<script src="{prefix}js/liril-page-voice.js?v=1"></script>',
+                    text,
+                    count=1,
+                    flags=re.I,
+                )
+    
+            # The persistent LIRIL guide bar (home parity). position:fixed, so DOM
+            # order is irrelevant — inject once before </body>.
+            if 'id="dock"' not in text:
+                text = re.sub(r"</body>", _dock() + "</body>", text, count=1, flags=re.I)
 
         # data-heal styles yield to the theme: relocate them BEFORE the theme
         # <link> so press-theme.css wins every tie — page CSS only fills
