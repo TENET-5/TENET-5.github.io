@@ -7,7 +7,7 @@ Atmosphere is not proof; market and sports predictions are **labeled models**, n
 
 | Desk | Public page | Job |
 |------|-------------|-----|
-| **Sunroom** | `sunroom.html` | Fully clothed fashion stills — sundresses, swim, summer street. **No faces.** Subjects cover faces. No tattoos, no identifying marks. People should ask: are these real? |
+| **Sunroom** | `sunroom.html` | Summer fashion desk — sundresses, linen, lake light. Privacy-forward (no portraits), fully clothed, magazine-clean. Never creepy, never softcore. |
 | **Sports Desk** | `sports-desk.html` | Future games, win probability, **point spreads** — Canadian + major leagues. STATED lines vs MODEL edge. |
 | **Markets Desk** | `markets.html` | Full **TSX / TSXV / Canadian markets** analysis: indices, sectors, movers, thesis cards. |
 | **Press Ink** | `cartoon-desk.html` | Political cartoons + short animated caricature beats. People must **actually laugh**. Absolute taste. |
@@ -16,11 +16,11 @@ Atmosphere is not proof; market and sports predictions are **labeled models**, n
 
 ### Sunroom
 - **Adults only (18+).** Never minors, never school settings.
-- **Fully clothed** at all times — sundress, linen, bikini/one-piece beachwear as mainstream newspaper fashion (Toronto Star Sunshine tradition, elevated).
-- **No faces** — hands, hat, book, hair, shadow, turned away, or soft out-of-focus face plane. Never readable facial identity.
-- **No tattoos, scars, moles maps, jewellery monograms, nameplates, readable logos.**
-- Ice-lake grade: cold light, restrained, magazine not softcore. No neon, no cyber, no porn framing.
-- Caption always: *AI-composed atmosphere · faces covered · Powered by LIRIL AI · not a real person you can identify.*
+- **Fully clothed** — sundress, linen, resort, swim-as-clothing. Mainstream fashion, elevated.
+- **Privacy by design, not thriller tone** — no portrait faces (hat, turn, soft focus). Frame fabric and light, not identity games.
+- **No tattoos, logos, neon, cyber, softcore.**
+- Caption: *Sunroom · summer editorial · Powered by LIRIL AI*
+- Copy must sound like a magazine fashion desk — never “are these real?”, “identity obscured”, or surveillance language.
 
 ### Sports / Markets
 - Never claim guaranteed wins. Every pick: **STATED** (public line) vs **MODEL** (LIRIL) vs **INFERENCE**.

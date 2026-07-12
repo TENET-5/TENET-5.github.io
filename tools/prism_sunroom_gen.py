@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Sunroom — elite face-covered fashion stills (fully clothed, ice-lake).
+"""Sunroom — summer fashion editorial stills (privacy-forward, fully clothed).
 
-No faces, no tattoos, no identifying marks. Sundress / beach / summer street.
-Outputs prompt packs + catalog for the public desk. Wire Flux/Comfy later.
+Magazine style: fabric, light, place. No portrait faces, no tattoos, no logos.
+Sundress / linen / resort. Outputs: elite, clean, never creepy or softcore.
 
   python tools/prism_sunroom_gen.py --json --apply --n 8
 """
@@ -101,7 +101,7 @@ def compose_prompt(seed: int, i: int) -> dict[str, Any]:
         "pose": pose,
         "prompt": re.sub(r"\s+", " ", prompt).strip(),
         "negative": neg,
-        "caption": "Sunroom · faces covered · fully clothed · AI-composed · Powered by LIRIL AI",
+        "caption": "Sunroom · summer editorial · Powered by LIRIL AI",
         "status": "prompt_ready",
     }
 

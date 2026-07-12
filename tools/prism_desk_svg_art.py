@@ -215,7 +215,7 @@ def sunroom_svg(item: dict[str, Any], i: int) -> str:
     # silhouette colors ice lake
     dress = ["#9adbe8", "#a89f90", "#e8e2d6", "#3f7c8c", "#c4b8a8"][i % 5]
     return f'''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="Sunroom fashion still — face covered">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="Sunroom summer fashion editorial">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#1a2830"/>
@@ -240,10 +240,10 @@ def sunroom_svg(item: dict[str, Any], i: int) -> str:
   <!-- legs suggestion -->
   <line x1="270" y1="520" x2="265" y2="620" stroke="#2a2420" stroke-width="8"/>
   <line x1="330" y1="520" x2="335" y2="620" stroke="#2a2420" stroke-width="8"/>
-  <text x="300" y="700" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="3" fill="#9adbe8">FACE COVERED · FULLY CLOTHED</text>
+  <text x="300" y="700" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="3" fill="#9adbe8">SUMMER EDITORIAL</text>
   <text x="300" y="730" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-style="italic" fill="#a89f90">{_esc(wardrobe)}</text>
   <text x="300" y="760" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#827a6d">{_esc(setting)}</text>
-  <text x="300" y="785" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="2" fill="#3f7c8c">SUNROOM · LIRIL AI · NOT IDENTIFIABLE</text>
+  <text x="300" y="785" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="2" fill="#3f7c8c">SUNROOM · TENET5 · POWERED BY LIRIL AI</text>
 </svg>
 '''
 
