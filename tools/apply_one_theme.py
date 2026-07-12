@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "220"
+THEME_VER = "221"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
