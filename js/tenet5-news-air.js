@@ -1,9 +1,10 @@
 /* TENET5 news air — play live desk segments (not canned atmosphere loops).
  * Lead player + per-segment Play buttons. Presentation can call TENET5_NEWS_AIR.playId.
+ * Prefer unmuted neural-mux packages (edge-tts Clara in the file).
  */
 (function () {
   'use strict';
-  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 1) return;
+  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 2) return;
 
   function $(id) { return document.getElementById(id); }
 
@@ -27,11 +28,24 @@
     s.src = src;
     s.type = 'video/mp4';
     if (!s.parentNode) v.appendChild(s);
+    /* Wire captions when segment has vtt */
+    var oldTracks = v.querySelectorAll('track');
+    for (var ti = 0; ti < oldTracks.length; ti++) oldTracks[ti].remove();
+    if (meta && meta.vtt) {
+      var tr = document.createElement('track');
+      tr.kind = 'captions';
+      tr.srclang = 'en-CA';
+      tr.label = 'LIRIL';
+      tr.src = meta.vtt;
+      tr.default = true;
+      v.appendChild(tr);
+    }
     v.load();
     v.muted = false;
     try {
       var p = v.play();
       if (p && p.catch) p.catch(function () {
+        /* Autoplay policy: try muted, user can unmute — still shows package */
         v.muted = true;
         v.play().catch(function () {});
       });
@@ -48,13 +62,15 @@
     var card = document.querySelector('[data-news-seg="' + id + '"]');
     if (!card) return;
     var src = card.getAttribute('data-video') || '';
+    var vtt = card.getAttribute('data-vtt') || '';
     var titleEl = card.querySelector('h3');
     var ledeEl = card.querySelector('p');
     var tagEl = card.querySelector('.news-seg-tag');
     playSrc(src, {
       tag: tagEl ? tagEl.textContent : 'NOW',
       title: titleEl ? titleEl.textContent : '',
-      lede: ledeEl ? ledeEl.textContent : ''
+      lede: ledeEl ? ledeEl.textContent : '',
+      vtt: vtt
     });
     document.querySelectorAll('.news-seg.is-on').forEach(function (el) {
       el.classList.remove('is-on');
@@ -117,7 +133,7 @@
   }
 
   window.TENET5_NEWS_AIR = {
-    __v: 1,
+    __v: 2,
     playId: playId,
     playAll: playAll,
     playSrc: playSrc

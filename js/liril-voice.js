@@ -370,23 +370,71 @@
     return out.length ? out : [t];
   }
 
+  /* ── PREBAKED NEURAL AUDIO (desk package) ──
+     Product path: edge-tts Clara MP3s under audio/desk/*. Live browser TTS
+     is backup only when no prebake exists. */
+  var activeAudio = null;
+
+  function stopAudio() {
+    if (activeAudio) {
+      try { activeAudio.pause(); activeAudio.removeAttribute('src'); activeAudio.load(); } catch (e) {}
+      activeAudio = null;
+    }
+  }
+
+  function playAudioSrc(src, opts) {
+    if (!src || window.__LIRIL_MUTED) return false;
+    stopAudio();
+    if (!(opts && opts.keepQueue) && window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (e0) { /* */ }
+    }
+    var a = new Audio(src);
+    a.preload = 'auto';
+    a.volume = (opts && opts.volume != null) ? opts.volume : 1.0;
+    activeAudio = a;
+    a.onended = function () {
+      if (activeAudio === a) activeAudio = null;
+      if (opts && opts.onend) opts.onend();
+    };
+    a.onerror = function (ev) {
+      if (activeAudio === a) activeAudio = null;
+      if (opts && opts.onerror) opts.onerror(ev || { error: 'audio' });
+    };
+    var p = a.play();
+    if (p && p.catch) {
+      p.catch(function (err) {
+        if (activeAudio === a) activeAudio = null;
+        if (opts && opts.onerror) opts.onerror(err || { error: 'play' });
+      });
+    }
+    return true;
+  }
+
   /* ── GUARDED SPEAK — the ONLY sanctioned way to speak ──
-     Returns true if the utterance was dispatched with an acceptable
-     voice; false means no acceptable voice exists → stay silent. */
+     Prefer prebaked neural audio (opts.audio). Browser TTS only as backup
+     with an acceptable Canadian/neural female voice — never male SAPI. */
   function speak(text, opts) {
+    opts = opts || {};
+    if (window.__LIRIL_MUTED) return false;
+
+    /* P0 product path: prebaked neural MP3 (desk package / presentation) */
+    if (opts.audio) {
+      return playAudioSrc(opts.audio, opts);
+    }
+
     if (!text || !window.speechSynthesis) return false;
-    if (window.__LIRIL_MUTED) return false;   // dock voice toggle — single point, site-wide
     var v = resolve();
     if (!isAcceptable(v)) {
       console.warn('[LIRIL-VOICE] speak() suppressed — no acceptable voice (never default).');
       return false;
     }
 
-    var breaths = (opts && opts.raw) ? [String(text)] : splitBreaths(text);
+    var breaths = opts.raw ? [String(text)] : splitBreaths(text);
     if (!breaths.length) return false;
 
+    stopAudio();
     /* Cancel only stale queue if not mid-guide multi-utterance chain with keepQueue */
-    if (!(opts && opts.keepQueue) && window.speechSynthesis.speaking) {
+    if (!opts.keepQueue && window.speechSynthesis.speaking) {
       try { window.speechSynthesis.cancel(); } catch (e0) { /* */ }
     }
 
@@ -396,9 +444,9 @@
     }
 
     window.__liril_utterances = window.__liril_utterances || [];
-    var rate = (opts && opts.rate != null) ? opts.rate : VOICE_PARAMS.rate;
-    var pitch = (opts && opts.pitch != null) ? opts.pitch : VOICE_PARAMS.pitch;
-    var volume = (opts && opts.volume != null) ? opts.volume : VOICE_PARAMS.volume;
+    var rate = (opts.rate != null) ? opts.rate : VOICE_PARAMS.rate;
+    var pitch = (opts.pitch != null) ? opts.pitch : VOICE_PARAMS.pitch;
+    var volume = (opts.volume != null) ? opts.volume : VOICE_PARAMS.volume;
     var last = breaths.length - 1;
 
     for (var i = 0; i < breaths.length; i++) {
@@ -408,7 +456,7 @@
       u.rate = rate;
       u.pitch = pitch;
       u.volume = volume;
-      if (i === last && opts) {
+      if (i === last) {
         if (opts.onend) u.onend = opts.onend;
         if (opts.onerror) u.onerror = opts.onerror;
         if (opts.onboundary) u.onboundary = opts.onboundary;
@@ -479,6 +527,11 @@
   window.LIRIL_VOICE = {
     get: resolve,
     speak: speak,
+    playAudio: playAudioSrc,
+    stop: function () {
+      stopAudio();
+      try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+    },
     naturalize: naturalize,
     splitBreaths: splitBreaths,
     guardUtterance: guardUtterance,

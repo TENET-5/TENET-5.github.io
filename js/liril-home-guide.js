@@ -5,8 +5,8 @@
  */
 (function () {
   'use strict';
-  if (window.__LIRIL_HOME_GUIDE_V >= 11) return;
-  window.__LIRIL_HOME_GUIDE_V = 11;
+  if (window.__LIRIL_HOME_GUIDE_V >= 12) return;
+  window.__LIRIL_HOME_GUIDE_V = 12;
 
   document.documentElement.classList.add('js');
 
@@ -230,39 +230,55 @@
       if (lineEl && text) lineEl.textContent = text;
     }
 
-    function speak(text, force) {
-      if (!text) return;
-      setLine(text);
+    function speak(text, force, audioSrc) {
+      if (!text && !audioSrc) return;
+      if (text) setLine(text);
       if (!(voiceOn || force)) return;
       if (!window.LIRIL_VOICE || typeof window.LIRIL_VOICE.speak !== 'function') {
         setStatus('Text presentation · voice engine not loaded');
         return;
       }
       if (dock) dock.classList.add('speaking');
-      var ok = window.LIRIL_VOICE.speak(text, {
+      var opts = {
+        audio: audioSrc || null,
         onend: function () { if (dock) dock.classList.remove('speaking'); },
         onerror: function (e) {
           if (dock) dock.classList.remove('speaking');
+          /* If prebake fails, fall back to neural browser voice once */
+          if (audioSrc && text && window.LIRIL_VOICE.speak) {
+            window.LIRIL_VOICE.speak(text, {
+              onend: function () { if (dock) dock.classList.remove('speaking'); }
+            });
+            setStatus('Live neural fallback · prebake miss');
+            return;
+          }
           var kind = (e && e.error) || '';
           if (kind === 'interrupted' || kind === 'canceled') return;
           setStatus('Voice error · text continues');
         }
-      });
+      };
+      var ok = window.LIRIL_VOICE.speak(text || ' ', opts);
       if (!ok) {
         if (dock) dock.classList.remove('speaking');
-        setStatus('No suitable voice · reading text only');
+        setStatus(audioSrc ? 'Audio blocked · enable sound' : 'No suitable voice · reading text only');
       } else {
-        setStatus(presenting ? 'LIRIL on air · desk reporter' : 'LIRIL speaking');
+        setStatus(presenting
+          ? (audioSrc ? 'LIRIL on air · neural package' : 'LIRIL on air · desk reporter')
+          : 'LIRIL speaking');
       }
+      /* Safety clear if audio/onend never fires */
       setTimeout(function () {
         if (dock) dock.classList.remove('speaking');
-      }, Math.min(20000, 70 * text.length + 900));
+      }, audioSrc ? 120000 : Math.min(20000, 70 * String(text || '').length + 900));
     }
 
     function stopPresentation() {
       presenting = false;
       document.querySelectorAll('.active-narration').forEach(function(el) { el.classList.remove('active-narration'); });
       if (presTimer) { clearTimeout(presTimer); presTimer = null; }
+      if (window.LIRIL_VOICE && typeof window.LIRIL_VOICE.stop === 'function') {
+        window.LIRIL_VOICE.stop();
+      }
       if (guideBtn) {
         guideBtn.classList.remove('on');
         guideBtn.textContent = 'Guide me';
@@ -334,9 +350,14 @@
           }
         }
       }
-      speak(seg.text, true);
-      setStatus('On air ' + presIndex + ' / ' + segs.length + ' · ' + (seg.role || seg.id || 'beat'));
-      var wait = seg.wait_ms || Math.min(18000, 55 * (seg.text || '').length + 4000);
+      /* Neural prebake MP3 preferred over live browser TTS */
+      speak(seg.text, true, seg.audio || null);
+      setStatus('On air ' + presIndex + ' / ' + segs.length + ' · ' + (seg.role || seg.id || 'beat') +
+        (seg.audio ? ' · neural VO' : ''));
+      /* Wait longer when playing full segment VO + video */
+      var wait = seg.wait_ms || Math.min(22000, 55 * (seg.text || '').length + 4000);
+      if (seg.audio) wait = Math.max(wait, 14000);
+      if (seg.video_id) wait = Math.max(wait, 18000);
       presTimer = setTimeout(stepPresentation, wait);
     }
 
