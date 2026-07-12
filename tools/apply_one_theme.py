@@ -547,7 +547,8 @@ def apply_page(path: Path) -> bool:
         text = text.replace("var(--slate-ice-edge)", "rgba(154,219,232,.16)")
 
         # Strip product soup shells
-        text = RE_MEDIA_BAND.sub("\n", text)
+        if path.name != "daily-briefing.html":
+            text = RE_MEDIA_BAND.sub("\n", text)
         text = RE_SOUP_NODES.sub("\n", text)
         text = RE_SKIP.sub("\n", text)
         text = RE_LEGACY_CHROME_JS.sub("", text)
