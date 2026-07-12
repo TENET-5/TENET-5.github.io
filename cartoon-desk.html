@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en-CA" data-press="1" data-press-interior="1">
+<head>
+<meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/press-theme.css?v=221">
+  <link rel="stylesheet" href="css/design-lock.css?v=221">
+  <script>document.documentElement.classList.add('js');</script>
+  <!-- ONE THEME: edit css/press-theme.css to restyle · css/design-lock.css is the LOCKED taste guardrail (loads last, do not edit) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Press Ink · political cartoons | TENET5</title>
+<meta name="description" content="Press Ink — elite political cartoons and animated caricature shorts. Policy punchlines. Taste locked. Powered by LIRIL AI.">
+  <meta name="theme-color" content="#050708">
+</head>
+<body class="press-interior">
+  <header class="press-bar" role="banner">
+    <a class="wm" href="index.html">TENET<sup>5</sup></a>
+    <nav aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="press-wire.html">Wire</a>
+      <a href="newsletter.html">Newsletter</a>
+      <a href="investigations.html">Investigations</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Guided</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+<main class="press-main ink-wrap">
+    <header class="press-hero" style="padding-top:2.5rem">
+      <span class="kick">Press Ink · elite editorial</span>
+      <h1>Make them<br><em>laugh.</em></h1>
+      <p class="dek">Political cartoons built like the best broadsheet ink on the planet — one target, one punchline,
+      public-record irony. Optional six-second animated caricature beats. No hate art. No gore.
+      Satire of <b>offices and policy</b>, not private life. Powered by LIRIL AI.</p>
+    </header>
+    <section class="glass" style="padding:1.1rem 1.25rem;margin:1.2rem 0">
+      <h2 style="font-size:1rem;margin:0 0 .4rem">Forge rules</h2>
+      <p style="font-size:.9rem;line-height:1.55;margin:0;opacity:.9">
+        Humor rubric ≥65 to ship · contrast joke · tight caption · rooted in the public record ·
+        ice-lake line · people should actually laugh. Generator: <code>tools/prism_cartoon_forge.py</code>
+      </p>
+    </section>
+    <h2 class="section-num">01 · Today’s ink</h2>
+    <div class="ink-grid" id="ink-grid"></div>
+  </main>
+  <footer class="press-foot" role="contentinfo">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+<script>
+  fetch('data/cartoon_desk.json',{cache:'no-cache'}).then(function(r){return r.json()}).then(function(doc){
+    var g=document.getElementById('ink-grid');
+    (doc.items||[]).filter(function(it){return it.status==='ready'}).forEach(function(it){
+      var c=document.createElement('article');
+      c.className='glass ink-card';
+      var sc=(it.humor&&it.humor.score!=null)?it.humor.score:'—';
+      c.innerHTML='<div class="ink-ph">Press ink · prompt ready<br>animate 6s available</div>'+
+        '<span class="kick">'+it.target+'</span>'+
+        '<h3>'+it.laugh_engine+'</h3>'+
+        '<p class="ink-setup">'+it.setup+'</p>'+
+        '<p class="ink-punch">'+it.punchline+'</p>'+
+        '<span class="ink-score">HUMOR '+sc+'/100 · '+it.claim_level+' · '+it.style.slice(0,42)+'</span>'+
+        '<p class="ink-score" style="opacity:.7">'+it.disclaimer+'</p>';
+      g.appendChild(c);
+    });
+  }).catch(function(){});
+  </script>
+<script src="js/liril-voice.js?v=44"></script>
+<script src="js/liril-page-voice.js?v=1"></script>
+<script src="js/liril-walkthrough.js?v=4"></script>
+<script defer src="js/liril-dock.js?v=2"></script>
+<script defer src="js/liril-radio.js?v=2"></script>
+<script defer src="js/rv-reveal.js?v=2"></script>
+<script defer src="js/reading-mode.js?v=2"></script>
+  <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
+    <div class="dock-in">
+      <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="say"><b>LIRIL</b><span id="liril-line">I can guide this page — voice matches what is on the record here.</span></div>
+      <button id="liril-guide-btn" type="button" title="LIRIL reads this page aloud, matched to the record">Guide me</button>
+      <button id="voice-btn" type="button" aria-pressed="true" title="Toggle LIRIL voice narration">Voice · On</button>
+      <div class="liril-status" id="liril-status">LIRIL ready</div>
+    </div>
+  </div>
+</body>
+</html>

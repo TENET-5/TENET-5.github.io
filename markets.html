@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-CA" data-press="1" data-press-interior="1">
+<head>
+<meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/press-theme.css?v=221">
+  <link rel="stylesheet" href="css/design-lock.css?v=221">
+  <script>document.documentElement.classList.add('js');</script>
+  <!-- ONE THEME: edit css/press-theme.css to restyle · css/design-lock.css is the LOCKED taste guardrail (loads last, do not edit) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markets Desk · TSX &amp; Canada | TENET5</title>
+<meta name="description" content="Markets Desk — S&amp;P/TSX, TSX names, sectors, thesis cards. STATED quotes vs MODEL read. Not investment advice. Powered by LIRIL AI.">
+  <meta name="theme-color" content="#050708">
+</head>
+<body class="press-interior">
+  <header class="press-bar" role="banner">
+    <a class="wm" href="index.html">TENET<sup>5</sup></a>
+    <nav aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="press-wire.html">Wire</a>
+      <a href="newsletter.html">Newsletter</a>
+      <a href="investigations.html">Investigations</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="liril-film.html">Guided</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+<main class="press-main mk-wrap">
+    <header class="press-hero" style="padding-top:2.5rem">
+      <span class="kick">Markets Desk · TSX spine</span>
+      <h1>Canadian tape.<br>Full <em>read.</em></h1>
+      <p class="dek">S&amp;P/TSX Composite, liquid ETFs, Big Six banks, energy, rails, tech.
+      STATED prices when the public tape answers; MODEL notes are desk reads.
+      <b>Not investment advice.</b> Powered by LIRIL AI.</p>
+      <p class="meta" id="mk-meta">Loading universe…</p>
+    </header>
+    <p class="dek" id="mk-disc" style="font-size:.9rem"></p>
+    <h2 class="section-num">01 · Universe</h2>
+    <div class="glass" style="padding:1rem;overflow:auto">
+      <table class="mk-table" id="mk-table">
+        <thead><tr><th>Symbol</th><th>Name</th><th>Sector</th><th>Price</th><th>Δ%</th><th>MODEL note</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <h2 class="section-num" style="margin-top:2rem">02 · Thesis cards</h2>
+    <div class="mk-grid" id="mk-thesis"></div>
+  </main>
+  <footer class="press-foot" role="contentinfo">
+    <span>TENET5 · Powered by LIRIL AI</span>
+    <a href="methodology-transparency.html">Methodology</a>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </footer>
+<script>
+  fetch('data/markets_desk.json',{cache:'no-cache'}).then(function(r){return r.json()}).then(function(doc){
+    document.getElementById('mk-disc').textContent=doc.disclaimer||'';
+    document.getElementById('mk-meta').textContent=
+      (doc.live_quotes||0)+' live quotes · '+(doc.universe_n||0)+' names · '+(doc.ts||'');
+    var tb=document.querySelector('#mk-table tbody');
+    (doc.rows||[]).forEach(function(r){
+      var ch=r.change_pct, cls=ch>0?'mk-up':(ch<0?'mk-dn':'');
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><b>'+r.symbol+'</b></td><td>'+r.name+'</td><td>'+r.sector+'</td>'+
+        '<td>'+(r.price!=null?r.price:'—')+'</td>'+
+        '<td class="'+cls+'">'+(ch!=null?ch+'%':'—')+'</td>'+
+        '<td style="font-size:.8rem;opacity:.85">'+(r.model_note||'')+'</td>';
+      tb.appendChild(tr);
+    });
+    var th=document.getElementById('mk-thesis');
+    (doc.thesis||[]).forEach(function(t){
+      var c=document.createElement('article');
+      c.className='glass mk-card';
+      c.innerHTML='<span class="kick">'+t.claim_level+'</span><h3>'+t.title+'</h3><p style="font-size:.9rem;line-height:1.5;opacity:.9">'+t.body+'</p>';
+      th.appendChild(c);
+    });
+  }).catch(function(){});
+  </script>
+<script src="js/liril-voice.js?v=44"></script>
+<script src="js/liril-page-voice.js?v=1"></script>
+<script src="js/liril-walkthrough.js?v=4"></script>
+<script defer src="js/liril-dock.js?v=2"></script>
+<script defer src="js/liril-radio.js?v=2"></script>
+<script defer src="js/rv-reveal.js?v=2"></script>
+<script defer src="js/reading-mode.js?v=2"></script>
+  <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
+    <div class="dock-in">
+      <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="say"><b>LIRIL</b><span id="liril-line">I can guide this page — voice matches what is on the record here.</span></div>
+      <button id="liril-guide-btn" type="button" title="LIRIL reads this page aloud, matched to the record">Guide me</button>
+      <button id="voice-btn" type="button" aria-pressed="true" title="Toggle LIRIL voice narration">Voice · On</button>
+      <div class="liril-status" id="liril-status">LIRIL ready</div>
+    </div>
+  </div>
+</body>
+</html>
