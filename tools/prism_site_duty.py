@@ -187,7 +187,125 @@ def _heal_liril_guide_removed() -> tuple[bool, str]:
     return check["ok"], "; ".join(notes) + f"; present={check.get('present')}"
 
 
+def lap_fast() -> dict:
+    """Pre-commit / --fast path only — no page swarm, desk video, publish, or acuity.
+
+    Gates: theme tokens + apply_one_theme + LIRIL guide removed + temple lock +
+    CSS quantum math (--no-cpp) + news slate main-ticker gate.
+    """
+    ts = datetime.now(timezone.utc).isoformat()
+    steps: list[dict] = []
+
+    if not THEME_PATH.exists() or THEME_PATH.stat().st_size < 1000:
+        steps.append({"name": "theme_file", "ok": False, "detail": f"missing {THEME_REL}"})
+        return _finish(ts, steps, "FAIL_NO_THEME")
+    theme_txt = THEME_PATH.read_text(encoding="utf-8", errors="replace")
+    token_ok = (
+        ":root" in theme_txt
+        and "--void:" in theme_txt
+        and "#050708" in theme_txt
+        and "--ice:" in theme_txt
+        and "#9adbe8" in theme_txt
+        and "--serif:" in theme_txt
+    )
+    steps.append({
+        "name": "theme_file",
+        "ok": token_ok,
+        "bytes": THEME_PATH.stat().st_size,
+        "path": THEME_REL,
+    })
+    if not token_ok:
+        return _finish(ts, steps, "FAIL_THEME_TOKENS")
+
+    apply = TOOLS / "apply_one_theme.py"
+    if apply.exists():
+        code, out = _run([sys.executable, str(apply), "--jobs", "12"], timeout=900)
+        steps.append({
+            "name": "apply_one_theme",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-400:],
+            "job": "fast pre-commit — snap THEME_VER chrome",
+        })
+    else:
+        steps.append({"name": "apply_one_theme", "ok": False, "detail": "missing apply_one_theme.py"})
+
+    # LIRIL guide must stay gone
+    home_path = ROOT / "index.html"
+    home = home_path.read_text(encoding="utf-8", errors="replace") if home_path.is_file() else ""
+    check = _check_liril_guide_removed(home)
+    if not check.get("ok"):
+        # heal once then recheck
+        strip = TOOLS / "strip_liril_guide_residue.py"
+        if strip.exists():
+            _run([sys.executable, str(strip)], timeout=120)
+        if apply.exists():
+            _run([sys.executable, str(apply), "--jobs", "8"], timeout=600)
+        home = home_path.read_text(encoding="utf-8", errors="replace") if home_path.is_file() else ""
+        check = _check_liril_guide_removed(home)
+    _write_liril_proof(check, healed=not check.get("ok"))
+    steps.append({
+        "name": "liril_guide_removed",
+        "ok": bool(check.get("ok")),
+        "present": check.get("present") or {},
+        "job": "public site must NOT carry LIRIL guide dock",
+    })
+
+    temple = TOOLS / "prism_temple_slate_lock.py"
+    if temple.exists():
+        code, out = _run(
+            [sys.executable, str(temple), "--sync-contract", "--json"],
+            timeout=180,
+        )
+        steps.append({
+            "name": "temple_slate_lock",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-400:],
+            "proof": r"C:\PRISM\log\prism_temple_slate_lock_last.json",
+        })
+    else:
+        steps.append({"name": "temple_slate_lock", "ok": True, "detail": "skipped (missing)"})
+
+    qcss = TOOLS / "prism_css_quantum_precision.py"
+    if qcss.exists():
+        code, out = _run([sys.executable, str(qcss), "--no-cpp"], timeout=180)
+        steps.append({
+            "name": "css_quantum_precision",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-400:],
+            "fast_math_only": True,
+        })
+    else:
+        steps.append({"name": "css_quantum_precision", "ok": True, "detail": "skipped (missing)"})
+
+    news_slate = TOOLS / "prism_news_slate.py"
+    if news_slate.exists():
+        code, out = _run([sys.executable, str(news_slate), "rectify", "--json"], timeout=90)
+        steps.append({
+            "name": "news_slate_rectify",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-300:],
+            "job": "main ticker isolation + temple stamp",
+        })
+    else:
+        steps.append({"name": "news_slate_rectify", "ok": True, "detail": "skipped (missing)"})
+
+    steps.append({"name": "visual_acuity_pc_mobile", "ok": True, "detail": "skipped (--fast)"})
+    steps.append({"name": "github_pages_publish", "ok": True, "detail": "skipped (--fast; publish is separate)"})
+    steps.append({"name": "auto_push", "ok": True, "detail": "skipped (--fast)"})
+
+    ok = all(s.get("ok") for s in steps)
+    return _finish(ts, steps, "SITE_DUTY_PASS" if ok else "SITE_DUTY_FAIL")
+
+
 def lap() -> dict:
+    # Pre-commit must not run the full editorial/swarm/publish mountain
+    if "--fast" in sys.argv or os.environ.get("PRISM_SITE_DUTY_FAST", "").strip() in {"1", "true", "yes"}:
+        return lap_fast()
+
     ts = datetime.now(timezone.utc).isoformat()
     steps: list[dict] = []
 
