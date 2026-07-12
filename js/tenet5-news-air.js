@@ -1,10 +1,9 @@
-/* TENET5 news air — play live desk segments (not canned atmosphere loops).
- * Lead player + per-segment Play buttons. Presentation can call TENET5_NEWS_AIR.playId.
- * Prefer unmuted neural-mux packages (edge-tts Clara in the file).
+/* TENET5 live desk air — broadcast hits (LIVE bug + lower-third + rundown).
+ * Not memorial cinema. playId drives stage + HUD.
  */
 (function () {
   'use strict';
-  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 2) return;
+  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 4) return;
 
   function $(id) { return document.getElementById(id); }
 
@@ -12,13 +11,32 @@
     return $('news-air-video');
   }
 
-  function setNow(tag, title, lede) {
+  function setNow(meta) {
     var t = $('news-air-now-tag');
     var h = $('news-air-now-title');
     var p = $('news-air-now-lede');
-    if (t && tag) t.textContent = tag;
-    if (h && title) h.textContent = title;
-    if (p && lede != null) p.textContent = lede;
+    var desk = (meta && meta.desk) || 'DESK';
+    if (t) t.textContent = 'TENET5 · ' + desk;
+    if (h && meta && meta.title) h.textContent = meta.title;
+    if (p && meta && meta.lede != null) p.textContent = meta.lede;
+    var hudSeg = document.querySelector('.bh-seg');
+    if (hudSeg && meta && meta.seg) hudSeg.textContent = meta.seg;
+  }
+
+  function tickClock() {
+    var el = $('news-air-clock');
+    if (!el) return;
+    try {
+      el.textContent = new Date().toLocaleString('en-CA', {
+        timeZone: 'America/Toronto',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }) + ' ET';
+    } catch (e) {
+      el.textContent = new Date().toLocaleTimeString() + ' ET';
+    }
   }
 
   function playSrc(src, meta) {
@@ -28,7 +46,6 @@
     s.src = src;
     s.type = 'video/mp4';
     if (!s.parentNode) v.appendChild(s);
-    /* Wire captions when segment has vtt */
     var oldTracks = v.querySelectorAll('track');
     for (var ti = 0; ti < oldTracks.length; ti++) oldTracks[ti].remove();
     if (meta && meta.vtt) {
@@ -45,37 +62,40 @@
     try {
       var p = v.play();
       if (p && p.catch) p.catch(function () {
-        /* Autoplay policy: try muted, user can unmute — still shows package */
         v.muted = true;
         v.play().catch(function () {});
       });
     } catch (e) { /* */ }
-    if (meta) {
-      setNow(meta.tag || 'NOW', meta.title || '', meta.lede || '');
-    }
+    setNow(meta || {});
     try {
       v.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch (e2) { /* */ }
+  }
+
+  function metaFromCard(card) {
+    if (!card) return {};
+    var tag = card.querySelector('.news-seg-tag');
+    return {
+      desk: card.getAttribute('data-desk') || 'DESK',
+      title: card.getAttribute('data-title') || (card.querySelector('h3') || {}).textContent || '',
+      lede: card.getAttribute('data-lede') || '',
+      vtt: card.getAttribute('data-vtt') || '',
+      seg: tag ? tag.textContent : ''
+    };
   }
 
   function playId(id) {
     var card = document.querySelector('[data-news-seg="' + id + '"]');
     if (!card) return;
     var src = card.getAttribute('data-video') || '';
-    var vtt = card.getAttribute('data-vtt') || '';
-    var titleEl = card.querySelector('h3');
-    var ledeEl = card.querySelector('p');
-    var tagEl = card.querySelector('.news-seg-tag');
-    playSrc(src, {
-      tag: tagEl ? tagEl.textContent : 'NOW',
-      title: titleEl ? titleEl.textContent : '',
-      lede: ledeEl ? ledeEl.textContent : '',
-      vtt: vtt
-    });
+    playSrc(src, metaFromCard(card));
     document.querySelectorAll('.news-seg.is-on').forEach(function (el) {
       el.classList.remove('is-on');
     });
     card.classList.add('is-on');
+    document.querySelectorAll('.broadcast-rundown li').forEach(function (li) {
+      li.classList.toggle('is-on', li.getAttribute('data-run') === id);
+    });
   }
 
   function playAll() {
@@ -98,6 +118,9 @@
   }
 
   function bind() {
+    tickClock();
+    setInterval(tickClock, 1000);
+
     var leadBtn = $('news-air-play-lead');
     if (leadBtn) {
       leadBtn.addEventListener('click', function () {
@@ -112,16 +135,16 @@
     var allBtn = $('news-air-play-all');
     if (allBtn) allBtn.addEventListener('click', playAll);
 
-    document.querySelectorAll('.news-seg-play').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        playId(btn.getAttribute('data-play'));
+    document.querySelectorAll('[data-news-seg]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        playId(card.getAttribute('data-news-seg'));
       });
     });
 
-    document.querySelectorAll('[data-news-seg]').forEach(function (card) {
-      card.addEventListener('click', function (ev) {
-        if (ev.target.closest('a,button')) return;
-        playId(card.getAttribute('data-news-seg'));
+    document.querySelectorAll('.broadcast-rundown li').forEach(function (li) {
+      li.addEventListener('click', function () {
+        var id = li.getAttribute('data-run');
+        if (id) playId(id);
       });
     });
   }
@@ -133,7 +156,7 @@
   }
 
   window.TENET5_NEWS_AIR = {
-    __v: 2,
+    __v: 4,
     playId: playId,
     playAll: playAll,
     playSrc: playSrc
