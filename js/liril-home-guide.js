@@ -593,6 +593,18 @@
     setStatus('LIRIL desk reporter loading…');
     pollVoice();
 
+    document.addEventListener('play', function (e) {
+      if (e.target && (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO')) {
+        if (e.target.muted && (e.target.hasAttribute('loop') || e.target.classList.contains('doc-stage-video'))) return;
+        if (presenting || (window.LIRIL_REPORTER && window.LIRIL_REPORTER.isLive())) {
+          stopPresentation();
+          if (window.LIRIL_REPORTER && window.LIRIL_REPORTER.isLive()) window.LIRIL_REPORTER.stopLive();
+          if (window.speechSynthesis) try { window.speechSynthesis.cancel(); } catch (err) {}
+          setStatus('Media playing · desk standing by');
+        }
+      }
+    }, true);
+
     loadPresentation().then(function (pres) {
       paintPresentationCard(pres);
       var dockDefault = ui('dock_default',

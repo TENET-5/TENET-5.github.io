@@ -460,6 +460,22 @@
     ensureCardButton();
     paintAir(false);
 
+    // Pause station if user plays media manually
+    document.addEventListener('play', function (e) {
+      if (e.target && (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO')) {
+        // Ignore the background ambient station loop itself
+        if (e.target.muted && (e.target.hasAttribute('loop') || e.target.classList.contains('doc-stage-video'))) return;
+        pauseStation(true);
+      }
+    }, true);
+
+    document.addEventListener('pause', function (e) {
+      if (e.target && (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO')) {
+        if (e.target.muted && (e.target.hasAttribute('loop') || e.target.classList.contains('doc-stage-video'))) return;
+        noteUserActivity(); // soft resume after idle
+      }
+    }, true);
+
     // Gesture unlock for voice (TV still runs visual without it)
     ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
       window.addEventListener(ev, function () {

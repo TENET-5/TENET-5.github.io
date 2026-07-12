@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", "_site", "static_dump", "trash", "tools", "lab"}
 # Not public canon — do not fail site chrome gates on archives
 SKIP_NAMES: set[str] = set()
-THEME_VER = "226"
+THEME_VER = "240"
 
 def _rel_prefix(path: Path) -> str:
     """Compute relative path prefix from file to ROOT (e.g. '../../' for data/mirror_reports/)."""
@@ -46,31 +46,49 @@ def _fonts_block(prefix: str = "") -> str:
 """
 
 def _dock() -> str:
-    # Same LIRIL guide bar the homepage carries, on every interior page.
-    # Driven by js/liril-page-voice.js (page-matched VO) + js/liril-dock.js.
-    return """  <div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
-    <div class="dock-in">
-      <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="say"><b>LIRIL</b><span id="liril-line">I can guide this page — voice matches what is on the record here.</span></div>
-      <button id="liril-guide-btn" type="button" title="LIRIL reads this page aloud, matched to the record">Guide me</button>
-      <button id="voice-btn" type="button" aria-pressed="true" title="Toggle LIRIL voice narration">Voice · On</button>
-      <div class="liril-status" id="liril-status">LIRIL ready</div>
-    </div>
-  </div>
-"""
+    # RETIRED 2026-07-12 — LIRIL guide dock removed from public site.
+    # Brand remains "Powered by LIRIL AI" in footers only.
+    return ""
+
+
+# Scripts that spawn extra voices / TTS / dual audio (public site = video-only sound)
+RE_LIRIL_GUIDE_JS = re.compile(
+    r"[ \t]*<script[^>]+(?:liril-dock|liril-page-voice|liril-home-guide|liril-station|"
+    r"liril-walkthrough|liril-voice|liril-reporter|liril-live|liril-radio|"
+    r"liril-autoreader|tenet5-unified-walkthrough|liril-bootstrap|liril-film-player|"
+    r"liril-documentary|liril_feedback|presentation\.js|chalkboard\.js|"
+    r"news-dashboard\.js)[^>]*>\s*</script>\s*",
+    re.I,
+)
+RE_DUP_PRODUCT_JS = re.compile(
+    r"(?:[ \t]*<script[^>]+tenet5-(?:live-station|news-air|doc-player|cinema-play|single-mic)\.js[^>]*>\s*</script>\s*)+",
+    re.I,
+)
+RE_LIRIL_DOCK_HTML = re.compile(
+    r"[ \t]*<div\b[^>]*\bid=[\"']dock[\"'][^>]*>[\s\S]*?</div>\s*"
+    r"(?=(?:<script|</body>|\Z))",
+    re.I,
+)
+# Nested dock-in structure: match whole dock block more greedily
+RE_LIRIL_DOCK_BLOCK = re.compile(
+    r"[ \t]*<div[^>]*class=[\"'][^\"']*\bdock\b[^\"']*[\"'][^>]*>[\s\S]*?</div>\s*"
+    r"(?=\s*(?:<script|</body>|<footer|\Z))",
+    re.I,
+)
 
 
 def _nav(prefix: str = "") -> str:
+    # Daniel 2026-07-12 IA: three lanes — News · Investigations · The Case
+    # (+ Briefing for today, Evidence for primaries). No Wire/Newsletter/Guided top clutter.
     return f"""  <header class="press-bar" role="banner">
     <a class="wm" href="{prefix}index.html">TENET<sup>5</sup></a>
     <nav aria-label="Primary">
       <a href="{prefix}index.html">Home</a>
+      <a href="{prefix}news.html">News</a>
       <a href="{prefix}daily-briefing.html">Briefing</a>
-      <a href="{prefix}press-wire.html">Wire</a>
-      <a href="{prefix}newsletter.html">Newsletter</a>
       <a href="{prefix}investigations.html">Investigations</a>
+      <a href="{prefix}argument.html">The Case</a>
       <a href="{prefix}evidence-index.html">Evidence</a>
-      <a href="{prefix}liril-film.html">Guided</a>
       <a href="{prefix}about.html">About</a>
     </nav>
   </header>
@@ -79,7 +97,12 @@ def _nav(prefix: str = "") -> str:
 def _foot(prefix: str = "") -> str:
     return f"""  <footer class="press-foot" role="contentinfo">
     <span>TENET5 · Powered by LIRIL AI</span>
-    <a href="{prefix}methodology-transparency.html">Methodology</a>
+    <a href="{prefix}news.html">News</a>
+    <a href="{prefix}investigations.html">Investigations</a>
+    <a href="{prefix}argument.html">The Case</a>
+    <a href="{prefix}evidence-index.html">Evidence</a>
+    <a href="{prefix}methodology-transparency.html">Method</a>
+    <a href="{prefix}information-architecture.html">Site map</a>
     <a href="{prefix}about.html">About</a>
     <a href="{prefix}legal.html">Legal</a>
   </footer>
@@ -141,11 +164,14 @@ BANNED_HREF = re.compile(
     re.I,
 )
 
-LIRIL_HOME_REQUIRED = (
+# LIRIL guide chrome is FORBIDDEN on the public site (removed 2026-07-12)
+LIRIL_GUIDE_FORBIDDEN = (
     'id="dock"',
     'id="liril-guide-btn"',
     "js/liril-home-guide.js",
-    "js/liril-voice.js",
+    "js/liril-dock.js",
+    "js/liril-station.js",
+    "js/liril-page-voice.js",
 )
 
 
@@ -212,16 +238,29 @@ def _force_body(text: str, home: bool) -> str:
     else:
         m = re.search(r"<body\b([^>]*)>", text, flags=re.I)
         extra = []
+        keep_attrs = ""
         if m:
-            cm = re.search(r'class=["\']([^"\']*)["\']', m.group(1), flags=re.I)
+            attrs = m.group(1)
+            cm = re.search(r'class=["\']([^"\']*)["\']', attrs, flags=re.I)
             if cm:
                 for part in cm.group(1).split():
                     if part in _BODY_KEEP_CLASSES and part not in extra:
                         extra.append(part)
+            # Preserve desk dialect + locked template attrs (do not strip stamp)
+            for attr in (
+                "data-presentation",
+                "data-desk",
+                "data-lane",
+                "data-template",
+                "data-act",
+            ):
+                am = re.search(rf'\b{attr}=["\']([^"\']+)["\']', attrs, flags=re.I)
+                if am:
+                    keep_attrs += f' {attr}="{am.group(1)}"'
         classes = " ".join(["press-interior"] + extra)
         text = re.sub(
             r"<body\b[^>]*>",
-            f'<body class="{classes}">',
+            f'<body class="{classes}"{keep_attrs}>',
             text,
             count=1,
             flags=re.I,
@@ -486,7 +525,7 @@ def apply_page(path: Path) -> bool:
     PAGE_CSS = {
         "liril-film.html": "css/liril-film.css?v=2",
         "network-analysis.html": "css/network-analysis.css?v=10",
-        "canada-map.html": "css/intel-report.css?v=4",
+        # canada-map: long-read lives in press-theme (Temple one-theme — no intel-report.css)
     }
     extra_css = PAGE_CSS.get(path.name)
     if extra_css and extra_css.split("?")[0] not in text:
@@ -542,9 +581,55 @@ def apply_page(path: Path) -> bool:
             text,
             flags=re.I,
         )
-        # undefined product accent var
+        # undefined product accent var + orphaned slate aliases → press tokens
         text = text.replace("var(--accent)", "var(--ice)")
         text = text.replace("var(--slate-ice-edge)", "rgba(154,219,232,.16)")
+        text = text.replace("var(--slate-ink-strong,#fff)", "var(--ivory)")
+        text = text.replace("var(--slate-ink-strong, #fff)", "var(--ivory)")
+        text = text.replace("var(--slate-ink-strong)", "var(--ivory)")
+        text = text.replace("var(--slate-ink-dim)", "var(--ivory-dim)")
+        text = text.replace("var(--slate-ink)", "var(--ivory)")
+        text = text.replace("var(--slate-accent)", "var(--ice)")
+        # SPA-era broken links (?load=foo.html) → real file hrefs
+        text = re.sub(
+            r'href=["\']\?load=([a-zA-Z0-9_./-]+\.html)(?:#[^"\']*)?["\']',
+            r'href="\1"',
+            text,
+            flags=re.I,
+        )
+        # Dossier pages wrongly marked act-cinema (video bg + wrong body class)
+        # — report surface inherits press-interior only; cinema reserved for acts
+        if path.name not in {
+            "act-i.html", "act-ii.html", "act-iii.html", "act-iv.html", "act-v.html",
+            "argument.html", "liril-film.html",
+        }:
+            if 'class="act-page-bg"' in text or "act-page-bg" in text:
+                text = re.sub(
+                    r'<video\b[^>]*class="[^"]*act-page-bg[^"]*"[^>]*>.*?</video>\s*',
+                    "",
+                    text,
+                    flags=re.I | re.S,
+                )
+                text = re.sub(
+                    r'<div\b[^>]*class="[^"]*act-page-veil[^"]*"[^>]*>\s*</div>\s*',
+                    "",
+                    text,
+                    flags=re.I,
+                )
+                text = re.sub(
+                    r"<!--\s*PRISM_PAGE_VIDEO_BG\s*-->\s*",
+                    "",
+                    text,
+                    flags=re.I,
+                )
+            text = re.sub(
+                r'(class=")([^"]*)\bact-cinema-page\b([^"]*")',
+                lambda m: m.group(1)
+                + " ".join(x for x in (m.group(2) + m.group(3)[:-1]).split() if x != "act-cinema-page")
+                + '"',
+                text,
+                count=1,
+            )
 
         # Strip product soup shells
         if path.name != "daily-briefing.html":
@@ -553,53 +638,136 @@ def apply_page(path: Path) -> bool:
         text = RE_SKIP.sub("\n", text)
         text = RE_LEGACY_CHROME_JS.sub("", text)
 
-        # ONE widget system: strip era-specific floating-UI scripts (each page
-        # had a different set — progress bars, cursor glow, subtitle bars),
-        # then guarantee the canonical guide stack on every interior:
-        # voice → page-voice (match) → walkthrough → dock → radio.
+        # ONE widget system: strip era-specific floating-UI + LIRIL guide stack.
+        # Daniel 2026-07-12: public site has NO LIRIL guide dock / Guide me / station.
         if path.name not in WIDGET_KEEP:
             text = RE_WIDGET_JS.sub("", text)
-        # Pin cache-bust versions (page-matched VO stack)
+        # Strip LIRIL guide chrome + multi-voice scripts (every page, including home)
+        text = RE_LIRIL_GUIDE_JS.sub("", text)
+        # Dedupe product media scripts (home had live-station + news-air twice)
+        for slug in (
+            "tenet5-live-station.js",
+            "tenet5-news-air.js",
+            "tenet5-doc-player.js",
+            "tenet5-cinema-play.js",
+            "tenet5-single-mic.js",
+            "broadcast-ticker-sync.js",
+        ):
+            hits = list(
+                re.finditer(
+                    rf"[ \t]*<script[^>]+{re.escape(slug)}[^>]*>\s*</script>\s*",
+                    text,
+                    flags=re.I,
+                )
+            )
+            if len(hits) > 1:
+                # keep last occurrence only
+                for h in hits[:-1]:
+                    text = text[: h.start()] + text[h.end() :]
+        # Dock is nested divs — remove any element with id=dock or class dock guide
         text = re.sub(
-            r'js/liril-voice\.js\?v=\d+',
-            'js/liril-voice.js?v=45',
+            r'[ \t]*<div[^>]*\bid=["\']dock["\'][^>]*>[\s\S]*?</div>\s*(?=<script|</body>|\Z)',
+            "\n",
+            text,
+            count=1,
+            flags=re.I,
+        )
+        # Multi-pass for nested dock-in (outer dock may leave residue)
+        for _ in range(3):
+            ntext = re.sub(
+                r'[ \t]*<div[^>]*class=["\'][^"\']*\bdock\b[^"\']*["\'][^>]*>[\s\S]*?</div>\s*',
+                "\n",
+                text,
+                count=1,
+                flags=re.I,
+            )
+            if ntext == text:
+                break
+            text = ntext
+        # Cover / presentation Guide CTAs
+        text = re.sub(
+            r'[ \t]*<button[^>]*id=["\']liril-guide-btn[^"\']*["\'][^>]*>[\s\S]*?</button>\s*',
+            "",
             text,
             flags=re.I,
         )
         text = re.sub(
-            r'js/liril-page-voice\.js\?v=\d+',
-            'js/liril-page-voice.js?v=1',
+            r'[ \t]*<button[^>]*id=["\'](?:voice-btn|liril-station-btn|liril-pres-start|liril-pres-live)["\'][^>]*>[\s\S]*?</button>\s*',
+            "",
+            text,
+            flags=re.I,
+        )
+        # Residual dock innards left after partial strip (visible if left in body)
+        text = re.sub(
+            r'[ \t]*<div class="say">[\s\S]*?<span id=["\']liril-line["\'][\s\S]*?</div>\s*'
+            r'<div class="liril-status"[^>]*>[\s\S]*?</div>\s*'
+            r'(?:</div>\s*){0,3}',
+            "\n",
             text,
             flags=re.I,
         )
         text = re.sub(
-            r'js/liril-dock\.js\?v=\d+',
-            'js/liril-dock.js?v=2',
+            r'[ \t]*<div class="say">[\s\S]*?id=["\']liril-line["\'][\s\S]*?</div>\s*',
+            "\n",
             text,
             flags=re.I,
         )
         text = re.sub(
-            r'js/liril-walkthrough\.js\?v=\d+',
-            'js/liril-walkthrough.js?v=4',
+            r'[ \t]*<div class="liril-status"[^>]*>[\s\S]*?</div>\s*',
+            "\n",
             text,
             flags=re.I,
         )
+        text = re.sub(
+            r'[ \t]*<div class="eq"[^>]*>[\s\S]*?</div>\s*',
+            "\n",
+            text,
+            flags=re.I,
+        )
+        # Truncate garbage after first closing html (orphan dock tails)
+        m_html = re.search(r"</html\s*>", text, flags=re.I)
+        if m_html:
+            text = text[: m_html.end()] + "\n"
+        text = re.sub(
+            r'js/tenet5-doc-player\.js\?v=\d+',
+            'js/tenet5-doc-player.js?v=5',
+            text,
+            flags=re.I,
+        )
+        text = re.sub(
+            r'js/tenet5-live-station\.js\?v=\d+',
+            'js/tenet5-live-station.js?v=4',
+            text,
+            flags=re.I,
+        )
+        text = re.sub(
+            r'js/tenet5-news-air\.js\?v=\d+',
+            'js/tenet5-news-air.js?v=7',
+            text,
+            flags=re.I,
+        )
+        # Single-mic ALWAYS FIRST — strip any existing tag (it may sit mid-stack, e.g. 5th on
+        # the homepage, booting AFTER the audio players) then re-inject it as the very first
+        # script right after <head>, so it patches Audio/speechSynthesis before ANY player runs.
+        text = re.sub(
+            r'[ \t]*<script[^>]+tenet5-single-mic\.js[^>]*>\s*</script>\s*',
+            "", text, flags=re.I,
+        )
+        mic = f'<script src="{prefix}js/tenet5-single-mic.js?v=2"></script>\n'
+        m_head = re.search(r"<head\b[^>]*>", text, re.I)
+        if m_head:
+            text = text[: m_head.end()] + "\n" + mic + text[m_head.end():]
+        else:
+            text = re.sub(
+                r"(<body\b[^>]*>)",
+                r"\1\n" + mic,
+                text,
+                count=1,
+                flags=re.I,
+            )
         if path.name not in WIDGET_KEEP:
             canon = []
-            if "js/liril-voice.js" not in text:
-                canon.append(f'<script src="{prefix}js/liril-voice.js?v=45"></script>')
-            if "liril-page-voice.js" not in text:
-                # Must load before dock so Guide me uses page-matched VO
-                canon.append(f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>')
-            if "liril-walkthrough.js" not in text:
-                canon.append(f'<script src="{prefix}js/liril-walkthrough.js?v=4"></script>')
-            if "liril-dock.js" not in text:
-                canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=2"></script>')
-            if "liril-radio.js" not in text:
-                canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
-            if "liril-live.js" not in text:
-                canon.append(f'<script src="{prefix}js/liril-live.js?v=1"></script>')
-            # always pin reveal to MutationObserver build (late glass inject)
+            # Non-guide utilities only — never voice stack
             text = re.sub(
                 r'js/rv-reveal\.js\?v=\d+',
                 'js/rv-reveal.js?v=2',
@@ -609,41 +777,13 @@ def apply_page(path: Path) -> bool:
                 canon.append(f'<script defer src="{prefix}js/rv-reveal.js?v=2"></script>')
             if "reading-mode.js" not in text:
                 canon.append(f'<script defer src="{prefix}js/reading-mode.js?v=2"></script>')
+            if "figures.js" not in text:
+                canon.append(f'<script defer src="{prefix}js/figures.js?v=1"></script>')
+            if "press-charts.js" not in text:
+                canon.append(f'<script defer src="{prefix}js/press-charts.js?v=1"></script>')
             if canon:
-                # Insert page-voice immediately before dock when dock already present
-                if "liril-page-voice.js" in "\n".join(canon) and "liril-dock.js" in text:
-                    text = re.sub(
-                        r'(<script[^>]*liril-dock\.js[^>]*>\s*</script>)',
-                        f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>\n\\1',
-                        text,
-                        count=1,
-                        flags=re.I,
-                    )
-                    canon = [c for c in canon if "liril-page-voice" not in c]
-                if canon:
-                    text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
-            # Guarantee page-voice before dock even when both were already listed
-            if "liril-page-voice.js" not in text and "liril-dock.js" in text:
-                text = re.sub(
-                    r'(<script[^>]*liril-dock\.js[^>]*>\s*</script>)',
-                    f'<script src="{prefix}js/liril-page-voice.js?v=1"></script>\n\\1',
-                    text,
-                    count=1,
-                    flags=re.I,
-                )
-            elif "liril-page-voice.js" not in text and "js/liril-voice.js" in text:
-                text = re.sub(
-                    r'(<script[^>]*liril-voice\.js[^>]*>\s*</script>)',
-                    f'\\1\n<script src="{prefix}js/liril-page-voice.js?v=1"></script>',
-                    text,
-                    count=1,
-                    flags=re.I,
-                )
-    
-            # The persistent LIRIL guide bar (home parity). position:fixed, so DOM
-            # order is irrelevant — inject once before </body>.
-            if 'id="dock"' not in text:
-                text = re.sub(r"</body>", _dock() + "</body>", text, count=1, flags=re.I)
+                text = re.sub(r"</body>", "\n".join(canon) + "\n</body>", text, count=1, flags=re.I)
+            # NEVER re-inject dock or multi-voice
 
         # data-heal styles yield to the theme: relocate them BEFORE the theme
         # <link> so press-theme.css wins every tie — page CSS only fills
@@ -758,9 +898,10 @@ def validate() -> dict:
     home = (ROOT / "index.html").read_text(encoding="utf-8", errors="replace")
     if "backwards" not in home or "ghost5" not in home:
         issues.append("index.html: missing press cover markers")
-    liril_ok = all(m in home for m in LIRIL_HOME_REQUIRED)
-    if not liril_ok:
-        issues.append("index.html: LIRIL guide chrome incomplete (PRISM job)")
+    # Guide must be ABSENT (not required)
+    liril_gone = all(m not in home for m in LIRIL_GUIDE_FORBIDDEN)
+    if not liril_gone:
+        issues.append("index.html: LIRIL guide chrome still present (must remove)")
 
     # de-dupe issues for count
     uniq = []
@@ -770,7 +911,7 @@ def validate() -> dict:
             seen.add(i)
             uniq.append(i)
 
-    home_ok = "backwards" in home and "press-theme.css" in home and liril_ok
+    home_ok = "backwards" in home and "press-theme.css" in home and liril_gone
     chrome_ok = (
         interior_total > 0
         and interior_press_bar == interior_total
@@ -783,7 +924,7 @@ def validate() -> dict:
         "issues": uniq[:60],
         "issue_count": len(uniq),
         "home_ok": home_ok,
-        "liril_guide_ok": liril_ok,
+        "liril_guide_ok": liril_gone,  # True when guide successfully removed
         "interior_total": interior_total,
         "interior_press_bar": interior_press_bar,
         "product_left": product_left,

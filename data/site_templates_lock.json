@@ -1,0 +1,112 @@
+{
+  "ts": "2026-07-12T21:00:00Z",
+  "version": 1,
+  "locked": true,
+  "doctrine": "one_theme_three_lanes_locked_templates",
+  "theme": {
+    "css": ["css/press-theme.css", "css/design-lock.css"],
+    "theme_ver_owner": "tools/apply_one_theme.py THEME_VER",
+    "fonts": "Fraunces + IBM Plex Mono via apply_one_theme",
+    "ban": ["page-local :root palette", "product.css", "tokens.css", "nav.js chrome", "liril guide dock", "autoplay voice"]
+  },
+  "nav_locked": ["Home", "News", "Briefing", "Investigations", "The Case", "Evidence", "About"],
+  "lanes": {
+    "news": {"hub": "news.html", "template": "news.package"},
+    "investigations": {"hub": "investigations.html", "template": "investigation.press-file"},
+    "case": {"hub": "argument.html", "template": "case.act"},
+    "evidence": {"hub": "evidence-index.html", "template": "evidence.shelf"},
+    "hub": {"template": "hub.lane"}
+  },
+  "templates": {
+    "shell": {
+      "file": "templates/shell.html",
+      "role": "Every public HTML chrome shell",
+      "required": ["data-press=\"1\"", "press-theme.css", "design-lock.css", "press-bar", "press-foot", "press-main"]
+    },
+    "investigation.press-file": {
+      "file": "templates/investigation.press-file.html",
+      "exemplar": "griffon-glle-procurement.html",
+      "role": "Long-form dossier — ONLY shape for Investigations lane",
+      "required": [
+        "body.press-interior",
+        "data-presentation",
+        "main.press-main.press-file",
+        "header.file-hero",
+        "file-meta-row",
+        "p.stand",
+        "file-rail",
+        "section.file-band",
+        "nr-metrics OR file-table",
+        "file-sources OR srcs"
+      ],
+      "sections_order": [
+        "file-hero (kick, status, h1, stand, rail)",
+        "scale / metrics (optional but preferred)",
+        "evidence table FACT only",
+        "analysis labeled inference",
+        "sources",
+        "related files"
+      ],
+      "forbidden": ["AI desk package", "Guide me", "id=\"dock\"", "bodyp-only dump without stand"]
+    },
+    "news.package": {
+      "file": "templates/news.package.html",
+      "exemplar": "story/desk-*.html via press.build_article",
+      "role": "Time-sensitive desk package — NOT a finished investigation",
+      "required": [
+        "data-lane=\"news\"",
+        "main.article.press-file OR main.press-main.article",
+        "file-hero OR kick+h1+stand",
+        "file-status containing News package OR Not a finished investigation",
+        "analysis-block.on-record",
+        "analysis-block.not-claimed",
+        "srcs"
+      ],
+      "forbidden": ["autoplay", "LIRIL guide dock", "claim of finished investigation"]
+    },
+    "hub.lane": {
+      "file": "templates/hub.lane.html",
+      "exemplar": "news.html · investigations.html",
+      "role": "Lane hubs with how-to-read + metrics + catalogs",
+      "required": ["file-hero", "stand", "file-rail", "nr-metrics", "catalog"]
+    },
+    "case.act": {
+      "file": "templates/case.act.html",
+      "exemplar": "act-i.html · argument.html",
+      "role": "Five-act Article 6 case stages",
+      "required": ["press-main", "file-hero OR ch-title", "link to argument.html", "primary source cites"]
+    },
+    "evidence.shelf": {
+      "file": "templates/evidence.shelf.html",
+      "exemplar": "evidence-index.html",
+      "role": "Primary sources without narrative dump",
+      "required": ["press-main", "sources or evidence list", "methodology link"]
+    }
+  },
+  "desks": ["procurement", "politics", "science", "research", "business", "media", "legal", "default"],
+  "owners": {
+    "chrome_nav_foot": "tools/apply_one_theme.py",
+    "investigation_upgrade": "tools/prism_press_file_desks.py + press-file structure",
+    "news_render": "tools/press.py build_article",
+    "hubs": "tools/build_investigations.py · tools/build_news_hub.py",
+    "validate": "tools/prism_templates.py",
+    "taste": "css/design-lock.css (do not freestyle palette)",
+    "news_slate": "tools/prism_news_slate.py + tools/NEWS_SLATE_SPEC.md",
+    "main_ticker": "tools/broadcast_ticker_slate.py (SEG only — no article/chart types)",
+    "temple": "tools/prism_temple_slate_lock.py"
+  },
+  "news_slate": {
+    "spec": "tools/NEWS_SLATE_SPEC.md",
+    "registry": "data/news_slate_registry.json",
+    "main_only": "main.broadcast_ticker",
+    "article_types_off_main": true,
+    "chart_types_off_main": true,
+    "rectify": "tools/prism_news_slate.py rectify"
+  },
+  "claude_contract": "Read data/site_templates_lock.json + templates/*.html + tools/NEWS_SLATE_SPEC.md before any public HTML. Never invent a second theme. Use investigation.press-file for dossiers. Use news.package for day packages. Never put article types or chart types on the main broadcast ticker. Run tools/prism_templates.py --validate and tools/prism_news_slate.py rectify after news/OSINT edits.",
+  "retired": [
+    "templates/accountability-template.html (legacy guide dock — do not copy)",
+    "tools/build_page.py Red Ensign template (rewired to press-file)",
+    "nav.js product chrome on interiors"
+  ]
+}

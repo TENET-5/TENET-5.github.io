@@ -518,8 +518,8 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=226">
-<link rel="stylesheet" href="css/design-lock.css?v=226">
+<link rel="stylesheet" href="css/press-theme.css?v=229">
+<link rel="stylesheet" href="css/design-lock.css?v=229">
 <!-- ONE THEME: edit css/press-theme.css · THEME_VER must match apply_one_theme.py · video = news segments not canned loops -->
 </head>
 <body>
@@ -529,6 +529,7 @@ def press_nav(active: str = "") -> str:
     """Interior chrome only — homepage keeps the cover. Never use cover-bar here."""
     items = [
         ("Home", "index.html", "home"),
+        ("LIVE", "live.html", "live"),
         ("Briefing", "daily-briefing.html", "briefing"),
         ("Wire", "press-wire.html", "wire"),
         ("Newsletter", "newsletter.html", "newsletter"),
@@ -597,10 +598,10 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
 </div>
 <script src="js/rv-reveal.js?v=1" defer></script>
 <script src="js/liril-radio.js?v=2" defer></script>
-<script src="js/liril-voice.js?v=43" defer></script>
+<script src="js/liril-voice.js?v=45" defer></script>
 <script src="js/liril-reporter.js?v=1" defer></script>
 <script src="js/liril-station.js?v=1" defer></script>
-<script src="js/liril-home-guide.js?v=10" defer></script>
+<script src="js/liril-home-guide.js?v=12" defer></script>
 {home_cine}
 </body>
 </html>"""
@@ -631,7 +632,13 @@ def collect_news_segments(limit: int = 8) -> list[dict]:
     brief_items: list[dict] = []
     try:
         brief = load_json(ROOT / "data" / "govt_daily_briefing.json")
-        brief_items = list(brief.get("items") or brief.get("briefing") or [])
+        # Real desk feed is happening_now (not legacy items/briefing)
+        brief_items = list(
+            brief.get("happening_now")
+            or brief.get("items")
+            or brief.get("briefing")
+            or []
+        )
     except Exception:
         brief_items = []
 
@@ -639,15 +646,23 @@ def collect_news_segments(limit: int = 8) -> list[dict]:
         man_path = man_dir / f"news-{i}_manifest.json"
         narration = ""
         desk = "DESK"
+        man_lower = ""
         if man_path.is_file():
             try:
                 raw = json.loads(man_path.read_text(encoding="utf-8"))
-                beat = raw[0] if isinstance(raw, list) and raw else raw
-                narration = str(beat.get("narration") or "").strip()
-                # "Update from the MUNICIPAL desk. …"
-                m = re.search(r"from the\s+([A-Z][A-Z /&-]+)\s+desk", narration, re.I)
+                beats = raw if isinstance(raw, list) else [raw]
+                beat0 = beats[0] if beats else {}
+                narration = str(beat0.get("narration") or "").strip()
+                man_lower = str(beat0.get("lower") or "").strip()
+                # "Coming up now on TENET5. MUNICIPAL desk. …"
+                m = re.search(r"\b([A-Z][A-Z0-9 /&-]{1,24})\s+desk\b", narration, re.I)
                 if m:
                     desk = m.group(1).strip().upper()
+                # Prefer lower-third headline from open beat
+                for b in beats:
+                    if b.get("lower") and b.get("role") in (None, "open", "body"):
+                        man_lower = str(b.get("lower") or man_lower).strip()
+                        break
             except Exception:
                 pass
         # Prefer real segment packages over tiny documentary stubs
@@ -663,32 +678,49 @@ def collect_news_segments(limit: int = 8) -> list[dict]:
                 break
         if not video:
             continue
-        # Prefer the actual news sentence, not "Update from the X desk"
-        title = f"News segment {i + 1}"
+        # Title priority: briefing headline → lower-third → non-boilerplate narration
+        title = man_lower or f"News segment {i + 1}"
         lede = narration
-        if narration:
+        if narration and not man_lower:
             parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", narration) if p.strip()]
-            if parts and re.match(r"^Update from the\s+", parts[0], re.I) and len(parts) > 1:
-                title = parts[1]
-                lede = " ".join(parts[1:]) if len(parts) > 1 else parts[0]
-            elif parts:
-                title = parts[0]
-                lede = " ".join(parts[1:]) if len(parts) > 1 else parts[0]
-        # Prefer briefing headline when available
+            skip = re.compile(
+                r"^(Update from the|Coming up now on TENET5|TENET5 desk)\b",
+                re.I,
+            )
+            for p in parts:
+                if not skip.match(p) and len(p) > 12:
+                    title = p
+                    break
+            lede = " ".join(parts[1:]) if len(parts) > 1 else (parts[0] if parts else "")
         href = ""
         if i < len(brief_items):
             bi = brief_items[i]
             if isinstance(bi, dict):
-                title = str(bi.get("title") or bi.get("headline") or title)[:120]
-                href = str(bi.get("href") or bi.get("url") or bi.get("page") or "")
+                title = str(bi.get("headline") or bi.get("title") or title)[:120]
+                href = str(bi.get("page") or bi.get("href") or bi.get("url") or "")
                 body = str(bi.get("body") or bi.get("summary") or bi.get("lede") or "")
                 if body:
                     lede = body
+                d2 = str(bi.get("domain") or "").strip()
+                if d2:
+                    desk = d2.upper()
         if not href:
             href = "daily-briefing.html"
         lede = lede.strip()
         if len(lede) > 220:
             lede = lede[:217].rsplit(" ", 1)[0] + "…"
+        audio = ""
+        vtt = ""
+        for ap in (
+            ROOT / "audio" / "desk" / f"news-{i}.mp3",
+            ROOT / "audio" / "desk" / f"news-{i}_mux.mp3",
+        ):
+            if ap.is_file() and ap.stat().st_size > 8_000:
+                audio = ap.relative_to(ROOT).as_posix()
+                break
+        vp = ROOT / "audio" / "desk" / f"news-{i}.vtt"
+        if vp.is_file():
+            vtt = vp.relative_to(ROOT).as_posix()
         segs.append(
             {
                 "id": f"news-{i}",
@@ -697,6 +729,8 @@ def collect_news_segments(limit: int = 8) -> list[dict]:
                 "title": title[:140],
                 "lede": lede,
                 "video": video,
+                "audio": audio,
+                "vtt": vtt,
                 "href": href,
             }
         )
@@ -717,69 +751,298 @@ def render_news_air(segments: list[dict]) -> str:
 
     lead = segments[0]
     cards = []
+    # Canonical ticker slate — web overlay + video burn share this hash/line
+    ticker_hash = ""
+    ticker_full = ""
+    try:
+        from broadcast_ticker_slate import build_slate, write_slate  # type: ignore
+
+        slate = build_slate(segments, source="press.render_news_air")
+        write_slate(slate)
+        ticker_hash = str(slate.get("hash") or "")
+        ticker_full = str(slate.get("full_line") or "")
+    except Exception:
+        ticker_bits = []
+        for s in segments:
+            ticker_bits.append(
+                f"SEG {int(s['n']):02d} {esc(s['desk'])}: {esc(s['title'][:48])}"
+            )
+        core = "  ·  ".join(ticker_bits)
+        ticker_full = f"{core}  ·  LIVE  ·  TIME NAV  ·  TOPIC NAV  ·  TENET5  ·  {core}"
+
     for s in segments:
         cards.append(
             f"""
-<article class="news-seg glass" data-news-seg="{esc(s['id'])}" data-video="{esc(s['video'])}">
+<button type="button" class="news-seg glass" data-news-seg="{esc(s['id'])}" data-video="{esc(s['video'])}" data-vtt="{esc(s.get('vtt') or '')}" data-audio="{esc(s.get('audio') or '')}" data-desk="{esc(s['desk'])}" data-title="{esc(s['title'])}" data-lede="{esc(s.get('lede') or '')}">
   <div class="news-seg-frame">
-    <video muted playsinline preload="metadata" controls
+    <video muted playsinline preload="metadata"
            data-news-video="{esc(s['id'])}"
            poster="media/landing/ledger_desk.jpg"
-           aria-label="{esc(s['title'])}">
+           aria-hidden="true">
       <source src="{esc(s['video'])}" type="video/mp4">
     </video>
+    <span class="news-seg-live">LIVE</span>
     <span class="news-seg-tag">SEG {int(s['n']):02d} · {esc(s['desk'])}</span>
   </div>
   <div class="news-seg-body">
     <h3>{esc(s['title'])}</h3>
-    <p>{esc(s.get('lede') or 'Desk update · sources on the linked file.')}</p>
-    <div class="news-seg-actions">
-      <button type="button" class="guide-cta news-seg-play" data-play="{esc(s['id'])}">Play segment</button>
-      <a class="begin begin-quiet" href="{esc(s['href'])}"><span>Open source file</span></a>
-    </div>
+    <p>{esc(s.get('lede') or 'Desk hit · sources on the linked file.')}</p>
+    <span class="news-seg-playlab">Play this hit →</span>
   </div>
-</article>"""
+</button>"""
         )
 
+    return render_live_station(
+        segments, lead, cards, ticker_full, ticker_hash=ticker_hash
+    )
+
+
+def render_live_station(
+    segments: list[dict],
+    lead: dict,
+    cards: list[str],
+    ticker: str,
+    *,
+    ticker_hash: str = "",
+) -> str:
+    """TENET5 LIVE — station feed + real-time time/topic navigation.
+
+    Ticker is phase-locked to desk video (js/broadcast-ticker-sync.js).
+    Text must match video burn-in; desync = hallucination signal.
+    """
+    # ticker arg is already full_line (doubled) from broadcast_ticker_slate
+    tick_html = esc(ticker) if ticker else ""
+    hash_attr = f' data-ticker-hash="{esc(ticker_hash)}"' if ticker_hash else ""
     return f"""
-<section class="news-air field" id="news-air" data-line="On air: live desk segments from today's briefing and wire — not canned atmosphere reels.">
+<section class="news-air field tls-home" id="news-air" data-line="TENET5 LIVE — live station with time and topic navigation.">
   <div class="wrapx rv">
-    <span class="kick">On air · news segments · live desk package</span>
-    <h2 class="thesis-title" style="margin-top:1.2vh">What is going on <em>now.</em></h2>
-    <p class="news-air-lede">
-      These are <strong>news segments</strong> for today's desk — municipal, defence, procurement, and the live package.
-      Not memorial b-roll. Not canned act loops. Play a segment, then open the source file.
-      LIRIL can read the full rundown with <strong>Start news presentation</strong>.</p>
-    <div class="news-air-lead glass" id="news-air-lead">
-      <div class="news-air-player">
-        <video id="news-air-video" controls playsinline preload="metadata"
-               poster="media/landing/ledger_desk.jpg"
-               aria-label="Lead news segment">
-          <source src="{esc(lead['video'])}" type="video/mp4">
-        </video>
-        <div class="news-air-now">
-          <span class="kick" id="news-air-now-tag">NOW · {esc(lead['desk'])}</span>
-          <h3 id="news-air-now-title">{esc(lead['title'])}</h3>
-          <p id="news-air-now-lede">{esc(lead.get('lede') or '')}</p>
-          <div class="news-seg-actions">
-            <button type="button" class="guide-cta" id="news-air-play-lead">Play lead segment</button>
-            <button type="button" class="guide-cta guide-cta-live" id="news-air-play-all">Play all segments</button>
-            <a class="begin begin-quiet" href="{esc(lead['href'])}"><span>Lead source file</span></a>
+    <div class="broadcast-head">
+      <span class="kick">TENET5 LIVE · news station</span>
+      <span class="tls-mode-badge live" id="tls-mode-badge">LIVE FEED</span>
+      <span class="broadcast-clock" id="tls-clock" aria-live="polite">— ET</span>
+    </div>
+    <h2 class="thesis-title" style="margin-top:0.6vh">Watch live. Navigate by <em>time</em> and <em>topic.</em></h2>
+    <p class="news-air-lede" id="tls-oneline">
+      Default is a <strong>live channel</strong> (wall-clock join, auto-advance).
+      Or explore: scrub the time rail, filter by desk topic, jump dayparts — then <strong>Join live</strong> to snap back on air.</p>
+    <p class="tls-tagline" id="tls-tagline">Canadian public-record news channel · Powered by LIRIL AI · You verify</p>
+    <p class="tls-count" id="tls-count"></p>
+
+    <div class="tls-nav-bar glass">
+      <div class="tls-mode-toggle" role="group" aria-label="Station mode">
+        <button type="button" class="tls-mode-btn is-on" data-tls-mode="live">Live feed</button>
+        <button type="button" class="tls-mode-btn" data-tls-mode="explore">Time / topic</button>
+      </div>
+      <div class="tls-topics" id="tls-topics" aria-label="Topics"></div>
+    </div>
+
+    <div class="tls-time-wrap glass">
+      <div class="tls-time-meta">
+        <span id="tls-pack-time">0:00 / 0:00</span>
+        <span id="tls-wall-time">LIVE @ 0:00</span>
+      </div>
+      <div class="tls-time-rail" id="tls-time-rail" title="Click to jump in package time">
+        <div class="tls-time-segs" id="tls-time-segs"></div>
+        <div class="tls-time-fill" id="tls-time-fill"></div>
+        <div class="tls-live-mark" id="tls-live-mark" title="Wall-clock live position"></div>
+      </div>
+      <div class="tls-time-legend">
+        <span class="tl-desk">Desk</span>
+        <span class="tl-reports">Reports</span>
+        <span class="tl-case">Case film</span>
+        <span class="tl-live">◆ live now</span>
+      </div>
+    </div>
+
+    <div class="tls glass" id="tls-root" data-mode="live">
+      <div class="tls-stage">
+        <div class="tls-frame">
+          <video id="tls-video" controls playsinline preload="metadata"
+                 poster="media/landing/ledger_desk.jpg"
+                 aria-label="TENET5 LIVE station"{hash_attr}>
+            <source src="{esc(lead['video'])}" type="video/mp4">
+          </video>
+          <div class="tls-hud" aria-hidden="true">
+            <span class="tls-live on" id="tls-live"><i></i> LIVE</span>
+            <span class="tls-desk" id="tls-desk">TENET5 · {esc(lead['desk'])}</span>
+            <span class="tls-block" id="tls-block">DESK HITS</span>
+            <span class="tls-prog" id="tls-prog">—</span>
           </div>
+          <div class="tls-lt">
+            <span class="tls-kicker" id="tls-status">STANDBY</span>
+            <span class="tls-title" id="tls-title">{esc(lead['title'])}</span>
+          </div>
+          <div class="tls-bar-wrap" aria-hidden="true"><div class="tls-bar" id="tls-bar"></div></div>
+          <div class="broadcast-ticker is-sync is-overlay" id="broadcast-ticker"
+               data-ticker-sync="1"
+               data-ticker-slate="data/broadcast_ticker_slate.json"
+               data-scroll-px-s="80"{hash_attr}
+               role="status"
+               aria-label="Desk ticker phase-locked to video">
+            <span id="broadcast-ticker-text">{tick_html}</span>
+          </div>
+        </div>
+        <div class="tls-side">
+          <p class="tls-lede" id="tls-lede">{esc(lead.get('lede') or '')}</p>
+          <div class="tls-now-next" id="tls-now-next"></div>
+          <div class="news-seg-actions">
+            <button type="button" class="guide-cta guide-cta-live" id="tls-join">Join live</button>
+            <button type="button" class="guide-cta" id="tls-unmute">Unmute</button>
+            <button type="button" class="guide-cta" id="tls-prev">Prev</button>
+            <button type="button" class="guide-cta" id="tls-next">Next</button>
+            <a class="begin begin-quiet" id="tls-open-source" href="{esc(lead.get('href') or 'daily-briefing.html')}"><span>Open source</span></a>
+            <a class="begin begin-quiet" href="live.html"><span>Full station</span></a>
+          </div>
+          <div class="tls-playlist" id="tls-playlist" aria-label="Station playlist by topic"></div>
         </div>
       </div>
     </div>
+
     <div class="news-seg-grid" role="list">
       {"".join(cards)}
     </div>
     <p class="news-air-foot">
-      Segment video is the desk product. The five-act case film stays on
-      <a href="argument.html">argument.html</a> and
-      <a href="liril-film.html">the guided record</a> — not as fake “live” wallpaper.
+      Live feed follows wall-clock ET. Time rail + topics let you jump without leaving the station.
+      Keys: ← → prev/next · L join live · T explore.
+      Ticker is locked to the desk video — if it drifts, that is a hallucination signal.
+      <a href="live.html">Full station →</a>
     </p>
   </div>
 </section>
-<script src="js/tenet5-news-air.js?v=2" defer></script>"""
+<script src="js/tenet5-live-station.js?v=2" defer></script>
+<script src="js/tenet5-news-air.js?v=5" defer></script>
+<script src="js/broadcast-ticker-sync.js?v=2" defer></script>"""
+
+
+def render_full_documentary() -> str:
+    """Case film is now part of the live station linear schedule — no separate dead player."""
+    return ""
+
+
+def build_live(site: dict) -> str:
+    """Dedicated TENET5 LIVE station page — full channel experience."""
+    segs = collect_news_segments(8)
+    lead = segs[0] if segs else {
+        "video": "media/film/video/news-0_mux.mp4",
+        "desk": "DESK",
+        "title": "TENET5 LIVE",
+        "lede": "Station is loading the linear package.",
+        "n": 1,
+        "href": "daily-briefing.html",
+    }
+    ticker_hash = ""
+    ticker_full = ""
+    try:
+        from broadcast_ticker_slate import build_slate, write_slate  # type: ignore
+
+        slate = build_slate(segs, source="press.build_live")
+        write_slate(slate)
+        ticker_hash = str(slate.get("hash") or "")
+        ticker_full = str(slate.get("full_line") or "")
+    except Exception:
+        core = "  ·  ".join(
+            f"SEG {int(s['n']):02d} {esc(s['desk'])}: {esc(s['title'][:40])}" for s in segs
+        ) or "TENET5 LIVE · PRIMARY SOURCES · YOU VERIFY"
+        ticker_full = f"{core}  ·  LIVE  ·  TIME  ·  TOPIC  ·  {core}"
+    hash_attr = f' data-ticker-hash="{esc(ticker_hash)}"' if ticker_hash else ""
+    body = press_nav("live") + f"""
+<main class="press-main tls-page">
+  <div class="broadcast-head">
+    <p class="kick" style="margin:0">TENET5 LIVE · news station</p>
+    <span class="tls-mode-badge live" id="tls-mode-badge">LIVE FEED</span>
+    <span class="broadcast-clock" id="tls-clock">— ET</span>
+  </div>
+  <h1>On air. Navigate by <em>time</em> &amp; <em>topic.</em></h1>
+  <p class="stand" id="tls-oneline">Live channel by default. Scrub time, filter desks, jump dayparts — Join live snaps you back to wall-clock ET. Ticker locks to the desk video — drift is a hallucination signal.</p>
+  <p class="tls-tagline" id="tls-tagline">Powered by LIRIL AI · You verify · Atmosphere is not proof</p>
+  <p class="tls-count" id="tls-count"></p>
+
+  <div class="tls-nav-bar glass">
+    <div class="tls-mode-toggle" role="group" aria-label="Station mode">
+      <button type="button" class="tls-mode-btn is-on" data-tls-mode="live">Live feed</button>
+      <button type="button" class="tls-mode-btn" data-tls-mode="explore">Time / topic</button>
+    </div>
+    <div class="tls-topics" id="tls-topics" aria-label="Topics"></div>
+  </div>
+
+  <div class="tls-time-wrap glass">
+    <div class="tls-time-meta">
+      <span id="tls-pack-time">0:00 / 0:00</span>
+      <span id="tls-wall-time">LIVE @ 0:00</span>
+    </div>
+    <div class="tls-time-rail" id="tls-time-rail" title="Click to jump in package time">
+      <div class="tls-time-segs" id="tls-time-segs"></div>
+      <div class="tls-time-fill" id="tls-time-fill"></div>
+      <div class="tls-live-mark" id="tls-live-mark" title="Wall-clock live position"></div>
+    </div>
+    <div class="tls-time-legend">
+      <span class="tl-desk">Desk</span>
+      <span class="tl-reports">Reports</span>
+      <span class="tl-case">Case film</span>
+      <span class="tl-live">◆ live now</span>
+    </div>
+  </div>
+
+  <div class="tls glass tls-full" id="tls-root" data-mode="live">
+    <div class="tls-stage">
+      <div class="tls-frame">
+        <video id="tls-video" controls playsinline preload="auto"
+               poster="media/landing/ledger_desk.jpg"
+               aria-label="TENET5 LIVE"{hash_attr}>
+          <source src="{esc(lead.get('video') or '')}" type="video/mp4">
+        </video>
+        <div class="tls-hud" aria-hidden="true">
+          <span class="tls-live on" id="tls-live"><i></i> LIVE</span>
+          <span class="tls-desk" id="tls-desk">TENET5 · {esc(lead.get('desk') or 'DESK')}</span>
+          <span class="tls-block" id="tls-block">DESK HITS</span>
+          <span class="tls-prog" id="tls-prog">—</span>
+        </div>
+        <div class="tls-lt">
+          <span class="tls-kicker" id="tls-status">STANDBY</span>
+          <span class="tls-title" id="tls-title">{esc(lead.get('title') or '')}</span>
+        </div>
+        <div class="tls-bar-wrap" aria-hidden="true"><div class="tls-bar" id="tls-bar"></div></div>
+        <div class="broadcast-ticker is-sync is-overlay" id="broadcast-ticker"
+             data-ticker-sync="1"
+             data-ticker-slate="data/broadcast_ticker_slate.json"
+             data-scroll-px-s="80"{hash_attr}
+             role="status"
+             aria-label="Desk ticker phase-locked to video">
+          <span id="broadcast-ticker-text">{esc(ticker_full)}</span>
+        </div>
+      </div>
+      <div class="tls-side">
+        <p class="tls-lede" id="tls-lede">{esc(lead.get('lede') or '')}</p>
+        <div class="tls-now-next" id="tls-now-next"></div>
+        <div class="news-seg-actions">
+          <button type="button" class="guide-cta guide-cta-live" id="tls-join">Join live</button>
+          <button type="button" class="guide-cta" id="tls-unmute">Unmute</button>
+          <button type="button" class="guide-cta" id="tls-prev">Prev</button>
+          <button type="button" class="guide-cta" id="tls-next">Next</button>
+          <a class="begin begin-quiet" id="tls-open-source" href="{esc(lead.get('href') or 'daily-briefing.html')}"><span>Open source</span></a>
+          <a class="begin begin-quiet" href="daily-briefing.html"><span>Briefing</span></a>
+          <a class="begin begin-quiet" href="argument.html"><span>Argument</span></a>
+        </div>
+        <div class="tls-playlist" id="tls-playlist" aria-label="Station playlist by topic"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="news-air-foot" style="margin-top:1.6rem">
+    Dayparts: <strong>desk</strong> → <strong>reports</strong> → <strong>case film</strong> → loop.
+    Time rail = package position. ◆ marker = wall-clock live. Keys: ← → · L live · T explore.
+    Ticker phase-locks to desk video — desync is the first hallucination signal.
+  </p>
+</main>
+<script src="js/tenet5-live-station.js?v=2" defer></script>
+<script src="js/broadcast-ticker-sync.js?v=2" defer></script>
+"""
+    return (
+        head("TENET5 LIVE", "Live Canadian news station — watch live or navigate by time and topic. Powered by LIRIL AI.")
+        + body
+        + footer_html(site)
+        + dock_and_script(site, with_rail=False)
+    )
 
 
 def render_rss_external_wire(limit: int = 6) -> str:
@@ -1288,6 +1551,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
   <div class="cover-bar">
     <span class="brand"><span class="wm">TENET<sup>5</sup></span></span>
     <nav class="cover-nav" aria-label="Primary">
+      <a href="live.html">LIVE</a>
       <a href="daily-briefing.html">Briefing</a>
       <a href="press-wire.html">Wire</a>
       <a href="newsletter.html">Newsletter</a>
@@ -1312,7 +1576,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <p>&ldquo;{esc(site["liril_cover"])}&rdquo;</p>
       <div class="guide-actions">
         <button type="button" class="guide-cta" id="liril-guide-btn-cover">Start today&#x27;s news package</button>
-        <a class="begin" href="#news-air" id="begin-record"><span>Play news segments</span><span class="arrow"></span></a>
+        <a class="begin" href="live.html" id="begin-record"><span>Watch TENET5 LIVE</span><span class="arrow"></span></a>
         <a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>
         <a class="begin begin-quiet" href="#liril-presentation"><span>Desk presentation</span></a>
       </div>
@@ -1383,7 +1647,8 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <div class="pres-actions">
         <button type="button" class="guide-cta" id="liril-pres-start">Start news presentation</button>
         <button type="button" class="guide-cta guide-cta-live" id="liril-pres-live">Listen live</button>
-        <a class="begin begin-quiet" href="#news-air"><span>News segments</span></a>
+        <a class="begin begin-quiet" href="#news-air"><span>Join desk air</span></a>
+        <a class="begin begin-quiet" href="live.html"><span>Full station</span></a>
         <a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>
       </div>
     </div>
@@ -1561,8 +1826,9 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     # Video product = render_news_air(news_segs) only.
 
     return (head("Canadian Investigative Newsroom",
-                 "Live Canadian news desk: daily briefing, playable news segments, multi-source wire, primary sources. Powered by LIRIL AI.")
-            + cover + newsdesk + render_news_air(news_segs) + enter + thesis + "".join(chapters) + visual_media + era
+                 "TENET5 LIVE: continuous Canadian news channel — desk hits, reports, case film, multi-source wire. Powered by LIRIL AI.")
+            + cover + newsdesk + render_news_air(news_segs)
+            + enter + thesis + "".join(chapters) + visual_media + era
             + render_catalog() + footer_html(site)
             + dock_and_script(site, with_rail=True))
 
@@ -1998,6 +2264,7 @@ def main() -> int:
     now = datetime.now(timezone.utc).astimezone()
 
     (ROOT / "index.html").write_text(build_index(site, posts, now), encoding="utf-8")
+    (ROOT / "live.html").write_text(build_live(site), encoding="utf-8")
     (ROOT / "evidence-index.html").write_text(build_evidence(site, evidence), encoding="utf-8")
     (ROOT / "daily-briefing.html").write_text(build_briefing(site), encoding="utf-8")
     # Preserve the product OSINT board shell (external JS/CSS + three tabs).
@@ -2016,7 +2283,7 @@ def main() -> int:
             n_stories += 1
 
     n_acts = build_acts()
-    print(f"[press] built index.html ({len(posts)} posts), evidence-index.html "
+    print(f"[press] built index.html + live.html ({len(posts)} posts), evidence-index.html "
           f"({len(evidence)} sources), {n_stories} story pages, {n_acts} act evidence files")
     return 0
 

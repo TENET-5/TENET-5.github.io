@@ -26,21 +26,25 @@ FEED_FILE = Path(__file__).parent.parent / "data" / "news_feed.json"
 LOOP_INTERVAL = 7200  # 2 hours
 
 # ── RSS Feed Sources ──────────────────────────────────────────────
+# Prefer live endpoints (2026-07-12 rectify: CTV /rss/politics 404; canada.ca news.rss timeout).
 FEEDS = [
     # Canada — politics & gov
-    {"name": "CBC Politics", "url": "https://www.cbc.ca/cmlink/rss-politics", "category": "politics"},
-    {"name": "CBC Canada", "url": "https://www.cbc.ca/cmlink/rss-canada", "category": "canada"},
-    {"name": "CTV Politics", "url": "https://www.ctvnews.ca/rss/politics", "category": "politics"},
+    {"name": "CBC Politics", "url": "https://www.cbc.ca/webfeed/rss/rss-politics", "category": "politics"},
+    {"name": "CBC Canada", "url": "https://www.cbc.ca/webfeed/rss/rss-canada", "category": "canada"},
+    {"name": "CBC Top Stories", "url": "https://www.cbc.ca/webfeed/rss/rss-topstories", "category": "canada"},
+    {"name": "CTV Top Stories", "url": "https://www.ctvnews.ca/rss/ctvnews-ca-top-stories-public-rss-1.822009", "category": "news"},
     {"name": "Globe Politics", "url": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/", "category": "politics"},
     {"name": "National Post", "url": "https://nationalpost.com/feed", "category": "news"},
     {"name": "Parliament Bills", "url": "https://www.parl.ca/legisinfo/en/bills?rss=true", "category": "legislation"},
-    {"name": "Gov Canada News", "url": "https://www.canada.ca/en/news.rss.xml", "category": "government"},
+    # canada.ca atom/rss often times out from this host — use PCO + OpenParliament instead
+    {"name": "PCO Newsroom", "url": "https://www.canada.ca/en/privy-council.atom.xml", "category": "government"},
+    {"name": "OpenParliament", "url": "https://openparliament.ca/feeds/bills/", "category": "legislation"},
     # Global wire — multi-source balance (objective intake)
-    {"name": "Reuters World", "url": "https://feeds.reuters.com/Reuters/worldNews", "category": "world"},
-    {"name": "AP Top News", "url": "https://rsshub.app/apnews/topics/apf-topnews", "category": "world"},
-    {"name": "BBC World", "url": "http://feeds.bbci.co.uk/news/world/rss.xml", "category": "world"},
+    {"name": "BBC World", "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "category": "world"},
     {"name": "The Guardian World", "url": "https://www.theguardian.com/world/rss", "category": "world"},
     {"name": "Al Jazeera", "url": "https://www.aljazeera.com/xml/rss/all.xml", "category": "world"},
+    {"name": "Global News Canada", "url": "https://globalnews.ca/feed/", "category": "canada"},
+    {"name": "Ottawa Citizen", "url": "https://ottawacitizen.com/feed", "category": "canada"},
 ]
 
 # ── Relevance Keywords (investigation + civic, NOT partisan cheer) ──
@@ -55,26 +59,33 @@ KEYWORDS = {
     "arrivecan": 12, "phoenix pay": 12, "gcstrategies": 10,
     "procurement": 6, "auditor general": 8, "order in council": 8,
     "proactive disclosure": 7, "access to information": 7,
-    # Defence / veterans
+    "sole-source": 8, "contracting": 5, "p3": 5,
+    # Defence / veterans / Arctic
     "veterans affairs": 8, "cds": 6, "chief of defence": 8,
     "defence investment": 7, "submarine": 6, "griffon": 8,
+    "arctic": 6, "nato": 5, "norad": 7, "f-35": 6,
     # Foreign interference / security
     "foreign interference": 10, "csis": 8, "fitaa": 8,
-    "foreign influence": 8, "rcmp": 6,
-    # Lobbying / capture
+    "foreign influence": 8, "rcmp": 6, "nsicop": 10,
+    "foreign agent": 8, "election interference": 10,
+    # Lobbying / capture / finance
     "lobbying": 8, "lobbyist": 6, "conflict of interest": 10,
     "ethics commissioner": 9, "blind trust": 8,
-    # Institutions
+    "brookfield": 9, "blackrock": 7, "carney": 6,
+    "cija": 8, "wef": 5, "davos": 5,
+    # Institutions / media
     "hansard": 6, "committee": 4, "parliament": 3,
-    "supreme court": 5, "charter": 4,
+    "supreme court": 5, "charter": 4, "cbc": 4,
+    "municipal": 5, "transit": 4, "developer": 5,
     # Economy / fiscal (neutral)
     "bank of canada": 5, "deficit": 4, "budget": 4,
     "infrastructure bank": 6, "carbon tax": 5,
     # Global that still maps to Canadian analysis
-    "nato": 4, "trade": 3, "tariff": 5, "immigration": 4,
+    "trade": 3, "tariff": 5, "immigration": 4,
+    "housing": 5, "ltc": 6, "long-term care": 7,
 }
 
-MINIMUM_RELEVANCE = 6  # slightly lower so multi-source civic wire fills
+MINIMUM_RELEVANCE = 5  # multi-source civic wire + investigation desks
 
 
 def fetch_rss(url: str, timeout: int = 15) -> str | None:

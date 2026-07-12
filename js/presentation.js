@@ -1606,7 +1606,7 @@
     token: 0,
     subtitle: null,
     rateIdx: savedRate,
-    autoNarrate: savedAuto,
+    autoNarrate: false, /* Force autoNarrate OFF by default as per user request */
     narrateAllActive: false,
     narrateAllSlides: null,
     narrateAllTracker: null,
@@ -2105,6 +2105,10 @@
       updateNarrationButton();
     };
 
+    if (window.TENET5AudioBus) {
+      window.TENET5AudioBus.pauseAllDocs();
+      window.TENET5AudioBus.claim('speech');
+    }
     window.speechSynthesis.speak(u);
   }
 
@@ -2426,6 +2430,10 @@
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
     }
+    if (window.TENET5AudioBus) {
+      window.TENET5AudioBus.pauseAllDocs();
+      window.TENET5AudioBus.claim('speech');
+    }
     window.speechSynthesis.speak(u);
   }
 
@@ -2505,19 +2513,15 @@
     // presentation.js at 2000ms + liril-walkthrough at 2500ms).
     try {
       var autopilot = JSON.parse(sessionStorage.getItem('liril_autopilot') || 'null');
+      /* Autopilot autostart disabled as per user request */
       if (autopilot && autopilot.autostart) {
         var age = Date.now() - (autopilot.startedAt || 0);
         if (age >= 30 * 60 * 1000) {
           sessionStorage.removeItem('liril_autopilot');
         } else if (!window.__LIRIL_WALKTHROUGH_LOADED &&
                    !document.getElementById('liril-start-walkthrough')) {
-          // liril-walkthrough.js isn't loaded — we're the only engine. Fire.
-          setTimeout(function() {
-            if (window.__TENET5_LIRIL_NARRATE_ALL) {
-              console.log('[LIRIL] Autopilot: auto-starting Narrate All (no walkthrough bridge)');
-              window.__TENET5_LIRIL_NARRATE_ALL();
-            }
-          }, 2000);
+          // Disabled auto-start of Narrate All
+          console.log('[LIRIL] Autopilot: auto-start disabled by user request');
         } else {
           // liril-walkthrough.js will handle autopilot via its own startBridge trigger.
           console.log('[LIRIL] Autopilot: deferring to walkthrough bridge (double-voice fix)');
