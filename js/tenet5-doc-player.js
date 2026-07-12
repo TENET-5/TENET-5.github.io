@@ -423,13 +423,12 @@
     frame.appendChild(badge);
     controls.appendChild(btnPlay);
     controls.appendChild(btnSound);
-    controls.appendChild(btnPrev);
-    controls.appendChild(btnNext);
     controls.appendChild(status);
     controls.appendChild(openLink);
 
     root.appendChild(frame);
-    root.appendChild(chapters);
+    // User requested: "people only need a play button it should play straight through"
+    // Chapters and prev/next buttons removed from UI.
     root.appendChild(controls);
     root.appendChild(cap);
 
@@ -484,7 +483,9 @@
         var io = new IntersectionObserver(function (entries) {
           entries.forEach(function (en) {
             if (en.isIntersecting) {
-              playAll();
+              armVideo(v);
+              var p = v.play();
+              if (p && p.catch) p.catch(function () {});
             } else {
               try { v.pause(); } catch (e) { /* */ }
               if (audio) try { audio.pause(); } catch (e2) { /* */ }

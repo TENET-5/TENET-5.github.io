@@ -213,6 +213,7 @@
   function speak(text, opts) {
     if (!text || !window.speechSynthesis) return false;
     if (window.__LIRIL_MUTED) return false;   // dock voice toggle — single point, site-wide
+    text = text.replace(/TENET5/gi, 'Tenet Five');
     var v = resolve();
     if (!isAcceptable(v)) {
       console.warn('[LIRIL-VOICE] speak() suppressed — no acceptable voice (never default).');
@@ -234,6 +235,18 @@
     if (!(opts && opts.keepQueue) && window.speechSynthesis.speaking) {
       try { window.speechSynthesis.cancel(); } catch (e0) { /* */ }
     }
+    
+    // Fix Chrome garbage collection bug where utterances die mid-sentence
+    window.__liril_utterances = window.__liril_utterances || [];
+    window.__liril_utterances.push(u);
+    // Keep array from growing infinitely
+    if (window.__liril_utterances.length > 20) window.__liril_utterances.shift();
+
+    // Fix Chrome stuck-in-paused-state bug
+    if (window.speechSynthesis.paused) {
+      try { window.speechSynthesis.resume(); } catch (e1) { /* */ }
+    }
+    
     window.speechSynthesis.speak(u);
     return true;
   }
