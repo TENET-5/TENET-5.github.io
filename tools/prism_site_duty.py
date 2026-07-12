@@ -298,7 +298,7 @@ def lap() -> dict:
         ("prism_sports_desk.py", ["--json", "--apply"]),
         ("prism_markets_desk.py", ["--json", "--apply"]),
         ("prism_sunroom_gen.py", ["--json", "--apply", "--n", "12"]),
-        ("prism_cartoon_forge.py", ["--json", "--apply", "--n", "8", "--from-wire"]),
+        ("prism_cartoon_forge.py", ["--json", "--apply", "--n", "12"]),
         ("prism_desk_svg_art.py", ["--json", "--apply"]),
     ]
     life_ok = True
