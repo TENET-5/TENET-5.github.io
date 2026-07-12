@@ -1,4 +1,4 @@
-/* TENET5 hybrid documentary player v2
+/* TENET5 hybrid documentary player v3 — muxed VO+BGM preferred
  * Film + LIRIL narration + on-screen text + interactive chapter navigation.
  * Matches site structure: acts / stages / sources. Atmosphere is not proof.
  *
@@ -7,7 +7,7 @@
  */
 (function () {
   'use strict';
-  if (window.TENET5DocPlayer && window.TENET5DocPlayer.__v >= 2) return;
+  if (window.TENET5DocPlayer && window.TENET5DocPlayer.__v >= 3) return;
 
   function reduced() {
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -367,20 +367,32 @@
       btnSound.textContent = state.soundOn ? 'Narration · On' : 'Narration · Off';
       btnSound.classList.toggle('on', state.soundOn);
       if (state.soundOn) {
-        /* enable hybrid audio */
-        if (audio) {
+        v.dataset.userUnmuted = '1';
+        /* Prefer audio already muxed into the video (product path). */
+        var muxed = !!(v.src && /_mux\.mp4/i.test(v.src || v.currentSrc || ''));
+        if (muxed || (!audio && v.querySelector('source'))) {
+          try {
+            v.muted = false;
+            v.defaultMuted = false;
+            v.removeAttribute('muted');
+            v.volume = 1;
+          } catch (e0) { /* */ }
+          /* Suppress browser TTS when product file already has LIRIL VO + score */
+          if (muxed) state.narrateBeats = false;
+        }
+        if (audio && !muxed) {
           try {
             var ap = audio.play();
             if (ap && ap.catch) ap.catch(function () {});
           } catch (e) { /* */ }
-        } else {
-          v.dataset.userUnmuted = '1';
-          /* film files are silent Ken Burns — use LIRIL voice */
+        } else if (!muxed && !audio) {
+          /* Silent film fallback — LIRIL browser voice */
+          state.narrateBeats = true;
           var bi = activeBeatAt(v.currentTime || 0);
           speakBeat(bi >= 0 ? bi : 0, true);
         }
         if (v.paused) playAll();
-        else if (!audio) {
+        else if (!audio && !muxed) {
           var b2 = activeBeatAt(v.currentTime || 0);
           if (b2 >= 0) speakBeat(b2, true);
         }
@@ -389,6 +401,7 @@
         stopSpeak();
         v.dataset.userUnmuted = '';
         v.muted = true;
+        state.narrateBeats = true;
       }
     });
 

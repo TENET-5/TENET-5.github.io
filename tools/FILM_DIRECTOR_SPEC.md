@@ -32,6 +32,19 @@ The film runs in acts (Prologue → the record → present). B-roll motifs by re
   grey wind. Motif for accountability/parliament beats.
 - **The cost** — closed doors, empty waiting rooms, cold light on vacant chairs. Motif for
   the human-impact beats. (Restraint absolute here — dignity over drama.)
+- **Wire / weather / threshold** — newsdesk after hours, wet plazas, hearing doors, stairwells.
+  Stops every clip reading as the same corridor.
+
+### Intelligent anti-monotony (required)
+Runner: `E:/ComfyUI_native/tenet5_media_director.py` (wired into `tenet5_ltx_gen.py`).
+
+Every generate composes **DNA axes** so clips do not clone each other:
+`family × motif × material × light × lens × camera × register`.
+
+- History: `data/media_gen_history.json` — last N combos avoided.
+- Page affinity: `act-iv` → cost/housing; `daily-briefing` → wire; `argument` → institution.
+- Still images: same director via `tools/generate_v2_media.py` (ice-lake only — **never** cyber/Awwwards).
+- Flag: `--no-intelligent` is legacy monotony mode — do not use for product.
 
 ## Technical spec (current, honest) — SLATE tiers
 
@@ -51,6 +64,12 @@ The film runs in acts (Prologue → the record → present). B-roll motifs by re
   768×512, length 97, 8 steps — **single** RTX 5070 Ti, ~6s/clip warm. **Not p256.**
 - Output: `media/film/video/*.mp4` (catalog), `media/film/docs/*.mp4` (acts), hybrid manifests under `data/film/`.
 - Player: `js/tenet5-cinema-play.js` **v4** + CSS Ken Burns insurance in `press-theme.css`.
+
+## Audio product (hard — 2026-07-12)
+Silent hybrid documentaries are **not done**. See `tools/DOCUMENTARY_AUDIO_PRODUCT.md` and `tools/AUDIO_SLATE_SPEC.md`.
+- Neural LIRIL VO + ducked BGM must be **in the file** (`*_mux.mp4`) and/or paired `data-doc-audio`.
+- Command: `python tools/prism_audio_slate.py --json --apply acts`
+- Browser TTS is backup only.
 
 ## Integration
 - Cohesive documentaries are embedded as high-tier cinema players (`.cinema-player`) at the head of every story and article. 
