@@ -113,7 +113,7 @@
       beats: [],
       cues: [],
       beatIndex: -1,
-      soundOn: false,
+      soundOn: true,
       narrateBeats: true,
       lastSpokenBeat: -1
     };
@@ -161,8 +161,8 @@
 
     var btnSound = document.createElement('button');
     btnSound.type = 'button';
-    btnSound.className = 'doc-stage-btn doc-stage-btn-ghost';
-    btnSound.textContent = 'Narration · Off';
+    btnSound.className = 'doc-stage-btn doc-stage-btn-ghost on';
+    btnSound.textContent = 'Narration · On';
     btnSound.title = 'LIRIL narration + page audio when available';
 
     var btnPrev = document.createElement('button');
@@ -484,9 +484,7 @@
         var io = new IntersectionObserver(function (entries) {
           entries.forEach(function (en) {
             if (en.isIntersecting) {
-              armVideo(v);
-              var p = v.play();
-              if (p && p.catch) p.catch(function () {});
+              playAll();
             } else {
               try { v.pause(); } catch (e) { /* */ }
               if (audio) try { audio.pause(); } catch (e2) { /* */ }
