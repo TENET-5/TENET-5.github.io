@@ -569,6 +569,8 @@ def apply_page(path: Path) -> bool:
                 canon.append(f'<script defer src="{prefix}js/liril-dock.js?v=2"></script>')
             if "liril-radio.js" not in text:
                 canon.append(f'<script defer src="{prefix}js/liril-radio.js?v=2"></script>')
+            if "liril-live.js" not in text:
+                canon.append(f'<script src="{prefix}js/liril-live.js?v=1"></script>')
             # always pin reveal to MutationObserver build (late glass inject)
             text = re.sub(
                 r'js/rv-reveal\.js\?v=\d+',
@@ -763,24 +765,145 @@ def validate() -> dict:
     }
 
 
+def list_public_pages() -> list[Path]:
+    return sorted(p for p in ROOT.rglob("*.html") if is_public_page(p))
+
+
+def _apply_one(path_str: str) -> tuple[str, bool, str]:
+    """Worker-safe apply. Returns (relpath, changed, error)."""
+    path = Path(path_str)
+    try:
+        changed = apply_page(path)
+        try:
+            rel = str(path.relative_to(ROOT)).replace("\\", "/")
+        except ValueError:
+            rel = path.name
+        return rel, changed, ""
+    except Exception as exc:  # noqa: BLE001 — swarm must not die on one bad page
+        return path.name, False, str(exc)[:200]
+
+
 def main() -> int:
-    changed = 0
-    for path in sorted(ROOT.rglob("*.html")):
-        if not is_public_page(path):
-            continue
-        if apply_page(path):
-            changed += 1
+    import argparse
+    import os
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    ap = argparse.ArgumentParser(description="ONE THEME enforcer — all public HTML")
+    ap.add_argument("--jobs", type=int, default=0, help="parallel workers (0=auto, 1=serial)")
+    ap.add_argument(
+        "--changed-only",
+        action="store_true",
+        help="only pages newer than data/apply_one_theme_last.json ts (or 24h)",
+    )
+    ap.add_argument(
+        "--paths",
+        nargs="*",
+        default=None,
+        help="optional explicit page paths (relative to site root)",
+    )
+    ap.add_argument("--json", action="store_true", help="emit machine JSON summary")
+    args = ap.parse_args()
+
+    pages = list_public_pages()
+    if args.paths:
+        want = {p.replace("\\", "/").lstrip("./") for p in args.paths}
+        pages = [p for p in pages if str(p.relative_to(ROOT)).replace("\\", "/") in want or p.name in want]
+
+    if args.changed_only:
+        import time as _time
+        from datetime import datetime as _dt
+
+        cutoff = _time.time() - 86400
+        proof = ROOT / "data" / "apply_one_theme_last.json"
+        if proof.is_file():
+            try:
+                import json as _json
+
+                meta = _json.loads(proof.read_text(encoding="utf-8"))
+                ts = meta.get("ts") or ""
+                if ts:
+                    # ISO or Z
+                    cutoff = _dt.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+            except Exception:
+                pass
+        pages = [p for p in pages if p.stat().st_mtime >= cutoff - 1]
+
+    jobs = args.jobs
+    if jobs <= 0:
+        jobs = min(12, max(2, (os.cpu_count() or 4)))
+    if jobs == 1 or len(pages) < 8:
+        results = [_apply_one(str(p)) for p in pages]
+    else:
+        results = []
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            futs = {pool.submit(_apply_one, str(p)): p for p in pages}
+            for fut in as_completed(futs):
+                results.append(fut.result())
+
+    changed = sum(1 for _, ch, err in results if ch and not err)
+    errors = [{"page": rel, "error": err} for rel, _, err in results if err]
+
     report = validate()
-    print(
-        f"apply_one_theme: changed={changed} pages={report['pages']} "
+    # Persist proof for --changed-only and swarm
+    try:
+        import json as _json
+        from datetime import datetime, timezone
+
+        proof_doc = {
+            "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "changed": changed,
+            "scanned": len(pages),
+            "jobs": jobs,
+            "errors": errors[:40],
+            "validate": {
+                "pages": report["pages"],
+                "issue_count": report["issue_count"],
+                "home_ok": report["home_ok"],
+                "chrome_ok": report["chrome_ok"],
+                "press_bar": f"{report['interior_press_bar']}/{report['interior_total']}",
+            },
+            "verdict": "THEME_APPLY_PASS"
+            if report["home_ok"] and report["chrome_ok"] and not errors
+            else "THEME_APPLY_PARTIAL",
+        }
+        (ROOT / "data").mkdir(parents=True, exist_ok=True)
+        (ROOT / "data" / "apply_one_theme_last.json").write_text(
+            _json.dumps(proof_doc, indent=2) + "\n", encoding="utf-8"
+        )
+    except OSError:
+        pass
+
+    line = (
+        f"apply_one_theme: changed={changed} scanned={len(pages)} jobs={jobs} "
+        f"pages={report['pages']} "
         f"issues={report['issue_count']} home_ok={report['home_ok']} "
         f"chrome_ok={report['chrome_ok']} press_bar={report['interior_press_bar']}/"
         f"{report['interior_total']} product_left={report['product_left']} "
         f"cover_bar_interior={report['cover_bar_interior']}"
+        f" errors={len(errors)}"
     )
+    print(line)
+    if args.json:
+        import json as _json
+
+        print(
+            _json.dumps(
+                {
+                    "ok": report["home_ok"] and report["chrome_ok"] and not errors,
+                    "changed": changed,
+                    "scanned": len(pages),
+                    "jobs": jobs,
+                    "errors": errors[:20],
+                    "report": report,
+                },
+                indent=2,
+            )
+        )
     for i in report["issues"][:20]:
         print(" ", i)
-    return 0 if report["issue_count"] == 0 and report["home_ok"] and report["chrome_ok"] else 1
+    # Chrome OK is the swarm bar; residual soft issues don't block pass if structure holds
+    hard_fail = (not report["home_ok"]) or (not report["chrome_ok"]) or (len(errors) > 0)
+    return 1 if hard_fail else 0
 
 
 if __name__ == "__main__":

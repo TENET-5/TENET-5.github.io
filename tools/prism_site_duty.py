@@ -68,6 +68,7 @@ PROJECT = {
         "liril_news_articles",       # AI desk articles from briefing + wire
         "liril_news_presentation",   # LIRIL front-page news presentation script
         "liril_desk_reporter",       # AI reporter persona + live wire (always-new news)
+        "page_swarm_correct_all",    # parallel correct EVERY public HTML (first)
         "press_rebuild",
         "network_osint_board",
         "design_lock_guardrail",     # crystal-clear taste contract, loads last (swarm-proof)
@@ -220,6 +221,30 @@ def lap() -> dict:
             "tokens": "root_void_ice_serif",
         }
     )
+
+    # 0) PAGE SWARM FIRST — correct every public HTML before content jobs
+    # (content tools that rewrite HTML must not leave uncorrected chrome behind)
+    page_swarm = TOOLS / "prism_page_swarm.py"
+    apply_early = TOOLS / "apply_one_theme.py"
+    if page_swarm.exists() and "--no-page-swarm" not in sys.argv:
+        changed_only = os.environ.get("PRISM_PAGE_SWARM_CHANGED", "").strip() in ("1", "true", "yes")
+        cmd = [sys.executable, str(page_swarm), "--json", "--jobs", "12"]
+        if changed_only or ("--fast" in sys.argv):
+            # pre-commit / fast: still correct, but prefer hot pages when proof exists
+            if changed_only:
+                cmd.append("--changed-only")
+        code, out = _run(cmd, timeout=900)
+        steps.append({
+            "name": "page_swarm_first",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-600:],
+            "job": "PRISM page swarm FIRST — parallel correct every public HTML",
+            "proof": str(ROOT / "data" / "prism_page_swarm_last.json"),
+        })
+    elif apply_early.exists() and "--no-page-swarm" not in sys.argv:
+        code, out = _run([sys.executable, str(apply_early), "--jobs", "12"], timeout=900)
+        steps.append({"name": "page_swarm_first", "ok": code == 0, "exit": code, "tail": (out or "")[-400:]})
 
     # 1b) RSS → objective home wire (multi-source; not TENET5 verdicts)
     # Always-new news: every 4th lap runs --scan to pull fresh feeds (network).
@@ -382,13 +407,40 @@ def lap() -> dict:
     else:
         steps.append({"name": "network_osint_board", "ok": False, "detail": "build_network_osint_board.py missing"})
 
-    # 3) enforce one theme on all pages
+    # 3) PAGE SWARM — correct EVERY public HTML in parallel (instant correct path)
+    # Prefer prism_page_swarm (parallel theme + liril-live inject). Fallback serial apply.
+    page_swarm = TOOLS / "prism_page_swarm.py"
     apply = TOOLS / "apply_one_theme.py"
-    if apply.exists():
-        code, out = _run([sys.executable, str(apply)], timeout=300)
-        steps.append({"name": "apply_one_theme", "ok": code == 0, "exit": code, "tail": out[-600:]})
+    if page_swarm.exists():
+        # Full correct every lap; --changed-only only when PRISM_PAGE_SWARM_CHANGED=1
+        changed_only = os.environ.get("PRISM_PAGE_SWARM_CHANGED", "").strip() in ("1", "true", "yes")
+        cmd = [sys.executable, str(page_swarm), "--json", "--jobs", "12"]
+        if changed_only:
+            cmd.append("--changed-only")
+        code, out = _run(cmd, timeout=900)
+        steps.append({
+            "name": "page_swarm",
+            "ok": code == 0,
+            "exit": code,
+            "tail": (out or "")[-800:],
+            "job": "PRISM page swarm — parallel correct every public HTML + liril-live",
+            "proof": str(ROOT / "data" / "prism_page_swarm_last.json"),
+            "owner": "PRISM",
+        })
+    elif apply.exists():
+        code, out = _run(
+            [sys.executable, str(apply), "--jobs", "12"],
+            timeout=900,
+        )
+        steps.append({
+            "name": "apply_one_theme",
+            "ok": code == 0,
+            "exit": code,
+            "tail": out[-600:],
+            "job": "parallel theme apply (page_swarm missing)",
+        })
     else:
-        steps.append({"name": "apply_one_theme", "ok": False, "detail": "apply_one_theme.py missing"})
+        steps.append({"name": "page_swarm", "ok": False, "detail": "prism_page_swarm.py and apply_one_theme.py missing"})
 
     # 4) hard home markers (press design lock)
     home_path = ROOT / "index.html"

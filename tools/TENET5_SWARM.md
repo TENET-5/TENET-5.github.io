@@ -18,9 +18,29 @@ the image/video pipelines, any agent) obeys this contract. Mission lives in
 4. **Taste + respect.** Grave subjects (MAID deaths, veterans, Indigenous harm) get restraint:
    single quiet frames, no faces/bodies, no sensationalism, collage EXACTLY once site-wide.
 
+## Instant page correct (2026-07-12 — swarm failure fix)
+
+Serial `apply_one_theme` over 300+ pages timed out / skipped; SEO/voice steps stole the lap.
+**Page swarm is now first-class and parallel:**
+
+```text
+python tools/prism_page_swarm.py --json --jobs 12
+python tools/apply_one_theme.py --jobs 12
+python tools/apply_one_theme.py --jobs 8 --changed-only
+```
+
+| Tool | Job |
+|------|-----|
+| `prism_page_swarm.py` | Parallel theme/chrome/leak heal + `liril-live.js` inject on **every** public HTML |
+| `apply_one_theme.py --jobs N` | Same enforcer, multi-threaded |
+| site-duty lap | Calls page swarm **before** slow SEO/acuity |
+
+Proof: `data/prism_page_swarm_last.json` · `data/apply_one_theme_last.json`
+
 ## The gates (run every site-duty lap — a lap fails if any fail)
 | Gate | Tool | Blocks on |
 |---|---|---|
+| **every page chrome** | `page_swarm` step | theme/dock/press-bar missing after parallel apply |
 | design-lock present + injected last | `design_lock` step | missing/unlinked guardrail |
 | zero-internals | `leak_scan` step → `leak_scanner.py` | LTX/p256/kernel/path/seed in visible text |
 | legal + internals self-heal | `apply_one_theme.py` `_COMPLIANCE`/`_LEAK` | (auto-relabels, non-blocking) |
