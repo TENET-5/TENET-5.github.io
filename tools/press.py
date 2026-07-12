@@ -1197,6 +1197,10 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <a class="newsdesk-pill" href="#month" role="listitem">Claim vs record</a>
       <a class="newsdesk-pill" href="evidence-index.html" role="listitem">Evidence shelf</a>
       <a class="newsdesk-pill" href="key-facts.html" role="listitem">Key facts</a>
+      <a class="newsdesk-pill" href="sunroom.html" role="listitem">Sunroom · gentlemen</a>
+      <a class="newsdesk-pill" href="sports-desk.html" role="listitem">Sports Desk</a>
+      <a class="newsdesk-pill" href="markets.html" role="listitem">Markets · TSX</a>
+      <a class="newsdesk-pill" href="cartoon-desk.html" role="listitem">Press Ink</a>
     </div>
     <div class="liril-presentation glass" id="liril-presentation" aria-label="LIRIL desk reporter — live news">
       <div class="pres-byline">
@@ -1216,8 +1220,8 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
 </section>
 <section class="doc-stage home-doc" id="doc-stage"
          data-doc-video="media/film/docs/maid_argument.mp4"
-         data-doc-audio="audio/genocide-evidence.mp3"
-         data-doc-vtt="audio/genocide-evidence.vtt"
+         data-doc-audio="audio/docs/hybrid_maid_argument.mp3"
+         data-doc-vtt="audio/docs/hybrid_maid_argument.vtt"
          data-doc-manifest="data/film/hybrid_maid_argument.json"
          data-doc-poster="media/landing/parliament_ice.jpg"
          data-doc-title="Documentary · five-act public record"
