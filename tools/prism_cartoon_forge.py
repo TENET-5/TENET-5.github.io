@@ -55,7 +55,7 @@ TEMPLATES: list[dict[str, Any]] = [
             "PAY STATUS — RETRY (since 2016). A civil-service silhouette "
             "holds an empty pay envelope. Banner above: 'MODERNIZATION COMPLETE.'"
         ),
-        "punch": "Still loading… since 2016.",
+        "punch": "Still loading... since 2016.",
         "labels": ["PHOENIX", "RETRY", "MODERNIZATION COMPLETE"],
         "record": "Phoenix pay failure — AG reports, years of under/overpayment",
     },
