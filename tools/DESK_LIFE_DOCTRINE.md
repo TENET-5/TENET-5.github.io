@@ -29,13 +29,15 @@ Atmosphere is not proof; market and sports predictions are **labeled models**, n
 - Cite public data sources (league sites, exchange, SEDAR+ when filing-based).
 - Not investment advice. Not gambling advice. Desk analysis only.
 
-### Press Ink (cartoons)
-- **Public figures and institutions only** for caricature (office, party, policy).
-- Punchline from **policy contradiction or public record**, never random cruelty.
-- No racial/religious hate caricature, no sexual humiliation, no gore.
-- Style: elite broadsheet ink — clean line, ice palette accents, one joke, one target.
-- Optional **animated short** (3–8s LTX): same taste, exaggerated motion once.
-- Generator must pass humor rubric + taste gate before ship.
+### Press Ink (cartoons) — must actually land
+- **3-second rule:** if the gag needs a paragraph, it fails. One visual + one knife caption.
+- **Specific Canadian public record** — Phoenix, ArriveCAN, ATIP, MAID capacity, VAC, interference process, media subsidy, ethics fines, PSDPA, procurement. No generic “politician with balloon.”
+- **Public offices / institutions only.** Punch the system, never patients, veterans’ dignity, or private life.
+- **Caption is the joke** (card headline = punchline). No academic “laugh_engine” titles.
+- No racial/religious hate, sexual humiliation, gore, or identity mockery.
+- Style: broadsheet ink, readable labels in-frame, ice-lake paper, single crimson accent on the lie.
+- Humor gate **≥70** with specificity + tight punch + labels + record anchor. Ban banal clichés.
+- Optional **animated short** (3–8s LTX): same gag, one motion beat.
 
 ## Generation owners
 

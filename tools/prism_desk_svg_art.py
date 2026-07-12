@@ -33,178 +33,234 @@ def _esc(s: str) -> str:
 
 
 def cartoon_svg(item: dict[str, Any]) -> str:
-    """Single-panel broadsheet ink SVG — funny, tasteful, readable caption."""
+    """Single-panel broadsheet ink — gag must read at a glance."""
     punch = (item.get("punchline") or "").replace("Caption:", "").strip().strip("'\"")
-    title = (item.get("laugh_engine") or item.get("target") or "Press Ink")[:48]
+    title = (item.get("title") or item.get("template") or "Press Ink")[:40]
     tid = item.get("template") or "ink"
+    uid = re.sub(r"[^a-zA-Z0-9]", "", item.get("id") or tid)[:16]
 
-    # Scene motifs by template id
     motifs = {
-        "promise_vs_ledger": _balloon_ledger(),
-        "oversight_asleep": _watchdog(),
-        "two_sets_of_books": _two_binders(),
-        "procurement_snail": _snail_jet(),
-        "maid_form_queue": _two_doors(),
-        "housing_ladder": _floating_ladder(),
-        "foreign_interference_smoke": _smoke_room(),
-        "media_subsidy_handshake": _cheque_notepad(),
+        "phoenix_still_loading": _sc_phoenix(),
+        "arrivecan_receipt": _sc_arrivecan(),
+        "atip_fully_disclosed": _sc_atip(),
+        "maid_capacity_found": _sc_maid_doors(),
+        "vac_other_option": _sc_vac(),
+        "interference_more_process": _sc_interference(),
+        "media_bailout_pen": _sc_media(),
+        "ethics_five_hundred": _sc_ethics(),
+        "whistleblower_shredder": _sc_whistle(),
+        "daycare_2031": _sc_daycare(),
+        "nato_study_options": _sc_nato(),
+        "equal_terms_apply": _sc_two_tier(),
     }
-    scene = motifs.get(tid, _balloon_ledger())
+    scene = motifs.get(tid, _sc_atip())
+
+    # Wrap long punchlines
+    punch_show = punch[:78]
+    punch_size = 18 if len(punch_show) > 48 else 22
 
     return f'''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="{_esc(title)}">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="{_esc(title)}: {_esc(punch_show)}">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="bg{uid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#0b1014"/>
       <stop offset="100%" stop-color="#050708"/>
     </linearGradient>
-    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.9  0 0 0 0 0.95  0 0 0 0.04 0"/></filter>
   </defs>
-  <rect width="800" height="500" fill="url(#bg)"/>
-  <rect x="24" y="20" width="752" height="460" fill="none" stroke="#9adbe8" stroke-opacity="0.22" stroke-width="1.5"/>
-  <rect x="28" y="24" width="744" height="452" fill="#0e1318" stroke="#ece7dc" stroke-opacity="0.12"/>
-  <!-- paper panel -->
-  <rect x="48" y="44" width="704" height="340" fill="#e8e2d6" opacity="0.96"/>
-  <rect x="48" y="44" width="704" height="340" filter="url(#grain)" opacity="0.35"/>
+  <rect width="800" height="500" fill="url(#bg{uid})"/>
+  <rect x="20" y="16" width="760" height="468" fill="none" stroke="#9adbe8" stroke-opacity="0.2" stroke-width="1"/>
+  <!-- newsprint panel -->
+  <rect x="40" y="36" width="720" height="360" fill="#efe9dc"/>
+  <rect x="40" y="36" width="720" height="28" fill="#0b0e10"/>
+  <text x="56" y="55" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="3" fill="#c4a574">{_esc(title.upper())}</text>
+  <text x="720" y="55" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#827a6d">PRESS INK</text>
   {scene}
-  <!-- caption bar -->
-  <rect x="48" y="396" width="704" height="68" fill="#0b0e10"/>
-  <text x="400" y="428" text-anchor="middle" font-family="Georgia, serif" font-size="20" font-style="italic" fill="#ece7dc">{_esc(punch[:72])}</text>
-  <text x="400" y="452" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="2" fill="#9adbe8">PRESS INK · TENET5 · POWERED BY LIRIL AI</text>
-  <text x="64" y="68" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="3" fill="#3f7c8c">{_esc(title.upper()[:40])}</text>
+  <!-- caption bar — the knife -->
+  <rect x="40" y="396" width="720" height="72" fill="#0b0e10"/>
+  <text x="400" y="430" text-anchor="middle" font-family="Georgia, serif" font-size="{punch_size}" font-style="italic" fill="#ece7dc">{_esc(punch_show)}</text>
+  <text x="400" y="454" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="2" fill="#3f7c8c">TENET5 · PUBLIC RECORD SATIRE · POWERED BY LIRIL AI</text>
 </svg>
 '''
 
 
-def _balloon_ledger() -> str:
+def _sc_phoenix() -> str:
     return '''
-  <rect x="120" y="200" width="220" height="140" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <line x1="140" y1="230" x2="300" y2="230" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="140" y1="260" x2="280" y2="260" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="140" y1="290" x2="260" y2="290" stroke="#1a1a1a" stroke-width="2"/>
-  <ellipse cx="520" cy="160" rx="90" ry="70" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <text x="520" y="168" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#1a1a1a">PROMISE</text>
-  <line x1="520" y1="230" x2="520" y2="300" stroke="#1a1a1a" stroke-width="2"/>
-  <circle cx="520" cy="310" r="8" fill="#c8102e"/>
-  <!-- stick figure office (no face detail) -->
-  <circle cx="520" cy="250" r="18" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="520" y1="268" x2="520" y2="320" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="520" y1="285" x2="490" y2="300" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="520" y1="285" x2="550" y2="270" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="180" y="100" width="440" height="220" rx="6" fill="#1a1a1a"/>
+  <rect x="196" y="116" width="408" height="160" fill="#0d1a12"/>
+  <text x="400" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#6a9" letter-spacing="4">PHOENIX PAY</text>
+  <text x="400" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="28" fill="#c8102e" font-weight="700">RETRY</text>
+  <text x="400" y="235" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#9adbe8">since 2016…</text>
+  <text x="400" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#1a1a1a">MODERNIZATION COMPLETE</text>
+  <rect x="250" y="330" width="90" height="40" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="295" y="355" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">$0.00</text>
 '''
 
 
-def _watchdog() -> str:
+def _sc_arrivecan() -> str:
     return '''
-  <ellipse cx="380" cy="280" rx="100" ry="55" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <circle cx="320" cy="240" r="36" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <ellipse cx="300" cy="220" rx="10" ry="18" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <ellipse cx="340" cy="220" rx="10" ry="18" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <!-- Zzz -->
-  <text x="380" y="200" font-family="Georgia, serif" font-size="28" fill="#1a1a1a">z z z</text>
-  <!-- reports -->
-  <rect x="480" y="220" width="90" height="110" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <rect x="500" y="200" width="90" height="110" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <rect x="520" y="180" width="90" height="110" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <text x="565" y="240" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">A.G.</text>
-  <rect x="300" y="300" width="50" height="18" rx="4" fill="none" stroke="#c8102e" stroke-width="2"/>
+  <rect x="280" y="90" width="120" height="200" rx="18" fill="none" stroke="#1a1a1a" stroke-width="4"/>
+  <rect x="295" y="115" width="90" height="140" fill="#1a2830"/>
+  <text x="340" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#9adbe8">Arrive</text>
+  <text x="340" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#9adbe8">CAN</text>
+  <path d="M400 140 Q520 100 560 180 Q580 240 540 280 Q480 320 420 260" fill="none" stroke="#c8102e" stroke-width="3"/>
+  <text x="530" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#c8102e" font-weight="700">$54M+</text>
+  <text x="530" y="230" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#1a1a1a">receipt unfurls…</text>
+  <text x="200" y="320" font-family="IBM Plex Mono, monospace" font-size="11" fill="#827a6d">COVID: gone</text>
+  <text x="200" y="340" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c8102e">INVOICE: forever</text>
 '''
 
 
-def _two_binders() -> str:
+def _sc_atip() -> str:
     return '''
-  <rect x="180" y="260" width="440" height="20" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <rect x="220" y="200" width="50" height="60" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <text x="245" y="235" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#1a1a1a">PUBLIC</text>
-  <g>
-    <rect x="400" y="100" width="70" height="160" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-    <rect x="410" y="90" width="70" height="160" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-    <rect x="420" y="80" width="70" height="160" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-    <rect x="430" y="70" width="70" height="160" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-    <rect x="440" y="60" width="70" height="160" fill="none" stroke="#c8102e" stroke-width="2"/>
+  <rect x="220" y="90" width="360" height="260" fill="#f5f0e6" stroke="#1a1a1a" stroke-width="3"/>
+  <text x="400" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="2" fill="#1a1a1a">ACCESS TO INFORMATION</text>
+  <rect x="250" y="145" width="300" height="22" fill="#0a0a0a"/>
+  <rect x="250" y="175" width="300" height="22" fill="#0a0a0a"/>
+  <rect x="250" y="205" width="260" height="22" fill="#0a0a0a"/>
+  <rect x="250" y="235" width="300" height="22" fill="#0a0a0a"/>
+  <rect x="250" y="265" width="180" height="22" fill="#0a0a0a"/>
+  <rect x="430" y="265" width="20" height="22" fill="#efe9dc" stroke="#1a1a1a"/>
+  <rect x="500" y="100" width="70" height="70" rx="8" fill="#c8102e"/>
+  <text x="535" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fff">FULLY</text>
+  <text x="535" y="148" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fff">DISCLOSED</text>
+'''
+
+
+def _sc_maid_doors() -> str:
+    return '''
+  <rect x="120" y="90" width="200" height="260" fill="none" stroke="#1a1a1a" stroke-width="4"/>
+  <text x="220" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#1a1a1a">CARE</text>
+  <text x="220" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#1a1a1a">WAITLIST</text>
+  <text x="220" y="190" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#827a6d">est. years</text>
+  <g fill="#1a1a1a" opacity="0.7">
+    <circle cx="160" cy="300" r="6"/><circle cx="180" cy="305" r="6"/>
+    <circle cx="200" cy="298" r="6"/><circle cx="220" cy="308" r="6"/>
+    <circle cx="240" cy="302" r="6"/><circle cx="260" cy="310" r="6"/>
+    <circle cx="170" cy="320" r="6"/><circle cx="210" cy="325" r="6"/>
+    <circle cx="250" cy="318" r="6"/>
   </g>
-  <text x="475" y="150" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#1a1a1a">BRIEFING</text>
+  <rect x="480" y="90" width="200" height="260" fill="none" stroke="#c8102e" stroke-width="4"/>
+  <text x="580" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#c8102e">MAID</text>
+  <text x="580" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#c8102e">OPEN</text>
+  <rect x="510" y="280" width="140" height="14" fill="#c8102e" opacity="0.35"/>
+  <text x="580" y="250" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#c8102e">no wait</text>
 '''
 
 
-def _snail_jet() -> str:
+def _sc_vac() -> str:
     return '''
-  <!-- snail -->
-  <ellipse cx="280" cy="280" rx="55" ry="28" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <path d="M230 280 Q200 250 220 230" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <circle cx="215" cy="225" r="6" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <path d="M260 255 Q280 220 310 250" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <!-- general hat -->
-  <rect x="250" y="248" width="40" height="10" fill="#1a1a1a"/>
-  <polygon points="255,248 290,248 272,230" fill="none" stroke="#c8102e" stroke-width="2"/>
-  <!-- tiny jet on string -->
-  <line x1="330" y1="270" x2="480" y2="200" stroke="#1a1a1a" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <path d="M480 200 l40 5 l-10 10 l-30 -5 z" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <text x="520" y="180" font-family="IBM Plex Mono, monospace" font-size="12" fill="#1a1a1a">2034</text>
-  <line x1="120" y1="320" x2="680" y2="320" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="160" y="100" width="480" height="50" fill="#1a1a1a"/>
+  <text x="400" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="16" fill="#ece7dc" letter-spacing="2">VETERANS AFFAIRS — HOW CAN WE HELP?</text>
+  <rect x="180" y="180" width="100" height="140" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="230" y="255" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">benefits</text>
+  <rect x="300" y="180" width="100" height="140" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="350" y="255" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">housing</text>
+  <rect x="420" y="180" width="100" height="140" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="470" y="255" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">treatment</text>
+  <rect x="540" y="170" width="110" height="160" fill="#3a1010" stroke="#c8102e" stroke-width="3"/>
+  <text x="595" y="250" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c8102e">OTHER</text>
+  <text x="595" y="270" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c8102e">OPTION</text>
 '''
 
 
-def _two_doors() -> str:
+def _sc_interference() -> str:
     return '''
-  <rect x="160" y="120" width="140" height="220" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <text x="230" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#1a1a1a">CARE</text>
-  <text x="230" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#1a1a1a">WAITLIST</text>
-  <!-- long queue of circles (no faces) -->
-  <g stroke="#1a1a1a" fill="none" stroke-width="1.5">
-    <circle cx="200" cy="300" r="8"/><circle cx="220" cy="305" r="8"/>
-    <circle cx="240" cy="298" r="8"/><circle cx="260" cy="310" r="8"/>
-    <circle cx="190" cy="320" r="8"/><circle cx="230" cy="325" r="8"/>
-  </g>
-  <rect x="480" y="120" width="140" height="220" fill="none" stroke="#c8102e" stroke-width="3"/>
-  <text x="550" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c8102e">FASTER</text>
-  <text x="550" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c8102e">OPTION</text>
-  <rect x="500" y="300" width="100" height="12" fill="#c8102e" opacity="0.35"/>
+  <rect x="120" y="90" width="560" height="240" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <ellipse cx="400" cy="200" rx="160" ry="70" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-dasharray="8 5"/>
+  <ellipse cx="420" cy="190" rx="100" ry="45" fill="none" stroke="#827a6d" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="400" y="205" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="16" fill="#1a1a1a" letter-spacing="2">INTERFERENCE</text>
+  <rect x="140" y="110" width="90" height="40" fill="#9adbe8" opacity="0.25" stroke="#3f7c8c"/>
+  <text x="185" y="135" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#1a1a1a">PROCESS</text>
+  <rect x="570" y="110" width="90" height="40" fill="#9adbe8" opacity="0.25" stroke="#3f7c8c"/>
+  <text x="615" y="135" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#1a1a1a">MORE STUDY</text>
+  <text x="200" y="300" font-family="Georgia, serif" font-size="12" fill="#c8102e">$$$ floating in the window →</text>
 '''
 
 
-def _floating_ladder() -> str:
+def _sc_media() -> str:
     return '''
-  <line x1="420" y1="80" x2="420" y2="280" stroke="#1a1a1a" stroke-width="3"/>
-  <line x1="480" y1="80" x2="480" y2="280" stroke="#1a1a1a" stroke-width="3"/>
-  <line x1="420" y1="110" x2="480" y2="110" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="420" y1="150" x2="480" y2="150" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="420" y1="190" x2="480" y2="190" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="420" y1="230" x2="480" y2="230" stroke="#1a1a1a" stroke-width="2"/>
-  <text x="500" y="115" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">rates</text>
-  <text x="500" y="155" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">zoning</text>
-  <text x="500" y="195" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">capital</text>
-  <!-- couple no faces -->
-  <circle cx="300" cy="300" r="14" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <circle cx="340" cy="300" r="14" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="300" y1="314" x2="300" y2="350" stroke="#1a1a1a" stroke-width="2"/>
-  <line x1="340" y1="314" x2="340" y2="350" stroke="#1a1a1a" stroke-width="2"/>
-  <text x="450" y="70" font-family="Georgia, serif" font-size="14" fill="#1a1a1a">starter home</text>
+  <rect x="160" y="120" width="280" height="180" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <text x="300" y="155" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#1a1a1a">THE DAILY INDEPENDENT</text>
+  <line x1="180" y1="180" x2="400" y2="180" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="180" y1="210" x2="380" y2="210" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="180" y1="240" x2="360" y2="240" stroke="#1a1a1a" stroke-width="1"/>
+  <rect x="480" y="140" width="160" height="100" fill="none" stroke="#c8102e" stroke-width="3"/>
+  <text x="560" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#c8102e">SUBSIDY</text>
+  <text x="560" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#1a1a1a">CHEQUEBOOK</text>
+  <path d="M440 220 C460 180 480 200 480 190" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <text x="400" y="340" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#827a6d">pen chained to the float</text>
 '''
 
 
-def _smoke_room() -> str:
+def _sc_ethics() -> str:
     return '''
-  <rect x="140" y="100" width="520" height="220" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <ellipse cx="400" cy="200" rx="120" ry="60" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-dasharray="6 4"/>
-  <ellipse cx="420" cy="190" rx="80" ry="40" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <text x="400" y="205" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#1a1a1a">FINDINGS</text>
-  <rect x="160" y="120" width="40" height="60" fill="none" stroke="#9adbe8" stroke-width="2"/>
-  <text x="180" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#3f7c8c">PROCESS</text>
-  <rect x="600" y="120" width="40" height="60" fill="none" stroke="#9adbe8" stroke-width="2"/>
+  <line x1="400" y1="90" x2="400" y2="160" stroke="#1a1a1a" stroke-width="4"/>
+  <line x1="280" y1="160" x2="520" y2="160" stroke="#1a1a1a" stroke-width="4"/>
+  <path d="M280 160 L220 280 L340 280 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <path d="M520 160 L480 200 L560 200 Z" fill="none" stroke="#c8102e" stroke-width="3"/>
+  <text x="280" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="16" fill="#1a1a1a">$100M+</text>
+  <text x="280" y="330" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#827a6d">contract</text>
+  <text x="520" y="230" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#c8102e">$500</text>
+  <text x="520" y="250" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#c8102e">ethics fine</text>
+  <text x="400" y="360" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="2" fill="#1a1a1a">LESSON LEARNED</text>
 '''
 
 
-def _cheque_notepad() -> str:
+def _sc_whistle() -> str:
     return '''
-  <rect x="200" y="160" width="200" height="140" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-  <line x1="220" y1="200" x2="360" y2="200" stroke="#1a1a1a" stroke-width="1.5"/>
-  <line x1="220" y1="230" x2="340" y2="230" stroke="#1a1a1a" stroke-width="1.5"/>
-  <line x1="220" y1="260" x2="320" y2="260" stroke="#1a1a1a" stroke-width="1.5"/>
-  <rect x="420" y="180" width="180" height="80" fill="none" stroke="#c8102e" stroke-width="2"/>
-  <text x="510" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#c8102e">$ SUBSIDY</text>
-  <path d="M400 220 Q410 200 420 220" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <circle cx="200" cy="200" r="40" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <path d="M240 200 L340 160 L340 240 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <text x="200" y="280" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">PROTECTED</text>
+  <text x="200" y="296" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1a1a1a">DISCLOSURE</text>
+  <rect x="360" y="140" width="200" height="140" fill="#1a1a1a"/>
+  <text x="460" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#c8102e">PSDPA</text>
+  <text x="460" y="230" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#ece7dc">SHREDDER</text>
+  <text x="460" y="320" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#827a6d">confetti: thank you for your service</text>
+  <text x="620" y="180" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c8102e">MAX $10k</text>
+'''
+
+
+def _sc_daycare() -> str:
+    return '''
+  <rect x="200" y="90" width="400" height="70" fill="#1a2830"/>
+  <text x="400" y="135" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#9adbe8">$10 / DAY — OPEN</text>
+  <path d="M120 280 Q200 200 280 280 Q360 200 440 280 Q520 200 600 280 Q680 220 720 280" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <text x="400" y="310" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#1a1a1a">the line</text>
+  <rect x="560" y="200" width="100" height="60" fill="none" stroke="#c8102e" stroke-width="2"/>
+  <text x="610" y="235" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" fill="#c8102e">2031</text>
+  <text x="200" y="350" font-family="IBM Plex Mono, monospace" font-size="11" fill="#827a6d">toddler holds a university form</text>
+'''
+
+
+def _sc_nato() -> str:
+    return '''
+  <rect x="160" y="100" width="40" height="200" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <rect x="164" y="260" width="32" height="40" fill="#3f7c8c" opacity="0.4"/>
+  <text x="180" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#1a1a1a">NATO 2%</text>
+  <rect x="240" y="160" width="160" height="50" fill="#efe9dc" stroke="#c8102e" stroke-width="2"/>
+  <text x="320" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#c8102e">STUDYING OPTIONS</text>
+  <line x1="480" y1="140" x2="480" y2="300" stroke="#1a1a1a" stroke-width="3"/>
+  <line x1="480" y1="300" x2="520" y2="340" stroke="#1a1a1a" stroke-width="3"/>
+  <line x1="480" y1="300" x2="440" y2="340" stroke="#1a1a1a" stroke-width="3"/>
+  <line x1="480" y1="200" x2="520" y2="240" stroke="#1a1a1a" stroke-width="3"/>
+  <line x1="520" y1="240" x2="560" y2="200" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="560" y="195" font-family="IBM Plex Mono, monospace" font-size="11" fill="#1a1a1a">broom = kit</text>
+  <text x="600" y="320" font-family="IBM Plex Mono, monospace" font-size="14" fill="#c8102e">DELIVERY 2034</text>
+'''
+
+
+def _sc_two_tier() -> str:
+    return '''
+  <circle cx="400" cy="120" r="28" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <line x1="400" y1="148" x2="400" y2="200" stroke="#1a1a1a" stroke-width="3"/>
+  <line x1="300" y1="200" x2="500" y2="200" stroke="#1a1a1a" stroke-width="4"/>
+  <path d="M300 200 L250 300 L350 300 Z" fill="none" stroke="#c8102e" stroke-width="3"/>
+  <path d="M500 200 L450 260 L550 260 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+  <text x="300" y="330" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#c8102e">CONNECTED</text>
+  <text x="300" y="350" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#c8102e">wrist slap</text>
+  <text x="500" y="290" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#1a1a1a">EVERYONE ELSE</text>
+  <text x="500" y="310" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#1a1a1a">full Code</text>
+  <text x="400" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="2" fill="#827a6d">EQUAL BEFORE THE LAW*</text>
 '''
 
 
