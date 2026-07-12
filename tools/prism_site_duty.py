@@ -64,6 +64,7 @@ PROJECT = {
         "daily_briefing_cycle",      # daily briefing refresh + still/video every update
         "liril_outlet_desk",         # LIRIL Press Wire — multi-outlet compare + outlet cards
         "liril_substack",            # Substack outbox drafts + newsletter.html + feed pull
+        "life_desks",                # Sunroom · Sports · Markets · Press Ink refresh
         "liril_news_articles",       # AI desk articles from briefing + wire
         "liril_news_presentation",   # LIRIL front-page news presentation script
         "liril_desk_reporter",       # AI reporter persona + live wire (always-new news)
@@ -291,6 +292,33 @@ def lap() -> dict:
         })
     else:
         steps.append({"name": "liril_substack", "ok": True, "detail": "prism_liril_substack.py missing (skipped)"})
+
+    # 1b4) Life desks — Sunroom / Sports / Markets / Press Ink
+    life_tools = [
+        ("prism_sports_desk.py", ["--json", "--apply"]),
+        ("prism_markets_desk.py", ["--json", "--apply"]),
+        ("prism_sunroom_gen.py", ["--json", "--apply", "--n", "12"]),
+        ("prism_cartoon_forge.py", ["--json", "--apply", "--n", "8", "--from-wire"]),
+        ("prism_desk_svg_art.py", ["--json", "--apply"]),
+    ]
+    life_ok = True
+    life_tails = []
+    for name, flags in life_tools:
+        p = TOOLS / name
+        if not p.exists():
+            life_tails.append(f"{name}:missing")
+            continue
+        code, out = _run([sys.executable, str(p), *flags], timeout=120)
+        life_ok = life_ok and code == 0
+        life_tails.append(f"{name}:{'ok' if code == 0 else 'fail'}")
+    steps.append({
+        "name": "life_desks",
+        "ok": life_ok,
+        "detail": "; ".join(life_tails),
+        "job": "Sunroom + Sports + Markets + Press Ink catalogs + SVG art",
+        "proof": str(ROOT / "data" / "prism_desk_svg_art_last.json"),
+        "owner": "LIRIL",
+    })
 
     # 1c) AI desk articles (briefing + wire → content/posts + catalog)
     liril_arts = TOOLS / "build_liril_news_articles.py"
