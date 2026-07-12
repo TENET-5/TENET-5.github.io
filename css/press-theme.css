@@ -1457,6 +1457,9 @@ a{color:inherit;text-decoration:none}a:hover{color:var(--ice)}
 ::selection{background:var(--ice);color:var(--void)}
 .js .rv{opacity:0;transform:translateY(26px);transition:opacity 1s ease,transform 1s ease}
 .js .rv.in{opacity:1;transform:none}
+/* Failsafe: never leave scroll-reveal content invisible if IO missed (formatting trash) */
+.js .rv:not(.in){animation:rv-failsafe 0s linear 1.4s forwards}
+@keyframes rv-failsafe{to{opacity:1;transform:none}}
 .brand-crest,.nav-crest,img[src*="crest"],img[src*="royal_crest"]{display:none!important}
 
 /* glass system ΓÇö every card is a pane over an aurora field */
@@ -1519,7 +1522,7 @@ a{color:inherit;text-decoration:none}a:hover{color:var(--ice)}
   color:var(--ivory-faint)}
 .cover .fr::before{content:"";display:inline-block;width:34px;height:1px;background:var(--ice);
   vertical-align:middle;margin-right:14px;box-shadow:0 0 10px rgba(154,219,232,.5)}
-.cover .stand{margin-top:3.5vh;max-width:clamp(520px, 40vw, 1200px);font-size:clamp(15px, 1.6vw, 32px);color:var(--ivory-dim)}
+.cover .stand{margin-top:3.5vh;max-width:min(62ch,92%);font-size:clamp(15px,1.35vw,20px);line-height:1.55;color:var(--ivory-dim)}
 .cover .stand b{color:var(--ivory);font-weight:600}
 .cover-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;
   padding:0 clamp(28px,4.4vw,64px) 5vh;max-width:var(--slate-max-wide, 1200px);width:100%;margin:0 auto;
@@ -2811,7 +2814,7 @@ body { overflow-x: clip; max-width: 100%; }
     color:var(--ivory-faint)}
   .cover .fr::before{content:"";display:inline-block;width:34px;height:1px;background:var(--ice);
     vertical-align:middle;margin-right:14px;box-shadow:0 0 10px rgba(154,219,232,.5)}
-  .cover .stand{margin-top:3.5vh;max-width:clamp(520px, 40vw, 1200px);font-size:clamp(15px, 1.6vw, 32px);color:var(--ivory-dim)}
+  .cover .stand{margin-top:3.5vh;max-width:min(62ch,92%);font-size:clamp(15px,1.35vw,20px);line-height:1.55;color:var(--ivory-dim)}
   .cover .stand b{color:var(--ivory);font-weight:600}
   .cover-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;
     padding:0 clamp(28px,4.4vw,64px) 5vh;max-width:var(--slate-max-wide, 1200px);width:100%;margin:0 auto;
@@ -3194,32 +3197,46 @@ body.press-interior table td{color:var(--ivory-dim)}
 body.press-interior table td.amt,body.press-interior table .amt{color:var(--ivory);font-family:var(--mono);white-space:nowrap}
 body.press-interior .reveal{opacity:1;transform:none}
 
-/* catalog — the whole book, A to Z (home) */
-.catalog{position:relative;padding:9vh 0}
+/* catalog — curated home shelf (full map on investigations.html) */
+.catalog{position:relative;padding:8vh 0 10vh}
 .catalog::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(154,219,232,.15) 50%,transparent)}
-.catalog .cat-layout { margin-top: 4vh; }
-.catalog .cat-section-title { font-family: 'Outfit', sans-serif; font-size: 24px; color: var(--ivory); border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; margin-top: 48px; margin-bottom: 24px; font-weight: 600; letter-spacing: 0.5px; }
-.catalog .cat-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 38px; }
-@media(max-width:1000px) { .catalog .cat-group { grid-template-columns: repeat(2, 1fr); } }
-@media(max-width:680px) { .catalog .cat-group { grid-template-columns: 1fr; } }
+.catalog .cat-layout{margin-top:3.2vh;display:flex;flex-direction:column;gap:2.4rem}
+.catalog-lede{margin:1.2rem 0 0;max-width:62ch;color:var(--ivory-dim);font-size:15.5px;line-height:1.7}
+.catalog-lede a{color:var(--ice);border-bottom:1px solid rgba(154,219,232,.35)}
+.catalog-lede a:hover{border-color:var(--ice)}
+.catalog-cta{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;margin:1.6rem 0 0}
+.begin.begin-inline{flex-direction:row;gap:10px;letter-spacing:.18em}
+.begin.begin-inline .arrow{width:28px;height:1px;animation:none;background:var(--ice)}
+.catalog-foot{margin:2.4rem 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--ivory-faint)}
+.catalog-foot a{color:var(--ice)}
+.cat-block{margin:0}
+.cat-block-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid rgba(154,219,232,.14)}
+.catalog .cat-section-title{
+  font-family:var(--serif);font-weight:400;font-size:clamp(18px,2.2vw,24px);
+  color:var(--ivory);margin:0;letter-spacing:-.01em
+}
+.kick-meta{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ivory-faint);white-space:nowrap}
+.catalog .cat-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media(max-width:1000px){.catalog .cat-group{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.catalog .cat-group{grid-template-columns:1fr}}
+.cat-more{margin:.85rem 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.1em}
+.cat-more a{color:var(--ice)}
 .cat-letter{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--ice);
   margin:20px 0 6px;break-inside:avoid}
-a.cat-item.glass,a.cat-item{
-  display:block;break-inside:avoid;padding:16px 18px;
+a.cat-item,a.cat-item.glass{
+  display:block;padding:16px 18px;margin:0;
   border:1px solid rgba(154,219,232,.16);border-radius:12px;
-  background:rgba(9,13,16,.5);backdrop-filter:blur(18px) saturate(140%);
-  -webkit-backdrop-filter:blur(18px) saturate(140%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
-
-  background:linear-gradient(135deg, rgba(154,219,232,.03), rgba(5,7,8,.3));
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);margin-bottom:16px;transition:all 0.3s cubic-bezier(0.25, 1, 0.5, 1)}
-a.cat-item .t{display:block;color:var(--ivory);font-size:14.5px;line-height:1.35;transition:all 0.2s}
-a.cat-item .d{display:block;color:var(--ivory-faint);font-size:11.5px;line-height:1.5;margin-top:6px}
-a.cat-item:hover{background:linear-gradient(135deg, rgba(154,219,232,.06), rgba(5,7,8,.5));
-  border-color:rgba(154,219,232,.3);transform:translateY(-2px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 12px 24px rgba(0,0,0,.5),0 0 15px rgba(154,219,232,.1)}
-a.cat-item:hover .t{color:var(--ice);text-shadow:0 0 10px rgba(154,219,232,.3)}
+  background:linear-gradient(160deg,rgba(154,219,232,.08),rgba(154,219,232,.02) 45%,rgba(5,7,8,.45));
+  backdrop-filter:blur(16px) saturate(1.15);-webkit-backdrop-filter:blur(16px) saturate(1.15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 20px 40px -28px rgba(0,0,0,.85);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+  text-decoration:none;color:inherit;min-height:100%
+}
+a.cat-item .t{display:block;color:var(--ivory);font-family:var(--serif);font-size:15px;line-height:1.35;font-weight:400}
+a.cat-item .d{display:block;color:var(--ivory-faint);font-size:12.5px;line-height:1.5;margin-top:8px}
+a.cat-item:hover{transform:translateY(-3px);border-color:rgba(154,219,232,.32);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 28px 48px -28px rgba(0,0,0,.92)}
+a.cat-item:hover .t{color:var(--ice)}
 
 /* ΓòÉΓòÉΓòÉ PRESS CONSISTENCY LAYER ΓÇö one design language on every interior ΓòÉΓòÉΓòÉ
    Appended last so it wins ties: canonical masthead, legacy hero containers
