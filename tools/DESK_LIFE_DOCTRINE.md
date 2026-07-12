@@ -7,20 +7,22 @@ Atmosphere is not proof; market and sports predictions are **labeled models**, n
 
 | Desk | Public page | Job |
 |------|-------------|-----|
-| **Sunroom** | `sunroom.html` | Summer fashion desk — sundresses, linen, lake light. Privacy-forward (no portraits), fully clothed, magazine-clean. Never creepy, never softcore. |
+| **Sunroom** | `sunroom.html` | Gentlemen’s summer fashion desk (Maxim energy) — sundresses, resort, swim-as-clothing. Fully clothed, confident, glamorous. Face not the subject. Never creepy, never softcore. |
 | **Sports Desk** | `sports-desk.html` | Future games, win probability, **point spreads** — Canadian + major leagues. STATED lines vs MODEL edge. |
 | **Markets Desk** | `markets.html` | Full **TSX / TSXV / Canadian markets** analysis: indices, sectors, movers, thesis cards. |
 | **Press Ink** | `cartoon-desk.html` | Political cartoons + short animated caricature beats. People must **actually laugh**. Absolute taste. |
 
 ## Hard taste (instant fail if violated)
 
-### Sunroom
+### Sunroom — for gentlemen
+- **Audience:** gentlemen’s magazine desk — aspirational, confident, heat done properly.
 - **Adults only (18+).** Never minors, never school settings.
-- **Fully clothed** — sundress, linen, resort, swim-as-clothing. Mainstream fashion, elevated.
-- **Privacy by design, not thriller tone** — no portrait faces (hat, turn, soft focus). Frame fabric and light, not identity games.
-- **No tattoos, logos, neon, cyber, softcore.**
-- Caption: *Sunroom · summer editorial · Powered by LIRIL AI*
-- Copy must sound like a magazine fashion desk — never “are these real?”, “identity obscured”, or surveillance language.
+- **Fully clothed** — sundress, linen, resort, swim-as-clothing. Sex sells; clothes stay on.
+- **Maxim energy, elite ice-lake taste** — body language open and assured; wardrobe and place are the story.
+- **Face not the subject** — turn, hat silhouette, over-shoulder as *magazine craft*, never “identity obscured” / hands-over-face thriller.
+- **No tattoos, logos, neon, cyber, softcore, creep, surveillance language.**
+- Caption: *Sunroom · gentlemen’s summer · Powered by LIRIL AI*
+- Copy must sound like Maxim for grown men who read the newsroom — never “are these real?”
 
 ### Sports / Markets
 - Never claim guaranteed wins. Every pick: **STATED** (public line) vs **MODEL** (LIRIL) vs **INFERENCE**.

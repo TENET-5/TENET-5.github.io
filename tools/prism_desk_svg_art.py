@@ -209,41 +209,51 @@ def _cheque_notepad() -> str:
 
 
 def sunroom_svg(item: dict[str, Any], i: int) -> str:
-    """Abstract fashion silhouette — no face, fully clothed silhouette art."""
+    """Gentlemen's fashion silhouette — glam stance, face not the subject."""
     wardrobe = (item.get("wardrobe") or "sundress")[:40]
     setting = (item.get("setting") or "lakeshore")[:40]
-    # silhouette colors ice lake
-    dress = ["#9adbe8", "#a89f90", "#e8e2d6", "#3f7c8c", "#c4b8a8"][i % 5]
+    # silhouette colors ice lake + warm fashion accents
+    dress = ["#c4a574", "#9adbe8", "#e8e2d6", "#3f7c8c", "#d4b896", "#a89f90"][i % 6]
+    # slight pose variation: lean / stand / three-quarter
+    lean = (i % 3) - 1  # -1, 0, 1
+    cx = 300 + lean * 18
     return f'''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="Sunroom summer fashion editorial">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="Sunroom gentlemen's summer fashion">
   <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#1a2830"/>
+    <linearGradient id="sky{i}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#243640"/>
+      <stop offset="55%" stop-color="#121a20"/>
       <stop offset="100%" stop-color="#050708"/>
     </linearGradient>
+    <linearGradient id="glow{i}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4a574" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#050708" stop-opacity="0"/>
+    </linearGradient>
   </defs>
-  <rect width="600" height="800" fill="url(#sky)"/>
-  <!-- horizon -->
-  <rect x="0" y="520" width="600" height="280" fill="#0b1014"/>
-  <line x1="0" y1="520" x2="600" y2="520" stroke="#3f7c8c" stroke-opacity="0.4" stroke-width="1"/>
-  <!-- figure body — no face -->
-  <ellipse cx="300" cy="220" rx="42" ry="48" fill="#1a1a1a"/>
-  <!-- hands covering face -->
-  <ellipse cx="275" cy="230" rx="22" ry="16" fill="#2a2420"/>
-  <ellipse cx="325" cy="230" rx="22" ry="16" fill="#2a2420"/>
-  <!-- hat brim -->
-  <ellipse cx="300" cy="190" rx="70" ry="12" fill="#1a1a1a"/>
-  <rect x="270" y="150" width="60" height="40" rx="8" fill="#1a1a1a"/>
-  <!-- dress / torso -->
-  <path d="M250 280 Q240 400 220 520 L380 520 Q360 400 350 280 Z" fill="{dress}" opacity="0.85"/>
-  <path d="M250 280 Q300 300 350 280" fill="none" stroke="#ece7dc" stroke-opacity="0.3" stroke-width="1"/>
-  <!-- legs suggestion -->
-  <line x1="270" y1="520" x2="265" y2="620" stroke="#2a2420" stroke-width="8"/>
-  <line x1="330" y1="520" x2="335" y2="620" stroke="#2a2420" stroke-width="8"/>
-  <text x="300" y="700" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="3" fill="#9adbe8">SUMMER EDITORIAL</text>
-  <text x="300" y="730" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-style="italic" fill="#a89f90">{_esc(wardrobe)}</text>
-  <text x="300" y="760" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#827a6d">{_esc(setting)}</text>
-  <text x="300" y="785" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="2" fill="#3f7c8c">SUNROOM · TENET5 · POWERED BY LIRIL AI</text>
+  <rect width="600" height="800" fill="url(#sky{i})"/>
+  <rect width="600" height="400" fill="url(#glow{i})"/>
+  <!-- horizon / lake -->
+  <rect x="0" y="500" width="600" height="300" fill="#0b1014"/>
+  <line x1="0" y1="500" x2="600" y2="500" stroke="#c4a574" stroke-opacity="0.25" stroke-width="1"/>
+  <!-- figure: three-quarter glam, face in hat shadow (magazine craft) -->
+  <ellipse cx="{cx}" cy="200" rx="38" ry="44" fill="#1a1614"/>
+  <!-- hair sweep over shoulder -->
+  <path d="M{cx - 30} 190 Q{cx - 70} 280 {cx - 40} 340" fill="none" stroke="#2a2420" stroke-width="18" stroke-linecap="round"/>
+  <!-- hat brim silhouette -->
+  <ellipse cx="{cx}" cy="175" rx="68" ry="11" fill="#0d0d0d"/>
+  <rect x="{cx - 28}" y="140" width="56" height="36" rx="6" fill="#0d0d0d"/>
+  <!-- confident shoulders + dress -->
+  <path d="M{cx - 55} 255 Q{cx - 70} 380 {cx - 90} 500 L{cx + 90} 500 Q{cx + 70} 380 {cx + 55} 255 Q{cx} 275 {cx - 55} 255 Z" fill="{dress}" opacity="0.9"/>
+  <path d="M{cx - 55} 255 Q{cx} 290 {cx + 55} 255" fill="none" stroke="#ece7dc" stroke-opacity="0.35" stroke-width="1.2"/>
+  <!-- waist cinch suggestion -->
+  <ellipse cx="{cx}" cy="340" rx="48" ry="8" fill="none" stroke="#050708" stroke-opacity="0.2" stroke-width="2"/>
+  <!-- long legs -->
+  <line x1="{cx - 28}" y1="500" x2="{cx - 32}" y2="620" stroke="#2a2420" stroke-width="9" stroke-linecap="round"/>
+  <line x1="{cx + 28}" y1="500" x2="{cx + 36}" y2="620" stroke="#2a2420" stroke-width="9" stroke-linecap="round"/>
+  <text x="300" y="680" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="3" fill="#c4a574">GENTLEMEN'S SUMMER</text>
+  <text x="300" y="710" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-style="italic" fill="#e8e2d6">{_esc(wardrobe)}</text>
+  <text x="300" y="740" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#827a6d">{_esc(setting)}</text>
+  <text x="300" y="770" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="2" fill="#3f7c8c">SUNROOM · TENET5 · POWERED BY LIRIL AI</text>
 </svg>
 '''
 
@@ -274,14 +284,12 @@ def apply() -> dict[str, Any]:
     if SUNROOM_CAT.is_file():
         cat = json.loads(SUNROOM_CAT.read_text(encoding="utf-8-sig"))
         items = cat.get("items") or []
-        for i, it in enumerate(items):
-            fn = f"{it.get('id') or f'sun_{i}'}.svg"
-            path = SUNROOM_DIR / fn
-            path.write_text(sunroom_svg(it, i), encoding="utf-8")
-            it["image"] = f"media/sunroom/{fn}"
-            it["art_kind"] = "svg_silhouette"
-            suns += 1
-            written.append(str(path))
+        for it in items:
+            # FLAG: Banned SVG generation for sunroom. High quality only.
+            if "image" in it:
+                del it["image"]
+            if "art_kind" in it:
+                del it["art_kind"]
         cat["ts_art"] = _utc()
         SUNROOM_CAT.write_text(json.dumps(cat, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Sunroom — summer fashion editorial stills (privacy-forward, fully clothed).
+"""Sunroom — gentlemen's summer fashion desk (Maxim energy, elite taste).
 
-Magazine style: fabric, light, place. No portrait faces, no tattoos, no logos.
-Sundress / linen / resort. Outputs: elite, clean, never creepy or softcore.
+For gentlemen: confident summer women, fully clothed, fashion-first.
+Sundress / resort / swim-as-clothing. Composition turns the face
+away as magazine craft — never privacy-thriller or softcore.
 
   python tools/prism_sunroom_gen.py --json --apply --n 8
 """
@@ -22,45 +23,55 @@ PROOF = ROOT / "data" / "prism_sunroom_gen_last.json"
 
 BANNED = re.compile(
     r"\b(nude|naked|topless|lingerie|porn|explicit|child|teen|schoolgirl|"
-    r"identifiable face|tattoo|scar|barcode|logo|flag|hud|neon|cyberpunk)\b",
+    r"identifiable face|tattoo|scar|barcode|logo|flag|hud|neon|cyberpunk|"
+    r"identity obscured|are these real|surveillance)\b",
     re.I,
 )
 
+# Aspirational Maxim wardrobe — sex sells, clothes stay on, taste holds.
 WARDROBE = [
-    "linen sundress in pale ice blue, light fabric in wind",
-    "classic one-piece swimsuit, high neck, modest cut, beach towel over shoulders",
-    "sundress with wide sun hat held over the face",
-    "summer linen set, cropped jacket, book held in front of the face",
-    "bikini with oversized shirt worn open as cover-up, hat brim down",
-    "floral midi sundress, hands gently covering the face",
-    "white cotton beach dress, turned three-quarters away from camera",
-    "resort wrap dress, scarf lightly across the lower face",
+    "pale linen sundress catching lake wind, bare shoulders, clean lines",
+    "classic high-neck one-piece swimsuit with open linen shirt as cover-up",
+    "floral midi sundress, cinched waist, summer hat as style prop",
+    "white cotton beach dress, light fabric against cool grey water",
+    "resort wrap dress, gold-tone sandals, confident full-figure stance",
+    "bikini with oversized oxford shirt worn open, hat brim low for style",
+    "ice-blue slip sundress, silk sheen, evening terrace light",
+    "tailored linen co-ord set, cropped jacket, long legs, yacht-club air",
 ]
 
 SETTINGS = [
-    "cold Toronto lakeshore boardwalk, overcast ice light",
-    "empty cottage dock on a grey-blue lake, morning mist",
+    "Toronto lakeshore boardwalk at golden hour, glass towers soft behind",
+    "empty cottage dock on a blue-grey lake, morning heat rising",
+    "hotel pool edge after rain, wet stone, pale sky, quiet money",
+    "sand path through dunes, Atlantic wind, resort weekend energy",
+    "rooftop terrace with glass rail, desaturated skyline, cocktail hour",
+    "yacht club pier, empty slips, restrained documentary fashion light",
+    "urban park path in deep shade with ice-lake highlights on fabric",
     "quiet residential street of brick houses, soft summer cloud",
-    "rooftop terrace with glass rail, desaturated skyline soft behind",
-    "sand path through dunes, cool Atlantic wind",
-    "hotel pool edge after rain, wet stone, pale sky",
-    "urban park path, deep shade and ice-lake highlights",
-    "yacht club pier, empty, restrained documentary fashion light",
 ]
 
+# Magazine craft: face not the subject — never hands-over-face thriller.
 POSE = [
-    "face completely covered by both hands, relaxed shoulders",
-    "wide-brim hat pulled low, chin tucked, no eyes visible",
-    "looking away to the far horizon, face out of focus and turned",
-    "magazine held open in front of the face, pages soft unreadable",
-    "hair blown across the face, identity obscured",
-    "shadow from a parasol covering the face plane entirely",
+    "three-quarter back to camera, hair over one shoulder, confident stance",
+    "walking toward the light, full figure, face turned to the horizon",
+    "leaning on a rail, looking out, body language open and assured",
+    "over-the-shoulder composition, face soft out of frame, dress the hero",
+    "wide-brim hat as silhouette, chin lifted, glamorous posture",
+    "seated edge of dock, legs long, gaze to water, magazine cover distance",
 ]
 
 LENS = [
-    "35mm fashion editorial, natural depth",
-    "50mm magazine cover distance, soft background",
-    "24mm environmental fashion, full figure",
+    "35mm fashion editorial, natural depth, full figure priority",
+    "50mm gentlemen's magazine cover distance, soft background",
+    "24mm environmental fashion, body and place in one frame",
+]
+
+CAPTIONS = [
+    "Sunroom · gentlemen's summer · Powered by LIRIL AI",
+    "Sunroom · heat, properly dressed · Powered by LIRIL AI",
+    "Sunroom · lake light and linen · Powered by LIRIL AI",
+    "Sunroom · resort hour · Powered by LIRIL AI",
 ]
 
 
@@ -79,19 +90,22 @@ def compose_prompt(seed: int, i: int) -> dict[str, Any]:
     setting = _pick(SETTINGS, key + "s")
     pose = _pick(POSE, key + "p")
     lens = _pick(LENS, key + "l")
+    caption = _pick(CAPTIONS, key + "c")
     prompt = (
-        f"Elite fashion still photograph of an adult woman, fully clothed, "
-        f"{wardrobe}, {pose}, standing in {setting}, {lens}, "
-        "ice-lake desaturated grade, restrained magazine taste, "
-        "identity fully obscured, no facial features readable, no tattoos, no scars, "
-        "no logos, no text, photoreal, high detail fabric, dignity not softcore"
+        f"Gentlemen's magazine fashion still of an adult woman, fully clothed, "
+        f"{wardrobe}, {pose}, in {setting}, {lens}, "
+        "aspirational Maxim energy with ice-lake elite taste, "
+        "confident glamorous body language, face not the subject of the frame, "
+        "no readable facial portrait, no tattoos, no scars, no logos, no text, "
+        "photoreal fabric detail, sexy but never softcore, never creepy"
     )
     if BANNED.search(prompt):
         prompt = BANNED.sub(" ", prompt)
         prompt = re.sub(r"\s+", " ", prompt).strip()
     neg = (
-        "face visible, eyes, nose detail, identifiable person, tattoo, scar, mole map, "
-        "nude, lingerie, porn, child, teen, school, logo, text, neon, cyberpunk, gore"
+        "face close-up, eyes detail, identifiable person, tattoo, scar, mole map, "
+        "nude, lingerie, porn, softcore, child, teen, school, logo, text, neon, "
+        "cyberpunk, gore, hands covering face, identity thriller"
     )
     return {
         "id": f"sunroom_{seed}_{i:02d}",
@@ -101,7 +115,7 @@ def compose_prompt(seed: int, i: int) -> dict[str, Any]:
         "pose": pose,
         "prompt": re.sub(r"\s+", " ", prompt).strip(),
         "negative": neg,
-        "caption": "Sunroom · summer editorial · Powered by LIRIL AI",
+        "caption": caption,
         "status": "prompt_ready",
     }
 
@@ -112,11 +126,14 @@ def build(n: int = 8, seed: int = 42) -> dict[str, Any]:
         "ok": True,
         "verdict": "SUNROOM_CATALOG_PASS",
         "ts": _utc(),
-        "doctrine": "sunroom_no_faces_fully_clothed_elite",
+        "doctrine": "sunroom_gentlemen_maxim_fully_clothed_elite",
         "n": len(items),
         "items": items,
         "public_page": "sunroom.html",
-        "note": "Prompts for Flux/Comfy. Never ship faces, tattoos, or nude framing.",
+        "note": (
+            "Gentlemen's summer desk. Flux/Comfy prompts. "
+            "Fully clothed, face not the subject, never softcore, never creep."
+        ),
     }
 
 
