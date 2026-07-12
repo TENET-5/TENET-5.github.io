@@ -518,9 +518,9 @@ def head(title: str, desc: str) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=215">
-<link rel="stylesheet" href="css/design-lock.css?v=215">
-<!-- ONE THEME: edit css/press-theme.css to restyle the whole site -->
+<link rel="stylesheet" href="css/press-theme.css?v=226">
+<link rel="stylesheet" href="css/design-lock.css?v=226">
+<!-- ONE THEME: edit css/press-theme.css · THEME_VER must match apply_one_theme.py · video = news segments not canned loops -->
 </head>
 <body>
 """
@@ -573,7 +573,7 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
   <a class="seg" href="#week" data-ch="week"><span class="lbl">Week</span><span class="dot"></span></a>
   <a class="seg" href="#month" data-ch="month"><span class="lbl">Month</span><span class="dot"></span></a>
   <a class="seg" href="#year" data-ch="year"><span class="lbl">Year</span><span class="dot"></span></a>
-  <a class="seg" href="#doc-stage" data-ch="doc"><span class="lbl">Film</span><span class="dot"></span></a>
+  <a class="seg" href="#news-air" data-ch="news-air"><span class="lbl">Air</span><span class="dot"></span></a>
   <a class="seg" href="#era" data-ch="era"><span class="lbl">Era</span><span class="dot"></span></a>
 </nav>""" if with_rail else ""
     home_cine = ""
@@ -592,7 +592,7 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
     <button id="liril-guide-btn" type="button" title="Start LIRIL desk reporter news presentation">Guide me</button>
     <button id="liril-station-btn" type="button" aria-pressed="false" title="Always-on news station — auto-presents while you browse">Station · Off</button>
     <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice narration">Voice · Off</button>
-    <div class="liril-status" id="liril-status">LIRIL station loading…</div>
+    <div class="liril-status" id="liril-status">LIRIL ready</div>
   </div>
 </div>
 <script src="js/rv-reveal.js?v=1" defer></script>
@@ -617,6 +617,169 @@ def load_home_wire() -> dict:
         except Exception:
             pass
     return {"wire": [], "briefing": []}
+
+
+def collect_news_segments(limit: int = 8) -> list[dict]:
+    """Live desk video segments — news updates, not canned atmospheric loops.
+
+    Prefers muxed VO packages under media/film/video/news-N_mux.mp4, then
+    news-N.mp4, then documentary stubs. Labels from segment manifests + briefing.
+    """
+    segs: list[dict] = []
+    man_dir = ROOT / "media" / "film" / "news"
+    vid_dir = ROOT / "media" / "film" / "video"
+    brief_items: list[dict] = []
+    try:
+        brief = load_json(ROOT / "data" / "govt_daily_briefing.json")
+        brief_items = list(brief.get("items") or brief.get("briefing") or [])
+    except Exception:
+        brief_items = []
+
+    for i in range(limit):
+        man_path = man_dir / f"news-{i}_manifest.json"
+        narration = ""
+        desk = "DESK"
+        if man_path.is_file():
+            try:
+                raw = json.loads(man_path.read_text(encoding="utf-8"))
+                beat = raw[0] if isinstance(raw, list) and raw else raw
+                narration = str(beat.get("narration") or "").strip()
+                # "Update from the MUNICIPAL desk. …"
+                m = re.search(r"from the\s+([A-Z][A-Z /&-]+)\s+desk", narration, re.I)
+                if m:
+                    desk = m.group(1).strip().upper()
+            except Exception:
+                pass
+        # Prefer real segment packages over tiny documentary stubs
+        candidates = [
+            vid_dir / f"news-{i}_mux.mp4",
+            vid_dir / f"news-{i}.mp4",
+            man_dir / f"news-{i}_documentary.mp4",
+        ]
+        video = None
+        for c in candidates:
+            if c.is_file() and c.stat().st_size > 80_000:
+                video = c.relative_to(ROOT).as_posix()
+                break
+        if not video:
+            continue
+        # Prefer the actual news sentence, not "Update from the X desk"
+        title = f"News segment {i + 1}"
+        lede = narration
+        if narration:
+            parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", narration) if p.strip()]
+            if parts and re.match(r"^Update from the\s+", parts[0], re.I) and len(parts) > 1:
+                title = parts[1]
+                lede = " ".join(parts[1:]) if len(parts) > 1 else parts[0]
+            elif parts:
+                title = parts[0]
+                lede = " ".join(parts[1:]) if len(parts) > 1 else parts[0]
+        # Prefer briefing headline when available
+        href = ""
+        if i < len(brief_items):
+            bi = brief_items[i]
+            if isinstance(bi, dict):
+                title = str(bi.get("title") or bi.get("headline") or title)[:120]
+                href = str(bi.get("href") or bi.get("url") or bi.get("page") or "")
+                body = str(bi.get("body") or bi.get("summary") or bi.get("lede") or "")
+                if body:
+                    lede = body
+        if not href:
+            href = "daily-briefing.html"
+        lede = lede.strip()
+        if len(lede) > 220:
+            lede = lede[:217].rsplit(" ", 1)[0] + "…"
+        segs.append(
+            {
+                "id": f"news-{i}",
+                "n": i + 1,
+                "desk": desk,
+                "title": title[:140],
+                "lede": lede,
+                "video": video,
+                "href": href,
+            }
+        )
+    return segs
+
+
+def render_news_air(segments: list[dict]) -> str:
+    """On-air news segments block — primary video product on the homepage."""
+    if not segments:
+        return """
+<section class="news-air field" id="news-air" data-line="News segments load from the live desk package. Open the briefing while the package rebuilds.">
+  <div class="wrapx rv">
+    <span class="kick">On air · news segments</span>
+    <h2 class="thesis-title" style="margin-top:1.2vh">Live desk <em>updates.</em></h2>
+    <p class="news-air-lede">No canned atmosphere loops. When the desk package is ready, segment video plays here with sourced rundowns. Until then: <a href="daily-briefing.html">open the daily briefing</a>.</p>
+  </div>
+</section>"""
+
+    lead = segments[0]
+    cards = []
+    for s in segments:
+        cards.append(
+            f"""
+<article class="news-seg glass" data-news-seg="{esc(s['id'])}" data-video="{esc(s['video'])}">
+  <div class="news-seg-frame">
+    <video muted playsinline preload="metadata" controls
+           data-news-video="{esc(s['id'])}"
+           poster="media/landing/ledger_desk.jpg"
+           aria-label="{esc(s['title'])}">
+      <source src="{esc(s['video'])}" type="video/mp4">
+    </video>
+    <span class="news-seg-tag">SEG {int(s['n']):02d} · {esc(s['desk'])}</span>
+  </div>
+  <div class="news-seg-body">
+    <h3>{esc(s['title'])}</h3>
+    <p>{esc(s.get('lede') or 'Desk update · sources on the linked file.')}</p>
+    <div class="news-seg-actions">
+      <button type="button" class="guide-cta news-seg-play" data-play="{esc(s['id'])}">Play segment</button>
+      <a class="begin begin-quiet" href="{esc(s['href'])}"><span>Open source file</span></a>
+    </div>
+  </div>
+</article>"""
+        )
+
+    return f"""
+<section class="news-air field" id="news-air" data-line="On air: live desk segments from today's briefing and wire — not canned atmosphere reels.">
+  <div class="wrapx rv">
+    <span class="kick">On air · news segments · live desk package</span>
+    <h2 class="thesis-title" style="margin-top:1.2vh">What is going on <em>now.</em></h2>
+    <p class="news-air-lede">
+      These are <strong>news segments</strong> for today's desk — municipal, defence, procurement, and the live package.
+      Not memorial b-roll. Not canned act loops. Play a segment, then open the source file.
+      LIRIL can read the full rundown with <strong>Start news presentation</strong>.</p>
+    <div class="news-air-lead glass" id="news-air-lead">
+      <div class="news-air-player">
+        <video id="news-air-video" controls playsinline preload="metadata"
+               poster="media/landing/ledger_desk.jpg"
+               aria-label="Lead news segment">
+          <source src="{esc(lead['video'])}" type="video/mp4">
+        </video>
+        <div class="news-air-now">
+          <span class="kick" id="news-air-now-tag">NOW · {esc(lead['desk'])}</span>
+          <h3 id="news-air-now-title">{esc(lead['title'])}</h3>
+          <p id="news-air-now-lede">{esc(lead.get('lede') or '')}</p>
+          <div class="news-seg-actions">
+            <button type="button" class="guide-cta" id="news-air-play-lead">Play lead segment</button>
+            <button type="button" class="guide-cta guide-cta-live" id="news-air-play-all">Play all segments</button>
+            <a class="begin begin-quiet" href="{esc(lead['href'])}"><span>Lead source file</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="news-seg-grid" role="list">
+      {"".join(cards)}
+    </div>
+    <p class="news-air-foot">
+      Segment video is the desk product. The five-act case film stays on
+      <a href="argument.html">argument.html</a> and
+      <a href="liril-film.html">the guided record</a> — not as fake “live” wallpaper.
+    </p>
+  </div>
+</section>
+<script src="js/tenet5-news-air.js?v=2" defer></script>"""
 
 
 def render_rss_external_wire(limit: int = 6) -> str:
@@ -755,8 +918,11 @@ CATALOG_SKIP = re.compile(
     r"test-|layout\.|gateway|permalink)", re.I)
 
 def render_catalog() -> str:
-    """The whole book — every public file, categorized by theme, from each page's own
-    title and description. LIRIL narrates entries via data-narrate."""
+    """Homepage shelf — curated samples per theme, full map on investigations.html.
+
+    Dumping 300+ files on the front page is formatting trash (Daniel 2026-07-12).
+    Home shows up to 6 glass cards per desk; the complete record lives on the hub.
+    """
     entries = []
     for p in sorted(ROOT.glob("*.html")):
         if CATALOG_SKIP.match(p.name):
@@ -770,55 +936,72 @@ def render_catalog() -> str:
         if not title:
             continue
         entries.append((title, p.name, desc))
-    
+
     CATS = [
         ("MAID & Euthanasia", re.compile(r"maid|euthan|assisted dying|carter|foley|palliat", re.I)),
         ("Foreign Interference", re.compile(r"foreign|interference|china|beijing|\bprc\b|hogue|nsicop|cija|arms pipeline|convoy", re.I)),
         ("Military, Veterans & CFNIS", re.compile(r"cfnis|military|veteran|ppcli|defence|\bforces\b|mpcc|rcmp|kit shop|submarine|arms export", re.I)),
         ("Procurement & Waste", re.compile(r"procurement|arrivecan|contract|waste|mckinsey|consult|phoenix|payroll|vendor|boondoggle", re.I)),
-        ("Foreign Influence & Money", re.compile(r"brookfield|donation|charity|aga khan|financial|banking", re.I)),
-        ("Media & Information Operations", re.compile(r"\bcbc\b|media|5gw|social amplif|narrative|psyop|radio-canada", re.I)),
-        ("Legal, Charter & Genocide", re.compile(r"charter|criminal code|genocide|rome statute|law societ|human rights|article [0-9]|prosecut", re.I)),
         ("Parliament & Accountability", re.compile(r"hansard|parliament|\bmp\b|voting|committee|auditor|\bag\b|accountab|ethics|lobby|appointment|scorecard|ombuds", re.I)),
     ]
-    
+    PER_CAT = 6
+
     categorized = {cat_name: [] for cat_name, _ in CATS}
-    categorized["Other Investigations"] = []
-    
     for title, href, desc in sorted(entries, key=lambda e: e[0].upper()):
-        text_to_search = f"{title} {desc}"
-        matched = False
+        text_to_search = f"{title} {href} {desc}"
         for cat_name, cat_re in CATS:
             if cat_re.search(text_to_search):
                 categorized[cat_name].append((title, href, desc))
-                matched = True
                 break
-        if not matched:
-            categorized["Other Investigations"].append((title, href, desc))
 
     items = []
+    shown = 0
     for cat_name, cat_entries in categorized.items():
         if not cat_entries:
             continue
-        items.append(f'<h3 class="cat-section-title">{esc(cat_name)}</h3>')
-        items.append('<div class="cat-group">')
-        for title, href, desc in cat_entries:
+        slice_ = cat_entries[:PER_CAT]
+        shown += len(slice_)
+        more = len(cat_entries) - len(slice_)
+        items.append(
+            f'<div class="cat-block">'
+            f'<div class="cat-block-head">'
+            f'<h3 class="cat-section-title">{esc(cat_name)}</h3>'
+            f'<span class="kick-meta">{len(cat_entries)} files</span>'
+            f"</div>"
+            f'<div class="cat-group">'
+        )
+        for title, href, desc in slice_:
+            d = desc[:120] + ("…" if len(desc) > 120 else "") if desc else "Open the file · sources on the page."
             items.append(
-                f'<a class="cat-item" href="{esc(href)}" data-narrate="{esc(title)}. {esc(desc)}">'
+                f'<a class="cat-item glass" href="{esc(href)}" data-narrate="{esc(title)}. {esc(d)}">'
                 f'<span class="t">{esc(title)}</span>'
-                + (f'<span class="d">{esc(desc)}</span>' if desc else "")
-                + "</a>")
-        items.append('</div>')
+                f'<span class="d">{esc(d)}</span></a>'
+            )
+        items.append("</div>")
+        if more > 0:
+            items.append(
+                f'<p class="cat-more"><a href="investigations.html">+{more} more in {esc(cat_name)} →</a></p>'
+            )
+        items.append("</div>")
 
     return f"""
-<section class="catalog field" id="book" data-line="The whole book — {len(entries)} files, mapped by structure. Choose any page and I will read it with you.">
+<section class="catalog field" id="book" data-line="The book is large — enter by subject on Investigations, not a 300-file dump on the front page.">
   <div class="wrapx rv">
-    <span class="kick">The Whole Book · {len(entries)} Files · Updated Daily</span>
-    <h2 class="thesis-title" style="margin-top:2vh">Everything, <em>mapped.</em></h2>
-    <p style="margin-top:2vh;max-width:720px;color:var(--ivory-dim);font-size:15px;line-height:1.7">
-    Every investigation, editorial, dossier and dataset on this site — categorized by organizational domain. Each entry is a sourced file. LIRIL can read any of
-    them to you.</p>
+    <span class="kick">The record · curated shelf · full map on Investigations</span>
+    <h2 class="thesis-title" style="margin-top:2vh">Enter by <em>subject.</em></h2>
+    <p class="catalog-lede">
+      {len(entries)} public files on this newsroom. Below: a short glass shelf per desk.
+      The complete categorized map is on
+      <a href="investigations.html">Investigations</a>
+      — not a wall of links on the front page.</p>
+    <p class="catalog-cta">
+      <a class="begin begin-inline" href="investigations.html"><span>Open full investigations hub</span><span class="arrow"></span></a>
+      <a class="begin begin-quiet begin-inline" href="evidence-index.html"><span>Evidence shelf</span></a>
+      <a class="begin begin-quiet begin-inline" href="argument.html"><span>Five-act case</span></a>
+    </p>
     <div class="cat-layout">{''.join(items)}</div>
+    <p class="catalog-foot">Showing {shown} of {len(entries)} ·
+      <a href="investigations.html">see every file by subject →</a></p>
   </div>
 </section>"""
 
@@ -1029,90 +1212,78 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     </div>
     <div class="links">
       <a href="argument.html">Open the case: Acts I&ndash;V</a>
-      <a href="act-i.html">Begin ACT I cinema</a>
+      <a href="act-i.html">Begin ACT I</a>
       <a href="5gw-subversion.html">Read the full thesis</a>
       <a href="axes-index.html">The axes of capture</a>
       <a href="accountability.html">The findings</a>
     </div>
     <div class="media-grid media-grid-4" style="margin-top:3.5vh" role="list">
-      <a class="media-card glass is-cine" href="act-i.html" role="listitem">
-        <div class="media-frame is-cine">
-          <video muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-home-cine aria-hidden="true">
-            <source src="media/film/docs/ch_01_intent.mp4" type="video/mp4">
-          </video>
-          <span class="media-tag">ACT I</span>
-        </div>
+      <a class="media-card glass" href="act-i.html" role="listitem">
+        <div class="media-frame"><img src="media/landing/parliament_ice.jpg" alt="" width="640" height="400" loading="lazy"><span class="media-tag">ACT I</span></div>
         <div class="media-body">
           <span class="kick">Intent · 6(a)</span>
           <h3>Intent to Destroy</h3>
           <p>Bill C-7 on the parliamentary record.</p>
-          <span class="media-more">Stage →</span>
+          <span class="media-more">Open act →</span>
         </div>
       </a>
-      <a class="media-card glass is-cine" href="act-ii.html" role="listitem">
-        <div class="media-frame is-cine">
-          <video muted loop playsinline preload="auto" poster="media/landing/hospital_corridor.jpg" data-home-cine aria-hidden="true">
-            <source src="media/film/docs/ch_02_killing.mp4" type="video/mp4">
-          </video>
-          <span class="media-tag">ACT II</span>
-        </div>
+      <a class="media-card glass" href="act-ii.html" role="listitem">
+        <div class="media-frame"><img src="media/landing/hospital_corridor.jpg" alt="" width="640" height="400" loading="lazy"><span class="media-tag">ACT II</span></div>
         <div class="media-body">
           <span class="kick">Killing · 6(a)</span>
           <h3>The Killing Fields</h3>
           <p>Track 2 · coroner files.</p>
-          <span class="media-more">Stage →</span>
+          <span class="media-more">Open act →</span>
         </div>
       </a>
-      <a class="media-card glass is-cine" href="act-iii.html" role="listitem">
-        <div class="media-frame is-cine">
-          <video muted loop playsinline preload="auto" poster="media/landing/committee_empty.jpg" data-home-cine aria-hidden="true">
-            <source src="media/film/docs/ch_03_harm.mp4" type="video/mp4">
-          </video>
-          <span class="media-tag">ACT III</span>
-        </div>
+      <a class="media-card glass" href="act-iii.html" role="listitem">
+        <div class="media-frame"><img src="media/landing/committee_empty.jpg" alt="" width="640" height="400" loading="lazy"><span class="media-tag">ACT III</span></div>
         <div class="media-body">
           <span class="kick">Harm · 6(b)</span>
           <h3>Bodily &amp; Mental Harm</h3>
           <p>VAC · Foley · care denied.</p>
-          <span class="media-more">Stage →</span>
+          <span class="media-more">Open act →</span>
         </div>
       </a>
-      <a class="media-card glass is-cine" href="argument.html" role="listitem">
-        <div class="media-frame is-cine">
-          <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-home-cine aria-hidden="true">
-            <source src="media/film/docs/maid_argument.mp4" type="video/mp4">
-          </video>
-          <span class="media-tag">IV · V · HUB</span>
-        </div>
+      <a class="media-card glass" href="argument.html" role="listitem">
+        <div class="media-frame"><img src="media/landing/ledger_desk.jpg" alt="" width="640" height="400" loading="lazy"><span class="media-tag">HUB</span></div>
         <div class="media-body">
-          <span class="kick">Conditions · Coercion</span>
-          <h3>Full five-act board</h3>
-          <p>Acts IV–V and the citation shelf.</p>
+          <span class="kick">IV–V · full case</span>
+          <h3>Five-act board</h3>
+          <p>Case film + citation shelf — not homepage wallpaper.</p>
           <span class="media-more">Open hub →</span>
         </div>
       </a>
     </div>
   </div>
 </section>
-<section class="scale field" id="scale" data-line="Scale of the book. Hundreds of files. Primary sources. One guided walkthrough.">
+<section class="scale field" id="scale" data-line="Scale of the book. Hundreds of files. Primary sources. Live news segments daily.">
   <div class="wrapx rv">
     <span class="kick">Scale of the record</span>
     <div class="scale-grid">
       <div class="scale-tile glass"><span class="v">380+</span><span class="l">Public files</span><span class="n">Investigations, dossiers, datasets</span></div>
       <div class="scale-tile glass"><span class="v">Daily</span><span class="l">Gov briefing</span><span class="n">Stated vs inferred · cited</span></div>
-      <div class="scale-tile glass"><span class="v">5</span><span class="l">Acts of the case</span><span class="n">Intent through coercion · hybrid film</span></div>
+      <div class="scale-tile glass"><span class="v">Live</span><span class="l">News segments</span><span class="n">Desk updates · not canned loops</span></div>
       <div class="scale-tile glass"><span class="v">LIRIL</span><span class="l">AI guide</span><span class="n">Powered by LIRIL AI · you verify</span></div>
     </div>
   </div>
 </section>"""
 
+    news_segs = collect_news_segments(8)
+    lead_vid = news_segs[0]["video"] if news_segs else "media/landing/ledger_desk.jpg"
+    lead_is_video = bool(news_segs)
+    cover_media = (
+        f"""  <video class="home-broll" autoplay muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-force-play aria-hidden="true">
+    <source src="{esc(lead_vid)}" type="video/mp4">
+  </video>
+  <div class="home-broll-veil" aria-hidden="true"></div>"""
+        if lead_is_video
+        else """  <div class="home-broll home-broll-still" style="background-image:url(media/landing/parliament_ice.jpg)" aria-hidden="true"></div>
+  <div class="home-broll-veil" aria-hidden="true"></div>"""
+    )
     cover = f"""
 <header class="cover" id="top">
-  <video class="home-broll" autoplay muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-force-play aria-hidden="true">
-    <source src="media/film/docs/maid_report_loop.mp4" type="video/mp4">
-    <source src="media/film/docs/maid_argument.mp4" type="video/mp4">
-  </video>
-  <div class="home-broll-veil" aria-hidden="true"></div>
+{cover_media}
   <span class="ghost5" aria-hidden="true">5</span>
   <div class="cover-bar">
     <span class="brand"><span class="wm">TENET<sup>5</sup></span></span>
@@ -1128,23 +1299,22 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <span>Powered by LIRIL AI</span>
   </div>
   <div class="cover-core">
-    <div class="cover-kick">Canadian public record · investigative newsroom · Powered by LIRIL AI</div>
+    <div class="cover-kick">Live news desk · segment updates · Powered by LIRIL AI</div>
     <h1>What Ottawa is <em>doing.</em><br>The record, read <em>backwards.</em></h1>
     <div class="fr">&laquo; Le dossier public du Canada — enqu&ecirc;te et analyse, source par source. &raquo;</div>
-    <p class="stand"><b>News desk, not vibe.</b> Daily government analysis, active investigations,
-    and a five-act MAID case built only from primary records. Begin at this hour and walk back —
-    LIRIL guides the walk; every claim is meant to open a document you can check.
-    Stated facts and labeled inference stay separate.</p>
+    <p class="stand"><b>News segments, not canned film.</b> LIRIL packages today&#x27;s briefing and wire into
+    playable desk updates. Open the source on every claim. Atmosphere wallpaper is retired from the front page —
+    the video product is the live package.</p>
   </div>
   <div class="cover-foot">
     <div class="liril-intro">
-      <div class="who">LIRIL · Your Guide</div>
+      <div class="who">LIRIL · Desk reporter</div>
       <p>&ldquo;{esc(site["liril_cover"])}&rdquo;</p>
       <div class="guide-actions">
-        <button type="button" class="guide-cta" id="liril-guide-btn-cover">Start today&#x27;s presentation</button>
-        <a class="begin" href="daily-briefing.html" id="begin-record"><span>Today&#x27;s briefing</span><span class="arrow"></span></a>
-        <a class="begin begin-quiet" href="#liril-presentation"><span>News presentation</span></a>
-        <a class="begin begin-quiet" href="#doc-stage"><span>Play documentary</span></a>
+        <button type="button" class="guide-cta" id="liril-guide-btn-cover">Start today&#x27;s news package</button>
+        <a class="begin" href="#news-air" id="begin-record"><span>Play news segments</span><span class="arrow"></span></a>
+        <a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>
+        <a class="begin begin-quiet" href="#liril-presentation"><span>Desk presentation</span></a>
       </div>
     </div>
   </div>
@@ -1158,7 +1328,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <h2 class="thesis-title" style="margin-top:1.2vh">Active investigation. Objective <em>analysis.</em></h2>
     <p class="newsdesk-lede">Time is the spine: second → minute → hour → day → week → month → year → era.
     Primary sources first, inference labeled, AI as guide only. External RSS is never our verdict.
-    Images below are ice-lake stills and case charts — atmosphere is not proof.</p>
+    Video on this page means <strong>news segments and live desk updates</strong> — not canned act loops.</p>
     <div class="newsdesk-grid newsdesk-grid-visual">
       <a class="newsdesk-card glass newsdesk-lead has-thumb" href="daily-briefing.html">
         <div class="newsdesk-thumb"><img src="media/landing/ledger_desk.jpg" alt="" width="640" height="360" loading="eager"></div>
@@ -1208,26 +1378,17 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
         <span class="kick">LIRIL · desk reporter</span>
       </div>
       <h2 class="thesis-title" style="margin-top:0.6em">What is going on <em>today.</em></h2>
-      <p class="pres-lede">Loading live desk package — briefing, multi-source wire, AI articles…</p>
-      <p class="pres-meta">LIRIL reads the news as time moves. Guide me for the package. Listen live for the continuous wire.</p>
+      <p class="pres-lede">Live package: briefing + wire + playable news segments. LIRIL reads the rundown; video follows the desk, not a canned reel.</p>
+      <p class="pres-meta">Start package for VO. Play segments below for video updates. Listen live for continuous wire.</p>
       <div class="pres-actions">
         <button type="button" class="guide-cta" id="liril-pres-start">Start news presentation</button>
         <button type="button" class="guide-cta guide-cta-live" id="liril-pres-live">Listen live</button>
+        <a class="begin begin-quiet" href="#news-air"><span>News segments</span></a>
         <a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>
       </div>
     </div>
   </div>
-</section>
-<section class="doc-stage home-doc" id="doc-stage"
-         data-doc-video="media/film/docs/maid_argument.mp4"
-         data-doc-audio="audio/docs/hybrid_maid_argument.mp3"
-         data-doc-vtt="audio/docs/hybrid_maid_argument.vtt"
-         data-doc-manifest="data/film/hybrid_maid_argument.json"
-         data-doc-poster="media/landing/parliament_ice.jpg"
-         data-doc-title="Documentary · five-act public record"
-         data-doc-caption="Hybrid: film + LIRIL captions + chapter navigation. Narration on for audio. Atmosphere is not proof — open each act for sources."
-         data-force-play
-         aria-label="Homepage hybrid documentary stage"></section>"""
+</section>"""
 
     enter = """
 <section class="enter field" id="enter" data-line="Four doors into the same newsroom. Pick a door; every line still cites its source.">
@@ -1257,15 +1418,11 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
         </div>
       </a>
       <a class="enter-card glass" href="argument.html">
-        <div class="enter-media">
-          <video muted loop playsinline preload="metadata" poster="media/landing/parliament_ice.jpg" data-home-cine aria-hidden="true">
-            <source src="media/film/docs/maid_argument.mp4" type="video/mp4">
-          </video>
-        </div>
+        <div class="enter-media"><img src="media/landing/parliament_ice.jpg" alt="" width="640" height="400" loading="lazy"></div>
         <div class="enter-body">
-          <span class="kick">Documentary</span>
-          <h3>Five-act case</h3>
-          <p>Hybrid film + sourced walkthrough under Rome Statute Article 6. Atmosphere is not the proof.</p>
+          <span class="kick">Case file</span>
+          <h3>Five-act argument</h3>
+          <p>Sourced walkthrough under Rome Statute Article 6. Case film lives here — not as homepage wallpaper.</p>
           <span class="meta">Open argument →</span>
         </div>
       </a>
@@ -1399,81 +1556,13 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       </a>
     </div>
   </div>
-</section>
-<section class="cinema field" id="cinema" data-line="Short atmospheric loops — atmosphere for the film of the record. The full guided film is next.">
-  <div class="wrapx rv">
-    <span class="kick">Cinema · guided record atmosphere · slate-spec</span>
-    <h2 class="thesis-title" style="margin-top:2vh">The film of the <em>record.</em></h2>
-    <p style="margin-top:2vh;max-width:640px;color:var(--ivory-dim);font-size:15.5px;line-height:1.7">
-      Atmospheric chapter loops from the documentary reel. Not entertainment —
-      a quieter frame so the hybrid walkthrough can hold attention on sources.</p>
-    <div class="cinema-grid cinema-grid-6">
-      <figure class="cinema-cell glass">
-        <div class="cine-frame">
-          <span class="cine-tag">CH 01</span>
-          <video muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-home-cine>
-            <source src="media/film/docs/ch_01_intent.mp4" type="video/mp4">
-          </video>
-        </div>
-        <figcaption><b>Intent</b>ACT I atmosphere.</figcaption>
-      </figure>
-      <figure class="cinema-cell glass">
-        <div class="cine-frame">
-          <span class="cine-tag">CH 02</span>
-          <video muted loop playsinline preload="auto" poster="media/landing/hospital_corridor.jpg" data-home-cine>
-            <source src="media/film/docs/ch_02_killing.mp4" type="video/mp4">
-          </video>
-        </div>
-        <figcaption><b>Killing</b>Track 2 frame.</figcaption>
-      </figure>
-      <figure class="cinema-cell glass">
-        <div class="cine-frame">
-          <span class="cine-tag">CH 03</span>
-          <video muted loop playsinline preload="auto" poster="media/landing/committee_empty.jpg" data-home-cine>
-            <source src="media/film/docs/ch_03_harm.mp4" type="video/mp4">
-          </video>
-        </div>
-        <figcaption><b>Harm</b>Empty chamber.</figcaption>
-      </figure>
-      <figure class="cinema-cell glass">
-        <div class="cine-frame">
-          <span class="cine-tag">CH 04</span>
-          <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-home-cine>
-            <source src="media/film/docs/ch_04_conditions.mp4" type="video/mp4">
-          </video>
-        </div>
-        <figcaption><b>Conditions</b>Ledgers · life conditions.</figcaption>
-      </figure>
-      <figure class="cinema-cell glass">
-        <div class="cine-frame">
-          <span class="cine-tag">CH 05</span>
-          <video muted loop playsinline preload="auto" poster="media/landing/parliament_ice.jpg" data-home-cine>
-            <source src="media/film/docs/ch_05_coercion.mp4" type="video/mp4">
-          </video>
-        </div>
-        <figcaption><b>Coercion</b>Close of the five acts.</figcaption>
-      </figure>
-      <figure class="cinema-cell glass">
-        <div class="cine-frame">
-          <span class="cine-tag">DOC</span>
-          <video muted loop playsinline preload="auto" poster="media/landing/ledger_desk.jpg" data-home-cine>
-            <source src="media/film/docs/maid_report_loop.mp4" type="video/mp4">
-          </video>
-        </div>
-        <figcaption><b>Report loop</b>News desk stitch.</figcaption>
-      </figure>
-    </div>
-    <div class="cinema-cta">
-      <a class="go-film" href="#doc-stage">&#9654; Play homepage documentary</a>
-      <a class="go-film" href="argument.html" style="margin-left:0.8rem">Five-act case</a>
-      <span class="alt" style="margin-top:0">or <a href="act-i.html">ACT I stage</a> · <a href="liril-film.html">guided film</a> · <a href="#now">this hour&#x27;s wire</a></span>
-    </div>
-  </div>
 </section>"""
+    # Retired: canned CH01–05 atmosphere cinema grid (Daniel 2026-07-12 — not news).
+    # Video product = render_news_air(news_segs) only.
 
     return (head("Canadian Investigative Newsroom",
-                 "Objective Canadian government analysis and active investigations. Daily briefing, MAID case, primary sources. Powered by LIRIL AI — every line cited.")
-            + cover + newsdesk + enter + thesis + "".join(chapters) + visual_media + era
+                 "Live Canadian news desk: daily briefing, playable news segments, multi-source wire, primary sources. Powered by LIRIL AI.")
+            + cover + newsdesk + render_news_air(news_segs) + enter + thesis + "".join(chapters) + visual_media + era
             + render_catalog() + footer_html(site)
             + dock_and_script(site, with_rail=True))
 

@@ -5,8 +5,8 @@
  */
 (function () {
   'use strict';
-  if (window.__LIRIL_HOME_GUIDE_V >= 10) return;
-  window.__LIRIL_HOME_GUIDE_V = 10;
+  if (window.__LIRIL_HOME_GUIDE_V >= 11) return;
+  window.__LIRIL_HOME_GUIDE_V = 11;
 
   document.documentElement.classList.add('js');
 
@@ -181,10 +181,11 @@
       '</button>' +
       '<button type="button" class="guide-cta guide-cta-station" id="liril-station-start">' +
         'Leave station on</button>' +
+      '<a class="begin begin-quiet" href="#news-air"><span>Play news segments</span></a>' +
       '<a class="begin begin-quiet" href="' + esc(pkgHref) + '"><span>Today\'s package</span></a>' +
       '<a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>' +
       '</div>' +
-      '<p class="pres-station-note">Leave this page open — TENET5 runs like a news channel: desk, documentary, wire, week. Navigate anytime.</p>';
+      '<p class="pres-station-note">Leave this page open — TENET5 runs like a news channel: live segments on air, briefing, wire, week. Case film stays on Argument / Guided — not as fake live wallpaper.</p>';
   }
 
   function tickClock() {
@@ -299,10 +300,39 @@
       var seg = segs[presIndex];
       presIndex++;
       document.querySelectorAll('.active-narration').forEach(function(el) { el.classList.remove('active-narration'); });
-      if (seg.scroll) {
-        scrollToId(seg.scroll);
-        var scrollEl = document.getElementById(seg.scroll);
+      /* Prefer news-air scroll so VO rides live segments, not canned film */
+      var scrollTarget = seg.scroll;
+      if (scrollTarget === 'doc-stage' || scrollTarget === 'cinema' || scrollTarget === 'now') {
+        scrollTarget = 'news-air';
+      }
+      if (scrollTarget) {
+        scrollToId(scrollTarget);
+        var scrollEl = document.getElementById(scrollTarget);
         if (scrollEl) scrollEl.classList.add('active-narration');
+      }
+      /* Drive news-segment video (video_id or role map) — never CH act loops */
+      if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.playId) {
+        var vid = seg.video_id || '';
+        var role = (seg.role || seg.id || '').toLowerCase();
+        var shouldPlay = !!vid ||
+          role.indexOf('story') >= 0 || role.indexOf('bulletin') >= 0 ||
+          role.indexOf('package') >= 0 || role.indexOf('rundown') >= 0 ||
+          role.indexOf('today') >= 0 || role.indexOf('tour') >= 0 ||
+          role.indexOf('wire') >= 0 || /^now_/.test(seg.id || '');
+        if (shouldPlay) {
+          if (vid) {
+            window.TENET5_NEWS_AIR.playId(vid);
+          } else {
+            var cards = document.querySelectorAll('[data-news-seg]');
+            var idx = 0;
+            var m = (seg.id || '').match(/now_(\d+)/);
+            if (m) idx = Math.min(cards.length - 1, parseInt(m[1], 10));
+            else idx = Math.max(0, Math.min(cards.length - 1, presIndex - 2));
+            if (cards[idx]) {
+              window.TENET5_NEWS_AIR.playId(cards[idx].getAttribute('data-news-seg'));
+            }
+          }
+        }
       }
       speak(seg.text, true);
       setStatus('On air ' + presIndex + ' / ' + segs.length + ' · ' + (seg.role || seg.id || 'beat'));

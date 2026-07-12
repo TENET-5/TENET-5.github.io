@@ -90,31 +90,35 @@ def build() -> dict:
         }
     )
 
-    # 2 — how the site works (time continuum)
+    # 2 — how the site works (time continuum) — video product = news air
     segs.append(
         {
             "id": "how",
             "role": "desk_tour",
-            "scroll": "newsdesk",
+            "scroll": "news-air",
             "wait_ms": 16000,
+            "video_id": "news-0",
             "text": (
                 "Here is how the website is structured — time is the spine. "
                 "The submarine dial marks second, minute, hour, day, week, month, year, and era. "
-                "Day is the news desk: daily briefing, investigations hub, five-act argument, and the MAID file. "
+                "Day is the news desk: daily briefing, live news segments on air, investigations hub, "
+                "five-act argument, and the MAID file. "
                 "Hour is the live wire — TENET5 desk beside multi-source external RSS. "
                 "Week holds active investigations. Month checks viral claims against documents. "
-                "Year holds case files. Atmosphere film is memorial tone — not proof."
+                "Year holds case files. Video on this page means news segments and live desk updates — "
+                "not canned atmosphere loops."
             ),
         }
     )
 
-    # 3 — today's lead bulletin
+    # 3 — today's lead bulletin → play lead segment
     segs.append(
         {
             "id": "today_lead",
             "role": "bulletin",
-            "scroll": "newsdesk",
+            "scroll": "news-air",
             "wait_ms": 14000,
+            "video_id": "news-0",
             "text": (
                 f"Today is {date_lab}. Desk posture: {threat}. "
                 f"Lead for this hour: {one}"
@@ -129,8 +133,9 @@ def build() -> dict:
             {
                 "id": "ai_package",
                 "role": "desk_package",
-                "scroll": "newsdesk",
+                "scroll": "news-air",
                 "wait_ms": 15000,
+                "video_id": "news-0",
                 "text": (
                     "Our AI desk has published today's news package from the live briefing and wire. "
                     f"Open: { _clean(daily.get('title') or 'today desk package', 140) }. "
@@ -177,8 +182,9 @@ def build() -> dict:
             {
                 "id": f"now_{i}",
                 "role": "story",
-                "scroll": "newsdesk" if i == 0 else "now",
+                "scroll": "news-air",
                 "wait_ms": 13000,
+                "video_id": f"news-{min(i, 7)}",
                 "text": (
                     f"Active file, {domain}. {hl}. {body} "
                     f"Open the file at {page.replace('.html', '').replace('-', ' ')}. "
@@ -196,8 +202,9 @@ def build() -> dict:
             {
                 "id": "rss_block",
                 "role": "wire",
-                "scroll": "now",
+                "scroll": "news-air",
                 "wait_ms": 14000,
+                "video_id": "news-1",
                 "text": (
                     "On the multi-source external wire — labeled external source, not a TENET5 verdict — "
                     f"recent intake includes: {heads}. "
@@ -207,18 +214,18 @@ def build() -> dict:
             }
         )
 
-    # 8 — documentary / argument
+    # 8 — case package stays on Argument (not home wallpaper)
     segs.append(
         {
             "id": "argument",
             "role": "package",
-            "scroll": "doc-stage",
+            "scroll": "news-air",
             "wait_ms": 12000,
             "text": (
-                "The long package is the five-act argument under Rome Statute Article 6 — "
+                "The long case package is the five-act argument under Rome Statute Article 6 — "
                 "intent, killing fields, harm, conditions, coercion — filed from Canadian public records. "
-                "Play the documentary stage for atmosphere, then walk each act for sources. "
-                "Film is not evidence."
+                "That film lives on Argument and the guided record — not as fake live wallpaper here. "
+                "On this page, video means news segments. Open Argument when you want the case film."
             ),
             "href": "argument.html",
         }
@@ -229,13 +236,13 @@ def build() -> dict:
         {
             "id": "close",
             "role": "signoff",
-            "scroll": "now",
+            "scroll": "news-air",
             "wait_ms": 12000,
             "text": (
-                "That is today's presentation of the TENET5 website and desk. "
-                "I will walk you down the time continuum: desk, hour wire, week investigations, "
-                "month claim-check, year case files. Toggle Voice for narration. "
-                "Bring skepticism. If a claim cannot open a source, do not accept it. "
+                "That is today's presentation of the TENET5 news desk. "
+                "Play the live segments, open the briefing, then walk the continuum: "
+                "hour wire, week investigations, month claim-check, year case files. "
+                "Toggle Voice for narration. Bring skepticism. If a claim cannot open a source, do not accept it. "
                 "This is TENET5 — Canadian public record, read with care. Powered by LIRIL AI."
             ),
         }
