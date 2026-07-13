@@ -1628,10 +1628,6 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <a class="newsdesk-pill" href="#month" role="listitem">Claim vs record</a>
       <a class="newsdesk-pill" href="evidence-index.html" role="listitem">Evidence shelf</a>
       <a class="newsdesk-pill" href="key-facts.html" role="listitem">Key facts</a>
-      <a class="newsdesk-pill" href="sunroom.html" role="listitem">Sunroom · gentlemen</a>
-      <a class="newsdesk-pill" href="sports-desk.html" role="listitem">Sports Desk</a>
-      <a class="newsdesk-pill" href="markets.html" role="listitem">Markets · TSX</a>
-      <a class="newsdesk-pill" href="cartoon-desk.html" role="listitem">Press Ink</a>
     </div>
     <div class="glass" id="today-desk" aria-label="Today on the desk">
       <div class="pres-byline">
@@ -1797,7 +1793,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
         <div class="media-frame"><img src="media/generated/offshore_finance.png" alt="" width="640" height="400" loading="lazy"></div>
         <div class="media-body"><span class="kick">Finance</span><h3>Financial crime policy</h3><span class="media-more">Open file →</span></div>
       </a>
-      <a class="media-card glass" href="cfnis.html" role="listitem">
+      <a class="media-card glass" href="cfnis-proxy.html" role="listitem">
         <div class="media-frame"><img src="media/generated/cfnis_military.png" alt="" width="640" height="400" loading="lazy"></div>
         <div class="media-body"><span class="kick">Military</span><h3>CFNIS record</h3><span class="media-more">Open file →</span></div>
       </a>
