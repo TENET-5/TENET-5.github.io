@@ -1,25 +1,10 @@
 #!/bin/sh
-# PRISM site duty on every commit — one theme forever
+# TENET5 pre-commit — STATIC ONLY (Daniel: no Python consoles / terminal storms)
+# Full site duty is NOT run here. Agents must not stack python.exe windows.
 set -e
 ROOT="$(git rev-parse --show-toplevel)"
-PY=""
-for c in \
-  "C:/Users/Xbxac/AppData/Roaming/uv/python/cpython-3.14.3-windows-x86_64-none/python.exe" \
-  "python"
-do
-  if [ -f "$c" ] || command -v "$c" >/dev/null 2>&1; then PY="$c"; break; fi
-done
-[ -n "$PY" ] || { echo "no python"; exit 1; }
 
-if [ -f "$ROOT/tools/prism_site_duty.py" ]; then
-  echo "[pre-commit] PRISM site duty (fast: theme + LIRIL guide)..."
-  # Full visual acuity runs in --forever; pre-commit must not fail on Pages CDN lag.
-  PRISM_SITE_AUTO_PUSH=0 PRISM_SITE_DUTY_FAST=1 "$PY" "$ROOT/tools/prism_site_duty.py" --fast || exit 1
-  # restage theme-fixed HTML
-  git add -u -- '*.html' 'css/press-theme.css' 2>/dev/null || true
-fi
-
-# hard fail if homepage lost press cover / LIRIL guide (PRISM permanent jobs)
+# Homepage must keep press cover + one theme
 if ! grep -q 'backwards' "$ROOT/index.html" 2>/dev/null; then
   echo "[pre-commit] BLOCKED: index lost 'read backwards' cover"
   exit 1
@@ -28,38 +13,33 @@ if ! grep -q 'press-theme.css' "$ROOT/index.html" 2>/dev/null; then
   echo "[pre-commit] BLOCKED: index not on one theme (press-theme.css)"
   exit 1
 fi
-if ! grep -q 'liril-home-guide.js' "$ROOT/index.html" 2>/dev/null; then
-  echo "[pre-commit] BLOCKED: LIRIL home guide script missing (PRISM job)"
-  exit 1
-fi
-if ! grep -q 'id="dock"' "$ROOT/index.html" 2>/dev/null; then
-  echo "[pre-commit] BLOCKED: LIRIL dock missing (PRISM job)"
-  exit 1
-fi
-if ! grep -q 'liril-guide-btn' "$ROOT/index.html" 2>/dev/null; then
-  echo "[pre-commit] BLOCKED: Guide me control missing (PRISM job)"
-  exit 1
-fi
-# CSS mathematical tokens (fast path of quantum precision)
+
+# CSS tokens present (no python)
 if [ -f "$ROOT/css/press-theme.css" ]; then
   if ! grep -q ':root' "$ROOT/css/press-theme.css"; then
-    echo "[pre-commit] BLOCKED: press-theme.css missing :root (quantum precision)"
+    echo "[pre-commit] BLOCKED: press-theme.css missing :root"
     exit 1
   fi
   if ! grep -q '#050708' "$ROOT/css/press-theme.css"; then
-    echo "[pre-commit] BLOCKED: void #050708 missing (quantum precision)"
+    echo "[pre-commit] BLOCKED: void #050708 missing"
     exit 1
   fi
   if ! grep -q '#9adbe8' "$ROOT/css/press-theme.css"; then
-    echo "[pre-commit] BLOCKED: ice #9adbe8 missing (quantum precision)"
+    echo "[pre-commit] BLOCKED: ice #9adbe8 missing"
     exit 1
   fi
 fi
 
-# ZERO-INTERNALS LEAK GATE (owner directive): no leaked AI scaffold / eval garbage on the public
-# site. Hard-fails any commit that ADDS the scaffold patterns — catches page-swarm regeneration too.
+# Zero-internals: no AI scaffold garbage in staged HTML
 if git diff --cached -U0 -- '*.html' 2>/dev/null | grep -qiE '^\+.*(sweep_synthesis|Synthesize these OSINT|second smallest value|Manual review recommend|Collection Method:[[:space:]]*OSINT|[0-9]+% confidence.*threat)'; then
-  echo "[pre-commit] BLOCKED: leaked AI scaffold / eval garbage in staged HTML (zero-internals). Scrub it before commit."
+  echo "[pre-commit] BLOCKED: leaked AI scaffold / eval garbage in staged HTML"
   exit 1
 fi
+
+# No LIRIL guide dock reintroduced
+if git diff --cached -U0 -- '*.html' 2>/dev/null | grep -qiE '^\+.*(id="dock"|liril-guide-btn|Guide me)'; then
+  echo "[pre-commit] BLOCKED: LIRIL guide chrome staged — guide is retired"
+  exit 1
+fi
+
 exit 0

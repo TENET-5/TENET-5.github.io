@@ -15,6 +15,11 @@ Outputs:
   data/liril_news_articles.json          (catalog for LIRIL presentation)
   C:/PRISM/log/liril_news_articles_last.json
 
+Media (required product floor — every article):
+  After posts write, run:
+    python tools/prism_news_article_media.py --json --apply
+  → hero image + LIRIL-read mux video per post (see OBJECTIVITY_NEWS_DOCTRINE).
+
 Usage:
   python tools/build_liril_news_articles.py
   python tools/build_liril_news_articles.py --max 6
@@ -149,8 +154,8 @@ def article_from_happening(item: dict, date: str, et_now: datetime, idx: int) ->
         "kicker": f"Desk · {domain}",
         "title": headline,
         "dek": _clean(
-            f"AI desk package for {date}. Domain {domain}. "
-            f"{body_src[:140]}" + ("…" if len(body_src) > 140 else ""),
+            f"{domain} desk · {date}. "
+            f"{body_src[:160]}" + ("…" if len(body_src) > 160 else ""),
             220,
         ),
         "body": [known, not_known, method, next_step],
@@ -209,7 +214,7 @@ def article_daily_package(brief: dict, wire_heads: list[str], et_now: datetime) 
             "Day is the news desk (briefing, investigations, five-act argument, MAID file). "
             "Hour is the live wire. Week holds investigations. Month is claim versus record. "
             "Year holds case files. Atmosphere film is memorial tone — not proof. "
-            "Tap Guide me on the homepage for LIRIL's full news presentation."
+            "Open the homepage news air desk for LIRIL's full video presentation."
         ),
     ]
 

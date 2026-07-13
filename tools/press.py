@@ -529,13 +529,11 @@ def press_nav(active: str = "") -> str:
     """Interior chrome only — homepage keeps the cover. Never use cover-bar here."""
     items = [
         ("Home", "index.html", "home"),
-        ("LIVE", "live.html", "live"),
+        ("News", "news.html", "news"),
         ("Briefing", "daily-briefing.html", "briefing"),
-        ("Wire", "press-wire.html", "wire"),
-        ("Newsletter", "newsletter.html", "newsletter"),
         ("Investigations", "investigations.html", "investigations"),
+        ("The Case", "argument.html", "case"),
         ("Evidence", "evidence-index.html", "evidence"),
-        ("Guided", "liril-film.html", "film"),
         ("About", "about.html", "about"),
     ]
     links = []
@@ -556,17 +554,24 @@ def footer_html(site: dict) -> str:
     return """
 <footer class="press-foot" role="contentinfo">
   <span>TENET5 · Powered by LIRIL AI</span>
-  <a href="methodology-transparency.html">Methodology</a>
+  <a href="news.html">News</a>
+  <a href="investigations.html">Investigations</a>
+  <a href="argument.html">The Case</a>
+  <a href="evidence-index.html">Evidence</a>
+  <a href="methodology-transparency.html">Method</a>
+  <a href="information-architecture.html">Site map</a>
   <a href="about.html">About</a>
   <a href="legal.html">Legal</a>
-  <a href="evidence-index.html">Evidence</a>
-  <a href="daily-briefing.html">Briefing</a>
 </footer>
 """
 
 
 def dock_and_script(site: dict, with_rail: bool) -> str:
-    """LIRIL system guide chrome: rail + always-on dock + voice/guide scripts."""
+    """Home chrome after main content. LIRIL guide dock RETIRED 2026-07-12.
+
+    Keeps optional timeline rail + cinema/time-dial utilities only.
+    Brand: Powered by LIRIL AI in footers — not a talking guide.
+    """
     rail = """
 <nav class="rail" aria-label="Timeline">
   <a class="seg" href="#newsdesk" data-ch="newsdesk"><span class="lbl">Day</span><span class="dot"></span></a>
@@ -579,29 +584,17 @@ def dock_and_script(site: dict, with_rail: bool) -> str:
 </nav>""" if with_rail else ""
     home_cine = ""
     if with_rail:
-        # Force-play cover broll + hybrid documentary + submarine time dial
         home_cine = """
-<script src="js/tenet5-cinema-play.js?v=3"></script>
-<script src="js/tenet5-doc-player.js?v=2"></script>
-<script src="js/tenet5-time-dial.js?v=1"></script>"""
-    # Cover inject: Guide me button inside liril-intro (patched after build if needed)
+<script src="js/tenet5-cinema-play.js?v=4"></script>
+<script src="js/tenet5-single-mic.js?v=1"></script>
+<script src="js/tenet5-doc-player.js?v=5"></script>
+<script src="js/tenet5-time-dial.js?v=1"></script>
+<script src="js/tenet5-single-mic.js?v=1"></script>
+<script src="js/tenet5-live-station.js?v=4" defer></script>
+<script src="js/tenet5-news-air.js?v=7" defer></script>
+<script src="js/broadcast-ticker-sync.js?v=2" defer></script>"""
     return rail + f"""
-<div class="dock guide-ready up" id="dock" role="region" aria-label="LIRIL guide">
-  <div class="dock-in">
-    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="say"><b>LIRIL · Station</b><span id="liril-line">{esc(site.get("liril_default", "Leave this page open — TENET5 presents the desk like a news station. Navigate anytime."))}</span></div>
-    <button id="liril-guide-btn" type="button" title="Start LIRIL desk reporter news presentation">Guide me</button>
-    <button id="liril-station-btn" type="button" aria-pressed="false" title="Always-on news station — auto-presents while you browse">Station · Off</button>
-    <button id="voice-btn" type="button" aria-pressed="false" title="Toggle LIRIL voice narration">Voice · Off</button>
-    <div class="liril-status" id="liril-status">LIRIL ready</div>
-  </div>
-</div>
-<script src="js/rv-reveal.js?v=1" defer></script>
-<script src="js/liril-radio.js?v=2" defer></script>
-<script src="js/liril-voice.js?v=45" defer></script>
-<script src="js/liril-reporter.js?v=1" defer></script>
-<script src="js/liril-station.js?v=1" defer></script>
-<script src="js/liril-home-guide.js?v=12" defer></script>
+<script src="js/rv-reveal.js?v=2" defer></script>
 {home_cine}
 </body>
 </html>"""
@@ -823,9 +816,9 @@ def render_live_station(
     </div>
     <h2 class="thesis-title" style="margin-top:0.6vh">Watch live. Navigate by <em>time</em> and <em>topic.</em></h2>
     <p class="news-air-lede" id="tls-oneline">
-      Default is a <strong>live channel</strong> (wall-clock join, auto-advance).
-      Or explore: scrub the time rail, filter by desk topic, jump dayparts — then <strong>Join live</strong> to snap back on air.</p>
-    <p class="tls-tagline" id="tls-tagline">Canadian public-record news channel · Powered by LIRIL AI · You verify</p>
+      Silent until you hit <strong>Join live</strong> or video <strong>Play</strong> — nothing auto-plays.
+      Scrub the time rail, filter by desk topic, jump dayparts, then start when you want sound.</p>
+    <p class="tls-tagline" id="tls-tagline">Canadian public-record news channel · Powered by LIRIL AI · No auto voice · You verify</p>
     <p class="tls-count" id="tls-count"></p>
 
     <div class="tls-nav-bar glass">
@@ -857,9 +850,10 @@ def render_live_station(
     <div class="tls glass" id="tls-root" data-mode="live">
       <div class="tls-stage">
         <div class="tls-frame">
-          <video id="tls-video" controls playsinline preload="metadata"
+          <video id="tls-video" controls playsinline muted preload="metadata"
                  poster="media/landing/ledger_desk.jpg"
-                 aria-label="TENET5 LIVE station"{hash_attr}>
+                 aria-label="TENET5 LIVE station — press play to start"
+                 data-user-arm-required="1"{hash_attr}>
             <source src="{esc(lead['video'])}" type="video/mp4">
           </video>
           <div class="tls-hud" aria-hidden="true">
@@ -869,7 +863,7 @@ def render_live_station(
             <span class="tls-prog" id="tls-prog">—</span>
           </div>
           <div class="tls-lt">
-            <span class="tls-kicker" id="tls-status">STANDBY</span>
+            <span class="tls-kicker" id="tls-status">STANDBY · TAP PLAY</span>
             <span class="tls-title" id="tls-title">{esc(lead['title'])}</span>
           </div>
           <div class="tls-bar-wrap" aria-hidden="true"><div class="tls-bar" id="tls-bar"></div></div>
@@ -909,8 +903,9 @@ def render_live_station(
     </p>
   </div>
 </section>
-<script src="js/tenet5-live-station.js?v=2" defer></script>
-<script src="js/tenet5-news-air.js?v=5" defer></script>
+<script src="js/tenet5-single-mic.js?v=1"></script>
+<script src="js/tenet5-live-station.js?v=4" defer></script>
+<script src="js/tenet5-news-air.js?v=7" defer></script>
 <script src="js/broadcast-ticker-sync.js?v=2" defer></script>"""
 
 
@@ -953,8 +948,8 @@ def build_live(site: dict) -> str:
     <span class="broadcast-clock" id="tls-clock">— ET</span>
   </div>
   <h1>On air. Navigate by <em>time</em> &amp; <em>topic.</em></h1>
-  <p class="stand" id="tls-oneline">Live channel by default. Scrub time, filter desks, jump dayparts — Join live snaps you back to wall-clock ET. Ticker locks to the desk video — drift is a hallucination signal.</p>
-  <p class="tls-tagline" id="tls-tagline">Powered by LIRIL AI · You verify · Atmosphere is not proof</p>
+  <p class="stand" id="tls-oneline">Silent until you hit <strong>Join live</strong> or the video <strong>Play</strong> control. Nothing auto-plays. Scrub time, filter desks, jump dayparts — then start when you want sound.</p>
+  <p class="tls-tagline" id="tls-tagline">Powered by LIRIL AI · You verify · No auto voice · Atmosphere is not proof</p>
   <p class="tls-count" id="tls-count"></p>
 
   <div class="tls-nav-bar glass">
@@ -986,9 +981,10 @@ def build_live(site: dict) -> str:
   <div class="tls glass tls-full" id="tls-root" data-mode="live">
     <div class="tls-stage">
       <div class="tls-frame">
-        <video id="tls-video" controls playsinline preload="auto"
+        <video id="tls-video" controls playsinline muted preload="metadata"
                poster="media/landing/ledger_desk.jpg"
-               aria-label="TENET5 LIVE"{hash_attr}>
+               aria-label="TENET5 LIVE — press play to start"
+               data-user-arm-required="1"{hash_attr}>
           <source src="{esc(lead.get('video') or '')}" type="video/mp4">
         </video>
         <div class="tls-hud" aria-hidden="true">
@@ -998,7 +994,7 @@ def build_live(site: dict) -> str:
           <span class="tls-prog" id="tls-prog">—</span>
         </div>
         <div class="tls-lt">
-          <span class="tls-kicker" id="tls-status">STANDBY</span>
+          <span class="tls-kicker" id="tls-status">STANDBY · TAP PLAY</span>
           <span class="tls-title" id="tls-title">{esc(lead.get('title') or '')}</span>
         </div>
         <div class="tls-bar-wrap" aria-hidden="true"><div class="tls-bar" id="tls-bar"></div></div>
@@ -1034,11 +1030,12 @@ def build_live(site: dict) -> str:
     Ticker phase-locks to desk video — desync is the first hallucination signal.
   </p>
 </main>
-<script src="js/tenet5-live-station.js?v=2" defer></script>
+<script src="js/tenet5-single-mic.js?v=1"></script>
+<script src="js/tenet5-live-station.js?v=4" defer></script>
 <script src="js/broadcast-ticker-sync.js?v=2" defer></script>
 """
     return (
-        head("TENET5 LIVE", "Live Canadian news station — watch live or navigate by time and topic. Powered by LIRIL AI.")
+        head("TENET5 LIVE", "Live Canadian news station — silent until you hit play. Powered by LIRIL AI.")
         + body
         + footer_html(site)
         + dock_and_script(site, with_rail=False)
@@ -1126,7 +1123,7 @@ def render_features(posts: list[dict]) -> str:
         <h3><a href="{link}">{esc(main["title"])}</a></h3>
         <p class="lede">{esc(main.get("dek",""))}</p>
         {body}
-        <div class="meta" style="margin-top:20px">{sources_line(main)} · LIRIL reads this file aloud</div>
+        <div class="meta" style="margin-top:20px">{sources_line(main)} · Powered by LIRIL AI · you verify</div>
       </article>
       <div class="side">{pull}{side}</div>
     </div>"""
@@ -1527,7 +1524,7 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <div class="scale-tile glass"><span class="v">380+</span><span class="l">Public files</span><span class="n">Investigations, dossiers, datasets</span></div>
       <div class="scale-tile glass"><span class="v">Daily</span><span class="l">Gov briefing</span><span class="n">Stated vs inferred · cited</span></div>
       <div class="scale-tile glass"><span class="v">Live</span><span class="l">News segments</span><span class="n">Desk updates · not canned loops</span></div>
-      <div class="scale-tile glass"><span class="v">LIRIL</span><span class="l">AI guide</span><span class="n">Powered by LIRIL AI · you verify</span></div>
+      <div class="scale-tile glass"><span class="v">LIRIL</span><span class="l">AI brand</span><span class="n">Powered by LIRIL AI · you verify</span></div>
     </div>
   </div>
 </section>"""
@@ -1551,13 +1548,12 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
   <div class="cover-bar">
     <span class="brand"><span class="wm">TENET<sup>5</sup></span></span>
     <nav class="cover-nav" aria-label="Primary">
-      <a href="live.html">LIVE</a>
+      <a href="news.html">News</a>
       <a href="daily-briefing.html">Briefing</a>
-      <a href="press-wire.html">Wire</a>
-      <a href="newsletter.html">Newsletter</a>
       <a href="investigations.html">Investigations</a>
-      <a href="argument.html">Argument</a>
+      <a href="argument.html">The Case</a>
       <a href="evidence-index.html">Evidence</a>
+      <a href="information-architecture.html">Map</a>
     </nav>
     <span id="dateline">&mdash;</span>
     <span>Powered by LIRIL AI</span>
@@ -1566,19 +1562,20 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
     <div class="cover-kick">Live news desk · segment updates · Powered by LIRIL AI</div>
     <h1>What Ottawa is <em>doing.</em><br>The record, read <em>backwards.</em></h1>
     <div class="fr">&laquo; Le dossier public du Canada — enqu&ecirc;te et analyse, source par source. &raquo;</div>
-    <p class="stand"><b>News segments, not canned film.</b> LIRIL packages today&#x27;s briefing and wire into
-    playable desk updates. Open the source on every claim. Atmosphere wallpaper is retired from the front page —
-    the video product is the live package.</p>
+    <p class="stand"><b>Three lanes:</b> <a href="news.html">News</a> for today ·
+    <a href="investigations.html">Investigations</a> for dossiers ·
+    <a href="argument.html">The Case</a> for the five-act MAID argument.
+    Open the source on every claim. You verify.</p>
   </div>
   <div class="cover-foot">
     <div class="liril-intro">
       <div class="who">LIRIL · Desk reporter</div>
       <p>&ldquo;{esc(site["liril_cover"])}&rdquo;</p>
       <div class="guide-actions">
-        <button type="button" class="guide-cta" id="liril-guide-btn-cover">Start today&#x27;s news package</button>
+
         <a class="begin" href="live.html" id="begin-record"><span>Watch TENET5 LIVE</span><span class="arrow"></span></a>
         <a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>
-        <a class="begin begin-quiet" href="#liril-presentation"><span>Desk presentation</span></a>
+        <a class="begin begin-quiet" href="#news-air"><span>Desk air</span></a>
       </div>
     </div>
   </div>
@@ -1636,17 +1633,14 @@ def build_index(site: dict, posts: list[dict], now: datetime) -> str:
       <a class="newsdesk-pill" href="markets.html" role="listitem">Markets · TSX</a>
       <a class="newsdesk-pill" href="cartoon-desk.html" role="listitem">Press Ink</a>
     </div>
-    <div class="liril-presentation glass" id="liril-presentation" aria-label="LIRIL desk reporter — live news">
+    <div class="glass" id="today-desk" aria-label="Today on the desk">
       <div class="pres-byline">
-        <span class="pres-air" id="liril-air-pill">DESK READY</span>
-        <span class="kick">LIRIL · desk reporter</span>
+        <span class="kick">Desk · today</span>
       </div>
       <h2 class="thesis-title" style="margin-top:0.6em">What is going on <em>today.</em></h2>
-      <p class="pres-lede">Live package: briefing + wire + playable news segments. LIRIL reads the rundown; video follows the desk, not a canned reel.</p>
-      <p class="pres-meta">Start package for VO. Play segments below for video updates. Listen live for continuous wire.</p>
+      <p class="pres-lede">Live package: briefing + wire + playable news segments. Video follows the desk — not a canned reel. Powered by LIRIL AI.</p>
+      <p class="pres-meta">Play segments below for video updates. Open the briefing for sourced claims.</p>
       <div class="pres-actions">
-        <button type="button" class="guide-cta" id="liril-pres-start">Start news presentation</button>
-        <button type="button" class="guide-cta guide-cta-live" id="liril-pres-live">Listen live</button>
         <a class="begin begin-quiet" href="#news-air"><span>Join desk air</span></a>
         <a class="begin begin-quiet" href="live.html"><span>Full station</span></a>
         <a class="begin begin-quiet" href="daily-briefing.html"><span>Full briefing</span></a>
@@ -1946,7 +1940,7 @@ def build_briefing(site: dict) -> str:
     <h1>Today, in the <em>record.</em></h1>
     <p class="stand" id="brief-oneline">Loading today's briefing from the record&hellip;</p>
     <div class="guide-actions" style="margin:1.5em 0 2em">
-      <button class="guide-cta" id="read-brief" type="button">LIRIL reads the briefing</button>
+
       <span class="threat" id="brief-threat" hidden></span>
       <span class="meta" id="brief-date"></span>
     </div>
@@ -2235,22 +2229,104 @@ def build_network(site: dict) -> str:
 # ══ ARTICLE PAGES ═══════════════════════════════════════════════════════════
 
 def build_article(site: dict, p: dict) -> str:
-    paras = "".join(f'<p class="bodyp">{esc(b)}</p>' for b in p.get("body", []))
+    """News-lane article. Analysis layout: on record / not claimed / method / sources."""
+    body_list = list(p.get("body") or [])
+    # Prefer structured blocks when body follows desk package order
+    on_record = body_list[0] if len(body_list) > 0 else ""
+    not_claimed = body_list[1] if len(body_list) > 1 else ""
+    method = body_list[2] if len(body_list) > 2 else ""
+    next_step = body_list[3] if len(body_list) > 3 else ""
+    extra = body_list[4:]
+
+    def _block(title: str, text: str, cls: str) -> str:
+        if not text:
+            return ""
+        return (
+            f'<section class="analysis-block {cls}" aria-label="{esc(title)}">'
+            f'<h2 class="analysis-h">{esc(title)}</h2>'
+            f'<p class="bodyp">{esc(text)}</p></section>'
+        )
+
+    structured = (
+        _block("On the record", on_record, "on-record")
+        + _block("Not claimed from this package alone", not_claimed, "not-claimed")
+        + _block("How this is labeled", method, "method")
+        + _block("What to open next", next_step, "next-step")
+    )
+    if not structured:
+        structured = "".join(f'<p class="bodyp">{esc(b)}</p>' for b in body_list)
+    else:
+        structured += "".join(f'<p class="bodyp">{esc(b)}</p>' for b in extra)
+
     srcs = "".join(f'<div class="meta" style="margin-bottom:8px">{sources_line(p)}</div>')
-    # story/ pages: press chrome with ../ paths
-    nav = press_nav("home").replace('href="', 'href="../')
+    nav = press_nav("news").replace('href="', 'href="../')
+    hero = (p.get("hero_image") or p.get("og_image") or "").strip()
+    video = (p.get("video_mux") or p.get("video") or "").strip()
+    audio = (p.get("audio") or "").strip()
+    vtt = (p.get("captions_vtt") or "").strip()
+    media_bits = []
+    if hero:
+        media_bits.append(
+            f'<figure class="article-hero glass">'
+            f'<img src="../{esc(hero)}" alt="" width="1280" height="720" loading="eager">'
+            f"</figure>"
+        )
+    if video:
+        a_attr = f' data-doc-audio="../{esc(audio)}"' if audio else ""
+        v_attr = f' data-doc-vtt="../{esc(vtt)}"' if vtt else ""
+        media_bits.append(
+            f'<section class="doc-stage article-seg" id="article-seg"'
+            f' data-doc-video="../{esc(video)}"{a_attr}{v_attr}'
+            f' data-doc-title="{esc(p.get("title") or "News segment")}"'
+            f' data-doc-caption="News segment — primary sources on the page. Powered by LIRIL AI. You verify."'
+            f' data-doc-finished="1"'
+            f' aria-label="News segment"></section>'
+        )
+    media_html = ("\n  " + "\n  ".join(media_bits) + "\n") if media_bits else ""
+    doc_player = (
+        (
+            '\n<script src="../js/tenet5-single-mic.js?v=1"></script>'
+            '\n<script src="../js/tenet5-doc-player.js?v=5"></script>'
+        )
+        if video
+        else ""
+    )
+    deep = (p.get("link") or "").strip()
+    deep_pill = ""
+    if deep:
+        if not deep.startswith("http") and not deep.startswith("../"):
+            deep = f"../{deep.lstrip('/')}"
+        deep_pill = f'<a class="file-pill" href="{esc(deep)}" role="listitem">Deep file →</a>'
+
     body = nav + f"""
-<main class="press-main article">
-  <span class="kick red">{esc(p.get("kicker",""))}</span>
-  <h1>{esc(p["title"])}</h1>
-  <p class="dek">{esc(p.get("dek",""))}</p>
-  {paras}
-  <div class="srcs glass"><h4>Sources in this file</h4>{srcs}</div>
+<main class="press-main article press-file" data-lane="news" data-template="news.package">
+  <header class="press-hero file-hero">
+    <div class="file-meta-row">
+      <span class="kick section-num">{esc(p.get("kicker") or "News desk")}</span>
+      <span class="file-status">News package</span>
+      <span class="file-status">Not a finished investigation</span>
+    </div>
+    <h1>{esc(p["title"])}</h1>
+    <p class="stand">{esc(p.get("dek") or "")}</p>
+    <div class="file-rail" role="list" aria-label="Lanes">
+      <a class="file-pill" href="../news.html" role="listitem">News hub →</a>
+      <a class="file-pill" href="../daily-briefing.html" role="listitem">Briefing →</a>
+      <a class="file-pill" href="../investigations.html" role="listitem">Investigations →</a>
+      {deep_pill}
+    </div>
+  </header>
+  {media_html}
+  {structured}
+  <div class="srcs glass"><h2 class="analysis-h">Sources in this package</h2>{srcs}</div>
+  <p class="meta" style="margin-top:1.5rem;opacity:.75">
+    News lane — time-sensitive package. For depth open the linked investigation or
+    <a href="../argument.html">The Case</a>. Powered by LIRIL AI · you verify.
+  </p>
 </main>"""
     page = (head(p["title"], p.get("dek", ""))
             + body + footer_html(site).replace('href="', 'href="../')
-            + dock_and_script(site, with_rail=False))
-    # version-agnostic: emitted tags carry ?v=N, so match on the path prefix
+            + dock_and_script(site, with_rail=False)
+            + doc_player)
     return page.replace('src="js/liril-', 'src="../js/liril-') \
                .replace("fetch('data/film", "fetch('../data/film")
 

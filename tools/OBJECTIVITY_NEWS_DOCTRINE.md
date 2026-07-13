@@ -115,3 +115,15 @@ EXTERNAL SOURCE and STATED/INFERRED labels preserved. No invented facts.
 - `.prism_liril_substack=forever` — Substack outbox + newsletter page
 - Site duty: `rss_home_wire` → `liril_outlet_desk` → `liril_substack` → `liril_news_articles` → `liril_news_presentation` → `press_rebuild`
 - Manual: `python tools/nemoclaw_news_scanner.py` then articles → presentation → `python tools/press.py`
+
+## News article media floor (2026-07-12)
+
+Every `content/posts/*.json` article ships with:
+
+1. **Hero image** — `media/articles/<slug>/hero.jpg` (branded still; Flux when available)
+2. **LIRIL segment video** — `media/film/video/articles/<slug>_mux.mp4` (neural VO + Ken Burns + LIVE burn)
+3. **Captions** — `audio/articles/<slug>.vtt` + mp3 stem
+
+Tool: `python tools/prism_news_article_media.py --json --apply`
+Story pages render hero + `tenet5-doc-player` stage from post fields.
+Homepage desk hits remain `news-N_mux.mp4` via `prism_desk_video_package.py`.

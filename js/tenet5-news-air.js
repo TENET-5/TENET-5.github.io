@@ -3,7 +3,7 @@
  */
 (function () {
   'use strict';
-  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 5) return;
+  if (window.TENET5_NEWS_AIR && window.TENET5_NEWS_AIR.__v >= 7) return;
 
   function $(id) { return document.getElementById(id); }
 
@@ -39,7 +39,9 @@
     }
   }
 
-  function playSrc(src, meta) {
+  function playSrc(src, meta, opts) {
+    opts = opts || {};
+    var forceMuted = opts.muted === true;
     var v = lead();
     if (!v || !src) return;
     var s = v.querySelector('source') || document.createElement('source');
@@ -58,12 +60,27 @@
       v.appendChild(tr);
     }
     v.load();
-    v.muted = false;
+    /* Single mic: unmuted mux VO kills TTS/station so LIRIL does not double-talk */
+    if (!forceMuted) {
+      try {
+        if (window.LIRIL_VOICE && window.LIRIL_VOICE.stopAll) window.LIRIL_VOICE.stopAll();
+        else if (window.LIRIL_VOICE && window.LIRIL_VOICE.stop) window.LIRIL_VOICE.stop();
+        if (window.LIRIL_STATION && window.LIRIL_STATION.stop) window.LIRIL_STATION.stop();
+        if (window.LIRIL_HOME_GUIDE && window.LIRIL_HOME_GUIDE.stop) window.LIRIL_HOME_GUIDE.stop();
+        if (window.LIRIL_REPORTER && window.LIRIL_REPORTER.stopLive) window.LIRIL_REPORTER.stopLive();
+      } catch (eKill) { /* */ }
+    }
+    /* User already clicked a card/button to reach playSrc — still start muted
+       unless caller asked for sound. Never silent-retry loops that surprise VO. */
+    v.muted = forceMuted || opts.sound !== true;
+    if (v.muted) v.setAttribute('muted', '');
+    else v.removeAttribute('muted');
     try {
       var p = v.play();
       if (p && p.catch) p.catch(function () {
-        v.muted = true;
-        v.play().catch(function () {});
+        /* No auto-retry. User hits native play or Unmute. */
+        var st = document.getElementById('tls-status') || document.getElementById('news-air-now-tag');
+        if (st) st.textContent = 'TAP PLAY TO START';
       });
     } catch (e) { /* */ }
     setNow(meta || {});
@@ -84,14 +101,15 @@
     };
   }
 
-  function playId(id) {
-    /* Prefer continuous station if mounted */
+  function playId(id, opts) {
+    opts = opts || {};
+    /* Prefer continuous station if mounted — honor muted for Guide package */
     if (window.TENET5_LIVE && typeof window.TENET5_LIVE.playAt === 'function' && window.TENET5_LIVE.getSchedule) {
       var sch = window.TENET5_LIVE.getSchedule();
       if (sch && sch.linear) {
         for (var i = 0; i < sch.linear.length; i++) {
           if (sch.linear[i].id === id) {
-            window.TENET5_LIVE.playAt(i, 0, true);
+            window.TENET5_LIVE.playAt(i, 0, true, opts);
             document.querySelectorAll('.news-seg.is-on').forEach(function (el) {
               el.classList.remove('is-on');
             });
@@ -105,7 +123,7 @@
     var card = document.querySelector('[data-news-seg="' + id + '"]');
     if (!card) return;
     var src = card.getAttribute('data-video') || '';
-    playSrc(src, metaFromCard(card));
+    playSrc(src, metaFromCard(card), opts);
     document.querySelectorAll('.news-seg.is-on').forEach(function (el) {
       el.classList.remove('is-on');
     });
@@ -173,7 +191,7 @@
   }
 
   window.TENET5_NEWS_AIR = {
-    __v: 5,
+    __v: 7,
     playId: playId,
     playAll: function () {
       if (window.TENET5_LIVE && window.TENET5_LIVE.join) window.TENET5_LIVE.join();

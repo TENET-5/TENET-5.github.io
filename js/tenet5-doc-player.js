@@ -1,16 +1,50 @@
-/* TENET5 hybrid documentary player v3 — muxed VO+BGM preferred
- * Film + LIRIL narration + on-screen text + interactive chapter navigation.
- * Matches site structure: acts / stages / sources. Atmosphere is not proof.
+/* TENET5 hybrid documentary player v5 — VIDEO ONLY audio
  *
- * data-doc-video, data-doc-audio?, data-doc-manifest?, data-doc-vtt?,
- * data-doc-poster?, data-doc-title?, data-doc-caption?, data-doc-loop, data-force-play
+ * Daniel 2026-07-12: one mic. Sound comes only from the <video> the user plays.
+ * - No separate data-doc-audio MP3 dual-play
+ * - No browser TTS / LIRIL_VOICE narrate beats
+ * - Prefer *_mux.mp4 (VO baked in); otherwise silent film until user unmutes
+ * - Requires user Play; no force-play with sound
  */
 (function () {
   'use strict';
-  if (window.TENET5DocPlayer && window.TENET5DocPlayer.__v >= 3) return;
+  if (window.TENET5DocPlayer && window.TENET5DocPlayer.__v >= 5) return;
 
-  function reduced() {
-    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var PLAYERS = [];
+
+  function bus() {
+    if (!window.TENET5AudioBus) {
+      window.TENET5AudioBus = {
+        owner: null,
+        docPlaying: false,
+        claim: function (who) {
+          this.owner = who || null;
+          this.docPlaying = who === 'doc';
+          window.__TENET5_DOC_ON_AIR = this.docPlaying;
+        },
+        release: function (who) {
+          if (!who || this.owner === who) {
+            this.owner = null;
+            this.docPlaying = false;
+            window.__TENET5_DOC_ON_AIR = false;
+          }
+        },
+        stopNonDoc: function () {
+          try {
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+          } catch (e) { /* */ }
+        },
+        pauseAllDocs: function () {
+          for (var i = 0; i < PLAYERS.length; i++) {
+            try {
+              if (PLAYERS[i] && PLAYERS[i].pauseQuiet) PLAYERS[i].pauseQuiet();
+            } catch (e) { /* */ }
+          }
+          this.release('doc');
+        }
+      };
+    }
+    return window.TENET5AudioBus;
   }
 
   function clean(s, n) {
@@ -19,80 +53,8 @@
     return s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…';
   }
 
-  function parseVtt(text) {
-    var cues = [];
-    if (!text) return cues;
-    var blocks = String(text).replace(/\r/g, '').split(/\n\n+/);
-    for (var i = 0; i < blocks.length; i++) {
-      var lines = blocks[i].split('\n').filter(function (l) { return l && l.indexOf('WEBVTT') !== 0 && !/^\d+$/.test(l.trim()); });
-      if (!lines.length) continue;
-      var timeLine = null;
-      var body = [];
-      for (var j = 0; j < lines.length; j++) {
-        if (lines[j].indexOf('-->') >= 0) timeLine = lines[j];
-        else body.push(lines[j]);
-      }
-      if (!timeLine || !body.length) continue;
-      var m = timeLine.match(/(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})/);
-      if (!m) {
-        m = timeLine.match(/(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2})\.(\d{3})/);
-        if (m) {
-          cues.push({
-            start: (+m[1]) * 60 + (+m[2]) + (+m[3]) / 1000,
-            end: (+m[4]) * 60 + (+m[5]) + (+m[6]) / 1000,
-            text: body.join(' ')
-          });
-        }
-        continue;
-      }
-      cues.push({
-        start: (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000,
-        end: (+m[5]) * 3600 + (+m[6]) * 60 + (+m[7]) + (+m[8]) / 1000,
-        text: body.join(' ')
-      });
-    }
-    return cues;
-  }
-
-  function fetchText(url) {
-    return fetch(url, { cache: 'no-cache' })
-      .then(function (r) { return r.ok ? r.text() : ''; })
-      .catch(function () { return ''; });
-  }
-
-  function fetchJson(url) {
-    return fetch(url, { cache: 'no-cache' })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; });
-  }
-
-  function armVideo(v) {
-    if (!v) return;
-    v.playsInline = true;
-    v.setAttribute('playsinline', '');
-    v.setAttribute('webkit-playsinline', '');
-    v.preload = 'auto';
-    if (!v.dataset.userUnmuted) {
-      v.muted = true;
-      v.defaultMuted = true;
-      v.setAttribute('muted', '');
-    }
-  }
-
-  function speakLiril(text, force) {
-    if (!text) return false;
-    if (!window.LIRIL_VOICE || typeof window.LIRIL_VOICE.speak !== 'function') return false;
-    if (window.__LIRIL_MUTED === true && !force) return false;
-    try {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-    } catch (e) { /* */ }
-    return !!window.LIRIL_VOICE.speak(text, {});
-  }
-
-  function stopSpeak() {
-    try {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-    } catch (e) { /* */ }
+  function isMuxSrc(src) {
+    return !!(src && /_mux\.mp4/i.test(String(src)));
   }
 
   function mount(root) {
@@ -101,25 +63,22 @@
     root.classList.add('doc-hybrid');
 
     var videoSrc = root.getAttribute('data-doc-video') || '';
-    var audioSrc = root.getAttribute('data-doc-audio') || '';
-    var manifestUrl = root.getAttribute('data-doc-manifest') || '';
+    // IGNORED by design — no dual MP3 VO
+    // var audioSrc = root.getAttribute('data-doc-audio') || '';
     var vttUrl = root.getAttribute('data-doc-vtt') || '';
     var poster = root.getAttribute('data-doc-poster') || '';
     var title = root.getAttribute('data-doc-title') || 'Documentary stage';
-    var caption = root.getAttribute('data-doc-caption') ||
-      'Film atmosphere. Primary sources remain in the text and links. Powered by LIRIL AI — you verify.';
+    var caption =
+      root.getAttribute('data-doc-caption') ||
+      'Film. Sound is in the video file when you press play. Powered by LIRIL AI — you verify.';
 
+    var muxed = isMuxSrc(videoSrc);
     var state = {
-      beats: [],
-      cues: [],
-      beatIndex: -1,
-      soundOn: true,
-      narrateBeats: true,
-      lastSpokenBeat: -1,
-      userPlayed: false
+      soundOn: false,
+      userPlayed: false,
+      productMux: muxed
     };
 
-    /* ── DOM ── */
     var frame = document.createElement('div');
     frame.className = 'doc-stage-frame';
 
@@ -127,6 +86,12 @@
     v.className = 'doc-stage-video';
     v.setAttribute('controls', '');
     v.controls = true;
+    v.playsInline = true;
+    v.setAttribute('playsinline', '');
+    v.preload = 'metadata';
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute('muted', '');
     v.loop = root.hasAttribute('data-doc-loop');
     if (poster) v.setAttribute('poster', poster);
     if (videoSrc) {
@@ -136,225 +101,80 @@
       s.type = 'video/mp4';
       v.appendChild(s);
     }
-    armVideo(v);
+    if (vttUrl) {
+      var tr = document.createElement('track');
+      tr.kind = 'captions';
+      tr.srclang = 'en-CA';
+      tr.label = 'Captions';
+      tr.src = vttUrl;
+      tr.default = true;
+      v.appendChild(tr);
+    }
 
-    /* On-screen lower third */
-    var lower = document.createElement('div');
-    lower.className = 'doc-stage-lower';
-    lower.setAttribute('aria-live', 'polite');
-    lower.innerHTML =
-      '<span class="doc-lower-kicker"></span>' +
-      '<strong class="doc-lower-title"></strong>' +
-      '<p class="doc-lower-text"></p>';
-
-    var badge = document.createElement('span');
-    badge.className = 'doc-stage-badge';
-    badge.setAttribute('aria-hidden', 'true');
-    badge.textContent = 'Hybrid documentary';
-
-    var controls = document.createElement('div');
-    controls.className = 'doc-stage-bar';
-
+    var chrome = document.createElement('div');
+    chrome.className = 'doc-stage-chrome';
     var btnPlay = document.createElement('button');
     btnPlay.type = 'button';
-    btnPlay.className = 'doc-stage-btn';
-    btnPlay.textContent = 'Play film';
-
+    btnPlay.className = 'doc-btn doc-btn-play';
+    btnPlay.textContent = 'Play';
     var btnSound = document.createElement('button');
     btnSound.type = 'button';
-    btnSound.className = 'doc-stage-btn doc-stage-btn-ghost on';
-    btnSound.textContent = 'Narration · On';
-    btnSound.title = 'LIRIL narration + page audio when available';
-
-    var btnPrev = document.createElement('button');
-    btnPrev.type = 'button';
-    btnPrev.className = 'doc-stage-btn doc-stage-btn-ghost';
-    btnPrev.textContent = '← Chapter';
-    btnPrev.disabled = true;
-
-    var btnNext = document.createElement('button');
-    btnNext.type = 'button';
-    btnNext.className = 'doc-stage-btn doc-stage-btn-ghost';
-    btnNext.textContent = 'Chapter →';
-    btnNext.disabled = true;
-
-    var status = document.createElement('span');
-    status.className = 'doc-stage-status';
-    status.textContent = title;
-
-    var openLink = document.createElement('a');
-    openLink.className = 'doc-stage-open';
-    openLink.href = '#';
-    openLink.hidden = true;
-    openLink.textContent = 'Open sources →';
-
-    var chapters = document.createElement('nav');
-    chapters.className = 'doc-stage-chapters';
-    chapters.setAttribute('aria-label', 'Documentary chapters');
-
-    var audio = null;
-    if (audioSrc) {
-      audio = document.createElement('audio');
-      audio.preload = 'metadata';
-      audio.src = audioSrc;
-      audio.setAttribute('playsinline', '');
-      root.appendChild(audio);
-    }
-
+    btnSound.className = 'doc-btn doc-btn-sound';
+    btnSound.textContent = muxed ? 'Sound · Off (tap after play)' : 'Sound · Off';
     var cap = document.createElement('p');
-    cap.className = 'doc-stage-cap';
+    cap.className = 'doc-stage-caption';
     cap.textContent = caption;
 
+    chrome.appendChild(btnPlay);
+    chrome.appendChild(btnSound);
+    frame.appendChild(v);
+    frame.appendChild(chrome);
+    root.appendChild(frame);
+    root.appendChild(cap);
+
     function setPlaying(on) {
-      badge.textContent = on ? (state.soundOn ? 'On air · hybrid' : 'Playing · silent film') : 'Hybrid documentary';
-      badge.setAttribute('data-state', on ? 'play' : 'wait');
-      btnPlay.textContent = on ? 'Pause' : 'Play film';
+      btnPlay.textContent = on ? 'Pause' : 'Play';
+      root.classList.toggle('is-playing', on);
     }
 
-    function paintLower(titleT, textT, kicker) {
-      var k = lower.querySelector('.doc-lower-kicker');
-      var t = lower.querySelector('.doc-lower-title');
-      var p = lower.querySelector('.doc-lower-text');
-      if (k) k.textContent = kicker || 'LIRIL · on screen';
-      if (t) t.textContent = titleT || '';
-      if (p) p.textContent = textT || '';
-      lower.classList.toggle('empty', !titleT && !textT);
-    }
-
-    function paintChapters() {
-      chapters.innerHTML = '';
-      if (!state.beats.length) {
-        chapters.hidden = true;
-        btnPrev.disabled = true;
-        btnNext.disabled = true;
-        return;
-      }
-      chapters.hidden = false;
-      btnPrev.disabled = false;
-      btnNext.disabled = false;
-      state.beats.forEach(function (b, idx) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'doc-ch-chip' + (idx === state.beatIndex ? ' on' : '');
-        btn.textContent = b.label || b.title || ('Ch ' + (idx + 1));
-        btn.setAttribute('data-idx', String(idx));
-        btn.addEventListener('click', function () { seekBeat(idx, true); });
-        chapters.appendChild(btn);
-      });
-    }
-
-    function activeBeatAt(t) {
-      for (var i = 0; i < state.beats.length; i++) {
-        var b = state.beats[i];
-        var a = typeof b.start === 'number' ? b.start : 0;
-        var e = typeof b.end === 'number' ? b.end : 1e9;
-        if (t >= a && t < e) return i;
-      }
-      if (state.beats.length && t >= (state.beats[state.beats.length - 1].start || 0)) {
-        return state.beats.length - 1;
-      }
-      return -1;
-    }
-
-    function cueAt(t) {
-      for (var i = 0; i < state.cues.length; i++) {
-        if (t >= state.cues[i].start && t < state.cues[i].end) return state.cues[i];
-      }
-      return null;
-    }
-
-    function speakBeat(idx, force) {
-      if (!state.soundOn || !state.narrateBeats) return;
-      if (!force && !state.userPlayed && !v.dataset.userUnmuted) return;
-      if (idx < 0 || idx >= state.beats.length) return;
-      if (!force && idx === state.lastSpokenBeat) return;
-      var b = state.beats[idx];
-      var line = b.narration || b.text || b.title || '';
-      if (!line) return;
-      state.lastSpokenBeat = idx;
-      /* Page audio (LIRIL mp3) owns the bed while it lasts — avoid double talk. */
-      if (audio && audio.error == null) {
-        var ad = audio.duration;
-        var t = v.currentTime || 0;
-        if (isFinite(ad) && ad > 1 && t <= ad + 0.35) return;
-        /* Past the end of the bed: LIRIL continues chapter narration over remaining film. */
-      }
-      speakLiril(line, true);
-    }
-
-    function applyBeat(idx, fromUser) {
-      if (idx < 0 || idx >= state.beats.length) {
-        paintLower(title, caption, 'Documentary');
-        openLink.hidden = true;
-        return;
-      }
-      state.beatIndex = idx;
-      var b = state.beats[idx];
-      paintLower(b.title || b.label, b.text, b.label || 'Chapter');
-      paintChapters();
-      status.textContent = (b.label || title) + (b.href ? ' · navigable' : '');
-      if (b.href) {
-        openLink.hidden = false;
-        openLink.href = b.href;
-        openLink.textContent = (b.href.charAt(0) === '#' ? 'Jump to stage →' : 'Open ' + (b.label || 'file') + ' →');
-      } else {
-        openLink.hidden = true;
-      }
-      if (fromUser || state.soundOn) speakBeat(idx, !!fromUser);
-    }
-
-    function seekBeat(idx, fromUser) {
-      if (idx < 0 || idx >= state.beats.length) return;
-      var b = state.beats[idx];
-      var t = typeof b.start === 'number' ? b.start : 0;
-      try { v.currentTime = Math.max(0, t + 0.05); } catch (e) { /* */ }
-      if (audio && state.soundOn) {
-        try { audio.currentTime = Math.min(t, audio.duration || t); } catch (e2) { /* */ }
-      }
-      state.lastSpokenBeat = -1;
-      applyBeat(idx, fromUser);
-      if (v.paused) playAll();
-    }
-
-    function syncOverlay() {
-      var t = v.currentTime || 0;
-      var bi = activeBeatAt(t);
-      if (bi !== state.beatIndex && bi >= 0) {
-        applyBeat(bi, false);
-        if (state.soundOn && !audio) speakBeat(bi, false);
-      }
-      var cue = cueAt(t);
-      if (cue && cue.text) {
-        /* VTT supersedes beat body while cue active — keeps on-screen text live */
-        var b = state.beats[state.beatIndex] || {};
-        paintLower(b.title || title, cue.text, b.label || 'LIRIL · captions');
-      }
+    function unmuteProduct() {
+      v.dataset.userUnmuted = '1';
+      try {
+        v.muted = false;
+        v.defaultMuted = false;
+        v.removeAttribute('muted');
+        v.volume = 1;
+      } catch (e0) { /* */ }
     }
 
     function playAll() {
       state.userPlayed = true;
-      armVideo(v);
-      var p = v.play();
-      if (p && p.catch) p.catch(function () {});
-      if (state.soundOn && audio) {
-        try {
-          audio.currentTime = Math.min(audio.currentTime || 0, v.currentTime || 0);
-          var ap = audio.play();
-          if (ap && ap.catch) ap.catch(function () {});
-        } catch (e) { /* */ }
+      bus().stopNonDoc();
+      bus().claim('doc');
+      // Stay muted until user explicitly hits Sound
+      if (state.soundOn) unmuteProduct();
+      else {
+        v.muted = true;
+        v.setAttribute('muted', '');
       }
-      if (state.soundOn && !audio) {
-        var bi = activeBeatAt(v.currentTime || 0);
-        if (bi >= 0) speakBeat(bi, true);
+      var p = v.play();
+      if (p && p.catch) {
+        p.catch(function () {
+          v.muted = true;
+          setPlaying(false);
+        });
       }
       setPlaying(true);
     }
 
-    function pauseAll() {
+    function pauseQuiet() {
       try { v.pause(); } catch (e) { /* */ }
-      if (audio) try { audio.pause(); } catch (e2) { /* */ }
-      stopSpeak();
       setPlaying(false);
+    }
+
+    function pauseAll() {
+      pauseQuiet();
+      bus().release('doc');
     }
 
     btnPlay.addEventListener('click', function () {
@@ -363,169 +183,78 @@
     });
 
     btnSound.addEventListener('click', function () {
-      state.soundOn = !state.soundOn;
-      btnSound.textContent = state.soundOn ? 'Narration · On' : 'Narration · Off';
+      if (!state.userPlayed && v.paused) {
+        // Require play first — sound alone shouldn't auto-start VO stack
+        state.soundOn = true;
+        playAll();
+      } else {
+        state.soundOn = !state.soundOn;
+      }
+      btnSound.textContent = state.soundOn
+        ? (muxed ? 'Sound · On (video VO)' : 'Sound · On')
+        : 'Sound · Off';
       btnSound.classList.toggle('on', state.soundOn);
       if (state.soundOn) {
-        v.dataset.userUnmuted = '1';
-        /* Prefer audio already muxed into the video (product path). */
-        var muxed = !!(v.src && /_mux\.mp4/i.test(v.src || v.currentSrc || ''));
-        if (muxed || (!audio && v.querySelector('source'))) {
-          try {
-            v.muted = false;
-            v.defaultMuted = false;
-            v.removeAttribute('muted');
-            v.volume = 1;
-          } catch (e0) { /* */ }
-          /* Suppress browser TTS when product file already has LIRIL VO + score */
-          if (muxed) state.narrateBeats = false;
-        }
-        if (audio && !muxed) {
-          try {
-            var ap = audio.play();
-            if (ap && ap.catch) ap.catch(function () {});
-          } catch (e) { /* */ }
-        } else if (!muxed && !audio) {
-          /* Silent film fallback — LIRIL browser voice */
-          state.narrateBeats = true;
-          var bi = activeBeatAt(v.currentTime || 0);
-          speakBeat(bi >= 0 ? bi : 0, true);
-        }
+        bus().stopNonDoc();
+        unmuteProduct();
+        bus().claim('doc');
         if (v.paused) playAll();
-        else if (!audio && !muxed) {
-          var b2 = activeBeatAt(v.currentTime || 0);
-          if (b2 >= 0) speakBeat(b2, true);
-        }
       } else {
-        if (audio) try { audio.pause(); } catch (e2) { /* */ }
-        stopSpeak();
-        v.dataset.userUnmuted = '';
         v.muted = true;
-        state.narrateBeats = true;
+        v.setAttribute('muted', '');
+        v.dataset.userUnmuted = '';
       }
     });
 
-    btnPrev.addEventListener('click', function () {
-      var i = state.beatIndex <= 0 ? 0 : state.beatIndex - 1;
-      seekBeat(i, true);
+    v.addEventListener('play', function () {
+      state.userPlayed = true;
+      bus().claim('doc');
+      bus().stopNonDoc();
+      setPlaying(true);
     });
-    btnNext.addEventListener('click', function () {
-      var i = state.beatIndex < 0 ? 0 : Math.min(state.beats.length - 1, state.beatIndex + 1);
-      if (state.beatIndex >= 0 && state.beatIndex < state.beats.length - 1) i = state.beatIndex + 1;
-      seekBeat(i, true);
-    });
-
-    v.addEventListener('play', function () { setPlaying(true); });
     v.addEventListener('pause', function () {
-      if (audio) try { audio.pause(); } catch (e) { /* */ }
-      setPlaying(false);
-    });
-    v.addEventListener('timeupdate', function () {
-      if (audio && state.soundOn && Math.abs((audio.currentTime || 0) - (v.currentTime || 0)) > 0.45) {
-        try { audio.currentTime = v.currentTime; } catch (e) { /* */ }
-      }
-      syncOverlay();
+      if (!v.ended) setPlaying(false);
     });
     v.addEventListener('ended', function () {
       if (!v.loop) {
-        stopSpeak();
-        setPlaying(false);
-        status.textContent = 'End of film · open a chapter or source';
+        pauseAll();
       }
     });
 
-    frame.appendChild(v);
-    frame.appendChild(lower);
-    frame.appendChild(badge);
-    controls.appendChild(btnPlay);
-    controls.appendChild(btnSound);
-    controls.appendChild(status);
-    controls.appendChild(openLink);
+    // Never honor data-force-play with sound
+    root.removeAttribute('data-force-play');
 
-    root.appendChild(frame);
-    // User requested: "people only need a play button it should play straight through"
-    // Chapters and prev/next buttons removed from UI.
-    root.appendChild(controls);
-    root.appendChild(cap);
-
-    paintLower(title, caption, 'Loading hybrid…');
-
-    /* Load manifest + VTT */
-    var jobs = [];
-    if (manifestUrl) jobs.push(fetchJson(manifestUrl).then(function (m) {
-      if (!m) return;
-      if (m.beats && m.beats.length) state.beats = m.beats;
-      if (m.captions_vtt && !vttUrl) vttUrl = m.captions_vtt;
-      if (m.audio && !audioSrc) {
-        audioSrc = m.audio;
-        audio = document.createElement('audio');
-        audio.preload = 'metadata';
-        audio.src = audioSrc;
-        root.appendChild(audio);
-      }
-      if (m.title) {
-        title = m.title;
-        status.textContent = title;
-      }
-      if (m.doctrine) cap.textContent = m.doctrine + ' ' + caption;
-    }));
-    /* Fallback beats from data attributes if no manifest */
-    if (!manifestUrl) {
-      state.beats = [{
-        id: 'whole',
-        label: 'Film',
-        start: 0,
-        end: 9999,
-        title: title,
-        text: caption,
-        narration: caption,
-        href: root.getAttribute('data-doc-href') || ''
-      }];
-    }
-
-    Promise.all(jobs).then(function () {
-      paintChapters();
-      var loadVtt = vttUrl || root.getAttribute('data-doc-vtt') || '';
-      if (loadVtt) {
-        return fetchText(loadVtt).then(function (txt) {
-          state.cues = parseVtt(txt);
-        });
-      }
-    }).then(function () {
-      paintLower(title, caption, 'Hybrid ready · Narration for LIRIL');
-      applyBeat(0, false);
-      /* Auto-start muted film in view */
-      if ('IntersectionObserver' in window && !reduced()) {
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (en) {
-            if (en.isIntersecting) {
-              armVideo(v);
-              var p = v.play();
-              if (p && p.catch) p.catch(function () {});
-            } else {
-              var wasPlaying = !v.paused;
-              try { v.pause(); } catch (e) { /* */ }
-              if (audio) try { audio.pause(); } catch (e2) { /* */ }
-              if (wasPlaying) stopSpeak();
-            }
-          });
-        }, { threshold: 0.35 });
-        io.observe(root);
-      } else if (root.hasAttribute('data-force-play') && !reduced()) {
-        playAll();
-      }
-    });
+    var api = {
+      pauseQuiet: pauseQuiet,
+      play: playAll,
+      pause: pauseAll,
+      video: v,
+      title: title
+    };
+    PLAYERS.push(api);
+    root._tenet5Doc = api;
   }
 
-  function boot() {
-    document.querySelectorAll('[data-doc-video]').forEach(mount);
+  function scan() {
+    var nodes = document.querySelectorAll(
+      '.doc-stage[data-doc-video], [data-doc-video].doc-stage, section.doc-stage'
+    );
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].getAttribute('data-doc-video')) mount(nodes[i]);
+    }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', scan);
   } else {
-    boot();
+    scan();
   }
 
-  window.TENET5DocPlayer = { mount: mount, boot: boot, __v: 2 };
+  window.TENET5DocPlayer = {
+    __v: 5,
+    scan: scan,
+    pauseAll: function () {
+      bus().pauseAllDocs();
+    }
+  };
 })();

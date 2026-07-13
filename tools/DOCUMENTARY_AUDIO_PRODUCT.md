@@ -18,11 +18,15 @@ python tools/prism_audio_slate.py --json --apply full --manifest data/film/hybri
 python tools/prism_audio_slate.py --json audit
 ```
 
-## Player contract (`tenet5-doc-player.js`)
+## Player contract (`tenet5-doc-player.js` v4+)
 
 1. Prefer **muxed MP4** (`*_mux.mp4`) so voice + score play inside the video when user unmutes.
-2. Always wire `data-doc-audio` + `data-doc-vtt` as fallback / dual path.
+2. Wire `data-doc-audio` + `data-doc-vtt` as fallback only when video is **not** mux product.
 3. Browser TTS is **backup only** when stems missing — never the sole product path for acts.
+4. **Hard exclusivity:** while film is on air (`__TENET5_DOC_ON_AIR` / `TENET5AudioBus.owner=doc`):
+   - no page Guide VO, no walkthrough speak, no `LIRIL_VOICE.speak` over the bed
+   - Guide me **pauses** the documentary first; never dual-voice
+5. Finish gate: `tools/prism_doc_finish_gate.py` → `data/docs_finished.json`
 
 ## Forbidden
 

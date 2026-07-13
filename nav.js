@@ -29,7 +29,7 @@
         '<div class="nav-status-stack" aria-label="Record status">' +
           '<span class="nav-status-pill">Primary sources</span>' +
           '<span class="nav-status-pill nav-status-live">OSINT</span>' +
-          '<span class="nav-status-pill">LIRIL guide</span>' +
+          '<span class="nav-status-pill">Powered by LIRIL AI</span>' +
         '</div>' +
       '</div>' +
       '<div class="nav-bar">' +

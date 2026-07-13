@@ -1,17 +1,19 @@
-/* TENET5 LIVE v2 — live news station + real-time time/topic navigation.
+/* TENET5 LIVE v4 — live news station + real-time time/topic navigation.
  *
- * Default = LIVE (wall-clock join, auto-advance, like a channel).
+ * HARD RULE (Daniel 2026-07-12): NOTHING plays until the user hits play / Join live / Unmute.
+ * No auto-join, no auto-play, no LIRIL mux VO on page load.
  * Explore = navigate by time rail + topic chips without leaving the station.
- * Join live snaps back to wall-clock position.
+ * Join live snaps to wall-clock position — still requires that user click.
  */
 (function () {
   'use strict';
-  if (window.TENET5_LIVE && window.TENET5_LIVE.__v >= 2) return;
+  if (window.TENET5_LIVE && window.TENET5_LIVE.__v >= 4) return;
 
   var schedule = null;
   var idx = 0;
   var playing = false;
   var joined = false;
+  var userArmed = false; /* true only after explicit user activation */
   var seekPending = 0;
   var mode = 'live'; /* live | explore */
   var topicFilter = 'ALL';
@@ -298,8 +300,9 @@
       segs.querySelectorAll('.tls-tseg').forEach(function (b) {
         b.addEventListener('click', function (ev) {
           ev.stopPropagation();
+          userArmed = true;
           setMode('explore');
-          playAt(parseInt(b.getAttribute('data-idx'), 10) || 0, 0, true);
+          playAt(parseInt(b.getAttribute('data-idx'), 10) || 0, 0, true, { muted: true });
         });
       });
     }
@@ -325,9 +328,28 @@
     v.load();
   }
 
-  function playAt(i, offset, user) {
+  function killOtherVoice() {
+    try {
+      if (window.LIRIL_VOICE && window.LIRIL_VOICE.stopAll) window.LIRIL_VOICE.stopAll();
+      else if (window.LIRIL_VOICE && window.LIRIL_VOICE.stop) window.LIRIL_VOICE.stop();
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (window.LIRIL_STATION && window.LIRIL_STATION.stop) window.LIRIL_STATION.stop();
+      if (window.LIRIL_HOME_GUIDE && window.LIRIL_HOME_GUIDE.stop) window.LIRIL_HOME_GUIDE.stop();
+      if (window.LIRIL_REPORTER && window.LIRIL_REPORTER.stopLive) window.LIRIL_REPORTER.stopLive();
+    } catch (eKill) { /* */ }
+  }
+
+  function playAt(i, offset, user, opts) {
+    opts = opts || {};
+    var forceMuted = opts.muted === true;
     var list = items();
     if (!list.length) return;
+    /* HARD: never start media without user arming the station */
+    if (!userArmed && !user && opts.force !== true) {
+      cueAt(i, offset, 'STANDBY · TAP JOIN LIVE OR PLAY');
+      return;
+    }
+    if (user) userArmed = true;
     idx = ((i % list.length) + list.length) % list.length;
     var item = list[idx];
     if (user) setMode('explore');
@@ -342,43 +364,100 @@
         try { v.currentTime = seekPending; } catch (e) { /* */ }
       }
       seekPending = 0;
-      v.muted = false;
+      /* Default MUTED until user taps Unmute — mux files carry LIRIL VO audio */
+      if (!forceMuted && user && opts.sound === true) {
+        killOtherVoice();
+        v.muted = false;
+      } else {
+        v.muted = true;
+        v.setAttribute('muted', '');
+      }
+      if (!userArmed) {
+        v.pause();
+        playing = false;
+        setHud(item, 'STANDBY · TAP PLAY');
+        return;
+      }
       var p = v.play();
       if (p && p.catch) {
         p.catch(function () {
-          v.muted = true;
-          v.play().catch(function () {});
+          /* Do NOT retry-play. User must hit the control again. */
+          v.pause();
+          playing = false;
           var st = $('tls-status');
-          if (st) st.textContent = (mode === 'live' ? 'ON AIR' : 'NAV') + ' · TAP UNMUTE';
+          if (st) st.textContent = 'TAP PLAY TO START';
         });
       }
       playing = true;
       joined = true;
       setHud(item);
+      if (v.muted) {
+        var st2 = $('tls-status');
+        if (st2 && st2.textContent.indexOf('UNMUTE') < 0) {
+          st2.textContent = (mode === 'live' ? 'ON AIR' : 'NAV') + ' · MUTED · TAP UNMUTE FOR SOUND';
+        }
+      }
+    };
+    if (v.readyState >= 1) onMeta();
+    else v.addEventListener('loadedmetadata', onMeta);
+  }
+
+  /** Cue item + HUD without playing (standby). */
+  function cueAt(i, offset, statusText) {
+    var list = items();
+    if (!list.length) return;
+    idx = ((i % list.length) + list.length) % list.length;
+    var item = list[idx];
+    loadSrc(item);
+    setHud(item, statusText || 'STANDBY · TAP JOIN LIVE OR PLAY');
+    var v = video();
+    if (!v) return;
+    v.muted = true;
+    v.setAttribute('muted', '');
+    seekPending = offset || 0;
+    var onMeta = function () {
+      v.removeEventListener('loadedmetadata', onMeta);
+      if (seekPending > 0.4 && seekPending < (item.duration_s || 999) - 0.5) {
+        try { v.currentTime = seekPending; } catch (e) { /* */ }
+      }
+      seekPending = 0;
+      try { v.pause(); } catch (e2) { /* */ }
+      playing = false;
     };
     if (v.readyState >= 1) onMeta();
     else v.addEventListener('loadedmetadata', onMeta);
   }
 
   function advance() {
+    if (!userArmed) return;
     var list = items();
     if (!list.length) return;
     /* In live mode after end of package, re-join wall clock; else next item */
     if (mode === 'live' && idx >= list.length - 1) {
-      joinLive();
+      joinLive(true);
       return;
     }
-    playAt(idx + 1, 0, mode === 'explore');
+    playAt(idx + 1, 0, true);
   }
 
-  function joinLive() {
+  function joinLive(fromUser) {
+    /* Only play when user armed the station (click / key). fromUser=true arms. */
+    if (fromUser) userArmed = true;
+    if (!userArmed) {
+      setMode('live');
+      topicFilter = 'ALL';
+      paintPlaylist();
+      var j0 = findJoinIndex();
+      cueAt(j0.index, j0.offset, 'STANDBY · TAP JOIN LIVE OR PLAY');
+      return;
+    }
     setMode('live');
     topicFilter = 'ALL';
     paintPlaylist();
     var j = findJoinIndex();
-    playAt(j.index, j.offset, false);
+    playAt(j.index, j.offset, true, { muted: true });
     var st = $('tls-status');
-    if (st) st.textContent = 'JOINED LIVE';
+    if (st) st.textContent = 'JOINED LIVE · MUTED · TAP UNMUTE FOR SOUND';
   }
 
   function seekPackageTime(pos) {
@@ -413,14 +492,16 @@
 
   function bindControls() {
     var go = $('tls-join');
-    if (go) go.addEventListener('click', joinLive);
+    if (go) go.addEventListener('click', function () { joinLive(true); });
     var next = $('tls-next');
     if (next) next.addEventListener('click', function () {
+      userArmed = true;
       setMode('explore');
       advance();
     });
     var prev = $('tls-prev');
     if (prev) prev.addEventListener('click', function () {
+      userArmed = true;
       setMode('explore');
       playAt(idx - 1, 0, true);
     });
@@ -428,32 +509,57 @@
     if (mute) mute.addEventListener('click', function () {
       var v = video();
       if (!v) return;
+      userArmed = true;
+      killOtherVoice();
       v.muted = false;
-      v.play().catch(function () {});
+      v.removeAttribute('muted');
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { /* need gesture */ });
+      var st = $('tls-status');
+      if (st) st.textContent = 'ON AIR · SOUND ON';
     });
     document.querySelectorAll('[data-tls-mode]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var m = btn.getAttribute('data-tls-mode');
-        if (m === 'live') joinLive();
+        if (m === 'live') joinLive(true);
         else setMode('explore');
       });
     });
     var rail = $('tls-time-rail');
     if (rail) {
       rail.addEventListener('click', function (ev) {
+        userArmed = true;
         var rect = rail.getBoundingClientRect();
         var x = (ev.clientX - rect.left) / Math.max(1, rect.width);
         seekPackageTime(x * totalDur());
       });
     }
-    /* keyboard: arrows = prev/next, L = live, T = explore */
+    /* Native video controls: first play is user activation */
+    var v = video();
+    if (v) {
+      v.addEventListener('play', function () {
+        userArmed = true;
+        playing = true;
+        joined = true;
+      });
+      /* Block programmatic autoplay before arm: if something else calls play, re-pause */
+      v.addEventListener('playing', function () {
+        if (!userArmed) {
+          try { v.pause(); v.muted = true; } catch (eP) { /* */ }
+          playing = false;
+          var st = $('tls-status');
+          if (st) st.textContent = 'STANDBY · TAP PLAY TO START';
+        }
+      });
+    }
+    /* keyboard: arrows = prev/next, L = live, T = explore — only after user focus on page is a gesture */
     document.addEventListener('keydown', function (ev) {
       if (!document.getElementById('tls-root')) return;
       var tag = (ev.target && ev.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      if (ev.key === 'ArrowRight') { setMode('explore'); advance(); }
-      if (ev.key === 'ArrowLeft') { setMode('explore'); playAt(idx - 1, 0, true); }
-      if (ev.key === 'l' || ev.key === 'L') joinLive();
+      if (ev.key === 'ArrowRight') { userArmed = true; setMode('explore'); advance(); }
+      if (ev.key === 'ArrowLeft') { userArmed = true; setMode('explore'); playAt(idx - 1, 0, true); }
+      if (ev.key === 'l' || ev.key === 'L') joinLive(true);
       if (ev.key === 't' || ev.key === 'T') setMode('explore');
     });
   }
@@ -488,15 +594,19 @@
     bindControls();
     setMode('live');
     setInterval(tick, 400);
-    setTimeout(function () {
-      if (!joined) joinLive();
-    }, 350);
+    /* NO auto-join. Cue wall-clock slot muted+paused until user hits Join live / Play. */
+    userArmed = false;
+    joined = false;
+    playing = false;
+    var j = findJoinIndex();
+    cueAt(j.index, j.offset, 'STANDBY · TAP JOIN LIVE OR PLAY');
+    killOtherVoice();
     var one = $('tls-oneline');
     if (one && schedule.one_line) one.textContent = schedule.one_line;
     var tag = $('tls-tagline');
     if (tag && schedule.tagline) tag.textContent = schedule.tagline;
     var n = $('tls-count');
-    if (n) n.textContent = schedule.item_count + ' hits · ' + fmtTime(schedule.total_duration_s) + ' loop';
+    if (n) n.textContent = schedule.item_count + ' hits · ' + fmtTime(schedule.total_duration_s) + ' loop · silent until you play';
   }
 
   function load() {
@@ -525,11 +635,17 @@
   }
 
   window.TENET5_LIVE = {
-    __v: 2,
-    join: joinLive,
+    __v: 4,
+    join: function () { joinLive(true); },
     next: advance,
-    playAt: playAt,
-    seekTime: seekPackageTime,
+    playAt: function (i, o, u, opts) {
+      if (u) userArmed = true;
+      return playAt(i, o, !!u, opts || {});
+    },
+    seekTime: function (pos) {
+      userArmed = true;
+      return seekPackageTime(pos);
+    },
     setTopic: function (t) {
       topicFilter = t || 'ALL';
       setMode('explore');
@@ -537,12 +653,14 @@
     },
     load: load,
     getSchedule: function () { return schedule; },
-    getMode: function () { return mode; }
+    getMode: function () { return mode; },
+    isArmed: function () { return userArmed; }
   };
 
   window.TENET5_NEWS_AIR = window.TENET5_NEWS_AIR || {};
-  window.TENET5_NEWS_AIR.playAll = function () { joinLive(); };
+  window.TENET5_NEWS_AIR.playAll = function () { joinLive(true); };
   window.TENET5_NEWS_AIR.playId = function (id) {
+    userArmed = true;
     var list = items();
     for (var i = 0; i < list.length; i++) {
       if (list[i].id === id) { playAt(i, 0, true); return; }
