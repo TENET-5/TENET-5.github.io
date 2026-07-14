@@ -262,8 +262,36 @@ class PrismStudioEngine {
     // --- Kinetic Smoothing & Drawing ---
     bindEvents() {
         this.canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
-        this.canvas.addEventListener('pointermove', (e) => this.onPointerMove(e));
         window.addEventListener('pointerup', () => this.onPointerUp());
+        
+        // Dynamic Cursor Element
+        this.cursorElement = document.getElementById('dynamic-cursor');
+        
+        this.canvas.addEventListener('pointerenter', () => {
+            if (this.cursorElement) this.cursorElement.style.display = 'block';
+        });
+        
+        this.canvas.addEventListener('pointerleave', () => {
+            if (this.cursorElement && !this.isDrawing) this.cursorElement.style.display = 'none';
+        });
+        
+        window.addEventListener('pointermove', (e) => {
+            this.onPointerMove(e);
+            
+            // Update Cursor Position & Size
+            if (this.cursorElement && (e.target === this.canvas || this.isDrawing)) {
+                this.cursorElement.style.display = 'block';
+                this.cursorElement.style.left = `${e.clientX}px`;
+                this.cursorElement.style.top = `${e.clientY}px`;
+                
+                const pressure = e.pressure !== undefined && e.pressure > 0 ? e.pressure : 0.5;
+                const visualSize = this.brushSize * 2 * (0.5 + pressure);
+                this.cursorElement.style.width = `${visualSize}px`;
+                this.cursorElement.style.height = `${visualSize}px`;
+            } else if (this.cursorElement) {
+                this.cursorElement.style.display = 'none';
+            }
+        });
         
         // Tool Selection
         document.querySelectorAll('.tool-item').forEach(btn => {
@@ -316,21 +344,6 @@ class PrismStudioEngine {
         });
 
         // Overrides
-        const sizeSlider = document.getElementById('brush-size');
-        if (sizeSlider) sizeSlider.addEventListener('input', e => this.brushSize = parseFloat(e.target.value));
-        
-        const waterSlider = document.getElementById('water-amount');
-        if (waterSlider) waterSlider.addEventListener('input', e => this.waterAmount = parseFloat(e.target.value) / 100.0);
-        
-        const loadSlider = document.getElementById('paint-load');
-        if (loadSlider) loadSlider.addEventListener('input', e => this.paintLoad = parseFloat(e.target.value) / 100.0);
-        
-        const grainSelect = document.getElementById('canvas-grain');
-        if (grainSelect) grainSelect.addEventListener('change', e => {
-            const val = e.target.value;
-            this.canvasGrain = val === 'fine' ? 4.0 : val === 'rough' ? 1.0 : 2.0;
-        });
-
         const btnClear = document.getElementById('btn-clear');
         if (btnClear) btnClear.addEventListener('click', () => this.clearCanvas());
 
@@ -353,15 +366,91 @@ class PrismStudioEngine {
                 document.getElementById('studio-atmosphere').classList.toggle('golden');
             });
         }
+        
+        // UI Sync setup
+        const sizeSlider = document.getElementById('brush-size');
+        if (sizeSlider) {
+            sizeSlider.addEventListener('input', (e) => {
+                this.brushSize = parseFloat(e.target.value);
+                // Show cursor preview briefly
+                if (this.cursorElement) {
+                    this.cursorElement.style.display = 'block';
+                    this.cursorElement.style.width = `${this.brushSize * 2}px`;
+                    this.cursorElement.style.height = `${this.brushSize * 2}px`;
+                    clearTimeout(this.cursorTimeout);
+                    this.cursorTimeout = setTimeout(() => {
+                        if (!this.isDrawing) this.cursorElement.style.display = 'none';
+                    }, 1000);
+                }
+            });
+        }
+        const loadSlider = document.getElementById('paint-load');
+        if (loadSlider) loadSlider.addEventListener('input', (e) => this.paintLoad = parseFloat(e.target.value) / 100.0);
+        
+        const waterSlider = document.getElementById('water-amount');
+        if (waterSlider) waterSlider.addEventListener('input', (e) => this.waterAmount = parseFloat(e.target.value) / 100.0);
+        
+        const grainSelect = document.getElementById('canvas-grain');
+        if (grainSelect) grainSelect.addEventListener('change', e => {
+            const val = e.target.value;
+            this.canvasGrain = val === 'fine' ? 4.0 : val === 'rough' ? 1.0 : 2.0;
+        });
+        
+        // --- Mixing Palette Setup ---
+        this.mixingCanvas = document.getElementById('mixing-canvas');
+        if (this.mixingCanvas) {
+            this.mixingCtx = this.mixingCanvas.getContext('2d', { willReadFrequently: true });
+            this.mixingIsDrawing = false;
+            
+            // Initial size based on CSS
+            setTimeout(() => {
+                const rect = this.mixingCanvas.parentElement.getBoundingClientRect();
+                this.mixingCanvas.width = rect.width - 20; // account for padding
+                this.mixingCanvas.height = 150;
+                
+                // Fill with base wood tone so mix mode works (simulated)
+                this.mixingCtx.fillStyle = '#5c3a21';
+                this.mixingCtx.fillRect(0, 0, this.mixingCanvas.width, this.mixingCanvas.height);
+            }, 100);
+            
+            this.mixingCanvas.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return;
+                this.mixingIsDrawing = true;
+                this.mixingCtx.beginPath();
+                this.mixingCtx.moveTo(e.offsetX, e.offsetY);
+                // Subtle ripple on the canvas container
+                this.mixingCanvas.parentElement.style.transform = 'scale(0.99)';
+            });
+            
+            this.mixingCanvas.addEventListener('pointermove', (e) => {
+                if (!this.mixingIsDrawing) return;
+                this.mixingCtx.lineWidth = this.brushSize * ((e.pressure || 0.5) * 1.5);
+                this.mixingCtx.lineCap = 'round';
+                this.mixingCtx.lineJoin = 'round';
+                
+                const c = this.currentColor;
+                this.mixingCtx.strokeStyle = `rgba(${c[0]*255}, ${c[1]*255}, ${c[2]*255}, ${Math.min(1.0, this.paintLoad * 2)})`;
+                
+                this.mixingCtx.lineTo(e.offsetX, e.offsetY);
+                this.mixingCtx.stroke();
+            });
+            
+            window.addEventListener('pointerup', () => {
+                this.mixingIsDrawing = false;
+                if (this.mixingCanvas) this.mixingCanvas.parentElement.style.transform = 'none';
+            });
+        }
     }
 
     onPointerDown(e) {
+        if (e.button !== 0) return; // Only draw on primary click
         this.isDrawing = true;
         this.points = [];
-        this.addPoint(e.clientX, e.clientY);
         this.lastX = e.clientX;
         this.lastY = e.clientY;
         this.velocity = 0;
+        const pressure = e.pressure !== undefined && e.pressure > 0 ? e.pressure : 0.5;
+        this.addPoint(e.clientX, e.clientY, pressure);
     }
 
     onPointerMove(e) {
@@ -370,24 +459,33 @@ class PrismStudioEngine {
         const dx = e.clientX - this.lastX;
         const dy = e.clientY - this.lastY;
         this.velocity = Math.sqrt(dx*dx + dy*dy);
+        const pressure = e.pressure !== undefined && e.pressure > 0 ? e.pressure : 0.5;
         
-        this.addPoint(e.clientX, e.clientY);
+        this.addPoint(e.clientX, e.clientY, pressure);
         
         if (this.points.length >= 3) {
             const p0 = this.points[this.points.length - 3];
             const p1 = this.points[this.points.length - 2];
             const p2 = this.points[this.points.length - 1];
             
-            const steps = Math.max(5, Math.floor(this.velocity));
+            // Adaptive Step Distance Interpolation
+            const dpr = window.devicePixelRatio || 1;
+            const baseBrushSize = this.brushSize * dpr;
+            const stepDistance = Math.max(1.0, baseBrushSize * 0.15); // Smooth overlapping
+            
+            const dist = Math.sqrt(Math.pow(p2.x - p0.x, 2) + Math.pow(p2.y - p0.y, 2));
+            const steps = Math.max(1, Math.floor(dist / stepDistance));
+            
             for (let i = 0; i <= steps; i++) {
                 const t = i / steps;
                 const xt = Math.pow(1-t, 2)*p0.x + 2*(1-t)*t*p1.x + Math.pow(t, 2)*p2.x;
                 const yt = Math.pow(1-t, 2)*p0.y + 2*(1-t)*t*p1.y + Math.pow(t, 2)*p2.y;
+                const pt = Math.pow(1-t, 2)*p0.p + 2*(1-t)*t*p1.p + Math.pow(t, 2)*p2.p;
                 
-                this.drawStamp(xt, yt, this.velocity);
+                this.drawStamp(xt, yt, this.velocity, pt);
             }
         } else {
-            this.drawStamp(e.clientX, e.clientY, this.velocity);
+            this.drawStamp(e.clientX, e.clientY, this.velocity, pressure);
         }
 
         this.lastX = e.clientX;
@@ -400,12 +498,12 @@ class PrismStudioEngine {
         this.points = [];
     }
 
-    addPoint(x, y) {
-        this.points.push({x, y});
+    addPoint(x, y, p) {
+        this.points.push({x, y, p});
     }
 
     // --- WebGL Rendering ---
-    drawStamp(x, y, velocity) {
+    drawStamp(x, y, velocity, pressure = 0.5) {
         const gl = this.gl;
         
         // 1. Bind the target FBO layer
@@ -418,7 +516,12 @@ class PrismStudioEngine {
         const dpr = window.devicePixelRatio || 1;
         x *= dpr;
         y *= dpr;
-        let size = this.brushSize * dpr;
+        
+        // Stylus Pressure affects size (50% to 150%)
+        let size = this.brushSize * dpr * (0.5 + pressure);
+        
+        // Stylus Pressure affects paint load
+        let currentLoad = Math.min(1.0, this.paintLoad * (0.5 + pressure));
         
         let toolType = 0;
         if (this.currentTool === 'pencil') {
@@ -465,7 +568,7 @@ class PrismStudioEngine {
         gl.uniform1f(gl.getUniformLocation(program, "u_velocity"), velocity);
         gl.uniform1f(gl.getUniformLocation(program, "u_grain"), this.canvasGrain);
         gl.uniform1f(gl.getUniformLocation(program, "u_water"), this.waterAmount);
-        gl.uniform1f(gl.getUniformLocation(program, "u_load"), this.paintLoad);
+        gl.uniform1f(gl.getUniformLocation(program, "u_load"), currentLoad);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         
