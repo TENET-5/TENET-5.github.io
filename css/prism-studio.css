@@ -1,0 +1,332 @@
+:root {
+    --bg-color: #eef2f5;
+    --panel-bg: rgba(255, 255, 255, 0.6);
+    --panel-border: rgba(255, 255, 255, 0.4);
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --accent: #d4af37; /* Default golden accent */
+    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    
+    /* Golden Lighting variables */
+    --ambient-light: #ffffff;
+    --directional-light: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    transition: background-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Atmosphere System */
+#studio-environment {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+
+/* Golden Lighting Overlay */
+#studio-environment::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at top right, var(--ambient-light), var(--directional-light));
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 1.5s ease-in-out, background 1.5s ease-in-out;
+    mix-blend-mode: overlay;
+    opacity: 0.8;
+}
+
+#studio-environment.golden-lighting {
+    --bg-color: #fcf4e8;
+    --ambient-light: rgba(255, 215, 0, 0.15);
+    --directional-light: rgba(212, 175, 55, 0.05);
+    --panel-bg: rgba(255, 252, 245, 0.7);
+    --panel-border: rgba(212, 175, 55, 0.3);
+}
+
+/* Canvas */
+#art-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    cursor: crosshair;
+}
+
+/* Glassmorphism UI */
+.glass-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow);
+    z-index: 10;
+    transition: all 0.5s ease;
+}
+
+/* Header */
+.studio-header {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    padding: 10px 24px;
+    border-radius: 30px;
+    gap: 20px;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+.logo span {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background: var(--text-secondary);
+    opacity: 0.3;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.btn-text .indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+#studio-environment.golden-lighting .btn-text .indicator {
+    background: #f1c40f;
+    box-shadow: 0 0 8px #f1c40f;
+}
+
+/* Art Drawer */
+.art-drawer {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    width: 280px;
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.drawer-header h3 {
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+}
+
+.tool-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tool-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.tool-item:hover {
+    background: rgba(255,255,255,0.4);
+    transform: translateX(5px);
+}
+
+.tool-item.active {
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--accent);
+}
+
+.tool-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    z-index: 2;
+}
+
+/* 3D Tool Models (CSS Only) */
+.tool-3d-model {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    perspective: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+/* Pencil */
+.pencil-model {
+    transform: rotate(-45deg);
+}
+.pencil-model .body {
+    width: 20px; height: 6px;
+    background: #e67e22;
+    border-top: 2px solid #d35400;
+    border-bottom: 2px solid #d35400;
+    border-radius: 1px;
+}
+.pencil-model .wood {
+    width: 8px; height: 6px;
+    background: #f5cd79;
+    clip-path: polygon(0 0, 100% 30%, 100% 70%, 0 100%);
+}
+.pencil-model .lead {
+    width: 4px; height: 2px;
+    background: #2c3e50;
+    border-radius: 50% 0 0 50%;
+}
+
+/* Brush (Watercolor & Oil) */
+.brush-model {
+    transform: rotate(-45deg);
+}
+.brush-model .handle {
+    width: 22px; height: 6px;
+    background: #7f8c8d;
+    border-radius: 0 3px 3px 0;
+}
+.brush-model .ferrule {
+    width: 6px; height: 6px;
+    background: linear-gradient(to bottom, #bdc3c7, #7f8c8d);
+}
+.brush-model .bristles {
+    width: 12px; height: 8px;
+    border-radius: 50% 0 0 50%;
+}
+
+.watercolor-bristles {
+    background: #3498db;
+    opacity: 0.8;
+}
+
+.oil-bristles {
+    background: #e74c3c;
+    border-top: 1px solid #c0392b;
+    border-bottom: 1px solid #c0392b;
+}
+
+/* Active Tool Animation */
+@keyframes floatTool {
+    0% { transform: translateY(0) rotate(-45deg); }
+    50% { transform: translateY(-3px) rotate(-42deg); }
+    100% { transform: translateY(0) rotate(-45deg); }
+}
+
+.tool-item.active .tool-3d-model {
+    animation: floatTool 3s ease-in-out infinite;
+}
+
+/* Palette */
+.color-palette h4, .brush-settings h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.color-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.color-swatch.active {
+    transform: scale(1.15);
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Range Input */
+input[type="range"] {
+    width: 100%;
+    appearance: none;
+    background: transparent;
+}
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    cursor: pointer;
+    margin-top: -6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: rgba(0,0,0,0.1);
+    border-radius: 2px;
+}
