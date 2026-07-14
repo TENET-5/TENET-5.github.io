@@ -149,6 +149,9 @@ class PrismStudioEngine {
             uniform float u_grain;
             uniform float u_water;
             uniform float u_load;
+            uniform sampler2D u_stampTex;
+            uniform sampler2D u_scratchTex;
+            uniform vec2 u_velocity_vec;
             
             float rand(vec2 co){
                 return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -207,15 +210,27 @@ class PrismStudioEngine {
                     color.a *= alpha * u_load * 0.3;
                 }
                 else if (u_tool_type == 5) {
-                    // Typography Stamp (hard edge)
-                    float alpha = 1.0 - smoothstep(u_size * 0.95, u_size, dist);
-                    color.a *= alpha * u_load;
+                    // Typography Stamp: sample the generated letter texture
+                    // coord is absolute, we need to map the stamp to the brush center
+                    vec2 stampCoord = (coord - u_center + vec2(u_size)) / (u_size * 2.0);
+                    // Flip Y for WebGL
+                    stampCoord.y = 1.0 - stampCoord.y;
+                    if (stampCoord.x < 0.0 || stampCoord.x > 1.0 || stampCoord.y < 0.0 || stampCoord.y > 1.0) discard;
+                    
+                    vec4 stampSample = texture2D(u_stampTex, stampCoord);
+                    float alpha = stampSample.a * u_load;
+                    color.a *= alpha;
                 }
                 else if (u_tool_type == 6) {
-                    // Palette Knife (Right Click Smudge) - Alters heightmap without pigment
-                    float bristle = smoothstep(0.4, 0.6, sin(coord.x * 5.0) * sin(coord.y * 5.0));
-                    float alpha = 1.0 - smoothstep(u_size * 0.8, u_size, dist);
-                    color = vec4(0.0, 0.0, 0.0, alpha * u_load * bristle * 0.5);
+                    // Palette Knife (Right Click Smudge) - Displace existing pixels
+                    // Read the scratch texture, offset by velocity
+                    vec2 uv = coord / u_resolution;
+                    float influence = 1.0 - smoothstep(0.0, u_size, dist);
+                    vec2 offset = (u_velocity_vec * influence * 0.05) / u_resolution;
+                    
+                    vec4 smeared = texture2D(u_scratchTex, uv - offset);
+                    // Output the smeared pixels directly (using ZERO, SRC_COLOR blend mode)
+                    color = smeared;
                 }
                 
                 // Premultiply alpha for correct WebGL blending in FBO
@@ -335,6 +350,25 @@ class PrismStudioEngine {
         }
         
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        
+        // Scratch Texture for smudging
+        if (this.scratchTexture) gl.deleteTexture(this.scratchTexture);
+        this.scratchTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.scratchTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        
+        // Typography Stamp Texture Setup
+        if (!this.stampCanvas) {
+            this.stampCanvas = document.createElement('canvas');
+            this.stampCanvas.width = 128;
+            this.stampCanvas.height = 128;
+            this.stampCtx = this.stampCanvas.getContext('2d');
+            this.stampTexture = gl.createTexture();
+        }
     }
 
     // --- Kinetic Smoothing & Drawing ---
@@ -529,6 +563,8 @@ class PrismStudioEngine {
         this.lastX = e.clientX;
         this.lastY = e.clientY;
         this.velocity = 0;
+        this.velocityX = 0;
+        this.velocityY = 0;
         const pressure = e.pressure !== undefined && e.pressure > 0 ? e.pressure : 0.5;
         this.addPoint(e.clientX, e.clientY, pressure);
     }
@@ -538,6 +574,8 @@ class PrismStudioEngine {
         
         const dx = e.clientX - this.lastX;
         const dy = e.clientY - this.lastY;
+        this.velocityX = dx;
+        this.velocityY = dy;
         this.velocity = Math.sqrt(dx*dx + dy*dy);
         const pressure = e.pressure !== undefined && e.pressure > 0 ? e.pressure : 0.5;
         
@@ -606,7 +644,16 @@ class PrismStudioEngine {
         let toolType = 0;
         if (this.isSmudging) {
             toolType = 6;
-            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            // Smudge: Copy FBO to scratch, sample scratch, write to FBO
+            gl.bindTexture(gl.TEXTURE_2D, this.scratchTexture);
+            gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, this.canvas.width, this.canvas.height, 0);
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, this.scratchTexture);
+            gl.uniform1i(gl.getUniformLocation(program, "u_scratchTex"), 1);
+            gl.uniform2f(gl.getUniformLocation(program, "u_velocity_vec"), this.velocityX || 0, -(this.velocityY || 0)); // flip Y
+            
+            // Opaque override (completely replace pixel with smeared pixel)
+            gl.blendFunc(gl.ONE, gl.ZERO);
         } else if (this.currentTool === 'pencil') {
             toolType = 0;
             // Standard Premultiplied Alpha
@@ -629,6 +676,23 @@ class PrismStudioEngine {
         } else if (this.currentTool === 'stamp') {
             toolType = 5;
             gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            
+            // Generate letter texture on the fly
+            const letterInput = document.getElementById('stamp-letter');
+            const letter = letterInput ? letterInput.value : 'A';
+            this.stampCtx.clearRect(0, 0, 128, 128);
+            this.stampCtx.fillStyle = 'rgba(255,255,255,1.0)'; // Pure white mask
+            this.stampCtx.font = 'bold 100px Inter, sans-serif';
+            this.stampCtx.textAlign = 'center';
+            this.stampCtx.textBaseline = 'middle';
+            this.stampCtx.fillText(letter, 64, 64);
+            
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.stampTexture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.stampCanvas);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.uniform1i(gl.getUniformLocation(program, "u_stampTex"), 0);
         }
 
         gl.enable(gl.BLEND);
