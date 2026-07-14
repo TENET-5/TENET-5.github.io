@@ -152,6 +152,7 @@ class PrismStudioEngine {
             uniform sampler2D u_stampTex;
             uniform sampler2D u_scratchTex;
             uniform vec2 u_velocity_vec;
+            uniform vec2 u_resolution;
             
             float rand(vec2 co){
                 return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
