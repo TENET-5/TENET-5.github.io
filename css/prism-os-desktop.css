@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════
+   PRISM OS DESKTOP
+   Quantanium Aesthetics · Glassmorphism · p256 Load
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --prism-bg: #030405;
+  --prism-void: #0a0c0e;
+  --prism-glow: rgba(90, 125, 124, 0.15);
+  --prism-accent: #5A7D7C;
+  --prism-accent-bright: #89b3b2;
+  --prism-text: #E6E2DA;
+  --prism-text-dim: #9aa2a0;
+  --prism-border: rgba(92, 64, 51, 0.4);
+  --prism-glass: rgba(10, 12, 14, 0.65);
+  --prism-glass-hover: rgba(20, 24, 28, 0.85);
+  
+  --font-display: "Fraunces", serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+body.prism-os-mode {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--prism-bg);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(90, 125, 124, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(92, 64, 51, 0.05) 0%, transparent 50%);
+  color: var(--prism-text);
+  font-family: var(--font-mono);
+  height: 100vh;
+  width: 100vw;
+  /* Taskbar buffer */
+  padding-bottom: 56px !important;
+  box-sizing: border-box;
+}
+
+/* Background animated mesh */
+.prism-mesh {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/></svg>');
+  z-index: -1;
+  pointer-events: none;
+  animation: drift 120s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes drift {
+  from { background-position: 0 0; }
+  to { background-position: -400px -400px; }
+}
+
+/* ── WINDOW PANELS (Glassmorphism) ── */
+.prism-window {
+  position: absolute;
+  background: var(--prism-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--prism-border);
+  border-radius: 8px;
+  box-shadow: 0 16px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.prism-window.active {
+  z-index: 100;
+  border-color: rgba(90, 125, 124, 0.4);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.6), 0 0 20px var(--prism-glow), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.prism-window-header {
+  height: 32px;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--prism-border);
+  cursor: grab;
+  user-select: none;
+}
+
+.prism-window-header:active {
+  cursor: grabbing;
+}
+
+.prism-window-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--prism-text);
+  text-transform: uppercase;
+}
+
+.prism-window-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.prism-window-btn {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.prism-window-btn.close:hover { background: #ff4747; }
+.prism-window-btn.min:hover { background: #ffbd2e; }
+.prism-window-btn.max:hover { background: #28c940; }
+
+.prism-window-content {
+  flex-grow: 1;
+  padding: 16px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--prism-text-dim);
+}
+
+.prism-window-content::-webkit-scrollbar {
+  width: 6px;
+}
+.prism-window-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.prism-window-content::-webkit-scrollbar-thumb {
+  background: var(--prism-border);
+  border-radius: 3px;
+}
+
+/* ── SPECIFIC WIDGETS ── */
+/* LIRIL Chat Interface */
+#liril-comm {
+  width: 480px;
+  height: 600px;
+  top: 10%;
+  left: 5%;
+}
+
+.liril-log {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.liril-msg {
+  display: flex;
+  flex-direction: column;
+}
+
+.liril-msg .sender {
+  font-size: 10px;
+  color: var(--prism-accent);
+  margin-bottom: 4px;
+}
+
+.liril-msg.system .sender {
+  color: #ff4747;
+}
+
+.liril-input-box {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--prism-border);
+}
+
+.liril-input-box input {
+  flex-grow: 1;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--prism-border);
+  border-radius: 4px;
+  color: var(--prism-text);
+  padding: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+}
+
+.liril-input-box input:focus {
+  border-color: var(--prism-accent);
+}
+
+/* P256 System Load */
+#sys-load {
+  width: 320px;
+  height: 240px;
+  top: 10%;
+  right: 5%;
+}
+
+.load-bar-container {
+  margin-bottom: 12px;
+}
+.load-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+.load-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.load-bar-fill {
+  height: 100%;
+  background: var(--prism-accent);
+  width: 0%;
+  transition: width 0.5s ease-out;
+}
+.load-bar-fill.high {
+  background: #ffbd2e;
+}
+.load-bar-fill.critical {
+  background: #ff4747;
+}
+
+/* NATS Stream */
+#nats-stream {
+  width: 400px;
+  height: 300px;
+  bottom: 80px;
+  right: 5%;
+}
+
+.stream-log {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--prism-text-dim);
+}
+.stream-log div {
+  margin-bottom: 4px;
+}
+.stream-log span.ts { color: #666; margin-right: 8px; }
+.stream-log span.topic { color: var(--prism-accent-bright); }
