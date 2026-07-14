@@ -163,12 +163,14 @@ class PrismStudioEngine {
                     color.a *= pow(alpha, 1.5) * 0.15 * (0.5 + 0.5 * settling);
                 }
                 else if (u_tool_type == 2) {
-                    // Oil
+                    // Oil: Thick Impasto Height Maps
                     float noise = rand(coord * 0.1);
                     float bristle = smoothstep(0.4, 0.6, sin(coord.x * 2.0 + noise * 5.0) * sin(coord.y * 2.0));
+                    float heightMap = rand(coord * 0.5) * 0.5 + 0.5; // High freq noise for bump
                     float alpha = 1.0 - smoothstep(u_size * 0.9, u_size, dist);
                     color.rgb *= (0.8 + 0.2 * bristle);
-                    color.a *= alpha * u_load;
+                    // Output thick physical volume
+                    color.a *= alpha * u_load * (0.5 + 0.5 * heightMap);
                 }
                 else if (u_tool_type == 3) {
                     // Eraser: outputs an alpha mask that glBlendFunc will subtract
@@ -185,13 +187,14 @@ class PrismStudioEngine {
             }
         `;
 
-        // Fragment Shader (Compositing Layers)
+        // Fragment Shader (Compositing Layers with Physical Lighting)
         const fsComposite = `
             precision mediump float;
             varying vec2 v_texCoord;
             uniform sampler2D u_layer0; // Underpainting
             uniform sampler2D u_layer1; // Glaze
             uniform sampler2D u_layer2; // Final Pass
+            uniform vec2 u_resolution;
 
             // Standard Alpha Blending (Front over Back)
             vec4 blend(vec4 front, vec4 back) {
@@ -200,6 +203,14 @@ class PrismStudioEngine {
                 if (outA == 0.0) return vec4(0.0);
                 vec3 outRGB = front.rgb + back.rgb * (1.0 - front.a);
                 return vec4(outRGB, outA);
+            }
+
+            // Alpha thickness determines height map
+            float getThickness(vec2 uv) {
+                vec4 c0 = texture2D(u_layer0, uv);
+                vec4 c1 = texture2D(u_layer1, uv);
+                vec4 c2 = texture2D(u_layer2, uv);
+                return blend(c2, blend(c1, c0)).a;
             }
 
             void main() {
@@ -211,10 +222,38 @@ class PrismStudioEngine {
                 vec4 c1 = texture2D(u_layer1, uv);
                 vec4 c2 = texture2D(u_layer2, uv);
                 
-                vec4 comp01 = blend(c1, c0);
-                vec4 finalOut = blend(c2, comp01);
+                vec4 finalOut = blend(c2, blend(c1, c0));
                 
-                gl_FragColor = finalOut;
+                // Bump Mapping / Impasto Lighting
+                vec2 texel = 1.0 / u_resolution;
+                
+                // Sample neighbors for height map gradient
+                float hL = getThickness(uv + vec2(-texel.x, 0.0));
+                float hR = getThickness(uv + vec2(texel.x, 0.0));
+                float hU = getThickness(uv + vec2(0.0, -texel.y)); // Flipped Y sampling
+                float hD = getThickness(uv + vec2(0.0, texel.y));
+                float hC = finalOut.a;
+                
+                // Calculate Normal Vector
+                vec3 normal = normalize(vec3((hL - hR) * 1.5, (hD - hU) * 1.5, 0.1));
+                
+                // Directional Lighting
+                vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0));
+                float diff = max(dot(normal, lightDir), 0.0);
+                
+                // Specular Highlight (Wet Paint)
+                vec3 viewDir = vec3(0.0, 0.0, 1.0);
+                vec3 halfDir = normalize(lightDir + viewDir);
+                float spec = pow(max(dot(normal, halfDir), 0.0), 32.0) * hC; // Only shine thick paint
+                
+                // Ambient Occlusion
+                float ao = clamp(0.7 + 0.3 * hC, 0.0, 1.0);
+                
+                // Apply Lighting Model
+                vec3 litColor = finalOut.rgb * (0.8 * ao + 0.3 * diff);
+                litColor += vec3(1.0, 0.95, 0.9) * spec * 0.5; // Golden specular
+                
+                gl_FragColor = vec4(litColor, finalOut.a);
             }
         `;
 
