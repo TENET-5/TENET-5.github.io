@@ -37,8 +37,31 @@ class PrismStudioEngine {
         // Render Targets (FBOs)
         this.layers = [];
         this.programs = {};
-        
-        this.init();
+        // Binding input
+        this.bindEvents();
+        this.initLirilTutorial();
+        this.initHotkeys();
+    }
+
+    initLirilTutorial() {
+        const btn = document.getElementById('btn-dismiss-liril');
+        const overlay = document.getElementById('liril-hologram');
+        if (btn && overlay) {
+            btn.addEventListener('click', () => {
+                overlay.classList.remove('active');
+            });
+        }
+    }
+
+    initHotkeys() {
+        window.addEventListener('keydown', (e) => {
+            const sizeSlider = document.getElementById('paint-load'); // actually there's no brush size slider yet, just buttons.
+            if (e.key === 'e' || e.key === 'E') {
+                document.querySelector('[data-tool="eraser"]').click();
+            } else if (e.key === 'm' || e.key === 'M') {
+                // Future palette knife trigger
+            }
+        });
     }
 
     init() {
@@ -175,12 +198,28 @@ class PrismStudioEngine {
                 else if (u_tool_type == 3) {
                     // Eraser: outputs an alpha mask that glBlendFunc will subtract
                     float alpha = 1.0 - smoothstep(u_size * 0.8, u_size, dist);
-                    // Kneaded eraser (low load) vs Gum eraser (high load)
                     color = vec4(1.0, 1.0, 1.0, alpha * u_load);
+                }
+                else if (u_tool_type == 4) {
+                    // Alcohol Marker: Multiply blend
+                    float alpha = 1.0 - smoothstep(u_size * 0.5, u_size, dist);
+                    color.rgb *= 1.5; // Saturated dye
+                    color.a *= alpha * u_load * 0.3;
+                }
+                else if (u_tool_type == 5) {
+                    // Typography Stamp (hard edge)
+                    float alpha = 1.0 - smoothstep(u_size * 0.95, u_size, dist);
+                    color.a *= alpha * u_load;
+                }
+                else if (u_tool_type == 6) {
+                    // Palette Knife (Right Click Smudge) - Alters heightmap without pigment
+                    float bristle = smoothstep(0.4, 0.6, sin(coord.x * 5.0) * sin(coord.y * 5.0));
+                    float alpha = 1.0 - smoothstep(u_size * 0.8, u_size, dist);
+                    color = vec4(0.0, 0.0, 0.0, alpha * u_load * bristle * 0.5);
                 }
                 
                 // Premultiply alpha for correct WebGL blending in FBO
-                if (u_tool_type != 3) {
+                if (u_tool_type != 3 && u_tool_type != 4 && u_tool_type != 6) {
                     color.rgb *= color.a;
                 }
                 gl_FragColor = color;
@@ -300,6 +339,7 @@ class PrismStudioEngine {
 
     // --- Kinetic Smoothing & Drawing ---
     bindEvents() {
+        window.addEventListener('contextmenu', e => e.preventDefault()); // Disable native right click
         this.canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
         window.addEventListener('pointerup', () => this.onPointerUp());
         
@@ -482,8 +522,9 @@ class PrismStudioEngine {
     }
 
     onPointerDown(e) {
-        if (e.button !== 0) return; // Only draw on primary click
+        if (e.button !== 0 && e.button !== 2) return; // Allow primary and secondary
         this.isDrawing = true;
+        this.isSmudging = (e.button === 2); // Right click is Palette Knife / Smudge
         this.points = [];
         this.lastX = e.clientX;
         this.lastY = e.clientY;
@@ -563,7 +604,10 @@ class PrismStudioEngine {
         let currentLoad = Math.min(1.0, this.paintLoad * (0.5 + pressure));
         
         let toolType = 0;
-        if (this.currentTool === 'pencil') {
+        if (this.isSmudging) {
+            toolType = 6;
+            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        } else if (this.currentTool === 'pencil') {
             toolType = 0;
             // Standard Premultiplied Alpha
             gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -578,6 +622,13 @@ class PrismStudioEngine {
             toolType = 3;
             // Erase: Subtract alpha from destination
             gl.blendFunc(gl.ZERO, gl.ONE_MINUS_SRC_ALPHA);
+        } else if (this.currentTool === 'marker') {
+            toolType = 4;
+            // Multiply blend
+            gl.blendFunc(gl.DST_COLOR, gl.ONE_MINUS_SRC_ALPHA);
+        } else if (this.currentTool === 'stamp') {
+            toolType = 5;
+            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         }
 
         gl.enable(gl.BLEND);
