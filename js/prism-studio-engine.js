@@ -55,13 +55,48 @@ class PrismStudioEngine {
 
     initHotkeys() {
         window.addEventListener('keydown', (e) => {
-            const sizeSlider = document.getElementById('paint-load'); // actually there's no brush size slider yet, just buttons.
             if (e.key === 'e' || e.key === 'E') {
-                document.querySelector('[data-tool="eraser"]').click();
+                const btn = document.querySelector('[data-tool="eraser"]');
+                if (btn) btn.click();
             } else if (e.key === 'm' || e.key === 'M') {
-                // Future palette knife trigger
+                // Toggle Smudge / Palette Knife by just activating right click mode visually, 
+                // but actually we just alert them to use right click!
+                this.isSmudging = !this.isSmudging;
+            } else if (e.key === 'l' || e.key === 'L') {
+                const btn = document.getElementById('btn-atmosphere');
+                if (btn) btn.click();
+            } else if (e.key === '[' || e.key === '{') {
+                this.brushSize = Math.max(1.0, this.brushSize - 2.0);
+                this.showCursorFeedback();
+            } else if (e.key === ']' || e.key === '}') {
+                this.brushSize = Math.min(200.0, this.brushSize + 2.0);
+                this.showCursorFeedback();
             }
         });
+
+        // Ensure context menu is fully disabled globally for the art studio
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            return false;
+        });
+        if (this.canvas) {
+            this.canvas.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                return false;
+            });
+        }
+    }
+
+    showCursorFeedback() {
+        if (this.cursorElement) {
+            this.cursorElement.style.display = 'block';
+            this.cursorElement.style.width = `${this.brushSize * 2}px`;
+            this.cursorElement.style.height = `${this.brushSize * 2}px`;
+            clearTimeout(this.cursorTimeout);
+            this.cursorTimeout = setTimeout(() => {
+                if (!this.isDrawing) this.cursorElement.style.display = 'none';
+            }, 1000);
+        }
     }
 
     init() {
