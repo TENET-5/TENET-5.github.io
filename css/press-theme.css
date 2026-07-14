@@ -8,11 +8,23 @@
 /* CRITICAL: without :root, var(--void) is invalid ΓåÆ browser paints WHITE.
    PRISM site duty fails visual acuity if these tokens are missing. */
 :root{
-  --void:#050708;--ink:#0b0e10;
-  --ivory:#ece7dc;--ivory-dim:#a89f90;--ivory-faint:#827a6d;
-  --hair:#26221c;--hair-lit:#3a342b;
-  --ice:#9adbe8;--ice-deep:#3f7c8c;
-  --red:#c8102e;--red-deep:#8f0f24;--gold:#d3a625;
+  /* CONTOUR v3.0.0 Palette (Scotopic Vision) */
+  --void:#1A1612;      /* Warm Umber (Scotopic Dark) */
+  --ink:#231E18;       /* Slightly lighter umber */
+  --ivory:#FBF8F1;     /* Cream cold-pressed paper */
+  --ivory-dim:#E6E2DA;
+  --ivory-faint:#C4BFAF;
+  --hair:#5C4033;      /* Bark - Sepia ink, contour lines, borders */
+  --hair-lit:#7A5D4F;
+  --ice:#5A7D7C;       /* Creek - Cool accent, water features */
+  --ice-deep:#3C5959;
+  --red:#C4573A;       /* Ember - Hazard zones, warnings */
+  --red-deep:#A6432A;
+  --gold:#B66A50;      /* Clay - Warm accent */
+  --moss:#4A5D3A;      /* Accent, brand mark */
+  --charcoal:#2B2B2B;  /* Text, headings in light mode / dark accents */
+  --snow:#F0EDE8;      /* Alpine, tundra */
+  
   --accent:var(--ice);
   --serif:'Fraunces',Georgia,serif;--mono:'IBM Plex Mono',Consolas,monospace;
   /* ── Visual media template (source: homepage index.html · Quantanium ice-lake) ── */
@@ -381,11 +393,18 @@
 body.topo,
 body.topo::before {
   background-image:
+    repeating-radial-gradient(
+      circle at 50% 0%, 
+      transparent 0, 
+      transparent 40px, 
+      rgba(92, 64, 51, 0.1) 40px, /* bark/sepia ink */
+      rgba(92, 64, 51, 0.1) 41px
+    ),
     radial-gradient(ellipse 140% 70% at 50% -15%,
-      rgba(154,219,232,0.055) 0%,
+      rgba(182, 106, 80, 0.1) 0%, /* clay/warm */
       transparent 55%),
     linear-gradient(180deg, var(--ink) 0%, var(--void) 40%, var(--void) 100%) !important;
-  background-color: var(--slate-bg) !important;
+  background-color: var(--void) !important;
 }
 
 
@@ -394,23 +413,13 @@ body.topo::before {
 .glass-card,
 .liril-glass,
 .liril-glass-strong {
-  /* Glass optics: white top-glint (specular) + translucent stack — no cyan rim */
-  background:
-    linear-gradient(180deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.02) 22%,
-      transparent 48%),
-    linear-gradient(165deg,
-      rgba(154, 219, 232, 0.05) 0%,
-      rgba(5, 7, 8, 0.55) 100%) !important;
-  border: 1px solid rgba(154, 219, 232, 0.14) !important;
+  /* Glass optics: Frosted Cream Pills (CONTOUR Spec) */
+  background: rgba(251, 248, 241, 0.05) !important; /* Cream 5% over dark */
+  border: 1px solid var(--hair) !important; /* 1px bark border */
   border-radius: var(--slate-radius-md) !important;
-  box-shadow:
-    0 12px 40px rgba(5, 7, 8, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
-  backdrop-filter: var(--slate-glass-blur);
-  -webkit-backdrop-filter: var(--slate-glass-blur);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: transform var(--slate-duration-base) var(--slate-ease-out),
     border-color var(--slate-duration-base) var(--slate-ease-out),
     box-shadow var(--slate-duration-base) var(--slate-ease-out) !important;
@@ -420,23 +429,8 @@ body.topo::before {
 .glass-card:hover,
 .liril-glass:hover {
   transform: translateY(-2px) !important;
-  border-color: var(--slate-border-hot) !important;
-  box-shadow: 0 20px 56px rgba(5,7,8,0.75), inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
-}
-
-.ice-panel::before,
-.glass-card::before {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--slate-ice-edge) 20%,
-    var(--slate-ice-edge) 80%,
-    transparent 100%);
-  opacity: 0.9;
+  border-color: var(--gold) !important; /* Glows warm clay on hover */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
 .ice-panel,
