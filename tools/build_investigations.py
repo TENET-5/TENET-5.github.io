@@ -67,6 +67,7 @@ FLAGSHIP = [
     ("dnd-procurement.html", "DND procurement velocity"),
     ("genocide-evidence.html", "Genocide evidence shelf (case file)"),
     ("phoenix-pay.html", "Phoenix pay — waste pattern"),
+    ("speech-suppression-bills.html", "Speech & surveillance cluster — six federal bills (C-11/18/8/9/22/34)"),
 ]
 
 _BOILER = re.compile(
