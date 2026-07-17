@@ -45,18 +45,18 @@ _CNW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 # Screenshot-locked press palette (exact hex — integer RGB ground truth)
 CANON = {
-    "void": "#1a1612",
-    "ink": "#231e18",
-    "ivory": "#fbf8f1",
-    "ivory_dim": "#e6e2da",
-    "ivory_faint": "#c4bfaf",
-    "hair": "#5c4033",
-    "hair_lit": "#7a5d4f",
-    "ice": "#5a7d7c",
-    "ice_deep": "#3c5959",
-    "red": "#c4573a",
-    "red_deep": "#a6432a",
-    "gold": "#b66a50",
+    "void": "#050708",
+    "ink": "#0b0e10",
+    "ivory": "#ece7dc",
+    "ivory_dim": "#a89f90",
+    "ivory_faint": "#827a6d",
+    "hair": "#26221c",
+    "hair_lit": "#3a342b",
+    "ice": "#9adbe8",
+    "ice_deep": "#3f7c8c",
+    "red": "#c8102e",
+    "red_deep": "#8f0f24",
+    "gold": "#d3a625",
 }
 # CSS custom property names
 CSS_KEYS = {
