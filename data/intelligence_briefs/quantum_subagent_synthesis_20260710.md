@@ -1,7 +1,7 @@
-# Intelligence Brief — Quantum Subagent OSINT Synthesis
+# Intelligence Brief — OSINT Synthesis
 
 **Filed:** 2026-07-10  
-**Product:** Subagent read-only synthesis (no new collection)  
+**Product:** Read-only synthesis (no new collection)  
 **JSON:** `data/osint_laps/subagent_osint_synthesis_last.json`  
 **Standard:** Public corpus only. **FACT / REPORTING / SOCIAL_SIGNAL / INFERENCE** labeled. Inclusion ≠ criminal finding.
 

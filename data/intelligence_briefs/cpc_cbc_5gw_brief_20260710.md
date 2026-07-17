@@ -115,31 +115,13 @@ Fraser Institute + **Atlas Network** Canadian members: MLI, MEI, JCCF — public
 
 **Q4 headline:** Full disability-voice ratio still untested; anchors include PMC media review, CBC 2026 committee piece, UN CRPD 2025 questions.
 
-## 8. PRISM quantum pipeline (armed this session)
-
-| Surface | Path |
-|---------|------|
-| Work-loop job | `C:\PRISM\data\prism_work_loop_jobs\osint_5gw_quantum_pipeline.json` |
-| p256 slave pack (5 agents) | `C:\PRISM\data\mesh\osint_5gw_agents.json` |
-| Mesh inbox | `C:\PRISM\data\mesh\task_inbox\osint_5gw_quantum.json` |
-| Decision envelope (base-42 rank) | `data/osint_laps/quantum_osint_decision_envelope.json` |
-| Arm log | `data/osint_laps/quantum_pipeline_arm_last.json` |
-| PRISM log | `C:\PRISM\log\osint_5gw_quantum_pipeline_last.json` |
-
-**Flags armed:** use_prism · first_subagents · duel_tower · quantum_coding_bench · ops_lap · ai_labs · 256_work_loop · max_spec  
-
-**Ising collapse next (score/42):** Q1 hard CPAC vault (40) → Q4 MAID N100 (36) → Q6 EC donors (32)
-
-**Status:** ARMED_AWAITING_PICKUP — do not claim p256 slave LIVE until `prism_first_subagent_last.json` ts > arm.
-
-## 9. Continue lap 3 (quantum rank: Q6 → Q5 → Q4)
+## 9. Continue lap 3 (rank: Q6 → Q5 → Q4)
 
 | Q | Result | Artifact |
 |---|--------|----------|
 | **Q6 EC donors** | **DONE** stream 6.2M rows | `data/cpc_top_donors_2023_2025.json` |
 | **Q5 board OIC** | PARTIAL FACT | `data/cbc_board_oic_public_records.json` — **PC 2024-1113** Bouchard CEO |
 | **Q4 MAID** | N=12 partial | `data/maid_cbc_framing_sample_batch1.json` |
-| PRISM | Flags re-armed | mesh `osint_continue_lap3.json` |
 
 ### Q6 headlines (public EC open data)
 - CPC monetary gifts 2023–2025 in corpus: **157,828** (2023-heavy; 2024/25 lag)
@@ -153,7 +135,7 @@ Fraser Institute + **Atlas Network** Canadian members: MLI, MEI, JCCF — public
 ## 10. Next collection (hard residuals)
 
 1. **P0** — SHA256 CPAC video `PllLWKW56RA`  
-2. **P1** — Bluesky; FITR after 2026-08-04; PRISM pickup drain  
+2. **P1** — Bluesky; FITR after 2026-08-04  
 3. **P2** — MAID N≥100 systematic; remaining director OICs  
 4. **P3** — T3010 PDF line items
 
