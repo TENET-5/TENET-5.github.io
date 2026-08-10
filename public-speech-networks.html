@@ -281,15 +281,15 @@
     <div class="file-meta-row">
       <span class="kick section-num">Investigations · Open-source speech map</span>
       <span class="file-status">Active file</span>
-      <span class="file-status">Wave 7 · primary Mayhem</span>
+      <span class="file-status">Wave 8 · org channel · split table</span>
     </div>
     <h1>Public speech networks</h1>
     <p class="stand">
       Multipolar online coalitions leave a public trail: who speaks with whom, who shares an adversary,
       and where the record is empty. This file maps <strong>public posts only</strong>.
       Use the <strong>Network</strong> window for analysis, or <strong>Celestial</strong> for orbital layout.
-      Wave 7 banks <strong>primary</strong> @MsMaggieMayhem speech about Barrett (2022), adds Emma Best via
-      attribution/chronicle only, and keeps 2026 attributed quotes OPEN. No allegation upgrades.
+      Wave 8 maps official <strong>ddosecrets.org</strong>, banks Micon’s denial of Mayhem contact, and publishes a
+      primary-vs-attributed speech split for Mayhem. No allegation upgrades.
     </p>
     <div class="file-rail" role="list" aria-label="Related">
       <a class="file-pill" href="investigations.html" role="listitem">Investigations hub</a>
@@ -745,6 +745,27 @@
       if (data.null_findings && data.null_findings.length) {
         html += "<p class=\"psn-note\" style=\"margin-top:.85rem\"><strong>Null findings this wave:</strong> " +
           data.null_findings.map(function (n) { return n.text; }).join(" · ") + "</p>";
+      }
+      if (data.official_org && data.official_org.web) {
+        html += "<p class=\"psn-note\" style=\"margin-top:.65rem\"><strong>Official org web:</strong> " +
+          '<a href="' + data.official_org.web + '" rel="noopener noreferrer" target="_blank">' +
+          data.official_org.web + "</a>" +
+          (data.official_org.about ? ' · <a href="' + data.official_org.about + '" rel="noopener noreferrer" target="_blank">About</a>' : "") +
+          "</p>";
+      }
+      if (data.primary_vs_attributed_mayhem) {
+        var pva = data.primary_vs_attributed_mayhem;
+        html += "<div style=\"margin-top:1rem\"><strong style=\"font-size:.85rem\">" + (pva.title || "Primary vs attributed") + "</strong>";
+        html += "<table class=\"psn-claim-table\" style=\"margin-top:.4rem\"><thead><tr><th>Status</th><th>Date / id</th><th>Topic</th></tr></thead><tbody>";
+        (pva.primary || []).forEach(function (r) {
+          html += "<tr><td><span class=\"psn-status PUBLIC_POST_FACT\">PRIMARY</span></td><td>" + (r.date || "") +
+            " · " + (r.id || "") + "</td><td>" + (r.topic || "") + "</td></tr>";
+        });
+        (pva.attributed_open || []).forEach(function (r) {
+          html += "<tr><td><span class=\"psn-status OPEN\">ATTRIBUTED OPEN</span></td><td>BB " + (r.bb || "") +
+            "</td><td>" + (r.topic || "") + "</td></tr>";
+        });
+        html += "</tbody></table></div>";
       }
       pc.innerHTML = html;
     }
