@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en-CA" data-press="1" data-press-interior="1">
+<head>
+<script src="js/tenet5-single-mic.js?v=2"></script>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/press-theme.css?v=243">
+<link rel="stylesheet" href="css/design-lock.css?v=243">
+<script>document.documentElement.classList.add('js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Speech Networks — Multipolar Online Coalitions | TENET5</title>
+<meta name="description" content="Open-source map of multipolar public-speech networks: hubs, bridges, shared adversaries, and null edges. Network and celestial views. Centrality is not guilt.">
+<meta name="theme-color" content="#050708">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="author" content="TENET5">
+<meta name="publisher" content="TENET5">
+<meta property="og:site_name" content="TENET5">
+<meta property="og:locale" content="en_CA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Public Speech Networks — Multipolar Online Coalitions | TENET5">
+<meta property="og:description" content="Open-source map of multipolar public-speech networks. Network and celestial windows. Centrality is not guilt.">
+<meta property="og:url" content="https://tenet-5.github.io/public-speech-networks.html">
+<meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Public Speech Networks | TENET5">
+<meta name="twitter:description" content="Open-source multipolar online coalitions. Network and celestial views.">
+<meta name="twitter:image" content="https://tenet-5.github.io/img/og-card.png">
+<style>
+  /* layout only — palette from press-theme */
+  .psn-windows {
+    display: grid;
+    grid-template-columns: 1fr minmax(260px, 320px);
+    gap: 0.85rem;
+    margin: 1rem 0 1.75rem;
+    min-height: 520px;
+  }
+  @media (max-width: 900px) {
+    .psn-windows { grid-template-columns: 1fr; min-height: 0; }
+  }
+  .psn-win {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    background: rgba(0,0,0,0.28);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .psn-win-chrome {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.35);
+  }
+  .psn-win-title {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-right: auto;
+  }
+  .psn-mode {
+    display: inline-flex;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .psn-mode button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: 0.72rem var(--mono, ui-monospace, monospace);
+    padding: 0.28rem 0.7rem;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  .psn-mode button.on {
+    background: rgba(154,219,232,0.12);
+    color: var(--ice, #9adbe8);
+    opacity: 1;
+  }
+  .psn-tool {
+    appearance: none;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: transparent;
+    color: inherit;
+    font: 0.7rem var(--mono, ui-monospace, monospace);
+    padding: 0.28rem 0.55rem;
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0.8;
+  }
+  .psn-tool.on, .psn-tool:hover {
+    border-color: rgba(154,219,232,0.4);
+    color: var(--ice, #9adbe8);
+    opacity: 1;
+  }
+  .psn-stage {
+    flex: 1;
+    min-height: 460px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 32% 42%, rgba(40,90,160,0.12) 0%, transparent 52%),
+      radial-gradient(ellipse at 72% 48%, rgba(120,70,30,0.08) 0%, transparent 48%),
+      #05080d;
+  }
+  .psn-stage.celestial {
+    background:
+      radial-gradient(ellipse 80% 60% at 38% 48%, rgba(40,90,160,0.16) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 72% 42%, rgba(120,70,30,0.12) 0%, transparent 50%),
+      #03060c;
+  }
+  #psn-stars {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .psn-stage.celestial #psn-stars { opacity: 1; }
+  #psn-svg {
+    position: relative; z-index: 1;
+    width: 100%; height: 460px; display: block; cursor: grab;
+  }
+  #psn-svg:active { cursor: grabbing; }
+  .psn-hint {
+    position: absolute; z-index: 2; left: 12px; bottom: 10px;
+    font-size: 0.68rem; opacity: 0.65; max-width: 70%;
+    pointer-events: none; line-height: 1.35;
+  }
+  .psn-detail {
+    flex: 1;
+    padding: 1rem 1.1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow: auto;
+  }
+  .psn-detail h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+  .psn-detail .tier {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 0.5rem;
+  }
+  .psn-detail ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+    font-size: 0.8rem;
+  }
+  .psn-legend {
+    display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem;
+    font-size: 0.78rem; opacity: 0.85; margin: 0.5rem 0 1rem;
+  }
+  .psn-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .psn-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 1.5px solid currentColor; display: inline-block;
+  }
+  .psn-findings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.85rem;
+    margin: 1.25rem 0 2rem;
+  }
+  .psn-findings article {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    background: rgba(0,0,0,0.18);
+  }
+  .psn-findings h3 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+  .psn-findings p { margin: 0; font-size: 0.88rem; line-height: 1.5; opacity: 0.9; }
+  .psn-matrix {
+    width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0 1.5rem;
+  }
+  .psn-matrix th, .psn-matrix td {
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 0.45rem 0.55rem;
+    text-align: left;
+  }
+  .psn-matrix th { font-weight: 500; opacity: 0.8; }
+  .psn-null { opacity: 0.55; font-style: italic; }
+  .psn-note {
+    font-size: 0.82rem; line-height: 1.5; opacity: 0.8;
+    border-left: 2px solid rgba(255,255,255,0.15);
+    padding-left: 0.85rem; margin: 1rem 0 1.5rem;
+  }
+  .psn-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 0 0 1.25rem;
+  }
+  @media (max-width: 700px) {
+    .psn-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  .psn-stats .nr-metric { min-height: auto; }
+</style>
+</head>
+<body class="press-interior" data-presentation="research" data-desk="research">
+  <header class="press-bar" role="banner">
+    <a class="wm" href="index.html">TENET<sup>5</sup></a>
+    <nav aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="news.html">News</a>
+      <a href="daily-briefing.html">Briefing</a>
+      <a href="investigations.html">Investigations</a>
+      <a href="argument.html">The Case</a>
+      <a href="evidence-index.html">Evidence</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+<main class="press-main press-file">
+  <header class="press-hero file-hero">
+    <div class="file-meta-row">
+      <span class="kick section-num">Investigations · Open-source speech map</span>
+      <span class="file-status">Active file</span>
+      <span class="file-status">Wave 1 · 2026-08-10</span>
+    </div>
+    <h1>Public speech networks</h1>
+    <p class="stand">
+      Multipolar online coalitions leave a public trail: who speaks with whom, who shares an adversary,
+      and where the record is empty. This file maps <strong>public posts only</strong>.
+      Use the <strong>Network</strong> window for analysis, or <strong>Celestial</strong> for orbital layout.
+      Centrality is not guilt. Allegations stay labeled.
+    </p>
+    <div class="file-rail" role="list" aria-label="Related">
+      <a class="file-pill" href="investigations.html" role="listitem">Investigations hub</a>
+      <a class="file-pill" href="network-analysis.html" role="listitem">Institutional network board</a>
+      <a class="file-pill" href="methodology-transparency.html" role="listitem">Method</a>
+      <a class="file-pill" href="evidence-index.html" role="listitem">Evidence shelf</a>
+    </div>
+  </header>
+
+  <div class="content press-file" id="main" role="main">
+
+    <p class="psn-note">
+      <strong>Stated vs inferred.</strong> A public post is stated. Co-presence counts and graph structure are
+      measurement of public speech patterns. Claims that someone is a police asset, a criminal, or the same person
+      under another legal name remain <em>third-party public allegations</em> until independently verified.
+      This file does not publish private addresses, family data, or non-public material.
+    </p>
+
+    <div class="psn-stats nr-metrics" role="group" aria-label="Board scale" id="psn-stats">
+      <div class="nr-metric glass"><span class="v" id="st-nodes">—</span><span class="l">Nodes</span><span class="n">Public handles / orgs</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-edges">—</span><span class="l">Edges</span><span class="n">Documented public links</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-hubs">—</span><span class="l">Hubs</span><span class="n">Dense gravity wells</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-nulls">—</span><span class="l">Null edges</span><span class="n">Empty bilateral record</span></div>
+    </div>
+
+    <span class="kick section-num">01 · Findings</span>
+    <h2>What the public map shows</h2>
+    <div class="psn-findings" id="findings"></div>
+
+    <span class="kick section-num">02 · Map windows</span>
+    <h2>Hubs, bridges, and empty edges</h2>
+    <p class="stand file-narrow">
+      Two windows: the map stage (Network or Celestial) and the inspector.
+      Click a node. Lines are public-speech relationships, not secret membership.
+    </p>
+    <div class="psn-legend" aria-hidden="true">
+      <span><i class="psn-dot" style="color:#c9a227"></i> Hub</span>
+      <span><i class="psn-dot" style="color:#9adbe8"></i> Core</span>
+      <span><i class="psn-dot" style="color:#e8a0b0"></i> Bridge</span>
+      <span><i class="psn-dot" style="color:#a89f90"></i> Orbit / org</span>
+    </div>
+
+    <div class="psn-windows">
+      <div class="psn-win" id="map-window">
+        <div class="psn-win-chrome">
+          <span class="psn-win-title">Map · public speech</span>
+          <span class="psn-mode" role="group" aria-label="View mode">
+            <button type="button" id="btn-mode-network" class="on">Network</button>
+            <button type="button" id="btn-mode-celestial">Celestial</button>
+          </span>
+          <button type="button" class="psn-tool on" id="btn-labels">Labels</button>
+          <button type="button" class="psn-tool on" id="btn-edges">Edges</button>
+          <button type="button" class="psn-tool" id="btn-reset">Reset</button>
+        </div>
+        <div class="psn-stage" id="psn-stage">
+          <canvas id="psn-stars" aria-hidden="true"></canvas>
+          <svg id="psn-svg" viewBox="0 0 100 62" role="img" aria-label="Public speech network board"></svg>
+          <div class="psn-hint" id="psn-hint">Network view · click a node to inspect · drag to pan when celestial</div>
+        </div>
+      </div>
+      <div class="psn-win" id="inspector-window">
+        <div class="psn-win-chrome">
+          <span class="psn-win-title">Inspector</span>
+        </div>
+        <aside class="psn-detail" id="psn-detail">
+          <span class="tier">Select a node</span>
+          <h3>Open any account</h3>
+          <p>Each node is a public handle or organization named in public bios or posts.
+          Each edge is documented public speech or measured co-presence — never an invented conspiracy.</p>
+        </aside>
+      </div>
+    </div>
+
+    <span class="kick section-num">03 · Core matrix</span>
+    <h2>Four accounts, six pairs</h2>
+    <p class="stand file-narrow">
+      The investigation opened on four frequently discussed public handles.
+      Pairwise results matter because absences stop false coordination claims.
+    </p>
+    <table class="psn-matrix">
+      <thead>
+        <tr><th>Pair</th><th>Public relationship class</th><th>Record strength</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>@Kronykal ↔ @Render64</td><td>Strong co-presence in open-source archives</td><td>High</td></tr>
+        <tr><td>@Kronykal ↔ @FuxNet</td><td>Adversarial public speech (mutual disdain posts)</td><td>Moderate</td></tr>
+        <tr><td>@Kronykal ↔ @thewardoll</td><td>Outer orbit / shared viral-thread adjacency</td><td>Moderate–low</td></tr>
+        <tr><td>@FuxNet ↔ @Render64</td><td>Hostile one-way public claim in posts</td><td>Moderate</td></tr>
+        <tr><td>@FuxNet ↔ @thewardoll</td><td class="psn-null">No bilateral public posts banked this wave</td><td class="psn-null">Null</td></tr>
+        <tr><td>@Render64 ↔ @thewardoll</td><td class="psn-null">No clean bilateral public posts banked</td><td class="psn-null">Null*</td></tr>
+      </tbody>
+    </table>
+
+    <span class="kick section-num">04 · Campaign actor</span>
+    <h2>Barrett Brown (@ProjPM) — public pressure wave</h2>
+    <p class="stand file-narrow">
+      One reason this network is “hot” in 2026 is a visible public campaign from
+      <a href="https://x.com/ProjPM" rel="noopener noreferrer" target="_blank">@ProjPM</a>.
+      Mapping the campaign is not endorsing every claim inside it.
+    </p>
+    <ul>
+      <li><strong>What is documented:</strong> public posts equating handles (e.g. cho0b / Fuxnet / Jihad), open calls for identity tips via the bio email, screenshot posts, and repeated asset/fed framing of named accounts.</li>
+      <li><strong>Primary public pressure:</strong> @FuxNet and related scene names; public naming of Meepkitty / Meeps in Rustle League narratives; separate serialized pressure against other named accounts in the wider conflict space.</li>
+      <li><strong>Method:</strong> treat each Barrett sentence as a claim ticket — bank the URL, extract the assertion, assign a verification status. Do not collapse “he said it” into “it is true.”</li>
+      <li><strong>Example (method, not conclusion):</strong>
+        <a href="https://x.com/ProjPM/status/2086663353586327849" rel="noopener noreferrer" target="_blank">2026-08-10 post</a>
+        openly solicits confirmation of identity/background on “cho0b/Fuxnet/Jihad.”</li>
+    </ul>
+    <p class="psn-note">
+      Third-party legal-name and employment claims (including police or intelligence employment) stay
+      <em>allegation</em> until independently verified. TENET5 will not promote unproven employment claims as fact.
+    </p>
+
+    <span class="kick section-num">05 · Bridges</span>
+    <h2>Accounts that appear in more than one well</h2>
+    <ul>
+      <li><strong>@0x686967</strong> — high co-presence in multi-account conflict packs; also appears in historic scene discourse that touches the companion hub’s public fights.</li>
+      <li><strong>@meepkittyfuck</strong> (Meeps / Meepkitty) — extensive friendly historic speech with the dense hub; named in public narratives about the companion hub’s older online scene. Identity and employment claims advanced by third parties remain <em>allegations</em>.</li>
+      <li><strong>@Bitchiest</strong> — co-presence in multi-handle conflict threads and historic scene speech that crosses wings.</li>
+      <li><strong>@ProjPM</strong> — not a “friend hub”: a shared <em>adversarial attractor</em>. Multiple accounts organize public speech against the same target.</li>
+    </ul>
+
+    <span class="kick section-num">06 · Method</span>
+    <h2>How this board was built</h2>
+    <ol>
+      <li><strong>Primary surface:</strong> public posts and public profile text on X.</li>
+      <li><strong>Edge types:</strong> direct @-mention / reply chains; archive co-presence counts; self-bio organization links; labeled third-party public claims.</li>
+      <li><strong>Null edges:</strong> published when searches and prior banks found no bilateral public speech — a finding, not a gap to fill with rumor.</li>
+      <li><strong>Out of scope:</strong> private messages, non-public documents, doxxing, and unverified legal-name locks presented as fact.</li>
+    </ol>
+    <p class="psn-note">
+      Related board: the institutional <a href="network-analysis.html">public-record network</a>
+      (lobbying, appointments, procurement). That board uses government instruments.
+      This file uses public social speech. Do not conflate the two datasets.
+    </p>
+
+    <span class="kick section-num">07 · Next waves</span>
+    <h2>Investigation continues</h2>
+    <ul>
+      <li>Claim-by-claim ledger for @ProjPM posts (identity, asset, historic ops) with status OPEN / VERIFIED / REFUTED.</li>
+      <li>Counterspeech bank from named targets on the same claims.</li>
+      <li>Parent-chain hydrate for major viral threads (who replied to whom).</li>
+      <li>Archive completeness for handle merges and display-name timelines.</li>
+      <li>Organization filings that appear in public bios (open registries only).</li>
+      <li>Independent verification before any third-party legal-name claim is promoted past ALLEGATION.</li>
+    </ul>
+  </div>
+
+  <section class="file-band catalog file-sources srcs" id="sources" aria-labelledby="src-h">
+    <span class="kick section-num">Sources</span>
+    <h2 id="src-h">Primary public records on this <em>file.</em></h2>
+    <p class="stand file-narrow">Open the post. Atmosphere is not evidence.</p>
+    <ul class="src-list" id="src-list">
+      <li><a href="https://x.com/Kronykal" rel="noopener noreferrer" target="_blank">X — @Kronykal</a></li>
+      <li><a href="https://x.com/FuxNet" rel="noopener noreferrer" target="_blank">X — @FuxNet</a></li>
+      <li><a href="https://x.com/Render64" rel="noopener noreferrer" target="_blank">X — @Render64</a></li>
+      <li><a href="https://x.com/thewardoll" rel="noopener noreferrer" target="_blank">X — @thewardoll</a></li>
+      <li><a href="https://x.com/ProjPM" rel="noopener noreferrer" target="_blank">X — @ProjPM</a></li>
+      <li><a href="https://x.com/0x686967" rel="noopener noreferrer" target="_blank">X — @0x686967</a></li>
+      <li><a href="https://x.com/ronbryn" rel="noopener noreferrer" target="_blank">X — @ronbryn</a></li>
+      <li><a href="https://x.com/urharmless" rel="noopener noreferrer" target="_blank">X — @urharmless</a></li>
+      <li><a href="data/public_speech_networks_v1.json">TENET5 — machine board JSON (v1)</a></li>
+      <li><a href="network-analysis.html">TENET5 — institutional network board</a></li>
+      <li><a href="methodology-transparency.html">TENET5 — Methodology</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="press-foot" role="contentinfo">
+  <span>TENET5 · Powered by LIRIL AI</span>
+  <a href="news.html">News</a>
+  <a href="investigations.html">Investigations</a>
+  <a href="argument.html">The Case</a>
+  <a href="evidence-index.html">Evidence</a>
+  <a href="methodology-transparency.html">Method</a>
+  <a href="about.html">About</a>
+  <a href="legal.html">Legal</a>
+</footer>
+
+<script defer src="js/reading-mode.js?v=2"></script>
+<script defer src="js/rv-reveal.js?v=2"></script>
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var COLORS = { HUB: "#c9a227", CORE: "#9adbe8", BRIDGE: "#e8a0b0", ORBIT: "#a89f90", ORG: "#8a9a7a" };
+  var data = null;
+  var focus = null;
+  var mode = "network"; /* network | celestial */
+  var showLabels = true;
+  var showEdges = true;
+  var pan = { x: 0, y: 0 };
+  var dragging = false;
+  var dragStart = null;
+
+  function el(tag, attrs) {
+    var n = document.createElementNS(NS, tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    return n;
+  }
+
+  function layoutNetwork(nodes) {
+    var hubs = nodes.filter(function (n) { return n.tier === "HUB"; });
+    var cores = nodes.filter(function (n) { return n.tier === "CORE"; });
+    var bridges = nodes.filter(function (n) { return n.tier === "BRIDGE"; });
+    var rest = nodes.filter(function (n) { return n.tier !== "HUB" && n.tier !== "CORE" && n.tier !== "BRIDGE"; });
+    var pos = {};
+    hubs.forEach(function (n, i) {
+      pos[n.id] = { x: 28 + i * 28, y: 28 };
+    });
+    cores.forEach(function (n, i) {
+      pos[n.id] = { x: 22 + i * 22, y: 44 };
+    });
+    bridges.forEach(function (n, i) {
+      var a = (i / Math.max(bridges.length, 1)) * Math.PI * 2 - Math.PI / 2;
+      pos[n.id] = { x: 50 + Math.cos(a) * 22, y: 30 + Math.sin(a) * 14 };
+    });
+    rest.forEach(function (n, i) {
+      var a = (i / Math.max(rest.length, 1)) * Math.PI * 2;
+      pos[n.id] = { x: 50 + Math.cos(a) * 38, y: 31 + Math.sin(a) * 24 };
+    });
+    return pos;
+  }
+
+  function layoutCelestial(nodes) {
+    /* orbital rings by tier — same data, star-system geometry */
+    var rings = { HUB: 0, CORE: 12, BRIDGE: 22, ORBIT: 32, ORG: 38 };
+    var buckets = {};
+    nodes.forEach(function (n) {
+      var t = n.tier || "ORBIT";
+      if (!buckets[t]) buckets[t] = [];
+      buckets[t].push(n);
+    });
+    var pos = {};
+    Object.keys(buckets).forEach(function (tier) {
+      var list = buckets[tier];
+      var r = rings[tier] != null ? rings[tier] : 30;
+      list.forEach(function (n, i) {
+        if (tier === "HUB") {
+          pos[n.id] = {
+            x: 50 + (i - (list.length - 1) / 2) * 10 + pan.x * 0.02,
+            y: 31 + pan.y * 0.02
+          };
+        } else {
+          var a = (i / list.length) * Math.PI * 2 - Math.PI / 2 + (tier === "BRIDGE" ? 0.25 : 0);
+          pos[n.id] = {
+            x: 50 + Math.cos(a) * r + pan.x * 0.02,
+            y: 31 + Math.sin(a) * r * 0.62 + pan.y * 0.02
+          };
+        }
+      });
+    });
+    return pos;
+  }
+
+  function showDetail(node) {
+    var box = document.getElementById("psn-detail");
+    if (!node) return;
+    var edges = data.edges.filter(function (e) {
+      return e.from === node.id || e.to === node.id;
+    });
+    var html = '<span class="tier">' + node.tier + " · " + (node.role || "") + "</span>";
+    html += "<h3>" + node.label + "</h3>";
+    html += "<p>" + (node.note || "Public handle.") + "</p>";
+    if (node.tier) {
+      html += '<p style="margin-top:.5rem;font-size:.78rem;opacity:.75">Open profile: ';
+      html += '<a href="https://x.com/' + node.label.replace("@", "") + '" rel="noopener noreferrer" target="_blank">' + node.label + "</a></p>";
+    }
+    if (edges.length) {
+      html += '<p style="margin-top:.75rem;font-size:.8rem;opacity:.85"><strong>Public edges:</strong></p><ul>';
+      edges.forEach(function (e) {
+        var other = e.from === node.id ? e.to : e.from;
+        var on = data.nodes.find(function (n) { return n.id === other; });
+        html += "<li>" + (on ? on.label : other) + " — " + e.rel.replace(/_/g, " ") +
+          ' <span style="opacity:.65">(' + e.level + ")</span></li>";
+      });
+      html += "</ul>";
+    }
+    box.innerHTML = html;
+  }
+
+  function drawStars() {
+    var c = document.getElementById("psn-stars");
+    if (!c) return;
+    var stage = document.getElementById("psn-stage");
+    var w = stage.clientWidth || 800;
+    var h = stage.clientHeight || 460;
+    c.width = w; c.height = h;
+    var ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, w, h);
+    if (mode !== "celestial") return;
+    var n = 120;
+    for (var i = 0; i < n; i++) {
+      var x = (Math.sin(i * 12.9898) * 43758.5453) % 1;
+      if (x < 0) x = -x;
+      var y = (Math.sin(i * 78.233) * 12345.6789) % 1;
+      if (y < 0) y = -y;
+      var r = 0.4 + (i % 3) * 0.35;
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(230,240,255," + (0.25 + (i % 5) * 0.1) + ")";
+      ctx.arc(x * w, y * h, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function draw() {
+    if (!data) return;
+    var svg = document.getElementById("psn-svg");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var pos = mode === "celestial" ? layoutCelestial(data.nodes) : layoutNetwork(data.nodes);
+    var gEdges = el("g");
+    var gNodes = el("g");
+    if (showEdges) {
+      data.edges.forEach(function (e) {
+        var a = pos[e.from], b = pos[e.to];
+        if (!a || !b) return;
+        var w = Math.max(0.15, (e.weight || 1) * 0.18);
+        var isNull = e.level === "NULL_EDGE" || e.weight === 0;
+        var line = el("line", {
+          x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+          stroke: isNull ? "rgba(160,160,160,0.22)" : (mode === "celestial" ? "rgba(180,200,230,0.28)" : "rgba(200,210,220,0.35)"),
+          "stroke-width": isNull ? 0.25 : w,
+          "stroke-dasharray": isNull || e.level === "THIRD_PARTY_PUBLIC" ? "0.8 0.6" : ""
+        });
+        if (focus && e.from !== focus && e.to !== focus) line.setAttribute("opacity", "0.12");
+        gEdges.appendChild(line);
+      });
+    }
+    data.nodes.forEach(function (n) {
+      var p = pos[n.id];
+      if (!p) return;
+      var col = COLORS[n.tier] || COLORS.ORBIT;
+      var r = n.tier === "HUB" ? 2.4 : n.tier === "BRIDGE" ? 1.8 : 1.4;
+      if (mode === "celestial") r *= 1.05;
+      var dim = focus && focus !== n.id;
+      var g = el("g", { style: "cursor:pointer", opacity: dim ? "0.22" : "1" });
+      g.appendChild(el("circle", {
+        cx: p.x, cy: p.y, r: r + (mode === "celestial" ? 1.4 : 0.9),
+        fill: col, opacity: mode === "celestial" ? "0.12" : "0.15"
+      }));
+      g.appendChild(el("circle", {
+        cx: p.x, cy: p.y, r: r,
+        fill: "#0a0c10", stroke: col, "stroke-width": focus === n.id ? "0.55" : "0.35"
+      }));
+      if (showLabels) {
+        var t = el("text", {
+          x: p.x, y: p.y + r + 2.3,
+          fill: col, "font-size": "1.55", "text-anchor": "middle",
+          "font-family": "IBM Plex Mono, ui-monospace, monospace"
+        });
+        t.textContent = n.label.replace("@", "");
+        g.appendChild(t);
+      }
+      g.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        focus = focus === n.id ? null : n.id;
+        showDetail(n);
+        draw();
+      });
+      gNodes.appendChild(g);
+    });
+    svg.appendChild(gEdges);
+    svg.appendChild(gNodes);
+    document.getElementById("psn-hint").textContent =
+      mode === "celestial"
+        ? "Celestial · rings by tier · drag to pan · click a star"
+        : "Network · click a node to inspect · edges = public speech";
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById("btn-mode-network").classList.toggle("on", m === "network");
+    document.getElementById("btn-mode-celestial").classList.toggle("on", m === "celestial");
+    document.getElementById("psn-stage").classList.toggle("celestial", m === "celestial");
+    drawStars();
+    draw();
+  }
+
+  function renderFindings() {
+    var box = document.getElementById("findings");
+    if (!data || !data.findings) return;
+    box.innerHTML = data.findings.map(function (f) {
+      return "<article><h3>" + f.title + "</h3><p>" + f.text + "</p></article>";
+    }).join("");
+  }
+
+  function renderStats() {
+    if (!data) return;
+    document.getElementById("st-nodes").textContent = String(data.nodes.length);
+    document.getElementById("st-edges").textContent = String(data.edges.length);
+    document.getElementById("st-hubs").textContent = String(data.nodes.filter(function (n) { return n.tier === "HUB"; }).length);
+    document.getElementById("st-nulls").textContent = String(data.edges.filter(function (e) { return e.level === "NULL_EDGE"; }).length);
+  }
+
+  /* controls */
+  document.getElementById("btn-mode-network").addEventListener("click", function () { setMode("network"); });
+  document.getElementById("btn-mode-celestial").addEventListener("click", function () { setMode("celestial"); });
+  document.getElementById("btn-labels").addEventListener("click", function () {
+    showLabels = !showLabels;
+    this.classList.toggle("on", showLabels);
+    draw();
+  });
+  document.getElementById("btn-edges").addEventListener("click", function () {
+    showEdges = !showEdges;
+    this.classList.toggle("on", showEdges);
+    draw();
+  });
+  document.getElementById("btn-reset").addEventListener("click", function () {
+    focus = null; pan = { x: 0, y: 0 };
+    document.getElementById("psn-detail").innerHTML =
+      '<span class="tier">Select a node</span><h3>Open any account</h3>' +
+      "<p>Each node is a public handle or organization named in public bios or posts.</p>";
+    draw();
+  });
+
+  /* pan on celestial */
+  var svgEl = document.getElementById("psn-svg");
+  svgEl.addEventListener("pointerdown", function (e) {
+    if (mode !== "celestial") return;
+    dragging = true;
+    dragStart = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+    svgEl.setPointerCapture(e.pointerId);
+  });
+  svgEl.addEventListener("pointermove", function (e) {
+    if (!dragging || !dragStart) return;
+    pan.x = dragStart.panX + (e.clientX - dragStart.x);
+    pan.y = dragStart.panY + (e.clientY - dragStart.y);
+    draw();
+  });
+  svgEl.addEventListener("pointerup", function () { dragging = false; dragStart = null; });
+  window.addEventListener("resize", function () { drawStars(); });
+
+  fetch("data/public_speech_networks_v1.json")
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      data = j;
+      renderFindings();
+      renderStats();
+      drawStars();
+      draw();
+    })
+    .catch(function () {
+      document.getElementById("psn-detail").innerHTML =
+        "<h3>Board unavailable</h3><p>Could not load data/public_speech_networks_v1.json.</p>";
+    });
+})();
+</script>
+<div class="t5-last-updated" role="contentinfo" style="margin:1.5rem auto;padding:.5rem 1rem;max-width:960px;font-size:.85rem;color:#888;text-align:center;border-top:1px solid rgba(128,128,128,.2);">
+  Last updated: <time datetime="2026-08-10">2026-08-10</time> · TENET5 · Powered by LIRIL AI
+</div>
+</body>
+</html>
