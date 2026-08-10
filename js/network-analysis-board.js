@@ -1381,4 +1381,13 @@
     emptyEl.hidden = false;
     emptyEl.textContent = 'Loading board…';
   }
+
+  /* Failsafe: if DOM ready but packs still empty after 8s, surface honest error */
+  setTimeout(function () {
+    if (state.loaded) return;
+    if (emptyEl && !emptyEl.hidden) {
+      emptyEl.textContent =
+        'Board is taking longer than expected. Try refresh — data lives under data/network_osint_board.json.';
+    }
+  }, 8000);
 })();
