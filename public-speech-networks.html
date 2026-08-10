@@ -203,6 +203,57 @@
     .psn-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   .psn-stats .nr-metric { min-height: auto; }
+  .psn-filters {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+    margin: 0.75rem 0 0.85rem;
+  }
+  .psn-filters button {
+    appearance: none; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: transparent; color: inherit;
+    font: 0.7rem var(--mono, ui-monospace, monospace);
+    padding: 0.3rem 0.65rem; border-radius: 999px;
+    opacity: 0.75;
+  }
+  .psn-filters button.on {
+    border-color: rgba(154,219,232,0.45);
+    background: rgba(154,219,232,0.1);
+    color: var(--ice, #9adbe8);
+    opacity: 1;
+  }
+  .psn-claim-table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    margin: 0.5rem 0 1rem;
+  }
+  .psn-claim-table th, .psn-claim-table td {
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 0.5rem 0.55rem; text-align: left; vertical-align: top;
+  }
+  .psn-claim-table th { font-weight: 500; opacity: 0.8; font-size: 0.75rem; }
+  .psn-status {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.68rem; letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .psn-status.ALLEGATION { color: #d3a625; }
+  .psn-status.OPEN { color: #9adbe8; }
+  .psn-status.ACTIVE_METHOD,
+  .psn-status.PUBLIC_POST_FACT { color: #a8c0a0; }
+  .psn-status.COUNTERSPEECH { color: #e8a0b0; }
+  .psn-timeline {
+    list-style: none; margin: 0.75rem 0 1.5rem; padding: 0;
+  }
+  .psn-timeline li {
+    display: grid; grid-template-columns: 6.5rem 1fr;
+    gap: 0.75rem; padding: 0.45rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.85rem;
+  }
+  .psn-timeline time {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.72rem; opacity: 0.75;
+  }
+  .psn-claim-meta { font-size: 0.75rem; opacity: 0.75; margin-top: 0.25rem; }
 </style>
 </head>
 <body class="press-interior" data-presentation="research" data-desk="research">
@@ -224,7 +275,7 @@
     <div class="file-meta-row">
       <span class="kick section-num">Investigations · Open-source speech map</span>
       <span class="file-status">Active file</span>
-      <span class="file-status">Wave 1 · 2026-08-10</span>
+      <span class="file-status">Wave 2 · claim ledger</span>
     </div>
     <h1>Public speech networks</h1>
     <p class="stand">
@@ -325,25 +376,43 @@
       </tbody>
     </table>
 
-    <span class="kick section-num">04 · Campaign actor</span>
-    <h2>Barrett Brown (@ProjPM) — public pressure wave</h2>
+    <span class="kick section-num">04 · Claim ledger window</span>
+    <h2>Pressure-campaign tickets — not verdicts</h2>
     <p class="stand file-narrow">
       One reason this network is “hot” in 2026 is a visible public campaign from
-      <a href="https://x.com/ProjPM" rel="noopener noreferrer" target="_blank">@ProjPM</a>.
+      <a href="https://x.com/ProjPM" rel="noopener noreferrer" target="_blank">@ProjPM</a> (Barrett Brown).
+      Each row is a <strong>claim ticket</strong>: what was said, by whom, with a primary link and a status.
       Mapping the campaign is not endorsing every claim inside it.
     </p>
-    <ul>
-      <li><strong>What is documented:</strong> public posts equating handles (e.g. cho0b / Fuxnet / Jihad), open calls for identity tips via the bio email, screenshot posts, and repeated asset/fed framing of named accounts.</li>
-      <li><strong>Primary public pressure:</strong> @FuxNet and related scene names; public naming of Meepkitty / Meeps in Rustle League narratives; separate serialized pressure against other named accounts in the wider conflict space.</li>
-      <li><strong>Method:</strong> treat each Barrett sentence as a claim ticket — bank the URL, extract the assertion, assign a verification status. Do not collapse “he said it” into “it is true.”</li>
-      <li><strong>Example (method, not conclusion):</strong>
-        <a href="https://x.com/ProjPM/status/2086663353586327849" rel="noopener noreferrer" target="_blank">2026-08-10 post</a>
-        openly solicits confirmation of identity/background on “cho0b/Fuxnet/Jihad.”</li>
-    </ul>
     <p class="psn-note">
-      Third-party legal-name and employment claims (including police or intelligence employment) stay
-      <em>allegation</em> until independently verified. TENET5 will not promote unproven employment claims as fact.
+      <strong>Read the status column.</strong> <em>ALLEGATION</em> means a third party asserted it in public —
+      not that TENET5 verified it. Legal-name and employment claims stay allegation-tier until independent primaries exist.
     </p>
+    <div class="psn-filters" id="claim-filters" role="group" aria-label="Filter claim tickets"></div>
+    <div class="psn-win" style="margin-bottom:1.25rem">
+      <div class="psn-win-chrome">
+        <span class="psn-win-title">Ledger · <span id="claim-count">—</span> tickets</span>
+      </div>
+      <div style="overflow:auto;max-height:420px">
+        <table class="psn-claim-table" id="claim-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Speaker → about</th>
+              <th>Claim ticket</th>
+              <th>Primary</th>
+            </tr>
+          </thead>
+          <tbody id="claim-body">
+            <tr><td colspan="5">Loading claim ledger…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <span class="kick section-num">04b · Campaign timeline</span>
+    <h2>July–August 2026 public wave</h2>
+    <ol class="psn-timeline" id="claim-timeline"></ol>
 
     <span class="kick section-num">05 · Bridges</span>
     <h2>Accounts that appear in more than one well</h2>
@@ -370,13 +439,13 @@
 
     <span class="kick section-num">07 · Next waves</span>
     <h2>Investigation continues</h2>
-    <ul>
-      <li>Claim-by-claim ledger for @ProjPM posts (identity, asset, historic ops) with status OPEN / VERIFIED / REFUTED.</li>
-      <li>Counterspeech bank from named targets on the same claims.</li>
+    <ul id="work-queue">
+      <li>Expand claim tickets for every alias-equation post with date + URL.</li>
+      <li>Bank more counterspeech from named targets with dates.</li>
+      <li>Keep Meepkitty employment claims on a separate ticket from scene-history claims.</li>
+      <li>Map DDoSecrets-adjacent names as their own cluster (do not collapse into the FuxNet hub).</li>
       <li>Parent-chain hydrate for major viral threads (who replied to whom).</li>
-      <li>Archive completeness for handle merges and display-name timelines.</li>
-      <li>Organization filings that appear in public bios (open registries only).</li>
-      <li>Independent verification before any third-party legal-name claim is promoted past ALLEGATION.</li>
+      <li>Independent verification before any ALLEGATION is promoted.</li>
     </ul>
   </div>
 
@@ -394,6 +463,7 @@
       <li><a href="https://x.com/ronbryn" rel="noopener noreferrer" target="_blank">X — @ronbryn</a></li>
       <li><a href="https://x.com/urharmless" rel="noopener noreferrer" target="_blank">X — @urharmless</a></li>
       <li><a href="data/public_speech_networks_v1.json">TENET5 — machine board JSON (v1)</a></li>
+      <li><a href="data/public_speech_claim_ledger_v1.json">TENET5 — claim ledger JSON (v1)</a></li>
       <li><a href="network-analysis.html">TENET5 — institutional network board</a></li>
       <li><a href="methodology-transparency.html">TENET5 — Methodology</a></li>
     </ul>
@@ -663,6 +733,86 @@
   svgEl.addEventListener("pointerup", function () { dragging = false; dragStart = null; });
   window.addEventListener("resize", function () { drawStars(); });
 
+  /* —— claim ledger window —— */
+  var ledger = null;
+  var claimFilter = "ALL";
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderClaims() {
+    if (!ledger) return;
+    var body = document.getElementById("claim-body");
+    var rows = ledger.claims.filter(function (c) {
+      return claimFilter === "ALL" || c.bucket === claimFilter || c.status === claimFilter;
+    });
+    document.getElementById("claim-count").textContent = String(rows.length);
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="5">No tickets in this filter.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (c) {
+      var about = (c.about || []).join(", ");
+      var link = c.url
+        ? '<a href="' + esc(c.url) + '" rel="noopener noreferrer" target="_blank">Open</a>'
+        : "—";
+      return "<tr>" +
+        "<td>" + esc(c.id) + "</td>" +
+        '<td><span class="psn-status ' + esc(c.status) + '">' + esc(c.status) + "</span></td>" +
+        "<td>" + esc(c.speaker) + "<div class=\"psn-claim-meta\">→ " + esc(about) + "</div></td>" +
+        "<td>" + esc(c.text) +
+          '<div class="psn-claim-meta"><strong>Fact:</strong> ' + esc(c.what_is_fact) +
+          " · <strong>Not:</strong> " + esc(c.what_is_not) + "</div></td>" +
+        "<td>" + link + (c.date ? '<div class="psn-claim-meta">' + esc(c.date) + "</div>" : "") + "</td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function renderClaimChrome() {
+    if (!ledger) return;
+    var filters = document.getElementById("claim-filters");
+    var opts = [{ id: "ALL", label: "All" }]
+      .concat((ledger.buckets || []).map(function (b) { return { id: b.id, label: b.label }; }))
+      .concat([
+        { id: "ALLEGATION", label: "Allegations only" },
+        { id: "COUNTERSPEECH", label: "Counterspeech" },
+        { id: "ACTIVE_METHOD", label: "Campaign method" }
+      ]);
+    filters.innerHTML = "";
+    opts.forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = o.label;
+      b.className = o.id === claimFilter ? "on" : "";
+      b.addEventListener("click", function () {
+        claimFilter = o.id;
+        renderClaimChrome();
+        renderClaims();
+      });
+      filters.appendChild(b);
+    });
+    var tl = document.getElementById("claim-timeline");
+    if (ledger.timeline && tl) {
+      tl.innerHTML = ledger.timeline.map(function (t) {
+        var href = t.url
+          ? '<a href="' + esc(t.url) + '" rel="noopener noreferrer" target="_blank">' + esc(t.event) + "</a>"
+          : esc(t.event);
+        return "<li><time datetime=\"" + esc(t.date) + "\">" + esc(t.date) + "</time><span>" + href + "</span></li>";
+      }).join("");
+    }
+    if (ledger.work_queue_public) {
+      var wq = document.getElementById("work-queue");
+      if (wq) {
+        wq.innerHTML = ledger.work_queue_public.map(function (t) {
+          return "<li>" + esc(t) + "</li>";
+        }).join("");
+      }
+    }
+  }
+
   fetch("data/public_speech_networks_v1.json")
     .then(function (r) { return r.json(); })
     .then(function (j) {
@@ -675,6 +825,18 @@
     .catch(function () {
       document.getElementById("psn-detail").innerHTML =
         "<h3>Board unavailable</h3><p>Could not load data/public_speech_networks_v1.json.</p>";
+    });
+
+  fetch("data/public_speech_claim_ledger_v1.json")
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      ledger = j;
+      renderClaimChrome();
+      renderClaims();
+    })
+    .catch(function () {
+      document.getElementById("claim-body").innerHTML =
+        '<tr><td colspan="5">Claim ledger unavailable.</td></tr>';
     });
 })();
 </script>
