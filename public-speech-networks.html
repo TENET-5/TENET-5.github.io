@@ -195,9 +195,12 @@
   }
   .psn-stats {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.65rem;
     margin: 0 0 1.25rem;
+  }
+  @media (min-width: 960px) {
+    .psn-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   }
   @media (max-width: 700px) {
     .psn-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -275,13 +278,14 @@
     <div class="file-meta-row">
       <span class="kick section-num">Investigations · Open-source speech map</span>
       <span class="file-status">Active file</span>
-      <span class="file-status">Wave 2 · claim ledger</span>
+      <span class="file-status">Wave 3 · full network</span>
     </div>
     <h1>Public speech networks</h1>
     <p class="stand">
       Multipolar online coalitions leave a public trail: who speaks with whom, who shares an adversary,
       and where the record is empty. This file maps <strong>public posts only</strong>.
       Use the <strong>Network</strong> window for analysis, or <strong>Celestial</strong> for orbital layout.
+      Wave 3 expands the board from the four-core seed into war-pack, CoSo, hellthread, and companion-wing nodes.
       Centrality is not guilt. Allegations stay labeled.
     </p>
     <div class="file-rail" role="list" aria-label="Related">
@@ -302,11 +306,14 @@
     </p>
 
     <div class="psn-stats nr-metrics" role="group" aria-label="Board scale" id="psn-stats">
-      <div class="nr-metric glass"><span class="v" id="st-nodes">—</span><span class="l">Nodes</span><span class="n">Public handles / orgs</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-nodes">—</span><span class="l">Nodes</span><span class="n">Public handles / orgs on board</span></div>
       <div class="nr-metric glass"><span class="v" id="st-edges">—</span><span class="l">Edges</span><span class="n">Documented public links</span></div>
       <div class="nr-metric glass"><span class="v" id="st-hubs">—</span><span class="l">Hubs</span><span class="n">Dense gravity wells</span></div>
       <div class="nr-metric glass"><span class="v" id="st-nulls">—</span><span class="l">Null edges</span><span class="n">Empty bilateral record</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-archive">195</span><span class="l">Archive seeds</span><span class="n">Full graph available offline</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-live">9</span><span class="l">Live posts</span><span class="n">Aug 2026 bank this wave</span></div>
     </div>
+    <div class="psn-findings" id="communities" style="margin-bottom:1.25rem"></div>
 
     <span class="kick section-num">01 · Findings</span>
     <h2>What the public map shows</h2>
@@ -462,7 +469,10 @@
       <li><a href="https://x.com/0x686967" rel="noopener noreferrer" target="_blank">X — @0x686967</a></li>
       <li><a href="https://x.com/ronbryn" rel="noopener noreferrer" target="_blank">X — @ronbryn</a></li>
       <li><a href="https://x.com/urharmless" rel="noopener noreferrer" target="_blank">X — @urharmless</a></li>
-      <li><a href="data/public_speech_networks_v1.json">TENET5 — machine board JSON (v1)</a></li>
+      <li><a href="https://x.com/SassyGirlBoss" rel="noopener noreferrer" target="_blank">X — @SassyGirlBoss</a></li>
+      <li><a href="https://x.com/th3j35t3r" rel="noopener noreferrer" target="_blank">X — @th3j35t3r</a></li>
+      <li><a href="https://x.com/Maynard598212" rel="noopener noreferrer" target="_blank">X — @Maynard598212</a></li>
+      <li><a href="data/public_speech_networks_v1.json">TENET5 — machine board JSON (v3)</a></li>
       <li><a href="data/public_speech_claim_ledger_v1.json">TENET5 — claim ledger JSON (v1)</a></li>
       <li><a href="network-analysis.html">TENET5 — institutional network board</a></li>
       <li><a href="methodology-transparency.html">TENET5 — Methodology</a></li>
@@ -693,6 +703,19 @@
     document.getElementById("st-edges").textContent = String(data.edges.length);
     document.getElementById("st-hubs").textContent = String(data.nodes.filter(function (n) { return n.tier === "HUB"; }).length);
     document.getElementById("st-nulls").textContent = String(data.edges.filter(function (e) { return e.level === "NULL_EDGE"; }).length);
+    if (data.meta && data.meta.collection) {
+      var c = data.meta.collection;
+      var a = document.getElementById("st-archive");
+      var l = document.getElementById("st-live");
+      if (a && c.archive_seed_nodes) a.textContent = String(c.archive_seed_nodes);
+      if (l && c.live_posts_banked) l.textContent = String(c.live_posts_banked);
+    }
+    var box = document.getElementById("communities");
+    if (box && data.communities) {
+      box.innerHTML = data.communities.map(function (cm) {
+        return "<article><h3>" + cm.label + "</h3><p>" + (cm.members || []).join(" · ") + "</p></article>";
+      }).join("");
+    }
   }
 
   /* controls */
