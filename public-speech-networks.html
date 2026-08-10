@@ -199,8 +199,11 @@
     gap: 0.65rem;
     margin: 0 0 1.25rem;
   }
-  @media (min-width: 960px) {
-    .psn-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  @media (min-width: 1100px) {
+    .psn-stats { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  }
+  @media (min-width: 960px) and (max-width: 1099px) {
+    .psn-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
   @media (max-width: 700px) {
     .psn-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -278,14 +281,14 @@
     <div class="file-meta-row">
       <span class="kick section-num">Investigations · Open-source speech map</span>
       <span class="file-status">Active file</span>
-      <span class="file-status">Wave 3 · full network</span>
+      <span class="file-status">Wave 4 · chains · DDo desk</span>
     </div>
     <h1>Public speech networks</h1>
     <p class="stand">
       Multipolar online coalitions leave a public trail: who speaks with whom, who shares an adversary,
       and where the record is empty. This file maps <strong>public posts only</strong>.
       Use the <strong>Network</strong> window for analysis, or <strong>Celestial</strong> for orbital layout.
-      Wave 3 expands the board from the four-core seed into war-pack, CoSo, hellthread, and companion-wing nodes.
+      Wave 4 adds hydrated parent chains, Meeps dual-orbit tickets, and a separate DDoSecrets-adjacent pressure desk.
       Centrality is not guilt. Allegations stay labeled.
     </p>
     <div class="file-rail" role="list" aria-label="Related">
@@ -311,9 +314,16 @@
       <div class="nr-metric glass"><span class="v" id="st-hubs">—</span><span class="l">Hubs</span><span class="n">Dense gravity wells</span></div>
       <div class="nr-metric glass"><span class="v" id="st-nulls">—</span><span class="l">Null edges</span><span class="n">Empty bilateral record</span></div>
       <div class="nr-metric glass"><span class="v" id="st-archive">195</span><span class="l">Archive seeds</span><span class="n">Full graph available offline</span></div>
-      <div class="nr-metric glass"><span class="v" id="st-live">9</span><span class="l">Live posts</span><span class="n">Aug 2026 bank this wave</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-live">22</span><span class="l">Live posts</span><span class="n">Aug 2026 banked</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-chains">3</span><span class="l">Parent chains</span><span class="n">Hydrated serials</span></div>
     </div>
     <div class="psn-findings" id="communities" style="margin-bottom:1.25rem"></div>
+    <div class="psn-win" style="margin-bottom:1.25rem" id="chains-window">
+      <div class="psn-win-chrome"><span class="psn-win-title">Parent chains · hydrated</span></div>
+      <div class="psn-detail" id="parent-chains" style="padding:0.85rem 1.1rem">
+        <p class="psn-claim-meta">Loading chains…</p>
+      </div>
+    </div>
 
     <span class="kick section-num">01 · Findings</span>
     <h2>What the public map shows</h2>
@@ -715,6 +725,21 @@
       box.innerHTML = data.communities.map(function (cm) {
         return "<article><h3>" + cm.label + "</h3><p>" + (cm.members || []).join(" · ") + "</p></article>";
       }).join("");
+    }
+    if (data.meta && data.meta.collection && data.meta.collection.parent_chains_hydrated) {
+      var ch = document.getElementById("st-chains");
+      if (ch) ch.textContent = String(data.meta.collection.parent_chains_hydrated);
+    }
+    var pc = document.getElementById("parent-chains");
+    if (pc && data.parent_chains) {
+      pc.innerHTML = "<ul style=\"margin:0;padding-left:1.1rem;font-size:.88rem\">" + data.parent_chains.map(function (c) {
+        var link = c.root
+          ? '<a href="' + c.root + '" rel="noopener noreferrer" target="_blank">' + (c.title || c.id) + "</a>"
+          : (c.title || c.id);
+        return "<li><strong>" + (c.id || "") + "</strong> · " + link +
+          " <span class=\"psn-claim-meta\">" + (c.speaker || "") + " · " + (c.date || "") +
+          " · " + (c.parts || "?") + " parts</span></li>";
+      }).join("") + "</ul>";
     }
   }
 
