@@ -6,12 +6,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/press-theme.css?v=243">
-<link rel="stylesheet" href="css/design-lock.css?v=243">
+<link rel="stylesheet" href="css/press-theme.css?v=244">
+<link rel="stylesheet" href="css/design-lock.css?v=244">
 <script>document.documentElement.classList.add('js');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Public Speech Networks — Multipolar Online Coalitions | TENET5</title>
-<meta name="description" content="Open-source map of multipolar public-speech networks: hubs, bridges, shared adversaries, and null edges. Network and celestial views. Centrality is not guilt.">
+<meta name="description" content="Open-source multipolar public-speech map with Network and Celestial boards, claim ledger, and primary-vs-attributed speech split. Centrality is not guilt.">
 <meta name="theme-color" content="#050708">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="author" content="TENET5">
@@ -20,246 +20,228 @@
 <meta property="og:locale" content="en_CA">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Public Speech Networks — Multipolar Online Coalitions | TENET5">
-<meta property="og:description" content="Open-source map of multipolar public-speech networks. Network and celestial windows. Centrality is not guilt.">
+<meta property="og:description" content="Readable network board: hubs, bridges, claim tickets. Centrality is not guilt.">
 <meta property="og:url" content="https://tenet-5.github.io/public-speech-networks.html">
 <meta property="og:image" content="https://tenet-5.github.io/img/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Public Speech Networks | TENET5">
-<meta name="twitter:description" content="Open-source multipolar online coalitions. Network and celestial views.">
+<meta name="twitter:description" content="Open-source multipolar online coalitions. Network and celestial boards.">
 <meta name="twitter:image" content="https://tenet-5.github.io/img/og-card.png">
 <style>
-  /* layout only — palette from press-theme */
+  /* layout + board chrome only — colors via press-theme tokens */
+  .psn-board-hero { margin: 0 0 2rem; }
+  .psn-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.65rem;
+    margin: 0 0 0.75rem;
+  }
+  .psn-toolbar .kick { margin: 0; margin-right: auto; }
+  .psn-mode, .psn-tool-row { display: inline-flex; gap: 0; border-radius: 999px; overflow: hidden;
+    border: 1px solid rgba(154,219,232,0.18); background: rgba(0,0,0,0.25); }
+  .psn-mode button, .psn-tool {
+    appearance: none; border: 0; background: transparent; color: inherit;
+    font: 0.72rem var(--mono, ui-monospace, monospace); padding: 0.4rem 0.85rem;
+    cursor: pointer; opacity: 0.72; letter-spacing: 0.03em;
+  }
+  .psn-mode button + button, .psn-tool + .psn-tool { border-left: 1px solid rgba(154,219,232,0.12); }
+  .psn-mode button.on, .psn-tool.on {
+    background: linear-gradient(180deg, rgba(154,219,232,0.16), rgba(154,219,232,0.06));
+    color: var(--ice, #9adbe8); opacity: 1;
+  }
+  .psn-mode button:hover, .psn-tool:hover { opacity: 1; }
+  .psn-comm-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.85rem; }
+  .psn-comm-filters button {
+    appearance: none; cursor: pointer; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.22);
+    color: inherit; font: 0.68rem var(--mono, ui-monospace, monospace);
+    padding: 0.32rem 0.7rem; opacity: 0.8;
+  }
+  .psn-comm-filters button.on {
+    border-color: rgba(154,219,232,0.45); background: rgba(154,219,232,0.1);
+    color: var(--ice, #9adbe8); opacity: 1;
+  }
   .psn-windows {
-    display: grid;
-    grid-template-columns: 1fr minmax(260px, 320px);
-    gap: 0.85rem;
-    margin: 1rem 0 1.75rem;
-    min-height: 520px;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 0.9rem; min-height: 560px;
   }
-  @media (max-width: 900px) {
-    .psn-windows { grid-template-columns: 1fr; min-height: 0; }
-  }
+  @media (max-width: 960px) { .psn-windows { grid-template-columns: 1fr; min-height: 0; } }
   .psn-win {
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    background: rgba(0,0,0,0.28);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    position: relative; display: flex; flex-direction: column; min-height: 0;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(154,219,232,0.14);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 28%),
+      rgba(8,10,14,0.72);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .psn-win-chrome {
-    flex: 0 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 0.75rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background: rgba(0,0,0,0.35);
+    flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem;
+    padding: 0.65rem 0.9rem; border-bottom: 1px solid rgba(154,219,232,0.1);
+    background: rgba(0,0,0,0.28);
   }
   .psn-win-title {
-    font-family: var(--mono, ui-monospace, monospace);
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0.8;
-    margin-right: auto;
-  }
-  .psn-mode {
-    display: inline-flex;
-    border-radius: 999px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.12);
-  }
-  .psn-mode button {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    font: 0.72rem var(--mono, ui-monospace, monospace);
-    padding: 0.28rem 0.7rem;
-    cursor: pointer;
-    opacity: 0.7;
-  }
-  .psn-mode button.on {
-    background: rgba(154,219,232,0.12);
-    color: var(--ice, #9adbe8);
-    opacity: 1;
-  }
-  .psn-tool {
-    appearance: none;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: transparent;
-    color: inherit;
-    font: 0.7rem var(--mono, ui-monospace, monospace);
-    padding: 0.28rem 0.55rem;
-    border-radius: 999px;
-    cursor: pointer;
-    opacity: 0.8;
-  }
-  .psn-tool.on, .psn-tool:hover {
-    border-color: rgba(154,219,232,0.4);
-    color: var(--ice, #9adbe8);
-    opacity: 1;
+    font: 0.68rem var(--mono, ui-monospace, monospace); letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0.78; margin-right: auto;
   }
   .psn-stage {
-    flex: 1;
-    min-height: 460px;
-    position: relative;
+    flex: 1; min-height: 520px; position: relative;
     background:
-      radial-gradient(ellipse at 32% 42%, rgba(40,90,160,0.12) 0%, transparent 52%),
-      radial-gradient(ellipse at 72% 48%, rgba(120,70,30,0.08) 0%, transparent 48%),
-      #05080d;
+      radial-gradient(ellipse 55% 50% at 35% 45%, rgba(40,90,160,0.14) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 72% 40%, rgba(120,70,30,0.1) 0%, transparent 50%),
+      #06080d;
   }
   .psn-stage.celestial {
     background:
-      radial-gradient(ellipse 80% 60% at 38% 48%, rgba(40,90,160,0.16) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 40% at 72% 42%, rgba(120,70,30,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 55% at 38% 48%, rgba(40,90,160,0.18) 0%, transparent 58%),
+      radial-gradient(ellipse 45% 40% at 70% 42%, rgba(120,70,30,0.12) 0%, transparent 52%),
       #03060c;
   }
-  #psn-stars {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 0; opacity: 0;
-    transition: opacity 0.35s ease;
-  }
+  #psn-stars { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0; transition: opacity .35s ease; }
   .psn-stage.celestial #psn-stars { opacity: 1; }
-  #psn-svg {
-    position: relative; z-index: 1;
-    width: 100%; height: 460px; display: block; cursor: grab;
-  }
+  #psn-svg { position: relative; z-index: 1; width: 100%; height: 520px; display: block; cursor: grab; touch-action: none; }
   #psn-svg:active { cursor: grabbing; }
   .psn-hint {
-    position: absolute; z-index: 2; left: 12px; bottom: 10px;
-    font-size: 0.68rem; opacity: 0.65; max-width: 70%;
-    pointer-events: none; line-height: 1.35;
+    position: absolute; z-index: 2; left: 12px; bottom: 10px; right: 12px;
+    font: 0.68rem var(--mono, ui-monospace, monospace); opacity: 0.6; line-height: 1.35;
+    pointer-events: none;
   }
-  .psn-detail {
-    flex: 1;
-    padding: 1rem 1.1rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    overflow: auto;
+  .psn-tooltip {
+    position: absolute; z-index: 5; display: none; pointer-events: none;
+    max-width: 240px; padding: 0.55rem 0.7rem; border-radius: 8px;
+    background: rgba(10,12,16,0.96); border: 1px solid rgba(154,219,232,0.22);
+    font-size: 0.78rem; line-height: 1.35; box-shadow: 0 12px 32px rgba(0,0,0,0.45);
   }
-  .psn-detail h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+  .psn-tooltip strong { display: block; margin-bottom: 0.2rem; color: var(--ice, #9adbe8); }
+  .psn-detail { flex: 1; padding: 1rem 1.1rem 1.2rem; font-size: 0.9rem; line-height: 1.5; overflow: auto; }
   .psn-detail .tier {
-    font-family: var(--mono, ui-monospace, monospace);
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.75;
-    margin-bottom: 0.5rem;
+    display: inline-block; font: 0.68rem var(--mono, ui-monospace, monospace);
+    letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.5rem;
+    border-radius: 999px; border: 1px solid rgba(154,219,232,0.2); margin-bottom: 0.55rem; opacity: 0.9;
   }
-  .psn-detail ul {
-    margin: 0.35rem 0 0;
-    padding-left: 1.1rem;
-    font-size: 0.8rem;
+  .psn-detail h3 { margin: 0 0 0.35rem; font-size: 1.2rem; }
+  .psn-detail .role { opacity: 0.8; font-size: 0.84rem; margin: 0 0 0.65rem; }
+  .psn-edge-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+  .psn-edge-list li {
+    display: flex; flex-wrap: wrap; gap: 0.35rem 0.55rem; align-items: baseline;
+    padding: 0.45rem 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem;
   }
+  .psn-edge-list .rel { opacity: 0.75; }
+  .psn-badge {
+    font: 0.62rem var(--mono, ui-monospace, monospace); letter-spacing: 0.04em;
+    padding: 0.12rem 0.4rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.12);
+  }
+  .psn-badge.HUB { color: #d3a625; border-color: rgba(211,166,37,0.35); }
+  .psn-badge.CORE { color: #9adbe8; border-color: rgba(154,219,232,0.35); }
+  .psn-badge.BRIDGE { color: #e8a0b0; border-color: rgba(232,160,176,0.35); }
+  .psn-badge.ORBIT, .psn-badge.ORG { color: #a89f90; border-color: rgba(168,159,144,0.35); }
   .psn-legend {
-    display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem;
-    font-size: 0.78rem; opacity: 0.85; margin: 0.5rem 0 1rem;
+    display: flex; flex-wrap: wrap; gap: 0.65rem 1.1rem; font-size: 0.76rem;
+    opacity: 0.88; margin: 0.35rem 0 0.85rem;
   }
   .psn-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
-  .psn-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    border: 1.5px solid currentColor; display: inline-block;
+  .psn-dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-block; }
+  .psn-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.55rem; margin: 0 0 1.1rem;
   }
+  .psn-stats .nr-metric { min-height: auto; padding: 0.75rem 0.85rem; }
+  .psn-stats .nr-metric .v { font-size: 1.35rem; }
+  .psn-comm-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.65rem; margin: 0 0 1.5rem;
+  }
+  .psn-comm-card {
+    border-radius: 10px; padding: 0.85rem 0.95rem;
+    border: 1px solid rgba(154,219,232,0.12); background: rgba(0,0,0,0.22);
+  }
+  .psn-comm-card h3 { margin: 0 0 0.35rem; font-size: 0.88rem; }
+  .psn-comm-card p { margin: 0; font-size: 0.78rem; line-height: 1.4; opacity: 0.85; }
   .psn-findings {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 0.85rem;
-    margin: 1.25rem 0 2rem;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.75rem; margin: 1rem 0 1.75rem;
   }
   .psn-findings article {
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
-    padding: 1rem 1.1rem;
-    background: rgba(0,0,0,0.18);
+    border-radius: 12px; padding: 1rem 1.05rem;
+    border: 1px solid rgba(154,219,232,0.12);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.03), transparent 40%),
+      rgba(0,0,0,0.22);
   }
   .psn-findings h3 { margin: 0 0 0.4rem; font-size: 0.95rem; }
-  .psn-findings p { margin: 0; font-size: 0.88rem; line-height: 1.5; opacity: 0.9; }
-  .psn-matrix {
-    width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0 1.5rem;
-  }
+  .psn-findings p { margin: 0; font-size: 0.86rem; line-height: 1.5; opacity: 0.9; }
+  .psn-matrix { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.75rem 0 1.5rem; }
   .psn-matrix th, .psn-matrix td {
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 0.45rem 0.55rem;
-    text-align: left;
+    border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.6rem; text-align: left;
   }
-  .psn-matrix th { font-weight: 500; opacity: 0.8; }
+  .psn-matrix th { font-weight: 500; opacity: 0.8; font-size: 0.75rem; }
   .psn-null { opacity: 0.55; font-style: italic; }
   .psn-note {
-    font-size: 0.82rem; line-height: 1.5; opacity: 0.8;
-    border-left: 2px solid rgba(255,255,255,0.15);
-    padding-left: 0.85rem; margin: 1rem 0 1.5rem;
+    font-size: 0.82rem; line-height: 1.5; opacity: 0.82;
+    border-left: 2px solid rgba(154,219,232,0.28); padding-left: 0.85rem; margin: 0.85rem 0 1.25rem;
   }
-  .psn-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.65rem;
-    margin: 0 0 1.25rem;
-  }
-  @media (min-width: 1100px) {
-    .psn-stats { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-  }
-  @media (min-width: 960px) and (max-width: 1099px) {
-    .psn-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  }
-  @media (max-width: 700px) {
-    .psn-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  .psn-stats .nr-metric { min-height: auto; }
-  .psn-filters {
-    display: flex; flex-wrap: wrap; gap: 0.4rem;
-    margin: 0.75rem 0 0.85rem;
-  }
+  .psn-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.65rem 0 0.85rem; }
   .psn-filters button {
-    appearance: none; cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: transparent; color: inherit;
-    font: 0.7rem var(--mono, ui-monospace, monospace);
-    padding: 0.3rem 0.65rem; border-radius: 999px;
-    opacity: 0.75;
+    appearance: none; cursor: pointer; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.2);
+    color: inherit; font: 0.68rem var(--mono, ui-monospace, monospace);
+    padding: 0.32rem 0.7rem; opacity: 0.78;
   }
   .psn-filters button.on {
-    border-color: rgba(154,219,232,0.45);
-    background: rgba(154,219,232,0.1);
-    color: var(--ice, #9adbe8);
-    opacity: 1;
+    border-color: rgba(154,219,232,0.45); background: rgba(154,219,232,0.1);
+    color: var(--ice, #9adbe8); opacity: 1;
   }
-  .psn-claim-table {
-    width: 100%; border-collapse: collapse; font-size: 0.82rem;
-    margin: 0.5rem 0 1rem;
+  .psn-claim-cards {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.7rem; max-height: 540px; overflow: auto; padding: 0.15rem 0.15rem 0.5rem;
   }
-  .psn-claim-table th, .psn-claim-table td {
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 0.5rem 0.55rem; text-align: left; vertical-align: top;
+  .psn-claim-card {
+    border-radius: 12px; padding: 0.85rem 0.95rem;
+    border: 1px solid rgba(154,219,232,0.12);
+    background: rgba(0,0,0,0.28);
   }
-  .psn-claim-table th { font-weight: 500; opacity: 0.8; font-size: 0.75rem; }
+  .psn-claim-card .top {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 0.45rem;
+  }
+  .psn-claim-card .id {
+    font: 0.68rem var(--mono, ui-monospace, monospace); opacity: 0.7; margin-left: auto;
+  }
+  .psn-claim-card h4 { margin: 0 0 0.35rem; font-size: 0.88rem; font-weight: 500; }
+  .psn-claim-card .about { font-size: 0.78rem; opacity: 0.8; margin: 0 0 0.45rem; }
+  .psn-claim-card .body { font-size: 0.84rem; line-height: 1.45; margin: 0 0 0.45rem; }
+  .psn-claim-card .meta { font-size: 0.72rem; opacity: 0.72; line-height: 1.4; }
+  .psn-claim-card a { font-size: 0.78rem; }
   .psn-status {
-    font-family: var(--mono, ui-monospace, monospace);
-    font-size: 0.68rem; letter-spacing: 0.04em;
+    font: 0.62rem var(--mono, ui-monospace, monospace); letter-spacing: 0.05em;
+    padding: 0.15rem 0.45rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14);
     white-space: nowrap;
   }
-  .psn-status.ALLEGATION { color: #d3a625; }
-  .psn-status.OPEN { color: #9adbe8; }
+  .psn-status.ALLEGATION { color: #d3a625; border-color: rgba(211,166,37,0.4); background: rgba(211,166,37,0.08); }
+  .psn-status.OPEN { color: #9adbe8; border-color: rgba(154,219,232,0.35); background: rgba(154,219,232,0.08); }
   .psn-status.ACTIVE_METHOD,
-  .psn-status.PUBLIC_POST_FACT { color: #a8c0a0; }
-  .psn-status.COUNTERSPEECH { color: #e8a0b0; }
-  .psn-timeline {
-    list-style: none; margin: 0.75rem 0 1.5rem; padding: 0;
-  }
+  .psn-status.PUBLIC_POST_FACT { color: #a8c0a0; border-color: rgba(168,192,160,0.35); background: rgba(168,192,160,0.08); }
+  .psn-status.COUNTERSPEECH { color: #e8a0b0; border-color: rgba(232,160,176,0.35); background: rgba(232,160,176,0.08); }
+  .psn-timeline { list-style: none; margin: 0.75rem 0 1.5rem; padding: 0; }
   .psn-timeline li {
-    display: grid; grid-template-columns: 6.5rem 1fr;
-    gap: 0.75rem; padding: 0.45rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    font-size: 0.85rem;
+    display: grid; grid-template-columns: 6.5rem 1fr; gap: 0.75rem;
+    padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.85rem;
   }
-  .psn-timeline time {
-    font-family: var(--mono, ui-monospace, monospace);
-    font-size: 0.72rem; opacity: 0.75;
+  .psn-timeline time { font: 0.72rem var(--mono, ui-monospace, monospace); opacity: 0.75; }
+  .psn-split-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.5rem; }
+  .psn-split-table th, .psn-split-table td {
+    border: 1px solid rgba(255,255,255,0.08); padding: 0.45rem 0.55rem; text-align: left; vertical-align: top;
   }
-  .psn-claim-meta { font-size: 0.75rem; opacity: 0.75; margin-top: 0.25rem; }
+  .psn-chain-list { list-style: none; margin: 0; padding: 0; }
+  .psn-chain-list li {
+    padding: 0.65rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.88rem;
+  }
+  .psn-chain-list .cid {
+    font: 0.68rem var(--mono, ui-monospace, monospace); opacity: 0.7; display: block; margin-bottom: 0.2rem;
+  }
+  .psn-search {
+    width: min(220px, 100%); background: rgba(0,0,0,0.35); border: 1px solid rgba(154,219,232,0.18);
+    color: inherit; border-radius: 999px; padding: 0.38rem 0.8rem;
+    font: 0.75rem var(--mono, ui-monospace, monospace); outline: none;
+  }
+  .psn-search:focus { border-color: rgba(154,219,232,0.45); }
 </style>
 </head>
 <body class="press-interior" data-presentation="research" data-desk="research">
@@ -281,15 +263,14 @@
     <div class="file-meta-row">
       <span class="kick section-num">Investigations · Open-source speech map</span>
       <span class="file-status">Active file</span>
-      <span class="file-status">Wave 8 · org channel · split table</span>
+      <span class="file-status">Wave 9 · board redesign</span>
     </div>
     <h1>Public speech networks</h1>
     <p class="stand">
       Multipolar online coalitions leave a public trail: who speaks with whom, who shares an adversary,
       and where the record is empty. This file maps <strong>public posts only</strong>.
-      Use the <strong>Network</strong> window for analysis, or <strong>Celestial</strong> for orbital layout.
-      Wave 8 maps official <strong>ddosecrets.org</strong>, banks Micon’s denial of Mayhem contact, and publishes a
-      primary-vs-attributed speech split for Mayhem. No allegation upgrades.
+      Use the board below — Network for analysis, Celestial for orbital layout. Click a node.
+      Centrality is not guilt. Allegations stay labeled.
     </p>
     <div class="file-rail" role="list" aria-label="Related">
       <a class="file-pill" href="investigations.html" role="listitem">Investigations hub</a>
@@ -302,193 +283,158 @@
   <div class="content press-file" id="main" role="main">
 
     <p class="psn-note">
-      <strong>Stated vs inferred.</strong> A public post is stated. Co-presence counts and graph structure are
-      measurement of public speech patterns. Claims that someone is a police asset, a criminal, or the same person
-      under another legal name remain <em>third-party public allegations</em> until independently verified.
-      This file does not publish private addresses, family data, or non-public material.
+      <strong>Stated vs inferred.</strong> A public post is stated. Graph structure measures public speech patterns.
+      Employment, intelligence-affiliation, and legal-name claims stay <em>third-party allegations</em> until independently verified.
     </p>
 
     <div class="psn-stats nr-metrics" role="group" aria-label="Board scale" id="psn-stats">
-      <div class="nr-metric glass"><span class="v" id="st-nodes">—</span><span class="l">Nodes</span><span class="n">Public handles / orgs on board</span></div>
-      <div class="nr-metric glass"><span class="v" id="st-edges">—</span><span class="l">Edges</span><span class="n">Documented public links</span></div>
-      <div class="nr-metric glass"><span class="v" id="st-hubs">—</span><span class="l">Hubs</span><span class="n">Dense gravity wells</span></div>
-      <div class="nr-metric glass"><span class="v" id="st-nulls">—</span><span class="l">Null edges</span><span class="n">Empty bilateral record</span></div>
-      <div class="nr-metric glass"><span class="v" id="st-archive">195</span><span class="l">Archive seeds</span><span class="n">Full graph available offline</span></div>
-      <div class="nr-metric glass"><span class="v" id="st-live">30</span><span class="l">Live posts</span><span class="n">Aug 2026 banked</span></div>
-      <div class="nr-metric glass"><span class="v" id="st-chains">4</span><span class="l">Parent chains</span><span class="n">Hydrated serials</span></div>
-    </div>
-    <div class="psn-findings" id="communities" style="margin-bottom:1.25rem"></div>
-    <div class="psn-win" style="margin-bottom:1.25rem" id="chains-window">
-      <div class="psn-win-chrome"><span class="psn-win-title">Parent chains · hydrated</span></div>
-      <div class="psn-detail" id="parent-chains" style="padding:0.85rem 1.1rem">
-        <p class="psn-claim-meta">Loading chains…</p>
-      </div>
+      <div class="nr-metric glass"><span class="v" id="st-nodes">—</span><span class="l">Nodes</span><span class="n">On board</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-edges">—</span><span class="l">Edges</span><span class="n">Public links</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-hubs">—</span><span class="l">Hubs</span><span class="n">Gravity wells</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-nulls">—</span><span class="l">Null edges</span><span class="n">Empty pairs</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-archive">195</span><span class="l">Archive seeds</span><span class="n">Offline graph</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-live">—</span><span class="l">Live posts</span><span class="n">Banked</span></div>
+      <div class="nr-metric glass"><span class="v" id="st-chains">—</span><span class="l">Chains</span><span class="n">Hydrated</span></div>
     </div>
 
-    <span class="kick section-num">01 · Findings</span>
-    <h2>What the public map shows</h2>
-    <div class="psn-findings" id="findings"></div>
-
-    <span class="kick section-num">02 · Map windows</span>
-    <h2>Hubs, bridges, and empty edges</h2>
-    <p class="stand file-narrow">
-      Two windows: the map stage (Network or Celestial) and the inspector.
-      Click a node. Lines are public-speech relationships, not secret membership.
-    </p>
-    <div class="psn-legend" aria-hidden="true">
-      <span><i class="psn-dot" style="color:#c9a227"></i> Hub</span>
-      <span><i class="psn-dot" style="color:#9adbe8"></i> Core</span>
-      <span><i class="psn-dot" style="color:#e8a0b0"></i> Bridge</span>
-      <span><i class="psn-dot" style="color:#a89f90"></i> Orbit / org</span>
-    </div>
-
-    <div class="psn-windows">
-      <div class="psn-win" id="map-window">
-        <div class="psn-win-chrome">
-          <span class="psn-win-title">Map · public speech</span>
-          <span class="psn-mode" role="group" aria-label="View mode">
-            <button type="button" id="btn-mode-network" class="on">Network</button>
-            <button type="button" id="btn-mode-celestial">Celestial</button>
-          </span>
+    <!-- HERO BOARD -->
+    <section class="psn-board-hero" aria-labelledby="map-h">
+      <div class="psn-toolbar">
+        <span class="kick section-num" id="map-h">Board · map</span>
+        <span class="psn-mode" role="group" aria-label="View mode">
+          <button type="button" id="btn-mode-network" class="on">Network</button>
+          <button type="button" id="btn-mode-celestial">Celestial</button>
+        </span>
+        <span class="psn-tool-row" role="group" aria-label="Display">
           <button type="button" class="psn-tool on" id="btn-labels">Labels</button>
           <button type="button" class="psn-tool on" id="btn-edges">Edges</button>
           <button type="button" class="psn-tool" id="btn-reset">Reset</button>
+        </span>
+        <input class="psn-search" id="node-search" type="search" placeholder="Find handle…" aria-label="Find handle" />
+      </div>
+      <div class="psn-legend" aria-hidden="true">
+        <span><i class="psn-dot" style="color:#d3a625"></i> Hub</span>
+        <span><i class="psn-dot" style="color:#9adbe8"></i> Core</span>
+        <span><i class="psn-dot" style="color:#e8a0b0"></i> Bridge</span>
+        <span><i class="psn-dot" style="color:#a89f90"></i> Orbit / org</span>
+        <span style="opacity:.7">Size = connection count · dashed = third-party / null</span>
+      </div>
+      <div class="psn-comm-filters" id="comm-filters" role="group" aria-label="Community filter"></div>
+
+      <div class="psn-windows">
+        <div class="psn-win" id="map-window">
+          <div class="psn-win-chrome">
+            <span class="psn-win-title">Map · public speech</span>
+            <span class="psn-win-title" id="map-focus-label" style="margin-right:0;opacity:.65">no selection</span>
+          </div>
+          <div class="psn-stage" id="psn-stage">
+            <canvas id="psn-stars" aria-hidden="true"></canvas>
+            <svg id="psn-svg" viewBox="0 0 960 600" role="img" aria-label="Public speech network board"></svg>
+            <div class="psn-tooltip" id="psn-tip"></div>
+            <div class="psn-hint" id="psn-hint">Click a node · drag to pan · scroll not required</div>
+          </div>
         </div>
-        <div class="psn-stage" id="psn-stage">
-          <canvas id="psn-stars" aria-hidden="true"></canvas>
-          <svg id="psn-svg" viewBox="0 0 100 62" role="img" aria-label="Public speech network board"></svg>
-          <div class="psn-hint" id="psn-hint">Network view · click a node to inspect · drag to pan when celestial</div>
+        <div class="psn-win" id="inspector-window">
+          <div class="psn-win-chrome">
+            <span class="psn-win-title">Inspector</span>
+          </div>
+          <aside class="psn-detail" id="psn-detail">
+            <span class="tier">Select a node</span>
+            <h3>Open any account</h3>
+            <p class="role">Each node is a public handle or organization. Edges are documented public speech or measured co-presence — not secret membership.</p>
+          </aside>
         </div>
       </div>
-      <div class="psn-win" id="inspector-window">
-        <div class="psn-win-chrome">
-          <span class="psn-win-title">Inspector</span>
-        </div>
-        <aside class="psn-detail" id="psn-detail">
-          <span class="tier">Select a node</span>
-          <h3>Open any account</h3>
-          <p>Each node is a public handle or organization named in public bios or posts.
-          Each edge is documented public speech or measured co-presence — never an invented conspiracy.</p>
-        </aside>
-      </div>
+    </section>
+
+    <span class="kick section-num">01 · Communities</span>
+    <h2>Desks on this board</h2>
+    <div class="psn-comm-grid" id="communities"></div>
+
+    <span class="kick section-num">02 · Findings</span>
+    <h2>What the public map shows</h2>
+    <div class="psn-findings" id="findings"></div>
+
+    <span class="kick section-num">03 · Chains &amp; nulls</span>
+    <h2>Hydrated threads · honest absences</h2>
+    <div class="psn-win" style="margin-bottom:1.5rem">
+      <div class="psn-win-chrome"><span class="psn-win-title">Parent chains · org channel · primary/attributed split</span></div>
+      <div class="psn-detail" id="parent-chains"><p style="opacity:.7">Loading…</p></div>
     </div>
 
-    <span class="kick section-num">03 · Core matrix</span>
+    <span class="kick section-num">04 · Core matrix</span>
     <h2>Four accounts, six pairs</h2>
-    <p class="stand file-narrow">
-      The investigation opened on four frequently discussed public handles.
-      Pairwise results matter because absences stop false coordination claims.
-    </p>
+    <p class="stand file-narrow">Pairwise results matter because absences stop false coordination claims.</p>
     <table class="psn-matrix">
       <thead>
         <tr><th>Pair</th><th>Public relationship class</th><th>Record strength</th></tr>
       </thead>
       <tbody>
         <tr><td>@Kronykal ↔ @Render64</td><td>Strong co-presence in open-source archives</td><td>High</td></tr>
-        <tr><td>@Kronykal ↔ @FuxNet</td><td>Adversarial public speech (mutual disdain posts)</td><td>Moderate</td></tr>
+        <tr><td>@Kronykal ↔ @FuxNet</td><td>Adversarial public speech</td><td>Moderate</td></tr>
         <tr><td>@Kronykal ↔ @thewardoll</td><td>Outer orbit / shared viral-thread adjacency</td><td>Moderate–low</td></tr>
-        <tr><td>@FuxNet ↔ @Render64</td><td>Hostile one-way public claim in posts</td><td>Moderate</td></tr>
-        <tr><td>@FuxNet ↔ @thewardoll</td><td class="psn-null">No bilateral public posts banked this wave</td><td class="psn-null">Null</td></tr>
+        <tr><td>@FuxNet ↔ @Render64</td><td>Hostile one-way public claim</td><td>Moderate</td></tr>
+        <tr><td>@FuxNet ↔ @thewardoll</td><td class="psn-null">No bilateral public posts banked</td><td class="psn-null">Null</td></tr>
         <tr><td>@Render64 ↔ @thewardoll</td><td class="psn-null">No clean bilateral public posts banked</td><td class="psn-null">Null*</td></tr>
       </tbody>
     </table>
 
-    <span class="kick section-num">04 · Claim ledger window</span>
+    <span class="kick section-num">05 · Claim ledger</span>
     <h2>Pressure-campaign tickets — not verdicts</h2>
     <p class="stand file-narrow">
-      One reason this network is “hot” in 2026 is a visible public campaign from
-      <a href="https://x.com/ProjPM" rel="noopener noreferrer" target="_blank">@ProjPM</a> (Barrett Brown).
-      Each row is a <strong>claim ticket</strong>: what was said, by whom, with a primary link and a status.
-      Mapping the campaign is not endorsing every claim inside it.
+      Visible public campaign from
+      <a href="https://x.com/ProjPM" rel="noopener noreferrer" target="_blank">@ProjPM</a>.
+      Each card is a claim ticket. Mapping is not endorsement.
     </p>
     <p class="psn-note">
-      <strong>Read the status column.</strong> <em>ALLEGATION</em> means a third party asserted it in public —
-      not that TENET5 verified it. Legal-name and employment claims stay allegation-tier until independent primaries exist.
+      <strong>Read the status badge.</strong> <em>ALLEGATION</em> = third party asserted it in public — not TENET5-verified.
     </p>
     <div class="psn-filters" id="claim-filters" role="group" aria-label="Filter claim tickets"></div>
     <div class="psn-win" style="margin-bottom:1.25rem">
       <div class="psn-win-chrome">
         <span class="psn-win-title">Ledger · <span id="claim-count">—</span> tickets</span>
       </div>
-      <div style="overflow:auto;max-height:420px">
-        <table class="psn-claim-table" id="claim-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Status</th>
-              <th>Speaker → about</th>
-              <th>Claim ticket</th>
-              <th>Primary</th>
-            </tr>
-          </thead>
-          <tbody id="claim-body">
-            <tr><td colspan="5">Loading claim ledger…</td></tr>
-          </tbody>
-        </table>
+      <div class="psn-claim-cards" id="claim-body" aria-live="polite">
+        <p style="opacity:.7;padding:1rem">Loading claim ledger…</p>
       </div>
     </div>
-    <span class="kick section-num">04b · Campaign timeline</span>
+
+    <span class="kick section-num">05b · Campaign timeline</span>
     <h2>July–August 2026 public wave</h2>
     <ol class="psn-timeline" id="claim-timeline"></ol>
 
-    <span class="kick section-num">05 · Bridges</span>
+    <span class="kick section-num">06 · Bridges</span>
     <h2>Accounts that appear in more than one well</h2>
     <ul>
-      <li><strong>@0x686967</strong> — high co-presence in multi-account conflict packs; also appears in historic scene discourse that touches the companion hub’s public fights.</li>
-      <li><strong>@meepkittyfuck</strong> (Meeps / Meepkitty) — extensive friendly historic speech with the dense hub; named in public narratives about the companion hub’s older online scene. Identity and employment claims advanced by third parties remain <em>allegations</em>.</li>
-      <li><strong>@Bitchiest</strong> — co-presence in multi-handle conflict threads and historic scene speech that crosses wings.</li>
-      <li><strong>@ProjPM</strong> — not a “friend hub”: a shared <em>adversarial attractor</em>. Multiple accounts organize public speech against the same target.</li>
+      <li><strong>@0x686967</strong> — multi-account conflict packs + historic scene adjacency.</li>
+      <li><strong>@meepkittyfuck</strong> — dual orbit: dense-hub social history + companion-wing naming; employment claims stay allegations.</li>
+      <li><strong>@Bitchiest</strong> — hellthread + historic scene speech.</li>
+      <li><strong>@ProjPM</strong> — shared adversarial attractor, not a friend hub.</li>
     </ul>
 
-    <span class="kick section-num">06 · Method</span>
+    <span class="kick section-num">07 · Method</span>
     <h2>How this board was built</h2>
     <ol>
-      <li><strong>Primary surface:</strong> public posts and public profile text on X.</li>
-      <li><strong>Edge types:</strong> direct @-mention / reply chains; archive co-presence counts; self-bio organization links; labeled third-party public claims.</li>
-      <li><strong>Null edges:</strong> published when searches and prior banks found no bilateral public speech — a finding, not a gap to fill with rumor.</li>
-      <li><strong>Out of scope:</strong> private messages, non-public documents, doxxing, and unverified legal-name locks presented as fact.</li>
+      <li><strong>Primary surface:</strong> public posts and public profile text on X; official org web where mapped.</li>
+      <li><strong>Edge types:</strong> reply chains; archive co-presence; self-bio org links; labeled third-party claims.</li>
+      <li><strong>Null edges:</strong> published when no bilateral public speech is banked — a finding, not a rumor gap.</li>
+      <li><strong>Out of scope:</strong> private messages, non-public documents, doxxing, unverified legal-name locks as fact.</li>
     </ol>
     <p class="psn-note">
-      Related board: the institutional <a href="network-analysis.html">public-record network</a>
-      (lobbying, appointments, procurement). That board uses government instruments.
-      This file uses public social speech. Do not conflate the two datasets.
+      Related board: the institutional <a href="network-analysis.html">public-record network</a>.
+      Do not conflate social-speech edges with government instruments.
     </p>
 
-    <span class="kick section-num">07 · Next waves</span>
+    <span class="kick section-num">08 · Next</span>
     <h2>Investigation continues</h2>
-    <ul id="work-queue">
-      <li>Expand claim tickets for every alias-equation post with date + URL.</li>
-      <li>Bank more counterspeech from named targets with dates.</li>
-      <li>Keep Meepkitty employment claims on a separate ticket from scene-history claims.</li>
-      <li>Map DDoSecrets-adjacent names as their own cluster (do not collapse into the FuxNet hub).</li>
-      <li>Parent-chain hydrate for major viral threads (who replied to whom).</li>
-      <li>Independent verification before any ALLEGATION is promoted.</li>
-    </ul>
+    <ul id="work-queue"></ul>
   </div>
 
   <section class="file-band catalog file-sources srcs" id="sources" aria-labelledby="src-h">
     <span class="kick section-num">Sources</span>
     <h2 id="src-h">Primary public records on this <em>file.</em></h2>
     <p class="stand file-narrow">Open the post. Atmosphere is not evidence.</p>
-    <ul class="src-list" id="src-list">
-      <li><a href="https://x.com/Kronykal" rel="noopener noreferrer" target="_blank">X — @Kronykal</a></li>
-      <li><a href="https://x.com/FuxNet" rel="noopener noreferrer" target="_blank">X — @FuxNet</a></li>
-      <li><a href="https://x.com/Render64" rel="noopener noreferrer" target="_blank">X — @Render64</a></li>
-      <li><a href="https://x.com/thewardoll" rel="noopener noreferrer" target="_blank">X — @thewardoll</a></li>
-      <li><a href="https://x.com/ProjPM" rel="noopener noreferrer" target="_blank">X — @ProjPM</a></li>
-      <li><a href="https://x.com/0x686967" rel="noopener noreferrer" target="_blank">X — @0x686967</a></li>
-      <li><a href="https://x.com/ronbryn" rel="noopener noreferrer" target="_blank">X — @ronbryn</a></li>
-      <li><a href="https://x.com/urharmless" rel="noopener noreferrer" target="_blank">X — @urharmless</a></li>
-      <li><a href="https://x.com/SassyGirlBoss" rel="noopener noreferrer" target="_blank">X — @SassyGirlBoss</a></li>
-      <li><a href="https://x.com/th3j35t3r" rel="noopener noreferrer" target="_blank">X — @th3j35t3r</a></li>
-      <li><a href="https://x.com/Maynard598212" rel="noopener noreferrer" target="_blank">X — @Maynard598212</a></li>
-      <li><a href="https://x.com/BryanMicon" rel="noopener noreferrer" target="_blank">X — @BryanMicon</a></li>
-      <li><a href="https://x.com/BryanMicon/status/2086618178453471366" rel="noopener noreferrer" target="_blank">X — Micon counterspeech statement</a></li>
-      <li><a href="data/public_speech_networks_v1.json">TENET5 — machine board JSON (v5)</a></li>
-      <li><a href="data/public_speech_claim_ledger_v1.json">TENET5 — claim ledger JSON (v1)</a></li>
-      <li><a href="network-analysis.html">TENET5 — institutional network board</a></li>
-      <li><a href="methodology-transparency.html">TENET5 — Methodology</a></li>
-    </ul>
+    <ul class="src-list" id="src-list"></ul>
   </section>
 </main>
 
@@ -507,123 +453,202 @@
 <script defer src="js/rv-reveal.js?v=2"></script>
 <script>
 (function () {
+  "use strict";
   var NS = "http://www.w3.org/2000/svg";
-  var COLORS = { HUB: "#c9a227", CORE: "#9adbe8", BRIDGE: "#e8a0b0", ORBIT: "#a89f90", ORG: "#8a9a7a" };
-  var data = null;
-  var focus = null;
-  var mode = "network"; /* network | celestial */
-  var showLabels = true;
-  var showEdges = true;
-  var pan = { x: 0, y: 0 };
-  var dragging = false;
-  var dragStart = null;
+  var COLORS = { HUB: "#d3a625", CORE: "#9adbe8", BRIDGE: "#e8a0b0", ORBIT: "#a89f90", ORG: "#8a9a7a" };
+  var VW = 960, VH = 600, CX = 480, CY = 300;
+  var data = null, ledger = null;
+  var focus = null, hover = null, mode = "network";
+  var showLabels = true, showEdges = true, commFilter = "ALL", claimFilter = "ALL";
+  var pan = { x: 0, y: 0 }, dragging = false, dragStart = null, layoutCache = null;
+  var searchQ = "";
 
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
   function el(tag, attrs) {
     var n = document.createElementNS(NS, tag);
     if (attrs) Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
     return n;
   }
-
-  function layoutNetwork(nodes) {
-    var hubs = nodes.filter(function (n) { return n.tier === "HUB"; });
-    var cores = nodes.filter(function (n) { return n.tier === "CORE"; });
-    var bridges = nodes.filter(function (n) { return n.tier === "BRIDGE"; });
-    var rest = nodes.filter(function (n) { return n.tier !== "HUB" && n.tier !== "CORE" && n.tier !== "BRIDGE"; });
-    var pos = {};
-    hubs.forEach(function (n, i) {
-      pos[n.id] = { x: 28 + i * 28, y: 28 };
+  function degree(id) {
+    if (!data) return 0;
+    var d = 0;
+    data.edges.forEach(function (e) { if (e.from === id || e.to === id) d++; });
+    return d;
+  }
+  function shortLabel(lab) {
+    var s = String(lab || "").replace(/^@/, "");
+    if (s.length > 14) s = s.slice(0, 12) + "…";
+    return s;
+  }
+  function profileUrl(node) {
+    var lab = String(node.label || "");
+    if (lab.indexOf("@") === 0) return "https://x.com/" + lab.slice(1);
+    if (node.id === "ddose") return "https://ddosecrets.org/";
+    if (node.id === "emmabest") return "https://ddosecrets.org/about";
+    return null;
+  }
+  function nodeInComm(node, commId) {
+    if (commId === "ALL") return true;
+    if (!data.communities) return true;
+    var c = data.communities.find(function (x) { return x.id === commId; });
+    if (!c || !c.members) return true;
+    var lab = node.label;
+    return c.members.some(function (m) {
+      return m === lab || m === lab.replace(/^@/, "") || ("@" + m.replace(/^@/, "")) === lab ||
+        (node.id === "ddose" && /DDoSecrets/i.test(m)) ||
+        (node.id === "maggiemayhem" && /Maggie|Mayhem/i.test(m)) ||
+        (node.id === "emmabest" && /Emma Best/i.test(m));
     });
-    cores.forEach(function (n, i) {
-      pos[n.id] = { x: 22 + i * 22, y: 44 };
-    });
-    bridges.forEach(function (n, i) {
-      var a = (i / Math.max(bridges.length, 1)) * Math.PI * 2 - Math.PI / 2;
-      pos[n.id] = { x: 50 + Math.cos(a) * 22, y: 30 + Math.sin(a) * 14 };
-    });
-    rest.forEach(function (n, i) {
-      var a = (i / Math.max(rest.length, 1)) * Math.PI * 2;
-      pos[n.id] = { x: 50 + Math.cos(a) * 38, y: 31 + Math.sin(a) * 24 };
-    });
-    return pos;
+  }
+  function matchesSearch(node) {
+    if (!searchQ) return true;
+    var q = searchQ.toLowerCase();
+    return (node.label || "").toLowerCase().indexOf(q) >= 0 ||
+      (node.role || "").toLowerCase().indexOf(q) >= 0 ||
+      (node.id || "").toLowerCase().indexOf(q) >= 0;
   }
 
-  function layoutCelestial(nodes) {
-    /* orbital rings by tier — same data, star-system geometry */
-    var rings = { HUB: 0, CORE: 12, BRIDGE: 22, ORBIT: 32, ORG: 38 };
-    var buckets = {};
+  function seedLayout(nodes) {
+    var buckets = { HUB: [], CORE: [], BRIDGE: [], ORBIT: [], ORG: [] };
     nodes.forEach(function (n) {
-      var t = n.tier || "ORBIT";
-      if (!buckets[t]) buckets[t] = [];
+      var t = buckets[n.tier] ? n.tier : "ORBIT";
       buckets[t].push(n);
     });
     var pos = {};
+    var rings = { HUB: 0, CORE: 110, BRIDGE: 200, ORBIT: 280, ORG: 340 };
     Object.keys(buckets).forEach(function (tier) {
       var list = buckets[tier];
-      var r = rings[tier] != null ? rings[tier] : 30;
       list.forEach(function (n, i) {
         if (tier === "HUB") {
+          var spread = Math.min(160, 70 * Math.max(list.length - 1, 0));
           pos[n.id] = {
-            x: 50 + (i - (list.length - 1) / 2) * 10 + pan.x * 0.02,
-            y: 31 + pan.y * 0.02
+            x: CX + (i - (list.length - 1) / 2) * (spread / Math.max(list.length - 1, 1) || 0),
+            y: CY - 20
           };
         } else {
-          var a = (i / list.length) * Math.PI * 2 - Math.PI / 2 + (tier === "BRIDGE" ? 0.25 : 0);
-          pos[n.id] = {
-            x: 50 + Math.cos(a) * r + pan.x * 0.02,
-            y: 31 + Math.sin(a) * r * 0.62 + pan.y * 0.02
-          };
+          var a0 = tier === "CORE" ? -0.9 : tier === "BRIDGE" ? 0.35 : tier === "ORG" ? 2.2 : -2.4;
+          var a = a0 + (i / Math.max(list.length, 1)) * Math.PI * 1.85;
+          var r = rings[tier];
+          var yScale = mode === "celestial" ? 0.62 : 0.78;
+          pos[n.id] = { x: CX + Math.cos(a) * r, y: CY + Math.sin(a) * r * yScale };
         }
       });
     });
     return pos;
   }
 
+  function relax(pos, nodes, edges, iters) {
+    var ids = nodes.map(function (n) { return n.id; });
+    var i, j, a, b, e, dx, dy, dist, f;
+    for (i = 0; i < iters; i++) {
+      // repulsion
+      for (a = 0; a < ids.length; a++) {
+        for (b = a + 1; b < ids.length; b++) {
+          var pa = pos[ids[a]], pb = pos[ids[b]];
+          dx = pa.x - pb.x; dy = pa.y - pb.y;
+          dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          f = 2200 / (dist * dist);
+          dx = (dx / dist) * f; dy = (dy / dist) * f;
+          pa.x += dx; pa.y += dy; pb.x -= dx; pb.y -= dy;
+        }
+      }
+      // edge attraction
+      edges.forEach(function (ed) {
+        var pa = pos[ed.from], pb = pos[ed.to];
+        if (!pa || !pb) return;
+        dx = pb.x - pa.x; dy = pb.y - pa.y;
+        dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+        f = (dist - 140) * 0.012 * Math.max(0.4, (ed.weight || 1) / 5);
+        dx = (dx / dist) * f; dy = (dy / dist) * f;
+        pa.x += dx; pa.y += dy; pb.x -= dx; pb.y -= dy;
+      });
+      // soft center pull + bounds
+      ids.forEach(function (id) {
+        var p = pos[id];
+        p.x += (CX - p.x) * 0.01;
+        p.y += (CY - p.y) * 0.01;
+        p.x = Math.max(40, Math.min(VW - 40, p.x));
+        p.y = Math.max(36, Math.min(VH - 40, p.y));
+      });
+    }
+    return pos;
+  }
+
+  function computeLayout() {
+    if (!data) return {};
+    var nodes = data.nodes;
+    var pos = seedLayout(nodes);
+    if (mode === "network") pos = relax(pos, nodes, data.edges, 55);
+    else {
+      // celestial: ring only + pan
+      Object.keys(pos).forEach(function (id) {
+        pos[id].x += pan.x * 0.35;
+        pos[id].y += pan.y * 0.35;
+      });
+    }
+    layoutCache = pos;
+    return pos;
+  }
+
   function showDetail(node) {
     var box = document.getElementById("psn-detail");
     if (!node) return;
-    var edges = data.edges.filter(function (e) {
-      return e.from === node.id || e.to === node.id;
-    });
-    var html = '<span class="tier">' + node.tier + " · " + (node.role || "") + "</span>";
-    html += "<h3>" + node.label + "</h3>";
-    html += "<p>" + (node.note || "Public handle.") + "</p>";
-    if (node.tier) {
-      html += '<p style="margin-top:.5rem;font-size:.78rem;opacity:.75">Open profile: ';
-      html += '<a href="https://x.com/' + node.label.replace("@", "") + '" rel="noopener noreferrer" target="_blank">' + node.label + "</a></p>";
+    var edges = data.edges.filter(function (e) { return e.from === node.id || e.to === node.id; })
+      .sort(function (a, b) { return (b.weight || 0) - (a.weight || 0); });
+    var purl = profileUrl(node);
+    var html = '<span class="tier ' + esc(node.tier) + '">' + esc(node.tier) + "</span> ";
+    html += '<span class="psn-badge ' + esc(node.tier) + '">' + degree(node.id) + " edges</span>";
+    html += "<h3>" + esc(node.label) + "</h3>";
+    html += '<p class="role">' + esc(node.role || "") + "</p>";
+    html += "<p>" + esc(node.note || "Public handle or organization.") + "</p>";
+    if (purl) {
+      html += '<p style="margin-top:.65rem"><a href="' + esc(purl) + '" rel="noopener noreferrer" target="_blank">Open source ↗</a></p>';
     }
     if (edges.length) {
-      html += '<p style="margin-top:.75rem;font-size:.8rem;opacity:.85"><strong>Public edges:</strong></p><ul>';
+      html += '<p style="margin-top:.85rem;font-size:.78rem;opacity:.8;text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono,monospace)">Connected speech</p><ul class="psn-edge-list">';
       edges.forEach(function (e) {
         var other = e.from === node.id ? e.to : e.from;
         var on = data.nodes.find(function (n) { return n.id === other; });
-        html += "<li>" + (on ? on.label : other) + " — " + e.rel.replace(/_/g, " ") +
-          ' <span style="opacity:.65">(' + e.level + ")</span></li>";
+        html += "<li><strong>" + esc(on ? on.label : other) + '</strong><span class="rel">' +
+          esc((e.rel || "").replace(/_/g, " ")) + '</span><span class="psn-badge">' + esc(e.level || "") +
+          "</span></li>";
       });
       html += "</ul>";
     }
     box.innerHTML = html;
+    document.getElementById("map-focus-label").textContent = node.label;
   }
+
+  function tipShow(x, y, node) {
+    var tip = document.getElementById("psn-tip");
+    tip.style.display = "block";
+    tip.innerHTML = "<strong>" + esc(node.label) + "</strong>" + esc(node.role || "") +
+      "<br><span style=\"opacity:.75\">" + degree(node.id) + " edges · " + esc(node.tier) + "</span>";
+    var stage = document.getElementById("psn-stage");
+    var rect = stage.getBoundingClientRect();
+    tip.style.left = Math.min(rect.width - 250, Math.max(8, x)) + "px";
+    tip.style.top = Math.min(rect.height - 80, Math.max(8, y)) + "px";
+  }
+  function tipHide() { document.getElementById("psn-tip").style.display = "none"; }
 
   function drawStars() {
     var c = document.getElementById("psn-stars");
-    if (!c) return;
     var stage = document.getElementById("psn-stage");
-    var w = stage.clientWidth || 800;
-    var h = stage.clientHeight || 460;
+    if (!c || !stage) return;
+    var w = stage.clientWidth || 900, h = stage.clientHeight || 520;
     c.width = w; c.height = h;
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, w, h);
     if (mode !== "celestial") return;
-    var n = 120;
-    for (var i = 0; i < n; i++) {
-      var x = (Math.sin(i * 12.9898) * 43758.5453) % 1;
-      if (x < 0) x = -x;
-      var y = (Math.sin(i * 78.233) * 12345.6789) % 1;
-      if (y < 0) y = -y;
-      var r = 0.4 + (i % 3) * 0.35;
+    for (var i = 0; i < 160; i++) {
+      var x = Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1;
+      var y = Math.abs(Math.sin(i * 78.233) * 12345.6789) % 1;
       ctx.beginPath();
-      ctx.fillStyle = "rgba(230,240,255," + (0.25 + (i % 5) * 0.1) + ")";
-      ctx.arc(x * w, y * h, r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(230,240,255," + (0.18 + (i % 5) * 0.08) + ")";
+      ctx.arc(x * w, y * h, 0.5 + (i % 3) * 0.4, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -632,68 +657,97 @@
     if (!data) return;
     var svg = document.getElementById("psn-svg");
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    var pos = mode === "celestial" ? layoutCelestial(data.nodes) : layoutNetwork(data.nodes);
-    var gEdges = el("g");
-    var gNodes = el("g");
+    var pos = computeLayout();
+    var gEdges = el("g"), gNodes = el("g");
+
     if (showEdges) {
       data.edges.forEach(function (e) {
         var a = pos[e.from], b = pos[e.to];
         if (!a || !b) return;
-        var w = Math.max(0.15, (e.weight || 1) * 0.18);
+        var na = data.nodes.find(function (n) { return n.id === e.from; });
+        var nb = data.nodes.find(function (n) { return n.id === e.to; });
+        if (na && (!nodeInComm(na, commFilter) || !matchesSearch(na))) return;
+        if (nb && (!nodeInComm(nb, commFilter) || !matchesSearch(nb))) return;
         var isNull = e.level === "NULL_EDGE" || e.weight === 0;
+        var isThird = e.level === "THIRD_PARTY_PUBLIC";
+        var w = Math.max(1.1, Math.min(4.2, (e.weight || 1) * 0.65));
+        var focused = focus && (e.from === focus || e.to === focus);
+        var dim = focus && !focused;
         var line = el("line", {
           x1: a.x, y1: a.y, x2: b.x, y2: b.y,
-          stroke: isNull ? "rgba(160,160,160,0.22)" : (mode === "celestial" ? "rgba(180,200,230,0.28)" : "rgba(200,210,220,0.35)"),
-          "stroke-width": isNull ? 0.25 : w,
-          "stroke-dasharray": isNull || e.level === "THIRD_PARTY_PUBLIC" ? "0.8 0.6" : ""
+          stroke: isNull ? "rgba(160,160,160,0.28)" : focused ? "rgba(154,219,232,0.55)" : "rgba(200,210,220,0.28)",
+          "stroke-width": focused ? w + 0.8 : w,
+          "stroke-dasharray": isNull || isThird ? "5 4" : "",
+          opacity: dim ? "0.08" : "1"
         });
-        if (focus && e.from !== focus && e.to !== focus) line.setAttribute("opacity", "0.12");
         gEdges.appendChild(line);
       });
     }
+
     data.nodes.forEach(function (n) {
       var p = pos[n.id];
       if (!p) return;
+      var inF = nodeInComm(n, commFilter) && matchesSearch(n);
       var col = COLORS[n.tier] || COLORS.ORBIT;
-      var r = n.tier === "HUB" ? 2.4 : n.tier === "BRIDGE" ? 1.8 : 1.4;
-      if (mode === "celestial") r *= 1.05;
-      var dim = focus && focus !== n.id;
-      var g = el("g", { style: "cursor:pointer", opacity: dim ? "0.22" : "1" });
+      var deg = degree(n.id);
+      var r = 8 + Math.min(14, deg * 1.1);
+      if (n.tier === "HUB") r += 4;
+      if (n.tier === "BRIDGE") r += 1.5;
+      var dim = (focus && focus !== n.id) || !inF;
+      var g = el("g", { style: "cursor:pointer", opacity: dim ? "0.14" : "1" });
       g.appendChild(el("circle", {
-        cx: p.x, cy: p.y, r: r + (mode === "celestial" ? 1.4 : 0.9),
-        fill: col, opacity: mode === "celestial" ? "0.12" : "0.15"
+        cx: p.x, cy: p.y, r: r + (mode === "celestial" ? 10 : 6),
+        fill: col, opacity: mode === "celestial" ? "0.1" : "0.12"
       }));
       g.appendChild(el("circle", {
         cx: p.x, cy: p.y, r: r,
-        fill: "#0a0c10", stroke: col, "stroke-width": focus === n.id ? "0.55" : "0.35"
+        fill: "#0a0c10", stroke: col,
+        "stroke-width": focus === n.id || hover === n.id ? "2.4" : "1.4"
       }));
-      if (showLabels) {
+      var showLab = showLabels && inF && (n.tier === "HUB" || n.tier === "CORE" || n.tier === "BRIDGE" || focus === n.id || hover === n.id || searchQ);
+      if (showLab) {
         var t = el("text", {
-          x: p.x, y: p.y + r + 2.3,
-          fill: col, "font-size": "1.55", "text-anchor": "middle",
+          x: p.x, y: p.y + r + 14,
+          fill: col, "font-size": "12", "text-anchor": "middle",
           "font-family": "IBM Plex Mono, ui-monospace, monospace"
         });
-        t.textContent = n.label.replace("@", "");
+        t.textContent = shortLabel(n.label);
         g.appendChild(t);
       }
       g.addEventListener("click", function (ev) {
         ev.stopPropagation();
         focus = focus === n.id ? null : n.id;
-        showDetail(n);
+        if (focus) showDetail(n);
+        else {
+          document.getElementById("map-focus-label").textContent = "no selection";
+          document.getElementById("psn-detail").innerHTML =
+            '<span class="tier">Select a node</span><h3>Open any account</h3><p class="role">Click a node on the map.</p>';
+        }
         draw();
+      });
+      g.addEventListener("pointerenter", function (ev) {
+        hover = n.id;
+        var stage = document.getElementById("psn-stage").getBoundingClientRect();
+        tipShow(ev.clientX - stage.left + 12, ev.clientY - stage.top + 12, n);
+        draw();
+      });
+      g.addEventListener("pointerleave", function () {
+        hover = null; tipHide(); draw();
       });
       gNodes.appendChild(g);
     });
+
     svg.appendChild(gEdges);
     svg.appendChild(gNodes);
     document.getElementById("psn-hint").textContent =
       mode === "celestial"
-        ? "Celestial · rings by tier · drag to pan · click a star"
-        : "Network · click a node to inspect · edges = public speech";
+        ? "Celestial · rings by tier · drag background to pan · click a star"
+        : "Network · click a node · size = connections · dashed = third-party / null";
   }
 
   function setMode(m) {
     mode = m;
+    layoutCache = null;
     document.getElementById("btn-mode-network").classList.toggle("on", m === "network");
     document.getElementById("btn-mode-celestial").classList.toggle("on", m === "celestial");
     document.getElementById("psn-stage").classList.toggle("celestial", m === "celestial");
@@ -705,8 +759,36 @@
     var box = document.getElementById("findings");
     if (!data || !data.findings) return;
     box.innerHTML = data.findings.map(function (f) {
-      return "<article><h3>" + f.title + "</h3><p>" + f.text + "</p></article>";
+      return "<article class=\"glass\"><h3>" + esc(f.title) + "</h3><p>" + esc(f.text) + "</p></article>";
     }).join("");
+  }
+
+  function renderCommunities() {
+    var box = document.getElementById("communities");
+    var filters = document.getElementById("comm-filters");
+    if (!data) return;
+    if (box && data.communities) {
+      box.innerHTML = data.communities.map(function (cm) {
+        return '<div class="psn-comm-card glass"><h3>' + esc(cm.label) + "</h3><p>" +
+          esc((cm.members || []).join(" · ")) + "</p></div>";
+      }).join("");
+    }
+    if (filters && data.communities) {
+      var opts = [{ id: "ALL", label: "All desks" }].concat(
+        data.communities.map(function (c) { return { id: c.id, label: c.label }; })
+      );
+      filters.innerHTML = "";
+      opts.forEach(function (o) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = o.label;
+        b.className = o.id === commFilter ? "on" : "";
+        b.addEventListener("click", function () {
+          commFilter = o.id; layoutCache = null; renderCommunities(); draw();
+        });
+        filters.appendChild(b);
+      });
+    }
   }
 
   function renderStats() {
@@ -715,108 +797,62 @@
     document.getElementById("st-edges").textContent = String(data.edges.length);
     document.getElementById("st-hubs").textContent = String(data.nodes.filter(function (n) { return n.tier === "HUB"; }).length);
     document.getElementById("st-nulls").textContent = String(data.edges.filter(function (e) { return e.level === "NULL_EDGE"; }).length);
-    if (data.meta && data.meta.collection) {
-      var c = data.meta.collection;
-      var a = document.getElementById("st-archive");
-      var l = document.getElementById("st-live");
-      if (a && c.archive_seed_nodes) a.textContent = String(c.archive_seed_nodes);
-      if (l && c.live_posts_banked) l.textContent = String(c.live_posts_banked);
-    }
-    var box = document.getElementById("communities");
-    if (box && data.communities) {
-      box.innerHTML = data.communities.map(function (cm) {
-        return "<article><h3>" + cm.label + "</h3><p>" + (cm.members || []).join(" · ") + "</p></article>";
-      }).join("");
-    }
-    if (data.meta && data.meta.collection && data.meta.collection.parent_chains_hydrated) {
-      var ch = document.getElementById("st-chains");
-      if (ch) ch.textContent = String(data.meta.collection.parent_chains_hydrated);
-    }
+    var col = data.meta && data.meta.collection ? data.meta.collection : {};
+    if (col.archive_seed_nodes) document.getElementById("st-archive").textContent = String(col.archive_seed_nodes);
+    if (col.live_posts_banked != null) document.getElementById("st-live").textContent = String(col.live_posts_banked);
+    if (col.parent_chains_hydrated != null) document.getElementById("st-chains").textContent = String(col.parent_chains_hydrated);
+
     var pc = document.getElementById("parent-chains");
     if (pc && data.parent_chains) {
-      var html = "<ul style=\"margin:0;padding-left:1.1rem;font-size:.88rem\">" + data.parent_chains.map(function (c) {
+      var html = '<ul class="psn-chain-list">';
+      data.parent_chains.forEach(function (c) {
         var link = c.root
-          ? '<a href="' + c.root + '" rel="noopener noreferrer" target="_blank">' + (c.title || c.id) + "</a>"
-          : (c.title || c.id);
-        return "<li><strong>" + (c.id || "") + "</strong> · " + link +
-          " <span class=\"psn-claim-meta\">" + (c.speaker || "") + " · " + (c.date || "") +
-          " · " + (c.parts || "?") + " parts</span></li>";
-      }).join("") + "</ul>";
-      if (data.null_findings && data.null_findings.length) {
-        html += "<p class=\"psn-note\" style=\"margin-top:.85rem\"><strong>Null findings this wave:</strong> " +
-          data.null_findings.map(function (n) { return n.text; }).join(" · ") + "</p>";
-      }
+          ? '<a href="' + esc(c.root) + '" rel="noopener noreferrer" target="_blank">' + esc(c.title || c.id) + "</a>"
+          : esc(c.title || c.id);
+        html += '<li><span class="cid">' + esc(c.id || "") + "</span>" + link +
+          '<div style="opacity:.72;font-size:.78rem;margin-top:.2rem">' + esc(c.speaker || "") +
+          " · " + esc(c.date || "") + " · " + esc(String(c.parts || "?")) + " parts</div></li>";
+      });
+      html += "</ul>";
       if (data.official_org && data.official_org.web) {
-        html += "<p class=\"psn-note\" style=\"margin-top:.65rem\"><strong>Official org web:</strong> " +
-          '<a href="' + data.official_org.web + '" rel="noopener noreferrer" target="_blank">' +
-          data.official_org.web + "</a>" +
-          (data.official_org.about ? ' · <a href="' + data.official_org.about + '" rel="noopener noreferrer" target="_blank">About</a>' : "") +
-          "</p>";
+        html += '<p class="psn-note"><strong>Official org web:</strong> <a href="' + esc(data.official_org.web) +
+          '" rel="noopener noreferrer" target="_blank">' + esc(data.official_org.web) + "</a>";
+        if (data.official_org.about) {
+          html += ' · <a href="' + esc(data.official_org.about) + '" rel="noopener noreferrer" target="_blank">About</a>';
+        }
+        html += "</p>";
+      }
+      if (data.null_findings && data.null_findings.length) {
+        html += '<p class="psn-note"><strong>Null findings:</strong> ' +
+          data.null_findings.map(function (n) { return esc(n.text); }).join(" · ") + "</p>";
       }
       if (data.primary_vs_attributed_mayhem) {
         var pva = data.primary_vs_attributed_mayhem;
-        html += "<div style=\"margin-top:1rem\"><strong style=\"font-size:.85rem\">" + (pva.title || "Primary vs attributed") + "</strong>";
-        html += "<table class=\"psn-claim-table\" style=\"margin-top:.4rem\"><thead><tr><th>Status</th><th>Date / id</th><th>Topic</th></tr></thead><tbody>";
+        html += "<strong style=\"font-size:.82rem\">" + esc(pva.title || "Primary vs attributed") + "</strong>";
+        html += '<table class="psn-split-table"><thead><tr><th>Status</th><th>Ref</th><th>Topic</th></tr></thead><tbody>';
         (pva.primary || []).forEach(function (r) {
-          html += "<tr><td><span class=\"psn-status PUBLIC_POST_FACT\">PRIMARY</span></td><td>" + (r.date || "") +
-            " · " + (r.id || "") + "</td><td>" + (r.topic || "") + "</td></tr>";
+          html += '<tr><td><span class="psn-status PUBLIC_POST_FACT">PRIMARY</span></td><td>' +
+            esc(r.date || "") + " · " + esc(r.id || "") + "</td><td>" + esc(r.topic || "") + "</td></tr>";
         });
         (pva.attributed_open || []).forEach(function (r) {
-          html += "<tr><td><span class=\"psn-status OPEN\">ATTRIBUTED OPEN</span></td><td>BB " + (r.bb || "") +
-            "</td><td>" + (r.topic || "") + "</td></tr>";
+          html += '<tr><td><span class="psn-status OPEN">ATTRIBUTED OPEN</span></td><td>BB ' +
+            esc(r.bb || "") + "</td><td>" + esc(r.topic || "") + "</td></tr>";
         });
-        html += "</tbody></table></div>";
+        html += "</tbody></table>";
       }
       pc.innerHTML = html;
     }
-  }
 
-  /* controls */
-  document.getElementById("btn-mode-network").addEventListener("click", function () { setMode("network"); });
-  document.getElementById("btn-mode-celestial").addEventListener("click", function () { setMode("celestial"); });
-  document.getElementById("btn-labels").addEventListener("click", function () {
-    showLabels = !showLabels;
-    this.classList.toggle("on", showLabels);
-    draw();
-  });
-  document.getElementById("btn-edges").addEventListener("click", function () {
-    showEdges = !showEdges;
-    this.classList.toggle("on", showEdges);
-    draw();
-  });
-  document.getElementById("btn-reset").addEventListener("click", function () {
-    focus = null; pan = { x: 0, y: 0 };
-    document.getElementById("psn-detail").innerHTML =
-      '<span class="tier">Select a node</span><h3>Open any account</h3>' +
-      "<p>Each node is a public handle or organization named in public bios or posts.</p>";
-    draw();
-  });
-
-  /* pan on celestial */
-  var svgEl = document.getElementById("psn-svg");
-  svgEl.addEventListener("pointerdown", function (e) {
-    if (mode !== "celestial") return;
-    dragging = true;
-    dragStart = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
-    svgEl.setPointerCapture(e.pointerId);
-  });
-  svgEl.addEventListener("pointermove", function (e) {
-    if (!dragging || !dragStart) return;
-    pan.x = dragStart.panX + (e.clientX - dragStart.x);
-    pan.y = dragStart.panY + (e.clientY - dragStart.y);
-    draw();
-  });
-  svgEl.addEventListener("pointerup", function () { dragging = false; dragStart = null; });
-  window.addEventListener("resize", function () { drawStars(); });
-
-  /* —— claim ledger window —— */
-  var ledger = null;
-  var claimFilter = "ALL";
-
-  function esc(s) {
-    return String(s == null ? "" : s)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    // sources from data when present
+    var src = document.getElementById("src-list");
+    if (src && data.sources && data.sources.length) {
+      src.innerHTML = data.sources.map(function (s) {
+        return '<li><a href="' + esc(s.url) + '" rel="noopener noreferrer" target="_blank">' + esc(s.label || s.url) + "</a></li>";
+      }).join("") +
+        '<li><a href="data/public_speech_networks_v1.json">TENET5 — board JSON</a></li>' +
+        '<li><a href="data/public_speech_claim_ledger_v1.json">TENET5 — claim ledger JSON</a></li>' +
+        '<li><a href="methodology-transparency.html">TENET5 — Methodology</a></li>';
+    }
   }
 
   function renderClaims() {
@@ -827,23 +863,25 @@
     });
     document.getElementById("claim-count").textContent = String(rows.length);
     if (!rows.length) {
-      body.innerHTML = '<tr><td colspan="5">No tickets in this filter.</td></tr>';
+      body.innerHTML = '<p style="opacity:.7;padding:1rem">No tickets in this filter.</p>';
       return;
     }
     body.innerHTML = rows.map(function (c) {
       var about = (c.about || []).join(", ");
       var link = c.url
-        ? '<a href="' + esc(c.url) + '" rel="noopener noreferrer" target="_blank">Open</a>'
-        : "—";
-      return "<tr>" +
-        "<td>" + esc(c.id) + "</td>" +
-        '<td><span class="psn-status ' + esc(c.status) + '">' + esc(c.status) + "</span></td>" +
-        "<td>" + esc(c.speaker) + "<div class=\"psn-claim-meta\">→ " + esc(about) + "</div></td>" +
-        "<td>" + esc(c.text) +
-          '<div class="psn-claim-meta"><strong>Fact:</strong> ' + esc(c.what_is_fact) +
-          " · <strong>Not:</strong> " + esc(c.what_is_not) + "</div></td>" +
-        "<td>" + link + (c.date ? '<div class="psn-claim-meta">' + esc(c.date) + "</div>" : "") + "</td>" +
-        "</tr>";
+        ? '<a href="' + esc(c.url) + '" rel="noopener noreferrer" target="_blank">Open primary ↗</a>'
+        : "";
+      return '<article class="psn-claim-card">' +
+        '<div class="top"><span class="psn-status ' + esc(c.status) + '">' + esc(c.status) +
+        '</span><span class="id">' + esc(c.id) + "</span></div>" +
+        "<h4>" + esc(c.speaker || "") + "</h4>" +
+        '<p class="about">→ ' + esc(about) + "</p>" +
+        '<p class="body">' + esc(c.text) + "</p>" +
+        '<p class="meta"><strong>Fact:</strong> ' + esc(c.what_is_fact) +
+        " · <strong>Not:</strong> " + esc(c.what_is_not) + "</p>" +
+        (c.date ? '<p class="meta">' + esc(c.date) + "</p>" : "") +
+        (link ? "<p style=\"margin:.45rem 0 0\">" + link + "</p>" : "") +
+        "</article>";
     }).join("");
   }
 
@@ -853,9 +891,10 @@
     var opts = [{ id: "ALL", label: "All" }]
       .concat((ledger.buckets || []).map(function (b) { return { id: b.id, label: b.label }; }))
       .concat([
-        { id: "ALLEGATION", label: "Allegations only" },
+        { id: "ALLEGATION", label: "Allegations" },
         { id: "COUNTERSPEECH", label: "Counterspeech" },
-        { id: "ACTIVE_METHOD", label: "Campaign method" }
+        { id: "ACTIVE_METHOD", label: "Campaign method" },
+        { id: "OPEN", label: "Open" }
       ]);
     filters.innerHTML = "";
     opts.forEach(function (o) {
@@ -864,9 +903,7 @@
       b.textContent = o.label;
       b.className = o.id === claimFilter ? "on" : "";
       b.addEventListener("click", function () {
-        claimFilter = o.id;
-        renderClaimChrome();
-        renderClaims();
+        claimFilter = o.id; renderClaimChrome(); renderClaims();
       });
       filters.appendChild(b);
     });
@@ -881,19 +918,54 @@
     }
     if (ledger.work_queue_public) {
       var wq = document.getElementById("work-queue");
-      if (wq) {
-        wq.innerHTML = ledger.work_queue_public.map(function (t) {
-          return "<li>" + esc(t) + "</li>";
-        }).join("");
-      }
+      if (wq) wq.innerHTML = ledger.work_queue_public.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
     }
   }
+
+  /* controls */
+  document.getElementById("btn-mode-network").addEventListener("click", function () { setMode("network"); });
+  document.getElementById("btn-mode-celestial").addEventListener("click", function () { setMode("celestial"); });
+  document.getElementById("btn-labels").addEventListener("click", function () {
+    showLabels = !showLabels; this.classList.toggle("on", showLabels); draw();
+  });
+  document.getElementById("btn-edges").addEventListener("click", function () {
+    showEdges = !showEdges; this.classList.toggle("on", showEdges); draw();
+  });
+  document.getElementById("btn-reset").addEventListener("click", function () {
+    focus = null; pan = { x: 0, y: 0 }; searchQ = ""; layoutCache = null;
+    document.getElementById("node-search").value = "";
+    document.getElementById("map-focus-label").textContent = "no selection";
+    document.getElementById("psn-detail").innerHTML =
+      '<span class="tier">Select a node</span><h3>Open any account</h3><p class="role">Click a node on the map.</p>';
+    draw();
+  });
+  document.getElementById("node-search").addEventListener("input", function () {
+    searchQ = (this.value || "").trim();
+    draw();
+  });
+
+  var svgEl = document.getElementById("psn-svg");
+  svgEl.addEventListener("pointerdown", function (e) {
+    if (e.target !== svgEl && e.target.tagName !== "svg") return;
+    dragging = true;
+    dragStart = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+    svgEl.setPointerCapture(e.pointerId);
+  });
+  svgEl.addEventListener("pointermove", function (e) {
+    if (!dragging || !dragStart) return;
+    pan.x = dragStart.panX + (e.clientX - dragStart.x);
+    pan.y = dragStart.panY + (e.clientY - dragStart.y);
+    if (mode === "celestial") { layoutCache = null; draw(); }
+  });
+  svgEl.addEventListener("pointerup", function () { dragging = false; dragStart = null; });
+  window.addEventListener("resize", function () { drawStars(); });
 
   fetch("data/public_speech_networks_v1.json")
     .then(function (r) { return r.json(); })
     .then(function (j) {
       data = j;
       renderFindings();
+      renderCommunities();
       renderStats();
       drawStars();
       draw();
@@ -912,7 +984,7 @@
     })
     .catch(function () {
       document.getElementById("claim-body").innerHTML =
-        '<tr><td colspan="5">Claim ledger unavailable.</td></tr>';
+        '<p style="opacity:.7;padding:1rem">Claim ledger unavailable.</p>';
     });
 })();
 </script>
