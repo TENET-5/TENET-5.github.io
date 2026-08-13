@@ -40,7 +40,8 @@
     federal_politics: "#74b9ff",
     infosec_history: "#636e72",
     independent_media: "#fab1a0",
-    platform: "#b2bec3"
+    platform: "#b2bec3",
+    foreign_interference: "#a29bfe"
   };
 
   function catColor(c) {
@@ -56,6 +57,9 @@
     if (/political|party|candidacy/i.test(t)) return "rgba(116,185,255,0.7)";
     if (/discourse|method_bridge/i.test(t)) return "rgba(155,89,182,0.4)";
     if (/commission|reviewed|investigated/i.test(t)) return "rgba(93,173,226,0.7)";
+    if (/court_outcome|charged_public/i.test(t)) return "rgba(230,126,34,0.8)";
+    if (/foreign|hogue|nsicop|monitor_report|oversight/i.test(t))
+      return "rgba(162,155,254,0.7)";
     return "rgba(160,180,200,0.35)";
   }
 
@@ -149,6 +153,10 @@
         category: n.category || "?",
         note: n.note || "",
         score: +n.score || 0,
+        court_status: n.court_status || "",
+        court_status_label: n.court_status_label || "",
+        court_status_note: n.court_status_note || "",
+        role: n.role || "",
         x: Math.cos(ang) * r,
         y: Math.sin(ang) * r,
         vx: 0,
@@ -192,6 +200,7 @@
 
     var vivaSet = null;
     var packASet = null;
+    var packCSet = null;
     if (DATA.subgraphs && DATA.subgraphs.thevivafrei && DATA.subgraphs.thevivafrei.include_node_ids) {
       vivaSet = {};
       DATA.subgraphs.thevivafrei.include_node_ids.forEach(function (id) {
@@ -204,11 +213,17 @@
         packASet[id] = 1;
       });
     }
+    if (DATA.subgraphs && DATA.subgraphs.hogue_fi && DATA.subgraphs.hogue_fi.include_node_ids) {
+      packCSet = {};
+      DATA.subgraphs.hogue_fi.include_node_ids.forEach(function (id) {
+        packCSet[id] = 1;
+      });
+    }
 
     function visible(n) {
       if (state.filter === "all") return true;
       if (state.filter === "canada")
-        return /diagolon|public_order|coutts|institution|federal|press|monitor|independent_media|platform/i.test(
+        return /diagolon|public_order|coutts|institution|federal|press|monitor|independent_media|platform|foreign_interference/i.test(
           n.category
         );
       if (state.filter === "method")
@@ -221,6 +236,12 @@
       if (state.filter === "viva") {
         if (vivaSet) return !!vivaSet[n.id];
         return n.id === "thevivafrei" || n.id === "david_freiheit";
+      }
+      if (state.filter === "hogue") {
+        if (packCSet) return !!packCSet[n.id];
+        return /foreign_interference|hogue|nsicop|csis|chong|han_dong|kenny/i.test(
+          n.category + " " + n.id
+        );
       }
       return true;
     }
@@ -368,6 +389,16 @@
         ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
         ctx.fillStyle = dim ? "rgba(60,75,90,0.28)" : catColor(n.category);
         ctx.fill();
+        // court-status ring (press class — not a verdict badge alone)
+        if (!dim && n.court_status) {
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, r + 3, 0, Math.PI * 2);
+          ctx.strokeStyle = /guilty/i.test(n.court_status)
+            ? "rgba(231,76,60,0.85)"
+            : "rgba(230,126,34,0.75)";
+          ctx.lineWidth = 1.6 / s;
+          ctx.stroke();
+        }
         if (sel && n.id === sel.id) {
           ctx.strokeStyle = "#eef5fa";
           ctx.lineWidth = 2 / s;
@@ -431,6 +462,20 @@
         '</strong> <span class="chip">' +
         escapeHtml(n.category) +
         "</span></div>";
+      if (n.court_status) {
+        h +=
+          '<p class="warn" style="margin:0.35rem 0 0.2rem"><span class="chip">' +
+          escapeHtml(n.court_status) +
+          "</span> " +
+          escapeHtml(n.court_status_label || "Court status (press class)") +
+          "</p>";
+        if (n.court_status_note) {
+          h +=
+            '<p class="muted" style="font-size:0.78rem">' +
+            escapeHtml(n.court_status_note) +
+            "</p>";
+        }
+      }
       h += '<p class="muted">' + escapeHtml(n.note) + "</p>";
       h += '<p class="ok">' + edges.length + " public edges</p><ul class=\"edge-list\">";
       edges.forEach(function (e) {
