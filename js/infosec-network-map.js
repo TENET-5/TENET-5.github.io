@@ -754,6 +754,59 @@
         state.alpha = 1;
       };
 
+    // Jump-to-node search (uses DATA.search_index or live node labels)
+    var searchEl = $("net-search");
+    if (searchEl) {
+      var jumpTo = function (q) {
+        q = String(q || "").trim().toLowerCase();
+        if (q.length < 2) return;
+        var list = DATA.search_index || [];
+        var hit = null;
+        for (var si = 0; si < list.length; si++) {
+          if (list[si].q && list[si].q.indexOf(q) !== -1) {
+            hit = list[si];
+            break;
+          }
+        }
+        if (!hit) {
+          for (var ni = 0; ni < nodes.length; ni++) {
+            var lab = (nodes[ni].label + " " + nodes[ni].id).toLowerCase();
+            if (lab.indexOf(q) !== -1) {
+              hit = { id: nodes[ni].id };
+              break;
+            }
+          }
+        }
+        if (!hit || !nmap[hit.id]) {
+          status("No node match for \"" + q + "\"", true);
+          return;
+        }
+        // show filter all so target is visible
+        if (!visible(nmap[hit.id])) {
+          state.filter = "all";
+          document.querySelectorAll("[data-net-filter]").forEach(function (b) {
+            b.classList.toggle("active", b.getAttribute("data-net-filter") === "all");
+          });
+        }
+        var tn = nmap[hit.id];
+        showSel(tn);
+        state.ox = -tn.x * state.scale;
+        state.oy = -tn.y * state.scale;
+        state.scale = Math.max(state.scale, 0.85);
+        status("Jumped to " + tn.label, false);
+        renderHubs();
+      };
+      searchEl.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          jumpTo(searchEl.value);
+        }
+      });
+      searchEl.addEventListener("change", function () {
+        jumpTo(searchEl.value);
+      });
+    }
+
     if ($("stats-nodes")) $("stats-nodes").textContent = String(nodes.length);
     if ($("stats-edges")) $("stats-edges").textContent = String(links.length);
     if ($("stats-sources")) $("stats-sources").textContent = String((DATA.sources || []).length);
