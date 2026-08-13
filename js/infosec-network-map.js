@@ -191,10 +191,17 @@
     };
 
     var vivaSet = null;
+    var packASet = null;
     if (DATA.subgraphs && DATA.subgraphs.thevivafrei && DATA.subgraphs.thevivafrei.include_node_ids) {
       vivaSet = {};
       DATA.subgraphs.thevivafrei.include_node_ids.forEach(function (id) {
         vivaSet[id] = 1;
+      });
+    }
+    if (DATA.subgraphs && DATA.subgraphs.diagolon_coutts && DATA.subgraphs.diagolon_coutts.include_node_ids) {
+      packASet = {};
+      DATA.subgraphs.diagolon_coutts.include_node_ids.forEach(function (id) {
+        packASet[id] = 1;
       });
     }
 
@@ -206,8 +213,11 @@
         );
       if (state.filter === "method")
         return /infosec|method|contractor|document|history/i.test(n.category);
-      if (state.filter === "diagolon")
-        return /diagolon|coutts|public_order/i.test(n.category);
+      if (state.filter === "diagolon") {
+        // Pack A: prefer explicit subgraph; else category heuristic
+        if (packASet) return !!packASet[n.id];
+        return /diagolon|coutts|public_order|institution|press|federal/i.test(n.category);
+      }
       if (state.filter === "viva") {
         if (vivaSet) return !!vivaSet[n.id];
         return n.id === "thevivafrei" || n.id === "david_freiheit";
@@ -232,8 +242,9 @@
       var N = nodes.length;
       var a = state.alpha;
       if (!N || a < 0.01) return;
-      var rep = 2200 * a;
-      var soft = 40;
+      // scale repulsion with graph size so ~90–120 node boards stay readable
+      var rep = (2200 + Math.min(1800, N * 18)) * a;
+      var soft = N > 80 ? 48 : 40;
       var i, j, e, n, dx, dy, d2, d, f, dist, ideal, ks, force;
 
       for (i = 0; i < N; i++) {
