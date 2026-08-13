@@ -157,6 +157,26 @@
       .join("");
   }
 
+  function renderPackMetrics(DATA) {
+    var el = $("pack-metrics");
+    if (!el) return;
+    var m = DATA.pack_metrics || {};
+    var a = m.A_diagolon_coutts_poec != null ? m.A_diagolon_coutts_poec : "—";
+    var b = m.B_thevivafrei != null ? m.B_thevivafrei : "—";
+    var c = m.C_hogue_fi != null ? m.C_hogue_fi : "—";
+    el.innerHTML =
+      "<strong>Pack filters:</strong> A Diagolon/Coutts/POEC <b>" +
+      a +
+      "</b> · B @thevivafrei <b>" +
+      b +
+      "</b> · C Hogue/FI <b>" +
+      c +
+      "</b> · non-edges <b>" +
+      (m.non_edges_total != null ? m.non_edges_total : (DATA.non_edges || []).length) +
+      "</b> · version " +
+      escapeHtml((DATA.meta && DATA.meta.version) || "?");
+  }
+
   function renderNonEdges(DATA) {
     var el = $("non-edges");
     if (!el) return;
@@ -215,6 +235,8 @@
         court_status: n.court_status || "",
         court_status_label: n.court_status_label || "",
         court_status_note: n.court_status_note || "",
+        primary_url: n.primary_url || "",
+        instrument_hint: n.instrument_hint || "",
         role: n.role || "",
         x: Math.cos(ang) * r,
         y: Math.sin(ang) * r,
@@ -536,6 +558,19 @@
         }
       }
       h += '<p class="muted">' + escapeHtml(n.note) + "</p>";
+      if (n.primary_url) {
+        h +=
+          '<p style="margin:0.4rem 0"><a href="' +
+          escapeHtml(n.primary_url) +
+          '" rel="noopener noreferrer" target="_blank" style="color:#9adbe8;font-weight:600">Open primary instrument →</a>';
+        if (n.instrument_hint) {
+          h +=
+            '<br/><span class="muted" style="font-size:0.75rem">' +
+            escapeHtml(n.instrument_hint) +
+            "</span>";
+        }
+        h += "</p>";
+      }
       h += '<p class="ok">' + edges.length + " public edges</p><ul class=\"edge-list\">";
       edges.forEach(function (e) {
         var other = e.a.id === n.id ? e.b : e.a;
@@ -735,6 +770,7 @@
       renderPrompts(DATA);
       renderEdgeLegend(DATA);
       renderNonEdges(DATA);
+      renderPackMetrics(DATA);
       bootMap(DATA);
       var err = $("map-error");
       if (err) err.style.display = "none";
