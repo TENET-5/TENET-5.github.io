@@ -164,6 +164,12 @@
     var a = m.A_diagolon_coutts_poec != null ? m.A_diagolon_coutts_poec : "—";
     var b = m.B_thevivafrei != null ? m.B_thevivafrei : "—";
     var c = m.C_hogue_fi != null ? m.C_hogue_fi : "—";
+    var purl =
+      m.primary_url_nodes != null
+        ? m.primary_url_nodes
+        : (DATA.nodes || []).filter(function (n) {
+            return n.primary_url;
+          }).length;
     el.innerHTML =
       "<strong>Pack filters:</strong> A Diagolon/Coutts/POEC <b>" +
       a +
@@ -173,6 +179,8 @@
       c +
       "</b> · non-edges <b>" +
       (m.non_edges_total != null ? m.non_edges_total : (DATA.non_edges || []).length) +
+      "</b> · primary links <b>" +
+      purl +
       "</b> · version " +
       escapeHtml((DATA.meta && DATA.meta.version) || "?");
   }
@@ -711,6 +719,14 @@
       state.scale = Math.max(0.1, Math.min(5, state.scale * (ev.deltaY < 0 ? 1.12 : 0.9)));
     };
 
+    var focusMap = (DATA.filter_focus) || {
+      viva: "thevivafrei",
+      diagolon: "coutts_blockade",
+      hogue: "fic_hogue",
+      method: "tenet5_method",
+      canada: "ottawa_convoy"
+    };
+
     document.querySelectorAll("[data-net-filter]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         document.querySelectorAll("[data-net-filter]").forEach(function (b) {
@@ -721,10 +737,11 @@
         state.alpha = 0.85;
         fit();
         renderHubs();
-        if (state.filter === "viva" && nmap.thevivafrei) {
-          showSel(nmap.thevivafrei);
-          state.ox = -nmap.thevivafrei.x * state.scale;
-          state.oy = -nmap.thevivafrei.y * state.scale;
+        var focusId = focusMap[state.filter];
+        if (focusId && nmap[focusId] && visible(nmap[focusId])) {
+          showSel(nmap[focusId]);
+          state.ox = -nmap[focusId].x * state.scale;
+          state.oy = -nmap[focusId].y * state.scale;
         }
       });
     });
