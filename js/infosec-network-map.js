@@ -132,6 +132,65 @@
       .join("");
   }
 
+  function renderEdgeLegend(DATA) {
+    var el = $("edge-legend");
+    if (!el) return;
+    var rows = DATA.edge_legend || [];
+    if (!rows.length) {
+      el.innerHTML = "<li class=\"muted\">No edge legend in data.</li>";
+      return;
+    }
+    el.innerHTML = rows
+      .map(function (r) {
+        return (
+          "<li><b style=\"color:" +
+          edgeColor(r.type) +
+          "\">●</b> <code>" +
+          escapeHtml(r.type) +
+          "</code> — " +
+          escapeHtml(r.label) +
+          ' <span class="muted">· pack ' +
+          escapeHtml(r.pack || "?") +
+          "</span></li>"
+        );
+      })
+      .join("");
+  }
+
+  function renderNonEdges(DATA) {
+    var el = $("non-edges");
+    if (!el) return;
+    var rows = DATA.non_edges || [];
+    if (!rows.length) {
+      el.innerHTML = "<p class=\"muted\">No explicit non-edges published.</p>";
+      return;
+    }
+    // resolve labels when possible
+    var lab = {};
+    (DATA.nodes || []).forEach(function (n) {
+      lab[n.id] = n.label || n.id;
+    });
+    el.innerHTML =
+      '<table style="width:100%;border-collapse:collapse;font-size:0.82rem">' +
+      "<thead><tr><th style=\"text-align:left;padding:0.35rem 0.4rem;border-bottom:1px solid rgba(255,255,255,0.12)\">A</th>" +
+      "<th style=\"text-align:left;padding:0.35rem 0.4rem;border-bottom:1px solid rgba(255,255,255,0.12)\">B</th>" +
+      "<th style=\"text-align:left;padding:0.35rem 0.4rem;border-bottom:1px solid rgba(255,255,255,0.12)\">Why no edge</th></tr></thead><tbody>" +
+      rows
+        .map(function (r) {
+          return (
+            "<tr><td style=\"padding:0.4rem;vertical-align:top;border-bottom:1px solid rgba(255,255,255,0.06)\"><strong>" +
+            escapeHtml(lab[r.a] || r.a) +
+            '</strong></td><td style="padding:0.4rem;vertical-align:top;border-bottom:1px solid rgba(255,255,255,0.06)"><strong>' +
+            escapeHtml(lab[r.b] || r.b) +
+            '</strong></td><td style="padding:0.4rem;vertical-align:top;border-bottom:1px solid rgba(255,255,255,0.06)" class="muted">' +
+            escapeHtml(r.reason) +
+            "</td></tr>"
+          );
+        })
+        .join("") +
+      "</tbody></table>";
+  }
+
   function bootMap(DATA) {
     var canvas = $("net-canvas");
     if (!canvas) throw new Error("canvas #net-canvas missing");
@@ -664,7 +723,7 @@
         nodes.length +
         "n / " +
         links.length +
-        "e · filters: All / Canada / Diagolon / Method / @thevivafrei · drag pan · wheel zoom"
+        "e · filters: All / Canada / Diagolon·Coutts·POEC / Method / @thevivafrei / Hogue·FI · non-edges published · drag pan · wheel zoom"
     );
   }
 
@@ -674,6 +733,8 @@
       renderSources(DATA);
       renderFindings(DATA);
       renderPrompts(DATA);
+      renderEdgeLegend(DATA);
+      renderNonEdges(DATA);
       bootMap(DATA);
       var err = $("map-error");
       if (err) err.style.display = "none";
