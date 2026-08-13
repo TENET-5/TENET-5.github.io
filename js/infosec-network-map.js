@@ -243,6 +243,7 @@
         court_status: n.court_status || "",
         court_status_label: n.court_status_label || "",
         court_status_note: n.court_status_note || "",
+        charge_class: n.charge_class || "",
         primary_url: n.primary_url || "",
         instrument_hint: n.instrument_hint || "",
         role: n.role || "",
@@ -564,6 +565,12 @@
             escapeHtml(n.court_status_note) +
             "</p>";
         }
+      }
+      if (n.charge_class) {
+        h +=
+          '<p class="muted" style="font-size:0.78rem;margin:0.25rem 0"><span class="chip">charge class</span> ' +
+          escapeHtml(n.charge_class) +
+          "</p>";
       }
       h += '<p class="muted">' + escapeHtml(n.note) + "</p>";
       if (n.primary_url) {
