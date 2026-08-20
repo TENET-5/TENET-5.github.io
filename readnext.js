@@ -41,6 +41,8 @@
         { href: 'daily-briefing.html', label: 'Daily Briefing', desc: 'Start here every day' },
         { href: 'reading-order.html', label: 'Reading Order', desc: 'Ordered checklist' },
         { href: '504-database.html', label: '504 Database', desc: 'Named record package' },
+        { href: 'master-504.html', label: 'Master s.504', desc: 'Eight clusters, named accused, Rome and Geneva overlay' },
+        { href: 'custodial-nutrition-notice.html', label: 'Kitchen notice', desc: 's.215, tax dollars vs the tray, Geneva Art. 26' },
       ]
     },
     'reading-order.html': {
